@@ -22,7 +22,3 @@ Imports:
     dplyr,
     magrittr,
     data.table
-Suggests:
-    delphi.epidata
-Remotes:
-    github::cmu-delphi/delphi-epidata-r
