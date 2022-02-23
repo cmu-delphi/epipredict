@@ -1,0 +1,28 @@
+Package: epipredict
+Title: Basic epidemiology forecasting methods
+Version: 0.0.1
+Authors@R: 
+  c(
+  person(given = "Jacob",
+         family = "Bien",
+         role = "aut"),
+  person(given = "Daniel",
+         family = "McDonald",
+         role = "aut"),
+  person(given = "Ryan",
+         family = "Tibshirani",
+         role = c("aut", "cre"),
+         email = "ryantibs@cmu.edu"))
+Description: What the package does (one paragraph).
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports: 
+    dplyr,
+    magrittr,
+    data.table
+Suggests:
+    delphi.epidata
+Remotes:
+    github::cmu-delphi/delphi-epidata-r
