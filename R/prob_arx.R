@@ -1,9 +1,11 @@
 prob_arx <- function(x, y, geo_value, time_value, lags = c(0, 7, 14),
                      ahead = 7, min_train_window = 20, lower_level = 0.05,
                      upper_level = 0.95, symmetrize = TRUE, nonneg = TRUE) {
+
   # Return NA if insufficient training data
   if (length(y) < min_train_window + max(lags) + ahead) {
-    return(data.frame(point = NA, lower = NA, upper = NA))
+    return(data.frame(geo_value = unique(geo_value),
+      point = NA, lower = NA, upper = NA))
   }
 
   # Useful transformations
