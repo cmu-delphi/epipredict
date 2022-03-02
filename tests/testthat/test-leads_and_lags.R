@@ -1,20 +1,24 @@
 y <- 1:20
 x <- -20:-1
 
-test_that("lag and lead processing works", {
+test_that("processing works", {
   lags <- c(1,2,4)
-  dat <- create_lags_and_leads(x, y, c(1,2,4), 1)
+  dat <- create_lags_and_leads(x, y, lags, 1)
   expect_length(dat, 7)
   expect_equal(nrow(dat), 20)
 })
 
-test_that("lag and lead processing accepts 1 lag", {
+test_that("accepts 1 lag", {
   dat <- create_lags_and_leads(x, y, 1, 1)
   expect_length(dat, 3)
   expect_identical(nrow(dat), 20L)
 })
 
-test_that("lag and lead processing accepts lag list", {
+test_that("dies from incorrect lags",{
+  expect_error(create_lags_and_leads(x, y, list(1, 1, 1), 1))
+})
+
+test_that("accepts lag list", {
   lags <- list(c(1,2), c(1))
   dat <- create_lags_and_leads(x, y, lags, 1)
   expect_length(dat, 4)
@@ -26,7 +30,7 @@ test_that("lag and lead processing accepts lag list", {
   expect_identical(nrow(dat), 20L)
 })
 
-test_that("lag and lead processing accepts leads", {
+test_that("accepts leads", {
 
   lags <- list(c(1,2), c(1))
   ahead <- c(1,2)
@@ -40,7 +44,7 @@ test_that("lag and lead processing accepts leads", {
   expect_identical(nrow(dat), 20L)
 })
 
-test_that("lag and lead names are `y/x` (clobbers everything)",{
+test_that("names are `y/x` (clobbers everything)",{
   lags <- list(c(1,2), c(1))
   ahead <- c(1,2)
   dat <- create_lags_and_leads(x, y, lags, ahead)
