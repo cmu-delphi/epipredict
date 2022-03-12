@@ -21,7 +21,12 @@ RoxygenNote: 7.1.2
 Imports: 
     dplyr,
     magrittr,
-    data.table
+    data.table,
+    tibble,
+    rlang,
+    purrr,
+    cli,
+    stats
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
