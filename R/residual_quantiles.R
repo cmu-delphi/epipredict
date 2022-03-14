@@ -4,6 +4,6 @@ residual_quantiles <- function(r, point, levels, symmetrize) {
   s <- ifelse(symmetrize, -1, NA)
   q <- quantile(c(r, s * r), probs = levels, na.rm = TRUE)
   out <- data.frame(point = point, outer(point, q, "+"))
-  names(out)[-1] <- sub("\\.", "_", sprintf("q%s", levels * 100))
+  names(out)[-1] <- probs_to_string(levels)
   out
 }
