@@ -21,7 +21,6 @@ RoxygenNote: 7.1.2
 Imports: 
     dplyr,
     magrittr,
-    data.table,
     tibble,
     rlang,
     purrr,

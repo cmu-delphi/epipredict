@@ -19,13 +19,15 @@
 #'
 #' x <- 1:20
 #' y <- -20:-1
-#' create_lags_and_leads(x, y, c(1, 2), 1)
-#' create_lags_and_leads(x, y, list(c(1, 2), 1), 1)
-#' create_lags_and_leads(x, y, list(c(-1, 1), NULL), 1)
-#' create_lags_and_leads(x, y, c(1, 2), c(0, 1))
-create_lags_and_leads <- function(x, y, xy_lags, y_leads) {
-  # TODO: make it so we don't clobber names if they exist.
-  if (!missing(x)) x <- data.frame(x, y) else x <- data.frame(y)
+#' time_value <- c(1:18, 20, 21)
+#' create_lags_and_leads(x, y, c(1, 2), 1, time_value)
+#' create_lags_and_leads(x, y, list(c(1, 2), 1), 1, time_value)
+#' create_lags_and_leads(x, y, list(c(-1, 1), NULL), 1, time_value)
+#' create_lags_and_leads(x, y, c(1, 2), c(0, 1), time_value)
+create_lags_and_leads <- function(x, y, xy_lags, y_leads,
+                                  time_value, key_vars = NULL) {
+
+  if (!missing(x)) x <- tibble(x, y) else x <- tibble(y)
   if (!is.list(xy_lags)) xy_lags <- list(xy_lags)
   p = ncol(x)
   assertthat::assert_that(
@@ -34,19 +36,8 @@ create_lags_and_leads <- function(x, y, xy_lags, y_leads) {
                 "If a list, it must have length 1 or `ncol(x) + 1`."))
   xy_lags = rep(xy_lags, length.out = p)
 
-  # Build features and response
-  dat <- do.call(
-    data.frame,
-    unlist( # Below we loop through and build the lagged features
-      purrr::map(1:p, function(i) {
-        purrr::map(xy_lags[[i]], function(lag) dplyr::lag(x[,i], n = lag))
-      }),
-      recursive = FALSE)) %>%
-    magrittr::set_names(paste0("x", 1:length(unlist(xy_lags))))
+  xdat <- epi_shift(x, xy_lags, time_value, key_vars)
+  ydat <- epi_shift(y, -1 * y_leads, time_value, key_vars, "y")
 
-  # Technically, can produce multiple cols of y
-  y <- suppressMessages(purrr::map_dfc(y_leads, ~ dplyr::lead(y, n = .x)))
-  if (ncol(y) > 1) names(y) <- paste0("y", 1:ncol(y)) else names(y) <- "y"
-
-  return(dplyr::bind_cols(y, dat))
+  suppressMessages(dplyr::full_join(ydat, xdat))
 }

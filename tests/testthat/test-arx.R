@@ -19,7 +19,7 @@ test_that("arx_args checks inputs", {
 
 
 test_that("arx returns proper empty tibble",{
-  template1 <- data.frame(key_vars = 1:10, point = NA)
+  template1 <- tibble::tibble(key_vars = 1:10, point = NA)
   template1 <- enframer(template1, c("q0.05", "q0.95"))
   expect_identical(
     arx_forecaster(1:100, 1:10, key_vars = 1:10, 1:10),
@@ -31,3 +31,5 @@ test_that("arx returns proper empty tibble",{
     template1
   )
 })
+
+

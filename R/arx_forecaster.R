@@ -13,6 +13,7 @@
 arx_forecaster <- function(x, y, key_vars, time_value,
                            args = arx_args_list()) {
 
+  # TODO: allow for formula interface? DJM suggests no.
   # TODO: function to verify standard forecaster signature inputs
 
   # get all args into the environment
@@ -21,23 +22,35 @@ arx_forecaster <- function(x, y, key_vars, time_value,
   # Return NA if insufficient training data (likely specific to the args)
   if (length(y) < min_train_window + max_lags + ahead) {
     qnames <- probs_to_string(levels)
-    # note: key_vars must be a df?!?
-    out = dplyr::bind_cols(dplyr::distinct(data.frame(key_vars)), point = NA)
+    if (is.null(key_vars)) out <- tibble(point=NA)
+    else out = dplyr::bind_cols(dplyr::distinct(tibble(key_vars)), point = NA)
     return(enframer(out, qnames))
   }
 
-  dat <- create_lags_and_leads(x, y, lags, ahead)
+  dat <- create_lags_and_leads(x, y, lags, ahead, time_value, key_vars)
   if (intercept) dat$x0 <- 1
-  obj <- stats::lm(y ~ . + 0, data = dat)
-  point <- make_prediction_with_S3(obj, dat, key_vars, time_value)
+  nas <- !complete.cases(dat)
 
-  # TODO: do we want to allow separate by geo?
-  q <- residual_quantiles_with_S3(obj, dat, point, levels, symmetrize)
+  obj <- stats::lm(y1 ~ . + 0, data = dat %>%
+                     dplyr::select(starts_with(c("x","y"))))
 
+  point <- make_predictions(obj, dat, time_value, key_vars)
+
+  # Residuals, simplest case,
+  # 1. same quantiles for all keys
+  # 2. `residuals(obj)` works
+  # (3.) didn't ask for quantiles
+  r <- residuals(obj)
+  q <- residual_quantiles(r, point, levels, symmetrize)
+
+  # Harder case,
+  # 1. different quantiles by key, need to bind the keys, then group_modify
+  # 2 fails. need to bind the keys, grab, y and yhat, subtract
   if (nonneg)
     q <- dplyr::mutate(q, dplyr::across(dplyr::everything(), ~ pmax(.x, 0)))
 
-  return(dplyr::bind_cols(dplyr::distinct(data.frame(key_vars)), q))
+  if (is.null(key_vars)) return(q)
+  else return(dplyr::bind_cols(dplyr::distinct(key_vars), q))
 }
 
 
@@ -45,7 +58,8 @@ arx_args_list <- function(
   lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
   levels = c(0.05, 0.95), intercept = TRUE,
   symmetrize = TRUE,
-  nonneg = TRUE) {
+  nonneg = TRUE,
+  quantile_by_key = FALSE) {
 
   # error checking if lags is a list
   .lags <- lags
