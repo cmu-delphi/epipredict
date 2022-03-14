@@ -29,7 +29,6 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 
   dat <- create_lags_and_leads(x, y, lags, ahead, time_value, key_vars)
   if (intercept) dat$x0 <- 1
-  nas <- !complete.cases(dat)
 
   obj <- stats::lm(y1 ~ . + 0, data = dat %>%
                      dplyr::select(starts_with(c("x","y"))))
@@ -50,7 +49,7 @@ arx_forecaster <- function(x, y, key_vars, time_value,
     q <- dplyr::mutate(q, dplyr::across(dplyr::everything(), ~ pmax(.x, 0)))
 
   if (is.null(key_vars)) return(q)
-  else return(dplyr::bind_cols(dplyr::distinct(key_vars), q))
+  else return(dplyr::bind_cols(dplyr::distinct(data.frame(key_vars)), q))
 }
 
 

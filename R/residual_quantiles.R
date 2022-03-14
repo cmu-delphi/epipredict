@@ -1,4 +1,4 @@
-residual_quantiles <- function(resids, point, levels, symmetrize) {
+residual_quantiles <- function(r, point, levels, symmetrize) {
   if (is.null(levels)) return(data.frame(point = point))
 
   s <- ifelse(symmetrize, -1, NA)
