@@ -108,6 +108,16 @@ arg_is_chr = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = F
   )
 }
 
+arg_is_function = function(..., allow_null = FALSE) {
+  handle_arg_list(
+    ...,
+    tests = function(name, value) {
+      if (!is.function(value) | (is.null(value) & allow_null))
+        cli_stop("All {.val {name}} must be in [0,1].")
+    }
+  )
+}
+
 arg_is_chr_scalar = function(..., allow_null = FALSE, allow_na = FALSE) {
   arg_is_chr(..., allow_null = allow_null, allow_na = allow_na)
   arg_is_scalar(..., allow_null = allow_null, allow_na = allow_na)

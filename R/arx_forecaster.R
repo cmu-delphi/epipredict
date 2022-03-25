@@ -22,7 +22,7 @@ arx_forecaster <- function(x, y, key_vars, time_value,
   # Return NA if insufficient training data (likely specific to the args)
   if (length(y) < min_train_window + max_lags + ahead) {
     qnames <- probs_to_string(levels)
-    if (is.null(key_vars)) out <- tibble(point=NA)
+    if (is.null(key_vars)) out <- tibble(point = NA)
     else out = dplyr::bind_cols(dplyr::distinct(tibble(key_vars)), point = NA)
     return(enframer(out, qnames))
   }
