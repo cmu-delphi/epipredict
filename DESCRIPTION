@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.1
+Version: 0.0.1.9000
 Authors@R: 
   c(
   person(given = "Jacob",
@@ -21,7 +21,15 @@ RoxygenNote: 7.1.2
 Imports: 
     dplyr,
     magrittr,
-    data.table
+    tibble,
+    rlang,
+    purrr,
+    cli,
+    stats,
+    splines,
+    tidyr,
+    assertthat,
+    tidyselect
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
