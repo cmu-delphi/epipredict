@@ -38,8 +38,9 @@ get_precision <- function(x, ...){
 }
 
 probs_to_string <- function(x, prefix = "q") {
-  arg_is_probabilities(x)
+  arg_is_probabilities(x, allow_null = TRUE)
   arg_is_chr_scalar(prefix)
+  if (is.null(x)) return()
   prec <- get_precision(x)
   sprintf("%s%.*f", prefix, prec, x)
 }

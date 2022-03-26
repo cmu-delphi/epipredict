@@ -65,6 +65,18 @@ arg_is_pos_int = function(..., allow_null = FALSE) {
   )
 }
 
+arg_is_int = function(..., allow_null = FALSE) {
+  handle_arg_list(
+    ...,
+    tests = function(name, value) {
+      if (!((is.numeric(value) && all(value%%1 == 0)) |
+            (is.null(value) & allow_null)))
+        cli_stop("All {.val {name}} must be whole positive number(s).")
+    }
+  )
+}
+
+
 arg_is_lgl = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = TRUE) {
   handle_arg_list(
     ...,
@@ -102,7 +114,7 @@ arg_is_chr = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = F
       if (any(is.na(value)) & !allow_na)
         cli_stop("Argument {.val {name}} must not contain any missing values ({.val {NA}}).")
 
-      if (length(value) == 0 & !allow_empty)
+      if (length(value) == 0 & !(allow_empty | allow_null))
         cli_stop("Argument {.val {name}} must have length >= 1.")
     }
   )

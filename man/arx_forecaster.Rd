@@ -20,7 +20,8 @@ combination.}
 by calling \code{arx_args_list()}.}
 }
 \value{
-
+A data frame of point (and optionally interval) forecasts at a single
+ahead (unique horizon) for each unique combination of \code{key_vars}.
 }
 \description{
 AR forecaster with optional covariates

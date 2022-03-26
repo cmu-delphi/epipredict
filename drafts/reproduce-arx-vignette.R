@@ -34,14 +34,15 @@ k_week_ahead <- function(x, ahead = 7, as_of = TRUE) {
   if (as_of) {
     x %>%
       epix_slide(fc = arx_forecaster(
-        percent_cli, case_rate, geo_value, time_value,
+        percent_cli, case_rate, NULL, time_value,
         args = arx_args_list(ahead = ahead)),
-        n = 120, ref_time_values = fc_time_values) %>%
+        n = 120, ref_time_values = fc_time_values, group_by = geo_value) %>%
       mutate(target_date = time_value + ahead, as_of = TRUE)
   } else {
     x_latest %>%
+      group_by(geo_value) %>%
       epi_slide(fc = arx_forecaster(
-        percent_cli, case_rate, geo_value, time_value,
+        percent_cli, case_rate, NULL, time_value,
         args = arx_args_list(ahead = ahead)),
         n = 120, ref_time_values = fc_time_values) %>%
       mutate(target_date = time_value + ahead, as_of = FALSE)
@@ -60,14 +61,60 @@ fc <- bind_rows(k_week_ahead(x, ahead = 7, as_of = TRUE),
 
 
 ggplot(fc, aes(x = target_date, group = time_value, fill = as_of)) +
-  geom_line(data = x_latest %>%
-              mutate(fc_key_vars = geo_value),
+  geom_line(data = x_latest,
             aes(x = time_value, y = case_rate),
             inherit.aes = FALSE, color = "gray50") +
   geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95), alpha = 0.4) +
   geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
-  facet_grid(vars(fc_key_vars), vars(as_of), scales = "free") +
+  facet_grid(vars(geo_value), vars(as_of), scales = "free") +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   labs(x = "Date", y = "Reported COVID-19 case rates") +
   theme(legend.position = "none")
+
+smooth_day_ahead <- function(x, as_of = TRUE) {
+  if (as_of) {
+    x %>%
+      epix_slide(fc = smooth_arx_forecaster(
+        percent_cli, case_rate, geo_value, time_value),
+        n = 120, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, as_of = TRUE)
+  } else {
+    x_latest %>%
+      epi_slide(fc = smooth_arx_forecaster(
+        percent_cli, case_rate, geo_value, time_value),
+        n = 120, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, as_of = FALSE)
+  }
+}
+
+sfc <- bind_rows(smooth_day_ahead(x, TRUE), smooth_day_ahead(x, FALSE))
+# Error in `Abort()`:
+#   ! If the slide computation returns a data frame, then it must have a
+# single row, or else one row per appearance of the reference time value in the
+# local window.
+
+
+sf_latest <- smooth_arx_forecaster(
+  x_latest$percent_cli, x_latest$case_rate,
+  x_latest$geo_value, x_latest$time_value)
+sf_latest <- sf_latest %>%
+  mutate(time_value = max(x_latest$time_value),
+         target_date = time_value + ahead)
+
+sf_latest %>%
+  ggplot(aes(x = target_date)) +
+  geom_line(data = x_latest %>%
+              mutate(key_vars = geo_value) %>%
+              filter(time_value > as.Date("2021-09-01")),
+            aes(x = time_value, y = case_rate),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = q0.05, ymax = q0.95, fill = key_vars), alpha = 0.4) +
+  geom_line(aes(y = point)) +
+  geom_point(aes(y = point), size = 0.5) +
+  facet_wrap(~ key_vars, scales = "free_y") +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(x = "Date", y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")
+
+# We should really do Intercept per geo!!!

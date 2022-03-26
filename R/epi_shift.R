@@ -15,7 +15,7 @@ epi_shift <- function(x, lags, time_value, keys = NULL, out_name = "x") {
   if (!is.data.frame(x)) x <- data.frame(x)
   if (is.null(keys)) keys <- rep("empty", nrow(x))
   p_in = ncol(x)
-  out_list <- tibble(i = 1:p_in, lag = lags) %>%
+  out_list <- tibble::tibble(i = 1:p_in, lag = lags) %>%
     tidyr::unchop(lag) %>% # what is chop
     dplyr::mutate(name = paste0(out_name, 1:nrow(.))) %>%
     # One list element for each lagged feature

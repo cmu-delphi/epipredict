@@ -1,6 +1,7 @@
 #' Create lags and leads of predictors and response
 #'
-#' @param x Data frame or matrix. Predictor variables.
+#' @param x Data frame or matrix. Predictor variables. May be
+#'   missing.
 #' @param y Response vector. Typical usage will "lead" y by the
 #'   number of steps forward for the prediction horizon (ahead).
 #' @param xy_lags Vector or list. If a vector, the lags will apply
@@ -11,6 +12,10 @@
 #' @param y_leads Scalar or vector. If a scalar, we "lead" `y` by this
 #'   amount. A vector will produce multiple columns of `y` if this is
 #'   useful for your model. Negative values will "lag" the variable.
+#' @param time_value Vector of time values at which the data are
+#'   observed
+#' @param key_vars Factors representing different groups. May be
+#'   `NULL` (the default).
 #'
 #' @return A `data.frame`.
 #' @export

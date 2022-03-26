@@ -7,7 +7,8 @@
 create_lags_and_leads(x, y, xy_lags, y_leads, time_value, key_vars = NULL)
 }
 \arguments{
-\item{x}{Data frame or matrix. Predictor variables.}
+\item{x}{Data frame or matrix. Predictor variables. May be
+missing.}
 
 \item{y}{Response vector. Typical usage will "lead" y by the
 number of steps forward for the prediction horizon (ahead).}
@@ -21,6 +22,12 @@ result. Negative values will "lead" the variable.}
 \item{y_leads}{Scalar or vector. If a scalar, we "lead" \code{y} by this
 amount. A vector will produce multiple columns of \code{y} if this is
 useful for your model. Negative values will "lag" the variable.}
+
+\item{time_value}{Vector of time values at which the data are
+observed}
+
+\item{key_vars}{Factors representing different groups. May be
+\code{NULL} (the default).}
 }
 \value{
 A \code{data.frame}.

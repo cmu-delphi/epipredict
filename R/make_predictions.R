@@ -9,8 +9,8 @@ make_predictions <- function(obj, dat, time_value, key_vars = NULL) {
   key_names <- setdiff(common_names, "time_value")
 
   dat <- dplyr::left_join(time_keys, dat, by = common_names) %>%
-    dplyr::group_by(dplyr::across(tidyselect::all_of(key_names))) %>%
-    tidyr::fill(tidyselect::starts_with("x"))
+    dplyr::group_by(dplyr::across(dplyr::all_of(key_names))) %>%
+    tidyr::fill(dplyr::starts_with("x"))
   ## DJM: Old version below. Replaced with tidyr version above
   #data.table::setDT(dat) # Convert to a data.table object by reference
   #cols <- setdiff(names(dat), common_names)
@@ -21,6 +21,6 @@ make_predictions <- function(obj, dat, time_value, key_vars = NULL) {
     dplyr::filter(time_value == test_time_value)
 
 
-  point <- predict(obj, newdata = newdata)
+  point <- stats::predict(obj, newdata = newdata)
   point
 }
