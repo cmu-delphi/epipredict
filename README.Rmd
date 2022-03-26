@@ -1,19 +1,29 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # epipredict
 
 <!-- badges: start -->
-
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/workflows/R-CMD-check/badge.svg)](https://github.com/cmu-delphi/epipredict/actions)
 <!-- badges: end -->
 
-The goal of epipredict is to …
+The goal of epipredict is to ...
 
 ## Installation
 
-You can install the development version of epipredict from
-[GitHub](https://github.com/) with:
+You can install the development version of epipredict from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
@@ -24,12 +34,11 @@ devtools::install_github("cmu-delphi/epipredict")
 
 This is a basic example which shows you how to solve a common problem:
 
-``` r
+```{r example}
 library(epipredict)
 ## basic example code
 ```
 
 ## Documentation
 
-You can view documentation for the `main` branch at
-<https://cmu-delphi.github.io/epipredict>.
+You can view documentation for the `main` branch at <https://cmu-delphi.github.io/epipredict>.

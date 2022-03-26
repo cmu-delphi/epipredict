@@ -3,3 +3,8 @@
 ^LICENSE\.md$
 ^drafts$
 ^man-roxygen$
+^README\.Rmd$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
