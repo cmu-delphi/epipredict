@@ -8,7 +8,8 @@
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/workflows/R-CMD-check/badge.svg)](https://github.com/cmu-delphi/epipredict/actions)
 <!-- badges: end -->
 
-The goal of epipredict is to …
+**Note:** This package is currently in development and likely will not
+work as expected.
 
 ## Installation
 
