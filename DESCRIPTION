@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.1.9000
+Version: 0.0.0.9000
 Authors@R: 
   c(
   person(given = "Jacob",
@@ -33,4 +33,4 @@ Imports:
 Suggests: 
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
-URL: https://cmu-delphi.github.io/epipredict/
+URL: https://github.com/cmu-delphi/epipredict/
