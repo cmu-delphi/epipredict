@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```{r pkgs}
 library(epipredict)
 library(epiprocess)
-library(delphi.epidata)
+library(covidcast)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -36,30 +36,24 @@ In this vignette, we reproduce the simple forecasting activity described in the 
 ```{r grab-epi-data}
 theme_set(theme_bw())
 
-y1 <- covidcast(
-  data_source = "doctor-visits", signals = "smoothed_adj_cli",
-  time_type = "day", geo_type = "state",
-  time_values = epirange(20200601, 20211201),
-  geo_values = "ca,fl", issues = epirange(20200601, 20211201)
-) %>% fetch_tbl()
-
-y2 <- covidcast(
-  data_source = "jhu-csse", signals = "confirmed_7dav_incidence_prop",
-  time_type = "day", geo_type = "state",
-  time_values = epirange(20200601, 20211201),
-  geo_values = "ca,fl", issues = epirange(20200601, 20211201)
-) %>% fetch_tbl()
-
-x <- y1 %>%
+y <- covidcast_signals(
+  c("doctor-visits", "jhu-csse"),
+  c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
+  start_day = "2020-06-01", 
+  end_day = "2021-12-01",
+  issues = c("2020-06-01", "2021-12-01"),
+  geo_type = "state", 
+  geo_values = c("ca", "fl")) 
+ 
+x <- y[[1]] %>% 
   select(geo_value, time_value, version = issue, percent_cli = value) %>%
   as_epi_archive()
 
 epix_merge(
-  x, 
-  y2 %>% select(geo_value, time_value, version = issue, case_rate = value) %>% as_epi_archive(),
-  all = TRUE
-)
-
+  x, y[[2]] %>% 
+    select(geo_value, time_value, version = issue, case_rate = value) %>%
+    as_epi_archive(),
+  all = TRUE)
 ```
 
 We now make forecasts on the archive and compare to forecasts on the latest
