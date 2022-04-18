@@ -64,22 +64,22 @@ data.
 x_latest <- epix_as_of(x, max_version = max(x$DT$version))
 fc_time_values <- seq(as.Date("2020-08-01"), as.Date("2021-12-01"), by = "1 month")
 
+
 k_week_ahead <- function(x, ahead = 7, as_of = TRUE) {
   if (as_of) {
     x %>%
       epix_slide(fc = arx_forecaster(
-        percent_cli, case_rate, NULL, time_value,
-        args = arx_args_list(ahead = ahead)),
-        n = 120, ref_time_values = fc_time_values, group_by = geo_value) %>%
-      mutate(target_date = time_value + ahead, as_of = TRUE)
+        percent_cli, case_rate, geo_value, time_value, 
+        args = arx_args_list(ahead = ahead,intercept = FALSE)),
+        n = 120, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, as_of = as_of,geo_value = fc_key_vars)
   } else {
     x_latest %>%
-      group_by(geo_value) %>%
       epi_slide(fc = arx_forecaster(
-        percent_cli, case_rate, NULL, time_value,
-        args = arx_args_list(ahead = ahead)),
+        percent_cli, case_rate, geo_value, time_value,
+        args = arx_args_list(ahead = ahead,intercept = FALSE)),
         n = 120, ref_time_values = fc_time_values) %>%
-      mutate(target_date = time_value + ahead, as_of = FALSE)
+      mutate(target_date = time_value + ahead, as_of = as_of)
   }
 }
 
