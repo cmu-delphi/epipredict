@@ -31,19 +31,23 @@ In this vignette, we reproduce the simple forecasting activity described in the 
 
 ## Reproducing the ARX forecaster
 
+First, we download the data and process as before (hidden).
 
 
-```{r grab-epi-data}
+```{r grab-epi-data, echo=FALSE}
 theme_set(theme_bw())
-
-y <- covidcast_signals(
-  c("doctor-visits", "jhu-csse"),
-  c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
-  start_day = "2020-06-01", 
-  end_day = "2021-12-01",
-  issues = c("2020-06-01", "2021-12-01"),
-  geo_type = "state", 
-  geo_values = c("ca", "fl")) 
+# y <- covidcast_signals(
+#   c("doctor-visits", "jhu-csse"),
+#   c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
+#   start_day = "2020-06-01", 
+#   end_day = "2021-12-01",
+#   issues = c("2020-06-01", "2021-12-01"),
+#   geo_type = "state", 
+#   geo_values = c("ca", "fl")) 
+# saveRDS(y, "inst/extdata/epi_archive.rds")
+y <- readRDS(
+  system.file("extdata", "epi_archive.rds", package = "epipredict", mustWork = TRUE)
+)
  
 x <- y[[1]] %>% 
   select(geo_value, time_value, version = issue, percent_cli = value) %>%
