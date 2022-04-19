@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```{r pkgs}
 library(epipredict)
 library(epiprocess)
-library(covidcast)
+# library(covidcast)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -66,36 +66,34 @@ data.
 ```{r make-arx-kweek}
 # Latest snapshot of data, and forecast dates
 x_latest <- epix_as_of(x, max_version = max(x$DT$version))
-fc_time_values <- seq(as.Date("2020-08-01"), as.Date("2021-12-01"), by = "1 month")
+fc_time_values <- seq(as.Date("2020-08-01"), as.Date("2021-12-01"), 
+                      by = "1 month")
 
 
-k_week_ahead <- function(x, ahead = 7, as_of = TRUE) {
+k_week_ahead <- function(ahead = 7, as_of = TRUE) {
   if (as_of) {
     x %>%
       epix_slide(fc = arx_forecaster(
         percent_cli, case_rate, geo_value, time_value, 
-        args = arx_args_list(ahead = ahead,intercept = FALSE)),
+        args = arx_args_list(ahead = ahead, intercept = FALSE)),
         n = 120, ref_time_values = fc_time_values) %>%
-      mutate(target_date = time_value + ahead, as_of = as_of,geo_value = fc_key_vars)
+      mutate(target_date = time_value + ahead, as_of = as_of,
+             geo_value = fc_key_vars)
   } else {
     x_latest %>%
       epi_slide(fc = arx_forecaster(
         percent_cli, case_rate, geo_value, time_value,
-        args = arx_args_list(ahead = ahead,intercept = FALSE)),
+        args = arx_args_list(ahead = ahead, intercept = FALSE)),
         n = 120, ref_time_values = fc_time_values) %>%
       mutate(target_date = time_value + ahead, as_of = as_of)
   }
 }
 
 # Generate the forecasts, and bind them together
-fc <- bind_rows(k_week_ahead(x, ahead = 7, as_of = TRUE),
-                k_week_ahead(x, ahead = 14, as_of = TRUE),
-                k_week_ahead(x, ahead = 21, as_of = TRUE),
-                k_week_ahead(x, ahead = 28, as_of = TRUE),
-                k_week_ahead(x, ahead = 7, as_of = FALSE),
-                k_week_ahead(x, ahead = 14, as_of = FALSE),
-                k_week_ahead(x, ahead = 21, as_of = FALSE),
-                k_week_ahead(x, ahead = 28, as_of = FALSE))
+fc <- bind_rows(
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, as_of = TRUE)),
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, as_of = FALSE))
+)
 ```
 
 Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the target (respecting time stamps and locations) along with lags of the features (here, the response and doctors visits), estimates an autoregressive model, creates predictions, and non-parametric confidence bands.
@@ -138,9 +136,10 @@ In `epipredict`, this methodology is implemented with the `smooth_arx_forecaster
 ```{r smooth-on-the-archive}
 fc_data <- x %>%
   epix_slide(
-    fc = smooth_arx_forecaster(percent_cli, case_rate, geo_value, time_value) %>%
-      nest_by(key_vars), # on each date, this produces a data frame, 
-                         # which we nest to allow for sliding.
+    fc = smooth_arx_forecaster(
+      percent_cli, case_rate, geo_value, time_value
+    ) %>% nest_by(key_vars), # on each date, this produces a data frame, 
+                             # which we nest to allow for sliding.
     n = 120, ref_time_values = fc_time_values) %>%
   unnest(fc_data) %>% # unnest it to get a long dataframe like before
   mutate(target_date = time_value + ahead) %>%
@@ -152,7 +151,7 @@ Everything else works similarly to `arx_forecaster()` above.
 Unfortunately, there's a bug in this forecaster...
 
 
-```{r plot-smooth, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
+```{r plot-smooth, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
 ggplot(fc_data, aes(x = target_date, group = time_value)) +
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
   geom_line(data = x_latest, aes(x = time_value, y = case_rate),
@@ -177,7 +176,8 @@ First, we load versioned case numbers at the provincial level, and convert these
 ```{r get-can-fc}
 # source("drafts/canada-case-rates.R)
 can <- readRDS(
-  system.file("extdata", "can_prov_cases.rds", package = "epipredict", mustWork = TRUE)
+  system.file("extdata", "can_prov_cases.rds", 
+              package = "epipredict", mustWork = TRUE)
   ) %>%
   group_by(version, geo_value) %>% 
   arrange(time_value) %>% 
@@ -186,112 +186,66 @@ can <- readRDS(
 can <- as_epi_archive(can)
 can_latest <- epix_as_of(can, max_version = max(can$DT$version))
 
-can_k_week_ahead <- function(x, ahead = 7, as_of = TRUE) {
-  if(as_of){
+can_k_week_ahead <- function(ahead = 7, as_of = TRUE) {
+  if (as_of) {
     can %>%
       epix_slide(fc = arx_forecaster(
         y = cr_7dav, key_vars = geo_value, time_value = time_value,
-        args = arx_args_list(intercept = FALSE,ahead = ahead)),
+        args = arx_args_list(intercept = FALSE, ahead = ahead)),
         n = 120, ref_time_values = fc_time_values) %>%
-      mutate(target_date = time_value + ahead, geo_value = fc_key_vars, as_of = as_of)
-  }
-  else{
+      mutate(target_date = time_value + ahead, geo_value = fc_key_vars,
+             as_of = as_of)
+  } else {
     can_latest %>%
       epi_slide(fc = arx_forecaster(
         y = cr_7dav, key_vars = geo_value, time_value = time_value,
-        args = arx_args_list(intercept = FALSE,ahead = ahead)),
+        args = arx_args_list(intercept = FALSE, ahead = ahead)),
         n = 120, ref_time_values = fc_time_values) %>%
-      mutate(target_date = time_value + ahead, geo_value = fc_key_vars, as_of = as_of)
+      mutate(target_date = time_value + ahead, geo_value = fc_key_vars,
+             as_of = as_of)
   }
 }
 
-can_fc <- bind_rows(purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(can, ahead = .x, as_of = TRUE)),
-                    purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(can_latest, ahead = .x, as_of = FALSE)))
+can_fc <- bind_rows(
+  purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(ahead = .x, as_of = TRUE)),
+  purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(ahead = .x, as_of = FALSE))
+)
 ```
 
-The figure below shows the results for all of the provinces. Note that we are showing the 7-day averages rather than the reported case numbers due to highly variable provincial reporting mismatches.
+The figures below shows the results for all of the provinces. Note that we are showing the 7-day averages rather than the reported case numbers due to highly variable provincial reporting mismatches.
+
 
 ```{r plot-can-fc, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
-ggplot(can_fc, aes(x = target_date, group = time_value)) +
+ggplot(can_fc %>% filter(! as_of), 
+       aes(x = target_date, group = time_value)) +
   coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
   geom_line(data = can_latest, aes(x = time_value, y = cr_7dav),
             inherit.aes = FALSE, color = "gray50") +
-  geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value), alpha = 0.4) +
+  geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value),
+              alpha = 0.4) +
   geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
+  
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
-  facet_wrap(paste('as_of: ', as_of)~geo_value,scales = "free",ncol = 4) +
+  facet_wrap(~geo_value, scales = "free_y", ncol = 3) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
-  labs(x = "Date", y = "Reported COVID-19 case rates") +
+  labs(title = "Finalized data", x = "Date", 
+       y = "Reported COVID-19 case rates") +
   theme(legend.position = "none")  
 ```
 
-## Goals for `epipredict`
-
-**We hope to provide:**
-
-1. A set of basic, easy-to-use forecasters that work out of the box. You should be able to do a reasonably limited amount of customization on them. (Any serious customization happens with point number 2.) For the basic forecasters, we should provide, at least: 
-    * Baseline flat-line forecaster 
-    * Autoregressive forecaster
-    * Autoregressive classifier
-2. A framework for creating custom forecasters out of modular components. There are four types of components:
-    * Preprocessor: do things to the data before model training
-    * Trainer: train a model on data, resulting in a fitted model object
-    * Predictor: make predictions, using a fitted model object
-    * Postprocessor: do things to the predictions before returning
-
-**Target audience:**
-
-* Basic. Has data, calls forecaster with default arguments.
-* Intermediate. Wants to examine changes to the arguments, take advantage of built in flexibility.
-* Advanced. Wants to write their own forecasters. Maybe willing to build up from some components that we write. 
-
-The Advanced user should find their task to be relatively easy (and we'll show them how). 
-
-Example: During a quiet period, a user decides they want to first predict whether a surge is about to occur, say using variant information from GISAID. Then for surging locations, they want to train an AR model using past surges in the same location. Everywhere else, they predict a flat line. We should be able to do this in a few lines of code.
-
-Delphi's own forecasts have been produced/evaluated in this way for a while now, but the code base is scattered and evolving. We want to consolidate, generalize, and simplify to allow others to benefit as well.
-
-The basic framework should allow for something like the following. This would
-feel very familiar to anyone working in `R`+`{tidyverse}`.
-
-**Simple linear autoregressive model with scaling (modular)**
-
-```{r ideal-framework, eval=FALSE}
-my_fcaster = new_epi_predictor() %>%
-  add_preprocessor(scaler, var = cases, by = pop) %>%
-  add_preprocessor(lagger, var = dv_cli, lags = c(0, 7, 14)) %>%
-  add_trainer(lm) %>%
-  add_predictor(lm.predict) %>%
-  add_postprocessor(scaler, by = 1/pop)
+```{r plot-can-fc-proper, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
+ggplot(can_fc %>% filter(as_of), 
+       aes(x = target_date, group = time_value)) +
+  coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
+  geom_line(data = can_latest, aes(x = time_value, y = cr_7dav),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value),
+              alpha = 0.4) +
+  geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
+  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  facet_wrap(~ geo_value, scales = "free_y", ncol = 3) +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(title = "Properly versioned data", x = "Date", 
+       y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")  
 ```
-
-Then you could run this on an `epi_df` with one line.
-
-```{r run-ideal, eval=FALSE}
-my_fcaster(lead(cases, 7) ~ ., epi_df, key_vars, time_vars)
-```
-
-The hypothetical example of first classifying, then fitting different models would also fit into this framework. And this isn't far from our current production models.
-
-### Why doesn't this exist
-
-Closest neighbor is [`{fable}`](https://fable.tidyverts.org/). It does some of what we want but has a few major downsides:
-
-1. Small set of standard Time Series models.
-    * Small modifications are hard (e.g. can't "just use" `glmnet` instead of `lm`) in an AR model.
-1. Multi-period forecasting is model-based only.
-    * This is "iterative" forecasting, and is very bad in epidemiology.
-    * Much better with simple models to use "direct" forecasting.
-1. Confidence bands are model-based only.
-    * In epi tasks, these dramatically under-cover.
-1. Layering is not possible/natural
-1. Can't use methods that aren't already implemented.
-
-The forecasts we did above can't be produced with `{fable}`.
-
-
-**However:** The developers behind `{fable}` wrote a package called `{fabletools}` that powers model creation (based on `R6`). We can almost certainly borrow some of that technology to lever up.
-
-### What this isn't
-
-This is not a framework for SIR models. We intend to create some simple versions, but advanced models---those that use variants, hospitalizations, different types of immunity, age stratification, etc.---cannot be compartmentalized in the same way (though see [pypm](https://pypm.github.io/home/)). These types of models also are better at scenario modeling than short term forecasts unless they are quite complicated.

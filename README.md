@@ -21,16 +21,106 @@ You can install the development version of epipredict from
 devtools::install_github("cmu-delphi/epipredict")
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-``` r
-library(epipredict)
-## basic example code
-```
-
 ## Documentation
 
 You can view documentation for the `main` branch at
 <https://cmu-delphi.github.io/epipredict>.
+
+## Goals for `epipredict`
+
+**We hope to provide:**
+
+1.  A set of basic, easy-to-use forecasters that work out of the box.
+    You should be able to do a reasonably limited amount of
+    customization on them. (Any serious customization happens with point
+    number 2.) For the basic forecasters, we should provide, at least:
+    -   Baseline flat-line forecaster
+    -   Autoregressive forecaster
+    -   Autoregressive classifier
+2.  A framework for creating custom forecasters out of modular
+    components. There are four types of components:
+    -   Preprocessor: do things to the data before model training
+    -   Trainer: train a model on data, resulting in a fitted model
+        object
+    -   Predictor: make predictions, using a fitted model object
+    -   Postprocessor: do things to the predictions before returning
+
+**Target audience:**
+
+-   Basic. Has data, calls forecaster with default arguments.
+-   Intermediate. Wants to examine changes to the arguments, take
+    advantage of built in flexibility.
+-   Advanced. Wants to write their own forecasters. Maybe willing to
+    build up from some components that we write.
+
+The Advanced user should find their task to be relatively easy (and
+we’ll show them how).
+
+**Example:**  
+During a quiet period, a user decides they want to first predict whether
+a surge is about to occur, say using variant information from GISAID.
+Then for surging locations, they want to train an AR model using past
+surges in the same location. Everywhere else, they predict a flat line.
+We should be able to do this in a few lines of code.
+
+Delphi’s own forecasts have been produced/evaluated in this way for a
+while now, but the code base is scattered and evolving. We want to
+consolidate, generalize, and simplify to allow others to benefit as
+well.
+
+The basic framework should allow for something like the following. This
+would feel very familiar to anyone working in `R`+`{tidyverse}`.
+
+**Simple linear autoregressive model with scaling (modular)**
+
+``` r
+my_fcaster = new_epi_predictor() %>%
+  add_preprocessor(scaler, var = cases, by = pop) %>%
+  add_preprocessor(lagger, var = dv_cli, lags = c(0, 7, 14)) %>%
+  add_trainer(lm) %>%
+  add_predictor(lm.predict) %>%
+  add_postprocessor(scaler, by = 1/pop)
+```
+
+Then you could run this on an `epi_df` with one line.
+
+``` r
+my_fcaster(lead(cases, 7) ~ ., epi_df, key_vars, time_vars)
+```
+
+The hypothetical example of first classifying, then fitting different
+models would also fit into this framework. And this isn’t far from our
+current production models.
+
+### Why doesn’t this exist
+
+Closest neighbor is [`{fable}`](https://fable.tidyverts.org/). It does
+some of what we want but has a few major downsides:
+
+1.  Small set of standard Time Series models.
+    -   Small modifications are hard (e.g. can’t “just use” `glmnet`
+        instead of `lm`) in an AR model.
+2.  Multi-period forecasting is model-based only.
+    -   This is “iterative” forecasting, and is very bad in
+        epidemiology.
+    -   Much better with simple models to use “direct” forecasting.
+3.  Confidence bands are model-based only.
+    -   In epi tasks, these dramatically under-cover.
+4.  Layering is not possible/natural
+5.  Can’t use methods that aren’t already implemented.
+
+The forecasts we did above can’t be produced with `{fable}`.
+
+**However:** The developers behind `{fable}` wrote a package called
+`{fabletools}` that powers model creation (based on `R6`). We can almost
+certainly borrow some of that technology to lever up.
+
+### What this isn’t
+
+This is not a framework for SIR models. We intend to create some simple
+versions, but advanced models—those that use variants, hospitalizations,
+different types of immunity, age stratification, etc.—cannot be
+compartmentalized in the same way (though see
+[pypm](https://pypm.github.io/home/)). These types of models also are
+better at scenario modeling than short term forecasts unless they are
+quite complicated.
