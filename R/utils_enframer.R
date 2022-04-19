@@ -8,3 +8,12 @@ enframer <- function(df, x, fill = NA) {
   for (v in x) df <- dplyr::mutate(df, !!v := fill)
   df
 }
+
+enlist <- function (...) {
+  # in epiprocess
+  x = list(...)
+  n = as.character(sys.call())[-1]
+  if (!is.null(n0 <- names(x))) n[n0 != ""] = n0[n0 != ""]
+  names(x) = n
+  x
+}
