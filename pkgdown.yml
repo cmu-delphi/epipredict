@@ -3,7 +3,7 @@ pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   simple-forecasts: simple-forecasts.html
-last_built: 2022-04-19T15:48Z
+last_built: 2022-04-19T16:51Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles

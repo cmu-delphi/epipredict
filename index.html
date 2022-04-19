@@ -44,6 +44,9 @@
     <a class="dropdown-item" href="articles/simple-forecasts.html">Simple forecasts</a>
   </div>
 </li>
+<li class="nav-item">
+  <a class="nav-link" href="news/index.html">Changelog</a>
+</li>
       </ul>
 <form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="search.json" id="search-input" placeholder="Search for" autocomplete="off">
@@ -78,17 +81,87 @@
 <span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"cmu-delphi/epipredict"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<p>This is a basic example which shows you how to solve a common problem:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span>
-<span class="co">## basic example code</span></code></pre></div>
-</div>
-<div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
 <p>You can view documentation for the <code>main</code> branch at <a href="https://cmu-delphi.github.io/epipredict" class="uri">https://cmu-delphi.github.io/epipredict</a>.</p>
+</div>
+<div class="section level2">
+<h2 id="goals-for-epipredict">Goals for <code>epipredict</code>
+<a class="anchor" aria-label="anchor" href="#goals-for-epipredict"></a>
+</h2>
+<p><strong>We hope to provide:</strong></p>
+<ol style="list-style-type: decimal">
+<li>A set of basic, easy-to-use forecasters that work out of the box. You should be able to do a reasonably limited amount of customization on them. (Any serious customization happens with point number 2.) For the basic forecasters, we should provide, at least:
+<ul>
+<li>Baseline flat-line forecaster</li>
+<li>Autoregressive forecaster</li>
+<li>Autoregressive classifier</li>
+</ul>
+</li>
+<li>A framework for creating custom forecasters out of modular components. There are four types of components:
+<ul>
+<li>Preprocessor: do things to the data before model training</li>
+<li>Trainer: train a model on data, resulting in a fitted model object</li>
+<li>Predictor: make predictions, using a fitted model object</li>
+<li>Postprocessor: do things to the predictions before returning</li>
+</ul>
+</li>
+</ol>
+<p><strong>Target audience:</strong></p>
+<ul>
+<li>Basic. Has data, calls forecaster with default arguments.</li>
+<li>Intermediate. Wants to examine changes to the arguments, take advantage of built in flexibility.</li>
+<li>Advanced. Wants to write their own forecasters. Maybe willing to build up from some components that we write.</li>
+</ul>
+<p>The Advanced user should find their task to be relatively easy (and we’ll show them how).</p>
+<p><strong>Example:</strong><br>
+During a quiet period, a user decides they want to first predict whether a surge is about to occur, say using variant information from GISAID. Then for surging locations, they want to train an AR model using past surges in the same location. Everywhere else, they predict a flat line. We should be able to do this in a few lines of code.</p>
+<p>Delphi’s own forecasts have been produced/evaluated in this way for a while now, but the code base is scattered and evolving. We want to consolidate, generalize, and simplify to allow others to benefit as well.</p>
+<p>The basic framework should allow for something like the following. This would feel very familiar to anyone working in <code>R</code>+<a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a>.</p>
+<p><strong>Simple linear autoregressive model with scaling (modular)</strong></p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">my_fcaster</span> <span class="op">=</span> <span class="fu">new_epi_predictor</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">add_preprocessor</span><span class="op">(</span><span class="va">scaler</span>, var <span class="op">=</span> <span class="va">cases</span>, by <span class="op">=</span> <span class="va">pop</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">add_preprocessor</span><span class="op">(</span><span class="va">lagger</span>, var <span class="op">=</span> <span class="va">dv_cli</span>, lags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">add_trainer</span><span class="op">(</span><span class="va">lm</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">add_predictor</span><span class="op">(</span><span class="va">lm.predict</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span>
+  <span class="fu">add_postprocessor</span><span class="op">(</span><span class="va">scaler</span>, by <span class="op">=</span> <span class="fl">1</span><span class="op">/</span><span class="va">pop</span><span class="op">)</span></code></pre></div>
+<p>Then you could run this on an <code>epi_df</code> with one line.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu">my_fcaster</span><span class="op">(</span><span class="fu">lead</span><span class="op">(</span><span class="va">cases</span>, <span class="fl">7</span><span class="op">)</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">epi_df</span>, <span class="va">key_vars</span>, <span class="va">time_vars</span><span class="op">)</span></code></pre></div>
+<p>The hypothetical example of first classifying, then fitting different models would also fit into this framework. And this isn’t far from our current production models.</p>
+<div class="section level3">
+<h3 id="why-doesnt-this-exist">Why doesn’t this exist<a class="anchor" aria-label="anchor" href="#why-doesnt-this-exist"></a>
+</h3>
+<p>Closest neighbor is <a href="https://fable.tidyverts.org/" class="external-link"><code>{fable}</code></a>. It does some of what we want but has a few major downsides:</p>
+<ol style="list-style-type: decimal">
+<li>Small set of standard Time Series models.
+<ul>
+<li>Small modifications are hard (e.g. can’t “just use” <code>glmnet</code> instead of <code>lm</code>) in an AR model.</li>
+</ul>
+</li>
+<li>Multi-period forecasting is model-based only.
+<ul>
+<li>This is “iterative” forecasting, and is very bad in epidemiology.</li>
+<li>Much better with simple models to use “direct” forecasting.</li>
+</ul>
+</li>
+<li>Confidence bands are model-based only.
+<ul>
+<li>In epi tasks, these dramatically under-cover.</li>
+</ul>
+</li>
+<li>Layering is not possible/natural</li>
+<li>Can’t use methods that aren’t already implemented.</li>
+</ol>
+<p>The forecasts we did above can’t be produced with <a href="https://fable.tidyverts.org" class="external-link">fable</a>.</p>
+<p><strong>However:</strong> The developers behind <a href="https://fable.tidyverts.org" class="external-link">fable</a> wrote a package called <a href="https://fabletools.tidyverts.org/" class="external-link">fabletools</a> that powers model creation (based on <code>R6</code>). We can almost certainly borrow some of that technology to lever up.</p>
+</div>
+<div class="section level3">
+<h3 id="what-this-isnt">What this isn’t<a class="anchor" aria-label="anchor" href="#what-this-isnt"></a>
+</h3>
+<p>This is not a framework for SIR models. We intend to create some simple versions, but advanced models—those that use variants, hospitalizations, different types of immunity, age stratification, etc.—cannot be compartmentalized in the same way (though see <a href="https://pypm.github.io/home/" class="external-link">pypm</a>). These types of models also are better at scenario modeling than short term forecasts unless they are quite complicated.</p>
+</div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
