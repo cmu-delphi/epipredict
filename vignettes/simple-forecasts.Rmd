@@ -177,25 +177,37 @@ can <- readRDS(
   ) %>%
   group_by(version, geo_value) %>% 
   arrange(time_value) %>% 
-  mutate(cr_7dav = RcppRoll::roll_meanr(case_rate, n = 7L))
+  mutate(cr_7dav = RcppRoll::roll_meanr(case_rate, n = 7L)) #%>%
+  #filter(geo_value %in% c('Alberta', "BC"))
 can <- as_epi_archive(can)
+can_latest <- epix_as_of(can, max_version = max(can$DT$version))
 
-can_k_week_ahead <- function(ahead = 7) {
-  can %>%
-    epix_slide(fc = arx_forecaster(
-      y = cr_7dav, key_vars = geo_value, time_value = time_value,
-      args = arx_args_list(ahead = ahead)),
-      n = 120, ref_time_values = fc_time_values, group_by = geo_value) %>%
-    mutate(target_date = time_value + ahead)
+can_k_week_ahead <- function(x, ahead = 7, as_of = TRUE) {
+  if(as_of){
+    can %>%
+      epix_slide(fc = arx_forecaster(
+        y = cr_7dav, key_vars = geo_value, time_value = time_value,
+        args = arx_args_list(intercept = FALSE,ahead = ahead)),
+        n = 120, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, geo_value = fc_key_vars, as_of = as_of)
+  }
+  else{
+    can_latest %>%
+      epi_slide(fc = arx_forecaster(
+        y = cr_7dav, key_vars = geo_value, time_value = time_value,
+        args = arx_args_list(intercept = FALSE,ahead = ahead)),
+        n = 120, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, geo_value = fc_key_vars, as_of = as_of)
+  }
 }
 
-can_fc <- purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(.x))
+can_fc <- bind_rows(purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(can, ahead = .x, as_of = TRUE)),
+                    purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(can_latest, ahead = .x, as_of = FALSE)))
 ```
 
 The figure below shows the results for all of the provinces. Note that we are showing the 7-day averages rather than the reported case numbers due to highly variable provincial reporting mismatches.
 
 ```{r plot-can-fc, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
-can_latest <- epix_as_of(can, max_version = max(x$DT$version)) 
 ggplot(can_fc, aes(x = target_date, group = time_value)) +
   coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
   geom_line(data = can_latest, aes(x = time_value, y = cr_7dav),
@@ -203,10 +215,10 @@ ggplot(can_fc, aes(x = target_date, group = time_value)) +
   geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value), alpha = 0.4) +
   geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
-  facet_wrap(~geo_value, scales = "free", ncol = 3) +
+  facet_wrap(paste('as_of: ', as_of)~geo_value,scales = "free",ncol = 4) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   labs(x = "Date", y = "Reported COVID-19 case rates") +
-  theme(legend.position = "none")
+  theme(legend.position = "none")  
 ```
 
 ## Goals for `epipredict`
