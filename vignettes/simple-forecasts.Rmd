@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r pkgs}
-devtools::load_all('.')
 library(epipredict)
 library(epiprocess)
 library(covidcast)
