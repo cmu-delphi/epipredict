@@ -224,7 +224,6 @@ ggplot(can_fc %>% filter(! as_of),
   geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value),
               alpha = 0.4) +
   geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
-  
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
   facet_wrap(~geo_value, scales = "free_y", ncol = 3) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
