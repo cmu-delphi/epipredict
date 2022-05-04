@@ -19,8 +19,8 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Remotes:
-  dajmcdon/delphi.epidata@dev
-  cmu-delphi/epiprocess
+    dajmcdon/delphi.epidata
+    cmu-delphi/epiprocess
 Imports: 
     dplyr,
     magrittr,
@@ -33,10 +33,10 @@ Imports:
     tidyr,
     assertthat,
     tidyselect,
-    delphi.epidata,
     epiprocess
 Suggests: 
     data.table,
+    delphi.epidata,
     covidcast,
     ggplot2,
     knitr,
@@ -46,5 +46,5 @@ Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3
 URL: https://github.com/cmu-delphi/epipredict/,
-    https://cmu-delphi.github.io/epiprocess
+     https://cmu-delphi.github.io/epiprocess
 VignetteBuilder: knitr
