@@ -19,8 +19,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Remotes:
-    dajmcdon/delphi.epidata
-    cmu-delphi/epiprocess
+    cmu-delphi/epiprocess#58
 Imports: 
     dplyr,
     magrittr,
@@ -36,7 +35,6 @@ Imports:
     epiprocess
 Suggests: 
     data.table,
-    delphi.epidata,
     covidcast,
     ggplot2,
     knitr,
