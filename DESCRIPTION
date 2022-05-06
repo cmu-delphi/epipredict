@@ -28,12 +28,11 @@ Imports:
     purrr,
     cli,
     stats,
-    splines,
     tidyr,
     assertthat,
-    tidyselect,
-    epiprocess
+    tidyselect
 Suggests: 
+    epiprocess,
     data.table,
     covidcast,
     ggplot2,
