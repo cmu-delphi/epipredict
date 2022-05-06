@@ -35,6 +35,7 @@ First, we download the data and process as before (hidden).
 
 
 ```{r grab-epi-data, echo=FALSE}
+options(scipen = 0, digits = 7)
 theme_set(theme_bw())
 # y <- covidcast_signals(
 #   c("doctor-visits", "jhu-csse"),
