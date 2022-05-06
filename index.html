@@ -70,7 +70,6 @@
 <div class="page-header"><h1 id="epipredict">epipredict<a class="anchor" aria-label="anchor" href="#epipredict"></a>
 </h1></div>
 <!-- badges: start -->
-
 <p><strong>Note:</strong> This package is currently in development and likely will not work as expected.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -91,15 +90,13 @@
 </h2>
 <p><strong>We hope to provide:</strong></p>
 <ol style="list-style-type: decimal">
-<li>A set of basic, easy-to-use forecasters that work out of the box. You should be able to do a reasonably limited amount of customization on them. (Any serious customization happens with point number 2.) For the basic forecasters, we should provide, at least:
-<ul>
+<li>A set of basic, easy-to-use forecasters that work out of the box. You should be able to do a reasonably limited amount of customization on them. (Any serious customization happens with point number 2.) For the basic forecasters, we should provide, at least:<ul>
 <li>Baseline flat-line forecaster</li>
 <li>Autoregressive forecaster</li>
 <li>Autoregressive classifier</li>
 </ul>
 </li>
-<li>A framework for creating custom forecasters out of modular components. There are four types of components:
-<ul>
+<li>A framework for creating custom forecasters out of modular components. There are four types of components:<ul>
 <li>Preprocessor: do things to the data before model training</li>
 <li>Trainer: train a model on data, resulting in a fitted model object</li>
 <li>Predictor: make predictions, using a fitted model object</li>
@@ -135,21 +132,14 @@ During a quiet period, a user decides they want to first predict whether a surge
 </h3>
 <p>Closest neighbor is <a href="https://fable.tidyverts.org/" class="external-link"><code>{fable}</code></a>. It does some of what we want but has a few major downsides:</p>
 <ol style="list-style-type: decimal">
-<li>Small set of standard Time Series models.
-<ul>
-<li>Small modifications are hard (e.g. can’t “just use” <code>glmnet</code> instead of <code>lm</code>) in an AR model.</li>
-</ul>
+<li>Small set of standard Time Series models.<ul><li>Small modifications are hard (e.g. can’t “just use” <code>glmnet</code> instead of <code>lm</code>) in an AR model.</li></ul>
 </li>
-<li>Multi-period forecasting is model-based only.
-<ul>
+<li>Multi-period forecasting is model-based only.<ul>
 <li>This is “iterative” forecasting, and is very bad in epidemiology.</li>
 <li>Much better with simple models to use “direct” forecasting.</li>
 </ul>
 </li>
-<li>Confidence bands are model-based only.
-<ul>
-<li>In epi tasks, these dramatically under-cover.</li>
-</ul>
+<li>Confidence bands are model-based only.<ul><li>In epi tasks, these dramatically under-cover.</li></ul>
 </li>
 <li>Layering is not possible/natural</li>
 <li>Can’t use methods that aren’t already implemented.</li>
@@ -214,7 +204,7 @@ During a quiet period, a user decides they want to first predict whether a surge
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
     </footer>
