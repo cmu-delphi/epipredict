@@ -30,7 +30,8 @@ Imports:
     stats,
     tidyr,
     assertthat,
-    tidyselect
+    tidyselect,
+    tensr
 Suggests: 
     epiprocess,
     data.table,

@@ -17,7 +17,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r pkgs}
-devtools::load_all('.')
 library(epipredict)
 library(epiprocess)
 library(covidcast)
@@ -49,26 +48,15 @@ theme_set(theme_bw())
 #   geo_values = c("ca", "fl")) 
 # saveRDS(y, "inst/extdata/epi_archive.rds")
 y <- readRDS(
-  system.file("extdata", "us_full_data.RData", package = "epipredict", mustWork = TRUE)
+  system.file("extdata", "epi_archive.rds", package = "epipredict", mustWork = TRUE)
 )
-STATES <- c('ga', 'nh', 'va', 'ar', 'az', 'in',
-           'oh', 'hi', 'al', 'nj', 'ma', 'ok',
-           'wa', 'nd', 'sd', 'wy', 'ne', 'nm',
-           'mi', 'la', 'ut', 'pa', 'ky', 'ia',
-           'de', 'mt', 'tn', 'md', 'sc', 'ks',
-           'me', 'ri', 'mn', 'il', 'co', 'tx',
-           'ny', 'dc', 'mo', 'nc', 'ms', 'or',
-           'wi', 'id', 'ak', 'ca', 'ct', 'fl',
-           'nv', 'wv', 'vt')
 x <- y[[1]] %>%  
   select(geo_value, time_value, version = issue, percent_cli = value) %>%
-  filter(geo_value %in% STATES) %>%
   as_epi_archive()
 
 epix_merge(
   x, y[[2]] %>% 
     select(geo_value, time_value, version = issue, case_rate = value) %>%
-    filter(geo_value %in% STATES) %>%
     as_epi_archive(),
   all = TRUE)
 ```
@@ -91,7 +79,7 @@ k_week_ahead <- function(ahead = 7, as_of = TRUE) {
         args = knnarx_args_list(ahead = ahead,
                       lags = c(1,7,14),
                       query_window_len = 32,
-                      topK = 1000,
+                      topK = 100,
                       intercept = FALSE)),
         n = Inf, ref_time_values = fc_time_values) %>%
       mutate(target_date = time_value + ahead, as_of = as_of,
@@ -103,7 +91,7 @@ k_week_ahead <- function(ahead = 7, as_of = TRUE) {
         args = knnarx_args_list(ahead = ahead,
                       lags = c(1,7,14),
                       query_window_len = 32,
-                      topK = 1000,
+                      topK = 100,
                        intercept = FALSE)),
         n = Inf, ref_time_values = fc_time_values) %>%
       mutate(target_date = time_value + ahead, as_of = as_of)
@@ -119,7 +107,7 @@ fc <- bind_rows(
 
 
 
-```{r plot-smooth, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 18}
+```{r plot-smooth, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
 ggplot(fc %>% filter(as_of == TRUE), aes(x = target_date, group = time_value)) +
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
   geom_line(data = x_latest, aes(x = time_value, y = case_rate),
@@ -137,7 +125,7 @@ ggplot(fc %>% filter(as_of == TRUE), aes(x = target_date, group = time_value)) +
 
 For the moment, the KNN Enhanced iterative forecasting strategy only support the AR forecastor, which means it can only deal with one signal each time. Same as the direct example, the following pipeline run predictions with the iterative forecasting strategy.
 
-```{r make-iterative-knnar-kweek, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 18}
+```{r make-iterative-knnar-kweek, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
 ahead <- 21
 final_iterative <- x %>%
   epix_slide(
@@ -147,7 +135,7 @@ final_iterative <- x %>%
         ahead = ahead,
         lags = c(1, 7, 14),
         query_window_len = 32,
-        topK = 1000,
+        topK = 100,
         symmetrize = FALSE,
         update_model = FALSE
       )
@@ -174,7 +162,7 @@ ggplot(final_iterative, aes(x = target_date, group = time_value)) +
 
 The `update_model` parameter in the iterative forecastor API decides if the one-step ahead model will be updated or not during the iterative predicting procedure. The following pipeline shows the results with this trigger turned on.
 
-```{r make-dynamiciterative-knnar-kweek, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 18}
+```{r make-dynamiciterative-knnar-kweek, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
 final_dynamiciterative <- x %>%
   epix_slide(
     fc = knn_iteraive_ar_forecaster(
@@ -183,7 +171,7 @@ final_dynamiciterative <- x %>%
         ahead = ahead,
         lags = c(1, 7, 14),
         query_window_len = 32,
-        topK = 1000,
+        topK = 100,
         symmetrize = FALSE,
         update_model = TRUE
       )

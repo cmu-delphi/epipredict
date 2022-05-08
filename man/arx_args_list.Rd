@@ -33,8 +33,8 @@ training residuals. A \code{NULL} value will result in point forecasts only.}
 \item{intercept}{Logical. The default \code{TRUE} includes intercept in the
 forecaster.}
 
-\item{symmetrize}{Logical. The default \code{TRUE} calculates symmetric prediction
-intervals.}
+\item{symmetrize}{Logical. The default \code{TRUE} calculates
+symmetric prediction intervals.}
 
 \item{nonneg}{Logical. The default \code{TRUE} enforeces nonnegative predictions
 by hard-thresholding at 0.}
