@@ -16,6 +16,8 @@ epi_recipe <- function(x, ...) {
 #' @export
 epi_recipe.default <- function(x, ...) {
   ## if not a formula or an epi_df, we just pass to recipes::recipe
+  if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x))
+    x <- x[1,,drop=FALSE]
   recipes::recipe(x, ...)
 }
 
@@ -108,7 +110,7 @@ epi_recipe.epi_df <-
     }
 
     ## Add types
-    var_info <- full_join(get_types(x), var_info, by = "variable")
+    var_info <- dplyr::full_join(recipes:::get_types(x), var_info, by = "variable")
     var_info$source <- "original"
 
     ## Return final object of class `recipe`
@@ -155,7 +157,7 @@ epi_recipe.formula <- function(formula, data, ...) {
 
 # slightly modified version of `form2args()` in {recipes}
 epi_form2args <- function(formula, data, ...) {
-  if (! is_formula(formula)) formula <- as.formula(formula)
+  if (! rlang::is_formula(formula)) formula <- as.formula(formula)
 
   ## check for in-line formulas
   inline_check(formula)
