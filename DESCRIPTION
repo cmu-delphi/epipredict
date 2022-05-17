@@ -1,47 +1,42 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
 Version: 0.0.0.9000
-Authors@R: 
-  c(
-  person(given = "Jacob",
-         family = "Bien",
-         role = "aut"),
-  person(given = "Daniel",
-         family = "McDonald",
-         role = "aut"),
-  person(given = "Ryan",
-         family = "Tibshirani",
-         role = c("aut", "cre"),
-         email = "ryantibs@cmu.edu"))
+Authors@R: c(
+    person("Jacob", "Bien", role = "aut"),
+    person("Daniel", "McDonald", role = "aut"),
+    person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = c("aut", "cre"))
+  )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
-Remotes:
-    cmu-delphi/epiprocess#58
+URL: https://github.com/cmu-delphi/epipredict/,
+    https://cmu-delphi.github.io/epiprocess
 Imports: 
+    assertthat,
+    cli,
     dplyr,
     magrittr,
-    tibble,
-    rlang,
     purrr,
-    cli,
+    recipes,
+    rlang,
     stats,
+    tibble,
     tidyr,
-    assertthat,
     tidyselect
 Suggests: 
-    epiprocess,
-    data.table,
     covidcast,
+    data.table,
+    epiprocess,
     ggplot2,
     knitr,
     lubridate,
     RcppRoll,
     rmarkdown,
     testthat (>= 3.0.0)
+VignetteBuilder: 
+    knitr
+Remotes:
+    cmu-delphi/epiprocess#58
 Config/testthat/edition: 3
-URL: https://github.com/cmu-delphi/epipredict/,
-     https://cmu-delphi.github.io/epiprocess
-VignetteBuilder: knitr
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0
