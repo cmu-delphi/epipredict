@@ -29,7 +29,26 @@ test_that("epi_recipe formula works", {
     geo_value = "ca"
   ) %>% epiprocess::as_epi_df()
 
-  epi_recipe(y~x, tib)
+  r <- epi_recipe(y~x, tib)
+  ref_var_info <- tibble::tribble(
+    ~ variable, ~ type, ~ role, ~ source,
+    "x", "numeric", "predictor", "original",
+    "y", "numeric", "outcome", "original",
+    "time_value", "date", "time_value", "original",
+    "geo_value", "nominal", "key", "original"
+  )
+  expect_identical(r$var_info, ref_var_info)
+
+  r <- epi_recipe(y ~ x + geo_value, tib)
+  ref_var_info <- tibble::tribble(
+    ~ variable, ~ type, ~ role, ~ source,
+    "x", "numeric", "predictor", "original",
+    "geo_value", "nominal", "predictor", "original",
+    "y", "numeric", "outcome", "original",
+    "time_value", "date", "time_value", "original",
+    "geo_value", "nominal", "key", "original"
+  )
+  expect_identical(r$var_info, ref_var_info)
 })
 
 

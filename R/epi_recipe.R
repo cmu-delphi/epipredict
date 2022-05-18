@@ -89,9 +89,8 @@ epi_recipe.epi_df <-
     }
 
     keys <- epi_keys(x) # we know x is an epi_df
-    x <- x[1, union(vars, keys)] # ensure there's only 1 row
 
-    var_info <- tibble(variable = c(vars, keys))
+    var_info <- tibble(variable = vars)
     key_roles <- c("time_value", rep("key", length(keys) - 1))
 
     ## Check and add roles when available
@@ -104,14 +103,29 @@ epi_recipe.epi_df <-
           )
         )
       }
-      var_info$role <- c(roles, key_roles)
+      var_info$role <- roles
     } else {
-      var_info$role <- c(rep(NA, length(vars)), key_roles)
+      var_info$role <- rep(NA, length(vars))
     }
+    ## Now we add the keys
+    var_info <- var_info %>%
+      tibble::add_row(
+        variable = keys,
+        role = key_roles
+      )
 
     ## Add types
     var_info <- dplyr::full_join(recipes:::get_types(x), var_info, by = "variable")
     var_info$source <- "original"
+
+    ## arrange to easy order
+    var_info <- var_info %>%
+      dplyr::arrange(factor(
+        role,
+        levels = union(
+          c("predictor", "outcome", "time_value", "key"),
+          unique(role)) # anything else
+      ))
 
     ## Return final object of class `recipe`
     out <- list(
@@ -177,19 +191,19 @@ epi_form2args <- function(formula, data, ...) {
     predictors <- predictors[!(predictors %in% keys)]
   }
 
-  ## get `vars` from rhs, lhs, and keys
-  vars <- c(predictors, outcomes, keys)
+  ## get `vars` from rhs, lhs. keys get added downstream
+  vars <- c(predictors, outcomes)
   ## subset data columns
-  data <- data[, vars]
+  data <- data[, union(vars, keys)]
 
   ## derive roles
   roles <- rep("predictor", length(predictors))
   if (length(outcomes) > 0) {
     roles <- c(roles, rep("outcome", length(outcomes)))
   }
-  if (length(keys) > 0) {
-    roles <- c(roles, c("time_value", rep("key", length(keys) - 1)))
-  }
+  # if (length(keys) > 0) {
+  #   roles <- c(roles, c("time_value", rep("key", length(keys) - 1)))
+  # }
 
   ## pass to recipe.default with vars and roles
   list(x = data, vars = vars, roles = roles)
