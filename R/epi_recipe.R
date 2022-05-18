@@ -105,14 +105,14 @@ epi_recipe.epi_df <-
       }
       var_info$role <- roles
     } else {
-      var_info$role <- rep(NA, length(vars))
+      var_info <- var_info %>% dplyr::filter(!(variable %in% keys))
+      var_info$role <- NA
     }
-    ## Now we add the keys
-    var_info <- var_info %>%
-      tibble::add_row(
-        variable = keys,
-        role = key_roles
-      )
+    ## Now we add the keys when necessary
+    var_info <- dplyr::union(
+      var_info,
+      tibble::tibble(variable = keys, role = key_roles)
+    )
 
     ## Add types
     var_info <- dplyr::full_join(recipes:::get_types(x), var_info,
@@ -133,7 +133,7 @@ epi_recipe.epi_df <-
       var_info = var_info,
       term_info = var_info,
       steps = NULL,
-      template = x,
+      template = x[1,],
       levels = NULL,
       retained = NA
     )

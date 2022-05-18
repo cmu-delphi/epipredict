@@ -70,14 +70,25 @@ test_that("epi_recipe formula works", {
 })
 
 test_that("epi_recipe epi_df works", {
-  # these all call recipes::recipe(), but the template will always have 1 row
+
   tib <- tibble(
     x = 1:5, y = 1:5,
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
     geo_value = "ca"
   ) %>% epiprocess::as_epi_df()
 
-  r <- epi_recipe(y~x, tib)
+  r <- epi_recipe(tib)
+  ref_var_info <- tibble::tribble(
+    ~ variable, ~ type, ~ role, ~ source,
+    "time_value", "date", "time_value", "original",
+    "geo_value", "nominal", "geo_value", "original",
+    "x", "numeric", NA, "original",
+    "y", "numeric", NA, "original"
+  )
+  expect_identical(r$var_info, ref_var_info)
+  expect_equal(nrow(r$template), 1L)
+
+  r <- epi_recipe(tib, formula = y ~ x)
   ref_var_info <- tibble::tribble(
     ~ variable, ~ type, ~ role, ~ source,
     "x", "numeric", "predictor", "original",
@@ -88,15 +99,16 @@ test_that("epi_recipe epi_df works", {
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 
-  r <- epi_recipe(y ~ x + geo_value, tib)
-  ref_var_info <- tibble::tribble(
-    ~ variable, ~ type, ~ role, ~ source,
-    "x", "numeric", "predictor", "original",
-    "geo_value", "nominal", "predictor", "original",
-    "y", "numeric", "outcome", "original",
-    "time_value", "date", "time_value", "original",
-    "geo_value", "nominal", "key", "original"
+
+  r <- epi_recipe(
+    tib,
+    roles = c("geo_value", "funny_business", "predictor", "outcome")
   )
+  ref_var_info <- ref_var_info %>%
+    tibble::add_row(
+      variable = "time_value", type = "date", role = "funny_business",
+      source = "original"
+    )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 })
