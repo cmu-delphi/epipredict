@@ -115,8 +115,7 @@ epi_recipe.epi_df <-
     )
 
     ## Add types
-    var_info <- dplyr::full_join(recipes:::get_types(x), var_info,
-                                 by = "variable")
+    var_info <- dplyr::full_join(get_types(x), var_info, by = "variable")
     var_info$source <- "original"
 
     ## arrange to easy order

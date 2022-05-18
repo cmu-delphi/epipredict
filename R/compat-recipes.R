@@ -1,4 +1,4 @@
-# These are copied from `recipes`
+# These are copied from `recipes` where they are unexported
 
 fun_calls <- function (f) {
   if (is.function(f)) fun_calls(body(f))
@@ -23,6 +23,7 @@ inline_check <- function(x) {
   invisible(x)
 }
 
+#' @importFrom stats as.formula
 get_lhs_vars <- function(formula, data) {
   if (!rlang::is_formula(formula)) {
     formula <- as.formula(formula)
@@ -33,6 +34,7 @@ get_lhs_vars <- function(formula, data) {
   get_rhs_vars(new_formula, data)
 }
 
+#' @importFrom stats model.frame
 get_rhs_vars <- function(formula, data, no_lhs = FALSE) {
   if (!rlang::is_formula(formula)) {
     formula <- as.formula(formula)
@@ -53,4 +55,42 @@ get_rhs_vars <- function(formula, data, no_lhs = FALSE) {
     predictor_names <- predictor_names[-response_info]
   }
   predictor_names
+}
+
+## Buckets variables into discrete, mutally exclusive types
+get_types <- function(x) {
+  var_types <-
+    c(
+      character = "nominal",
+      factor = "nominal",
+      ordered = "nominal",
+      integer = "numeric",
+      numeric = "numeric",
+      double = "numeric",
+      Surv = "censored",
+      logical = "logical",
+      Date = "date",
+      POSIXct = "date",
+      list = "list",
+      textrecipes_tokenlist = "tokenlist"
+    )
+
+  classes <- lapply(x, class)
+  res <- lapply(
+    classes,
+    function(x, types) {
+      in_types <- x %in% names(types)
+      if (sum(in_types) > 0) {
+        # not sure what to do with multiple matches; right now
+        ## pick the first match which favors "factor" over "ordered"
+        out <- unname(types[min(which(names(types) %in% x))])
+      } else {
+        out <- "other"
+      }
+      out
+    },
+    types = var_types
+  )
+  res <- unlist(res)
+  tibble(variable = names(res), type = unname(res))
 }
