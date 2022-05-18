@@ -91,7 +91,7 @@ epi_recipe.epi_df <-
     keys <- epi_keys(x) # we know x is an epi_df
 
     var_info <- tibble(variable = vars)
-    key_roles <- c("time_value", rep("key", length(keys) - 1))
+    key_roles <- c("time_value", "geo_value", rep("key", length(keys) - 2))
 
     ## Check and add roles when available
     if (!is.null(roles)) {
@@ -115,7 +115,8 @@ epi_recipe.epi_df <-
       )
 
     ## Add types
-    var_info <- dplyr::full_join(recipes:::get_types(x), var_info, by = "variable")
+    var_info <- dplyr::full_join(recipes:::get_types(x), var_info,
+                                 by = "variable")
     var_info$source <- "original"
 
     ## arrange to easy order
@@ -123,7 +124,7 @@ epi_recipe.epi_df <-
       dplyr::arrange(factor(
         role,
         levels = union(
-          c("predictor", "outcome", "time_value", "key"),
+          c("predictor", "outcome", "time_value", "geo_value", "key"),
           unique(role)) # anything else
       ))
 

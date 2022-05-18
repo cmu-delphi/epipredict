@@ -7,7 +7,8 @@
 epi_keys <- function(x) {
   keys <- NULL
   if (epiprocess::is_epi_df(x)) {
-    keys <- c("time_value", "geo_value", attributes(x)$other_keys)
+    keys <- c("time_value", "geo_value",
+              attributes(x)$metadata$other_keys)
   }
   keys
 }
