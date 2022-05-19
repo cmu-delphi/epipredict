@@ -6,6 +6,7 @@
 #'   columns present in an `epi_df`
 #'
 #' @aliases epi_recipe epi_recipe.default epi_recipe.formula
+#' @import recipes
 #' @export
 epi_recipe <- function(x, ...) {
   UseMethod("epi_recipe")

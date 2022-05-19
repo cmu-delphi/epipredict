@@ -17,3 +17,14 @@ test_that("epi shift works with groups", {
   expect_equal(nrow(out), 18L)
   expect_equal(sum(complete.cases(out)), 2L)
 })
+
+test_that("epi shift single works, renames", {
+  tib <- tibble(
+    x = 1:5, y = 1:5,
+    time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5)
+  ) %>% epiprocess::as_epi_df()
+  ess <- epi_shift_single(tib, "x", 1, "test", epi_keys(tib))
+  expect_named(ess, c("time_value", "geo_value", "test"))
+  expect_equal(ess$time_value, tib$time_value + 1)
+
+})
