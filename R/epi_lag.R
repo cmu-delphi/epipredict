@@ -113,7 +113,7 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
   if (!all(object$lag == as.integer(object$lag))) {
-    rlang::abort("step_lag requires 'lag' argument to be integer valued.")
+    rlang::abort("step_epi_lag requires 'lag' argument to be integer valued.")
   }
 
   grid <- tidyr::expand_grid(col = object$columns, lag_val = object$lag) %>%
@@ -142,6 +142,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
 #' @export
 print.step_epi_lag <-
   function(x, width = max(20, options()$width - 30), ...) {
+    ## TODO add printing of the lags
     title <- "Lagging "
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
