@@ -12,6 +12,7 @@ step_epi_lag(
   lag = 1,
   prefix = "lag_",
   default = NA,
+  keys = epi_keys(recipe),
   columns = NULL,
   skip = FALSE,
   id = rand_id("epi_lag")
@@ -69,6 +70,7 @@ df <- data.frame(
   day = seq(start, end, by = "day")
 )
 
+library(recipes)
 recipe(~., data = df) \%>\%
   step_lag(index, day, lag = 2:3) \%>\%
   prep(df) \%>\%

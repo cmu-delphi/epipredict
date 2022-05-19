@@ -43,6 +43,7 @@
 #'   day = seq(start, end, by = "day")
 #' )
 #'
+#' library(recipes)
 #' recipe(~., data = df) %>%
 #'   step_lag(index, day, lag = 2:3) %>%
 #'   prep(df) %>%
