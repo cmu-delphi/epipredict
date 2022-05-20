@@ -7,22 +7,8 @@
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
-#' @param recipe A recipe object. The step will be added to the
-#'  sequence of operations for this recipe.
-#' @param ... One or more selector functions to choose variables
-#'  for this step. See [selections()] for more details.
-#' @param role For model terms created by this step, what analysis role should
-#'  they be assigned? By default, the new columns created by this step from
-#'  the original variables will be used as _predictors_ in a model.
-#' @param trained A logical to indicate if the quantities for
-#'  preprocessing have been estimated.
 #' @param lag A vector of positive integers. Each specified column will be
 #'  lagged for each value in the vector.
-#' @param prefix A prefix for generated column names, default to "lag_".
-#' @param columns A character string of variable names that will
-#'  be populated (eventually) by the `terms` argument.
-#' @param default Determines what fills empty rows
-#'   left by lagging (defaults to NA).
 #' @template step-return
 #'
 #' @details The step assumes that the data are already _in the proper sequential
@@ -30,24 +16,7 @@
 #'
 #' @family row operation steps
 #' @export
-#' @rdname step_epi_lag
-#'
-#' @examples
-#' n <- 10
-#' start <- as.Date("1999/01/01")
-#' end <- as.Date("1999/01/10")
-#'
-#' df <- data.frame(
-#'   x = runif(n),
-#'   index = 1:n,
-#'   day = seq(start, end, by = "day")
-#' )
-#'
-#' library(recipes)
-#' recipe(~., data = df) %>%
-#'   step_lag(index, day, lag = 2:3) %>%
-#'   prep(df) %>%
-#'   bake(df)
+#' @rdname step_epi_ahead
 step_epi_lag <-
   function(recipe,
            ...,
@@ -130,14 +99,18 @@ bake.step_epi_lag <- function(object, new_data, ...) {
              paste0(new_data_names[intersection], collapse = ", "),
              "."))
   }
-
+  ok <- object$keys
   lagged <- purrr::reduce(
-    purrr::pmap(grid, epi_shift_single, x = new_data, key_cols = object$keys),
+    purrr::pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
     dplyr::full_join,
-    by = object$keys
+    by = ok
   )
 
-  dplyr::full_join(new_data, lagged, by = object$keys)
+  dplyr::full_join(new_data, lagged, by = object$keys) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
+    dplyr::arrange(time_value) %>%
+    dplyr::ungroup()
+
 }
 
 #' @export
