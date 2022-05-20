@@ -101,17 +101,17 @@ The step assumes that the data are already \emph{in the proper sequential
 order} for lagging.
 }
 \examples{
-tib <- tibble(
+tib <- tibble::tibble(
   x = 1:5, y = 1:5,
   time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
   geo_value = "ca"
   ) \%>\% epiprocess::as_epi_df()
 
 library(recipes)
-recipe(y ~ x., data = tib) \%>\%
+epi_recipe(y ~ x, data = tib) \%>\%
   step_epi_lag(x, lag = 2:3) \%>\%
   step_epi_ahead(y, ahead = 1) \%>\%
-  prep(df) \%>\%
-  bake(df)
+  prep(tib) \%>\%
+  bake(tib)
 }
 \concept{row operation steps}
