@@ -121,8 +121,11 @@ bake.step_epi_ahead <- function(object, new_data, ...) {
   }
 
   grid <- tidyr::expand_grid(
-    col = object$columns, lag_val = -object$ahead, ahead_val = object$ahead) %>%
-    dplyr::mutate(newname = glue::glue("{object$prefix}{ahead_val}_{col}")) %>%
+    col = object$columns, lag_val = -object$ahead) %>%
+    dplyr::mutate(
+      ahead_val = -lag_val,
+      newname = glue::glue("{object$prefix}{ahead_val}_{col}")
+    ) %>%
     dplyr::select(-ahead_val)
 
   ## ensure no name clashes
@@ -143,7 +146,7 @@ bake.step_epi_ahead <- function(object, new_data, ...) {
     by = ok
   )
 
-  dplyr::full_join(new_data, lagged, by = object$keys) %>%
+  dplyr::full_join(new_data, lagged, by = ok) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
     dplyr::arrange(time_value) %>%
     dplyr::ungroup()

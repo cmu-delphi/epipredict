@@ -106,7 +106,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
     by = ok
   )
 
-  dplyr::full_join(new_data, lagged, by = object$keys) %>%
+  dplyr::full_join(new_data, lagged, by = ok) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
     dplyr::arrange(time_value) %>%
     dplyr::ungroup()

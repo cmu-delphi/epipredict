@@ -107,7 +107,7 @@ epi_recipe.epi_df <-
       var_info$role <- roles
     } else {
       var_info <- var_info %>% dplyr::filter(!(variable %in% keys))
-      var_info$role <- NA
+      var_info$role <- "raw"
     }
     ## Now we add the keys when necessary
     var_info <- dplyr::union(
