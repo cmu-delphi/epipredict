@@ -117,7 +117,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
   if (!all(object$ahead == as.integer(object$ahead))) {
-    rlang::abort("step_epi_ahead requires 'lag' argument to be integer valued.")
+    rlang::abort("step_epi_ahead requires 'ahead' argument to be integer valued.")
   }
 
   grid <- tidyr::expand_grid(

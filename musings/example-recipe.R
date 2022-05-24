@@ -47,6 +47,7 @@ r <- epi_recipe(x) %>% # if we add this as a class, maybe we get better
 
 slm <- linear_reg()
 
+# slm_fit <- workflow(r, slm)
 slm_fit <- workflow() %>%
   add_recipe(r) %>%
   add_model(slm) %>%
