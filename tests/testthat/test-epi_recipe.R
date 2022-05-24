@@ -82,8 +82,8 @@ test_that("epi_recipe epi_df works", {
     ~ variable, ~ type, ~ role, ~ source,
     "time_value", "date", "time_value", "original",
     "geo_value", "nominal", "geo_value", "original",
-    "x", "numeric", NA, "original",
-    "y", "numeric", NA, "original"
+    "x", "numeric", "raw", "original",
+    "y", "numeric", "raw", "original"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
