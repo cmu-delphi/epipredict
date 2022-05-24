@@ -40,6 +40,12 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/df_mat_mul.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/epi_keys.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/epi_recipe.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/epi_shift.html</loc>
   </url>
   <url>
@@ -59,5 +65,8 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/smooth_arx_forecaster.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/step_epi_ahead.html</loc>
   </url>
 </urlset>
