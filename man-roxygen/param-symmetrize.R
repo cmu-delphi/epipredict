@@ -1,2 +1,2 @@
-#' @param symmetrize Logical. The default `TRUE` calculates symmetric prediction
-#'   intervals.
+#' @param symmetrize Logical. The default `TRUE` calculates 
+#'      symmetric prediction intervals.
