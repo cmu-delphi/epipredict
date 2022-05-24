@@ -13,6 +13,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/articles/index.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/articles/knn-forecasts.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/articles/simple-forecasts.html</loc>
   </url>
   <url>
@@ -56,6 +59,18 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/knn_iteraive_ar_args_list.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/knn_iteraive_ar_forecaster.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/knnarx_args_list.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/knnarx_forecaster.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/pipe.html</loc>
