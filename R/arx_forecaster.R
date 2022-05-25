@@ -37,7 +37,9 @@ arx_forecaster <- function(x, y, key_vars, time_value,
   if (intercept) dat$x0 <- 1
 
   obj <- stats::lm(
-    y1 ~ . + 0, data = dat %>% dplyr::select(starts_with(c("x","y"))))
+    y1 ~ . + 0,
+    data = dat %>% dplyr::select(starts_with(c("x", "y")))
+  )
 
   point <- make_predictions(obj, dat, time_value, keys)
 
@@ -50,8 +52,9 @@ arx_forecaster <- function(x, y, key_vars, time_value,
   # Harder case requires handling failures of 1 and or 2, neither implemented
   # 1. different quantiles by key, need to bind the keys, then group_modify
   # 2 fails. need to bind the keys, grab, y and yhat, subtract
-  if (nonneg)
+  if (nonneg) {
     q <- dplyr::mutate(q, dplyr::across(dplyr::everything(), ~ pmax(.x, 0)))
+  }
 
   return(
     dplyr::bind_cols(distinct_keys, q) %>%
@@ -80,12 +83,11 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
 #' arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
-arx_args_list <- function(
-  lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
-  levels = c(0.05, 0.95), intercept = TRUE,
-  symmetrize = TRUE,
-  nonneg = TRUE,
-  quantile_by_key = FALSE) {
+arx_args_list <- function(lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
+                          levels = c(0.05, 0.95), intercept = TRUE,
+                          symmetrize = TRUE,
+                          nonneg = TRUE,
+                          quantile_by_key = FALSE) {
 
   # error checking if lags is a list
   .lags <- lags
@@ -94,13 +96,15 @@ arx_args_list <- function(
   arg_is_scalar(ahead, min_train_window)
   arg_is_nonneg_int(ahead, min_train_window, lags)
   arg_is_lgl(intercept, symmetrize, nonneg)
-  arg_is_probabilities(levels, allow_null=TRUE)
+  arg_is_probabilities(levels, allow_null = TRUE)
 
   max_lags <- max(lags)
 
-  list(lags = .lags, ahead = as.integer(ahead),
-       min_train_window = min_train_window,
-       levels = levels, intercept = intercept,
-       symmetrize = symmetrize, nonneg = nonneg,
-       max_lags = max_lags)
+  list(
+    lags = .lags, ahead = as.integer(ahead),
+    min_train_window = min_train_window,
+    levels = levels, intercept = intercept,
+    symmetrize = symmetrize, nonneg = nonneg,
+    max_lags = max_lags
+  )
 }

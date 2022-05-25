@@ -29,3 +29,10 @@ epi_shift <- function(x, lags, time_value, keys = NULL, out_name = "x") {
 
   purrr::reduce(out_list, dplyr::full_join, by = common_names)
 }
+
+epi_shift_single <- function(x, col, lag_val, newname, key_cols) {
+  x %>%
+    dplyr::select(tidyselect::all_of(c(key_cols, col))) %>%
+    dplyr::mutate(time_value = time_value + lag_val) %>%
+    dplyr::rename(!!newname := col)
+}

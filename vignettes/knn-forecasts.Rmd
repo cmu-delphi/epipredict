@@ -1,0 +1,289 @@
+---
+title: "KNN AR(X) forecasts"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{KNN AR(X) forecasts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+```
+
+```{r pkgs}
+library(epipredict)
+library(epiprocess)
+library(covidcast)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(tensr)
+```
+
+
+In this vignette, we explore the KNN enhanced forecasting strategies.
+
+
+## KNN Enhanced Direct ARX Forecastor
+
+First, we download the data and process as before (hidden).
+
+
+```{r grab-epi-data, echo=FALSE}
+theme_set(theme_bw())
+# y <- covidcast_signals(
+#   c("doctor-visits", "jhu-csse"),
+#   c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
+#   start_day = "2020-06-01", 
+#   end_day = "2021-12-01",
+#   issues = c("2020-06-01", "2021-12-01"),
+#   geo_type = "state", 
+#   geo_values = c("ca", "fl")) 
+# saveRDS(y, "inst/extdata/epi_archive.rds")
+y <- readRDS(
+  system.file("extdata", "epi_archive.rds", package = "epipredict", mustWork = TRUE)
+)
+x <- y[[1]] %>%  
+  select(geo_value, time_value, version = issue, percent_cli = value) %>%
+  as_epi_archive()
+
+epix_merge(
+  x, y[[2]] %>% 
+    select(geo_value, time_value, version = issue, case_rate = value) %>%
+    as_epi_archive(),
+  all = TRUE)
+```
+
+We now make forecasts on the archive and compare to forecasts on the latest
+data. 
+
+```{r make-knnarx-kweek}
+# Latest snapshot of data, and forecast dates
+x_latest <- epix_as_of(x, max_version = max(x$DT$version))
+fc_time_values <- seq(as.Date("2020-10-01"), as.Date("2021-12-01"), 
+                      by = "1 month")
+
+
+k_week_ahead <- function(ahead = 7, as_of = TRUE) {
+  if (as_of) {
+    x %>%
+      epix_slide(fc = knnarx_forecaster(
+        percent_cli, case_rate, geo_value, time_value, 
+        args = knnarx_args_list(ahead = ahead,
+                      lags = c(1,7,14),
+                      query_window_len = 32,
+                      topK = 100,
+                      intercept = FALSE)),
+        n = Inf, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, as_of = as_of,
+             geo_value = fc_key_vars)
+  } else {
+    x_latest %>%
+      epi_slide(fc = knnarx_forecaster(
+        percent_cli, case_rate, geo_value, time_value,
+        args = knnarx_args_list(ahead = ahead,
+                      lags = c(1,7,14),
+                      query_window_len = 32,
+                      topK = 100,
+                       intercept = FALSE)),
+        n = Inf, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, as_of = as_of)
+  }
+}
+
+# Generate the forecasts, and bind them together
+fc <- bind_rows(
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, as_of = TRUE)),
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, as_of = FALSE))
+)
+```
+
+
+
+```{r plot-smooth, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
+ggplot(fc %>% filter(as_of == TRUE), aes(x = target_date, group = time_value)) +
+  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_line(data = x_latest, aes(x = time_value, y = case_rate),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value), alpha = 0.4) +
+  geom_line(aes(y = fc_point)) +
+  geom_point(aes(y = fc_point), size = 0.5) +
+  facet_wrap(~ geo_value, ncol = 4, scales = "free_y") +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(x = "Date", y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")
+```
+
+## KNN Enhanced Iterative AR Forecastor
+
+For the moment, the KNN Enhanced iterative forecasting strategy only support the AR forecastor, which means it can only deal with one signal each time. Same as the direct example, the following pipeline run predictions with the iterative forecasting strategy.
+
+```{r make-iterative-knnar-kweek, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
+ahead <- 21
+final_iterative <- x %>%
+  epix_slide(
+    fc = knn_iteraive_ar_forecaster(
+      NULL, case_rate, geo_value, time_value,
+      args = knn_iteraive_ar_args_list(
+        ahead = ahead,
+        lags = c(1, 7, 14),
+        query_window_len = 32,
+        topK = 100,
+        symmetrize = FALSE,
+        update_model = FALSE
+      )
+    ) %>% nest_by(key_vars),
+    n = Inf, ref_time_values = fc_time_values
+  ) %>% unnest(fc_data) %>% 
+  mutate(target_date = time_value + ahead, as_of = TRUE) %>%
+  rename(geo_value = fc_key_vars)
+
+ggplot(final_iterative, aes(x = target_date, group = time_value)) +
+  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_line(data = x_latest  , aes(x = time_value, y = case_rate),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = q0.05, ymax = q0.95, fill = geo_value), alpha = 0.4) +
+  geom_line(aes(y = point)) +
+  geom_point(aes(y = point), size = 0.5) +
+  facet_wrap(~ geo_value, ncol = 4, scales = "free_y") +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(x = "Date", y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")
+```
+
+
+
+The `update_model` parameter in the iterative forecastor API decides if the one-step ahead model will be updated or not during the iterative predicting procedure. The following pipeline shows the results with this trigger turned on.
+
+```{r make-dynamiciterative-knnar-kweek, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 4}
+final_dynamiciterative <- x %>%
+  epix_slide(
+    fc = knn_iteraive_ar_forecaster(
+      NULL, case_rate, geo_value, time_value,
+      args = knn_iteraive_ar_args_list(
+        ahead = ahead,
+        lags = c(1, 7, 14),
+        query_window_len = 32,
+        topK = 100,
+        symmetrize = FALSE,
+        update_model = TRUE
+      )
+    ) %>% nest_by(key_vars),
+    n = Inf, ref_time_values = fc_time_values
+  ) %>% unnest(fc_data) %>% 
+  mutate(target_date = time_value + ahead, as_of = TRUE) %>%
+  rename(geo_value = fc_key_vars)
+
+ggplot(final_dynamiciterative, aes(x = target_date, group = time_value)) +
+  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_line(data = x_latest  , aes(x = time_value, y = case_rate),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = q0.05, ymax = q0.95, fill = geo_value), alpha = 0.4) +
+  geom_line(aes(y = point)) +
+  geom_point(aes(y = point), size = 0.5) +
+  facet_wrap(~ geo_value, ncol = 4, scales = "free_y") +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(x = "Date", y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")
+```
+
+
+## Using data for Canada
+
+By leveraging the flexibility of `epiprocess`, we can apply the same techniques to data from other sources. Since I'm in British Columbia, may as well do the same thing for Canada.
+
+The [COVID-19 Canada Open Data Working Group](https://opencovid.ca/) collects daily time series data on COVID-19 cases, deaths, recoveries, testing and vaccinations at the health region and province levels. Data are collected from publicly available sources such as government datasets and news releases. Unfortunately, there is no simple versioned source, so we have created our own from the Commit history.
+
+First, we load versioned case numbers at the provincial level, and convert these to an `epi_archive` object. Then we run a very similar forcasting exercise as that above.
+
+```{r get-can-fc}
+# source("drafts/canada-case-rates.R)
+can <- readRDS(
+  system.file("extdata", "can_prov_cases.rds", 
+              package = "epipredict", mustWork = TRUE)
+  ) %>%
+  group_by(version, geo_value) %>% 
+  arrange(time_value) %>% 
+  mutate(cr_7dav = RcppRoll::roll_meanr(case_rate, n = 7L))
+
+can <- as_epi_archive(can)
+can_latest <- epix_as_of(can, max_version = max(can$DT$version))
+can_fc_time_values = seq(as.Date("2020-10-01"), as.Date("2021-11-01"), 
+                      by = "1 month")
+
+can_k_week_ahead <- function(ahead = 7, as_of = TRUE) {
+  if (as_of) {
+    can %>%
+      epix_slide(fc = knnarx_forecaster(
+        y = cr_7dav, key_vars = geo_value, time_value = time_value,
+        args =knnarx_args_list(ahead = ahead,
+                      lags = c(1,7,14),
+                      query_window_len = 32,
+                      topK = 200)),
+        n = Inf, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, geo_value = fc_key_vars,
+             as_of = as_of)
+  } else {
+    can_latest %>%
+      epi_slide(fc = knnarx_forecaster(
+        y = cr_7dav, key_vars = geo_value, time_value = time_value,
+        args = knnarx_args_list(ahead = ahead,
+                      lags = c(1,7,14),
+                      query_window_len = 32,
+                      topK = 300)),
+        n = Inf, ref_time_values = fc_time_values) %>%
+      mutate(target_date = time_value + ahead, geo_value = fc_key_vars,
+             as_of = as_of)
+  }
+}
+
+can_fc <- bind_rows(
+  purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(ahead = .x, as_of = TRUE)),
+  purrr:::map_dfr(c(7,14,21,28), ~ can_k_week_ahead(ahead = .x, as_of = FALSE))
+)
+```
+
+The figures below shows the results for all of the provinces. Note that we are showing the 7-day averages rather than the reported case numbers due to highly variable provincial reporting mismatches.
+
+
+```{r plot-can-fc, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
+ggplot(can_fc %>% filter(! as_of), 
+       aes(x = target_date, group = time_value)) +
+  coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
+  geom_line(data = can_latest, aes(x = time_value, y = cr_7dav),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value),
+              alpha = 0.4) +
+  geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
+  
+  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  facet_wrap(~geo_value, scales = "free_y", ncol = 3) +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(title = "Finalized data", x = "Date", 
+       y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")  
+```
+
+```{r plot-can-fc-proper, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
+ggplot(can_fc %>% filter(as_of), 
+       aes(x = target_date, group = time_value)) +
+  coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
+  geom_line(data = can_latest, aes(x = time_value, y = cr_7dav),
+            inherit.aes = FALSE, color = "gray50") +
+  geom_ribbon(aes(ymin = fc_q0.05, ymax = fc_q0.95, fill = geo_value),
+              alpha = 0.4) +
+  geom_line(aes(y = fc_point)) + geom_point(aes(y = fc_point), size = 0.5) +
+  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  facet_wrap(~ geo_value, scales = "free_y", ncol = 3) +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  labs(title = "Properly versioned data", x = "Date", 
+       y = "Reported COVID-19 case rates") +
+  theme(legend.position = "none")  
+```
