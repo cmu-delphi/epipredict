@@ -16,13 +16,13 @@
 #'
 #' @family row operation steps
 #' @export
-#' @rdname step_epi_ahead
+#' @rdname step_epi_lag
 step_epi_lag <-
   function(recipe,
            ...,
            role = "predictor",
            trained = FALSE,
-           lag = 1,
+           lag = 1, # negative for ahead
            prefix = "lag_",
            default = NA,
            keys = epi_keys(recipe),
@@ -117,7 +117,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
 print.step_epi_lag <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the lags
-    title <- "Lagging "
+    title <- ifelse(x$lag >= 0, "Lagging", "Leading")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
