@@ -10,7 +10,7 @@ step_epi_lag(
   role = "predictor",
   trained = FALSE,
   lag = 1,
-  prefix = "lag_",
+  prefix = ifelse(lag >= 0, "lag_", "ahead_"),
   default = NA,
   keys = epi_keys(recipe),
   columns = NULL,

@@ -22,13 +22,13 @@ step_epi_lag <-
            ...,
            role = "predictor",
            trained = FALSE,
-           lag = 1, # negative for ahead
-           prefix = "lag_",
+           lag = 1,
+           prefix = ifelse(lag >= 0, "lag_","ahead_"),
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE,
-           id = rand_id("epi_lag")) {
+           id = rand_id(ifelse(lag >= 0, "epi_lag","epi_ahead"))) {
     add_step(
       recipe,
       step_epi_lag_new(
@@ -86,7 +86,10 @@ bake.step_epi_lag <- function(object, new_data, ...) {
     rlang::abort("step_epi_lag requires 'lag' argument to be integer valued.")
   }
 
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$lag) %>%
+  is_neg <- object$lag < 0
+
+  grid <- tidyr::expand_grid(col = object$columns,
+                             lag_val = object$lag) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{lag_val}_{col}"))
 
   ## ensure no name clashes
