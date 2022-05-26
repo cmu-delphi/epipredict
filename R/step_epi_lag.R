@@ -50,7 +50,7 @@ step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
            columns, skip, id) {
     step(
-      subclass = "epi_lag",
+      subclass = "step_epi_lag",
       terms = terms,
       role = role,
       trained = trained,
