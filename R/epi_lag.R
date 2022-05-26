@@ -22,7 +22,7 @@ step_epi_lag <-
            ...,
            role = "predictor",
            trained = FALSE,
-           lag = 1, # negative for ahead
+           lag = 1,
            prefix = "lag_",
            default = NA,
            keys = epi_keys(recipe),
