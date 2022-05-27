@@ -36,7 +36,7 @@ xx <- x %>% filter(time_value > "2021-12-01")
 # Baseline AR3
 r <- epi_recipe(x) %>% # if we add this as a class, maybe we get better
                        # behaviour downstream?
-  step_epi_lag(death_rate, lag = -7) %>%
+  step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
   step_naomit(all_predictors()) %>%
