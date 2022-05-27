@@ -4,7 +4,7 @@
 \name{step_epi_ahead}
 \alias{step_epi_ahead}
 \alias{step_epi_lag}
-\alias{step_epi_shift2}
+\alias{step_epi_shift}
 \title{Create a leading outcome}
 \usage{
 step_epi_ahead(
@@ -35,18 +35,18 @@ step_epi_lag(
   id = rand_id("epi_lag")
 )
 
-step_epi_shift2(
+step_epi_shift(
   recipe,
   ...,
   role = "predictor",
   trained = FALSE,
-  shift2 = 1,
-  prefix = "shift2_",
+  lag = 1,
+  prefix = "shift_",
   default = NA,
   keys = epi_keys(recipe),
   columns = NULL,
   skip = FALSE,
-  id = rand_id("epi_shift2")
+  id = rand_id("epi_shift")
 )
 }
 \arguments{
