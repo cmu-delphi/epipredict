@@ -85,7 +85,6 @@ bake.step_epi_lag <- function(object, new_data, ...) {
   if (!all(object$lag == as.integer(object$lag))) {
     rlang::abort("step_epi_lag requires 'lag' argument to be integer valued.")
   }
-
   grid <- tidyr::expand_grid(col = object$columns, lag_val = object$lag) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{lag_val}_{col}"))
 
