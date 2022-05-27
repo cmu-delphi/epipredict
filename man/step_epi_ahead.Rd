@@ -38,15 +38,15 @@ step_epi_lag(
 step_epi_shift(
   recipe,
   ...,
-  role = "predictor",
-  trained = FALSE,
-  lag = 1,
-  prefix = "shift_",
-  default = NA,
-  keys = epi_keys(recipe),
-  columns = NULL,
-  skip = FALSE,
-  id = rand_id("epi_shift")
+  role,
+  trained,
+  lag,
+  prefix,
+  default,
+  keys,
+  columns,
+  skip,
+  id
 )
 }
 \arguments{
