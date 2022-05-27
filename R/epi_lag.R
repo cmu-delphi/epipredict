@@ -16,19 +16,19 @@
 #'
 #' @family row operation steps
 #' @export
-#' @rdname step_epi_lag
+#' @rdname step_epi_ahead
 step_epi_lag <-
   function(recipe,
            ...,
            role = "predictor",
            trained = FALSE,
            lag = 1,
-           prefix = ifelse(lag >= 0, "lag_","ahead_"),
+           prefix = "lag_",
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE,
-           id = rand_id(ifelse(lag >= 0, "epi_lag","epi_ahead"))) {
+           id = rand_id("epi_lag")) {
     add_step(
       recipe,
       step_epi_lag_new(
@@ -50,7 +50,7 @@ step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
            columns, skip, id) {
     step(
-      subclass = "step_epi_lag",
+      subclass = "epi_lag",
       terms = terms,
       role = role,
       trained = trained,
@@ -86,10 +86,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
     rlang::abort("step_epi_lag requires 'lag' argument to be integer valued.")
   }
 
-  is_neg <- object$lag < 0
-
-  grid <- tidyr::expand_grid(col = object$columns,
-                             lag_val = object$lag) %>%
+  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$lag) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{lag_val}_{col}"))
 
   ## ensure no name clashes
@@ -120,7 +117,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
 print.step_epi_lag <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the lags
-    title <- ifelse(x$lag >= 0, "Lagging", "Leading")
+    title <- "Lagging "
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
