@@ -29,38 +29,17 @@ step_epi_lag <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
-    add_step(
-      recipe,
-      step_epi_lag_new(
-        terms = dplyr::enquos(...),
-        role = role,
-        trained = trained,
-        lag = lag,
-        prefix = prefix,
-        default = default,
-        keys = keys,
-        columns = columns,
-        skip = skip,
-        id = id
-      )
-    )
-  }
-
-step_epi_lag_new <-
-  function(terms, role, trained, lag, prefix, default, keys,
-           columns, skip, id) {
-    step(
-      subclass = "epi_lag",
-      terms = terms,
-      role = role,
-      trained = trained,
-      lag = lag,
-      prefix = prefix,
-      default = default,
-      keys = keys,
-      columns = columns,
-      skip = skip,
-      id = id
+    step_epi_shift(recipe,
+                   ...,
+                   role = role,
+                   trained = trained,
+                   lag = lag,
+                   prefix = prefix,
+                   default = default,
+                   keys = keys,
+                   columns = columns,
+                   skip = skip,
+                   id = id
     )
   }
 
