@@ -17,25 +17,25 @@
 #' @family row operation steps
 #' @export
 #' @rdname step_epi_ahead
-step_epi_lag2 <-
+step_epi_shift2 <-
   function(recipe,
            ...,
            role = "predictor",
            trained = FALSE,
-           lag = 1,
-           prefix = "lag_",
+           shift2 = 1,
+           prefix = "shift2_",
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE,
-           id = rand_id("epi_lag")) {
+           id = rand_id("epi_shift2")) {
     add_step(
       recipe,
-      step_epi_lag2_new(
+      step_epi_shift2_new(
         terms = dplyr::enquos(...),
         role = role,
         trained = trained,
-        lag = lag,
+        shift2 = shift2,
         prefix = prefix,
         default = default,
         keys = keys,
@@ -46,15 +46,15 @@ step_epi_lag2 <-
     )
   }
 
-step_epi_lag2_new <-
-  function(terms, role, trained, lag, prefix, default, keys,
+step_epi_shift2_new <-
+  function(terms, role, trained, shift2, prefix, default, keys,
            columns, skip, id) {
     step(
-      subclass = "epi_lag",
+      subclass = "epi_shift2",
       terms = terms,
       role = role,
       trained = trained,
-      lag = lag,
+      shift2 = shift2,
       prefix = prefix,
       default = default,
       keys = keys,
@@ -65,12 +65,12 @@ step_epi_lag2_new <-
   }
 
 #' @export
-prep.step_epi_lag2 <- function(x, training, info = NULL, ...) {
-  step_epi_lag2_new(
+prep.step_epi_shift2 <- function(x, training, info = NULL, ...) {
+  step_epi_shift2_new(
     terms = x$terms,
     role = x$role,
     trained = TRUE,
-    lag = x$lag,
+    shift2 = x$shift2,
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
@@ -81,12 +81,12 @@ prep.step_epi_lag2 <- function(x, training, info = NULL, ...) {
 }
 
 #' @export
-bake.step_epi_lag2 <- function(object, new_data, ...) {
-  if (!all(object$lag == as.integer(object$lag))) {
-    rlang::abort("step_epi_lag requires 'lag' argument to be integer valued.")
+bake.step_epi_shift2 <- function(object, new_data, ...) {
+  if (!all(object$shift2 == as.integer(object$shift2))) {
+    rlang::abort("step_epi_shift2 requires 'shift2' argument to be integer valued.")
   }
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$lag) %>%
-    dplyr::mutate(newname = glue::glue("{object$prefix}{lag_val}_{col}"))
+  grid <- tidyr::expand_grid(col = object$columns, shift2_val = object$shift2) %>%
+    dplyr::mutate(newname = glue::glue("{object$prefix}{shift2_val}_{col}"))
 
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
@@ -99,13 +99,13 @@ bake.step_epi_lag2 <- function(object, new_data, ...) {
              "."))
   }
   ok <- object$keys
-  lagged <- purrr::reduce(
+  shiftged <- purrr::reduce(
     purrr::pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
     dplyr::full_join,
     by = ok
   )
 
-  dplyr::full_join(new_data, lagged, by = ok) %>%
+  dplyr::full_join(new_data, shifted, by = ok) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
     dplyr::arrange(time_value) %>%
     dplyr::ungroup()
@@ -113,7 +113,7 @@ bake.step_epi_lag2 <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_epi_lag2 <-
+print.step_epi_shift2 <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the lags
     title <- "Lagging "
