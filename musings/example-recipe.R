@@ -53,13 +53,6 @@ slm_fit <- workflow() %>%
   add_model(slm) %>%
   fit(data = x)
 
-# Provides a summary of a fit's model
-sm <- function(myfit) {
-  summary(myfit$fit$fit$fit)
-}
-
-sm(slm_fit)
-
 x_latest <- x %>%
   filter(!is.na(case_rate), !is.na(death_rate)) %>%
   group_by(geo_value) %>%
