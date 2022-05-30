@@ -53,7 +53,7 @@ slm_fit <- workflow() %>%
   add_model(slm) %>%
   fit(data = x)
 
-# Provides a summary of a fit
+# Provides a summary of a fit's model
 sm <- function(myfit) {
   summary(myfit$fit$fit$fit)
 }

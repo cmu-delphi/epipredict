@@ -85,10 +85,23 @@ bake.step_epi_shift <- function(object, new_data, ...) {
   if (!all(object$shift == as.integer(object$shift))) {
     rlang::abort("step_epi_shift requires 'shift' argument to be integer valued.")
   }
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = -object$shift) %>%
-    # Account for lag/lead
-    dplyr::mutate(newname = glue::glue("{object$prefix}{lag_val}_{col}"))
-
+  grid <- tidyr::expand_grid(col = object$columns, lag_val = -object$shift)
+  is_lag <- object$role == "predictor"
+  if (!is_lag) {
+    grid <- dplyr::mutate(grid,ahead_val = -lag_val)
+  }
+  grid <- dplyr::mutate(grid,
+      newname = glue::glue(
+        paste0(
+          "{object$prefix}",
+          ifelse(is_lag,"{lag_val}","{ahead_val}"),
+          "_{col}"
+          )
+        )
+    )
+  if (!is_lag) {
+    grid <- dplyr::select(grid, -ahead_val)
+  }
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
@@ -117,7 +130,7 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the shifts
-    title <- "shifting " # Account for lag/lead
+    title <- ifelse(x$role == "predictor","Lagging ","Leading ") # Account for lag/lead
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
