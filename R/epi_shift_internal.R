@@ -1,18 +1,18 @@
-#' Create a lagged predictor
+#' Create a shifted predictor
 #'
 #' `step_epi_shift` creates a *specification* of a recipe step that
-#'   will add new columns of lagged data. Lagged data will
-#'   by default include NA values where the lag was induced.
+#'   will add new columns of shifted data. shifted data will
+#'   by default include NA values where the shift was induced.
 #'   These can be removed with [step_naomit()], or you may
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
 #' @param shift A vector of integers. Each specified column will be
-#'  lagged for each value in the vector.
+#'  shifted for each value in the vector.
 #' @template step-return
 #'
 #' @details The step assumes that the data are already _in the proper sequential
-#'  order_ for lagging.
+#'  order_ for shifting.
 #'
 #' @family row operation steps
 #' @export
@@ -22,7 +22,7 @@ step_epi_shift <-
            ...,
            role,
            trained,
-           lag,
+           shift,
            prefix,
            default,
            keys,
@@ -35,7 +35,7 @@ step_epi_shift <-
         terms = dplyr::enquos(...),
         role = role,
         trained = trained,
-        lag = lag,
+        shift = shift,
         prefix = prefix,
         default = default,
         keys = keys,
@@ -47,14 +47,14 @@ step_epi_shift <-
   }
 
 step_epi_shift_new <-
-  function(terms, role, trained, lag, prefix, default, keys,
+  function(terms, role, trained, shift, prefix, default, keys,
            columns, skip, id) {
     step(
       subclass = "epi_shift",
       terms = terms,
       role = role,
       trained = trained,
-      lag = lag,
+      shift = shift,
       prefix = prefix,
       default = default,
       keys = keys,
@@ -70,7 +70,7 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
     terms = x$terms,
     role = x$role,
     trained = TRUE,
-    lag = x$lag,
+    shift = x$shift,
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
@@ -82,10 +82,11 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_shift <- function(object, new_data, ...) {
-  if (!all(object$lag == as.integer(object$lag))) {
-    rlang::abort("step_epi_lag requires 'lag' argument to be integer valued.")
+  if (!all(object$shift == as.integer(object$shift))) {
+    rlang::abort("step_epi_shift requires 'shift' argument to be integer valued.")
   }
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$lag) %>%
+  grid <- tidyr::expand_grid(col = object$columns, lag_val = -object$shift) %>%
+    # Account for lag/lead
     dplyr::mutate(newname = glue::glue("{object$prefix}{lag_val}_{col}"))
 
   ## ensure no name clashes
@@ -99,13 +100,13 @@ bake.step_epi_shift <- function(object, new_data, ...) {
              "."))
   }
   ok <- object$keys
-  lagged <- purrr::reduce(
+  shifted <- purrr::reduce(
     purrr::pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
     dplyr::full_join,
     by = ok
   )
 
-  dplyr::full_join(new_data, lagged, by = ok) %>%
+  dplyr::full_join(new_data, shifted, by = ok) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
     dplyr::arrange(time_value) %>%
     dplyr::ungroup()
@@ -115,8 +116,8 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 #' @export
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
-    ## TODO add printing of the lags
-    title <- "Lagging "
+    ## TODO add printing of the shifts
+    title <- "shifting " # Account for lag/lead
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }

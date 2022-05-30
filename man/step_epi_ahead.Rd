@@ -40,7 +40,7 @@ step_epi_shift(
   ...,
   role,
   trained,
-  lag,
+  shift,
   prefix,
   default,
   keys,
@@ -88,7 +88,7 @@ the computations for subsequent operations.}
 lagged for each value in the vector.}
 
 \item{shift}{A vector of integers. Each specified column will be
-lagged for each value in the vector.}
+shifted for each value in the vector.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
@@ -116,8 +116,8 @@ specify an alternative filler value with the \code{default}
 argument.
 
 \code{step_epi_shift} creates a \emph{specification} of a recipe step that
-will add new columns of lagged data. Lagged data will
-by default include NA values where the lag was induced.
+will add new columns of shifted data. shifted data will
+by default include NA values where the shift was induced.
 These can be removed with \code{\link[=step_naomit]{step_naomit()}}, or you may
 specify an alternative filler value with the \code{default}
 argument.
@@ -130,7 +130,7 @@ The step assumes that the data are already \emph{in the proper sequential
 order} for lagging.
 
 The step assumes that the data are already \emph{in the proper sequential
-order} for lagging.
+order} for shifting.
 }
 \examples{
 tib <- tibble::tibble(

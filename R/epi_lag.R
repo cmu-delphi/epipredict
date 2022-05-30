@@ -33,7 +33,7 @@ step_epi_lag <-
                    ...,
                    role = role,
                    trained = trained,
-                   lag = lag,
+                   shift = -lag,
                    prefix = prefix,
                    default = default,
                    keys = keys,
@@ -42,3 +42,4 @@ step_epi_lag <-
                    id = id
     )
   }
+
