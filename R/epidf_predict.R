@@ -25,8 +25,9 @@ epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
     keys_df_fcd <- keys_df %>%
       dplyr::mutate(time_value = forecast_date) # %% called this time_value ok? Overwriting that.
 
-    return(as_epi_df(dplyr::bind_cols(keys_df_fcd, pred_df)))
+    pred_df <- as_epi_df(dplyr::bind_cols(keys_df_fcd, pred_df))
   } else {
-    stats::predict(obj, new_data)
+    pred_df <- stats::predict(obj, new_data)
   }
+  pred_df
 }
