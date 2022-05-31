@@ -26,7 +26,7 @@ epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
     keys_df_fcd <- keys_df %>%
       dplyr::mutate(time_value = as.Date(forecast_date))
 
-    pred_df <- as_epi_df(dplyr::bind_cols(keys_df_fcd, pred_df),
+    pred_df <- as_epi_df(dplyr::bind_cols(keys_df_fcd, pred = pred_df),
                          geo_type = attributes(new_data)$metadata$geo_type,
                          time_type = attributes(new_data)$metadata$time_type,
                          as_of = attributes(new_data)$metadata$as_of)
