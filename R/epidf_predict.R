@@ -1,4 +1,4 @@
-epidf_predict <- function(obj, new_data, ahead = 0, forecast_date = NULL) {
+epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
   if (is_epi_df(new_data)) {
     pred_df <- stats::predict(obj, new_data)
     keys_df <- new_data %>%
@@ -19,8 +19,8 @@ epidf_predict <- function(obj, new_data, ahead = 0, forecast_date = NULL) {
     } else if (max_time_value <= forecast_date) {
       warning("Maximum time_value is less than or equal to forecast_date.")
     }
-    if (forecast_date < as_of_date) { #%%
-      warning("forecast_date is less than the most recent update date of the data (as_of).")
+    if (forecast_date < as_of_date) { #%% Check over the structure of if else statements!
+      warning("forecast_date is less than the most recent update date of the data.")
     }
 
     keys_df_fcd <- keys_df %>%
