@@ -35,20 +35,24 @@ rm(y)
 
 xx <- x %>% filter(time_value > "2021-12-01")
 
+slm_fit <- function(recipe, data = x) {
+  workflow() %>%
+    add_recipe(recipe) %>%
+    add_model(linear_reg()) %>%
+    fit(data = data)
+}
+
 # Tests
 test_that("Check that epi_ahead shifts properly", {
-  r <- epi_recipe(x) %>%
+  r1 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = -7) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
 
-  slm_fit <- workflow() %>%
-    add_recipe(r) %>%
-    add_model(linear_reg()) %>%
-    fit(data = x)
+  slm_fit1 <- slm_fit(r1)
 
-  slope_ahead <- slm_fit$fit$fit$fit$coefficients[[2]]
+  slope_ahead <- slm_fit1$fit$fit$fit$coefficients[[2]]
   expect_equal(slope_ahead,1)
 })
 
@@ -59,11 +63,27 @@ test_that("Check that epi_lag shifts properly", {
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
 
-  slm_fit2 <- workflow() %>%
-    add_recipe(r2) %>%
-    add_model(linear_reg()) %>%
-    fit(data = x)
+  slm_fit2 <- slm_fit(r2)
 
   slope_lag <- slm_fit2$fit$fit$fit$coefficients[[2]]
   expect_equal(slope_lag,1)
+})
+
+test_that("Check for non-integer values", {
+  r3 <- epi_recipe(x) %>%
+    step_epi_ahead(death_rate, ahead = 3.6) %>%
+    step_epi_lag(death_rate, lag = 1.9)
+  expect_error(
+    slm_fit(r3)
+  )
+})
+
+test_that("Check for duplicate values", {
+  r4 <- epi_recipe(x) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_lag(death_rate, lag = 7) %>%
+    step_epi_lag(death_rate, lag = 7)
+  expect_error(
+    slm_fit(r4)
+  )
 })
