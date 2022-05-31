@@ -19,7 +19,7 @@ epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
     } else if (max_time_value <= forecast_date) {
       warning("Maximum time_value is less than or equal to forecast_date.")
     }
-    if (forecast_date < as_of_date) { #%% Check over the structure of if else statements!
+    if (forecast_date < as_of_date) {
       warning("forecast_date is less than the most recent update date of the data.")
     }
 
