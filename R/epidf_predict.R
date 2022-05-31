@@ -1,4 +1,4 @@
-epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
+epidf_predict <- function(obj, new_data, ahead = 0, forecast_date = NULL) {
   if (is_epi_df(new_data)) {
     pred_df <- stats::predict(obj, new_data)
     keys_df <- new_data %>%
@@ -18,12 +18,13 @@ epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
       warning("Set forecast_date equal to maximum time_value.")
     } else if (max_time_value <= forecast_date) {
       warning("Maximum time_value is less than or equal to forecast_date.")
-    } else if (forecast_date < as_of_date) {
+    }
+    if (forecast_date < as_of_date) { #%%
       warning("forecast_date is less than the most recent update date of the data (as_of).")
     }
 
     keys_df_fcd <- keys_df %>%
-      dplyr::mutate(time_value = forecast_date) # %% called this time_value ok? Overwriting that.
+      dplyr::mutate(time_value = as.Date(forecast_date))
 
     pred_df <- as_epi_df(dplyr::bind_cols(keys_df_fcd, pred_df))
   } else {
