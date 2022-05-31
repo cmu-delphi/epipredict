@@ -1,4 +1,50 @@
-epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
+#' A wrapper function for making predictions such that if `new_data`
+#' has class `epi_df`, then the keys are kept in the prediction
+#'
+#' @param obj A model object for which prediction is desired.
+#' @param new_data Input data for which to predict values.
+#' @param ahead A numeric value indicating how far ahead in the future
+#'  to make forecasts. Default is `0`.
+#' @param forecast_date The date to which these forecasts correspond.
+#'  Default is `NULL`.
+#' @param time_value the time value associated with each row of measurements.
+#'
+#' @return An object of class `epi_df` with all keys from `new_data`.
+#'
+#' @details To use this function properly either specify an ahead value (and
+#'  leave the forecast date unspecifed) or specify a forecast date. In the
+#'  former, the forecast date will be set as the maximum time value plus
+#'  the ahead value. In that case, as well as in the cases when the
+#'  maximum time value is less than or equal to the forecast date, and
+#'  when the forecast date is less than the most recent update date of the data
+#'  (ie. the `as_of` value), an appropriate warning will be thrown.
+#'
+#' @export
+#'
+#' @examples
+#' set.seed(2034)
+#' n <- 100
+#' tib <- tibble(
+#'   x = rnorm(n), y = x + rnorm(n),
+#'   time_value = seq(as.Date("2020-01-01"), by = 1, length.out = n),
+#'   geo_value = "ca"
+#' ) %>% epiprocess::as_epi_df(as_of = "2020-04-12")
+#'
+#' obj <- lm(y ~ x, data = tib)
+#' newdata <- tib %>%
+#'  slice_tail(n = 1)
+#'
+#' # Now let's predict under various circumstances
+#' # ahead specified and forecast_date = NULL
+#' epidf_predict(obj, newdata, ahead = 7)
+#' # max time_value <= specified forecast_date
+#' epidf_predict(obj, newdata, forecast_date = "2020-04-17")
+#' # specified forecast_date < max_time_value < as_of_date
+#' epidf_predict(obj, newdata, forecast_date = "2020-04-08")
+#' # specified forecast_date < max_time_value < as_of_date
+#' epidf_predict(obj, newdata, forecast_date = "2020-04-11")
+
+epidf_predict <- function(obj, new_data, ahead = 0, forecast_date = NULL) {
   if (is_epi_df(new_data)) {
     pred_df <- stats::predict(obj, new_data)
     keys_df <- new_data %>%
