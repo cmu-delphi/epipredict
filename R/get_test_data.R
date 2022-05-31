@@ -23,8 +23,11 @@
 
 get_test_data <- function(recipe, x){
   # TO-DO: SOME CHECKS OF THE DATASET
-  ## CHECK geo_value, time_value exists
+  if (any(!(c('geo_value','time_value') %in% colnames(x)))) {
+    rlang::abort("`geo_value`, `time_value` does not exist in data")
+  }
   ## CHECK if it is epi_df?
+
 
   # initialize vector to hold max lags for each variable
   max_lags <- c()
@@ -34,9 +37,14 @@ get_test_data <- function(recipe, x){
     }
   }
 
+  # CHECK: Return NA if insufficient training data
+  if (dplyr::n_distinct(x$time_value)< max(max_lags)) {
+    stop("insufficient training data")
+  }
+
   test_data <- x %>%
     dplyr::filter(
-      dplyr::across(
+      dplyr::if_any(
         .cols = recipe$term_info$variable[which(recipe$var_info$role == 'raw')],
         .fns = ~ !is.na(.x)
       )
