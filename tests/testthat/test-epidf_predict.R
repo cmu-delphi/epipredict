@@ -12,7 +12,7 @@ newdata <- tib %>%
 
 test_that("ahead specified and forecast_date = NULL", {
   pred_epi_df <- suppressWarnings(epidf_predict(obj, newdata, ahead = 7))
-  expect_true(is_epi_df(pred_epi_df))
+  expect_true(epiprocess::is_epi_df(pred_epi_df))
   expect_length(pred_epi_df, 3L)
   expect_identical(pred_epi_df$geo_value, "ca")
   expect_identical(pred_epi_df$time_value, as.Date("2020-04-16"))
@@ -22,7 +22,7 @@ test_that("ahead specified and forecast_date = NULL", {
 
 test_that("max_time_value < forecast_date = as_of", {
   pred_epi_df2 <- epidf_predict(obj, newdata, forecast_date = "2020-04-12")
-  expect_true(is_epi_df(pred_epi_df2))
+  expect_true(epiprocess::is_epi_df(pred_epi_df2))
   expect_length(pred_epi_df2, 3L)
   expect_identical(pred_epi_df2$geo_value, "ca")
   expect_identical(pred_epi_df2$time_value, as.Date("2020-04-12"))
@@ -30,7 +30,7 @@ test_that("max_time_value < forecast_date = as_of", {
 
 test_that("max_time_value < as_of < forecast_date", {
   pred_epi_df3 <- epidf_predict(obj, newdata, forecast_date = "2020-04-14")
-  expect_true(is_epi_df(pred_epi_df3))
+  expect_true(epiprocess::is_epi_df(pred_epi_df3))
   expect_length(pred_epi_df3, 3L)
   expect_identical(pred_epi_df3$geo_value, "ca")
   expect_identical(pred_epi_df3$time_value, as.Date("2020-04-14"))
@@ -38,7 +38,7 @@ test_that("max_time_value < as_of < forecast_date", {
 
 test_that("forecast_date < max_time_value < as_of", {
   pred_epi_df4 <- suppressWarnings(epidf_predict(obj, newdata, forecast_date = "2020-04-08"))
-  expect_true(is_epi_df(pred_epi_df4))
+  expect_true(epiprocess::is_epi_df(pred_epi_df4))
   expect_length(pred_epi_df4, 3L)
   expect_identical(pred_epi_df4$geo_value, "ca")
   expect_identical(pred_epi_df4$time_value, as.Date("2020-04-08"))
@@ -48,7 +48,7 @@ test_that("forecast_date < max_time_value < as_of", {
 
 test_that("max time_value < forecast_date < as_of", {
   pred_epi_df5 <- suppressWarnings(epidf_predict(obj, newdata, forecast_date = "2020-04-11"))
-  expect_true(is_epi_df(pred_epi_df5))
+  expect_true(epiprocess::is_epi_df(pred_epi_df5))
   expect_length(pred_epi_df5, 3L)
   expect_identical(pred_epi_df5$geo_value, "ca")
   expect_identical(pred_epi_df5$time_value, as.Date("2020-04-11"))
