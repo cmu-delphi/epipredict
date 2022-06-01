@@ -55,7 +55,7 @@ epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
 
     max_time_value <- max(keys_df$time_value)
     as_of_date <-
-      as.Date(str_extract(
+      as.Date(stringr::str_extract(
         attributes(new_data)$metadata$as_of,
         "\\d{4}-\\d{2}-\\d{2}"
       ))
