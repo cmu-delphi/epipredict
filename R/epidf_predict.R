@@ -7,7 +7,6 @@
 #'  to make forecasts.
 #' @param forecast_date The date to which these forecasts correspond.
 #'  Default is `NULL`.
-#' @param time_value the time value associated with each row of measurements.
 #'
 #' @return An object of class `epi_df` with all keys from `new_data`.
 #'

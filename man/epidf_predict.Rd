@@ -17,8 +17,6 @@ to make forecasts.}
 
 \item{forecast_date}{The date to which these forecasts correspond.
 Default is \code{NULL}.}
-
-\item{time_value}{the time value associated with each row of measurements.}
 }
 \value{
 An object of class \code{epi_df} with all keys from \code{new_data}.

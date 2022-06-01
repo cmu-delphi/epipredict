@@ -23,7 +23,8 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    tensr
+    tensr,
+    stringr
 Suggests: 
     covidcast,
     data.table,
