@@ -1,6 +1,7 @@
 library(dplyr)
 library(epiprocess)
-library(tidymodels)
+library(parsnip)
+library(workflows)
 
 # Random generated dataset
 set.seed(100)
