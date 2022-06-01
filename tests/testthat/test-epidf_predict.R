@@ -1,4 +1,4 @@
-set.seed(2035)
+set.seed(2034)
 n <- 100
 tib <- dplyr::tibble(
   x = rnorm(n), y = x + rnorm(n),
