@@ -50,7 +50,7 @@ epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
     pred_df <- stats::predict(obj, new_data)
     keys_df <- new_data %>%
       dplyr::select(epi_keys(new_data)) %>%
-      group_by(geo_value) %>%
+      dplyr::group_by(geo_value) %>%
       dplyr::slice(n())
 
     max_time_value <- max(keys_df$time_value)
