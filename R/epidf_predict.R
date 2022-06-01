@@ -21,7 +21,6 @@
 #' @export
 #'
 #' @examples
-#'
 #' set.seed(2034)
 #' n <- 100
 #' tib <- dplyr::tibble(
