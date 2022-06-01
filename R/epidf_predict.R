@@ -23,7 +23,7 @@
 #' @examples
 #' set.seed(2034)
 #' n <- 100
-#' tib <- tibble(
+#' tib <- dplyr::tibble(
 #'   x = rnorm(n), y = x + rnorm(n),
 #'   time_value = seq(as.Date("2020-01-01"), by = 1, length.out = n),
 #'   geo_value = "ca"
@@ -31,7 +31,7 @@
 #'
 #' obj <- lm(y ~ x, data = tib)
 #' newdata <- tib %>%
-#'  slice_tail(n = 1)
+#'  dplyr::slice_tail(n = 1)
 #'
 #' # Now let's predict under various circumstances
 #' # ahead specified and forecast_date = NULL
