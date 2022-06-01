@@ -8,7 +8,7 @@ tib <- tibble(
 
 obj <- lm(y ~ x, data = tib)
 newdata <- tib %>%
-  slice_tail(n = 1)
+  dplyr::slice_tail(n = 1)
 
 test_that("ahead specified and forecast_date = NULL", {
   pred_epi_df <- suppressWarnings(epidf_predict(obj, newdata, ahead = 7))
