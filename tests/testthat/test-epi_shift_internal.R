@@ -1,5 +1,5 @@
 # Loading
-library(tidyverse)
+library(dplyr)
 library(covidcast)
 library(delphi.epidata)
 library(epiprocess)
