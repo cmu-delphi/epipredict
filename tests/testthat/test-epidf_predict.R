@@ -17,7 +17,7 @@ test_that("ahead specified and forecast_date = NULL", {
   expect_identical(pred_epi_df$geo_value, "ca")
   expect_identical(pred_epi_df$time_value, as.Date("2020-04-16"))
   expect_warning(epidf_predict(obj, newdata, ahead = 7),
-                 "Set forecast_date equal to maximum time_value.")
+                 "Set forecast_date equal to maximum time value plus ahead value.")
 })
 
 test_that("max_time_value < forecast_date = as_of", {
