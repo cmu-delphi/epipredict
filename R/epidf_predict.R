@@ -46,7 +46,7 @@
 #' epidf_predict(obj, newdata, forecast_date = "2020-04-11")
 
 epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
-  if (is_epi_df(new_data)) {
+  if (epiprocess::is_epi_df(new_data)) {
     pred_df <- stats::predict(obj, new_data)
     keys_df <- new_data %>%
       dplyr::select(epi_keys(new_data)) %>%
