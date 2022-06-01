@@ -1,38 +1,14 @@
 library(dplyr)
-library(covidcast)
-library(delphi.epidata)
 library(epiprocess)
 library(tidymodels)
 
-# Taken from example-recipe
-x <- covidcast(
-  data_source = "jhu-csse",
-  signals = "confirmed_7dav_incidence_prop",
-  time_type = "day",
-  geo_type = "state",
-  time_values = epirange(20200301, 20211231),
-  geo_values = "*"
-) %>%
-  fetch_tbl() %>%
-  select(geo_value, time_value, case_rate = value)
-
-y <- covidcast(
-  data_source = "jhu-csse",
-  signals = "deaths_7dav_incidence_prop",
-  time_type = "day",
-  geo_type = "state",
-  time_values = epirange(20200301, 20211231),
-  geo_values = "*"
-) %>%
-  fetch_tbl() %>%
-  select(geo_value, time_value, death_rate = value)
-
-x <- x %>%
-  full_join(y, by = c("geo_value", "time_value")) %>%
+# Random generated dataset
+set.seed(100)
+x <- tibble(geo_value = rep("nowhere",200),
+              time_value = as.Date("2021-01-01") + 0:199,
+              case_rate = rpois(100,20) + 1:200,
+              death_rate = rpois(100,10) + 1:200) %>%
   as_epi_df()
-rm(y)
-
-xx <- x %>% filter(time_value > "2021-12-01")
 
 slm_fit <- function(recipe, data = x) {
   workflow() %>%

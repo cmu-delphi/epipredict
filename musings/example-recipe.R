@@ -3,6 +3,7 @@ library(covidcast)
 library(delphi.epidata)
 library(epiprocess)
 library(tidymodels)
+
 x <- covidcast(
   data_source = "jhu-csse",
   signals = "confirmed_7dav_incidence_prop",
