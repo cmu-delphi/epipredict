@@ -1,3 +1,6 @@
+install.packages("parsnip")
+install.packages("workflows")
+
 library(dplyr)
 library(epiprocess)
 library(parsnip)
