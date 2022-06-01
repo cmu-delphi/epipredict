@@ -1,6 +1,6 @@
 set.seed(2034)
 n <- 100
-tib <- tibble(
+tib <- dplyr::tibble(
   x = rnorm(n), y = x + rnorm(n),
   time_value = seq(as.Date("2020-01-01"), by = 1, length.out = n),
   geo_value = "ca"
