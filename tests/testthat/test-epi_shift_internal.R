@@ -1,4 +1,3 @@
-# Loading
 library(dplyr)
 library(covidcast)
 library(delphi.epidata)
