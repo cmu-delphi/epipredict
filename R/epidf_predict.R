@@ -4,7 +4,7 @@
 #' @param obj A model object for which prediction is desired.
 #' @param new_data Input data for which to predict values.
 #' @param ahead A numeric value indicating how far ahead in the future
-#'  to make forecasts. Default is `0`.
+#'  to make forecasts.
 #' @param forecast_date The date to which these forecasts correspond.
 #'  Default is `NULL`.
 #' @param time_value the time value associated with each row of measurements.
@@ -14,9 +14,8 @@
 #' @details To use this function properly either specify an ahead value (and
 #'  leave the forecast date unspecifed) or specify a forecast date. In the
 #'  former, the forecast date will be set as the maximum time value plus
-#'  the ahead value. In that case, as well as in the cases when the
-#'  maximum time value is less than or equal to the forecast date, and
-#'  when the forecast date is less than the most recent update date of the data
+#'  the ahead value. In that case, as well as in the case when the
+#'  forecast date is less than the most recent update date of the data
 #'  (ie. the `as_of` value), an appropriate warning will be thrown.
 #'
 #' @export
@@ -37,14 +36,16 @@
 #' # Now let's predict under various circumstances
 #' # ahead specified and forecast_date = NULL
 #' epidf_predict(obj, newdata, ahead = 7)
-#' # max time_value <= specified forecast_date
-#' epidf_predict(obj, newdata, forecast_date = "2020-04-17")
-#' # specified forecast_date < max_time_value < as_of_date
+#' # forecast_date = as_of
+#' epidf_predict(obj, newdata, forecast_date = "2020-04-12")
+#' # max_time_value < as_of < forecast_date
+#' epidf_predict(obj, newdata, forecast_date = "2020-04-14")
+#' # forecast_date < max_time_value < as_of
 #' epidf_predict(obj, newdata, forecast_date = "2020-04-08")
-#' # specified forecast_date < max_time_value < as_of_date
+#' # max time_value < forecast_date < as_of
 #' epidf_predict(obj, newdata, forecast_date = "2020-04-11")
 
-epidf_predict <- function(obj, new_data, ahead = 0, forecast_date = NULL) {
+epidf_predict <- function(obj, new_data, ahead, forecast_date = NULL) {
   if (is_epi_df(new_data)) {
     pred_df <- stats::predict(obj, new_data)
     keys_df <- new_data %>%
@@ -62,8 +63,6 @@ epidf_predict <- function(obj, new_data, ahead = 0, forecast_date = NULL) {
     if (is.null(forecast_date)) {
       forecast_date <- max_time_value + ahead
       warning("Set forecast_date equal to maximum time_value.")
-    } else if (max_time_value <= forecast_date) {
-      warning("Maximum time_value is less than or equal to forecast_date.")
     }
     if (forecast_date < as_of_date) {
       warning("forecast_date is less than the most recent update date of the data.")
