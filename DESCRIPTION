@@ -16,6 +16,7 @@ Imports:
     dplyr,
     glue,
     magrittr,
+    parsnip,
     purrr,
     recipes,
     rlang,
@@ -23,7 +24,8 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    tensr
+    tensr,
+    workflows
 Suggests: 
     covidcast,
     data.table,

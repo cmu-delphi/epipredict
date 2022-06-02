@@ -1,5 +1,7 @@
 library(dplyr)
 library(epiprocess)
+library(parsnip)
+library(workflows)
 
 # Random generated dataset
 set.seed(100)
@@ -10,10 +12,10 @@ x <- tibble(geo_value = rep("nowhere",200),
   as_epi_df()
 
 slm_fit <- function(recipe, data = x) {
-  workflows::workflow() %>%
-    workflows::add_recipe(recipe) %>%
-    workflows::add_model(parsnip::linear_reg()) %>%
-    parsnip::fit(data = data)
+  workflow() %>%
+    add_recipe(recipe) %>%
+    add_model(linear_reg()) %>%
+    fit(data = data)
 }
 
 # Tests
