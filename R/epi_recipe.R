@@ -137,7 +137,7 @@ epi_recipe.epi_df <-
       levels = NULL,
       retained = NA
     )
-    class(out) <- "recipe"
+    class(out) <- c("epi_recipe", "recipe")
     out
   }
 
@@ -210,3 +210,19 @@ epi_form2args <- function(formula, data, ...) {
   list(x = data, vars = vars, roles = roles)
 }
 
+is_epi_recipe <- function(x) {
+  inherits(x, "epi_recipe")
+}
+
+add_epi_recipe <- function(
+    x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
+  add_recipe(x, recipe, ..., blueprint = blueprint)
+}
+
+default_epi_recipe_blueprint <-
+  function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
+           bake_dependent_roles = c("time_value", "geo_value", "key", "raw"),
+           composition = "tibble") {
+    hardhat::default_recipe_blueprint(
+      intercept, allow_novel_levels, fresh, bake_dependent_roles, composition)
+  }
