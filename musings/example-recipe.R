@@ -40,7 +40,7 @@ r <- epi_recipe(x) %>% # if we add this as a class, maybe we get better
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-  step_narm()
+  step_naomit2()
 
 
 slm <- linear_reg()
