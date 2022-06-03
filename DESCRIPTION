@@ -17,7 +17,7 @@ Imports:
     glue,
     magrittr,
     purrr,
-    recipes,
+    recipes (>= 0.2.0.9001),
     rlang,
     stats,
     tibble,
