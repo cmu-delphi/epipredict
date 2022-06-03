@@ -1,9 +1,10 @@
 #' Special NA omit step that does two steps in one
 #'
-#' @param x Recipe to be used.
+#' @param x Recipe to be used for omission steps
 #'
-#' @return A recipe with NA's omitted ....
-#' @export recipes
+#' @return Omits NA's from both predictors and outcomes and training time;
+#' however, only omits predictors at prediction time
+#' @export
 
 step_naomit2 <- function(x) {
   x %>%
