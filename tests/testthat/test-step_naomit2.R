@@ -19,15 +19,15 @@ extract <- function(recipe) {
   recipe
 }
 
-# Tests
-test_that("Check that epi_ahead shifts properly", {
-  expect_identical(step_naomit2(r),
-                   r %>%
-                     step_naomit(all_predictors()) %>%
-                     step_naomit(all_outcomes(), skip = TRUE))
-})
-
-z <- step_naomit2(r)
+z1 <- step_naomit2(r)
 z2 <- r %>%
   step_naomit(all_predictors()) %>%
   step_naomit(all_outcomes(), skip = TRUE)
+
+# Tests
+test_that("Check that both functions behave the same way", {
+  expect_identical(z1$steps[[3]][-1][-5],z2$steps[[3]][-1][-5])
+  expect_identical(z1$steps[[4]][-1][-5],z2$steps[[4]][-1][-5])
+  expect_identical(class(z1$steps[[3]]),class(z2$steps[[3]]))
+  expect_identical(class(z1$steps[[4]]),class(z2$steps[[4]]))
+})
