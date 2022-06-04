@@ -210,15 +210,78 @@ epi_form2args <- function(formula, data, ...) {
   list(x = data, vars = vars, roles = roles)
 }
 
+
+
+#' Test for `epi_df` format
+#'
+#' @param x An object.
+#' @return `TRUE` if the object inherits from `epi_recipe`.
+#'
+#' @export
 is_epi_recipe <- function(x) {
   inherits(x, "epi_recipe")
 }
 
+
+
+#' Add an epi_recipe to a workflow
+#'
+#' @seealso [workflows::add_recipe()]
+#' - `add_recipe()` specifies the terms of the model and any preprocessing that
+#'   is required through the usage of a recipe.
+#'
+#' - `remove_recipe()` removes the recipe as well as any downstream objects
+#'
+#' @details
+#' Has the same behaviour as [workflows::add_recipe()] but sets a different
+#' default blueprint to automatically handle [epiprocess::epi_df] data.
+#'
+#' @param x A workflow or epi_workflow
+#'
+#' @param recipe A recipe created using [recipes::recipe()]
+#'
+#' @param ... Not used.
+#'
+#' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
+#'
+#'   [default_epi_recipe_blueprint()] is used.
+#'
+#'   Note that preprocessing done here is separate from preprocessing that
+#'   might be done automatically by the underlying model.
+#'
+#' @return
+#' `x`, updated with a new recipe preprocessor.
+#'
+#' @export
+#' @examples
+#' library(recipes)
+#' library(magrittr)
+#'
+#' recipe <- epi_recipe(mpg ~ cyl, mtcars) %>%
+#'   step_log(cyl)
+#'
+#' workflow <- workflow() %>%
+#'   add_epi_recipe(recipe)
+#'
+#' workflow
+#'
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
   add_recipe(x, recipe, ..., blueprint = blueprint)
 }
 
+
+
+#' Recipe blueprint that accounts for `epi_df` panel data
+#'
+#' Used for simplicity. See [hardhat::default_recipe_blueprint()] for more
+#' details.
+#'
+#' @inheritParams hardhat::default_recipe_blueprint
+#'
+#' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
+#' @return A recipe blueprint.
+#' @export
 default_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
            bake_dependent_roles = c("time_value", "geo_value", "key", "raw"),
