@@ -2,10 +2,10 @@
 #'
 #' This is a container object that unifies preprocessing, fitting, prediction,
 #' and postprocessing for predictive modeling on epidemiological data. It extends
-#' the functionality of a [`workflows::workflow()`] to handle the typical panel
+#' the functionality of a [workflows::workflow()] to handle the typical panel
 #' data structures found in this field. This extension is handled completely
 #' internally, and should be invisible to the user. For all intents and purposes,
-#' this operates exactly like a [`workflows::workflow()`]. For more details
+#' this operates exactly like a [workflows::workflow()]. For more details
 #' and numerous examples, see there.
 #'
 #' @inheritParams workflows::workflow
@@ -18,13 +18,14 @@
 #' library(epiprocess)
 #' library(dplyr)
 #' library(parsnip)
+#' library(recipes)
 #'
 #' jhu <- jhu_csse_daily_subset %>%
 #'   filter(time_value > "2021-08-01") %>%
 #'   select(geo_value:death_rate_7d_av) %>%
 #'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 #'
-#' r <- epi_recipe(x) %>%
+#' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -79,7 +80,8 @@ is_epi_workflow <- function(x) {
 #' @inheritParams parsnip::predict.model_fit
 #' @param forecast_date The date on which the forecast is (was) made.
 #'
-#' @param object An epi_workflow that has been fit by [fit.workflow()]
+#' @param object An epi_workflow that has been fit by
+#'   [workflows::fit.workflow()]
 #'
 #' @param new_data A data frame containing the new predictors to preprocess
 #'   and predict on
@@ -96,21 +98,30 @@ is_epi_workflow <- function(x) {
 #' library(epiprocess)
 #' library(dplyr)
 #' library(parsnip)
+#' library(recipes)
 #'
 #' jhu <- jhu_csse_daily_subset %>%
 #'   filter(time_value > "2021-08-01") %>%
 #'   select(geo_value:death_rate_7d_av) %>%
 #'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 #'
-#' r <- epi_recipe(x) %>%
+#' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
 #'   step_naomit(all_predictors()) %>%
 #'   step_naomit(all_outcomes(), skip = TRUE)
 #'
-#' wf <- epi_workflow(r, linear_reg())
-#' preds <- predict(wf, forecast_date = "2021-12-31")
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
+#'
+#' jhu_latest <- jhu %>%
+#'   filter(!is.na(case_rate), !is.na(death_rate)) %>%
+#'   group_by(geo_value) %>%
+#'   slice_tail(n = 15) %>% # have lags 0,...,14, so need 15 for a complete case
+#'   ungroup()
+#'
+#' preds <- predict(wf, jhu_latest, forecast_date = "2021-12-31") %>%
+#'   filter(!is.na(.pred))
 #'
 #' preds
 predict.epi_workflow <-

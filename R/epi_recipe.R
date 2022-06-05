@@ -2,7 +2,7 @@
 #'
 #' A recipe is a description of the steps to be applied to a data set in
 #'   order to prepare it for data analysis. This is a loose wrapper
-#'   around `recipes::recipe()` to properly handle the additional
+#'   around [recipes::recipe()] to properly handle the additional
 #'   columns present in an `epi_df`
 #'
 #' @aliases epi_recipe epi_recipe.default epi_recipe.formula
@@ -51,18 +51,19 @@ epi_recipe.default <- function(x, ...) {
 #'   as the data given in the `data` argument but can be different after
 #'   the recipe is trained.}
 #'
-#  @includeRmd man/rmd/recipes.Rmd details
 #'
 #' @export
 #' @examples
 #' library(epiprocess)
 #' library(dplyr)
+#' library(recipes)
+#'
 #' jhu <- jhu_csse_daily_subset %>%
 #'   filter(time_value > "2021-08-01") %>%
 #'   select(geo_value:death_rate_7d_av) %>%
 #'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 #'
-#' r <- epi_recipe(x) %>%
+#' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -273,12 +274,14 @@ is_epi_recipe <- function(x) {
 #' @examples
 #' library(epiprocess)
 #' library(dplyr)
+#' library(recipes)
+#'
 #' jhu <- jhu_csse_daily_subset %>%
 #'   filter(time_value > "2021-08-01") %>%
 #'   select(geo_value:death_rate_7d_av) %>%
 #'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 #'
-#' r <- epi_recipe(x) %>%
+#' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -291,7 +294,7 @@ is_epi_recipe <- function(x) {
 #' workflow
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
-  add_recipe(x, recipe, ..., blueprint = blueprint)
+  workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
 }
 
 

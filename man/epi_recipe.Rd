@@ -53,18 +53,20 @@ the recipe is trained.}
 \description{
 A recipe is a description of the steps to be applied to a data set in
 order to prepare it for data analysis. This is a loose wrapper
-around \code{recipes::recipe()} to properly handle the additional
+around \code{\link[recipes:recipe]{recipes::recipe()}} to properly handle the additional
 columns present in an \code{epi_df}
 }
 \examples{
 library(epiprocess)
 library(dplyr)
+library(recipes)
+
 jhu <- jhu_csse_daily_subset \%>\%
   filter(time_value > "2021-08-01") \%>\%
   select(geo_value:death_rate_7d_av) \%>\%
   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 
-r <- epi_recipe(x) \%>\%
+r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%

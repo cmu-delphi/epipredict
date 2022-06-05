@@ -15,7 +15,8 @@
 )
 }
 \arguments{
-\item{object}{An epi_workflow that has been fit by \code{\link[=fit.workflow]{fit.workflow()}}}
+\item{object}{An epi_workflow that has been fit by
+\code{\link[workflows:fit-workflow]{workflows::fit.workflow()}}}
 
 \item{new_data}{A data frame containing the new predictors to preprocess
 and predict on}
@@ -77,21 +78,30 @@ possible. Specifically, the output will have \code{time_value} and
 library(epiprocess)
 library(dplyr)
 library(parsnip)
+library(recipes)
 
 jhu <- jhu_csse_daily_subset \%>\%
   filter(time_value > "2021-08-01") \%>\%
   select(geo_value:death_rate_7d_av) \%>\%
   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 
-r <- epi_recipe(x) \%>\%
+r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
   step_naomit(all_predictors()) \%>\%
   step_naomit(all_outcomes(), skip = TRUE)
 
-wf <- epi_workflow(r, linear_reg())
-preds <- predict(wf, forecast_date = "2021-12-31")
+wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
+
+jhu_latest <- jhu \%>\%
+  filter(!is.na(case_rate), !is.na(death_rate)) \%>\%
+  group_by(geo_value) \%>\%
+  slice_tail(n = 15) \%>\% # have lags 0,...,14, so need 15 for a complete case
+  ungroup()
+
+preds <- predict(wf, jhu_latest, forecast_date = "2021-12-31") \%>\%
+  filter(!is.na(.pred))
 
 preds
 }

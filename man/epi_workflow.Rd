@@ -33,13 +33,14 @@ and numerous examples, see there.
 library(epiprocess)
 library(dplyr)
 library(parsnip)
+library(recipes)
 
 jhu <- jhu_csse_daily_subset \%>\%
   filter(time_value > "2021-08-01") \%>\%
   select(geo_value:death_rate_7d_av) \%>\%
   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
 
-r <- epi_recipe(x) \%>\%
+r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
