@@ -212,7 +212,7 @@ epi_form2args <- function(formula, data, ...) {
 
 
 
-#' Test for `epi_df` format
+#' Test for `epi_recipe`
 #'
 #' @param x An object.
 #' @return `TRUE` if the object inherits from `epi_recipe`.
@@ -256,6 +256,7 @@ is_epi_recipe <- function(x) {
 #' @examples
 #' library(recipes)
 #' library(magrittr)
+#' library(workflows)
 #'
 #' recipe <- epi_recipe(mpg ~ cyl, mtcars) %>%
 #'   step_log(cyl)

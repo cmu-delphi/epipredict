@@ -2,7 +2,7 @@
 % Please edit documentation in R/epi_recipe.R
 \name{is_epi_recipe}
 \alias{is_epi_recipe}
-\title{Test for \code{epi_df} format}
+\title{Test for \code{epi_recipe}}
 \usage{
 is_epi_recipe(x)
 }
@@ -13,5 +13,5 @@ is_epi_recipe(x)
 \code{TRUE} if the object inherits from \code{epi_recipe}.
 }
 \description{
-Test for \code{epi_df} format
+Test for \code{epi_recipe}
 }
