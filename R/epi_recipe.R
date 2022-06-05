@@ -254,14 +254,12 @@ is_epi_recipe <- function(x) {
 #'
 #' @export
 #' @examples
-#' library(recipes)
 #' library(magrittr)
-#' library(workflows)
 #'
 #' recipe <- epi_recipe(mpg ~ cyl, mtcars) %>%
 #'   step_log(cyl)
 #'
-#' workflow <- workflow() %>%
+#' workflow <- epi_workflow() %>%
 #'   add_epi_recipe(recipe)
 #'
 #' workflow

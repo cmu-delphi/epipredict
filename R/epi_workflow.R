@@ -38,7 +38,39 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
-
+#' Predict from an epi_workflow
+#'
+#' @description
+#' This is the `predict()` method for a fit epi_workflow object. The nice thing
+#' about predicting from an epi_workflow is that it will:
+#'
+#' - Preprocess `new_data` using the preprocessing method specified when the
+#'   workflow was created and fit. This is accomplished using
+#'   [hardhat::forge()], which will apply any formula preprocessing or call
+#'   [recipes::bake()] if a recipe was supplied.
+#'
+#' - Call [parsnip::predict.model_fit()] for you using the underlying fit
+#'   parsnip model.
+#'
+#' - Ensure that the returned object is an [epiprocess::epi_df] where
+#'   possible. Specifically, the output will have `time_value` and
+#'   `geo_value` columns as well as the prediction.
+#'
+#' @inheritParams parsnip::predict.model_fit
+#' @param forecast_date The date on which the forecast is (was) made.
+#'
+#' @param object An epi_workflow that has been fit by [fit.workflow()]
+#'
+#' @param new_data A data frame containing the new predictors to preprocess
+#'   and predict on
+#'
+#' @return
+#' A data frame of model predictions, with as many rows as `new_data` has.
+#' If `new_data` is an `epi_df` or a data frame with `time_value` or
+#' `geo_value` columns, then the result will have those as well.
+#'
+#' @name predict-epi_workflow
+#' @export
 predict.epi_workflow <-
   function(object, new_data, type = NULL, opts = list(),
            forecast_date = NULL, ...) {
@@ -47,24 +79,24 @@ predict.epi_workflow <-
         c("Can't predict on an untrained epi_workflow.",
           i = "Do you need to call `fit()`?"))
     }
+    if (!is_null(forecast_date)) forecast_date <- as.Date(forecast_date)
     the_fit <- workflows::extract_fit_parsnip(object)
     mold <- workflows::extract_mold(object)
     forged <- hardhat::forge(new_data, blueprint = mold$blueprint)
     preds <- predict(the_fit, forged$predictors, type = type, opts = opts, ...)
     keys <- grab_forged_keys(forged, mold, new_data)
-    out <- dplyr::bind_cols(keys, preds, forecast_date)
+    out <- dplyr::bind_cols(keys, forecast_date = forecast_date, preds)
     out
   }
 
 grab_forged_keys <- function(forged, mold, new_data) {
   keys <- c("time_value", "geo_value", "key")
-  forged_names <- names(forged$extras$roles)
-  molded_names <- names(mold$extras$roles)
-  extras <- dplyr::bind_cols(forged$extras$roles[forged_names %in% keys])
+  forged_roles <- names(forged$extras$roles)
+  extras <- dplyr::bind_cols(forged$extras$roles[forged_roles %in% keys])
   # 1. these are the keys in the test data after prep/bake
   new_keys <- names(extras)
   # 2. these are the keys in the training data
-  old_keys <- purrr::map_chr(mold$extras$roles[molded_names %in% keys], names)
+  old_keys <- epi_keys_mold(mold)
   # 3. these are the keys in the test data as input
   new_df_keys <- epi_keys(new_data)
   if (! (setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
@@ -73,10 +105,13 @@ grab_forged_keys <- function(forged, mold, new_data) {
       "in `new_data`. Predictions will have only the available keys.")
     )
   }
-  if (epiprocess::is_epi_df(new_data) || keys[1:2] %in% new_keys) {
+  if (epiprocess::is_epi_df(new_data)) {
+    extras <- epiprocess::as_epi_df(extras)
+    attr(extras, "metadata") <- attr(new_data, "metadata")
+  } else if (keys[1:2] %in% new_keys) {
     l <- list()
     if (length(new_keys) > 2) l <- list(other_keys = new_keys[-c(1:2)])
-    extras <- as_epi_df(extras, additional_metadata = l)
+    extras <- epiprocess::as_epi_df(extras, additional_metadata = l)
   }
   extras
 }

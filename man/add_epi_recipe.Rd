@@ -31,13 +31,12 @@ Has the same behaviour as \code{\link[workflows:add_recipe]{workflows::add_recip
 default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
 }
 \examples{
-library(recipes)
 library(magrittr)
 
 recipe <- epi_recipe(mpg ~ cyl, mtcars) \%>\%
   step_log(cyl)
 
-workflow <- workflow() \%>\%
+workflow <- epi_workflow() \%>\%
   add_epi_recipe(recipe)
 
 workflow
