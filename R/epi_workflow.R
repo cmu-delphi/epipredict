@@ -14,6 +14,26 @@
 #' @seealso workflows::workflow
 #' @importFrom rlang is_null
 #' @export
+#' @examples
+#' library(epiprocess)
+#' library(dplyr)
+#' library(parsnip)
+#'
+#' jhu <- jhu_csse_daily_subset %>%
+#'   filter(time_value > "2021-08-01") %>%
+#'   select(geo_value:death_rate_7d_av) %>%
+#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#'
+#' r <- epi_recipe(x) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'   step_naomit(all_predictors()) %>%
+#'   step_naomit(all_outcomes(), skip = TRUE)
+#'
+#' wf <- epi_workflow(r, linear_reg())
+#'
+#' wf
 epi_workflow <- function(preprocessor = NULL, spec = NULL) {
   out <- workflows::workflow(spec = spec)
   class(out) <- c("epi_workflow", class(out))
@@ -71,6 +91,28 @@ is_epi_workflow <- function(x) {
 #'
 #' @name predict-epi_workflow
 #' @export
+#' @examples
+#'
+#' #' library(epiprocess)
+#' library(dplyr)
+#' library(parsnip)
+#'
+#' jhu <- jhu_csse_daily_subset %>%
+#'   filter(time_value > "2021-08-01") %>%
+#'   select(geo_value:death_rate_7d_av) %>%
+#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#'
+#' r <- epi_recipe(x) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'   step_naomit(all_predictors()) %>%
+#'   step_naomit(all_outcomes(), skip = TRUE)
+#'
+#' wf <- epi_workflow(r, linear_reg())
+#' preds <- predict(wf, forecast_date = "2021-12-31")
+#'
+#' preds
 predict.epi_workflow <-
   function(object, new_data, type = NULL, opts = list(),
            forecast_date = NULL, ...) {

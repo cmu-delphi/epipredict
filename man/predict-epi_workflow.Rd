@@ -72,3 +72,26 @@ possible. Specifically, the output will have \code{time_value} and
 \code{geo_value} columns as well as the prediction.
 }
 }
+\examples{
+
+#' library(epiprocess)
+library(dplyr)
+library(parsnip)
+
+jhu <- jhu_csse_daily_subset \%>\%
+  filter(time_value > "2021-08-01") \%>\%
+  select(geo_value:death_rate_7d_av) \%>\%
+  rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+
+r <- epi_recipe(x) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
+  step_naomit(all_predictors()) \%>\%
+  step_naomit(all_outcomes(), skip = TRUE)
+
+wf <- epi_workflow(r, linear_reg())
+preds <- predict(wf, forecast_date = "2021-12-31")
+
+preds
+}
