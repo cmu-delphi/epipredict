@@ -93,7 +93,7 @@ is_epi_workflow <- function(x) {
 #' @export
 #' @examples
 #'
-#' #' library(epiprocess)
+#' library(epiprocess)
 #' library(dplyr)
 #' library(parsnip)
 #'

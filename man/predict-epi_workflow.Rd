@@ -74,7 +74,7 @@ possible. Specifically, the output will have \code{time_value} and
 }
 \examples{
 
-#' library(epiprocess)
+library(epiprocess)
 library(dplyr)
 library(parsnip)
 
