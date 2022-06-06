@@ -28,6 +28,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/news/index.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/add_epi_recipe.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/arx_args_list.html</loc>
   </url>
   <url>
@@ -38,6 +41,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/create_lags_and_leads.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/default_epi_recipe_blueprint.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/df_mat_mul.html</loc>
@@ -52,6 +58,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/epi_shift.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/epi_workflow.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/get_precision.html</loc>
   </url>
   <url>
@@ -59,6 +68,12 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/is_epi_recipe.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/is_epi_workflow.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/knn_iteraive_ar_args_list.html</loc>
@@ -74,6 +89,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/pipe.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/predict-epi_workflow.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/smooth_arx_args_list.html</loc>
