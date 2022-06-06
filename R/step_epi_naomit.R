@@ -6,7 +6,7 @@
 #' however, only omits predictors at prediction time
 #' @export
 
-step_narm <- function(x) {
+step_epi_naomit <- function(x) {
   x %>%
     recipes::step_naomit(all_predictors()) %>%
     recipes::step_naomit(all_outcomes(), skip = TRUE)
