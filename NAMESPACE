@@ -26,7 +26,12 @@ export(smooth_arx_args_list)
 export(smooth_arx_forecaster)
 export(step_epi_ahead)
 export(step_epi_lag)
+<<<<<<< HEAD
 export(step_narm)
+=======
+export(step_epi_naomit)
+export(step_epi_shift)
+>>>>>>> 878eb71132d58400f79ffdd6eb14452f289cbf6a
 import(recipes)
 importFrom(magrittr,"%>%")
 importFrom(rlang,"!!")
