@@ -45,7 +45,7 @@ test_that("Check that epi_lag shifts properly", {
   expect_equal(slope_lag,1)
 })
 
-test_that("Check for non-integer values", {
+test_that("Values for ahead and lag must be integer values", {
   r3 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 3.6) %>%
     step_epi_lag(death_rate, lag = 1.9)
@@ -54,7 +54,7 @@ test_that("Check for non-integer values", {
   )
 })
 
-test_that("Check for duplicate values", {
+test_that("Values for ahead and lag cannot be duplicates", {
   r4 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = 7) %>%

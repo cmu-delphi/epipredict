@@ -15,7 +15,6 @@
 #'  order_ for shifting.
 #'
 #' @family row operation steps
-#' @export
 #' @rdname step_epi_ahead
 step_epi_shift <-
   function(recipe,
