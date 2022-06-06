@@ -169,6 +169,31 @@ grab_forged_keys <- function(forged, mold, new_data) {
   extras
 }
 
+
+#' Augment data with predictions
+#'
+#' @param x A trained epi_workflow
+#' @param new_data A epi_df of predictors
+#' @param ... Arguments passed on to the predict method.
+#'
+#' @return new_data with additional columns containing the predicted values
+#' @export
+augment.epi_workflow <- function (x, new_data, ...) {
+  predictions <- predict(x, new_data, ...)
+  if (is_epi_df(predictions)) join_by <- epi_keys(predictions)
+  else rlang::abort(
+    c("Cannot determine how to join new_data with the predictions.",
+      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."))
+  complete_overlap <- intersect(names(new_data), join_by)
+  if (length(complete_overlap) < length(join_by)) {
+    rlang::warn(
+      glue::glue("Your original training data had keys {join_by}, but",
+                 "`new_data` only has {complete_overlap}. The output",
+                 "may be strange."))
+  }
+  dplyr::full_join(predictions, new_data, by = join_by)
+}
+
 new_epi_workflow <- function(
     pre = workflows:::new_stage_pre(),
     fit = workflows:::new_stage_fit(),
