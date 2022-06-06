@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   knn-forecasts: knn-forecasts.html
   simple-forecasts: simple-forecasts.html
-last_built: 2022-06-06T23:00Z
+last_built: 2022-06-06T23:09Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles
