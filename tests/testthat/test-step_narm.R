@@ -16,7 +16,7 @@ r <- epi_recipe(x) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0,7,14))
 
-z1 <- step_naomit2(r)
+z1 <- step_narm(r)
 z2 <- r %>%
   step_naomit(all_predictors()) %>%
   step_naomit(all_outcomes(), skip = TRUE)
