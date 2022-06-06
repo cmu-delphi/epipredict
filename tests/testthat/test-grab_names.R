@@ -1,5 +1,3 @@
-print("a")
-
 df <- data.frame(b=1,c=2,ca=3,cat=4)
 
 test_that("Names are grabbed properly", {
