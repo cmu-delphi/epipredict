@@ -63,101 +63,16 @@ step_epi_ahead <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
-    add_step(
-      recipe,
-      step_epi_ahead_new(
-        terms = dplyr::enquos(...),
-        role = role,
-        trained = trained,
-        ahead = ahead,
-        prefix = prefix,
-        default = default,
-        keys = keys,
-        columns = columns,
-        skip = skip,
-        id = id
-      )
+    step_epi_shift(recipe,
+                   ...,
+                   role = role,
+                   trained = trained,
+                   shift = ahead,
+                   prefix = prefix,
+                   default = default,
+                   keys = keys,
+                   columns = columns,
+                   skip = skip,
+                   id = id
     )
-  }
-
-step_epi_ahead_new <-
-  function(terms, role, trained, ahead, prefix, default, keys,
-           columns, skip, id) {
-    step(
-      subclass = "epi_ahead",
-      terms = terms,
-      role = role,
-      trained = trained,
-      ahead = ahead,
-      prefix = prefix,
-      default = default,
-      keys = keys,
-      columns = columns,
-      skip = skip,
-      id = id
-    )
-  }
-
-#' @export
-prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
-  step_epi_ahead_new(
-    terms = x$terms,
-    role = x$role,
-    trained = TRUE,
-    ahead = x$ahead,
-    prefix = x$prefix,
-    default = x$default,
-    keys = x$keys,
-    columns = recipes_eval_select(x$terms, training, info),
-    skip = x$skip,
-    id = x$id
-  )
-}
-
-#' @export
-bake.step_epi_ahead <- function(object, new_data, ...) {
-  if (!all(object$ahead == as.integer(object$ahead))) {
-    rlang::abort("step_epi_ahead requires 'ahead' argument to be integer valued.")
-  }
-
-  grid <- tidyr::expand_grid(
-    col = object$columns, lag_val = -object$ahead) %>%
-    dplyr::mutate(
-      ahead_val = -lag_val,
-      newname = glue::glue("{object$prefix}{ahead_val}_{col}")
-    ) %>%
-    dplyr::select(-ahead_val)
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    rlang::abort(
-      paste0("Name collision occured in `", class(object)[1],
-             "`. The following variable names already exists: ",
-             paste0(new_data_names[intersection], collapse = ", "),
-             "."))
-  }
-
-  ok <- object$keys
-  lagged <- purrr::reduce(
-    purrr::pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    dplyr::full_join,
-    by = ok
-  )
-
-  dplyr::full_join(new_data, lagged, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup()
-
-}
-
-#' @export
-print.step_epi_ahead <-
-  function(x, width = max(20, options()$width - 30), ...) {
-    ## TODO add printing of the lags
-    title <- "Leading "
-    recipes::print_step(x$columns, x$terms, x$trained, title, width)
-    invisible(x)
   }

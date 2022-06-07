@@ -20,6 +20,7 @@ Imports:
     glue,
     hardhat (>= 1.0.0.9000),
     magrittr,
+    parsnip,
     purrr,
     recipes (>= 0.2.0.9001),
     rlang,
@@ -28,6 +29,7 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
+    tensr,
     workflows
 Suggests: 
     covidcast,
