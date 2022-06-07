@@ -16,6 +16,10 @@ r <- epi_recipe(x) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0,7,14))
 
+test_that("Argument must be a recipe", {
+  expect_error(step_epi_naomit(x))
+})
+
 z1 <- step_epi_naomit(r)
 z2 <- r %>%
   step_naomit(all_predictors()) %>%
