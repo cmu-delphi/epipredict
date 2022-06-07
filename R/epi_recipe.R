@@ -2,7 +2,7 @@
 #'
 #' A recipe is a description of the steps to be applied to a data set in
 #'   order to prepare it for data analysis. This is a loose wrapper
-#'   around `recipes::recipe()` to properly handle the additional
+#'   around [recipes::recipe()] to properly handle the additional
 #'   columns present in an `epi_df`
 #'
 #' @aliases epi_recipe epi_recipe.default epi_recipe.formula
@@ -51,9 +51,27 @@ epi_recipe.default <- function(x, ...) {
 #'   as the data given in the `data` argument but can be different after
 #'   the recipe is trained.}
 #'
-#  @includeRmd man/rmd/recipes.Rmd details
 #'
 #' @export
+#' @examples
+#' library(epiprocess)
+#' library(dplyr)
+#' library(recipes)
+#'
+#' jhu <- jhu_csse_daily_subset %>%
+#'   filter(time_value > "2021-08-01") %>%
+#'   select(geo_value:death_rate_7d_av) %>%
+#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'   step_naomit(all_predictors()) %>%
+#'   # below, `skip` means we don't do this at predict time
+#'   step_naomit(all_outcomes(), skip = TRUE)
+#'
+#' r
 epi_recipe.epi_df <-
   function(x,
            formula = NULL,
@@ -137,7 +155,7 @@ epi_recipe.epi_df <-
       levels = NULL,
       retained = NA
     )
-    class(out) <- "recipe"
+    class(out) <- c("epi_recipe", "recipe")
     out
   }
 
@@ -210,3 +228,91 @@ epi_form2args <- function(formula, data, ...) {
   list(x = data, vars = vars, roles = roles)
 }
 
+
+
+#' Test for `epi_recipe`
+#'
+#' @param x An object.
+#' @return `TRUE` if the object inherits from `epi_recipe`.
+#'
+#' @export
+is_epi_recipe <- function(x) {
+  inherits(x, "epi_recipe")
+}
+
+
+
+#' Add an epi_recipe to a workflow
+#'
+#' @seealso [workflows::add_recipe()]
+#' - `add_recipe()` specifies the terms of the model and any preprocessing that
+#'   is required through the usage of a recipe.
+#'
+#' - `remove_recipe()` removes the recipe as well as any downstream objects
+#'
+#' @details
+#' Has the same behaviour as [workflows::add_recipe()] but sets a different
+#' default blueprint to automatically handle [epiprocess::epi_df] data.
+#'
+#' @param x A workflow or epi_workflow
+#'
+#' @param recipe A recipe created using [recipes::recipe()]
+#'
+#' @param ... Not used.
+#'
+#' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
+#'
+#'   [default_epi_recipe_blueprint()] is used.
+#'
+#'   Note that preprocessing done here is separate from preprocessing that
+#'   might be done automatically by the underlying model.
+#'
+#' @return
+#' `x`, updated with a new recipe preprocessor.
+#'
+#' @export
+#' @examples
+#' library(epiprocess)
+#' library(dplyr)
+#' library(recipes)
+#'
+#' jhu <- jhu_csse_daily_subset %>%
+#'   filter(time_value > "2021-08-01") %>%
+#'   select(geo_value:death_rate_7d_av) %>%
+#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'   step_naomit(all_predictors()) %>%
+#'   step_naomit(all_outcomes(), skip = TRUE)
+#'
+#' workflow <- epi_workflow() %>%
+#'   add_epi_recipe(r)
+#'
+#' workflow
+add_epi_recipe <- function(
+    x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
+  workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
+}
+
+
+
+#' Recipe blueprint that accounts for `epi_df` panel data
+#'
+#' Used for simplicity. See [hardhat::default_recipe_blueprint()] for more
+#' details.
+#'
+#' @inheritParams hardhat::default_recipe_blueprint
+#'
+#' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
+#' @return A recipe blueprint.
+#' @export
+default_epi_recipe_blueprint <-
+  function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
+           bake_dependent_roles = c("time_value", "geo_value", "key", "raw"),
+           composition = "tibble") {
+    hardhat::default_recipe_blueprint(
+      intercept, allow_novel_levels, fresh, bake_dependent_roles, composition)
+  }

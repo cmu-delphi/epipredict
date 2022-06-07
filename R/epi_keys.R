@@ -23,3 +23,13 @@ epi_keys.epi_df <- function(x) {
 epi_keys.recipe <- function(x) {
   x$var_info$variable[x$var_info$role %in% c("time_value", "geo_value", "key")]
 }
+
+# a mold is a list extracted from a fitted workflow, gives info about
+# training data. But it doesn't have a class
+epi_keys_mold <- function(mold) {
+  keys <- c("time_value", "geo_value", "key")
+  molded_names <- names(mold$extras$roles)
+  mold_keys <- purrr::map_chr(mold$extras$roles[molded_names %in% keys], names)
+  unname(mold_keys)
+}
+
