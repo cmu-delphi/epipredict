@@ -16,6 +16,60 @@
 #'
 #' @family row operation steps
 #' @rdname step_epi_ahead
+#' @export
+step_epi_ahead <-
+  function(recipe,
+           ...,
+           role = "outcome",
+           trained = FALSE,
+           ahead = 1,
+           prefix = "ahead_",
+           default = NA,
+           keys = epi_keys(recipe),
+           columns = NULL,
+           skip = FALSE,
+           id = rand_id("epi_ahead")) {
+    step_epi_shift(recipe,
+                   ...,
+                   role = role,
+                   trained = trained,
+                   shift = ahead,
+                   prefix = prefix,
+                   default = default,
+                   keys = keys,
+                   columns = columns,
+                   skip = skip,
+                   id = id
+    )
+  }
+
+#' @export
+step_epi_lag <-
+  function(recipe,
+           ...,
+           role = "predictor",
+           trained = FALSE,
+           lag = 1,
+           prefix = "lag_",
+           default = NA,
+           keys = epi_keys(recipe),
+           columns = NULL,
+           skip = FALSE,
+           id = rand_id("epi_lag")) {
+    step_epi_shift(recipe,
+                   ...,
+                   role = role,
+                   trained = trained,
+                   shift = -lag,
+                   prefix = prefix,
+                   default = default,
+                   keys = keys,
+                   columns = columns,
+                   skip = skip,
+                   id = id
+    )
+  }
+
 step_epi_shift <-
   function(recipe,
            ...,
