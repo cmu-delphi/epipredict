@@ -4,11 +4,10 @@ library(parsnip)
 library(workflows)
 
 # Random generated dataset
-set.seed(100)
 x <- tibble(geo_value = rep("nowhere",200),
             time_value = as.Date("2021-01-01") + 0:199,
-            case_rate = rpois(100,20) + 1:200,
-            death_rate = rpois(100,10) + 1:200) %>%
+            case_rate = 1:200,
+            death_rate = 1:200) %>%
   as_epi_df()
 
 # Preparing the datasets to be used for comparison
