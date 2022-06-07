@@ -21,10 +21,15 @@ z2 <- r %>%
   step_naomit(all_predictors()) %>%
   step_naomit(all_outcomes(), skip = TRUE)
 
-# Test
+# Checks the behaviour of a step function, omitting the quosure and id that
+# differ from one another, even with identical behaviour
+behav <- function(recipe,step_num) recipe$steps[[step_num]][-1][-5]
+# Checks the class type of an object
+step_class <- function(recipe,step_num) class(recipe$steps[step_num])
+
 test_that("Check that both functions behave the same way", {
-  expect_identical(z1$steps[[3]][-1][-5],z2$steps[[3]][-1][-5])
-  expect_identical(z1$steps[[4]][-1][-5],z2$steps[[4]][-1][-5])
-  expect_identical(class(z1$steps[[3]]),class(z2$steps[[3]]))
-  expect_identical(class(z1$steps[[4]]),class(z2$steps[[4]]))
+  expect_identical(behav(z1,3),behav(z2,3))
+  expect_identical(behav(z1,4),behav(z2,4))
+  expect_identical(step_class(z1,3),step_class(z2,3))
+  expect_identical(step_class(z1,4),step_class(z2,4))
 })

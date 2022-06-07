@@ -13,8 +13,7 @@ test_that("Argument name is a character" ,{
 
 test_that("The length of names does not differ from the length of the number
           of outputs" ,{
-  expect_error(df_mat_mul(df, mat, c("a","b","c"),
-                          dplyr::num_range("X", 2:3)))
+  expect_error(df_mat_mul(df, mat, c("a","b","c"), 2:3))
 })
 
 test_that("The number of columns of the first data frame cannot differ from the
@@ -28,11 +27,8 @@ Z <- as.data.frame(as.matrix(df[2:3]) %*% mat)
 colnames(Z) <- c("z1","z2")
 output <- cbind(X,Z)
 
-test_that("Matrix multiplication is being handled as expected", {
+test_that("Names are being handled properly", {
   expect_identical(df_mat_mul(df, mat, "z", 2:3),output)
-})
-
-test_that("Names are used from the out_names field", {
   expect_identical(df_mat_mul(df, mat, c("z1","z2"), 2:3),output)
 })
 
@@ -40,4 +36,6 @@ test_that("Other tidyselect functionalities are working", {
   mult <- df_mat_mul(df, mat, "z", dplyr::num_range("X", 2:3))
   expect_identical(mult,output)
   expect_identical(df_mat_mul(df, mat, "z", 2, 3),output)
+  # Mismatched names should not work:
+  expect_error(df_mat_mul(df, mat, "z", dplyr::num_range("Y", 2:3)))
 })
