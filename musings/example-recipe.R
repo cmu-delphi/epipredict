@@ -2,7 +2,6 @@ library(tidyverse)
 library(covidcast)
 library(delphi.epidata)
 library(epiprocess)
-# library(epipredict)
 library(tidymodels)
 
 x <- covidcast(
