@@ -174,7 +174,7 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the shifts
-    title <- ifelse(object$prefix == "lag_","Lagging","Leading") %>%
+    title <- ifelse(x$prefix == "lag_","Lagging","Leading") %>%
       paste0(": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)

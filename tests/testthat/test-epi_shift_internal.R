@@ -6,8 +6,8 @@ library(workflows)
 # Random generated dataset
 x <- tibble(geo_value = rep("place",200),
               time_value = as.Date("2021-01-01") + 0:199,
-              case_rate = atan(0.5 * 1:200) + sin(5*1:200) + 1:200,
-              death_rate = atan(0.1 * 1:200) + cos(5*1:200) + 1:200) %>%
+              case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5*1:200) + 1,
+              death_rate = atan(0.1 * 1:200) + cos(5*1:200) + 1) %>%
   as_epi_df()
 
 slm_fit <- function(recipe, data = x) {
@@ -38,30 +38,24 @@ test_that("Values for ahead and lag cannot be duplicates", {
 
 xxx <- x %>%
   mutate(`..y` = lead(death_rate,7),
-         lag_7_case_rate = lag(case_rate,7),
-         lag_14_case_rate = lag(case_rate, 14),
          lag_7_death_rate = lag(death_rate,7),
          lag_14_death_rate = lag(death_rate, 14)) %>%
-  rename(lag_0_case_rate = case_rate,
-         lag_0_death_rate = death_rate)
+  rename(lag_0_death_rate = death_rate)
 
-lm1 <- lm(`..y` ~ lag_0_case_rate + lag_7_case_rate + lag_14_case_rate +
-     lag_0_death_rate + lag_7_death_rate + lag_14_death_rate, data = xxx)
+lm1 <- lm(`..y` ~ lag_0_death_rate + lag_7_death_rate + lag_14_death_rate,
+          data = xxx)
 
 
-test_that("Check that epi_lag shifts properly", {
+test_that("Check that epi_lag shifts applies the shift", {
   r3 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
-    step_epi_lag(death_rate, lag = c(0,7,14)) %>%
-    step_epi_lag(case_rate, lag = c(0,7,14)) %>%
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    step_epi_lag(death_rate, lag = c(0,7,14))
 
-  slm_fit3 <- slm_fit(r3)
+  # Two steps passed here
+  expect_equal(length(r3$steps),2)
 
-  sm <- slm_fit3$fit$fit$fit
+  fit3 <- slm_fit(r3)
 
-  slope_lag <- slm_fit3$fit$fit$fit$coefficients[[2]]
-
-  expect_equal(1,1) # stub
+  # Should have four predictors, including the intercept
+  expect_equal(length(fit3$fit$fit$fit$coefficients))
 })
