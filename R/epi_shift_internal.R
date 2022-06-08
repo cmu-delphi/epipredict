@@ -134,9 +134,9 @@ bake.step_epi_shift <- function(object, new_data, ...) {
   is_lag <- object$prefix == "lag_"
   if (!all(object$shift == as.integer(object$shift))) {
     error_msg <- paste0("step_epi_",
-                        ifelse(object$role == "predictor","lag","ahead"),
+                        ifelse(is_lag,"lag","ahead"),
                         " requires ",
-                        ifelse(object$role == "predictor","'lag'","'ahead'"),
+                        ifelse(is_lag,"'lag'","'ahead'"),
                         " argument to be integer valued.")
     rlang::abort(error_msg)
   }
