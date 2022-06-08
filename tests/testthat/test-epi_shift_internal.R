@@ -53,9 +53,8 @@ test_that("Check that epi_lag shifts applies the shift", {
 
   # Two steps passed here
   expect_equal(length(r3$steps),2)
-
   fit3 <- slm_fit(r3)
 
   # Should have four predictors, including the intercept
-  expect_equal(length(fit3$fit$fit$fit$coefficients))
+  expect_equal(length(fit3$fit$fit$fit$coefficients),4)
 })
