@@ -10,12 +10,10 @@ step_epi_ahead(
   role = "outcome",
   trained = FALSE,
   ahead = 1,
-  prefix = "ahead_",
   default = NA,
   keys = epi_keys(recipe),
   columns = NULL,
-  skip = FALSE,
-  id = rand_id("epi_ahead")
+  skip = FALSE
 )
 }
 \arguments{

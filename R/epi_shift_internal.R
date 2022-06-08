@@ -23,23 +23,21 @@ step_epi_ahead <-
            role = "outcome",
            trained = FALSE,
            ahead = 1,
-           prefix = "ahead_",
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
-           skip = FALSE,
-           id = rand_id("epi_ahead")) {
+           skip = FALSE) {
     step_epi_shift(recipe,
                    ...,
                    role = role,
                    trained = trained,
                    shift = ahead,
-                   prefix = prefix,
+                   prefix = "ahead_",
                    default = default,
                    keys = keys,
                    columns = columns,
                    skip = skip,
-                   id = id
+                   id = rand_id("epi_ahead")
     )
   }
 
@@ -50,23 +48,21 @@ step_epi_lag <-
            role = "predictor",
            trained = FALSE,
            lag = 1,
-           prefix = "lag_",
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
-           skip = FALSE,
-           id = rand_id("epi_lag")) {
+           skip = FALSE) {
     step_epi_shift(recipe,
                    ...,
                    role = role,
                    trained = trained,
                    shift = -lag,
-                   prefix = prefix,
+                   prefix = "lag_",
                    default = default,
                    keys = keys,
                    columns = columns,
                    skip = skip,
-                   id = id
+                   id = rand_id("epi_lag")
     )
   }
 
@@ -136,7 +132,12 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_epi_shift <- function(object, new_data, ...) {
   if (!all(object$shift == as.integer(object$shift))) {
-    rlang::abort("step_epi_shift requires 'shift' argument to be integer valued.")
+    error_msg <- paste0("step_epi_",
+                        ifelse(object$role == "predictor","lag","ahead"),
+                        " requires ",
+                        ifelse(object$role == "predictor","'lag'","'ahead'"),
+                        " argument to be integer valued.")
+    rlang::abort(error_msg)
   }
   grid <- tidyr::expand_grid(col = object$columns, lag_val = -object$shift)
   is_lag <- object$role == "predictor"
@@ -188,3 +189,7 @@ print.step_epi_shift <-
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
+
+is_lag <- function(x) {
+  FALSE #stub
+}
