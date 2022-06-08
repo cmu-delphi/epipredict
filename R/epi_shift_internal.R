@@ -131,6 +131,7 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_shift <- function(object, new_data, ...) {
+  is_lag <- object$prefix == "lag_"
   if (!all(object$shift == as.integer(object$shift))) {
     error_msg <- paste0("step_epi_",
                         ifelse(object$role == "predictor","lag","ahead"),
@@ -139,23 +140,12 @@ bake.step_epi_shift <- function(object, new_data, ...) {
                         " argument to be integer valued.")
     rlang::abort(error_msg)
   }
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = -object$shift)
-  is_lag <- object$role == "predictor"
-  if (!is_lag) {
-    grid <- dplyr::mutate(grid,ahead_val = -lag_val)
-  }
+  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$shift)
   grid <- dplyr::mutate(grid,
-      newname = glue::glue(
-        paste0(
-          "{object$prefix}",
-          ifelse(is_lag,"{lag_val}","{ahead_val}"),
-          "_{col}"
-          )
-        )
-    )
-  if (!is_lag) {
-    grid <- dplyr::select(grid, -ahead_val)
-  }
+                        newname = glue::glue(
+                          paste0("{object$prefix}","{abs(lag_val)}","_{col}")
+                        )
+  )
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
@@ -184,12 +174,8 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the shifts
-    title <- ifelse(x$role == "predictor","Lagging","Leading") %>%
+    title <- ifelse(object$prefix == "lag_","Lagging","Leading") %>%
       paste0(": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
-
-is_lag <- function(x) {
-  FALSE #stub
-}
