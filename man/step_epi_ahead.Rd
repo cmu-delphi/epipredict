@@ -36,4 +36,9 @@ argument.
 The step assumes that the data are already \emph{in the proper sequential
 order} for shifting.
 }
+\examples{
+epi_recipe(case_death_rate_subset) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_epi_lag(death_rate, lag = c(0,7,14))
+}
 \concept{row operation steps}
