@@ -4,7 +4,7 @@
 \alias{epi_workflow}
 \title{Create an epi_workflow}
 \usage{
-epi_workflow(preprocessor = NULL, spec = NULL)
+epi_workflow(preprocessor = NULL, spec = NULL, postprocessor = NULL)
 }
 \arguments{
 \item{preprocessor}{An optional preprocessor to add to the workflow. One of:

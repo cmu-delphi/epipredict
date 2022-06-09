@@ -35,17 +35,21 @@
 #' wf <- epi_workflow(r, linear_reg())
 #'
 #' wf
-epi_workflow <- function(preprocessor = NULL, spec = NULL) {
+epi_workflow <- function(preprocessor = NULL, spec = NULL,
+                         postprocessor = NULL) {
   out <- workflows::workflow(spec = spec)
   class(out) <- c("epi_workflow", class(out))
 
   if (is_epi_recipe(preprocessor)) {
     return(add_epi_recipe(out, preprocessor))
   }
-
   if (!is_null(preprocessor)) {
-    return(workflows:::add_preprocessor(out, preprocessor))
+    out <- workflows:::add_preprocessor(out, preprocessor)
   }
+  if (!is_null(postprocessor)) {
+    out <- add_postprocessor(out, postprocessor)
+  }
+
   out
 }
 
@@ -95,17 +99,11 @@ is_epi_workflow <- function(x) {
 #' @export
 #' @examples
 #'
-#' library(epiprocess)
 #' library(dplyr)
 #' library(parsnip)
 #' library(recipes)
 #'
-#' jhu <- jhu_csse_daily_subset %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   select(geo_value:death_rate_7d_av) %>%
-#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
-#'
-#' r <- epi_recipe(jhu) %>%
+#' r <- epi_recipe(case_death_rate_subset) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -114,33 +112,29 @@ is_epi_workflow <- function(x) {
 #'
 #' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
-#' jhu_latest <- jhu %>%
-#'   filter(!is.na(case_rate), !is.na(death_rate)) %>%
-#'   group_by(geo_value) %>%
-#'   slice_tail(n = 15) %>% # have lags 0,...,14, so need 15 for a complete case
-#'   ungroup()
+#' latest <- get_test_data(r, case_death_rate_subset)
 #'
-#' preds <- predict(wf, jhu_latest, forecast_date = "2021-12-31") %>%
+#' preds <- predict(wf, latest) %>%
 #'   filter(!is.na(.pred))
 #'
 #' preds
-predict.epi_workflow <-
-  function(object, new_data, type = NULL, opts = list(),
-           forecast_date = NULL, ...) {
-    if (!workflows::is_trained_workflow(object)) {
-      rlang::abort(
-        c("Can't predict on an untrained epi_workflow.",
-          i = "Do you need to call `fit()`?"))
-    }
-    if (!is_null(forecast_date)) forecast_date <- as.Date(forecast_date)
-    the_fit <- workflows::extract_fit_parsnip(object)
-    mold <- workflows::extract_mold(object)
-    forged <- hardhat::forge(new_data, blueprint = mold$blueprint)
-    preds <- predict(the_fit, forged$predictors, type = type, opts = opts, ...)
-    keys <- grab_forged_keys(forged, mold, new_data)
-    out <- dplyr::bind_cols(keys, forecast_date = forecast_date, preds)
-    out
+predict.epi_workflow <- function(object, new_data, ...) {
+  if (!workflows::is_trained_workflow(object)) {
+    rlang::abort(
+      c("Can't predict on an untrained epi_workflow.",
+        i = "Do you need to call `fit()`?"))
   }
+  components <- list()
+  the_fit <- workflows::extract_fit_parsnip(object)
+  components$mold <- workflows::extract_mold(object)
+  components$forged <- hardhat::forge(new_data,
+                                      blueprint = components$mold$blueprint)
+  components$keys <- grab_forged_keys(components$forged,
+                                      components$mold, new_data)
+  components <- apply_frosting(object, components, the_fit, ...)
+  out <- dplyr::bind_cols(components$keys, components$preds)
+  out
+}
 
 grab_forged_keys <- function(forged, mold, new_data) {
   keys <- c("time_value", "geo_value", "key")

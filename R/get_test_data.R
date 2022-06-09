@@ -31,14 +31,14 @@ get_test_data <- function(recipe, x){
 
   # initialize vector to hold max lags for each variable
   max_lags <- c()
-  for(i in c(1:length(recipe$steps))){
-    if("lag" %in% names(recipe$steps[[i]])){
+  for (i in seq_along(recipe$steps)) {
+    if ("lag" %in% names(recipe$steps[[i]])) {
       max_lags <- append(max_lags, max(recipe$steps[[i]]$lag))
     }
   }
 
   # CHECK: Return NA if insufficient training data
-  if (dplyr::n_distinct(x$time_value)< max(max_lags)) {
+  if (dplyr::n_distinct(x$time_value) < max(max_lags)) {
     stop("insufficient training data")
   }
 

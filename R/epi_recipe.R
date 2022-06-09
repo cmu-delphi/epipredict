@@ -73,11 +73,7 @@ epi_recipe.default <- function(x, ...) {
 #'
 #' r
 epi_recipe.epi_df <-
-  function(x,
-           formula = NULL,
-           ...,
-           vars = NULL,
-           roles = NULL) {
+  function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
     if (!is.null(formula)) {
       if (!is.null(vars)) {
         rlang::abort(
@@ -115,12 +111,9 @@ epi_recipe.epi_df <-
     ## Check and add roles when available
     if (!is.null(roles)) {
       if (length(roles) != length(vars)) {
-        rlang::abort(
-          paste0(
+        rlang::abort(c(
             "The number of roles should be the same as the number of ",
-            "variables"
-          )
-        )
+            "variables."))
       }
       var_info$role <- roles
     } else {
@@ -161,6 +154,7 @@ epi_recipe.epi_df <-
 
 
 #' @rdname epi_recipe
+#' @importFrom rlang abort
 #' @export
 epi_recipe.formula <- function(formula, data, ...) {
   # we ensure that there's only 1 row in the template
@@ -170,9 +164,9 @@ epi_recipe.formula <- function(formula, data, ...) {
     return(recipes::recipe(formula, data, ...))
   }
 
-  f_funcs <- fun_calls(formula)
+  f_funcs <- recipes:::fun_calls(formula)
   if (any(f_funcs == "-")) {
-    Abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
+    abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
   }
 
   # Check for other in-line functions
@@ -193,11 +187,11 @@ epi_form2args <- function(formula, data, ...) {
   if (! rlang::is_formula(formula)) formula <- as.formula(formula)
 
   ## check for in-line formulas
-  inline_check(formula)
+  recipes:::inline_check(formula)
 
   ## use rlang to get both sides of the formula
-  outcomes <- get_lhs_vars(formula, data)
-  predictors <- get_rhs_vars(formula, data, no_lhs = TRUE)
+  outcomes <- recipes:::get_lhs_vars(formula, data)
+  predictors <- recipes:::get_rhs_vars(formula, data, no_lhs = TRUE)
   keys <- epi_keys(data)
 
   ## if . was used on the rhs, subtract out the outcomes
@@ -316,3 +310,109 @@ default_epi_recipe_blueprint <-
     hardhat::default_recipe_blueprint(
       intercept, allow_novel_levels, fresh, bake_dependent_roles, composition)
   }
+
+
+# unfortunately, everything the same as in prep.recipe except string/fctr handling
+#' @export
+prep.epi_recipe <- function(
+    x, training = NULL, fresh = FALSE, verbose = FALSE,
+    retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
+  training <- recipes:::check_training_set(training, x, fresh)
+  tr_data <- recipes:::train_info(training)
+  keys <- epi_keys(training)
+  orig_lvls <- lapply(training, recipes:::get_levels)
+  orig_lvls <- kill_levels(orig_lvls, keys)
+  if (strings_as_factors) {
+    lvls <- lapply(training, recipes:::get_levels)
+    lvls <- kill_levels(lvls, keys)
+    training <- recipes:::strings2factors(training, lvls)
+  } else {
+    lvls <- NULL
+  }
+  skippers <- map_lgl(x$steps, recipes:::is_skipable)
+  if (any(skippers) & !retain) {
+    rlang::warn(c("Since some operations have `skip = TRUE`, using ",
+                  "`retain = TRUE` will allow those steps results to ",
+                  "be accessible."))
+  }
+  if (fresh) x$term_info <- x$var_info
+
+  running_info <- x$term_info %>% dplyr::mutate(number = 0, skip = FALSE)
+  for (i in seq(along.with = x$steps)) {
+    needs_tuning <- map_lgl(x$steps[[i]], recipes:::is_tune)
+    if (any(needs_tuning)) {
+      arg <- names(needs_tuning)[needs_tuning]
+      arg <- paste0("'", arg, "'", collapse = ", ")
+      msg <- paste0(
+        "You cannot `prep()` a tuneable recipe. Argument(s) with `tune()`: ",
+        arg, ". Do you want to use a tuning function such as `tune_grid()`?")
+      rlang::abort(msg)
+    }
+    note <- paste("oper", i, gsub("_", " ", class(x$steps[[i]])[1]))
+    if (!x$steps[[i]]$trained | fresh) {
+      if (verbose) {
+        cat(note, "[training]", "\n")
+      }
+      before_nms <- names(training)
+      x$steps[[i]] <- prep(x$steps[[i]], training = training,
+                           info = x$term_info)
+      training <- bake(x$steps[[i]], new_data = training)
+      if (!tibble::is_tibble(training)) {
+        abort("bake() methods should always return tibbles")
+      }
+      x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
+      if (!is.na(x$steps[[i]]$role)) {
+        new_vars <- setdiff(x$term_info$variable, running_info$variable)
+        pos_new_var <- x$term_info$variable %in% new_vars
+        pos_new_and_na_role <- pos_new_var & is.na(x$term_info$role)
+        pos_new_and_na_source <- pos_new_var & is.na(x$term_info$source)
+        x$term_info$role[pos_new_and_na_role] <- x$steps[[i]]$role
+        x$term_info$source[pos_new_and_na_source] <- "derived"
+      }
+      recipes:::changelog(log_changes, before_nms, names(training), x$steps[[i]])
+      running_info <- rbind(
+        running_info,
+        dplyr::mutate(x$term_info, number = i, skip = x$steps[[i]]$skip))
+    } else {
+      if (verbose) cat(note, "[pre-trained]\n")
+    }
+  }
+  if (strings_as_factors) {
+    lvls <- lapply(training, recipes:::get_levels)
+    lvls <- kill_levels(lvls, keys)
+    check_lvls <- recipes:::has_lvls(lvls)
+    if (!any(check_lvls)) lvls <- NULL
+  } else {
+    lvls <- NULL
+  }
+  if (retain) {
+    if (verbose) {
+      cat("The retained training set is ~",
+          format(object.size(training), units = "Mb", digits = 2),
+          " in memory.\n\n")
+    }
+    x$template <- training
+  } else {
+    x$template <- training[0, ]
+  }
+  x$tr_info <- tr_data
+  x$levels <- lvls
+  x$orig_lvls <- orig_lvls
+  x$retained <- retain
+  x$last_term_info <- running_info %>%
+    dplyr::group_by(variable) %>%
+    dplyr::arrange(dplyr::desc(number)) %>%
+    dplyr::summarise(
+      type = dplyr::first(type),
+      role = as.list(unique(unlist(role))),
+      source = dplyr::first(source),
+      number = dplyr::first(number),
+      skip = dplyr::first(skip),
+      .groups = "keep")
+  x
+}
+
+kill_levels <- function(x, keys) {
+  for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
+  x
+}
