@@ -17,6 +17,10 @@
 #' @family row operation steps
 #' @rdname step_epi_ahead
 #' @export
+#' @examples
+#' epi_recipe(case_death_rate_subset) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(death_rate, lag = c(0,7,14))
 step_epi_ahead <-
   function(recipe,
            ...,
