@@ -416,3 +416,9 @@ kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
   x
 }
+
+#' @export
+as_tibble.epi_df <- function(x, ...) {
+  # so that downstream calls to as_tibble don't clobber our metadata
+  return(x)
+}

@@ -58,10 +58,12 @@ frosting <- function(layers = NULL, requirements = NULL) {
   out <- new_frosting()
 }
 
+#' @export
 apply_frosting <- function(workflow, ...) {
   UseMethod("apply_frosting")
 }
 
+#' @export
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
     abort(c("Postprocessing is only available for epi_workflows currently.",
@@ -74,6 +76,7 @@ apply_frosting.default <- function(workflow, components, ...) {
 
 #' @importFrom rlang is_null
 #' @importFrom rlang abort
+#' @export
 apply_frosting.epi_workflow <- function(workflow, components, the_fit, ...) {
   if (!has_postprocessor(workflow)) {
     components$preds <- predict(the_fit, components$forged$predictors, ...)

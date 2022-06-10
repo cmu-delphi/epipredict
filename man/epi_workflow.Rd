@@ -30,15 +30,11 @@ this operates exactly like a \code{\link[workflows:workflow]{workflows::workflow
 and numerous examples, see there.
 }
 \examples{
-library(epiprocess)
 library(dplyr)
 library(parsnip)
 library(recipes)
 
-jhu <- jhu_csse_daily_subset \%>\%
-  filter(time_value > "2021-08-01") \%>\%
-  select(geo_value:death_rate_7d_av) \%>\%
-  rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+jhu <- case_death_rate_subset
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%

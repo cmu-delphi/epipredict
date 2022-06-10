@@ -17,4 +17,20 @@ test_that("frosting validators / constructors work", {
 
 test_that("prediction works without any postprocessor", {
 
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+  wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
+  latest <- get_test_data(r, jhu)
+
+  expect_silent(predict(wf, latest))
+  p <- predict(wf, latest) %>% dplyr::filter(!is.na(.pred))
+  expect_equal(nrow(p), 3)
+  expect_s3_class(p, "epi_df")
+  expect_equal(tail(p$time_value, 1), as.Date("2021-12-31"))
+  expect_equal(unique(p$geo_value), c("ak", "ca", "ny"))
 })

@@ -62,7 +62,9 @@ library(dplyr)
 library(parsnip)
 library(recipes)
 
-r <- epi_recipe(case_death_rate_subset) \%>\%
+jhu <- case_death_rate_subset
+
+r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
@@ -71,7 +73,7 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
 
 wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
-latest <- get_test_data(r, case_death_rate_subset)
+latest <- get_test_data(r, jhu)
 
 preds <- predict(wf, latest) \%>\%
   filter(!is.na(.pred))

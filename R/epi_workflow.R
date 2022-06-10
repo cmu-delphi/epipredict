@@ -15,15 +15,11 @@
 #' @importFrom rlang is_null
 #' @export
 #' @examples
-#' library(epiprocess)
 #' library(dplyr)
 #' library(parsnip)
 #' library(recipes)
 #'
-#' jhu <- jhu_csse_daily_subset %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   select(geo_value:death_rate_7d_av) %>%
-#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#' jhu <- case_death_rate_subset
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -103,7 +99,9 @@ is_epi_workflow <- function(x) {
 #' library(parsnip)
 #' library(recipes)
 #'
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' jhu <- case_death_rate_subset
+#'
+#' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -112,7 +110,7 @@ is_epi_workflow <- function(x) {
 #'
 #' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
-#' latest <- get_test_data(r, case_death_rate_subset)
+#' latest <- get_test_data(r, jhu)
 #'
 #' preds <- predict(wf, latest) %>%
 #'   filter(!is.na(.pred))
@@ -171,6 +169,7 @@ grab_forged_keys <- function(forged, mold, new_data) {
 #' @param ... Arguments passed on to the predict method.
 #'
 #' @return new_data with additional columns containing the predicted values
+#' @importFrom broom augment
 #' @export
 augment.epi_workflow <- function (x, new_data, ...) {
   predictions <- predict(x, new_data, ...)
