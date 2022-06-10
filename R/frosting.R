@@ -88,8 +88,8 @@ apply_frosting.epi_workflow <- function(workflow, components, the_fit, ...) {
     components$preds <- predict(the_fit, components$forged$predictors, ...)
     return(components)
   }
-  layers <- workflow$post$actions$frosting
-  for (l in seq_along(layers)) {
+  layers <- workflow$post$actions$frosting$frosting
+  for (l in seq_along(layers$layers)) {
     layer <- layers$layers[[l]]
     components <- slather(layer, components = components, the_fit)
   }
