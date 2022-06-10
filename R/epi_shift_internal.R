@@ -16,6 +16,60 @@
 #'
 #' @family row operation steps
 #' @rdname step_epi_ahead
+#' @export
+#' @examples
+#' epi_recipe(case_death_rate_subset) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(death_rate, lag = c(0,7,14))
+step_epi_ahead <-
+  function(recipe,
+           ...,
+           role = "outcome",
+           trained = FALSE,
+           ahead = 1,
+           default = NA,
+           keys = epi_keys(recipe),
+           columns = NULL,
+           skip = FALSE) {
+    step_epi_shift(recipe,
+                   ...,
+                   role = role,
+                   trained = trained,
+                   shift = ahead,
+                   prefix = "ahead_",
+                   default = default,
+                   keys = keys,
+                   columns = columns,
+                   skip = skip,
+                   id = rand_id("epi_ahead")
+    )
+  }
+
+#' @export
+step_epi_lag <-
+  function(recipe,
+           ...,
+           role = "predictor",
+           trained = FALSE,
+           lag = 1,
+           default = NA,
+           keys = epi_keys(recipe),
+           columns = NULL,
+           skip = FALSE) {
+    step_epi_shift(recipe,
+                   ...,
+                   role = role,
+                   trained = trained,
+                   shift = -lag,
+                   prefix = "lag_",
+                   default = default,
+                   keys = keys,
+                   columns = columns,
+                   skip = skip,
+                   id = rand_id("epi_lag")
+    )
+  }
+
 step_epi_shift <-
   function(recipe,
            ...,
@@ -81,26 +135,21 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_shift <- function(object, new_data, ...) {
+  is_lag <- object$prefix == "lag_"
   if (!all(object$shift == as.integer(object$shift))) {
-    rlang::abort("step_epi_shift requires 'shift' argument to be integer valued.")
+    error_msg <- paste0("step_epi_",
+                        ifelse(is_lag,"lag","ahead"),
+                        " requires ",
+                        ifelse(is_lag,"'lag'","'ahead'"),
+                        " argument to be integer valued.")
+    rlang::abort(error_msg)
   }
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = -object$shift)
-  is_lag <- object$role == "predictor"
-  if (!is_lag) {
-    grid <- dplyr::mutate(grid,ahead_val = -lag_val)
-  }
+  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$shift)
   grid <- dplyr::mutate(grid,
-      newname = glue::glue(
-        paste0(
-          "{object$prefix}",
-          ifelse(is_lag,"{lag_val}","{ahead_val}"),
-          "_{col}"
-          )
-        )
-    )
-  if (!is_lag) {
-    grid <- dplyr::select(grid, -ahead_val)
-  }
+                        newname = glue::glue(
+                          paste0("{object$prefix}","{abs(lag_val)}","_{col}")
+                        )
+  )
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
@@ -129,7 +178,7 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
     ## TODO add printing of the shifts
-    title <- ifelse(x$role == "predictor","Lagging","Leading") %>%
+    title <- ifelse(x$prefix == "lag_","Lagging","Leading") %>%
       paste0(": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)

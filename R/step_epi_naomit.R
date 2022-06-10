@@ -2,19 +2,15 @@
 #'
 #' @param recipe Recipe to be used for omission steps
 #'
-#' @return Omits NA's from both predictors and outcomes at training time;
-#'   however, only omits associated predictors at prediction time to avoid
-#'   losing data.
+#' @return Omits NA's from both predictors and outcomes at training time
+#'   to fit the model. Also only omits associated predictors and not
+#'   outcomes at prediction time due to lack of response and avoidance
+#'   of data loss.
 #' @export
 #' @examples
-#' tibble(geo_value = rep("place",200),
-#'            time_value = as.Date("2021-01-01") + 0:199,
-#'            case_rate = 1:200,
-#'            death_rate = 1:200) %>%
-#'  as_epi_df() %>%
+#' case_death_rate_subset %>%
 #'  recipe() %>%
 #'  step_epi_naomit()
-
 
 step_epi_naomit <- function(recipe) {
   stopifnot("recipe" %in% class(recipe))
