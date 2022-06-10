@@ -49,8 +49,9 @@ get_test_data <- function(recipe, x){
         .fns = ~ !is.na(.x)
       )
     ) %>%
-    dplyr::group_by(geo_value) %>%
-    dplyr::slice_tail(n = max(max_lags) + 1)
+    epiprocess::group_by(geo_value) %>%
+    dplyr::slice_tail(n = max(max_lags) + 1) %>%
+    epiprocess::ungroup()
 
   return(test_data)
 }

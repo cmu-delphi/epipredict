@@ -25,7 +25,7 @@ test_that("prediction works without any postprocessor", {
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
   wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
-  latest <- get_test_data(r, jhu)
+  latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 
   expect_silent(predict(wf, latest))
   p <- predict(wf, latest) %>% dplyr::filter(!is.na(.pred))
