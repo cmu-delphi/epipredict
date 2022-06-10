@@ -16,6 +16,7 @@ layer_predict_new <- function(id) {
 #' @export
 slather.layer_predict <- function(object, components, the_fit) {
   components$predictions <- predict(the_fit, components$forged$predictors)
+  components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
   components
 }
 

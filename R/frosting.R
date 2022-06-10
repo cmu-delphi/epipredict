@@ -79,23 +79,26 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @export
 apply_frosting.epi_workflow <- function(workflow, components, the_fit, ...) {
   if (!has_postprocessor(workflow)) {
-    components$preds <- predict(the_fit, components$forged$predictors, ...)
+    components$predictions <- predict(the_fit, components$forged$predictors, ...)
+    components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
     return(components)
   }
   if (!has_postprocessor_frosting(workflow)) {
     rlang::warn(c("Only postprocessors of class frosting are allowed.",
                   "Returning unpostprocessed predictions."))
-    components$preds <- predict(the_fit, components$forged$predictors, ...)
+    components$predictions <- predict(the_fit, components$forged$predictors, ...)
+    components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
     return(components)
   }
-  layers <- workflow$post$actions$frosting$frosting
-  for (l in seq_along(layers$layers)) {
-    layer <- layers$layers[[l]]
-    components <- slather(layer, components = components, the_fit)
+  layers <- workflow$post$actions$frosting$frosting$layers
+  for (l in seq_along(layers)) {
+    la <- layers[[l]]
+    components <- slather(la, components = components, the_fit)
   }
   # last for the moment, anticipating that layer[1] will do the prediction...
-  if (is_null(components$preds)) {
-    components$preds <- predict(the_fit, components$forged$predictors, ...)
+  if (is_null(components$predictions)) {
+    components$predictions <- predict(the_fit, components$forged$predictors, ...)
+    components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
   }
   return(components)
 }

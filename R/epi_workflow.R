@@ -130,8 +130,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
   components$keys <- grab_forged_keys(components$forged,
                                       components$mold, new_data)
   components <- apply_frosting(object, components, the_fit, ...)
-  out <- dplyr::bind_cols(components$keys, components$preds)
-  out
+  components$predictions
 }
 
 grab_forged_keys <- function(forged, mold, new_data) {
