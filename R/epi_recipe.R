@@ -417,6 +417,7 @@ kill_levels <- function(x, keys) {
   x
 }
 
+#' @importFrom tibble as_tibble
 #' @export
 as_tibble.epi_df <- function(x, ...) {
   # so that downstream calls to as_tibble don't clobber our metadata

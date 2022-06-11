@@ -13,6 +13,9 @@
 #' @return A new `epi_workflow` object.
 #' @seealso workflows::workflow
 #' @importFrom rlang is_null
+#' @importFrom stats predict
+#' @importFrom generics fit
+#' @importFrom generics augment
 #' @export
 #' @examples
 #' library(dplyr)
@@ -168,7 +171,6 @@ grab_forged_keys <- function(forged, mold, new_data) {
 #' @param ... Arguments passed on to the predict method.
 #'
 #' @return new_data with additional columns containing the predicted values
-#' @importFrom broom augment
 #' @export
 augment.epi_workflow <- function (x, new_data, ...) {
   predictions <- predict(x, new_data, ...)

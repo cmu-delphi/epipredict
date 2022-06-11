@@ -24,11 +24,13 @@ test_that("prediction works without any postprocessor", {
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
-  wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
-  latest <- jhu %>% filter(time_value >= max(time_value) - 14)
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+  latest <- jhu %>%
+    dplyr::filter(time_value >= max(time_value) - 14)
 
   expect_silent(predict(wf, latest))
-  p <- predict(wf, latest) %>% dplyr::filter(!is.na(.pred))
+  p <- predict(wf, latest) %>%
+    dplyr::filter(!is.na(.pred))
   expect_equal(nrow(p), 3)
   expect_s3_class(p, "epi_df")
   expect_equal(tail(p$time_value, 1), as.Date("2021-12-31"))
