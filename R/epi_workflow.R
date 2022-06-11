@@ -9,6 +9,8 @@
 #' and numerous examples, see there.
 #'
 #' @inheritParams workflows::workflow
+#' @param postprocessor An optional postprocessor to add to the workflow.
+#'   Currently only `frosting` is allowed using, `add_frosting()`.
 #'
 #' @return A new `epi_workflow` object.
 #' @seealso workflows::workflow
@@ -81,7 +83,6 @@ is_epi_workflow <- function(x) {
 #'   `geo_value` columns as well as the prediction.
 #'
 #' @inheritParams parsnip::predict.model_fit
-#' @param forecast_date The date on which the forecast is (was) made.
 #'
 #' @param object An epi_workflow that has been fit by
 #'   [workflows::fit.workflow()]
@@ -113,7 +114,7 @@ is_epi_workflow <- function(x) {
 #'
 #' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
-#' latest <- get_test_data(r, jhu)
+#' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #'
 #' preds <- predict(wf, latest) %>%
 #'   filter(!is.na(.pred))

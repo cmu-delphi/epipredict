@@ -1,3 +1,18 @@
+#' Prediction layer for postprocessing
+#'
+#' Implements prediction on a fitted `epi_workflow`. One may want different
+#' types of prediction, and to potentially apply this after some amount of
+#' postprocessing. This would typically be the first layer in a `frosting`
+#' postprocessor.
+#'
+#' @seealso `parsnip::predict.model_fit()`
+#'
+#' @inheritParams parsnip::predict.model_fit
+#' @param frosting a frosting object
+#' @param id a string identifying the layer
+#'
+#' @return An updated `frosting` object
+#' @export
 layer_predict <-
   function(frosting, type = NULL, opts = list(), ..., id = rand_id("predict_default")) {
     add_layer(
@@ -17,7 +32,7 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 }
 
 #' @export
-slather.layer_predict <- function(object, components, the_fit) {
+slather.layer_predict <- function(object, components, the_fit, ...) {
 
   components$predictions <- predict(the_fit, components$forged$predictors,
                                     type = object$type, opts = object$opts)

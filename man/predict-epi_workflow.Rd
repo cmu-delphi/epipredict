@@ -33,8 +33,6 @@ and "pred_int". Default value is \code{FALSE}.
 (not implemented yet)
 \item \code{time}: the time(s) for hazard and survival probability estimates.
 }}
-
-\item{forecast_date}{The date on which the forecast is (was) made.}
 }
 \value{
 A data frame of model predictions, with as many rows as \code{new_data} has.
@@ -73,7 +71,7 @@ r <- epi_recipe(jhu) \%>\%
 
 wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
-latest <- get_test_data(r, jhu)
+latest <- jhu \%>\% filter(time_value >= max(time_value) - 14)
 
 preds <- predict(wf, latest) \%>\%
   filter(!is.na(.pred))

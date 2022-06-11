@@ -16,6 +16,9 @@ epi_workflow(preprocessor = NULL, spec = NULL, postprocessor = NULL)
 
 \item{spec}{An optional parsnip model specification to add to the workflow.
 Passed on to \code{\link[workflows:add_model]{add_model()}}.}
+
+\item{postprocessor}{An optional postprocessor to add to the workflow.
+Currently only \code{frosting} is allowed using, \code{add_frosting()}.}
 }
 \value{
 A new \code{epi_workflow} object.

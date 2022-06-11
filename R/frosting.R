@@ -58,11 +58,22 @@ frosting <- function(layers = NULL, requirements = NULL) {
   out <- new_frosting()
 }
 
+#' Apply postprocessing to a fitted workflow
+#'
+#' This function is intended for internal use. It implements postprocessing
+#' inside of the `predict()` method for a fitted workflow.
+#'
+#' @param workflow An object of class workflow
+#' @param ... additional arguments passed on to methods
+#'
+#' @aliases apply_frosting.default apply_frosting.epi_recipe
 #' @export
 apply_frosting <- function(workflow, ...) {
   UseMethod("apply_frosting")
 }
 
+#' @inheritParams slather
+#' @rdname apply_frosting
 #' @export
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
@@ -74,6 +85,7 @@ apply_frosting.default <- function(workflow, components, ...) {
 
 
 
+#' @rdname apply_frosting
 #' @importFrom rlang is_null
 #' @importFrom rlang abort
 #' @export
@@ -113,7 +125,32 @@ add_layer <- function(frosting, object) {
   frosting
 }
 
-slather <- function(x, ...) {
+
+#' Spread a layer of frosting on a fitted workflow
+#'
+#' Slathering frosting means to implement a postprocessing layer. When
+#' creating a new postprocessing layer, you must implement an S3 method
+#' for this function
+#'
+#' @param object a workflow with `frosting` postprocessing steps
+#' @param components a list of components containing model information. These
+#'   will be updated and returned by the layer. These should be
+#'   * `mold` - the output of calling `hardhat::mold()` on the workflow. This
+#'     contains information about the preprocessing, including the recipe.
+#'   * `forged` - the output of calling `hardhat::forge()` on the workflow.
+#'     This should have predictors and outcomes for the `new_data`. It will
+#'     have three components `predictors`, `outcomes` (if these were in the
+#'     `new_data`), and `extras` (usually has the rest of the data, including
+#'     `keys`).
+#'   * `keys` - we put the keys (`time_value`, `geo_value`, and any others)
+#'     here for ease.
+#' @param the_fit the fitted model object as returned by calling `parsnip::fit()`
+#'
+#' @param ... additional arguments used by methods. Currently unused.
+#'
+#' @return The `components` list. In the same format after applying any updates.
+#' @export
+slather <- function(object, components, the_fit, ...) {
   UseMethod("slather")
 }
 

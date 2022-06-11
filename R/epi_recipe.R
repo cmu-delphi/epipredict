@@ -23,8 +23,7 @@ epi_recipe.default <- function(x, ...) {
 }
 
 #' @rdname epi_recipe
-#' @param vars A character string of column names corresponding to variables
-#'   that will be used in any context (see below)
+#' @inheritParams recipes::recipe
 #' @param roles A character string (the same length of `vars`) that
 #'   describes a single role that the variable will take. This value could be
 #'   anything but common roles are `"outcome"`, `"predictor"`,
@@ -38,19 +37,7 @@ epi_recipe.default <- function(x, ...) {
 #'  `cbind`; see Examples).
 #' @param x,data A data frame, tibble, or epi_df of the *template* data set
 #'   (see below). This is always coerced to the first row to avoid memory issues
-#' @return An object of class `recipe` with sub-objects:
-#'   \item{var_info}{A tibble containing information about the original data
-#'   set columns}
-#'   \item{term_info}{A tibble that contains the current set of terms in the
-#'   data set. This initially defaults to the same data contained in
-#'   `var_info`.}
-#'   \item{steps}{A list of `step`  or `check` objects that define the sequence of
-#'   preprocessing operations that will be applied to data. The default value is
-#'   `NULL`}
-#'   \item{template}{A tibble of the data. This is initialized to be the same
-#'   as the data given in the `data` argument but can be different after
-#'   the recipe is trained.}
-#'
+#' @inherit recipes::recipe return
 #'
 #' @export
 #' @examples
