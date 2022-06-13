@@ -42,6 +42,8 @@ get_test_data <- function(recipe, x){
     stop("insufficient training data")
   }
 
+  groups <- epi_keys(recipe)[epi_keys(recipe) != "time_value"]
+
   test_data <- x %>%
     dplyr::filter(
       dplyr::if_any(
@@ -49,8 +51,9 @@ get_test_data <- function(recipe, x){
         .fns = ~ !is.na(.x)
       )
     ) %>%
-    dplyr::group_by(geo_value) %>%
-    dplyr::slice_tail(n = max(max_lags) + 1)
+     dplyr::group_by(across(groups)) %>%
+    dplyr::slice_tail(n = max(max_lags) + 1) %>%
+    dplyr::ungroup()
 
   return(test_data)
 }

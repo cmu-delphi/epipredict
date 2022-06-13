@@ -1,4 +1,5 @@
-test_that("return expected number of rows", {
+library(dplyr)
+test_that("return expected number of rows and returned dataset is ungrouped", {
   r <- epi_recipe(case_death_rate_subset) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14, 21, 28)) %>%
@@ -10,6 +11,8 @@ test_that("return expected number of rows", {
 
   expect_equal(nrow(test),
                dplyr::n_distinct(case_death_rate_subset$geo_value)* 29)
+
+  expect_false(dplyr::is.grouped_df(test))
 })
 
 
@@ -35,3 +38,4 @@ test_that("expect error that geo_value or time_value does not exist", {
 
   expect_error(get_test_data(recipe = r, x = wrong_epi_df))
 })
+
