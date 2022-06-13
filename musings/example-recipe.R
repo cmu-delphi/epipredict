@@ -2,6 +2,7 @@ library(tidyverse)
 library(covidcast)
 library(delphi.epidata)
 library(epiprocess)
+# library(epipredict)
 library(tidymodels)
 x <- covidcast(
   data_source = "jhu-csse",
@@ -30,28 +31,32 @@ x <- x %>%
   as_epi_df()
 rm(y)
 
-xx <- x %>% filter(time_value > "2021-12-01")
+# xx <- x %>% filter(time_value > "2021-12-01")
 
 
-# Baseline AR3
+# Baseline AR3 (preprocessing)
 r <- epi_recipe(x) %>% # if we add this as a class, maybe we get better
                        # behaviour downstream?
-  step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+  step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
   step_naomit(all_predictors()) %>%
   # below, `skip` means we don't do this at predict time
   # we should probably do something useful here to avoid user error
   step_naomit(all_outcomes(), skip = TRUE)
 
-
+# specify trainer, this uses stats::lm() by default, but doing
+# slm <- linear_reg() %>% use_engine("glmnet", penalty = 0.1)
+# alter the trainer
 slm <- linear_reg()
 
-# slm_fit <- workflow(r, slm)
-slm_fit <- workflow() %>%
-  add_recipe(r) %>%
+# actually estimate the model
+slm_fit <- epi_workflow() %>%
+  add_epi_recipe(r) %>%
   add_model(slm) %>%
   fit(data = x)
+# slm_fit <- workflow(r, slm) also works
+
 
 x_latest <- x %>%
   filter(!is.na(case_rate), !is.na(death_rate)) %>%
@@ -59,8 +64,3 @@ x_latest <- x %>%
   slice_tail(n = 15) # have lag 0,...,14, so need 15 for a complete case
 
 pp <- predict(slm_fit, new_data = x_latest) # drops the keys...
-
-xl <- x %>%
-  filter(!is.na(case_rate), !is.na(death_rate)) %>%
-  group_by(geo_value) %>%
-  slice_tail(n = 14)
