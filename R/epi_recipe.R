@@ -408,5 +408,8 @@ kill_levels <- function(x, keys) {
 #' @export
 as_tibble.epi_df <- function(x, ...) {
   # so that downstream calls to as_tibble don't clobber our metadata
+  # this avoids infinite recursion inside dplyr::dplyr_col_modify
+  # TODO: this needs a different approach, long-term
+  class(x) <- class(x)[class(x) != "grouped_df"]
   return(x)
 }
