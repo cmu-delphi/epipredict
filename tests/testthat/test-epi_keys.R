@@ -1,4 +1,6 @@
-library(tidymodels)
+library(parsnip)
+library(workflows)
+library(dplyr)
 
 test_that("epi_keys returns null for an object that isn't an epi_df",{
   expect_null(epi_keys(data.frame(x=1:3,y=2:4)))

@@ -9,7 +9,7 @@
 #' @export
 #' @examples
 #' case_death_rate_subset %>%
-#'  recipe() %>%
+#'  epi_recipe() %>%
 #'  step_epi_naomit()
 
 step_epi_naomit <- function(recipe) {
