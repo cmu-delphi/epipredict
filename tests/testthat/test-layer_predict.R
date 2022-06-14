@@ -19,7 +19,7 @@ test_that("predict layer works alone", {
   expect_equal(ncol(p), 3L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 108L)
-  expect_named(p, c("geo_value", "time_value", ".pred"))
+  expect_named(p, c("time_value", "geo_value", ".pred"))
 
 })
 
@@ -32,9 +32,5 @@ test_that("prediction with interval works", {
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 108L)
-  expect_named(p, c("geo_value", "time_value", ".pred_lower", ".pred_upper"))
-
-
-
+  expect_named(p, c("time_value", "geo_value", ".pred_lower", ".pred_upper"))
 })
-
