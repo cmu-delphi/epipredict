@@ -51,7 +51,7 @@ get_test_data <- function(recipe, x){
         .fns = ~ !is.na(.x)
       )
     ) %>%
-    epiprocess::group_by(across(groups)) %>%
+    epiprocess::group_by(across(dplyr::all_of(groups))) %>%
     dplyr::slice_tail(n = max(max_lags) + 1) %>%
     epiprocess::ungroup()
 
