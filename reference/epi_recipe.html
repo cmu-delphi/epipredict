@@ -84,42 +84,57 @@ columns present in an <code>epi_df</code></p>
     <dl><dt>x, data</dt>
 <dd><p>A data frame, tibble, or epi_df of the <em>template</em> data set
 (see below). This is always coerced to the first row to avoid memory issues</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Further arguments passed to or from other methods (not currently
 used).</p></dd>
+
+
 <dt>formula</dt>
 <dd><p>A model formula. No in-line functions should be used here
 (e.g. <code>log(x)</code>, <code>x:y</code>, etc.) and minus signs are not allowed. These types of
 transformations should be enacted using <code>step</code> functions in this package.
 Dots are allowed as are simple multivariate outcome terms (i.e. no need for
 <code>cbind</code>; see Examples).</p></dd>
+
+
 <dt>vars</dt>
 <dd><p>A character string of column names corresponding to variables
 that will be used in any context (see below)</p></dd>
+
+
 <dt>roles</dt>
 <dd><p>A character string (the same length of <code>vars</code>) that
 describes a single role that the variable will take. This value could be
 anything but common roles are <code>"outcome"</code>, <code>"predictor"</code>,
 <code>"time_value"</code>, and <code>"geo_value"</code></p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>An object of class <code>recipe</code> with sub-objects:</p>
+    
+
+<p>An object of class <code>recipe</code> with sub-objects:</p>
 <dl><dt>var_info</dt>
 <dd><p>A tibble containing information about the original data
 set columns</p></dd>
+
 <dt>term_info</dt>
 <dd><p>A tibble that contains the current set of terms in the
 data set. This initially defaults to the same data contained in
 <code>var_info</code>.</p></dd>
+
 <dt>steps</dt>
 <dd><p>A list of <code>step</code>  or <code>check</code> objects that define the sequence of
 preprocessing operations that will be applied to data. The default value is
 <code>NULL</code></p></dd>
+
 <dt>template</dt>
 <dd><p>A tibble of the data. This is initialized to be the same
 as the data given in the <code>data</code> argument but can be different after
 the recipe is trained.</p></dd>
+
 </dl></div>
 
     <div class="section level2">
@@ -169,7 +184,7 @@ the recipe is trained.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
     </footer></div>
