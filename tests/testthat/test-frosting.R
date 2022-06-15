@@ -36,5 +36,3 @@ test_that("prediction works without any postprocessor", {
   expect_equal(tail(p$time_value, 1), as.Date("2021-12-31"))
   expect_equal(unique(p$geo_value), c("ak", "ca", "ny"))
 })
-
-
