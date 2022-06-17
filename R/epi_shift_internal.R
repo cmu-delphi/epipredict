@@ -15,7 +15,7 @@
 #'  order_ for shifting.
 #'
 #' @family row operation steps
-#' @rdname step_epi_ahead
+#' @rdname step_epi_shift
 #' @export
 #' @examples
 #' epi_recipe(case_death_rate_subset) %>%
