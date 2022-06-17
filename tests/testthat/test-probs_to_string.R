@@ -7,10 +7,9 @@ test_that("tests get_precision",{
 test_that("probs_to_string throws errors when it should",{
   expect_error(probs_to_string(100))
   expect_error(probs_to_string(0.5,c("a","b")))
-  expect_null(probs_to_string(NULL))
-  expect_equal(probs_to_string(c(0.2),"abc"),"abc0.2")
 })
 
-test_that("x",{
-
+test_that("probs_to_string works properly",{
+  expect_null(probs_to_string(NULL))
+  expect_equal(probs_to_string(c(0.2,0.45),"abc"),c("abc0.2","abc0.45"))
 })
