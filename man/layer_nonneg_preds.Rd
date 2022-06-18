@@ -46,7 +46,7 @@ latest <- jhu \%>\%
 f <- epipredict:::frosting() \%>\%
   layer_predict() \%>\%
   layer_nonneg_preds(pred_lower = 0.25, pred_upper = 0.31)
-wf1 <- wf \%>\% add_frosting(f)
+wf1 <- wf \%>\% epipredict:::add_frosting(f)
 p <- predict(wf1, latest)
 p
 }
