@@ -31,3 +31,22 @@ an updated \code{frosting} postprocessor
 This postprocessing step is used to retain only those
 prediction values that are within the specified lower and upper thresholds.
 }
+\examples{
+jhu <- case_death_rate_subset \%>\%
+  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+r <- epi_recipe(jhu) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_naomit(all_predictors()) \%>\%
+  step_naomit(all_outcomes(), skip = TRUE)
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
+latest <- jhu \%>\%
+  dplyr::filter(time_value >= max(time_value) - 14)
+
+f <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_nonneg_preds(pred_lower = 0.25, pred_upper = 0.31)
+wf1 <- wf \%>\% add_frosting(f)
+p <- predict(wf1, latest)
+p
+}
