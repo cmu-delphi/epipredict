@@ -19,7 +19,7 @@
 #' latest <- jhu %>%
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
-#' f <- frosting() %>% layer_predict() %>%
+#' f <- epipredict:::frosting() %>% layer_predict() %>%
 #'   layer_add_target_date(ahead = 7) %>% layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'

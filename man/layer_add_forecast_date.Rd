@@ -36,7 +36,8 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
-f <- frosting() \%>\% layer_predict() \%>\% layer_add_forecast_date(forecast_date = "2021-12-31") \%>\% layer_naomit(.pred)
+f <- epipredict:::frosting() \%>\% layer_predict() \%>\%
+  layer_add_forecast_date(forecast_date = "2021-12-31") \%>\% layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
 p <- predict(wf1, latest)
