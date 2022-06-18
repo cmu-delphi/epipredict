@@ -14,13 +14,12 @@
 #' @return An updated `frosting` object
 #' @export
 layer_predict <-
-  function(frosting, type = NULL, opts = list(), ..., id = rand_id("predict_default")) {
+  function(frosting, type = NULL, opts = list(), ..., id = rand_id("nonneg_preds")) {
     add_layer(
       frosting,
-      layer_predict_new(
-        type = type,
-        opts = opts,
-        dots_list = rlang::list2(...), # can't figure how to use this
+      layer_nonneg_preds_new(
+        pred_lower = pred_lower,
+        pred_upper = pred_upper,
         id = id
       )
     )
