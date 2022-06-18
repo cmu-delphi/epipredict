@@ -32,7 +32,6 @@
 #' wf1 <- wf %>% add_frosting(f)
 #' p <- predict(wf1, latest)
 #' p
-
 layer_nonneg_preds <-
   function(frosting, pred_lower = 0, pred_upper = Inf, id = rand_id("nonneg_preds")) {
     add_layer(
