@@ -8,7 +8,6 @@ layer_nonneg_preds(
   frosting,
   pred_lower = 0,
   pred_upper = Inf,
-  ...,
   id = rand_id("nonneg_preds")
 )
 }
