@@ -7,7 +7,7 @@
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
-#' @param shift A vector of integers. Each specified column will be
+#' @param ahead A vector of integers. Each specified column will be
 #'  shifted for each value in the vector.
 #' @template step-return
 #'
@@ -45,6 +45,23 @@ step_epi_ahead <-
     )
   }
 
+#' Create a shifted predictor
+#'
+#' `step_epi_lag` creates a *specification* of a recipe step that
+#'   will add new columns of shifted data. shifted data will
+#'   by default include NA values where the shift was induced.
+#'   These can be removed with [step_naomit()], or you may
+#'   specify an alternative filler value with the `default`
+#'   argument.
+#'
+#' @param lag A vector of integers. Each specified column will be
+#'  shifted for each value in the vector.
+#' @template step-return
+#'
+#' @details The step assumes that the data are already _in the proper sequential
+#'  order_ for shifting.
+#'
+#' @family row operation steps
 #' @export
 step_epi_lag <-
   function(recipe,
