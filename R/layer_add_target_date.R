@@ -21,7 +21,7 @@
 #'
 #' f <- epipredict:::frosting() %>% layer_predict() %>%
 #'   layer_add_target_date(ahead = 7) %>% layer_naomit(.pred)
-#' wf1 <- wf %>% add_frosting(f)
+#' wf1 <- wf %>% epipredict:::add_frosting(f)
 #'
 #' p <- predict(wf1, latest)
 #' p
