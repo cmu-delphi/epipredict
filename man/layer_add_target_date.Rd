@@ -26,8 +26,8 @@ jhu <- case_death_rate_subset \%>\%
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  step_naomit(all_outcomes(), skip = TRUE)
+  recipes::step_naomit(all_predictors()) \%>\%
+  recipes::step_naomit(all_outcomes(), skip = TRUE)
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
