@@ -15,7 +15,7 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 layer_nonneg_preds <-
-  function(frosting, pred_lower = 0, pred_upper = Inf, ..., id = rand_id("nonneg_preds")) {
+  function(frosting, pred_lower = 0, pred_upper = Inf, id = rand_id("nonneg_preds")) {
     add_layer(
       frosting,
       layer_nonneg_preds_new(
