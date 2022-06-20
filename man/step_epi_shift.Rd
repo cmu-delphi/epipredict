@@ -30,8 +30,24 @@ step_epi_lag(
 )
 }
 \arguments{
-\item{ahead}{A vector of integers. Each specified column will be
+\item{recipe}{A recipe for the step}
+
+\item{...}{Arguments to be used}
+
+\item{role}{A role for this function}
+
+\item{trained}{???}
+
+\item{ahead, lag}{A vector of integers. Each specified column will be
 shifted for each value in the vector.}
+
+\item{default}{???}
+
+\item{keys}{???}
+
+\item{columns}{???}
+
+\item{skip}{???}
 
 \item{lag}{A vector of integers. Each specified column will be
 shifted for each value in the vector.}

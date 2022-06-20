@@ -7,8 +7,16 @@
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
-#' @param ahead A vector of integers. Each specified column will be
+#' @param recipe A recipe for the step
+#' @param ... Arguments to be used
+#' @param role A role for this function
+#' @param trained ???
+#' @param ahead,lag A vector of integers. Each specified column will be
 #'  shifted for each value in the vector.
+#' @param default ???
+#' @param keys ???
+#' @param columns ???
+#' @param skip ???
 #' @template step-return
 #'
 #' @details The step assumes that the data are already _in the proper sequential
