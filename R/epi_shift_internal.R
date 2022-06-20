@@ -62,6 +62,7 @@ step_epi_ahead <-
 #'  order_ for shifting.
 #'
 #' @family row operation steps
+#' @rdname step_epi_shift
 #' @export
 step_epi_lag <-
   function(recipe,

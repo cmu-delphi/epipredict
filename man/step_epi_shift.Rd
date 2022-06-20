@@ -2,6 +2,7 @@
 % Please edit documentation in R/epi_shift_internal.R
 \name{step_epi_ahead}
 \alias{step_epi_ahead}
+\alias{step_epi_lag}
 \title{Create a shifted predictor}
 \usage{
 step_epi_ahead(
@@ -15,12 +16,30 @@ step_epi_ahead(
   columns = NULL,
   skip = FALSE
 )
+
+step_epi_lag(
+  recipe,
+  ...,
+  role = "predictor",
+  trained = FALSE,
+  lag = 1,
+  default = NA,
+  keys = epi_keys(recipe),
+  columns = NULL,
+  skip = FALSE
+)
 }
 \arguments{
 \item{ahead}{A vector of integers. Each specified column will be
 shifted for each value in the vector.}
+
+\item{lag}{A vector of integers. Each specified column will be
+shifted for each value in the vector.}
 }
 \value{
+An updated version of \code{recipe} with the new step added to the
+sequence of any existing operations.
+
 An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
@@ -31,8 +50,18 @@ by default include NA values where the shift was induced.
 These can be removed with \code{\link[=step_naomit]{step_naomit()}}, or you may
 specify an alternative filler value with the \code{default}
 argument.
+
+\code{step_epi_lag} creates a \emph{specification} of a recipe step that
+will add new columns of shifted data. shifted data will
+by default include NA values where the shift was induced.
+These can be removed with \code{\link[=step_naomit]{step_naomit()}}, or you may
+specify an alternative filler value with the \code{default}
+argument.
 }
 \details{
+The step assumes that the data are already \emph{in the proper sequential
+order} for shifting.
+
 The step assumes that the data are already \emph{in the proper sequential
 order} for shifting.
 }
@@ -40,9 +69,5 @@ order} for shifting.
 epi_recipe(case_death_rate_subset) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0,7,14))
-}
-\seealso{
-Other row operation steps: 
-\code{\link{step_epi_lag}()}
 }
 \concept{row operation steps}
