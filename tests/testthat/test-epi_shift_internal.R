@@ -26,13 +26,29 @@ test_that("Values for ahead and lag must be integer values", {
   )
 })
 
+test_that("A negative lag value should be warned against", {
+  expect_warning(
+    r2 <- epi_recipe(x) %>%
+      step_epi_ahead(death_rate, ahead = 7) %>%
+      step_epi_lag(death_rate, lag = -7)
+  )
+})
+
+test_that("A negative ahead value should be warned against", {
+  expect_warning(
+    r3 <- epi_recipe(x) %>%
+      step_epi_ahead(death_rate, ahead = -7) %>%
+      step_epi_lag(death_rate, lag = 7)
+  )
+})
+
 test_that("Values for ahead and lag cannot be duplicates", {
-  r2 <- epi_recipe(x) %>%
+  r4 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = 7) %>%
     step_epi_lag(death_rate, lag = 7)
   expect_error(
-    slm_fit(r2)
+    slm_fit(r4)
   )
 })
 
@@ -47,14 +63,14 @@ lm1 <- lm(`..y` ~ lag_0_death_rate + lag_7_death_rate + lag_14_death_rate,
 
 
 test_that("Check that epi_lag shifts applies the shift", {
-  r3 <- epi_recipe(x) %>%
+  r5 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0,7,14))
 
   # Two steps passed here
-  expect_equal(length(r3$steps),2)
-  fit3 <- slm_fit(r3)
+  expect_equal(length(r5$steps),2)
+  fit5 <- slm_fit(r5)
 
   # Should have four predictors, including the intercept
-  expect_equal(length(fit3$fit$fit$fit$coefficients),4)
+  expect_equal(length(fit5$fit$fit$fit$coefficients),4)
 })

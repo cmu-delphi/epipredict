@@ -17,7 +17,11 @@
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
 #' @param lag,ahead A vector of nonnegative integers. Each specified column will
-#'  be the lag or lead for each value in the vector.
+#'  be the lag or lead for each value in the vector. The use of negative
+#'  integers will not throw an error and may still work, but is advised against
+#'  as it may have unexpected results. Hence, a warning will be shown if the
+#'  user inputs at least one negative integer value. However, the use of
+#'  non-integer values will throw an error.
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
 #' @param keys A character vector of the keys in an epi_df
@@ -56,6 +60,10 @@ step_epi_lag <-
            keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE) {
+    if (any(lag<0)) {
+      warning("Negative lag value; you may get unexpected results")
+    }
+
     step_epi_shift(recipe,
                    ...,
                    role = role,
@@ -72,8 +80,6 @@ step_epi_lag <-
 
 #' Create a shifted predictor
 #'
-#' @template step-return
-#'
 #' @family row operation steps
 #' @rdname step_epi_shift
 #' @export
@@ -87,6 +93,10 @@ step_epi_ahead <-
            keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE) {
+    if (any(ahead<0)) {
+      warning("Negative ahead value; you may get unexpected results")
+    }
+
     step_epi_shift(recipe,
                    ...,
                    role = role,

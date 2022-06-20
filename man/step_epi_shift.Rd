@@ -43,7 +43,11 @@ they be assigned?}
 preprocessing have been estimated.}
 
 \item{lag, ahead}{A vector of nonnegative integers. Each specified column will
-be the lag or lead for each value in the vector.}
+be the lag or lead for each value in the vector. The use of negative
+integers will not throw an error and may still work, but is advised against
+as it may have unexpected results. Hence, a warning will be shown if the
+user inputs at least one negative integer value. However, the use of
+non-integer values will throw an error.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
@@ -61,9 +65,6 @@ Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
 }
 \value{
-An updated version of \code{recipe} with the new step added to the
-sequence of any existing operations.
-
 An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
