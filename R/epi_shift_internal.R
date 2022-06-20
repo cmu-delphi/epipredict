@@ -1,9 +1,10 @@
 #' Create a shifted predictor
 #'
-#' `step_epi_lag` creates a *specification* of a recipe step that
-#'   will add new columns of shifted data. shifted data will
+#' `step_epi_lag` and `step_epi_ahead` create a *specification* of a recipe step
+#'   that will add new columns of shifted data. The former will created a lag
+#'   column, while the latter will create a lead column. Shifted data will
 #'   by default include NA values where the shift was induced.
-#'   These can be removed with [step_naomit()], or you may
+#'   These can be properly removed with [step_epi_naomit()], or you may
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
@@ -15,8 +16,8 @@
 #'  they be assigned?
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
-#' @param ahead,lag A vector of nonnegative integers. Each specified column will
-#'  be lead for each value in the vector.
+#' @param lag,ahead A vector of nonnegative integers. Each specified column will
+#'  be the lag or lead for each value in the vector.
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
 #' @param keys A character vector of the keys in an epi_df
@@ -69,16 +70,7 @@ step_epi_lag <-
     )
   }
 
-
-
 #' Create a shifted predictor
-#'
-#' `step_epi_ahead` creates a *specification* of a recipe step that
-#'   will add new columns of shifted data. shifted data will
-#'   by default include NA values where the shift was induced.
-#'   These can be removed with [step_naomit()], or you may
-#'   specify an alternative filler value with the `default`
-#'   argument.
 #'
 #' @template step-return
 #'

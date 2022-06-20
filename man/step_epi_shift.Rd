@@ -42,6 +42,9 @@ they be assigned?}
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
 
+\item{lag, ahead}{A vector of nonnegative integers. Each specified column will
+be the lag or lead for each value in the vector.}
+
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
 
@@ -56,9 +59,6 @@ when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
 conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
-
-\item{ahead, lag}{A vector of nonnegative integers. Each specified column will
-be lead for each value in the vector.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
@@ -68,17 +68,11 @@ An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-\code{step_epi_lag} creates a \emph{specification} of a recipe step that
-will add new columns of shifted data. shifted data will
+\code{step_epi_lag} and \code{step_epi_ahead} create a \emph{specification} of a recipe step
+that will add new columns of shifted data. The former will created a lag
+column, while the latter will create a lead column. Shifted data will
 by default include NA values where the shift was induced.
-These can be removed with \code{\link[=step_naomit]{step_naomit()}}, or you may
-specify an alternative filler value with the \code{default}
-argument.
-
-\code{step_epi_ahead} creates a \emph{specification} of a recipe step that
-will add new columns of shifted data. shifted data will
-by default include NA values where the shift was induced.
-These can be removed with \code{\link[=step_naomit]{step_naomit()}}, or you may
+These can be properly removed with \code{\link[=step_epi_naomit]{step_epi_naomit()}}, or you may
 specify an alternative filler value with the \code{default}
 argument.
 }
@@ -87,7 +81,9 @@ The step assumes that the data are already \emph{in the proper sequential
 order} for shifting.
 
 The \code{prefix} and \code{id} arguments are unchangeable to ensure that the code runs
-properly. For \code{step_epi_ahead}, they are always set to
+properly and to avoid inconsistency with naming. For \code{step_epi_ahead}, they
+are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
+\code{step_epi_lag}, they are set to \code{"lag_"} and \verb{"epi_lag}, respectively.
 }
 \examples{
 epi_recipe(case_death_rate_subset) \%>\%
