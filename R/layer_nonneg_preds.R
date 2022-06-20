@@ -52,6 +52,6 @@ layer_nonneg_preds_new <- function(pred_lower, pred_upper, id) {
 #' @export
 slather.layer_nonneg_preds <- function(object, components, the_fit, ...) {
   components$predictions <- components$predictions %>%
-    dplyr::filter(.pred >= object$pred_lower & .pred <= object$pred_upper)
+    dplyr::filter(.pred >= object$pred_lower & .pred <= object$pred_upper) # %% change - any negatives are set to lb.
   components
 }
