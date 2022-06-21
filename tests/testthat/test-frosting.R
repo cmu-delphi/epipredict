@@ -14,6 +14,16 @@ test_that("frosting validators / constructors work", {
   expect_true(has_postprocessor_frosting(wf))
 })
 
+test_that("frosting can be created/added/removed", {
+  f <- frosting()
+  expect_error(frosting(layers = 1:5))
+  wf <- epi_workflow() %>% add_frosting(f)
+  expect_true(has_postprocessor_frosting(wf))
+  wf <- wf %>% remove_frosting()
+  expect_false(has_postprocessor_frosting(wf))
+  expect_false(has_postprocessor(wf))
+})
+
 
 test_that("prediction works without any postprocessor", {
 
