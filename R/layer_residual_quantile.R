@@ -1,13 +1,12 @@
 #' Creates predictions based on residual quantiles
 #'
 #' @param frosting a `frosting` postprocessor
-#' @param probs numeric vector of probabilities with values in [0,1] referring to the desired quantile.
+#' @param probs numeric vector of probabilities with values in (0,1) referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetrical.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor with additional columns of the residual quantiles added to the prediction
 #' @export
-#' @examples TO-DO
 layer_residual_quantile <- function(frosting, probs, symmetrize, id = rand_id("residual_quantile")) {
   add_layer(
     frosting,
