@@ -20,7 +20,7 @@ test_that("function works", {
   wf1 <- wf %>% add_frosting(f)
 
   expect_silent(p <- predict(wf1, latest))
-  expect_equal(ncol(p), 5L)
+  expect_equal(ncol(p), 6L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
   expect_named(p, c("time_value", "geo_value", ".pred","q0.0275","q0.8","q0.95"))
