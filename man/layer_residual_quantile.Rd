@@ -6,8 +6,8 @@
 \usage{
 layer_residual_quantile(
   frosting,
-  probs,
-  symmetrize,
+  probs = c(0.0275, 0.975),
+  symmetrize = TRUE,
   id = rand_id("residual_quantile")
 )
 }
