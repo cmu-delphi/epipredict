@@ -4,7 +4,7 @@
 \alias{augment.epi_workflow}
 \title{Augment data with predictions}
 \usage{
-\method{augment}{epi_workflow}(x, new_data, ...)
+augment.epi_workflow(x, new_data, ...)
 }
 \arguments{
 \item{x}{A trained epi_workflow}
