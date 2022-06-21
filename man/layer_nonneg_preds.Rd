@@ -15,11 +15,11 @@ layer_nonneg_preds(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{pred_lower}{Lower threshold for the prediction values. That is, any
-predictions greater than or equal to this lower bound are retained.
+predictions that are less than this lower bound are set to it.
 Default value is \code{0}.}
 
 \item{pred_upper}{Upper threshold for the prediction values. That is, any
-predictions less than or equal to this upper bound are retained.
+predictions that are greater than this upper bound are set to it.
 Default value is \code{Inf}.}
 
 \item{id}{a random id string}
@@ -28,12 +28,13 @@ Default value is \code{Inf}.}
 an updated \code{frosting} postprocessor
 }
 \description{
-This postprocessing step is used to retain only those
-prediction values that are within the specified lower and upper thresholds.
+This postprocessing step is used to set prediction values that are
+samaller than the lower threshold or higher than the upper threshold equal
+to the threshold values.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  dplyr::filter(time_value < "2021-03-08", geo_value \%in\% c("ak", "ca", "ar"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
@@ -45,7 +46,7 @@ latest <- jhu \%>\%
 
 f <- epipredict:::frosting() \%>\%
   layer_predict() \%>\%
-  layer_nonneg_preds(pred_lower = 0.25, pred_upper = 0.31)
+  layer_nonneg_preds(pred_lower = 0.180, pred_upper = 0.310)
 wf1 <- wf \%>\% epipredict:::add_frosting(f)
 p <- predict(wf1, latest)
 p
