@@ -14,7 +14,7 @@ layer_residual_quantile(
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
-\item{probs}{numeric vector of probabilities with values in \link{0,1} referring to the desired quantile.}
+\item{probs}{numeric vector of probabilities with values in (0,1) referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetrical.}
 
@@ -25,7 +25,4 @@ an updated \code{frosting} postprocessor with additional columns of the residual
 }
 \description{
 Creates predictions based on residual quantiles
-}
-\examples{
-TO-DO
 }
