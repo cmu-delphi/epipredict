@@ -23,5 +23,5 @@ test_that("function works", {
   expect_equal(ncol(p), 6L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_named(p, c("time_value", "geo_value", ".pred","q0.0275","q0.8","q0.95"))
+  expect_named(p, c("geo_value", "time_value",".pred","q0.0275","q0.8","q0.95"))
 })
