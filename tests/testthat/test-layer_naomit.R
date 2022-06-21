@@ -13,7 +13,7 @@ latest <- get_test_data(recipe = r, x = jhu) # 93 x 4
 latest[1:10, 4] <- NA # 10 rows have NA
 
 f <- epipredict:::frosting() %>%
-      layer_naomit(.pred)
+      layer_naomit(death_rate)
 
 wf1 <- wf %>% add_frosting(f)
 
