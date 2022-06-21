@@ -12,14 +12,28 @@ wf <- epipredict::epi_workflow(r, parsnip::linear_reg()) %>% parsnip::fit(jhu)
 latest <- get_test_data(recipe = r, x = jhu) # 93 x 4
 latest[1:10, 4] <- NA # 10 rows have NA
 
-f <- epipredict:::frosting() %>%
-      layer_naomit(death_rate)
 
-wf1 <- wf %>% add_frosting(f)
+test_that("Removing NA after predict", {
+  f <- epipredict:::frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred)
 
-test_that("Removing NA works", {
+  wf1 <- wf %>% add_frosting(f)
+
   expect_silent(p <- predict(wf1, latest))
   expect_s3_class(p, "epi_df")
-  expect_equal(nrow(p), 83L)
-  expect_named(p, c("geo_value", "time_value","case_rate","death_rate"))
+  expect_equal(nrow(p), 2L) # ak is NA so removed
+  expect_named(p, c("geo_value", "time_value",".pred"))
 })
+
+# test_that("Removing NA works by itself", {
+#   f <- epipredict:::frosting() %>%
+#     layer_naomit(death_rate)
+#
+#   wf1 <- wf %>% add_frosting(f)
+#
+#   expect_silent(p <- predict(wf1, latest))
+#   expect_s3_class(p, "epi_df")
+#   expect_equal(nrow(p), 83L) # ak is NA so removed
+#   expect_named(p, c("geo_value", "time_value",".pred"))
+# })
