@@ -7,6 +7,29 @@
 #'
 #' @return an updated `frosting` postprocessor with additional columns of the residual quantiles added to the prediction
 #' @export
+#' @examples
+#'  jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   recipes::step_naomit(recipes::all_predictors()) %>%
+#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+#'  parsnip::fit(jhu)
+#'
+#' latest <- get_test_data(recipe = r, x = jhu)
+#'
+#' f <- epipredict:::frosting() %>%
+#'      layer_predict() %>%
+#'      layer_residual_quantile(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'      layer_naomit(.pred)
+#' wf1 <- wf %>% epipredict:::add_frosting(f)
+#'
+#' p <- predict(wf1, latest)
+#' p
 layer_residual_quantile <- function(frosting, probs = c(0.0275, 0.975), symmetrize = TRUE, id = rand_id("residual_quantile")) {
   add_layer(
     frosting,
