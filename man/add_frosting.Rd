@@ -22,3 +22,30 @@ remove_frosting(x)
 \description{
 Add frosting to a workflow
 }
+\examples{
+#' # Try out frosting validators / constructors
+ wf <- epi_workflow()
+is_frosting(new_frosting()) # should be TRUE
+
+ ## Three ways to add a frosting postprocessor
+ wf1 <- epi_workflow(postprocessor = new_frosting())
+ has_postprocessor(wf1) # should be TRUE
+ has_postprocessor_frosting(wf1) # should be TRUE
+
+ wf2 <- wf \%>\% add_postprocessor(new_frosting())
+ has_postprocessor(wf2) # should be TRUE
+ has_postprocessor_frosting(wf2) # should be TRUE
+
+wf3 <- wf \%>\% add_frosting(new_frosting())
+ has_postprocessor(wf3) # should be TRUE
+ has_postprocessor_frosting(wf3) # should be TRUE
+
+# Frosting can be created/added/removed
+ f <- frosting()
+ wf <- epi_workflow() \%>\% add_frosting(f)
+has_postprocessor(wf) # should be TRUE
+has_postprocessor_frosting(wf) # should be TRUE
+ wf <- wf \%>\% remove_frosting()
+ has_postprocessor(wf) # should be FALSE
+ has_postprocessor_frosting(wf) # should be FALSE
+}
