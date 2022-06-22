@@ -46,7 +46,8 @@ step_training_window <-
            role = NA,
            trained = FALSE,
            nrec = 50,
-           skip = TRUE) {
+           skip = TRUE
+           id = rand_id("training_window")) {
 
     add_step(
       recipe,
@@ -54,13 +55,14 @@ step_training_window <-
         role = role,
         trained = trained,
         nrec = nrec,
-        skip = skip
+        skip = skip,
+        id = id
       )
     )
   }
 
 step_training_window_new <-
-  function(terms, role, trained, nrec, skip, id = rand_id("training_window")) {
+  function(terms, role, trained, nrec, skip, id = id) {
     step(
       subclass = "training_window",
       role = role,
