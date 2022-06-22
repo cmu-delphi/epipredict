@@ -11,7 +11,7 @@ wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 latest <- get_test_data(recipe = r, x = jhu)
 
 
-test_that("function works", {
+test_that("Returns expected number or rows and columns", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
