@@ -26,17 +26,16 @@
 #' p <- predict(wf1, latest)
 #' p
 layer_add_target_date <-
-  function(frosting, ahead = NULL, id = rand_id("add_target_date")) {
+  function(frosting, ahead = NULL) {
     add_layer(
       frosting,
       layer_add_target_date_new(
-        ahead = ahead,
-        id = id
+        ahead = ahead
       )
     )
   }
 
-layer_add_target_date_new <- function(ahead, id) {
+layer_add_target_date_new <- function(ahead, id = rand_id("add_target_date")) {
   layer("add_target_date", ahead = ahead, id = id)
 }
 
