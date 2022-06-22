@@ -13,6 +13,32 @@
 #'
 #' @return An updated `frosting` object
 #' @export
+#'
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#' dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'  step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'  step_epi_ahead(death_rate, ahead = 7) %>%
+#'  recipes::step_naomit(recipes::all_predictors()) %>%
+#'  recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- jhu %>%
+#'  dplyr::filter(time_value >= max(time_value) - 14)
+#'
+#' # Predict layer alone
+#' f <- frosting() %>% layer_predict()
+#' wf1 <- wf %>% add_frosting(f)
+#'
+#' p1 <- predict(wf1, latest)
+#' p1
+#'
+#' # Prediction with interval
+#' f <- frosting() %>% layer_predict(type = "pred_int")
+#' wf2 <- wf %>% add_frosting(f)
+#'
+#' p2 <- predict(wf2, latest)
+#' p2
 layer_predict <-
   function(frosting, type = NULL, opts = list(), ..., id = rand_id("predict_default")) {
     add_layer(
