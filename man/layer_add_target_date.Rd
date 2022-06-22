@@ -4,7 +4,7 @@
 \alias{layer_add_target_date}
 \title{Postprocessing step to add the target date}
 \usage{
-layer_add_target_date(frosting, ahead = NULL, id = rand_id("add_target_date"))
+layer_add_target_date(frosting, ahead = NULL)
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
@@ -32,9 +32,9 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
-f <- epipredict:::frosting() \%>\% layer_predict() \%>\%
+f <- frosting() \%>\% layer_predict() \%>\%
   layer_add_target_date(ahead = 7) \%>\% layer_naomit(.pred)
-wf1 <- wf \%>\% epipredict:::add_frosting(f)
+wf1 <- wf \%>\% add_frosting(f)
 
 p <- predict(wf1, latest)
 p

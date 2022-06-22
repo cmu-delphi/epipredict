@@ -4,17 +4,13 @@
 \alias{layer_add_forecast_date}
 \title{Postprocessing step to add the forecast date}
 \usage{
-layer_add_forecast_date(
-  frosting,
-  forecast_date = NULL,
-  id = rand_id("add_forecast_date")
-)
+layer_add_forecast_date(frosting, forecast_date = NULL)
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{forecast_date}{The forecast date to add as a column to the \code{epi_df}.
-This must be specified by the user.}
+This must be specified by the user in the form "yyyy-mm-dd".}
 
 \item{id}{a random id string}
 }
@@ -36,9 +32,9 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
-f <- epipredict:::frosting() \%>\% layer_predict() \%>\%
+f <- frosting() \%>\% layer_predict() \%>\%
   layer_add_forecast_date(forecast_date = "2021-12-31") \%>\% layer_naomit(.pred)
-wf1 <- wf \%>\% epipredict:::add_frosting(f)
+wf1 <- wf \%>\% add_frosting(f)
 
 p <- predict(wf1, latest)
 p
