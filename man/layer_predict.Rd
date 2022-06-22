@@ -64,7 +64,7 @@ r <- epi_recipe(jhu) \%>\%
  step_epi_ahead(death_rate, ahead = 7) \%>\%
  recipes::step_naomit(recipes::all_predictors()) \%>\%
  recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
 latest <- jhu \%>\%
  dplyr::filter(time_value >= max(time_value) - 14)
 
