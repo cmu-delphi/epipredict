@@ -14,7 +14,7 @@ latest[1:10, 4] <- NA # 10 rows have NA
 
 
 test_that("Removing NA after predict", {
-  f <- epipredict:::frosting() %>%
+  f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred)
 
@@ -26,14 +26,4 @@ test_that("Removing NA after predict", {
   expect_named(p, c("geo_value", "time_value",".pred"))
 })
 
-# test_that("Removing NA works by itself", {
-#   f <- epipredict:::frosting() %>%
-#     layer_naomit(death_rate)
-#
-#   wf1 <- wf %>% add_frosting(f)
-#
-#   expect_silent(p <- predict(wf1, latest))
-#   expect_s3_class(p, "epi_df")
-#   expect_equal(nrow(p), 83L) # ak is NA so removed
-#   expect_named(p, c("geo_value", "time_value",".pred"))
-# })
+
