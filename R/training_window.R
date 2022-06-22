@@ -46,7 +46,7 @@ step_training_window <-
            role = NA,
            trained = FALSE,
            nrec = 50,
-           skip = TRUE
+           skip = TRUE,
            id = rand_id("training_window")) {
 
     add_step(
