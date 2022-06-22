@@ -25,18 +25,18 @@ Add frosting to a workflow
 \examples{
 # Try out frosting validators / constructors
  wf <- epi_workflow()
-epipredict:::is_frosting(new_frosting()) # should be TRUE
+epipredict:::is_frosting(epipredict:::new_frosting()) # should be TRUE
 
  ## Three ways to add a frosting postprocessor
- wf1 <- epi_workflow(postprocessor = new_frosting())
+ wf1 <- epi_workflow(postprocessor = epipredict:::new_frosting())
  epipredict:::has_postprocessor(wf1) # should be TRUE
  epipredict:::has_postprocessor_frosting(wf1) # should be TRUE
 
- wf2 <- wf \%>\% epipredict:::add_postprocessor(new_frosting())
+ wf2 <- wf \%>\% epipredict:::add_postprocessor(epipredict:::new_frosting())
  epipredict:::has_postprocessor(wf2) # should be TRUE
  epipredict:::has_postprocessor_frosting(wf2) # should be TRUE
 
-wf3 <- wf \%>\% add_frosting(new_frosting())
+wf3 <- wf \%>\% add_frosting(epipredict:::new_frosting())
  epipredict:::has_postprocessor(wf3) # should be TRUE
  epipredict:::has_postprocessor_frosting(wf3) # should be TRUE
 
