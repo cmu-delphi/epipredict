@@ -8,7 +8,7 @@
 #' @export
 #'
 #' @examples
-#' #' # Try out frosting validators / constructors
+#' # Try out frosting validators / constructors
 #'  wf <- epi_workflow()
 #' is_frosting(new_frosting()) # should be TRUE
 #'
@@ -33,6 +33,7 @@
 #'  wf <- wf %>% remove_frosting()
 #'  has_postprocessor(wf) # should be FALSE
 #'  has_postprocessor_frosting(wf) # should be FALSE
+#'
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   action <- workflows:::new_action_post(frosting = frosting)
@@ -112,6 +113,11 @@ new_frosting <- function() {
 #'
 #' @return A frosting object.
 #' @export
+#'
+#' @examples
+#' # Frosting can be created and added for postprocessing
+#'  f <- frosting()
+#'  wf <- epi_workflow() %>% add_frosting(f)
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
     rlang::abort(c("Currently, no arguments to `frosting()` are allowed",

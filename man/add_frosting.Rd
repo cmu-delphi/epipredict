@@ -23,7 +23,7 @@ remove_frosting(x)
 Add frosting to a workflow
 }
 \examples{
-#' # Try out frosting validators / constructors
+# Try out frosting validators / constructors
  wf <- epi_workflow()
 is_frosting(new_frosting()) # should be TRUE
 
@@ -48,4 +48,5 @@ has_postprocessor_frosting(wf) # should be TRUE
  wf <- wf \%>\% remove_frosting()
  has_postprocessor(wf) # should be FALSE
  has_postprocessor_frosting(wf) # should be FALSE
+
 }

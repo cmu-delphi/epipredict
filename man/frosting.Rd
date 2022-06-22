@@ -21,3 +21,8 @@ to hold steps for postprocessing predictions.
 \details{
 The arguments are currently placeholders and must be NULL
 }
+\examples{
+# Frosting can be created/added/removed
+ f <- frosting()
+ wf <- epi_workflow() \%>\% add_frosting(f)
+}
