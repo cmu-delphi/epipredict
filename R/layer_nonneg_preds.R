@@ -27,10 +27,10 @@
 #' latest <- jhu %>%
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
-#' f <- epipredict:::frosting() %>%
+#' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_nonneg_preds(pred_lower = 0.180, pred_upper = 0.310)
-#' wf1 <- wf %>% epipredict:::add_frosting(f)
+#' wf1 <- wf %>% add_frosting(f)
 #' p <- predict(wf1, latest)
 #' p
 layer_nonneg_preds <-
