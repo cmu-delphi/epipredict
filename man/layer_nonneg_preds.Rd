@@ -4,12 +4,7 @@
 \alias{layer_nonneg_preds}
 \title{Lower and upper thresholds for prediction values}
 \usage{
-layer_nonneg_preds(
-  frosting,
-  pred_lower = 0,
-  pred_upper = Inf,
-  id = rand_id("nonneg_preds")
-)
+layer_nonneg_preds(frosting, pred_lower = 0, pred_upper = Inf)
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
@@ -21,8 +16,6 @@ Default value is \code{0}.}
 \item{pred_upper}{Upper threshold for the prediction values. That is, any
 predictions that are greater than this upper bound are set to it.
 Default value is \code{Inf}.}
-
-\item{id}{a random id string}
 }
 \value{
 an updated \code{frosting} postprocessor

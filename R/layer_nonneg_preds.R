@@ -11,7 +11,6 @@
 #' @param pred_upper Upper threshold for the prediction values. That is, any
 #' predictions that are greater than this upper bound are set to it.
 #' Default value is `Inf`.
-#' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
@@ -34,19 +33,18 @@
 #' p <- predict(wf1, latest)
 #' p
 layer_nonneg_preds <-
-  function(frosting, pred_lower = 0, pred_upper = Inf, id = rand_id("nonneg_preds")) {
+  function(frosting, pred_lower = 0, pred_upper = Inf) {
     add_layer(
       frosting,
       layer_nonneg_preds_new(
         pred_lower = pred_lower,
-        pred_upper = pred_upper,
-        id = id
+        pred_upper = pred_upper
       )
     )
   }
 
 
-layer_nonneg_preds_new <- function(pred_lower, pred_upper, id) {
+layer_nonneg_preds_new <- function(pred_lower, pred_upper, id = rand_id("nonneg_preds")) {
   layer("nonneg_preds", pred_lower = pred_lower, pred_upper = pred_upper, id = id)
 }
 
