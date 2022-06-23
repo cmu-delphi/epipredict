@@ -1,10 +1,10 @@
 
 #' Recipe blueprint that accounts for `epi_df` panel data
 #'
-#' Used for simplicity. See [hardhat::default_recipe_blueprint()] for more
-#' details.
+#' Used for simplicity. See [hardhat::new_recipe_blueprint()] or
+#' [hardhat::default_recipe_blueprint()] for more details.
 #'
-#' @inheritParams hardhat::default_recipe_blueprint
+#' @inheritParams hardhat::new_recipe_blueprint
 #'
 #' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
 #' @return A recipe blueprint.
@@ -56,6 +56,7 @@ default_epi_recipe_blueprint <-
   }
 
 #' @rdname new_epi_recipe_blueprint
+#' @inheritParams hardhat::new_default_recipe_blueprint
 #' @export
 new_default_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE,
@@ -76,9 +77,10 @@ new_default_epi_recipe_blueprint <-
   )
 }
 
+#' @importFrom hardhat run_mold
 #' @export
 run_mold.default_epi_recipe_blueprint <- function(blueprint, ..., data) {
-  hardhat:::check_dots_empty0(...)
+  rlang::check_dots_empty0(...)
   blueprint <- hardhat:::patch_recipe_default_blueprint(blueprint)
   cleaned <- mold_epi_recipe_default_clean(blueprint = blueprint, data = data)
   blueprint <- cleaned$blueprint
@@ -91,6 +93,7 @@ mold_epi_recipe_default_clean <- function(blueprint, data) {
   hardhat:::new_mold_clean(blueprint, data)
 }
 
+#' @importFrom hardhat refresh_blueprint
 #' @export
 refresh_blueprint.default_epi_recipe_blueprint <- function(blueprint) {
   do.call(new_default_epi_recipe_blueprint, as.list(blueprint))

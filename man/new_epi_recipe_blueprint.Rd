@@ -78,14 +78,30 @@ of the processed predictors. If "matrix" or "dgCMatrix" are chosen, all of
 the predictors must be numeric after the preprocessing method has been
 applied; otherwise an error is thrown.}
 
-\item{...}{Not used.}
+\item{ptypes}{Either \code{NULL}, or a named list with 2 elements, \code{predictors}
+and \code{outcomes}, both of which are 0-row tibbles. \code{ptypes} is generated
+automatically at \code{\link[hardhat:mold]{mold()}} time and is used to validate \code{new_data} at
+prediction time.}
+
+\item{recipe}{Either \code{NULL}, or an unprepped recipe. This argument is set
+automatically at \code{\link[hardhat:mold]{mold()}} time.}
+
+\item{...}{Name-value pairs for additional elements of blueprints that
+subclass this blueprint.}
+
+\item{subclass}{A character vector. The subclasses of this blueprint.}
+
+\item{extra_role_ptypes}{A named list. The names are the unique non-standard
+recipe roles (i.e. everything except \code{"predictors"} and \code{"outcomes"}). The
+values are prototypes of the original columns with that role. These are
+used for validation in \code{forge()}.}
 }
 \value{
 A recipe blueprint.
 }
 \description{
-Used for simplicity. See \code{\link[hardhat:default_recipe_blueprint]{hardhat::default_recipe_blueprint()}} for more
-details.
+Used for simplicity. See \code{\link[hardhat:new-blueprint]{hardhat::new_recipe_blueprint()}} or
+\code{\link[hardhat:default_recipe_blueprint]{hardhat::default_recipe_blueprint()}} for more details.
 }
 \details{
 The \code{bake_dependent_roles} are automatically set to \code{epi_df} defaults.
