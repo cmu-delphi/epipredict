@@ -5,7 +5,7 @@ tib <- tibble::tibble(
   geo_value = rep(c("ca", "hi"), each = 100)
 ) %>% epiprocess::as_epi_df()
 
-test_that("step_training_window works with default nrec", {
+test_that("step_training_window works with default n_recent", {
   p <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window() %>%
     recipes::prep(tib) %>%
@@ -19,9 +19,9 @@ test_that("step_training_window works with default nrec", {
   expect_equal(p$geo_value, rep(c("ca", "hi"), each = 50))
 })
 
-test_that("step_training_window works with specified nrec", {
+test_that("step_training_window works with specified n_recent", {
   p2 <- epi_recipe(y ~ x, data = tib) %>%
-    step_training_window(nrec = 5) %>%
+    step_training_window(n_recent = 5) %>%
     recipes::prep(tib) %>%
     recipes::bake(new_data = NULL)
 
@@ -36,7 +36,7 @@ test_that("step_training_window works with specified nrec", {
 test_that("step_training_window does not proceed with specified new_data", {
 # Should just return whatever the new_data is, unaffected by the step
   p3 <- epi_recipe(y ~ x, data = tib) %>%
-    step_training_window(nrec = 3) %>%
+    step_training_window(n_recent = 3) %>%
     recipes::prep(tib) %>%
     recipes::bake(new_data = tib[1:10,])
 
