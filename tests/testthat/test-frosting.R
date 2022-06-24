@@ -48,7 +48,7 @@ test_that("prediction works without any postprocessor", {
 })
 
 
-test_that("layer_predict is added by default", {
+test_that("layer_predict is added by default if missing", {
 
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
