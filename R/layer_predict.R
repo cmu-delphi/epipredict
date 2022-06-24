@@ -39,4 +39,3 @@ slather.layer_predict <- function(object, components, the_fit, ...) {
   components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
   components
 }
-
