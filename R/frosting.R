@@ -1,8 +1,31 @@
+#' Add frosting to a workflow
+#'
+#' @param x A workflow
+#' @param frosting A frosting layer created using `frosting()`
+#' @param ... Not used.
+#'
+#' @return `x`, updated with a new or removed frosting postprocessor
+#' @export
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   action <- workflows:::new_action_post(frosting = frosting)
   workflows:::add_action(x, action, "frosting")
 }
+
+#' @rdname add_frosting
+#' @export
+remove_frosting <- function(x) {
+  workflows:::validate_is_workflow(x)
+
+  if (!has_postprocessor_frosting(x)) {
+    rlang::warn("The workflow has no frosting postprocessor to remove.")
+    return(x)
+  }
+
+  x$post$actions[["frosting"]] <- NULL
+  x
+}
+
 
 has_postprocessor_frosting <- function(x) {
   "frosting" %in% names(x$post$actions)
@@ -50,6 +73,18 @@ new_frosting <- function() {
 }
 
 
+#' Create frosting for postprocessing predictions
+#'
+#' This generates a postprocessing container (much like `recipes::recipe()`)
+#' to hold steps for postprocessing predictions.
+#'
+#' The arguments are currently placeholders and must be NULL
+#'
+#' @param layers Must be `NULL`.
+#' @param requirements Must be `NULL`.
+#'
+#' @return A frosting object.
+#' @export
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
     rlang::abort(c("Currently, no arguments to `frosting()` are allowed",
@@ -105,7 +140,7 @@ apply_frosting.epi_workflow <- function(workflow, components, the_fit, ...) {
   layers <- workflow$post$actions$frosting$frosting$layers
   for (l in seq_along(layers)) {
     la <- layers[[l]]
-    components <- slather(la, components = components, the_fit)
+    components <- slather(la, components = components, the_fit = the_fit)
   }
   # last for the moment, anticipating that layer[1] will do the prediction...
   if (is_null(components$predictions)) {
