@@ -8,32 +8,30 @@
 #' @export
 #'
 #' @examples
-#' # Try out frosting validators / constructors
-#'  wf <- epi_workflow()
-#' epipredict:::is_frosting(epipredict:::new_frosting()) # should be TRUE
+#' library(dplyr)
+#' library(recipes)
 #'
-#'  ## Three ways to add a frosting postprocessor
-#'  wf1 <- epi_workflow(postprocessor = epipredict:::new_frosting())
-#'  epipredict:::has_postprocessor(wf1) # should be TRUE
-#'  epipredict:::has_postprocessor_frosting(wf1) # should be TRUE
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_naomit(all_predictors()) %>%
+#'   step_naomit(all_outcomes(), skip = TRUE)
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% parsnip::fit(jhu)
+#' latest <- jhu %>%
+#'   filter(time_value >= max(time_value) - 14)
 #'
-#'  wf2 <- wf %>% epipredict:::add_postprocessor(epipredict:::new_frosting())
-#'  epipredict:::has_postprocessor(wf2) # should be TRUE
-#'  epipredict:::has_postprocessor_frosting(wf2) # should be TRUE
+#' # Add frosting to a workflow and predict
+#' f <- frosting() %>% layer_predict() %>% layer_naomit(.pred)
+#' wf1 <- wf %>% add_frosting(f)
+#' p1 <- predict(wf1, latest)
+#' p1
 #'
-#' wf3 <- wf %>% add_frosting(epipredict:::new_frosting())
-#'  epipredict:::has_postprocessor(wf3) # should be TRUE
-#'  epipredict:::has_postprocessor_frosting(wf3) # should be TRUE
-#'
-#' # Frosting can be created/added/removed
-#'  f <- frosting()
-#'  wf <- epi_workflow() %>% add_frosting(f)
-#' epipredict:::has_postprocessor(wf) # should be TRUE
-#' epipredict:::has_postprocessor_frosting(wf) # should be TRUE
-#'  wf <- wf %>% remove_frosting()
-#'  epipredict:::has_postprocessor(wf) # should be FALSE
-#'  epipredict:::has_postprocessor_frosting(wf) # should be FALSE
-#'
+#' # Remove frosting from the workflow and predict
+#' wf2 <- wf1 %>% remove_frosting()
+#' p2 <- predict(wf2, latest)
+#' p2
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   action <- workflows:::new_action_post(frosting = frosting)
@@ -115,9 +113,31 @@ new_frosting <- function() {
 #' @export
 #'
 #' @examples
-#' # Frosting can be created and added for postprocessing
+#' # Toy example to show that frosting can be created and added for postprocessing
 #'  f <- frosting()
 #'  wf <- epi_workflow() %>% add_frosting(f)
+#'
+#' # A more realistic example
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_naomit(all_predictors()) %>%
+#'   step_naomit(all_outcomes(), skip = TRUE)
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- get_test_data(recipe = r, x = jhu)
+#'
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_naomit(.pred)
+#'
+#' wf1 <- wf %>% add_frosting(f)
+#'
+#' p <- predict(wf1, latest)
+#' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
     rlang::abort(c("Currently, no arguments to `frosting()` are allowed",
