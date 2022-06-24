@@ -138,6 +138,20 @@ apply_frosting.epi_workflow <- function(workflow, components, the_fit, ...) {
     return(components)
   }
   layers <- workflow$post$actions$frosting$frosting$layers
+
+  # checks if layer_predict() is in the postprocessors
+  list_of_layer_names <- c()
+  for (l in seq_along(layers)){
+    la <- layers[[l]]
+    list_of_layer_names <- append(list_of_layer_names,class(la)[1])
+  }
+  if (!"layer_predict" %in% list_of_layer_names){
+    predict_layer <- frosting() %>% layer_predict()
+    workflow$post$actions$frosting$frosting$layers <- append(predict_layer$layers[1], layers)
+  }
+
+  layers <- workflow$post$actions$frosting$frosting$layers # repopulate
+
   for (l in seq_along(layers)) {
     la <- layers[[l]]
     components <- slather(la, components = components, the_fit = the_fit)
