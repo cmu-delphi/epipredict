@@ -11,7 +11,7 @@ latest <- jhu %>%
 
 test_that("Default pred_lower and pred_upper work as intended", {
 
-  f <- frosting() %>% layer_predict() %>% layer_nonneg_preds() %>% layer_naomit(.pred)
+  f <- frosting() %>% layer_predict() %>% layer_thres_preds() %>% layer_naomit(.pred)
   wf1 <- wf %>% add_frosting(f)
 
   expect_silent(p <- predict(wf1, latest))
@@ -24,7 +24,7 @@ test_that("Default pred_lower and pred_upper work as intended", {
 
 test_that("Specified pred_lower and pred_upper work as intended", {
 
-  f <- frosting() %>% layer_predict() %>% layer_nonneg_preds(pred_lower = 0.180, pred_upper = 0.31) %>%
+  f <- frosting() %>% layer_predict() %>% layer_thres_preds(pred_lower = 0.180, pred_upper = 0.31) %>%
     layer_naomit(.pred)
   wf2 <- wf %>% add_frosting(f)
 
