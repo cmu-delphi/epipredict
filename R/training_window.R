@@ -86,7 +86,7 @@ bake.step_training_window <- function(object, new_data) {
   ek <- epi_keys(new_data)[which(epi_keys(new_data) != "time_value")]
 
   new_data %>%
-    dplyr::group_by(all_of(ek)) %>%
+    dplyr::group_by(dplyr::all_of(ek)) %>%
     dplyr::arrange(time_value) %>%
     dplyr::slice_tail(n = object$n_recent) %>%
     dplyr::ungroup()
