@@ -34,7 +34,8 @@ sequence of any existing operations.
 \description{
 \code{step_training_window} creates a \emph{specification} of a recipe step that
 limit the size of the training window to the \code{n_recent} most recent
-observations in \code{time_value} per location from \code{geo_value}.
+observations in \code{time_value} per group, where the groups are formed
+based on the remaining \code{epi_keys}.
 }
 \details{
 Note that \code{step_epi_lead()} and \code{step_epi_lag()} should come

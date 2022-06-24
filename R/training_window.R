@@ -2,7 +2,8 @@
 #'
 #' `step_training_window` creates a *specification* of a recipe step that
 #'   limit the size of the training window to the `n_recent` most recent
-#'   observations in `time_value` per location from `geo_value`.
+#'   observations in `time_value` per group, where the groups are formed
+#'   based on the remaining `epi_keys`.
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
@@ -82,7 +83,10 @@ bake.step_training_window <- function(object, new_data) {
     rlang::abort("step_training_window requires 'n_recent' to be integer valued.")
   }
 
-  new_data %>% dplyr::group_by(geo_value) %>%
+  ek <- epi_keys(new_data)[which(epi_keys(new_data) != "time_value")]
+
+  new_data %>%
+    dplyr::group_by(all_of(ek)) %>%
     dplyr::arrange(time_value) %>%
     dplyr::slice_tail(n = object$n_recent) %>%
     dplyr::ungroup()
