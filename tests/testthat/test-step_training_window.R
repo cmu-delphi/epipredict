@@ -47,3 +47,28 @@ test_that("step_training_window does not proceed with specified new_data", {
   expect_equal(p3$time_value, rep(seq(as.Date("2020-01-01"), as.Date("2020-01-10"), by = 1), times = 1))
   expect_equal(p3$geo_value, rep("ca", times = 10))
 })
+
+test_that("step_training_window works with multiple keys", {
+  tib2 <- tibble::tibble(
+    x = 1:200, y = 1:200,
+    time_value = rep(seq(as.Date("2020-01-01"), by = 1,
+                         length.out = 100), times = 2),
+    geo_value = rep(c("ca", "hi"), each = 100),
+    additional_key = as.factor(rep(1:4, each = 50)),
+  ) %>% epiprocess::as_epi_df()
+
+  attributes(tib2)$metadata$other_keys <- "additional_key"
+
+  p4 <- epi_recipe(y ~ x, data = tib2) %>%
+    step_training_window(n_recent = 3) %>%
+    recipes::prep(tib2) %>%
+    recipes::bake(new_data = NULL)
+
+  expect_equal(nrow(p4), 12L)
+  expect_equal(ncol(p4), 5L)
+  expect_s3_class(p4, "epi_df")
+  expect_named(p4, c("x", "y", "time_value", "geo_value", "additional_key"))
+  expect_equal(p4$time_value, rep(c(seq(as.Date("2020-04-04"), as.Date("2020-04-08"), by = 2),
+                                   seq(as.Date("2020-04-05"), as.Date("2020-04-09"), by = 2)), times = 2))
+  expect_equal(p4$geo_value, rep(c("ca", "hi"), each = 6))
+})
