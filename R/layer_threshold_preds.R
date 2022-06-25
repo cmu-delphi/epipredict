@@ -73,15 +73,16 @@ snap <- function(x, lower, upper) {
 }
 
 #' @export
-slather.layer_threshold <- function(object, components, the_fit, ...) {
-  exprs <- rlang::expr(c(!!!object$terms))
-  pos <- tidyselect::eval_select(exprs, components$predictions)
-  col_names <- names(pos)
-  components$predictions <- components$predictions %>%
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::all_of(col_names),
-        ~ snap(.x, object$lower, object$upper)
-      ))
-  components
-}
+slather.layer_threshold <-
+  function(object, components, the_fit, the_recipe, ...) {
+    exprs <- rlang::expr(c(!!!object$terms))
+    pos <- tidyselect::eval_select(exprs, components$predictions)
+    col_names <- names(pos)
+    components$predictions <- components$predictions %>%
+      dplyr::mutate(
+        dplyr::across(
+          dplyr::all_of(col_names),
+          ~ snap(.x, object$lower, object$upper)
+        ))
+    components
+  }

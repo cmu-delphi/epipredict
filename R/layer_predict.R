@@ -66,7 +66,7 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 }
 
 #' @export
-slather.layer_predict <- function(object, components, the_fit, ...) {
+slather.layer_predict <- function(object, components, the_fit, the_recipe, ...) {
 
   components$predictions <- predict(the_fit, components$forged$predictors,
                                     type = object$type, opts = object$opts)

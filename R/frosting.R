@@ -192,41 +192,44 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @importFrom rlang is_null
 #' @importFrom rlang abort
 #' @export
-apply_frosting.epi_workflow <- function(workflow, components, the_fit, ...) {
-  if (!has_postprocessor(workflow)) {
-    components$predictions <- predict(the_fit, components$forged$predictors, ...)
-    components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
+apply_frosting.epi_workflow <-
+  function(workflow, components, the_fit, the_recipe, ...) {
+
+    if (!has_postprocessor(workflow)) {
+      components$predictions <- predict(
+        the_fit, components$forged$predictors, ...)
+      components$predictions <- dplyr::bind_cols(
+        components$keys, components$predictions)
+      return(components)
+    }
+
+    if (!has_postprocessor_frosting(workflow)) {
+      rlang::warn(c("Only postprocessors of class frosting are allowed.",
+                    "Returning unpostprocessed predictions."))
+      components$predictions <- predict(
+        the_fit, components$forged$predictors, ...)
+      components$predictions <- dplyr::bind_cols(
+        components$keys, components$predictions)
+      return(components)
+    }
+
+    layers <- extract_layers(workflow)
+
+    # checks if layer_predict() is in the postprocessor
+    layer_names <- map_chr(layers, ~ class(.x)[1])
+    if (!detect_layer(workflow, "layer_predict")) {
+      layers <- c(
+        layer_predict_new(NULL, list(), list(), rand_id("predict_default")),
+        layers)
+    }
+
+    for (l in seq_along(layers)) {
+      la <- layers[[l]]
+      components <- slather(la, components, the_fit, the_recipe)
+    }
+
     return(components)
   }
-  if (!has_postprocessor_frosting(workflow)) {
-    rlang::warn(c("Only postprocessors of class frosting are allowed.",
-                  "Returning unpostprocessed predictions."))
-    components$predictions <- predict(the_fit, components$forged$predictors, ...)
-    components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
-    return(components)
-  }
-  layers <- workflow$post$actions$frosting$frosting$layers
-
-  # checks if layer_predict() is in the postprocessors
-  layer_names <- map_chr(layers, ~ class(.x)[1])
-  if (!"layer_predict" %in% layer_names){
-    predict_layer <- frosting() %>% layer_predict()
-    workflow$post$actions$frosting$frosting$layers <- append(predict_layer$layers[1], layers)
-  }
-
-  layers <- workflow$post$actions$frosting$frosting$layers # repopulate
-
-  for (l in seq_along(layers)) {
-    la <- layers[[l]]
-    components <- slather(la, components = components, the_fit = the_fit)
-  }
-  # last for the moment, anticipating that layer[1] will do the prediction...
-  if (is_null(components$predictions)) {
-    components$predictions <- predict(the_fit, components$forged$predictors, ...)
-    components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
-  }
-  return(components)
-}
 
 
 layer <- function(subclass, ..., .prefix = "layer_") {
@@ -265,6 +268,33 @@ add_layer <- function(frosting, object, flag = TRUE) {
   frosting
 }
 
+detect_layer <- function(x, name, ...) {
+  UseMethod(x)
+}
+
+detect_layer.frosting <- function(x, name, ...) {
+  name %in% map_chr(x$layers, ~ class(.x)[1])
+}
+
+detect_layer.workflow <- function(x, name, ...) {
+  validate_has_postprocessor(x)
+  detect_layer(x$post$actions$frosting$frosting)
+}
+
+extract_layers <- function(x, ...) {
+  UseMethod("extract_layers")
+}
+
+extract_layers.frosting <- function(x, ...) {
+  rlang::check_dots_empty()
+  x$layers
+}
+
+extract_layers.workflow <- function(x, ...) {
+  rlang::check_dots_empty()
+  validate_has_postprocessor(x)
+  extract_layers(x$post$actions$frosting$frosting)
+}
 
 #' Spread a layer of frosting on a fitted workflow
 #'
@@ -290,7 +320,7 @@ add_layer <- function(frosting, object, flag = TRUE) {
 #'
 #' @return The `components` list. In the same format after applying any updates.
 #' @export
-slather <- function(object, components, the_fit, ...) {
+slather <- function(object, components, the_fit, the_recipe, ...) {
   UseMethod("slather")
 }
 

@@ -55,16 +55,17 @@ layer_residual_quantile_new <- function(probs, symmetrize, id) {
 }
 
 #' @export
-slather.layer_residual_quantile <- function(object, components, the_fit,...) {
-  if (is.null(object$probs)) return(components)
+slather.layer_residual_quantile <-
+  function(object, components, the_fit, the_recipe, ...) {
+    if (is.null(object$probs)) return(components)
 
-  s <- ifelse(object$symmetrize, -1, NA)
-  r <- the_fit$fit$residuals
-  q <- quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)
+    s <- ifelse(object$symmetrize, -1, NA)
+    r <- the_fit$fit$residuals
+    q <- quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)
 
-  estimate <- components$predictions$.pred
-  interval <- data.frame(outer(estimate, q, "+"))
-  names(interval)<- probs_to_string(object$probs)
-  components$predictions <- dplyr::bind_cols(components$predictions,interval)
-  components
-}
+    estimate <- components$predictions$.pred
+    interval <- data.frame(outer(estimate, q, "+"))
+    names(interval)<- probs_to_string(object$probs)
+    components$predictions <- dplyr::bind_cols(components$predictions,interval)
+    components
+  }
