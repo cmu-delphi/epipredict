@@ -11,7 +11,10 @@ latest <- jhu %>%
 
 test_that("Default pred_lower and pred_upper work as intended", {
 
-  f <- frosting() %>% layer_predict() %>% layer_thres_preds() %>% layer_naomit(.pred)
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred)
   wf1 <- wf %>% add_frosting(f)
 
   expect_silent(p <- predict(wf1, latest))
@@ -25,7 +28,9 @@ test_that("Default pred_lower and pred_upper work as intended", {
 
 test_that("Specified pred_lower and pred_upper work as intended", {
 
-  f <- frosting() %>% layer_predict() %>% layer_thres_preds(pred_lower = 0.180, pred_upper = 0.31) %>%
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred, lower = 0.180, upper = 0.31) %>%
     layer_naomit(.pred)
   wf2 <- wf %>% add_frosting(f)
 
@@ -35,4 +40,23 @@ test_that("Specified pred_lower and pred_upper work as intended", {
   expect_equal(nrow(p), 3L)
   expect_equal(round(p$.pred, digits = 3), c(0.180, 0.180, 0.310))
   expect_named(p, c("geo_value", "time_value", ".pred"))
+})
+
+test_that("thresholds additional columns", {
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_residual_quantile(probs = c(.1, .9)) %>%
+    layer_threshold(.pred, dplyr::starts_with("q"), lower = 0.180, upper = 0.31) %>%
+    layer_naomit(.pred)
+  wf2 <- wf %>% add_frosting(f)
+
+  expect_silent(p <- predict(wf2, latest))
+  expect_equal(ncol(p), 5L)
+  expect_s3_class(p, "epi_df")
+  expect_equal(nrow(p), 3L)
+  expect_equal(round(p$.pred, digits = 3), c(0.180, 0.180, 0.310))
+  expect_equal(round(p$q0.1, digits = 3), c(0.180, 0.180, 0.310))
+  expect_equal(round(p$q0.9, digits = 3), c(0.310, 0.180, 0.310))
+  expect_named(p, c("geo_value", "time_value", ".pred", "q0.1", "q0.9"))
 })
