@@ -5,6 +5,7 @@ tib <- tibble::tibble(
   geo_value = rep(c("ca", "hi"), each = 100)
 ) %>% epiprocess::as_epi_df()
 
+
 test_that("step_training_window works with default n_recent", {
   p <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window() %>%
