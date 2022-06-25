@@ -88,6 +88,18 @@ is_frosting <- function(x) {
   inherits(x, "frosting")
 }
 
+#' @importFrom rlang caller_env
+validate_frosting <- function(x, ..., arg = "`x`", call = caller_env()) {
+  rlang::check_dots_empty()
+  if (!is_frosting(x)) {
+    glubort(
+      "{arg} must be a frosting postprocessor, not a {class(x)[[1]]}.",
+      .call = call
+    )
+  }
+  invisible(x)
+}
+
 new_frosting <- function() {
   structure(
     list(
@@ -221,8 +233,35 @@ layer <- function(subclass, ..., .prefix = "layer_") {
   structure(list(...), class = c(paste0(.prefix, subclass), "layer"))
 }
 
-add_layer <- function(frosting, object) {
-  frosting$layers[[length(frosting$layers) + 1]] <- object
+is_layer <- function(x) {
+  inherits(x, "layer")
+}
+
+validate_layer <- function(x, ..., arg = "`x`", call = caller_env()) {
+  rlang::check_dots_empty()
+  if (!is_layer(x)) {
+    glubort(
+      "{arg} must be a frosting layer, not a {class(x)[[1]]}.",
+      .call = call
+    )
+  }
+  invisible(x)
+}
+
+#' Add layer to a frosting object
+#'
+#' @param frosting a `frosting` postprocessor
+#' @param object a `frosting` layer
+#' @param flag logical to determine if the layer is added. Default `TRUE`.
+#'
+#' @return an updated `frosting` postprocessor
+#' @export
+add_layer <- function(frosting, object, flag = TRUE) {
+  validate_frosting(frosting)
+  validate_layer(object)
+
+  if (flag) frosting$layers[[length(frosting$layers) + 1]] <- object
+
   frosting
 }
 

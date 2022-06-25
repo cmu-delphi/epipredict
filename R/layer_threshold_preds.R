@@ -16,6 +16,8 @@
 #' @param upper Upper threshold for the prediction values. That is, any
 #'   predictions that are greater than this upper bound are set to it.
 #'   Default value is `Inf`.
+#' @param .flag a logical to determine if the layer is added. Passed on to
+#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #'
@@ -45,7 +47,7 @@
 #' p <- predict(wf, latest)
 #' p
 layer_threshold <-
-  function(frosting, ..., lower = 0, upper = Inf,
+  function(frosting, ..., lower = 0, upper = Inf, .flag = TRUE,
            id = rand_id("threshold")) {
     add_layer(
       frosting,
@@ -54,7 +56,8 @@ layer_threshold <-
         lower = lower,
         upper = upper,
         id = id
-      )
+      ),
+      flag = .flag
     )
   }
 
@@ -76,9 +79,9 @@ slather.layer_threshold <- function(object, components, the_fit, ...) {
   col_names <- names(pos)
   components$predictions <- components$predictions %>%
     dplyr::mutate(
-      dplyr::across(dplyr::all_of(col_names),
-                    ~ snap(.x, object$lower, object$upper)
-      )
-    )
+      dplyr::across(
+        dplyr::all_of(col_names),
+        ~ snap(.x, object$lower, object$upper)
+      ))
   components
 }

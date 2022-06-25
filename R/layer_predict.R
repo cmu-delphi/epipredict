@@ -9,6 +9,8 @@
 #'
 #' @inheritParams parsnip::predict.model_fit
 #' @param frosting a frosting object
+#' #' @param .flag a logical to determine if the layer is added. Passed on to
+#'   `add_layer()`. Default `TRUE`.
 #' @param id a string identifying the layer
 #'
 #' @return An updated `frosting` object
@@ -43,7 +45,9 @@
 #' p2 <- predict(wf2, latest)
 #' p2
 layer_predict <-
-  function(frosting, type = NULL, opts = list(), ..., id = rand_id("predict_default")) {
+  function(frosting, type = NULL, opts = list(), ...,
+           .flag = TRUE,
+           id = rand_id("predict_default")) {
     add_layer(
       frosting,
       layer_predict_new(
@@ -51,7 +55,8 @@ layer_predict <-
         opts = opts,
         dots_list = rlang::list2(...), # can't figure how to use this
         id = id
-      )
+      ),
+      flag = .flag
     )
   }
 

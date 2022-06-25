@@ -1,8 +1,11 @@
 #' Creates predictions based on residual quantiles
 #'
 #' @param frosting a `frosting` postprocessor
+#' @param ... Unused, include for consistency with other layers.
 #' @param probs numeric vector of probabilities with values in (0,1) referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetrical.
+#' @param .flag a logical to determine if the layer is added. Passed on to
+#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor with additional columns of the residual quantiles added to the prediction
@@ -30,17 +33,20 @@
 #'
 #' p <- predict(wf1, latest)
 #' p
-layer_residual_quantile <- function(frosting,
+layer_residual_quantile <- function(frosting, ...,
                                     probs = c(0.0275, 0.975),
                                     symmetrize = TRUE,
+                                    .flag = TRUE,
                                     id = rand_id("residual_quantile")) {
+  rlang::check_dots_empty()
   add_layer(
     frosting,
     layer_residual_quantile_new(
       probs = probs,
       symmetrize = symmetrize,
       id = id
-    )
+    ),
+    flag = .flag
   )
 }
 
@@ -61,6 +67,4 @@ slather.layer_residual_quantile <- function(object, components, the_fit,...) {
   names(interval)<- probs_to_string(object$probs)
   components$predictions <- dplyr::bind_cols(components$predictions,interval)
   components
-
-
 }
