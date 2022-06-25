@@ -97,8 +97,8 @@ print.step_training_window <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Number of most recent observations per location used in training window "
     n_recent = x$n_recent
-    tr_obj = format_selectors(enquos(n_recent), width)
-    recipes::print_step(tr_obj, enquos(n_recent),
+    tr_obj = format_selectors(rlang::enquos(n_recent), width)
+    recipes::print_step(tr_obj, rlang::enquos(n_recent),
                         x$trained, title, width)
     invisible(x)
   }
