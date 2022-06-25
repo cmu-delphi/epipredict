@@ -16,6 +16,8 @@
 #' @param upper Upper threshold for the prediction values. That is, any
 #'   predictions that are greater than this upper bound are set to it.
 #'   Default value is `Inf`.
+#' @param id a random id string
+#'
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
