@@ -280,24 +280,6 @@ add_epi_recipe <- function(
 
 
 
-#' Recipe blueprint that accounts for `epi_df` panel data
-#'
-#' Used for simplicity. See [hardhat::default_recipe_blueprint()] for more
-#' details.
-#'
-#' @inheritParams hardhat::default_recipe_blueprint
-#'
-#' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
-#' @return A recipe blueprint.
-#' @export
-default_epi_recipe_blueprint <-
-  function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
-           bake_dependent_roles = c("time_value", "geo_value", "key", "raw"),
-           composition = "tibble") {
-    hardhat::default_recipe_blueprint(
-      intercept, allow_novel_levels, fresh, bake_dependent_roles, composition)
-  }
-
 
 # unfortunately, everything the same as in prep.recipe except string/fctr handling
 #' @export
@@ -402,14 +384,4 @@ prep.epi_recipe <- function(
 kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
   x
-}
-
-#' @importFrom tibble as_tibble
-#' @export
-as_tibble.epi_df <- function(x, ...) {
-  # so that downstream calls to as_tibble don't clobber our metadata
-  # this avoids infinite recursion inside dplyr::dplyr_col_modify
-  # TODO: this needs a different approach, long-term
-  class(x) <- class(x)[class(x) != "grouped_df"]
-  return(x)
 }
