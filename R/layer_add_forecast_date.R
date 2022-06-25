@@ -42,8 +42,27 @@ layer_add_forecast_date_new <- function(forecast_date, id = rand_id("add_forecas
 slather.layer_add_forecast_date <- function(object, components, ...) {
   if(is.na(lubridate::ymd(object$forecast_date))) stop("specified `forecast_date` must be of format yyyy-mm-dd")
 
+  last_rows_df <- new_data %>% # %% new_data for forecast_date needed here... perhaps this is components or components$forged$predictors here???
+    dplyr::group_by(geo_value) %>%
+    dplyr::slice(dplyr::n())
+
+  max_time_value <- max(last_rows_df$time_value)
+
+  as_of_date <-
+    as.Date(stringr::str_extract(
+      attributes(new_data)$metadata$as_of, # %% new_data change
+      "\\d{4}-\\d{2}-\\d{2}"
+    ))
+
+  if (is.null(object$forecast_date)) {
+    forecast_date <- max_time_value + ahead ## %% need to be able to access recipe to get ahead here, yes?
+    warning("Set forecast_date equal to maximum time value plus ahead value.")
+  }
+  if (object$forecast_date < as_of_date) {
+    warning("forecast_date is less than the most recent update date of the data.")
+  }
+
   components$predictions <- dplyr::bind_cols(components$predictions,
                                              forecast_date = as.Date(object$forecast_date))
-  test <<- components
   components
 }
