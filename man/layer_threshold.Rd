@@ -9,6 +9,7 @@ layer_threshold(
   ...,
   lower = 0,
   upper = Inf,
+  .flag = TRUE,
   id = rand_id("threshold")
 )
 }
@@ -28,6 +29,9 @@ Default value is \code{0}.}
 \item{upper}{Upper threshold for the prediction values. That is, any
 predictions that are greater than this upper bound are set to it.
 Default value is \code{Inf}.}
+
+\item{.flag}{a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }

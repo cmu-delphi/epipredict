@@ -4,7 +4,7 @@
 \alias{layer_naomit}
 \title{Omit \code{NA}s from predictions or other columns}
 \usage{
-layer_naomit(frosting, ..., id = rand_id("naomit"))
+layer_naomit(frosting, ..., .flag = TRUE, id = rand_id("naomit"))
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
@@ -14,6 +14,9 @@ expressions separated by commas. Variable names can be used as if they
 were positions in the data frame, so expressions like \code{x:y} can
 be used to select a range of variables. Typical usage is \code{.pred} to remove
 any rows with \code{NA} predictions.}
+
+\item{.flag}{a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }

@@ -11,7 +11,10 @@
 #' @param frosting a frosting object
 #' #' @param .flag a logical to determine if the layer is added. Passed on to
 #'   `add_layer()`. Default `TRUE`.
+#' @param .flag a logical to determine if the layer is added. Passed on to
+#'   `add_layer()`. Default `TRUE`.
 #' @param id a string identifying the layer
+#'
 #'
 #' @return An updated `frosting` object
 #' @export

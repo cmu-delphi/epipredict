@@ -215,11 +215,12 @@ apply_frosting.epi_workflow <-
 
     layers <- extract_layers(workflow)
 
-    # checks if layer_predict() is in the postprocessor
-    layer_names <- map_chr(layers, ~ class(.x)[1])
-    if (!detect_layer(workflow, "layer_predict")) {
-      layers <- c(
-        layer_predict_new(NULL, list(), list(), rand_id("predict_default")),
+    # Check if there's a predict layer, add it if not.
+    if (rlang::is_null(layers)) {
+      layers <- extract_layers(frosting() %>% layer_predict())
+    } else if (! detect_layer(workflow, "layer_predict")) {
+      layers <- c(list(
+        layer_predict_new(NULL, list(), list(), rand_id("predict_default"))),
         layers)
     }
 
@@ -230,104 +231,3 @@ apply_frosting.epi_workflow <-
 
     return(components)
   }
-
-
-layer <- function(subclass, ..., .prefix = "layer_") {
-  structure(list(...), class = c(paste0(.prefix, subclass), "layer"))
-}
-
-is_layer <- function(x) {
-  inherits(x, "layer")
-}
-
-validate_layer <- function(x, ..., arg = "`x`", call = caller_env()) {
-  rlang::check_dots_empty()
-  if (!is_layer(x)) {
-    glubort(
-      "{arg} must be a frosting layer, not a {class(x)[[1]]}.",
-      .call = call
-    )
-  }
-  invisible(x)
-}
-
-#' Add layer to a frosting object
-#'
-#' @param frosting a `frosting` postprocessor
-#' @param object a `frosting` layer
-#' @param flag logical to determine if the layer is added. Default `TRUE`.
-#'
-#' @return an updated `frosting` postprocessor
-#' @export
-add_layer <- function(frosting, object, flag = TRUE) {
-  validate_frosting(frosting)
-  validate_layer(object)
-
-  if (flag) frosting$layers[[length(frosting$layers) + 1]] <- object
-
-  frosting
-}
-
-detect_layer <- function(x, name, ...) {
-  UseMethod(x)
-}
-
-detect_layer.frosting <- function(x, name, ...) {
-  name %in% map_chr(x$layers, ~ class(.x)[1])
-}
-
-detect_layer.workflow <- function(x, name, ...) {
-  validate_has_postprocessor(x)
-  detect_layer(x$post$actions$frosting$frosting)
-}
-
-extract_layers <- function(x, ...) {
-  UseMethod("extract_layers")
-}
-
-extract_layers.frosting <- function(x, ...) {
-  rlang::check_dots_empty()
-  x$layers
-}
-
-extract_layers.workflow <- function(x, ...) {
-  rlang::check_dots_empty()
-  validate_has_postprocessor(x)
-  extract_layers(x$post$actions$frosting$frosting)
-}
-
-#' Spread a layer of frosting on a fitted workflow
-#'
-#' Slathering frosting means to implement a postprocessing layer. When
-#' creating a new postprocessing layer, you must implement an S3 method
-#' for this function
-#'
-#' @param object a workflow with `frosting` postprocessing steps
-#' @param components a list of components containing model information. These
-#'   will be updated and returned by the layer. These should be
-#'   * `mold` - the output of calling `hardhat::mold()` on the workflow. This
-#'     contains information about the preprocessing, including the recipe.
-#'   * `forged` - the output of calling `hardhat::forge()` on the workflow.
-#'     This should have predictors and outcomes for the `new_data`. It will
-#'     have three components `predictors`, `outcomes` (if these were in the
-#'     `new_data`), and `extras` (usually has the rest of the data, including
-#'     `keys`).
-#'   * `keys` - we put the keys (`time_value`, `geo_value`, and any others)
-#'     here for ease.
-#' @param the_fit the fitted model object as returned by calling `parsnip::fit()`
-#'
-#' @param ... additional arguments used by methods. Currently unused.
-#'
-#' @return The `components` list. In the same format after applying any updates.
-#' @export
-slather <- function(object, components, the_fit, the_recipe, ...) {
-  UseMethod("slather")
-}
-
-# Possible types of steps
-# 1. mutate-like (apply a scalar transform to the .preds)
-# 2. Filtering (remove some rows from .preds)
-# 3. Imputation (fill the NA's in .preds, might need the training data)
-# 4. Quantiles (needs the_fit, residuals, .preds)
-# 5. add_target_date (needs the recipe, training data?)
-# requirements = c("predictions", "fit", "predictors", "outcomes", "extras"),
