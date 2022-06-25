@@ -30,7 +30,10 @@
 #'
 #' p <- predict(wf1, latest)
 #' p
-layer_residual_quantile <- function(frosting, probs = c(0.0275, 0.975), symmetrize = TRUE, id = rand_id("residual_quantile")) {
+layer_residual_quantile <- function(frosting,
+                                    probs = c(0.0275, 0.975),
+                                    symmetrize = TRUE,
+                                    id = rand_id("residual_quantile")) {
   add_layer(
     frosting,
     layer_residual_quantile_new(
