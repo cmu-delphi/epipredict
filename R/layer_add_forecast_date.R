@@ -56,7 +56,7 @@ slather.layer_add_forecast_date <- function(object, components, ...) {
     ))
 
   if (is.null(object$forecast_date)) {
-      forecast_date <- max_time_value + ahead ## %% need to be able to access recipe to get ahead here, yes?
+    forecast_date <- max_time_value + ahead ## %% need to be able to access recipe to get ahead here, yes?
     warning("Set forecast_date equal to maximum time value plus ahead value.")
   }
   if (object$forecast_date < as_of_date) {
@@ -65,5 +65,6 @@ slather.layer_add_forecast_date <- function(object, components, ...) {
 
   components$predictions <- dplyr::bind_cols(components$predictions,
                                              forecast_date = as.Date(object$forecast_date))
+  test <<- components
   components
 }
