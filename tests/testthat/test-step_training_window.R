@@ -10,7 +10,7 @@ test_that("step_training_window works with default n_recent", {
   p <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window() %>%
     recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL) %>% tibble::as_tibble()
+    recipes::bake(new_data = NULL)
 
   expect_equal(nrow(p), 100L)
   expect_equal(ncol(p), 4L)
