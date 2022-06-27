@@ -17,6 +17,7 @@ Imports:
     cli,
     dplyr,
     epiprocess,
+    fs,
     generics,
     glue,
     hardhat (>= 1.0.0.9000),
@@ -29,6 +30,7 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
+    usethis,
     workflows
 Suggests: 
     covidcast,
