@@ -6,6 +6,8 @@
 #'   were positions in the data frame, so expressions like `x:y` can
 #'   be used to select a range of variables. Typical usage is `.pred` to remove
 #'   any rows with `NA` predictions.
+#' @param .flag a logical to determine if the layer is added. Passed on to
+#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -33,13 +35,14 @@
 #'
 #' p <- predict(wf1, latest)
 #' p
-layer_naomit <- function(frosting, ..., id = rand_id("naomit")) {
+layer_naomit <- function(frosting, ..., .flag = TRUE, id = rand_id("naomit")) {
   add_layer(
     frosting,
     layer_naomit_new(
       terms = dplyr::enquos(...),
       id = id
-    )
+    ),
+    flag = .flag
   )
 }
 
@@ -48,7 +51,7 @@ layer_naomit_new <- function(terms, id) {
 }
 
 #' @export
-slather.layer_naomit <- function(object, components, the_fit,...) {
+slather.layer_naomit <- function(object, components, the_fit, the_recipe, ...) {
   exprs <- rlang::expr(c(!!!object$terms))
   pos <- tidyselect::eval_select(exprs, components$predictions)
   col_names <- names(pos)

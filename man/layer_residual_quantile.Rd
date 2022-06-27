@@ -6,17 +6,24 @@
 \usage{
 layer_residual_quantile(
   frosting,
+  ...,
   probs = c(0.0275, 0.975),
   symmetrize = TRUE,
+  .flag = TRUE,
   id = rand_id("residual_quantile")
 )
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
+\item{...}{Unused, include for consistency with other layers.}
+
 \item{probs}{numeric vector of probabilities with values in (0,1) referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetrical.}
+
+\item{.flag}{a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }
