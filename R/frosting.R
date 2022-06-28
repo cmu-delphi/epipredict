@@ -38,6 +38,8 @@ add_frosting <- function(x, frosting, ...) {
   workflows:::add_action(x, action, "frosting")
 }
 
+order_stage_post <- function() "frosting"
+
 #' @rdname add_frosting
 #' @export
 remove_frosting <- function(x) {
@@ -161,6 +163,23 @@ frosting <- function(layers = NULL, requirements = NULL) {
   out <- new_frosting()
 }
 
+extract_frosting <- function(x, ...) {
+  UseMethod("extract_frosting")
+}
+
+extract_frosting.default <- function(x, ...) {
+  abort(c("Frosting is only available for epi_workflows currently.",
+          i = "Can you use `epi_workflow()` instead of `workflow()`?"))
+  invisible(x)
+}
+
+extract_frosting.epi_workflow <- function(x, ...) {
+  if (has_postprocessor_frosting(x)) {
+    return(x$post$actions$frosting$frosting)
+  }
+  abort("The epi_workflow does not have a preprocessor.")
+}
+
 #' Apply postprocessing to a fitted workflow
 #'
 #' This function is intended for internal use. It implements postprocessing
@@ -231,3 +250,50 @@ apply_frosting.epi_workflow <-
 
     return(components)
   }
+
+
+#' @export
+print.frosting <- function(x, ...) {
+
+  layers <- x$layers
+  n_layers <- length(layers)
+  layer <- ifelse(n_layers == 1L, "Layer", "Layers")
+  n_layers_msg <- glue::glue("{n_layers} Frosting {layer}")
+  cat_line(n_layers_msg)
+
+  if (n_layers == 0L) return(invisible(x))
+
+  cat_line("")
+
+  layer_names <- map_chr(layers, pull_layer_name)
+
+  if (n_layers <= 10L) {
+    cli::cat_bullet(layer_names)
+    return(invisible(x))
+  }
+
+  extra_layers <- n_layers - 10L
+  layer_names <- layer_names[1:10]
+
+  layer <- ifelse(extra_layers == 1L, "layer", "layers")
+
+  extra_dots <- "..."
+  extra_msg <- glue::glue("and {extra_layers} more {layer}.")
+
+  layer_names <- c(layer_names, extra_dots, extra_msg)
+
+  cli::cat_bullet(layer_names)
+  invisible(x)
+}
+
+print_postprocessor <- function(x) {
+  if (!has_postprocessor_frosting(x)) return(invisible(x))
+
+  header <- cli::rule("Postprocessor")
+  cat_line(header)
+
+  frosting <- extract_frosting(x)
+  print(frosting)
+
+  invisible(x)
+}

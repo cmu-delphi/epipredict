@@ -67,6 +67,11 @@ is_layer <- function(x) {
   inherits(x, "layer")
 }
 
+pull_layer_name <- function(x) {
+  step <- class(x)[[1]]
+  glue::glue("{step}()")
+}
+
 #' @export
 #' @rdname layer-processors
 validate_layer <- function(x, ..., arg = "`x`", call = caller_env()) {
@@ -104,6 +109,7 @@ detect_layer.workflow <- function(x, name, ...) {
 extract_layers <- function(x, ...) {
   UseMethod("extract_layers")
 }
+
 
 #' @export
 #' @rdname layer-processors
