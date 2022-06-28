@@ -287,9 +287,7 @@ print.frosting <- function(x, ...) {
 }
 
 print_postprocessor <- function(x) {
-  no_frosting <- !has_postprocessor_frosting(x)
-
-  if (no_frosting) return(invisible(x))
+  if (!has_postprocessor_frosting(x)) return(invisible(x))
 
   header <- cli::rule("Postprocessor")
   cat_line(header)
