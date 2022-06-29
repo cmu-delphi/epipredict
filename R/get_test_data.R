@@ -28,23 +28,17 @@ get_test_data <- function(recipe, x){
   }
   ## CHECK if it is epi_df?
 
-
-  # initialize vector to hold max lags for each variable
-  max_lags <- c()
-  for (i in seq_along(recipe$steps)) {
-    if ("lag" %in% names(recipe$steps[[i]])) {
-      max_lags <- append(max_lags, max(recipe$steps[[i]]$lag))
-    }
-  }
+  max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)))
 
   # CHECK: Return NA if insufficient training data
-  if (dplyr::n_distinct(x$time_value) < max(max_lags)) {
-    stop("insufficient training data")
+  if (dplyr::n_distinct(x$time_value) < max_lags) {
+    cli_stop("Insufficient training data. You need at least {max_lags}",
+             "distinct time_values.")
   }
 
   groups <- epi_keys(recipe)[epi_keys(recipe) != "time_value"]
 
-  test_data <- x %>%
+  x %>%
     dplyr::filter(
       dplyr::if_any(
         .cols = recipe$term_info$variable[which(recipe$var_info$role == 'raw')],
@@ -52,8 +46,7 @@ get_test_data <- function(recipe, x){
       )
     ) %>%
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
-    dplyr::slice_tail(n = max(max_lags) + 1) %>%
+    dplyr::slice_tail(n = max_lags + 1) %>%
     epiprocess::ungroup()
 
-  return(test_data)
 }
