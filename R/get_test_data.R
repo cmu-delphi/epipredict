@@ -32,8 +32,8 @@ get_test_data <- function(recipe, x){
 
   # CHECK: Return NA if insufficient training data
   if (dplyr::n_distinct(x$time_value) < max_lags) {
-    cli_stop("Insufficient training data. You need at least {max_lags}",
-             "distinct time_values.")
+    cli_stop("You supplied insufficient training data for this recipe. ",
+             "You need at least {max_lags} distinct time_values.")
   }
 
   groups <- epi_keys(recipe)[epi_keys(recipe) != "time_value"]
