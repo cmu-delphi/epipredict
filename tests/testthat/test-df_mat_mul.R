@@ -1,14 +1,14 @@
 df <- data.frame(matrix(1:100, ncol = 5))
 mat <- matrix(1:4, ncol = 2)
 
-test_that("First input must be a data frame and second input must be a matrix",
-          {
-  expect_error(df_mat_mul(30,mat))
+test_that("First input must be a data frame and second
+          input must be a matrix", {
   expect_error(df_mat_mul(df,20))
+  expect_error(df_mat_mul(30,mat))
 })
 
-test_that("Argument name is a character" ,{
-            expect_error(df_mat_mul(df, mat, 100))
+test_that("Argument name is a character", {
+  expect_error(df_mat_mul(df, mat, 100))
 })
 
 test_that("The length of names does not differ from the length of the number
@@ -20,7 +20,7 @@ test_that("The number of columns of the first data frame cannot differ from the
           number of rows of the second matrix, hence preventing incompatible
           matrix multiplication", {
             expect_error(df_mat_mul(df, mat, "z", 1:3))
-          })
+})
 
 X <- df[c(1,4,5)]
 Z <- as.data.frame(as.matrix(df[2:3]) %*% mat)
