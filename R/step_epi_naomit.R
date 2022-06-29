@@ -13,7 +13,7 @@
 #'  step_epi_naomit()
 
 step_epi_naomit <- function(recipe) {
-  stopifnot("recipe" %in% class(recipe))
+  stopifnot(inherits(recipe, "recipe"))
   recipe %>%
     recipes::step_naomit(all_predictors()) %>%
     recipes::step_naomit(all_outcomes(), skip = TRUE)
