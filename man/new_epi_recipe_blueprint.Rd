@@ -11,7 +11,6 @@ new_epi_recipe_blueprint(
   intercept = FALSE,
   allow_novel_levels = FALSE,
   fresh = TRUE,
-  bake_dependent_roles = character(),
   composition = "tibble",
   ptypes = NULL,
   recipe = NULL,
@@ -23,7 +22,6 @@ epi_recipe_blueprint(
   intercept = FALSE,
   allow_novel_levels = FALSE,
   fresh = TRUE,
-  bake_dependent_roles = character(),
   composition = "tibble"
 )
 
@@ -31,7 +29,6 @@ default_epi_recipe_blueprint(
   intercept = FALSE,
   allow_novel_levels = FALSE,
   fresh = TRUE,
-  bake_dependent_roles = character(),
   composition = "tibble"
 )
 
@@ -39,7 +36,6 @@ new_default_epi_recipe_blueprint(
   intercept = FALSE,
   allow_novel_levels = FALSE,
   fresh = TRUE,
-  bake_dependent_roles = character(),
   composition = "tibble",
   ptypes = NULL,
   recipe = NULL,
