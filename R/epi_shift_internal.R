@@ -185,10 +185,9 @@ bake.step_epi_shift <- function(object, new_data, ...) {
                         " argument to be integer valued.")
     rlang::abort(error_msg)
   }
-  grid <- tidyr::expand_grid(col = object$columns, lag_val = object$shift)
-  grid <- dplyr::mutate(grid,
-                        newname = glue::glue(
-                          paste0("{object$prefix}","{abs(lag_val)}","_{col}")
+  grid <- tidyr::expand_grid(col = object$columns, shift_val = object$shift) %>%
+    dplyr::mutate(newname = glue::glue(
+                          paste0("{object$prefix}","{abs(shift_val)}","_{col}")
                         )
   )
   ## ensure no name clashes
