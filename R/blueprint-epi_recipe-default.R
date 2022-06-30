@@ -12,13 +12,12 @@
 #' @export
 new_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
-           bake_dependent_roles = character(), composition = "tibble",
+           composition = "tibble",
            ptypes = NULL, recipe = NULL, ..., subclass = character()) {
   hardhat::new_recipe_blueprint(
     intercept = intercept,
     allow_novel_levels = allow_novel_levels,
     fresh = fresh,
-    bake_dependent_roles = c(bake_dependent_roles, "time_value", "geo_value", "key", "raw"),
     composition = composition,
     ptypes = ptypes,
     recipe = recipe,
@@ -32,12 +31,11 @@ new_epi_recipe_blueprint <-
 #' @export
 epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE,
-           fresh = TRUE, bake_dependent_roles = character(),
+           fresh = TRUE,
            composition = "tibble") {
     new_epi_recipe_blueprint(intercept = intercept,
                              allow_novel_levels = allow_novel_levels,
                              fresh = fresh,
-                             bake_dependent_roles = bake_dependent_roles,
                              composition = composition)
   }
 
@@ -45,12 +43,11 @@ epi_recipe_blueprint <-
 #' @export
 default_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
-           bake_dependent_roles = character(), composition = "tibble") {
+           composition = "tibble") {
     new_default_epi_recipe_blueprint(
       intercept = intercept,
       allow_novel_levels = allow_novel_levels,
       fresh = fresh,
-      bake_dependent_roles = bake_dependent_roles,
       composition = composition
     )
   }
@@ -60,14 +57,13 @@ default_epi_recipe_blueprint <-
 #' @export
 new_default_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE,
-           fresh = TRUE, bake_dependent_roles = character(),
+           fresh = TRUE,
            composition = "tibble", ptypes = NULL, recipe = NULL,
            extra_role_ptypes = NULL, ..., subclass = character()) {
   new_epi_recipe_blueprint(
     intercept = intercept,
     allow_novel_levels = allow_novel_levels,
     fresh = fresh,
-    bake_dependent_roles = bake_dependent_roles,
     composition = composition,
     ptypes = ptypes,
     recipe = recipe,
@@ -81,7 +77,7 @@ new_default_epi_recipe_blueprint <-
 #' @export
 run_mold.default_epi_recipe_blueprint <- function(blueprint, ..., data) {
   rlang::check_dots_empty0(...)
-  blueprint <- hardhat:::patch_recipe_default_blueprint(blueprint)
+  # blueprint <- hardhat:::patch_recipe_default_blueprint(blueprint)
   cleaned <- mold_epi_recipe_default_clean(blueprint = blueprint, data = data)
   blueprint <- cleaned$blueprint
   data <- cleaned$data
