@@ -60,19 +60,6 @@ prediction time? This information is used by the \code{clean} function in the
 \item{fresh}{Should already trained operations be re-trained when \code{prep()} is
 called?}
 
-\item{bake_dependent_roles}{A character vector of recipes column "roles"
-specifying roles that are required to \code{\link[recipes:bake]{recipes::bake()}} new data. Can't be
-\code{"predictor"} or \code{"outcome"}, as predictors are always required and
-outcomes are handled by the \code{outcomes} argument of \code{\link[hardhat:forge]{forge()}}.
-
-Typically, non-standard roles (such as \code{"id"} or \code{"case_weights"}) are not
-required to \code{bake()} new data. Unless specified by \code{bake_dependent_roles},
-these non-standard role columns are excluded from checks done in \code{\link[hardhat:forge]{forge()}}
-to validate the column structure of \code{new_data}, will not be passed to
-\code{bake()} even if they existed in \code{new_data}, and will not be returned in
-the \code{forge()$extras$roles} slot. See the documentation of
-\code{\link[recipes:roles]{recipes::add_role()}} for more information about roles.}
-
 \item{composition}{Either "tibble", "matrix", or "dgCMatrix" for the format
 of the processed predictors. If "matrix" or "dgCMatrix" are chosen, all of
 the predictors must be numeric after the preprocessing method has been
@@ -81,8 +68,7 @@ applied; otherwise an error is thrown.}
 \item{ptypes}{Either \code{NULL}, or a named list with 2 elements, \code{predictors}
 and \code{outcomes}, both of which are 0-row tibbles. \code{ptypes} is generated
 automatically at \code{\link[hardhat:mold]{mold()}} time and is used to validate \code{new_data} at
-prediction time. At \code{\link[hardhat:mold]{mold()}} time, the information found in
-\code{blueprint$mold$process()$ptype} is used to set \code{ptypes} for the \code{blueprint}.}
+prediction time.}
 
 \item{recipe}{Either \code{NULL}, or an unprepped recipe. This argument is set
 automatically at \code{\link[hardhat:mold]{mold()}} time.}
