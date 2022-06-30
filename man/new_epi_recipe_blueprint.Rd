@@ -64,8 +64,7 @@ applied; otherwise an error is thrown.}
 \item{ptypes}{Either \code{NULL}, or a named list with 2 elements, \code{predictors}
 and \code{outcomes}, both of which are 0-row tibbles. \code{ptypes} is generated
 automatically at \code{\link[hardhat:mold]{mold()}} time and is used to validate \code{new_data} at
-prediction time. At \code{\link[hardhat:mold]{mold()}} time, the information found in
-\code{blueprint$mold$process()$ptype} is used to set \code{ptypes} for the \code{blueprint}.}
+prediction time.}
 
 \item{recipe}{Either \code{NULL}, or an unprepped recipe. This argument is set
 automatically at \code{\link[hardhat:mold]{mold()}} time.}

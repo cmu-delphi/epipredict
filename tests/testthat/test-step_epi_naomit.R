@@ -1,5 +1,4 @@
 library(dplyr)
-library(epiprocess)
 library(parsnip)
 library(workflows)
 
@@ -8,7 +7,7 @@ x <- tibble(geo_value = rep("nowhere",200),
             time_value = as.Date("2021-01-01") + 0:199,
             case_rate = 1:200,
             death_rate = 1:200) %>%
-  as_epi_df()
+  epiprocess::as_epi_df()
 
 # Preparing the datasets to be used for comparison
 r <- epi_recipe(x) %>%
