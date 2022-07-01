@@ -40,9 +40,12 @@ layer_add_target_date_new <- function(ahead, id = rand_id("add_target_date")) {
 }
 
 #' @export
-slather.layer_add_target_date <- function(object, components, ...) {
-  if(is.null(object$ahead)) stop("`ahead` must be specified.")
-  if(!is.numeric(object$ahead)) stop("`ahead` must be a numeric value.")
+slather.layer_add_target_date <- function(object, components, the_recipe, ...) {
+  test5 <<- components
+  object <<- object
+  recipe <<- the_recipe
+  #if(is.null(object$ahead)) stop("`ahead` must be specified.")
+  #if(!is.numeric(object$ahead)) stop("`ahead` must be a numeric value.")
   components$predictions <- dplyr::bind_cols(components$predictions,
                                              target_date = object$ahead + components$predictions$time_value)
   components
