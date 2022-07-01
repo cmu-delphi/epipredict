@@ -36,15 +36,13 @@
 #' wf <- epi_workflow(r, linear_reg())
 #'
 #' wf
-epi_workflow <- function(preprocessor = NULL, spec = NULL,
-                         postprocessor = NULL) {
+epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL) {
   out <- workflows::workflow(spec = spec)
   class(out) <- c("epi_workflow", class(out))
 
   if (is_epi_recipe(preprocessor)) {
-    return(add_epi_recipe(out, preprocessor))
-  }
-  if (!is_null(preprocessor)) {
+    out <- add_epi_recipe(out, preprocessor)
+  }else if (!is_null(preprocessor)) {
     out <- workflows:::add_preprocessor(out, preprocessor)
   }
   if (!is_null(postprocessor)) {
