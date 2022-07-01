@@ -9,11 +9,14 @@ layer_predict(
   type = NULL,
   opts = list(),
   ...,
+  .flag = TRUE,
   id = rand_id("predict_default")
 )
 }
 \arguments{
-\item{frosting}{a frosting object}
+\item{frosting}{a frosting object
+#' @param .flag a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
 
 \item{type}{A single character value or \code{NULL}. Possible values
 are "numeric", "class", "prob", "conf_int", "pred_int", "quantile", "time",
@@ -45,6 +48,9 @@ and "pred_int". Default value is \code{FALSE}.
 \item \code{time}: the time(s) for hazard and survival probability estimates.
 }}
 
+\item{.flag}{a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
+
 \item{id}{a string identifying the layer}
 }
 \value{
@@ -55,6 +61,35 @@ Implements prediction on a fitted \code{epi_workflow}. One may want different
 types of prediction, and to potentially apply this after some amount of
 postprocessing. This would typically be the first layer in a \code{frosting}
 postprocessor.
+}
+\examples{
+library(dplyr)
+library(recipes)
+
+jhu <- case_death_rate_subset \%>\%
+filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+r <- epi_recipe(jhu) \%>\%
+ step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+ step_epi_ahead(death_rate, ahead = 7) \%>\%
+ step_naomit(all_predictors()) \%>\%
+ step_naomit(all_outcomes(), skip = TRUE)
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
+latest <- jhu \%>\%
+ filter(time_value >= max(time_value) - 14)
+
+# Predict layer alone
+f <- frosting() \%>\% layer_predict()
+wf1 <- wf \%>\% add_frosting(f)
+
+p1 <- predict(wf1, latest)
+p1
+
+# Prediction with interval
+f <- frosting() \%>\% layer_predict(type = "pred_int")
+wf2 <- wf \%>\% add_frosting(f)
+
+p2 <- predict(wf2, latest)
+p2
 }
 \seealso{
 \code{parsnip::predict.model_fit()}

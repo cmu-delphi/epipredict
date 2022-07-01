@@ -17,3 +17,13 @@ cli_warn = function(..., .envir = parent.frame()) {
   text = cli_glue(..., .envir = .envir)
   warning(paste(text, collapse = "\n"), call. = FALSE)
 }
+
+#' @importFrom rlang caller_env
+glubort <-
+  function(..., .sep = "", .envir = caller_env(), .call = .envir) {
+    rlang::abort(glue::glue(..., .sep = .sep, .envir = .envir), call = .call)
+  }
+
+cat_line <- function(...) {
+  cat(paste0(..., collapse = "\n"), "\n", sep = "")
+}
