@@ -1,11 +1,14 @@
 #' Postprocessing step to add the target date
 #'
 #' @param frosting a `frosting` postprocessor
-#' @param ahead A positive integer to add to `time_value` to get the target date.
-#' This must be specified by the user.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
+#'
+#' @details This function assumes that a value for `ahead`
+#' has been specified in a preprocessing step (most likely in `step_epi_ahead`).
+#' Then, `ahead` is added to `time_value` to get the target date.
+#'
 #' @export
 #' @examples
 #' jhu <- case_death_rate_subset %>%

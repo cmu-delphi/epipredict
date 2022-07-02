@@ -10,15 +10,17 @@ layer_add_target_date(frosting, id = rand_id("add_target_date"))
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{id}{a random id string}
-
-\item{ahead}{A positive integer to add to \code{time_value} to get the target date.
-This must be specified by the user.}
 }
 \value{
 an updated \code{frosting} postprocessor
 }
 \description{
 Postprocessing step to add the target date
+}
+\details{
+This function assumes that a value for \code{ahead}
+has been specified in a preprocessing step (most likely in \code{step_epi_ahead}).
+Then, \code{ahead} is added to \code{time_value} to get the target date.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%

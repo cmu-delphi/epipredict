@@ -9,11 +9,11 @@ wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 latest <- jhu %>%
   dplyr::filter(time_value >= max(time_value) - 14)
 
-test_that("Specify a forecast_date in `layer_add_forecast_date()`", {
+test_that("Specify a `forecast_date` that is greater than or equal to `as_of` date", {
 
   f <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date(forecast_date = "2021-12-31") %>%
+    layer_add_forecast_date(forecast_date = "2022-05-31", newdata = latest) %>%
     layer_naomit(.pred)
   wf1 <- wf %>% add_frosting(f)
 
@@ -21,17 +21,41 @@ test_that("Specify a forecast_date in `layer_add_forecast_date()`", {
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_equal(p$forecast_date, rep(as.Date("2021-12-31"), times = 3))
-  expect_named(p, c("time_value", "geo_value", ".pred", "forecast_date"))
+  expect_equal(p$forecast_date, rep(as.Date("2022-05-31"), times = 3))
+  expect_named(p, c("geo_value", "time_value", ".pred", "forecast_date"))
 })
 
-test_that("Fail to specify a forecast_date in `layer_add_forecast_date()`", {
+test_that("Specify a `forecast_date` that is less than `as_of` date", {
 
-  f <- frosting() %>%
+  f2 <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date() %>%
+    layer_add_forecast_date(forecast_date = "2021-12-31", newdata = latest) %>%
     layer_naomit(.pred)
-  wf2 <- wf %>% add_frosting(f)
+  wf2 <- wf %>% add_frosting(f2)
 
-  expect_error(predict(wf2, latest), "`forecast_date` must be specified")
+  expect_warning(p2 <- predict(wf2, latest),
+                 "forecast_date is less than the most recent update date of the data.")
+  expect_equal(ncol(p2), 4L)
+  expect_s3_class(p2, "epi_df")
+  expect_equal(nrow(p2), 3L)
+  expect_equal(p2$forecast_date, rep(as.Date("2021-12-31"), times = 3))
+  expect_named(p2, c("geo_value", "time_value", ".pred", "forecast_date"))
+})
+
+test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
+
+  f3 <- frosting() %>%
+    layer_predict() %>%
+    layer_add_forecast_date(newdata = latest) %>%
+    layer_naomit(.pred)
+  wf3 <- wf %>% add_frosting(f3)
+
+  w <- capture_warnings(p3 <- predict(wf3, latest))
+  expect_equal(w[1], "Set forecast_date equal to maximum time value plus ahead value.")
+  expect_equal(w[2], "forecast_date is less than the most recent update date of the data.")
+  expect_equal(ncol(p3), 4L)
+  expect_s3_class(p3, "epi_df")
+  expect_equal(nrow(p3), 3L)
+  expect_equal(p3$forecast_date, rep(as.Date("2022-01-07"), times = 3))
+  expect_named(p3, c("geo_value", "time_value", ".pred", "forecast_date"))
 })

@@ -4,13 +4,22 @@
 \alias{layer_add_forecast_date}
 \title{Postprocessing step to add the forecast date}
 \usage{
-layer_add_forecast_date(frosting, forecast_date = NULL)
+layer_add_forecast_date(
+  frosting,
+  forecast_date = NULL,
+  newdata = NULL,
+  id = rand_id("add_forecast_date")
+)
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{forecast_date}{The forecast date to add as a column to the \code{epi_df}.
-This must be specified by the user in the form "yyyy-mm-dd".}
+This should be specified in the form "yyyy-mm-dd".}
+
+\item{newdata}{The rectangular data object, such as a data frame, for which
+one wants to make predictions. This should be the same \code{newdata} to be
+used in \code{predict}.}
 
 \item{id}{a random id string}
 }
@@ -19,6 +28,14 @@ an updated \code{frosting} postprocessor
 }
 \description{
 Postprocessing step to add the forecast date
+}
+\details{
+To use this function, either specify an ahead value in
+preprocessing and leave the forecast date unspecifed here or simply specify
+a forecast date here. In the former, the forecast date will be set as the
+maximum time value plus the ahead value. In that case, as well as in the case
+when the forecast date is less than the most recent update date of the data
+(ie. the \code{as_of} value), an appropriate warning will be thrown.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -32,10 +49,31 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
+# Specify a `forecast_date` that is greater than or equal to `as_of` date
 f <- frosting() \%>\% layer_predict() \%>\%
-  layer_add_forecast_date(forecast_date = "2021-12-31") \%>\% layer_naomit(.pred)
+  layer_add_forecast_date(forecast_date = "2022-05-31", newdata = latest) \%>\%
+  layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
-p <- predict(wf1, latest)
-p
+p1 <- predict(wf1, latest)
+p1
+
+# Specify a `forecast_date` that is less than `as_of` date
+f2 <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_add_forecast_date(forecast_date = "2021-12-31", newdata = latest) \%>\%
+  layer_naomit(.pred)
+wf2 <- wf \%>\% add_frosting(f2)
+
+p2 <- predict(wf2, latest)
+p2
+# Do not specify a forecast_date in `layer_add_forecast_date()`
+ f3 <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_add_forecast_date(newdata = latest) \%>\%
+  layer_naomit(.pred)
+wf3 <- wf \%>\% add_frosting(f3)
+
+p3 <- predict(wf3, latest)
+p3
 }

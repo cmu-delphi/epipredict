@@ -2,10 +2,21 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
-#' This must be specified by the user in the form "yyyy-mm-dd".
+#' This should be specified in the form "yyyy-mm-dd".
+#' @param newdata The rectangular data object, such as a data frame, for which
+#' one wants to make predictions. This should be the same `newdata` to be
+#' used in `predict`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
+#'
+#' @details To use this function, either specify an ahead value in
+#'  preprocessing and leave the forecast date unspecifed here or simply specify
+#'  a forecast date here. In the former, the forecast date will be set as the
+#'  maximum time value plus the ahead value. In that case, as well as in the case
+#'  when the forecast date is less than the most recent update date of the data
+#'  (ie. the `as_of` value), an appropriate warning will be thrown.
+#'
 #' @export
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -19,30 +30,53 @@
 #' latest <- jhu %>%
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
+#' # Specify a `forecast_date` that is greater than or equal to `as_of` date
 #' f <- frosting() %>% layer_predict() %>%
-#'   layer_add_forecast_date(forecast_date = "2021-12-31") %>% layer_naomit(.pred)
+#'   layer_add_forecast_date(forecast_date = "2022-05-31", newdata = latest) %>%
+#'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
-#' p
+#' p1 <- predict(wf1, latest)
+#' p1
+#'
+#' # Specify a `forecast_date` that is less than `as_of` date
+#' f2 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_add_forecast_date(forecast_date = "2021-12-31", newdata = latest) %>%
+#'   layer_naomit(.pred)
+#' wf2 <- wf %>% add_frosting(f2)
+#'
+#' p2 <- predict(wf2, latest)
+#' p2
+#' # Do not specify a forecast_date in `layer_add_forecast_date()`
+#'  f3 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_add_forecast_date(newdata = latest) %>%
+#'   layer_naomit(.pred)
+#' wf3 <- wf %>% add_frosting(f3)
+#'
+#' p3 <- predict(wf3, latest)
+#' p3
 layer_add_forecast_date <-
-  function(frosting, forecast_date = NULL) {
+  function(frosting, forecast_date = NULL, newdata = NULL, id = rand_id("add_forecast_date")) {
     add_layer(
       frosting,
       layer_add_forecast_date_new(
-        forecast_date = forecast_date
+        forecast_date = forecast_date,
+        newdata = newdata,
+        id = id
       )
     )
   }
 
-layer_add_forecast_date_new <- function(forecast_date, id = rand_id("add_forecast_date")) {
-  layer("add_forecast_date", forecast_date = forecast_date, id = id)
+layer_add_forecast_date_new <- function(forecast_date, newdata, id = id) {
+  layer("add_forecast_date", forecast_date = forecast_date, newdata = newdata, id = id)
 }
 
 slather.layer_add_forecast_date <- function(object, components, ...) {
-  if(is.na(lubridate::ymd(object$forecast_date))) stop("specified `forecast_date` must be of format yyyy-mm-dd")
+  if (is.null(object$newdata)) stop("`newdata` must be specified as an argument.")
 
-  last_rows_df <- new_data %>% # %% new_data for forecast_date needed here... perhaps this is components or components$forged$predictors here???
+  last_rows_df <- object$newdata %>% # %% new_data for forecast_date needed here... perhaps this is components or components$forged$predictors here???
     dplyr::group_by(geo_value) %>%
     dplyr::slice(dplyr::n())
 
@@ -50,19 +84,23 @@ slather.layer_add_forecast_date <- function(object, components, ...) {
 
   as_of_date <-
     as.Date(stringr::str_extract(
-      attributes(new_data)$metadata$as_of, # %% new_data change
+      attributes(object$newdata)$metadata$as_of, # %% new_data change
       "\\d{4}-\\d{2}-\\d{2}"
     ))
 
+  ahead <- as.numeric(stringr::str_extract(names(components$mold$outcomes),
+                                           "(?<=ahead_)\\d+"))
   if (is.null(object$forecast_date)) {
-    forecast_date <- max_time_value + ahead ## %% need to be able to access recipe to get ahead here, yes?
-    warning("Set forecast_date equal to maximum time value plus ahead value.")
+  object$forecast_date <- max_time_value + ahead
+  warning("Set forecast_date equal to maximum time value plus ahead value.")
   }
+
   if (object$forecast_date < as_of_date) {
-    warning("forecast_date is less than the most recent update date of the data.")
+  warning("forecast_date is less than the most recent update date of the data.")
   }
 
   components$predictions <- dplyr::bind_cols(components$predictions,
                                              forecast_date = as.Date(object$forecast_date))
   components
 }
+
