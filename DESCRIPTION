@@ -25,6 +25,7 @@ Imports:
     purrr,
     recipes (>= 0.2.0.9001),
     rlang,
+    stringr,
     stats,
     tensr,
     tibble,
