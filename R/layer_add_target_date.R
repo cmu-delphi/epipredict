@@ -20,34 +20,32 @@
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
 #' f <- frosting() %>% layer_predict() %>%
-#'   layer_add_target_date(ahead = 7) %>% layer_naomit(.pred)
+#'   layer_add_target_date() %>% layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
 #' p <- predict(wf1, latest)
 #' p
 layer_add_target_date <-
-  function(frosting, ahead = NULL, id = rand_id("add_target_date")) {
+  function(frosting, id = rand_id("add_target_date")) {
     add_layer(
       frosting,
       layer_add_target_date_new(
-        ahead = ahead,
         id = id
       )
     )
   }
 
-layer_add_target_date_new <- function(ahead, id = id) {
-  layer("add_target_date", ahead = ahead, id = id)
+layer_add_target_date_new <- function(id = id) {
+  layer("add_target_date", id = id)
 }
 
 #' @export
-slather.layer_add_target_date <- function(object, components, the_recipe, ...) {
-  test5 <<- components
-  object <<- object
-  recipe <<- the_recipe
-  #if(is.null(object$ahead)) stop("`ahead` must be specified.")
-  #if(!is.numeric(object$ahead)) stop("`ahead` must be a numeric value.")
-  #components$predictions <- dplyr::bind_cols(components$predictions,
-  #                                           target_date = object$ahead + components$predictions$time_value)
+slather.layer_add_target_date <- function(object, components, ...) {
+  ahead <- as.numeric(stringr::str_extract(names(components$mold$outcomes),
+                                           "(?<=ahead_)\\d+"))
+
+  if(is.na(object$ahead)) stop("`ahead` must be specified in preprocessing.")
+  components$predictions <- dplyr::bind_cols(components$predictions,
+                                             target_date = ahead + components$predictions$time_value)
   components
 }

@@ -4,15 +4,15 @@
 \alias{layer_add_target_date}
 \title{Postprocessing step to add the target date}
 \usage{
-layer_add_target_date(frosting, ahead = NULL)
+layer_add_target_date(frosting, id = rand_id("add_target_date"))
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
+\item{id}{a random id string}
+
 \item{ahead}{A positive integer to add to \code{time_value} to get the target date.
 This must be specified by the user.}
-
-\item{id}{a random id string}
 }
 \value{
 an updated \code{frosting} postprocessor
@@ -33,7 +33,7 @@ latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
 f <- frosting() \%>\% layer_predict() \%>\%
-  layer_add_target_date(ahead = 7) \%>\% layer_naomit(.pred)
+  layer_add_target_date() \%>\% layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
 p <- predict(wf1, latest)
