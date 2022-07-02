@@ -44,7 +44,7 @@ slather.layer_add_target_date <- function(object, components, ...) {
   ahead <- as.numeric(stringr::str_extract(names(components$mold$outcomes),
                                            "(?<=ahead_)\\d+"))
 
-  if(is.na(object$ahead)) stop("`ahead` must be specified in preprocessing.")
+  if(is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
   components$predictions <- dplyr::bind_cols(components$predictions,
                                              target_date = ahead + components$predictions$time_value)
   components
