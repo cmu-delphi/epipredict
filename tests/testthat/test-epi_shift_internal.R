@@ -27,15 +27,15 @@ test_that("Values for ahead and lag must be integer values", {
 })
 
 test_that("A negative lag value should be warned against", {
-  expect_warning(
+  expect_error(
     r2 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = 7) %>%
       step_epi_lag(death_rate, lag = -7)
   )
 })
 
-test_that("A negative ahead value should be warned against", {
-  expect_warning(
+test_that("A non-positive ahead value should be warned against", {
+  expect_error(
     r3 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = -7) %>%
       step_epi_lag(death_rate, lag = 7)

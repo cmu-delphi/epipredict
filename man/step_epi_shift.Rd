@@ -11,10 +11,12 @@ step_epi_lag(
   role = "predictor",
   trained = FALSE,
   lag = 1,
+  prefix = "lag_",
   default = NA,
   keys = epi_keys(recipe),
   columns = NULL,
-  skip = FALSE
+  skip = FALSE,
+  id = rand_id("epi_lag")
 )
 
 step_epi_ahead(
@@ -23,10 +25,12 @@ step_epi_ahead(
   role = "outcome",
   trained = FALSE,
   ahead = 1,
+  prefix = "ahead_",
   default = NA,
   keys = epi_keys(recipe),
   columns = NULL,
-  skip = FALSE
+  skip = FALSE,
+  id = rand_id("epi_ahead")
 )
 }
 \arguments{
@@ -42,12 +46,11 @@ they be assigned?}
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
 
-\item{lag, ahead}{A vector of nonnegative integers. Each specified column will
-be the lag or lead for each value in the vector. The use of negative
-integers will not throw an error and may still work, but is advised against
-as it may have unexpected results. Hence, a warning will be shown if the
-user inputs at least one negative integer value. However, the use of
-non-integer values will throw an error.}
+\item{lag, ahead}{A vector of integers. Each specified column will
+be the lag or lead for each value in the vector. Lag integers must be
+nonnegative, while ahead integers must be positive.}
+
+\item{prefix}{A prefix to indicate what type of variable this is}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
@@ -63,6 +66,8 @@ when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
 conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
+
+\item{id}{A unique identifier for the step}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the

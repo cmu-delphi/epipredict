@@ -16,12 +16,10 @@
 #'  they be assigned?
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
-#' @param lag,ahead A vector of nonnegative integers. Each specified column will
-#'  be the lag or lead for each value in the vector. The use of negative
-#'  integers will not throw an error and may still work, but is advised against
-#'  as it may have unexpected results. Hence, a warning will be shown if the
-#'  user inputs at least one negative integer value. However, the use of
-#'  non-integer values will throw an error.
+#' @param lag,ahead A vector of integers. Each specified column will
+#'  be the lag or lead for each value in the vector. Lag integers must be
+#'  nonnegative, while ahead integers must be positive.
+#' @param prefix A prefix to indicate what type of variable this is
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
 #' @param keys A character vector of the keys in an epi_df
@@ -33,6 +31,7 @@
 #'  conducted on new data (e.g. processing the outcome variable(s)).
 #'  Care should be taken when using `skip = TRUE` as it may affect
 #'  the computations for subsequent operations.
+#' @param id A unique identifier for the step
 #' @template step-return
 #'
 #' @details The step assumes that the data are already _in the proper sequential
@@ -56,25 +55,26 @@ step_epi_lag <-
            role = "predictor",
            trained = FALSE,
            lag = 1,
+           prefix = "lag_",
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
-           skip = FALSE) {
-    if (any(lag<0)) {
-      warning("Negative lag value; you may get unexpected results")
-    }
+           skip = FALSE,
+           id = rand_id("epi_lag")) {
+
+    stopifnot("Lag values must be nonnegative integers" = all(lag>=0))
 
     step_epi_shift(recipe,
                    ...,
                    role = role,
                    trained = trained,
                    shift = lag,
-                   prefix = "lag_",
+                   prefix = prefix,
                    default = default,
                    keys = keys,
                    columns = columns,
                    skip = skip,
-                   id = rand_id("epi_lag")
+                   id = id
     )
   }
 
@@ -89,25 +89,26 @@ step_epi_ahead <-
            role = "outcome",
            trained = FALSE,
            ahead = 1,
+           prefix = "ahead_",
            default = NA,
            keys = epi_keys(recipe),
            columns = NULL,
-           skip = FALSE) {
-    if (any(ahead<0)) {
-      warning("Negative ahead value; you may get unexpected results")
-    }
+           skip = FALSE,
+           id = rand_id("epi_ahead")) {
+
+    stopifnot("Ahead values must be positive integers" = all(ahead>0))
 
     step_epi_shift(recipe,
                    ...,
                    role = role,
                    trained = trained,
                    shift = -ahead,
-                   prefix = "ahead_",
+                   prefix = prefix,
                    default = default,
                    keys = keys,
                    columns = columns,
                    skip = skip,
-                   id = rand_id("epi_ahead")
+                   id = id
     )
   }
 
@@ -176,7 +177,7 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_shift <- function(object, new_data, ...) {
-  is_lag <- object$prefix == "lag_"
+  is_lag <- object$shift >= 0
   if (!all(object$shift == as.integer(object$shift))) {
     error_msg <- paste0("step_epi_",
                         ifelse(is_lag,"lag","ahead"),
