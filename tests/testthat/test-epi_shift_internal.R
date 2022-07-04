@@ -51,16 +51,6 @@ test_that("Values for ahead and lag cannot be duplicates", {
   )
 })
 
-xxx <- x %>%
-  mutate(`..y` = lead(death_rate,7),
-         lag_7_death_rate = lag(death_rate,7),
-         lag_14_death_rate = lag(death_rate, 14)) %>%
-  rename(lag_0_death_rate = death_rate)
-
-lm1 <- lm(`..y` ~ lag_0_death_rate + lag_7_death_rate + lag_14_death_rate,
-          data = xxx)
-
-
 test_that("Check that epi_lag shifts applies the shift", {
   r5 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
