@@ -18,24 +18,23 @@ slm_fit <- function(recipe, data = x) {
 }
 
 test_that("Values for ahead and lag must be integer values", {
-  r1 <- epi_recipe(x) %>%
-    step_epi_ahead(death_rate, ahead = 3.6) %>%
-    step_epi_lag(death_rate, lag = 1.9)
   expect_error(
-    slm_fit(r1)
+    r1 <- epi_recipe(x) %>%
+      step_epi_ahead(death_rate, ahead = 3.6) %>%
+      step_epi_lag(death_rate, lag = 1.9)
   )
 })
 
-test_that("A negative lag value should be warned against", {
-  expect_warning(
+test_that("A negative lag value should should throw an error", {
+  expect_error(
     r2 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = 7) %>%
       step_epi_lag(death_rate, lag = -7)
   )
 })
 
-test_that("A negative ahead value should be warned against", {
-  expect_warning(
+test_that("A nonpositive ahead value should throw an error", {
+  expect_error(
     r3 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = -7) %>%
       step_epi_lag(death_rate, lag = 7)
@@ -51,16 +50,6 @@ test_that("Values for ahead and lag cannot be duplicates", {
     slm_fit(r4)
   )
 })
-
-xxx <- x %>%
-  mutate(`..y` = lead(death_rate,7),
-         lag_7_death_rate = lag(death_rate,7),
-         lag_14_death_rate = lag(death_rate, 14)) %>%
-  rename(lag_0_death_rate = death_rate)
-
-lm1 <- lm(`..y` ~ lag_0_death_rate + lag_7_death_rate + lag_14_death_rate,
-          data = xxx)
-
 
 test_that("Check that epi_lag shifts applies the shift", {
   r5 <- epi_recipe(x) %>%
