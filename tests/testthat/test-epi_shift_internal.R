@@ -18,15 +18,14 @@ slm_fit <- function(recipe, data = x) {
 }
 
 test_that("Values for ahead and lag must be integer values", {
-  r1 <- epi_recipe(x) %>%
-    step_epi_ahead(death_rate, ahead = 3.6) %>%
-    step_epi_lag(death_rate, lag = 1.9)
   expect_error(
-    slm_fit(r1)
+    r1 <- epi_recipe(x) %>%
+      step_epi_ahead(death_rate, ahead = 3.6) %>%
+      step_epi_lag(death_rate, lag = 1.9)
   )
 })
 
-test_that("A negative lag value should be warned against", {
+test_that("A negative lag value should should throw an error", {
   expect_error(
     r2 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = 7) %>%
@@ -34,7 +33,7 @@ test_that("A negative lag value should be warned against", {
   )
 })
 
-test_that("A non-positive ahead value should be warned against", {
+test_that("A nonpositive ahead value should throw an error", {
   expect_error(
     r3 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = -7) %>%

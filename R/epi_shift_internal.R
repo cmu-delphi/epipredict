@@ -61,8 +61,8 @@ step_epi_lag <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
-
-    stopifnot("Lag values must be nonnegative integers" = all(lag>=0))
+    stopifnot("Lag values must be nonnegative integers" =
+                all(lag>=0 & lag == as.integer(lag)))
 
     step_epi_shift(recipe,
                    ...,
@@ -96,7 +96,8 @@ step_epi_ahead <-
            skip = FALSE,
            id = rand_id("epi_ahead")) {
 
-    stopifnot("Ahead values must be positive integers" = all(ahead>0))
+    stopifnot("Ahead values must be positive integers" =
+                all(ahead>0 & ahead == as.integer(ahead)))
 
     step_epi_shift(recipe,
                    ...,
