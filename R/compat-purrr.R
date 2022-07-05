@@ -30,12 +30,12 @@ map_chr <- function(.x, .f, ...) {
 }
 
 map2 <- function(.x, .y, .f, ...) {
-  .f <- as_function(.f, env = global_env())
+  .f <- rlang::as_function(.f, env = global_env())
   out <- mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
   if (length(out) == length(.x)) {
-    set_names(out, names(.x))
+    rlang::set_names(out, names(.x))
   } else {
-    set_names(out, NULL)
+    rlang::set_names(out, NULL)
   }
 }
 map2_lgl <- function(.x, .y, .f, ...) {
