@@ -74,7 +74,8 @@ step_epi_lag <-
                    keys = keys,
                    columns = columns,
                    skip = skip,
-                   id = id
+                   id = id,
+                   class = "lag"
     )
   }
 
@@ -109,7 +110,8 @@ step_epi_ahead <-
                    keys = keys,
                    columns = columns,
                    skip = skip,
-                   id = id
+                   id = id,
+                   class = "ahead"
     )
   }
 
@@ -124,7 +126,8 @@ step_epi_shift <-
            keys,
            columns,
            skip,
-           id) {
+           id,
+           class) {
     add_step(
       recipe,
       step_epi_shift_new(
@@ -137,13 +140,14 @@ step_epi_shift <-
         keys = keys,
         columns = columns,
         skip = skip,
-        id = id
+        id = id,
+        class = class
       )
     )
   }
 
 step_epi_shift_new <-
-  function(terms, role, trained, shift, prefix, default, keys,
+  function(terms, role, trained, shift, prefix, class, default, keys,
            columns, skip, id) {
     step(
       subclass = "epi_shift",
@@ -156,7 +160,8 @@ step_epi_shift_new <-
       keys = keys,
       columns = columns,
       skip = skip,
-      id = id
+      id = id,
+      class = class
     )
   }
 
@@ -172,7 +177,8 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
     keys = x$keys,
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
-    id = x$id
+    id = x$id,
+    class = x$class
   )
 }
 
@@ -210,7 +216,7 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 #' @export
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- ifelse(x$shift >= 0,"Lagging","Leading") %>%
+    title <- ifelse(x$class == "lag","Lagging","Leading") %>%
       paste0(": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
