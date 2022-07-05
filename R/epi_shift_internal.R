@@ -96,8 +96,8 @@ step_epi_ahead <-
            skip = FALSE,
            id = rand_id("epi_ahead")) {
 
-    stopifnot("Ahead values must be positive integers" =
-                all(ahead>0 & ahead == as.integer(ahead)))
+    stopifnot("Ahead values must be nonnegative integers" =
+                all(ahead>=0 & ahead == as.integer(ahead)))
 
     step_epi_shift(recipe,
                    ...,
@@ -178,7 +178,6 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_shift <- function(object, new_data, ...) {
-  is_lag <- object$shift >= 0
   grid <- tidyr::expand_grid(col = object$columns, shift_val = object$shift) %>%
     dplyr::mutate(newname = glue::glue(
                           paste0("{object$prefix}","{abs(shift_val)}","_{col}")
