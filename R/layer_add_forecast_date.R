@@ -73,30 +73,25 @@ layer_add_forecast_date_new <- function(forecast_date, newdata, id = id) {
   layer("add_forecast_date", forecast_date = forecast_date, newdata = newdata, id = id)
 }
 
-slather.layer_add_forecast_date <- function(object, components, ...) {
+#' @export
+slather.layer_add_forecast_date <- function(object, components, the_fit, the_recipe, ...) {
   if (is.null(object$newdata)) stop("`newdata` must be specified as an argument.")
 
-  last_rows_df <- object$newdata %>% # %% new_data for forecast_date needed here... perhaps this is components or components$forged$predictors here???
-    dplyr::group_by(geo_value) %>%
-    dplyr::slice(dplyr::n())
+  newdata <- object$newdata # %% new_data for forecast_date needed here... perhaps this is components or components$forged$predictors here???
 
-  max_time_value <- max(last_rows_df$time_value)
+  max_time_value <- max(newdata$time_value)
 
-  as_of_date <-
-    as.Date(stringr::str_extract(
-      attributes(object$newdata)$metadata$as_of, # %% new_data change
-      "\\d{4}-\\d{2}-\\d{2}"
-    ))
+  as_of_date <- as.Date.POSIXct(attributes(object$newdata)$metadata$as_of) # %% new_data change
 
-  ahead <- as.numeric(stringr::str_extract(names(components$mold$outcomes),
-                                           "(?<=ahead_)\\d+"))
+  ahead <- the_recipe$steps[[2]][["ahead"]]
+
   if (is.null(object$forecast_date)) {
-  object$forecast_date <- max_time_value + ahead
-  warning("Set forecast_date equal to maximum time value plus ahead value.")
+    object$forecast_date <- max_time_value + ahead
+    warning("Set forecast_date equal to maximum time value plus ahead value.")
   }
 
   if (object$forecast_date < as_of_date) {
-  warning("forecast_date is less than the most recent update date of the data.")
+    warning("forecast_date is less than the most recent update date of the data.")
   }
 
   components$predictions <- dplyr::bind_cols(components$predictions,

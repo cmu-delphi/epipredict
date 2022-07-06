@@ -44,6 +44,8 @@ layer_add_target_date_new <- function(id = id) {
 
 #' @export
 slather.layer_add_target_date <- function(object, components, the_fit, the_recipe, ...) {
+  the_fit <<- the_fit
+  the_recipe <<- the_recipe
   ahead <- the_recipe$steps[[2]][["ahead"]]
 
   if(is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
