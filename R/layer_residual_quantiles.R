@@ -2,46 +2,47 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
-#' @param probs numeric vector of probabilities with values in (0,1) referring to the desired quantile.
-#' @param symmetrize logical. If `TRUE` then interval will be symmetrical.
+#' @param probs numeric vector of probabilities with values in (0,1)
+#'   referring to the desired quantile.
+#' @param symmetrize logical. If `TRUE` then interval will be symmetric.
 #' @param .flag a logical to determine if the layer is added. Passed on to
 #'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
-#' @return an updated `frosting` postprocessor with additional columns of the residual quantiles added to the prediction
+#' @return an updated `frosting` postprocessor with additional columns of the
+#'   residual quantiles added to the prediction
 #' @export
 #' @examples
-#'  jhu <- case_death_rate_subset %>%
+#' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   recipes::step_naomit(recipes::all_predictors()) %>%
-#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#'   step_epi_naomit()
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
 #'  parsnip::fit(jhu)
 #'
 #' latest <- get_test_data(recipe = r, x = jhu)
 #'
-#' f <- epipredict:::frosting() %>%
-#'      layer_predict() %>%
-#'      layer_residual_quantile(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
-#'      layer_naomit(.pred)
-#' wf1 <- wf %>% epipredict:::add_frosting(f)
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'   layer_naomit(.pred)
+#' wf1 <- wf %>% add_frosting(f)
 #'
 #' p <- predict(wf1, latest)
 #' p
-layer_residual_quantile <- function(frosting, ...,
+layer_residual_quantiles <- function(frosting, ...,
                                     probs = c(0.0275, 0.975),
                                     symmetrize = TRUE,
                                     .flag = TRUE,
-                                    id = rand_id("residual_quantile")) {
+                                    id = rand_id("residual_quantiles")) {
   rlang::check_dots_empty()
   add_layer(
     frosting,
-    layer_residual_quantile_new(
+    layer_residual_quantiles_new(
       probs = probs,
       symmetrize = symmetrize,
       id = id
@@ -50,12 +51,12 @@ layer_residual_quantile <- function(frosting, ...,
   )
 }
 
-layer_residual_quantile_new <- function(probs, symmetrize, id) {
-  layer("residual_quantile", probs = probs, symmetrize = symmetrize, id = id)
+layer_residual_quantiles_new <- function(probs, symmetrize, id) {
+  layer("residual_quantiles", probs = probs, symmetrize = symmetrize, id = id)
 }
 
 #' @export
-slather.layer_residual_quantile <-
+slather.layer_residual_quantiles <-
   function(object, components, the_fit, the_recipe, ...) {
     if (is.null(object$probs)) return(components)
 
@@ -64,8 +65,7 @@ slather.layer_residual_quantile <-
     q <- quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)
 
     estimate <- components$predictions$.pred
-    interval <- data.frame(outer(estimate, q, "+"))
-    names(interval)<- probs_to_string(object$probs)
-    components$predictions <- dplyr::bind_cols(components$predictions,interval)
+    dstn <- dist_quantiles(map(estimate, "+", q), object$probs)
+    components$predictions$.quantiles <- dstn
     components
   }

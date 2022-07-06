@@ -10,7 +10,8 @@ new_quantiles <- function(q = double(), tau = double()) {
     q <- q[o]
     tau <- tau[o]
   }
-  if (is.unsorted(q)) rlang::abort("q[order(tau)] produces unsorted quantiles.")
+  if (is.unsorted(q, na.rm = TRUE))
+    rlang::abort("q[order(tau)] produces unsorted quantiles.")
 
   new_rcrd(list(q = q, tau = tau),
            class = c("dist_quantiles", "dist_default"))
@@ -93,8 +94,7 @@ extrapolate_quantiles <- function(x, p, ...) {
 #' @export
 extrapolate_quantiles.distribution <- function(x, p, ...) {
   arg_is_probabilities(p)
-  p <- distributional:::arg_listable(p, .ptype = double())
-  dstn <- distributional:::dist_apply(x, extrapolate_quantiles, p = p, ...)
+  dstn <- lapply(vec_data(x), extrapolate_quantiles, p = p, ...)
   distributional:::wrap_dist(dstn)
 }
 

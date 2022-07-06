@@ -2,7 +2,7 @@
 
 
 map <- function(.x, .f, ...) {
-  .f <- rlang::as_function(.f, env = global_env())
+  .f <- rlang::as_function(.f, env = rlang::global_env())
   lapply(.x, .f, ...)
 }
 walk <- function(.x, .f, ...) {
@@ -23,14 +23,14 @@ map_chr <- function(.x, .f, ...) {
   .rlang_purrr_map_mold(.x, .f, character(1), ...)
 }
 .rlang_purrr_map_mold <- function(.x, .f, .mold, ...) {
-  .f <- rlang::as_function(.f, env = global_env())
+  .f <- rlang::as_function(.f, env = rlang::global_env())
   out <- vapply(.x, .f, .mold, ..., USE.NAMES = FALSE)
   names(out) <- names(.x)
   out
 }
 
 map2 <- function(.x, .y, .f, ...) {
-  .f <- rlang::as_function(.f, env = global_env())
+  .f <- rlang::as_function(.f, env = rlang::global_env())
   out <- mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
   if (length(out) == length(.x)) {
     rlang::set_names(out, names(.x))

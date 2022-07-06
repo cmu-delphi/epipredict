@@ -4,8 +4,7 @@ jhu <- case_death_rate_subset %>%
 r <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
-  step_naomit(all_predictors()) %>%
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
 wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 latest <- get_test_data(recipe = r, x = jhu)
@@ -15,13 +14,19 @@ test_that("Returns expected number or rows and columns", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
-    layer_residual_quantile(probs = c(0.0275, 0.8, 0.95), symmetrize = FALSE)
+    layer_residual_quantiles(probs = c(0.0275, 0.8, 0.95), symmetrize = FALSE)
 
   wf1 <- wf %>% add_frosting(f)
 
   expect_silent(p <- predict(wf1, latest))
-  expect_equal(ncol(p), 6L)
+  expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_named(p, c("geo_value", "time_value",".pred","q0.0275","q0.8","q0.95"))
+  expect_named(p, c("geo_value", "time_value",".pred",".quantiles"))
+
+  nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.quantiles))
+  unnested <- nested %>% tidyr::unnest(.quantiles)
+
+  expect_equal(nrow(unnested), 9L)
+  expect_equal(unique(unnested$tau), c(.0275, .8, .95))
 })
