@@ -150,7 +150,7 @@ step_epi_shift_new <-
   function(terms, role, trained, shift, prefix, default, keys,
            columns, skip, id, intended_direction) {
     step(
-      subclass = "epi_shift",
+      subclass = c("epi_shift",intended_direction),
       terms = terms,
       role = role,
       trained = trained,
@@ -160,8 +160,7 @@ step_epi_shift_new <-
       keys = keys,
       columns = columns,
       skip = skip,
-      id = id,
-      intended_direction = intended_direction
+      id = id
     )
   }
 
