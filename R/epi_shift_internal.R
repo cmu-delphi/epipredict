@@ -213,17 +213,10 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_lag <-
+print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- paste0("Lagging: ", abs(x$shift),",")
-    recipes::print_step(x$columns, x$terms, x$trained, title, width)
-    invisible(x)
-  }
-
-#' @export
-print.step_ahead <-
-  function(x, width = max(20, options()$width - 30), ...) {
-    title <- paste0("Leading: ", abs(x$shift),",")
+    title <- paste0(dplyr::if_else("lag" %in% x$subclass,"Lagging","Leading"),
+                    ": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }
