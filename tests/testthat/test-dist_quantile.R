@@ -1,3 +1,5 @@
+library(distributional)
+
 test_that("constructor returns reasonable quantiles", {
   expect_error(new_quantiles(rnorm(5), rnorm(5)))
   expect_silent(new_quantiles(sort(rnorm(5)), sort(runif(5))))

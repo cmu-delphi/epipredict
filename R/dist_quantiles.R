@@ -1,19 +1,19 @@
 new_quantiles <- function(q = double(), tau = double()) {
   arg_is_probabilities(tau)
 
-  vctrs::vec_cast(q, double())
-  vctrs::vec_cast(tau, double())
+  vec_cast(q, double())
+  vec_cast(tau, double())
   stopifnot(length(q) == length(tau))
-  stopifnot(!vctrs::vec_duplicate_any(tau))
+  stopifnot(!vec_duplicate_any(tau))
   if (is.unsorted(tau)) {
-    o <- vctrs::vec_order(tau)
+    o <- vec_order(tau)
     q <- q[o]
     tau <- tau[o]
   }
   if (is.unsorted(q)) rlang::abort("q[order(tau)] produces unsorted quantiles.")
 
-  vctrs::new_rcrd(list(q = q, tau = tau),
-                  class = c("dist_quantiles", "dist_default"))
+  new_rcrd(list(q = q, tau = tau),
+           class = c("dist_quantiles", "dist_default"))
 }
 
 #' @export
@@ -23,24 +23,39 @@ vec_ptype_full.dist_quantiles <- function(x, ...) "dist_quantiles"
 
 #' @export
 format.dist_quantiles <- function(x, digits = 2, ...) {
-  q <- vctrs::field(x, "q")
-  tau <- vctrs::field(x, "tau")
+  q <- field(x, "q")
+  tau <- field(x, "tau")
   rng <- range(tau, na.rm = TRUE)
   paste0("[", round(rng[1], digits), ", ", round(rng[2], digits), "]<q-rng>")
 }
 
 
 
-#' @importFrom vctrs as_list_of
+
+#' A distribution parameterized by a set of quantiles
+#'
+#' @param x A vector of values
+#' @param tau A vector of probabilities corresponding to `x`
+#'
+#' @export
+#'
+#' @import vctrs
+#' @examples
+#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+#' quantile(dstn, p = c(.1, .25, .5, .9))
+#' median(dstn)
+#'
+#' # it's a bit annoying to inspect the data
+#' vctrs::vec_data(vctrs::vec_data(dstn[1])[[1]])
 dist_quantiles <- function(x, tau) {
   if (!is.list(x)) x <- list(x)
   if (!is.list(tau)) tau <- list(tau)
 
   x <- as_list_of(x, .ptype = double())
   tau <- as_list_of(tau, .ptype = double())
-  args <- vctrs::vec_recycle_common(x = x, tau = tau)
+  args <- vec_recycle_common(x = x, tau = tau)
   qntls <- as_list_of(map2(args$x, args$tau, new_quantiles))
-  vctrs::new_vctr(qntls, class = "distribution")
+  new_vctr(qntls, class = "distribution")
 }
 
 
@@ -48,7 +63,29 @@ dist_quantiles <- function(x, tau) {
 #   sprintf("quantiles[%s]", length(x))
 # }
 
+
+#' Summarize a distribution with a set of quantiles
+#'
+#' @param x a `distribution` vector
+#' @param p a vector of probabilities at which to calculate quantiles
+#' @param ... additional arguments passed on to the `quantile` method
+#'
+#' @return a `distribution` vector containing `dist_quantiles`
 #' @export
+#'
+#' @examples
+#' library(distributional)
+#' dstn <- dist_normal(c(10, 2), c(5, 10))
+#' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+#'
+#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+#' # because this distribution is already quantiles, any extra quantiles are
+#' # appended
+#' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+#'
+#' dstn <- c(dist_normal(c(10, 2), c(5, 10)),
+#'   dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8))))
+#' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 extrapolate_quantiles <- function(x, p, ...) {
   UseMethod("extrapolate_quantiles")
 }
@@ -70,16 +107,30 @@ extrapolate_quantiles.dist_default <- function(x, p, ...) {
 #' @export
 extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
   q <- quantile(x, p, ...)
-  tau <- vctrs::field(x, "tau")
-  qvals <- vctrs::field(x, "q")
+  tau <- field(x, "tau")
+  qvals <- field(x, "q")
   new_quantiles(q = c(qvals, q), tau = c(tau, p))
 }
 
+
+#' Turn a a vector of quantile distributions into a list-col
+#'
+#' @param x a `distribution` containing `dist_quantiles`
+#'
+#' @return a list-col
 #' @export
+#'
+#' @examples
+#' edf <- case_death_rate_subset[1:3,]
+#' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5/6, 2:4/5, 3:10/11))
+#'
+#' edf_nested <- edf %>% dplyr::mutate(q = nested_quantiles(q))
+#' edf_nested %>% tidyr::unnest(q)
 nested_quantiles <- function(x) {
-  stopifnot(is_distribution(x), all(family(x) == "quantiles"))
+  stopifnot(is_distribution(x),
+            all(stats::family(x) == "quantiles"))
   distributional:::dist_apply(x, .f = function(z) {
-    tibble::as_tibble(vctrs::vec_data(z)) %>%
+    tibble::as_tibble(vec_data(z)) %>%
       dplyr::mutate(dplyr::across(tidyselect::everything(), as.double)) %>%
       list_of()
   })
@@ -89,11 +140,14 @@ nested_quantiles <- function(x) {
 
 
 #' @export
+#' @importFrom stats median qnorm family
 median.dist_quantiles <- function(x, ..., middle = c("cubic", "linear")) {
   quantile(x, 0.5, ..., middle = middle)
 }
 
 #' @export
+#' @importFrom stats quantile
+#' @import distributional
 quantile.dist_quantiles <- function(x, p, ...,
                                     middle = c("cubic", "linear"),
                                     left_tail = c("normal", "exponential"),
@@ -108,8 +162,8 @@ quantile.dist_quantiles <- function(x, p, ...,
 
 quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
 
-    tau <- vctrs::field(x, "tau")
-    qvals <- vctrs::field(x, "q")
+    tau <- field(x, "tau")
+    qvals <- field(x, "q")
     r <- range(tau, na.rm = TRUE)
     qvals_out <- rep(NA, length(tau_out))
 
@@ -140,7 +194,7 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
     if (length(indl) > 0) {
       qvals_out[indl] <- tail_extrapolate(tau_out[indl], Q, "left", left_tail)
     }
-    if (length(indr) > 0) {d
+    if (length(indr) > 0) {
       qvals_out[indr] <- tail_extrapolate(tau_out[indr], Q, "right", right_tail)
     }
 
@@ -163,8 +217,8 @@ mean.dist_quantiles <- function(x, ...,
                                 left_tail = c("normal", "exponential"),
                                 right_tail = c("normal", "exponential")) {
   # TODO: currently nonfunctional
-  tau <- vctrs::field(x, "tau")
-  qvals <- vctrs::field(x, "q")
+  tau <- field(x, "tau")
+  qvals <- field(x, "q")
   r <- range(tau, na.rm = TRUE)
 
   if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
@@ -206,6 +260,6 @@ norm_q_par <- function(q) {
 
 norm_tail_q <- function(p, q, target) {
   ms <- norm_q_par(q)
-  qnorm(target, ms$m, ms$s)
+  stats::qnorm(target, ms$m, ms$s)
 }
 

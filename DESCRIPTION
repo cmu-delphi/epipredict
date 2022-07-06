@@ -15,6 +15,7 @@ Depends:
 Imports: 
     assertthat,
     cli,
+    distributional,
     dplyr,
     epiprocess,
     fs,
@@ -31,6 +32,7 @@ Imports:
     tidyr,
     tidyselect,
     usethis,
+    vctrs,
     workflows
 Suggests: 
     covidcast,

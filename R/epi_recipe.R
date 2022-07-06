@@ -357,7 +357,7 @@ prep.epi_recipe <- function(
   if (retain) {
     if (verbose) {
       cat("The retained training set is ~",
-          format(object.size(training), units = "Mb", digits = 2),
+          format(utils::object.size(training), units = "Mb", digits = 2),
           " in memory.\n\n")
     }
     x$template <- training
