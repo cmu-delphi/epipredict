@@ -10,15 +10,14 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(tidymodels)
 library(epiprocess)
+# devtools::install_github("cmu-delphi/epipredict")
 library(epipredict)
-
 ```
 
 ```{r small-data}
-jhu <- jhu_csse_daily_subset %>%
+jhu <- case_death_rate_subset %>%
   filter(time_value > "2021-08-01") %>%
-  select(geo_value:death_rate_7d_av) %>%
-  rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+  dplyr::arrange(geo_value, time_value)
 
 jhu_latest <- jhu %>%
   filter(!is.na(case_rate), !is.na(death_rate)) %>%
@@ -58,13 +57,19 @@ Predict gives a new `epi_df`
 
 ```{r predict}
 pp <- predict(wf, new_data = jhu_latest)
-pp
+pp 
 ```
 
 Can add a `forecast_date` (should be a post processing step)
 
 ```{r predict2}
-predict(wf, new_data = jhu_latest, forecast_date = "2021-12-31") %>%
+# Want: 
+# predict(wf, new_data = jhu_latest, forecast_date = "2021-12-31") %>%
+#  filter(!is.na(.pred))
+
+# Intended output:
+predict(wf, new_data = jhu_latest) %>% 
+  mutate(forecast_date = as.Date("2021-12-31")) %>% 
   filter(!is.na(.pred))
 ```
 
