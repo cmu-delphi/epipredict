@@ -215,7 +215,7 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 #' @export
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- ifelse(x$intended_direction == "lag","Lagging","Leading") %>%
+    title <- dplyr::if_else("lag" %in% x$subclass,"Lagging","Leading") %>%
       paste0(": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
