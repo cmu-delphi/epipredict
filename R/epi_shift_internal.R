@@ -75,7 +75,7 @@ step_epi_lag <-
                    columns = columns,
                    skip = skip,
                    id = id,
-                   class = "lag"
+                   intended_direction = "lag"
     )
   }
 
@@ -111,7 +111,7 @@ step_epi_ahead <-
                    columns = columns,
                    skip = skip,
                    id = id,
-                   class = "ahead"
+                   intended_direction = "ahead"
     )
   }
 
@@ -127,7 +127,7 @@ step_epi_shift <-
            columns,
            skip,
            id,
-           class) {
+           intended_direction) {
     add_step(
       recipe,
       step_epi_shift_new(
@@ -141,14 +141,14 @@ step_epi_shift <-
         columns = columns,
         skip = skip,
         id = id,
-        class = class
+        intended_direction = intended_direction
       )
     )
   }
 
 step_epi_shift_new <-
-  function(terms, role, trained, shift, prefix, class, default, keys,
-           columns, skip, id) {
+  function(terms, role, trained, shift, prefix, default, keys,
+           columns, skip, id, intended_direction) {
     step(
       subclass = "epi_shift",
       terms = terms,
@@ -161,7 +161,7 @@ step_epi_shift_new <-
       columns = columns,
       skip = skip,
       id = id,
-      class = class
+      intended_direction = intended_direction
     )
   }
 
@@ -178,7 +178,7 @@ prep.step_epi_shift <- function(x, training, info = NULL, ...) {
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id,
-    class = x$class
+    intended_direction = x$intended_direction
   )
 }
 
@@ -216,7 +216,7 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 #' @export
 print.step_epi_shift <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- ifelse(x$class == "lag","Lagging","Leading") %>%
+    title <- ifelse(x$intended_direction == "lag","Lagging","Leading") %>%
       paste0(": ", abs(x$shift),",")
     recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
