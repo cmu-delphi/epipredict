@@ -3,9 +3,6 @@
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
 #' This should be specified in the form "yyyy-mm-dd".
-#' @param newdata The rectangular data object, such as a data frame, for which
-#' one wants to make predictions. This should be the same `newdata` to be
-#' used in `predict`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -32,7 +29,7 @@
 #'
 #' # Specify a `forecast_date` that is greater than or equal to `as_of` date
 #' f <- frosting() %>% layer_predict() %>%
-#'   layer_add_forecast_date(forecast_date = "2022-05-31", newdata = latest) %>%
+#'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
@@ -42,7 +39,7 @@
 #' # Specify a `forecast_date` that is less than `as_of` date
 #' f2 <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_add_forecast_date(forecast_date = "2021-12-31", newdata = latest) %>%
+#'   layer_add_forecast_date(forecast_date = "2021-12-31") %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
@@ -51,37 +48,33 @@
 #' # Do not specify a forecast_date in `layer_add_forecast_date()`
 #'  f3 <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_add_forecast_date(newdata = latest) %>%
+#'   layer_add_forecast_date() %>%
 #'   layer_naomit(.pred)
 #' wf3 <- wf %>% add_frosting(f3)
 #'
 #' p3 <- predict(wf3, latest)
 #' p3
 layer_add_forecast_date <-
-  function(frosting, forecast_date = NULL, newdata = NULL, id = rand_id("add_forecast_date")) {
+  function(frosting, forecast_date = NULL, id = rand_id("add_forecast_date")) {
     add_layer(
       frosting,
       layer_add_forecast_date_new(
         forecast_date = forecast_date,
-        newdata = newdata,
         id = id
       )
     )
   }
 
-layer_add_forecast_date_new <- function(forecast_date, newdata, id = id) {
-  layer("add_forecast_date", forecast_date = forecast_date, newdata = newdata, id = id)
+layer_add_forecast_date_new <- function(forecast_date, id = id) {
+  layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
 #' @export
 slather.layer_add_forecast_date <- function(object, components, the_fit, the_recipe, ...) {
-  if (is.null(object$newdata)) stop("`newdata` must be specified as an argument.")
 
-  newdata <- object$newdata # %% new_data for forecast_date needed here... perhaps this is components or components$forged$predictors here???
+  max_time_value <- max(components$keys$time_value)
 
-  max_time_value <- max(newdata$time_value)
-
-  as_of_date <- as.Date.POSIXct(attributes(object$newdata)$metadata$as_of) # %% new_data change
+  as_of_date <- as.Date.POSIXct(attributes(components$keys)$metadata$as_of)
 
   ahead <- the_recipe$steps[[2]][["ahead"]]
 

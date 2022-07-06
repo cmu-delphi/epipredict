@@ -13,7 +13,7 @@ test_that("Specify a `forecast_date` that is greater than or equal to `as_of` da
 
   f <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date(forecast_date = "2022-05-31", newdata = latest) %>%
+    layer_add_forecast_date(forecast_date = "2022-05-31") %>%
     layer_naomit(.pred)
   wf1 <- wf %>% add_frosting(f)
 
@@ -29,7 +29,7 @@ test_that("Specify a `forecast_date` that is less than `as_of` date", {
 
   f2 <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date(forecast_date = "2021-12-31", newdata = latest) %>%
+    layer_add_forecast_date(forecast_date = "2021-12-31") %>%
     layer_naomit(.pred)
   wf2 <- wf %>% add_frosting(f2)
 
@@ -46,7 +46,7 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
 
   f3 <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date(newdata = latest) %>%
+    layer_add_forecast_date() %>%
     layer_naomit(.pred)
   wf3 <- wf %>% add_frosting(f3)
 
@@ -56,6 +56,6 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
   expect_equal(ncol(p3), 4L)
   expect_s3_class(p3, "epi_df")
   expect_equal(nrow(p3), 3L)
-  expect_equal(p3$forecast_date, rep(as.Date("2022-01-07"), times = 3))
+  expect_equal(p3$forecast_date, rep(as.Date("2022-01-21"), times = 3))
   expect_named(p3, c("geo_value", "time_value", ".pred", "forecast_date"))
 })
