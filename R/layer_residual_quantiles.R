@@ -61,7 +61,7 @@ slather.layer_residual_quantiles <-
     if (is.null(object$probs)) return(components)
 
     s <- ifelse(object$symmetrize, -1, NA)
-    r <- the_fit$fit$residuals
+    r <- grab_residuals(the_fit, components)
     q <- quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)
 
     estimate <- components$predictions$.pred
@@ -69,3 +69,11 @@ slather.layer_residual_quantiles <-
     components$predictions$.quantiles <- dstn
     components
   }
+
+grab_residuals <- function(the_fit, components) {
+  if (the_fit$spec$mode != "regression")
+    rlang::abort("For meaningful residuals, the predictor should be a regression model.")
+
+  yhat <- predict(the_fit, new_data = components$mold$predictors)
+  c(components$mold$outcomes - yhat)[[1]]
+}
