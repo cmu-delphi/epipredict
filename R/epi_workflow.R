@@ -42,7 +42,7 @@ epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL)
 
   if (is_epi_recipe(preprocessor)) {
     out <- add_epi_recipe(out, preprocessor)
-  }else if (!is_null(preprocessor)) {
+  } else if (!is_null(preprocessor)) {
     out <- workflows:::add_preprocessor(out, preprocessor)
   }
   if (!is_null(postprocessor)) {
