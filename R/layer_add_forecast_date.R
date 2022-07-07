@@ -11,8 +11,8 @@
 #'  preprocessing and leave the forecast date unspecifed here or simply specify
 #'  a forecast date here. In the former, the forecast date will be set as the
 #'  maximum time value in the test data (after any processing has been applied)
-#'  plus the ahead value. In that case, as well as in the case
-#'  when the forecast date is less than the most recent update date of the data
+#'  plus the ahead value. In that case, as well as in the case when the
+#'  forecast date is less than the most recent update date of the data
 #'  (ie. the `as_of` value), an appropriate warning will be thrown.
 #'
 #' @export
