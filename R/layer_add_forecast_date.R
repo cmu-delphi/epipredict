@@ -2,9 +2,9 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
-#' This should be specified in the form "yyyy-mm-dd". Note that when the
-#' forecast date is left unspecified, it is set to the maximum time value plus
-#' the ahead value from preprocessing.
+#' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
+#' when the forecast date is left unspecified, it is set to the maximum time
+#' value plus the ahead value from preprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor

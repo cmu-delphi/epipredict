@@ -14,9 +14,9 @@ layer_add_forecast_date(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{forecast_date}{The forecast date to add as a column to the \code{epi_df}.
-This should be specified in the form "yyyy-mm-dd". Note that when the
-forecast date is left unspecified, it is set to the maximum time value plus
-the ahead value from preprocessing.}
+For most cases, this should be specified in the form "yyyy-mm-dd". Note that
+when the forecast date is left unspecified, it is set to the maximum time
+value plus the ahead value from preprocessing.}
 
 \item{id}{a random id string}
 }

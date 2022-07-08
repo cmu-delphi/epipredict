@@ -4,7 +4,8 @@
 #' @param target_date The target date to add as a column to the `epi_df`.
 #' By default, this is `time_value` plus `ahead`, where `ahead` has
 #' been specified in preprocessing (most likely in `step_epi_ahead`).
-#' The user may override this with a date usually of the form "yyyy-mm-dd".
+#' The user may override this with a date of their own (that will usually
+#' be in the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
