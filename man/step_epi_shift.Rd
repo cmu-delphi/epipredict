@@ -95,5 +95,12 @@ are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
 r <- epi_recipe(case_death_rate_subset) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0,7,14))
+r
+
+r <- epi_recipe(case_death_rate_subset) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_epi_lag(death_rate, case_rate, lag = c(0,7,14)) \%>\%
+  step_epi_shift(case_rate, shift = c(-5, 5)) # pretty odd, but possible
+r
 }
 \concept{row operation steps}
