@@ -8,6 +8,9 @@
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
+#'  `step_epi_shift` is more general, accomodating both leads and lags
+#'  simultaneously.
+#'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
 #' @param ... One or more selector functions to choose variables
@@ -16,7 +19,7 @@
 #'  they be assigned?
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
-#' @param lag,ahead A vector of integers. Each specified column will
+#' @param lag,ahead,shift A vector of integers. Each specified column will
 #'  be the lag or lead for each value in the vector. Lag integers must be
 #'  nonnegative, while ahead integers must be positive.
 #' @param prefix A prefix to indicate what type of variable this is
@@ -32,6 +35,8 @@
 #'  Care should be taken when using `skip = TRUE` as it may affect
 #'  the computations for subsequent operations.
 #' @param id A unique identifier for the step
+#' @param intended_direction used by `step_epi_shift` to determine whether
+#'  leading or lagging was intended.
 #' @template step-return
 #'
 #' @details The step assumes that the data are already _in the proper sequential
@@ -54,7 +59,8 @@
 #' r <- epi_recipe(case_death_rate_subset) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, case_rate, lag = c(0,7,14)) %>%
-#'   step_epi_shift(case_rate, shift = c(-5, 5)) # pretty odd, but possible
+#'   # pretty odd, but possible
+#'   step_epi_shift(case_rate, shift = c(-5, 5), role = "predictor")
 #' r
 step_epi_lag <-
   function(recipe,
@@ -122,6 +128,9 @@ step_epi_ahead <-
     )
   }
 
+#' @family row operation steps
+#' @rdname step_epi_shift
+#' @export
 step_epi_shift <-
   function(recipe,
            ...,
