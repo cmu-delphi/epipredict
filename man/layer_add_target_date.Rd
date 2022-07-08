@@ -16,7 +16,7 @@ layer_add_target_date(
 \item{target_date}{The target date to add as a column to the \code{epi_df}.
 By default, this is \code{time_value} plus \code{ahead}, where \code{ahead} has
 been specified in preprocessing (most likely in \code{step_epi_ahead}).
-The user may override this with a date in the form "yyyy-mm-dd".}
+The user may override this with a date usually of the form "yyyy-mm-dd".}
 
 \item{id}{a random id string}
 }
@@ -43,10 +43,19 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
+# Use ahead from preprocessing
 f <- frosting() \%>\% layer_predict() \%>\%
   layer_add_target_date() \%>\% layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
 p <- predict(wf1, latest)
 p
+
+# Override default behaviour by specifying own target date
+f2 <- frosting() \%>\% layer_predict() \%>\%
+layer_add_target_date(target_date = "2022-01-08") \%>\% layer_naomit(.pred)
+wf2 <- wf \%>\% add_frosting(f2)
+
+p2 <- predict(wf2, latest)
+p2
 }
