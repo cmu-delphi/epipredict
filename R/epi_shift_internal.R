@@ -46,7 +46,7 @@
 #' @rdname step_epi_shift
 #' @export
 #' @examples
-#' epi_recipe(case_death_rate_subset) %>%
+#' r <- epi_recipe(case_death_rate_subset) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0,7,14))
 step_epi_lag <-
@@ -75,7 +75,7 @@ step_epi_lag <-
                    columns = columns,
                    skip = skip,
                    id = id,
-                   intended_direction = "lag"
+                   intended_direction = "epi_lag"
     )
   }
 
@@ -111,7 +111,7 @@ step_epi_ahead <-
                    columns = columns,
                    skip = skip,
                    id = id,
-                   intended_direction = "ahead"
+                   intended_direction = "epi_ahead"
     )
   }
 
@@ -119,15 +119,15 @@ step_epi_shift <-
   function(recipe,
            ...,
            role,
-           trained,
-           shift,
-           prefix,
-           default,
-           keys,
-           columns,
-           skip,
-           id,
-           intended_direction) {
+           trained = FALSE,
+           shift = 0,
+           prefix = "shift_",
+           default = NA,
+           keys = epi_keys(recipe),
+           columns = NULL,
+           skip = FALSE,
+           id = rand_id("epi_shift"),
+           intended_direction = NULL) {
     add_step(
       recipe,
       step_epi_shift_new(
@@ -150,7 +150,7 @@ step_epi_shift_new <-
   function(terms, role, trained, shift, prefix, default, keys,
            columns, skip, id, intended_direction) {
     step(
-      subclass = c("epi_shift",intended_direction),
+      subclass = c(intended_direction, "epi_shift"),
       terms = terms,
       role = role,
       trained = trained,
@@ -213,10 +213,50 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_epi_shift <-
-  function(x, width = max(20, options()$width - 30), ...) {
-    title <- paste0(dplyr::if_else(inherits(x,"step_lag"),"Lagging","Leading"),
-                    ": ", abs(x$shift),",")
-    recipes::print_step(x$columns, x$terms, x$trained, title, width)
-    invisible(x)
+print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- "Lagging: "
+  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = abs(x$shift))
+  invisible(x)
+}
+
+#' @export
+print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- "Leading: "
+  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = abs(x$shift))
+  invisible(x)
+}
+
+#' @export
+print.step_epi_shift <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- "Shifting: "
+  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = x$shift)
+  invisible(x)
+}
+
+
+print_step_shift <- function(
+    tr_obj = NULL, untr_obj = NULL, trained = FALSE, title = NULL,
+    width = max(20, options()$width - 30), case_weights = NULL, shift = NULL) {
+
+  cat(title)
+  if (trained) txt <- recipes::format_ch_vec(tr_obj, width = width)
+  else txt <- recipes::format_selectors(untr_obj, width = width)
+  if (length(txt) == 0L) txt <- "<none>"
+  cat(txt)
+  if (trained) {
+    if (is.null(case_weights)) cat(" [trained]")
+    else {
+      case_weights_ind <- ifelse(case_weights, "weighted",
+                                 "ignored weights")
+      trained_txt <- paste(case_weights_ind, "trained",
+                           sep = ", ")
+      trained_txt <- paste0(" [", trained_txt, "]")
+      cat(trained_txt)
+    }
   }
+  cat(" by ")
+  txt <- recipes::format_ch_vec(shift)
+  cat(txt)
+  cat("\n")
+  invisible(NULL)
+}
