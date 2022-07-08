@@ -213,23 +213,22 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- "Lagging: "
-  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = abs(x$shift))
-  invisible(x)
+print.step_epi_lag <- function(x, ...) {
+  NextMethod(title = "Lagging ", shift = abs(x$shift))
 }
 
 #' @export
-print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- "Leading: "
-  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = abs(x$shift))
-  invisible(x)
+print.step_epi_ahead <- function(x, ...) {
+  NextMethod(title = "Leading ", shift = abs(x$shift))
 }
 
 #' @export
-print.step_epi_shift <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- "Shifting: "
-  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = x$shift)
+print.step_epi_shift <- function(x,
+                                 width = max(20, options()$width - 30),
+                                 title = "Shifting ",
+                                 shift = x$shift,
+                                 ...) {
+  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = shift)
   invisible(x)
 }
 
