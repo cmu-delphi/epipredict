@@ -2,18 +2,20 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
-#' This should be specified in the form "yyyy-mm-dd".
+#' This should be specified in the form "yyyy-mm-dd". Note that when the
+#' forecast date is left unspecified, it is set to the maximum time value plus
+#' the ahead value from preprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
-#' @details To use this function, either specify an ahead value in
-#'  preprocessing and leave the forecast date unspecifed here or simply specify
-#'  a forecast date here. In the former, the forecast date will be set as the
-#'  maximum time value in the test data (after any processing has been applied)
-#'  plus the ahead value. In that case, as well as in the case when the
-#'  forecast date is less than the most recent update date of the data
-#'  (ie. the `as_of` value), an appropriate warning will be thrown.
+#' @details To use this function, either specify a forecast date or specify an
+#'  ahead value in preprocessing and leave the forecast date unspecifed here.
+#'  In the latter, the forecast date will be set as the maximum time value
+#'  in the test data (after any processing has been applied)
+#'  plus the ahead value. In any case, when the forecast date is less than the
+#'  most recent update date of the data (ie. the `as_of` value), an appropriate
+#'  warning will be thrown.
 #'
 #' @export
 #' @examples
@@ -75,13 +77,12 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
 
   max_time_value <- max(components$keys$time_value)
 
-  as_of_date <- as.Date.POSIXct(attributes(components$keys)$metadata$as_of)
+  as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
 
   ahead <- the_recipe$steps[[2]][["ahead"]]
 
   if (is.null(object$forecast_date)) {
     object$forecast_date <- max_time_value + ahead
-    warning("Set forecast_date equal to maximum time value plus ahead value.")
   }
 
   if (object$forecast_date < as_of_date) {
