@@ -1,0 +1,122 @@
+---
+title: "Introduction to `epipredict`"
+author: "DJM"
+date: '2022-07-07'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      collapse = TRUE,
+                      comment = "#>",
+                      out.width = "100%")
+library(tidyverse)
+library(tidymodels)
+library(epiprocess)
+# devtools::install_github("cmu-delphi/epipredict")
+library(epipredict)
+```
+
+
+# Goals for the package
+
+
+1. Provide a set of basic, easy-to-use forecasters that work out of the box. 
+You should be able to do a reasonably limited amount of customization on them. (Any serious customization happens with point number 2.) 
+For the basic forecasters, we should provide, at least: 
+    * Baseline flat-line forecaster 
+    * Autoregressive forecaster
+    * Autoregressive classifier
+Forcasters we provide should be built on our framework.
+2. A framework for creating custom forecasters out of modular components. There are four types of components:
+    * Preprocessor: do things to the data before model training
+    * Trainer: train a model on data, resulting in a fitted model object
+    * Predictor: make predictions, using a fitted model object
+    * Postprocessor: do things to the predictions before returning
+
+# Why doesn't this exist?
+
+* Parts actually DO exist. There's a universe called `{tidymodels}`. It handles 
+preprocessing, training, and prediction, bound together, through a package called
+`{workflows}`. We built `{epipredict}` on top of that setup. In this way, you CAN
+use almost everything they provide.
+
+* However, `{tidymodels}` doesn't do postprocessing. It also doesn't handle _panel data_.
+
+* The tidy-team doesn't have plans to do either of these things. (We checked).
+
+* There is a package that does _time series_ built on `{tidymodels}`, but it's
+"basic" time series: 1-step AR models, exponential smoothing, STL decomposition, etc.
+
+
+
+# How does it work?
+
+Suppose you want to ... 
+
+```{r demo-workflow}
+
+
+```
+
+
+```{r small-data}
+jhu <- case_death_rate_subset %>%
+  filter(time_value > "2021-08-01") %>%
+  dplyr::arrange(geo_value, time_value)
+
+jhu_latest <- jhu %>%
+  filter(!is.na(case_rate), !is.na(death_rate)) %>%
+  group_by(geo_value) %>%
+  slice_tail(n = 15) %>% # have lags 0,...,14, so need 15 for a complete case
+  ungroup()
+```
+
+The recipe encodes how to process training/testing data. S3 object.
+
+```{r recipe}
+r <- epi_recipe(jhu) %>%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+  step_epi_ahead(death_rate, ahead = 7) %>%
+  step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+  step_naomit(all_predictors()) %>%
+  step_naomit(all_outcomes(), skip = TRUE)
+```
+
+The workflow combines a recipe and a model specification. Fit, estimates
+the model, adds the resulting object to the workflow.
+
+```{r workflow}
+wf <- epi_workflow(r, linear_reg()) %>% 
+  fit(jhu)
+
+wf
+```
+
+The workflow also has slots for post-processing. (Currently unimplemented.)
+
+```{r workflow2}
+names(wf) # 3 lists and a flag
+```
+
+Predict gives a new `epi_df`
+
+```{r predict}
+pp <- predict(wf, new_data = jhu_latest)
+pp 
+```
+
+Can add a `forecast_date` (should be a post processing step)
+
+```{r predict2}
+# Want: 
+# predict(wf, new_data = jhu_latest, forecast_date = "2021-12-31") %>%
+#  filter(!is.na(.pred))
+
+# Intended output:
+predict(wf, new_data = jhu_latest) %>% 
+  mutate(forecast_date = as.Date("2021-12-31")) %>% 
+  filter(!is.na(.pred))
+```
+
+
