@@ -91,4 +91,3 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
                                              forecast_date = as.Date(object$forecast_date))
   components
 }
-
