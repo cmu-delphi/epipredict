@@ -4,18 +4,17 @@
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
 #' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
 #' when the forecast date is left unspecified, it is set to the maximum time
-#' value plus the ahead value from preprocessing.
+#' value in the test data after any processing (ex. leads and lags) has been
+#' applied.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
-#' @details To use this function, either specify a forecast date or specify an
-#'  ahead value in preprocessing and leave the forecast date unspecifed here.
-#'  In the latter, the forecast date will be set as the maximum time value
-#'  in the test data (after any processing has been applied)
-#'  plus the ahead value. In any case, when the forecast date is less than the
-#'  most recent update date of the data (ie. the `as_of` value), an appropriate
-#'  warning will be thrown.
+#' @details To use this function, either specify a forecast date or leave the
+#'  forecast date unspecifed here. In the latter case, the forecast date will
+#'  be set as the maximum time value in the processed test data. In any case,
+#'  when the forecast date is less than the most recent update date of the data
+#'  (ie. the `as_of` value), an appropriate warning will be thrown.
 #'
 #' @export
 #' @examples
@@ -48,7 +47,8 @@
 #'
 #' p2 <- predict(wf2, latest)
 #' p2
-#' # Do not specify a forecast_date in `layer_add_forecast_date()`
+#'
+#' # Do not specify a forecast_date
 #'  f3 <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_add_forecast_date() %>%
@@ -79,10 +79,8 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
 
   as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
 
-  ahead <- the_recipe$steps[[2]][["ahead"]]
-
   if (is.null(object$forecast_date)) {
-    object$forecast_date <- max_time_value + ahead
+    object$forecast_date <- max_time_value
   }
 
   if (object$forecast_date < as_of_date) {

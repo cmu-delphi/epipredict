@@ -2,17 +2,18 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param target_date The target date to add as a column to the `epi_df`.
-#' By default, this is `time_value` plus `ahead`, where `ahead` has
-#' been specified in preprocessing (most likely in `step_epi_ahead`).
-#' The user may override this with a date of their own (that will usually
-#' be in the form "yyyy-mm-dd").
+#' By default, this is the maximum `time_value` from the processed test
+#' data plus `ahead`, where `ahead` has been specified in preprocessing
+#' (most likely in `step_epi_ahead`). The user may override this with a
+#' date of their own (that will usually be in the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
 #' @details By default, this function assumes that a value for `ahead`
-#' has been specified in a preprocessing step (most likely in `step_epi_ahead`).
-#' Then, `ahead` is added to `time_value` to get the target date.
+#' has been specified in a preprocessing step (most likely in
+#' `step_epi_ahead`). Then, `ahead` is added to the maximum `time_value`
+#' in the test data to get the target date.
 #'
 #' @export
 #' @examples
@@ -60,12 +61,14 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 #' @export
 slather.layer_add_target_date <- function(object, components, the_fit, the_recipe, ...) {
 
-  if(is.null(object$target_date)){
+  max_time_value <- max(components$keys$time_value)
+
+  if (is.null(object$target_date)) {
   ahead <- the_recipe$steps[[2]][["ahead"]]
 
-  if(is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
+  if (is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
   components$predictions <- dplyr::bind_cols(components$predictions,
-                                             target_date = ahead + components$predictions$time_value)
+                                             target_date = max_time_value + ahead)
   } else{
     components$predictions <- dplyr::bind_cols(components$predictions,
                                                target_date = as.Date(object$target_date))

@@ -19,7 +19,7 @@ test_that("Use ahead from preprocessing", {
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_equal(p$target_date, rep(as.Date("2022-01-07"), times = 3))
+  expect_equal(p$target_date, rep(as.Date("2022-01-21"), times = 3))
   expect_named(p, c("geo_value", "time_value", ".pred", "target_date"))
 })
 

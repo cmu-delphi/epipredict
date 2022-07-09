@@ -14,10 +14,10 @@ layer_add_target_date(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{target_date}{The target date to add as a column to the \code{epi_df}.
-By default, this is \code{time_value} plus \code{ahead}, where \code{ahead} has
-been specified in preprocessing (most likely in \code{step_epi_ahead}).
-The user may override this with a date of their own (that will usually
-be in the form "yyyy-mm-dd").}
+By default, this is the maximum \code{time_value} from the processed test
+data plus \code{ahead}, where \code{ahead} has been specified in preprocessing
+(most likely in \code{step_epi_ahead}). The user may override this with a
+date of their own (that will usually be in the form "yyyy-mm-dd").}
 
 \item{id}{a random id string}
 }
@@ -29,8 +29,9 @@ Postprocessing step to add the target date
 }
 \details{
 By default, this function assumes that a value for \code{ahead}
-has been specified in a preprocessing step (most likely in \code{step_epi_ahead}).
-Then, \code{ahead} is added to \code{time_value} to get the target date.
+has been specified in a preprocessing step (most likely in
+\code{step_epi_ahead}). Then, \code{ahead} is added to the maximum \code{time_value}
+in the test data to get the target date.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
