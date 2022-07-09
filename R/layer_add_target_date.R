@@ -60,7 +60,7 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 
 #' @export
 slather.layer_add_target_date <- function(object, components, the_fit, the_recipe, ...) {
-test <<- the_recipe
+
   if (is.null(object$target_date)) {
     max_time_value <- max(components$keys$time_value)
     ahead <- unlist(the_recipe$steps)$ahead
