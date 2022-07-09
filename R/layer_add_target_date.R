@@ -61,17 +61,17 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 #' @export
 slather.layer_add_target_date <- function(object, components, the_fit, the_recipe, ...) {
 
-  max_time_value <- max(components$keys$time_value)
-
   if (is.null(object$target_date)) {
-  ahead <- unlist(the_recipe$steps)$ahead
+    max_time_value <- max(components$keys$time_value)
+    ahead <- unlist(the_recipe$steps)$ahead
 
-  if (is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
-  components$predictions <- dplyr::bind_cols(components$predictions,
-                                             target_date = max_time_value + ahead)
+    if (is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
+    target_date = max_time_value + ahead
   } else{
-    components$predictions <- dplyr::bind_cols(components$predictions,
-                                               target_date = as.Date(object$target_date))
+    target_date = as.Date(object$target_date)
   }
+
+  components$predictions <- dplyr::bind_cols(components$predictions,
+                                             target_date = target_date)
   components
 }

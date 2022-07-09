@@ -75,13 +75,12 @@ layer_add_forecast_date_new <- function(forecast_date, id = id) {
 #' @export
 slather.layer_add_forecast_date <- function(object, components, the_fit, the_recipe, ...) {
 
-  max_time_value <- max(components$keys$time_value)
-
-  as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
-
   if (is.null(object$forecast_date)) {
+    max_time_value <- max(components$keys$time_value)
     object$forecast_date <- max_time_value
   }
+
+  as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
 
   if (object$forecast_date < as_of_date) {
     warning("forecast_date is less than the most recent update date of the data.")
