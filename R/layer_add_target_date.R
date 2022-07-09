@@ -63,9 +63,13 @@ slather.layer_add_target_date <- function(object, components, the_fit, the_recip
 
   if (is.null(object$target_date)) {
     max_time_value <- max(components$keys$time_value)
-    ahead <- unlist(the_recipe$steps)$ahead
+    ahead <-
+      -test$steps[[which(unlist(lapply(test$steps,
+                                       function(x) all("ahead_" %in% unlist(x)))))]]$shift
 
-    if (is.null(ahead)) stop("`ahead` must be specified in preprocessing.")
+    if (is.null(ahead)){
+      stop("`ahead` must be specified in preprocessing.")
+    }
     target_date = max_time_value + ahead
   } else{
     target_date = as.Date(object$target_date)
