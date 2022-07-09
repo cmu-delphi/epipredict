@@ -64,7 +64,7 @@ slather.layer_add_target_date <- function(object, components, the_fit, the_recip
   if (is.null(object$target_date)) {
     max_time_value <- max(components$keys$time_value)
     ahead <-
-      -test$steps[[which(unlist(lapply(test$steps,
+      -the_recipe$steps[[which(unlist(lapply(the_recipe$steps,
                                        function(x) all("ahead_" %in% unlist(x)))))]]$shift
 
     if (is.null(ahead)){
