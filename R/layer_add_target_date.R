@@ -64,7 +64,7 @@ slather.layer_add_target_date <- function(object, components, the_fit, the_recip
   max_time_value <- max(components$keys$time_value)
 
   if (is.null(object$target_date)) {
-  ahead <- the_recipe$steps[[2]][["ahead"]]
+  ahead <- unlist(the_recipe$steps)$ahead
 
   if (is.na(ahead)) stop("`ahead` must be specified in preprocessing.")
   components$predictions <- dplyr::bind_cols(components$predictions,
