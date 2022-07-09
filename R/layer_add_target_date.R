@@ -60,12 +60,11 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 
 #' @export
 slather.layer_add_target_date <- function(object, components, the_fit, the_recipe, ...) {
-
+  steps <<- the_recipe$steps
   if (is.null(object$target_date)) {
     max_time_value <- max(components$keys$time_value)
-    ahead <-
-      -the_recipe$steps[[which(unlist(lapply(the_recipe$steps,
-                                       function(x) all("ahead_" %in% unlist(x)))))]]$shift
+    steps <- the_recipe$steps
+    ahead <- -steps[[which(unlist(lapply(steps, function(x) "ahead_" %in% x)))]]$shift
 
     if (is.null(ahead)){
       stop("`ahead` must be specified in preprocessing.")
