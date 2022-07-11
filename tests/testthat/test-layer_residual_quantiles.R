@@ -22,9 +22,9 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_named(p, c("geo_value", "time_value",".pred",".quantiles"))
+  expect_named(p, c("geo_value", "time_value",".pred",".pred_distn"))
 
-  nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.quantiles))
+  nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.pred_distn))
   unnested <- nested %>% tidyr::unnest(.quantiles)
 
   expect_equal(nrow(unnested), 9L)

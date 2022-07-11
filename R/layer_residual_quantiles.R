@@ -5,6 +5,7 @@
 #' @param probs numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
+#' @param name character. The name for the output column.
 #' @param .flag a logical to determine if the layer is added. Passed on to
 #'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
@@ -35,24 +36,30 @@
 #' p <- predict(wf1, latest)
 #' p
 layer_residual_quantiles <- function(frosting, ...,
-                                    probs = c(0.0275, 0.975),
-                                    symmetrize = TRUE,
-                                    .flag = TRUE,
-                                    id = rand_id("residual_quantiles")) {
+                                     probs = c(0.0275, 0.975),
+                                     symmetrize = TRUE,
+                                     name = ".pred_distn",
+                                     .flag = TRUE,
+                                     id = rand_id("residual_quantiles")) {
   rlang::check_dots_empty()
+  arg_is_chr_scalar(name, id)
+  arg_is_probabilities(probs)
+  arg_is_lgl(symmetrize)
   add_layer(
     frosting,
     layer_residual_quantiles_new(
       probs = probs,
       symmetrize = symmetrize,
+      name = name,
       id = id
     ),
     flag = .flag
   )
 }
 
-layer_residual_quantiles_new <- function(probs, symmetrize, id) {
-  layer("residual_quantiles", probs = probs, symmetrize = symmetrize, id = id)
+layer_residual_quantiles_new <- function(probs, symmetrize, name, id) {
+  layer("residual_quantiles", probs = probs, symmetrize = symmetrize,
+        name = name, id = id)
 }
 
 #' @export
@@ -65,8 +72,10 @@ slather.layer_residual_quantiles <-
     q <- quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)
 
     estimate <- components$predictions$.pred
-    dstn <- dist_quantiles(map(estimate, "+", q), object$probs)
-    components$predictions$.quantiles <- dstn
+    res <- tibble::tibble(
+      .pred_distn = dist_quantiles(map(estimate, "+", q), object$probs))
+    res <- check_pname(res, components$predictions, object)
+    components$predictions <- dplyr::mutate(components$predictions, !!!res)
     components
   }
 

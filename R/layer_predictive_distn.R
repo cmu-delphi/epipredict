@@ -1,7 +1,8 @@
-#' Returns predictive interval distributions
+#' Returns predictive distributions
 #'
 #' This function calculates an _approximation_ to a parametric predictive
-#' interval. Predictive intervals from linear models require `x* (X'X)^{-1} x*`
+#' distribution. Predictive distributions from linear models require
+#' `x* (X'X)^{-1} x*`
 #' along with the degrees of freedom. This function approximates both. It
 #' should be reasonably accurate for models fit using `lm` when the new point
 #' `x*` isn't too far from the bulk of the data.
@@ -10,6 +11,7 @@
 #' @param ... Unused, include for consistency with other layers.
 #' @param dist_type Gaussian or Student's t predictive intervals
 #' @param truncate Do we truncate the distribution to an interval
+#' @param name character. The name for the output column.
 #' @param .flag a logical to determine if the layer is added. Passed on to
 #'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
@@ -35,40 +37,45 @@
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_predictive_interval() %>%
+#'   layer_predictive_distn() %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
 #' p <- predict(wf1, latest)
 #' p
-layer_predictive_interval <- function(frosting,
+layer_predictive_distn <- function(frosting,
                                       ...,
                                       dist_type = c("gaussian", "student_t"),
                                       truncate = c(-Inf, Inf),
+                                      name = ".pred_distn",
                                       .flag = TRUE, # mandatory
-                                      id = rand_id("predictive_interval")) {
+                                      id = rand_id("predictive_distn")) {
   rlang::check_dots_empty()
+  arg_is_chr_scalar(name, id)
   dist_type <- match.arg(dist_type)
   stopifnot(length(truncate) == 2L,
             is.numeric(truncate),
             truncate[1] < truncate[2])
+
   add_layer(
     frosting,
-    layer_predictive_interval_new(
+    layer_predictive_distn_new(
       dist_type = dist_type,
       truncate = truncate,
+      name = name,
       id = id
     ),
     flag = .flag
   )
 }
 
-layer_predictive_interval_new <- function(dist_type, truncate, id) {
-  layer("predictive_interval", dist_type = dist_type, truncate = truncate, id = id)
+layer_predictive_distn_new <- function(dist_type, truncate, name, id) {
+  layer("predictive_distn", dist_type = dist_type, truncate = truncate,
+        name = name, id = id)
 }
 
 #' @export
-slather.layer_predictive_interval <-
+slather.layer_predictive_distn <-
   function(object, components, the_fit, the_recipe, ...) {
 
     m <- components$predictions$.pred
@@ -88,6 +95,8 @@ slather.layer_predictive_interval <-
     if (!all(is.infinite(truncate))) {
       dstn <- distributional::dist_truncated(dstn, truncate[1], truncate[2])
     }
-  components$predictions$.pred_int <- dstn
-  components
-}
+    dstn <- tibble::tibble(dstn = dstn)
+    dstn <- check_pname(dstn, components$predictions, object)
+    components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
+    components
+  }
