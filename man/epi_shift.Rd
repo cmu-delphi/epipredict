@@ -4,12 +4,12 @@
 \alias{epi_shift}
 \title{Shift predictors while maintaining grouping and time_value ordering}
 \usage{
-epi_shift(x, lags, time_value, keys = NULL, out_name = "x")
+epi_shift(x, shifts, time_value, keys = NULL, out_name = "x")
 }
 \arguments{
-\item{x}{Data frame. Variables to lag}
+\item{x}{Data frame. Variables to shift}
 
-\item{lags}{List. Each list element is a vector of lags.
+\item{shifts}{List. Each list element is a vector of shifts.
 Negative values produce leads. The list should have the same
 length as the number of columns in \code{x}.}
 
