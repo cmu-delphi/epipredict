@@ -11,12 +11,13 @@ test_that("preprocessing steps work", {
                             overwrite = FALSE) %>%
     step_epi_lag(death_rate_scaled, lag = c(0, 7, 14))
 
-  wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(newdata)
-  latest <- newdata %>%
-    dplyr::filter(time_value >= max(time_value) - 14)
-
-  f <- frosting() %>% layer_predict()
-  wf1 <- wf %>% add_frosting(f)
+   prep(r, newdata)
+  # wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(newdata)
+  # latest <- newdata %>%
+  #   dplyr::filter(time_value >= max(time_value) - 14)
+  #
+  # f <- frosting() %>% layer_predict()
+  # wf1 <- wf %>% add_frosting(f)
 
 
 })

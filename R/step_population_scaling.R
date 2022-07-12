@@ -45,6 +45,9 @@ step_population_scaling <-
           trained = FALSE,
           skip = FALSE,
           id = rand_id("population_scaling")){
+    df_pop_col <- enquo(df_pop_col)
+    x_scale_col <- enquo(x_scale_col)
+
   add_step(
     recipe,
     step_population_scaling_new(
@@ -89,7 +92,6 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
     trained = TRUE,
     skip = x$skip,
     id = x$id,
-   # columns = recipes_eval_select(x$terms, training, info)
   )
 }
 
@@ -108,7 +110,7 @@ bake.step_population_scaling <- function(object,
       colnames(newdata)[match(object$x_scale_col,names(newdata))] <- unlist(lapply(object$x_scale_col, function(x){paste0(x,"_scaled")}))
   }
   if (object$overwrite == FALSE) {
-    newdata = dplyr::left_join(newdata, pop_data, by = c("geo_value" = "states")) %>% # by= object$by) %>%
+    newdata = dplyr::left_join(newdata, pop_data, by= object$by) %>%
    #  map2(.x = object$x_scale_col, .y = object$df_pop_col, ~ mutate(paste0(.x,"_scaled") = .x/.y))
    for (i in length(object$x_scale_col)){
      num = enquo(object$x_scale_col[i])
@@ -117,6 +119,7 @@ bake.step_population_scaling <- function(object,
    }
 
   }
+  return(newdata)
 }
 
 
