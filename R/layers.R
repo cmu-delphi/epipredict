@@ -104,6 +104,50 @@ detect_layer.workflow <- function(x, name, ...) {
   detect_layer(x$post$actions$frosting$frosting, name)
 }
 
+extract_layer_argument <- function(x, layer_name, arg, ...) {
+  UseMethod("extract_layer_argument")
+}
+
+#' @export
+extract_layer_argument.layer <- function(x, layer_name, arg, ...) {
+  rlang::check_dots_empty()
+  arg_is_chr_scalar(layer_name, arg)
+  in_layer_name = class(x)[1]
+  if (layer_name != in_layer_name) {
+    cli_stop(
+      "Requested {layer_name} not found. This is a(n) {in_layer_name}."
+    )
+  }
+  if (! arg %in% names(x)) {
+    cli_stop("Requested argument {arg} not found in {layer_name}.")
+  }
+  x[[arg]]
+}
+
+#' @export
+extract_layer_argument.frosting <- function(x, layer_name, arg, ...) {
+  rlang::check_dots_empty()
+
+  has_layer <- detect_layer(x, layer_name)
+  if (!has_layer){
+    cli_stop("frosting object does not contain a {layer_name} layer.")
+  }
+  layer_names <- map_chr(x$layers, ~ class(.x)[1])
+  layer_locations <- which(layer_name == layer_names)
+  if (N <- length(layer_locations) > 1) {
+    cli_stop("frosting object has {N} {layer_name} layers. Can't disambiguate.")
+  }
+  extract_layer_argument(x$layers[[layer_locations]], layer_name, arg)
+}
+
+#' @export
+extract_layer_argument.epi_workflow <- function(x, layer_name, arg, ...) {
+  rlang::check_dots_empty()
+  validate_has_postprocessor(x)
+  extract_layer_argument(x$post$actions$frosting$frosting, layer_name, arg)
+}
+
+
 #' @export
 #' @rdname layer-processors
 extract_layers <- function(x, ...) {
