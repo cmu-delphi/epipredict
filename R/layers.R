@@ -104,9 +104,30 @@ detect_layer.workflow <- function(x, name, ...) {
   detect_layer(x$post$actions$frosting$frosting, name)
 }
 
+
+#' Extract argument made to a frosting layer
+#'
+#'
+#'
+#' @param x an epi_workflow, frosting, or layer object
+#' @param layer_name the name of the layer
+#' @param arg the name of the argument
+#' @param ... not used
+#'
+#' @return An object originally passed as an argument to a layer
+#' @export
+#'
+#' @examples
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_residual_quantile(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'   layer_naomit(.pred)
+#'
+#' extract_layer_argument(f, "layer_residual_quantile", "symmetrize")
 extract_layer_argument <- function(x, layer_name, arg, ...) {
   UseMethod("extract_layer_argument")
 }
+
 
 #' @export
 extract_layer_argument.layer <- function(x, layer_name, arg, ...) {
