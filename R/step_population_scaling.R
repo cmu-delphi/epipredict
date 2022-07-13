@@ -15,11 +15,11 @@
 #' To join by different variables on the `epi_df` and `df`, use a named vector. For example, by = c("geo_value" = "states") will match `epi_df$geo_value` to `df$states`.
 #' To join by multiple variables, use a vector with length > 1. For example, by = c("geo_value" = "states", "county" = "county") will match `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
-#' @param df_pop_col the name of the column(s) in the data frame `df` that contains the population data and will be used for scaling.
-#' @param x_scale_col the corresponding column(s) in the `epi_df` that will be scaled.
-#' For example, if there are two columns in the `epi_df` that will both be scaled by a column in `df`, then repeat it in `df_pop_col = c("county_population", "county_population")`
-#' match the columns in `epi_df` as `x_scale_col = c("daily_new_cases", "accumulated_cases")`
-#' @param overwrite TRUE to overwrite the original column; FALSE retains the original column and adds the population scaled variable as a new column.
+#' @param df_pop_col the name of the column in the data frame `df` that contains the population data and will be used for scaling. This should be one column.
+#' @param ... the corresponding column(s) in the `epi_df` that will be scaled.
+#' @param inputs Quosure(s) of `...`.
+#' @param create_new TRUE to create a new column and keep the original column in the `epi_df`
+#' @param suffix a character. The suffix added to the column name if `crete_new = TRUE`. Default to "_scaled".
 #' @param role For model terms created by this step, what analysis role should they be assigned? By default, the new columns created by this step from the original variables will be used as predictors in a model. Other options can be ard are not limited to "outcome".
 #' @param trained A logical to indicate if the quantities for preprocessing have been estimated.
 #' @param skip A logical. Should the step be skipped when the
@@ -37,16 +37,16 @@
 step_population_scaling <-
   function(recipe,
           df,
-          by,
+          by = NULL,
           df_pop_col,
-          x_scale_col,
-          overwrite = FALSE,
+          ...,
+          inputs = NULL,
+          create_new = TRUE,
+          suffix = "_scaled",
           role = "predictor",
           trained = FALSE,
           skip = FALSE,
           id = rand_id("population_scaling")){
-    df_pop_col <- enquo(df_pop_col)
-    x_scale_col <- enquo(x_scale_col)
 
   add_step(
     recipe,
@@ -54,8 +54,10 @@ step_population_scaling <-
       df = df,
       by = by,
       df_pop_col = df_pop_col,
-      x_scale_col = x_scale_col,
-      overwrite = overwrite,
+      terms = dplyr::enquos(...),
+      inputs = inputs,
+      create_new = create_new,
+      suffix = suffix,
       role = role,
       trained = trained,
       skip = skip,
@@ -65,14 +67,16 @@ step_population_scaling <-
 }
 
 step_population_scaling_new <-
-  function(df, by, df_pop_col, x_scale_col, overwrite, role, trained, skip, id) {
+  function(df, by, df_pop_col, terms, inputs, create_new, suffix, role, trained, skip, id) {
     step(
       subclass = "population_scaling",
       df = df,
       by = by,
       df_pop_col = df_pop_col,
-      x_scale_col = x_scale_col,
-      overwrite = overwrite,
+      terms = terms,
+      inputs= inputs,
+      create_new = create_new,
+      suffix = suffix,
       role = role,
       trained = trained,
       skip = skip,
@@ -82,12 +86,15 @@ step_population_scaling_new <-
 
 #' @export
 prep.step_population_scaling <- function(x, training, info = NULL, ...) {
+  # prep function calculates the statistics, to keep around the information used both on training and testing like centering
   step_population_scaling_new(
     df = x$df,
     by = x$by,
     df_pop_col = x$df_pop_col,
-    x_scale_col = x$x_scale_col,
-    overwrite = x$overwrite,
+    terms = x$terms,
+    inputs = recipes_eval_select(x$term, training, info),
+    create_new = x$create_new,
+    suffix = x$suffix,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
@@ -99,26 +106,14 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 bake.step_population_scaling <- function(object,
                                  newdata,
                                  ...) {
+
   ## add checks here too
 
+  pop_col = sym(object$df_pop_col)
+  suffix = ifelse(object$create_new, object$suffix, "")
+  newdata <- dplyr::left_join(newdata, object$df, by= object$by) %>%
+    mutate(across(all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}"))
 
-  pop_data <- object$df
-
-  if (object$overwrite) {
-      newdata =  dplyr::left_join(newdata, pop_data, by= object$by)
-      newdata[object$x_scale_col] = newdata[object$x_scale_col] / newdata[object$df_pop_col]
-      colnames(newdata)[match(object$x_scale_col,names(newdata))] <- unlist(lapply(object$x_scale_col, function(x){paste0(x,"_scaled")}))
-  }
-  if (object$overwrite == FALSE) {
-    newdata = dplyr::left_join(newdata, pop_data, by= object$by) %>%
-   #  map2(.x = object$x_scale_col, .y = object$df_pop_col, ~ mutate(paste0(.x,"_scaled") = .x/.y))
-   for (i in length(object$x_scale_col)){
-     num = enquo(object$x_scale_col[i])
-     denom = enquo(object$df_pop_col[i])
-     newdata = newdata %>% mutate( !!paste0(object$x_scale_col[i],"_scaled")  := !!num / !!denom )
-   }
-
-  }
   return(newdata)
 }
 
