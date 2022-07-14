@@ -10,12 +10,12 @@ test_that("preprocessing steps work", {
 
   r <- epi_recipe(newdata) %>%
     step_population_scaling(df = pop_data,
-                            df_pop_col = "value",
-                            ... = c("case_rate","death_rate")) %>%
-    step_epi_lag(death_rate_scaled, lag = c(0, 7, 14))
+                            df_pop_col = "value", by = c("geo_value" = "states"),
+                             case_rate)
 
-   prep(r, newdata)
-  # wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(newdata)
+
+  bake(prep(r, newdata), newdata)
+   wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(newdata)
   # latest <- newdata %>%
   #   dplyr::filter(time_value >= max(time_value) - 14)
   #

@@ -92,29 +92,29 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
     by = x$by,
     df_pop_col = x$df_pop_col,
     terms = x$terms,
-    inputs = recipes_eval_select(x$term, training, info),
+    inputs = recipes_eval_select(x$terms, training, info),
     create_new = x$create_new,
     suffix = x$suffix,
     role = x$role,
     trained = TRUE,
     skip = x$skip,
-    id = x$id,
+    id = x$id
   )
 }
 
 #' @export
 bake.step_population_scaling <- function(object,
-                                 newdata,
+                                 new_data,
                                  ...) {
 
   ## add checks here too
 
   pop_col = sym(object$df_pop_col)
   suffix = ifelse(object$create_new, object$suffix, "")
-  newdata <- dplyr::left_join(newdata, object$df, by= object$by) %>%
+  #browser()
+  dplyr::left_join(new_data, object$df, by= object$by) %>%
     mutate(across(all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}"))
 
-  return(newdata)
 }
 
 
