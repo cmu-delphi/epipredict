@@ -89,7 +89,7 @@ slather.layer_predictive_distn <-
     dstn <- switch(
       object$dist_type,
       gaussian = distributional::dist_normal(m, s),
-      student_t = distributional::dist_student_t(df, list(m), s)
+      student_t = distributional::dist_student_t(df, m, s)
     )
     truncate <- object$truncate
     if (!all(is.infinite(truncate))) {
