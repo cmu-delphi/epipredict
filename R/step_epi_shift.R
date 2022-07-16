@@ -14,7 +14,7 @@
 #' @param ... One or more selector functions to choose variables
 #'  for this step. See [selections()] for more details.
 #' @param role For model terms created by this step, what analysis role should
-#'  they be assigned?
+#'  they be assigned? `lag` is default a predictor while `ahead` is an outcome.
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
 #' @param lag,ahead A vector of integers. Each specified column will
@@ -61,8 +61,8 @@ step_epi_lag <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
-    stopifnot("Lag values must be nonnegative integers" =
-                all(lag>=0 & lag == as.integer(lag)))
+    arg_is_nonneg_int(lag)
+    arg_is_chr_scalar(prefix, id)
     add_step(recipe,
              step_epi_lag_new(
                terms = dplyr::enquos(...),
@@ -75,7 +75,7 @@ step_epi_lag <-
                columns = columns,
                skip = skip,
                id = id
-    ))
+             ))
   }
 
 #' Create a shifted predictor
@@ -94,9 +94,8 @@ step_epi_ahead <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
-
-    stopifnot("Ahead values must be nonnegative integers" =
-                all(ahead>=0 & ahead == as.integer(ahead)))
+    arg_is_nonneg_int(ahead)
+    arg_is_chr_scalar(prefix, id)
     add_step(recipe,
              step_epi_ahead_new(
                terms = dplyr::enquos(...),
@@ -160,7 +159,7 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     lag = x$lag,
     prefix = x$prefix,
     default = x$default,
-    keys = x$keys, #intersect(x$keys, epi_keys(training)),
+    keys = x$keys,
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id

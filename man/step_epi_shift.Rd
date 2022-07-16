@@ -39,7 +39,7 @@ sequence of operations for this recipe.}
 for this step. See \code{\link[=selections]{selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
-they be assigned?}
+they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
