@@ -3,7 +3,6 @@
 \name{step_epi_lag}
 \alias{step_epi_lag}
 \alias{step_epi_ahead}
-\alias{step_epi_shift}
 \title{Create a shifted predictor}
 \usage{
 step_epi_lag(
@@ -14,7 +13,6 @@ step_epi_lag(
   lag = 1,
   prefix = "lag_",
   default = NA,
-  keys = epi_keys(recipe),
   columns = NULL,
   skip = FALSE,
   id = rand_id("epi_lag")
@@ -28,25 +26,9 @@ step_epi_ahead(
   ahead = 1,
   prefix = "ahead_",
   default = NA,
-  keys = epi_keys(recipe),
   columns = NULL,
   skip = FALSE,
   id = rand_id("epi_ahead")
-)
-
-step_epi_shift(
-  recipe,
-  ...,
-  role,
-  trained = FALSE,
-  shift = 0,
-  prefix = "shift_",
-  default = NA,
-  keys = epi_keys(recipe),
-  columns = NULL,
-  skip = FALSE,
-  id = rand_id("epi_shift"),
-  intended_direction = NULL
 )
 }
 \arguments{
@@ -62,7 +44,7 @@ they be assigned?}
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
 
-\item{lag, ahead, shift}{A vector of integers. Each specified column will
+\item{lag, ahead}{A vector of integers. Each specified column will
 be the lag or lead for each value in the vector. Lag integers must be
 nonnegative, while ahead integers must be positive.}
 
@@ -70,8 +52,6 @@ nonnegative, while ahead integers must be positive.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
-
-\item{keys}{A character vector of the keys in an epi_df}
 
 \item{columns}{A character string of variable names that will
 be populated (eventually) by the \code{terms} argument.}
@@ -84,9 +64,6 @@ Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
 
 \item{id}{A unique identifier for the step}
-
-\item{intended_direction}{used by \code{step_epi_shift} to determine whether
-leading or lagging was intended.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
@@ -102,9 +79,6 @@ specify an alternative filler value with the \code{default}
 argument.
 }
 \details{
-\code{step_epi_shift} is more general, accomodating both leads and lags
-simultaneously.
-
 The step assumes that the data are already \emph{in the proper sequential
 order} for shifting.
 
@@ -117,13 +91,6 @@ are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
 r <- epi_recipe(case_death_rate_subset) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0,7,14))
-r
-
-r <- epi_recipe(case_death_rate_subset) \%>\%
-  step_epi_ahead(death_rate, ahead = 7) \%>\%
-  step_epi_lag(death_rate, case_rate, lag = c(0,7,14)) \%>\%
-  # pretty odd, but possible
-  step_epi_shift(case_rate, shift = c(-5, 5), role = "predictor")
 r
 }
 \concept{row operation steps}

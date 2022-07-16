@@ -8,8 +8,6 @@
 #'   specify an alternative filler value with the `default`
 #'   argument.
 #'
-#'  `step_epi_shift` is more general, accomodating both leads and lags
-#'  simultaneously.
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
@@ -19,13 +17,12 @@
 #'  they be assigned?
 #' @param trained A logical to indicate if the quantities for
 #'  preprocessing have been estimated.
-#' @param lag,ahead,shift A vector of integers. Each specified column will
+#' @param lag,ahead A vector of integers. Each specified column will
 #'  be the lag or lead for each value in the vector. Lag integers must be
 #'  nonnegative, while ahead integers must be positive.
 #' @param prefix A prefix to indicate what type of variable this is
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
-#' @param keys A character vector of the keys in an epi_df
 #' @param columns A character string of variable names that will
 #'  be populated (eventually) by the `terms` argument.
 #' @param skip A logical. Should the step be skipped when the
@@ -35,8 +32,6 @@
 #'  Care should be taken when using `skip = TRUE` as it may affect
 #'  the computations for subsequent operations.
 #' @param id A unique identifier for the step
-#' @param intended_direction used by `step_epi_shift` to determine whether
-#'  leading or lagging was intended.
 #' @template step-return
 #'
 #' @details The step assumes that the data are already _in the proper sequential
@@ -55,13 +50,6 @@
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0,7,14))
 #' r
-#'
-#' r <- epi_recipe(case_death_rate_subset) %>%
-#'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   step_epi_lag(death_rate, case_rate, lag = c(0,7,14)) %>%
-#'   # pretty odd, but possible
-#'   step_epi_shift(case_rate, shift = c(-5, 5), role = "predictor")
-#' r
 step_epi_lag <-
   function(recipe,
            ...,
@@ -70,26 +58,24 @@ step_epi_lag <-
            lag = 1,
            prefix = "lag_",
            default = NA,
-           keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
     stopifnot("Lag values must be nonnegative integers" =
                 all(lag>=0 & lag == as.integer(lag)))
-
-    step_epi_shift(recipe,
-                   ...,
-                   role = role,
-                   trained = trained,
-                   shift = lag,
-                   prefix = prefix,
-                   default = default,
-                   keys = keys,
-                   columns = columns,
-                   skip = skip,
-                   id = id,
-                   intended_direction = "epi_lag"
-    )
+    add_step(recipe,
+             step_epi_lag_new(
+               terms = dplyr::enquos(...),
+               role = role,
+               trained = trained,
+               lag = lag,
+               prefix = prefix,
+               default = default,
+               keys = epi_keys(recipe),
+               columns = columns,
+               skip = skip,
+               id = id
+    ))
   }
 
 #' Create a shifted predictor
@@ -105,72 +91,37 @@ step_epi_ahead <-
            ahead = 1,
            prefix = "ahead_",
            default = NA,
-           keys = epi_keys(recipe),
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
 
     stopifnot("Ahead values must be nonnegative integers" =
                 all(ahead>=0 & ahead == as.integer(ahead)))
-
-    step_epi_shift(recipe,
-                   ...,
-                   role = role,
-                   trained = trained,
-                   shift = -ahead,
-                   prefix = prefix,
-                   default = default,
-                   keys = keys,
-                   columns = columns,
-                   skip = skip,
-                   id = id,
-                   intended_direction = "epi_ahead"
-    )
+    add_step(recipe,
+             step_epi_ahead_new(
+               terms = dplyr::enquos(...),
+               role = role,
+               trained = trained,
+               ahead = ahead,
+               prefix = prefix,
+               default = default,
+               keys = epi_keys(recipe),
+               columns = columns,
+               skip = skip,
+               id = id
+             ))
   }
 
-#' @family row operation steps
-#' @rdname step_epi_shift
-#' @export
-step_epi_shift <-
-  function(recipe,
-           ...,
-           role,
-           trained = FALSE,
-           shift = 0,
-           prefix = "shift_",
-           default = NA,
-           keys = epi_keys(recipe),
-           columns = NULL,
-           skip = FALSE,
-           id = rand_id("epi_shift"),
-           intended_direction = NULL) {
-    add_step(
-      recipe,
-      step_epi_shift_new(
-        terms = dplyr::enquos(...),
-        role = role,
-        trained = trained,
-        shift = shift,
-        prefix = prefix,
-        default = default,
-        keys = keys,
-        columns = columns,
-        skip = skip,
-        id = id,
-        intended_direction = intended_direction
-      )
-    )
-  }
 
-step_epi_shift_new <-
-  function(terms, role, trained, shift, prefix, default, keys,
-           columns, skip, id, intended_direction) {
+step_epi_lag_new <-
+  function(terms, role, trained, lag, prefix, default, keys,
+           columns, skip, id) {
     step(
-      subclass = c(intended_direction, "epi_shift"),
+      subclass = "epi_lag",
       terms = terms,
       role = role,
       trained = trained,
-      shift = shift,
+      lag = lag,
       prefix = prefix,
       default = default,
       keys = keys,
@@ -180,30 +131,67 @@ step_epi_shift_new <-
     )
   }
 
+step_epi_ahead_new <-
+  function(terms, role, trained, ahead, prefix, default, keys,
+           columns, skip, id) {
+    step(
+      subclass = "epi_ahead",
+      terms = terms,
+      role = role,
+      trained = trained,
+      ahead = ahead,
+      prefix = prefix,
+      default = default,
+      keys = keys,
+      columns = columns,
+      skip = skip,
+      id = id
+    )
+  }
+
+
+
 #' @export
-prep.step_epi_shift <- function(x, training, info = NULL, ...) {
-  step_epi_shift_new(
+prep.step_epi_lag <- function(x, training, info = NULL, ...) {
+  step_epi_lag_new(
     terms = x$terms,
     role = x$role,
     trained = TRUE,
-    shift = x$shift,
+    lag = x$lag,
     prefix = x$prefix,
     default = x$default,
-    keys = x$keys,
+    keys = intersect(x$keys, epi_keys(training)),
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
-    id = x$id,
-    intended_direction = x$intended_direction
+    id = x$id
   )
 }
 
 #' @export
-bake.step_epi_shift <- function(object, new_data, ...) {
-  grid <- tidyr::expand_grid(col = object$columns, shift_val = object$shift) %>%
-    dplyr::mutate(newname = glue::glue(
-                          paste0("{object$prefix}","{abs(shift_val)}","_{col}")
-                        )
+prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
+  step_epi_ahead_new(
+    terms = x$terms,
+    role = x$role,
+    trained = TRUE,
+    ahead = x$ahead,
+    prefix = x$prefix,
+    default = x$default,
+    keys = intersect(x$keys, epi_keys(training)),
+    columns = recipes_eval_select(x$terms, training, info),
+    skip = x$skip,
+    id = x$id
   )
+}
+
+
+
+#' @export
+bake.step_epi_lag <- function(object, new_data, ...) {
+  grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
+    dplyr::mutate(newname = glue::glue("{object$prefix}{lag}_{col}"),
+                  shift = object$lag,
+                  lag = NULL)
+
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
@@ -215,8 +203,8 @@ bake.step_epi_shift <- function(object, new_data, ...) {
              "."))
   }
   ok <- object$keys
-  shifted <- purrr::reduce(
-    purrr::pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
+  shifted <- reduce(
+    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
     dplyr::full_join,
     by = ok
   )
@@ -229,22 +217,46 @@ bake.step_epi_shift <- function(object, new_data, ...) {
 }
 
 #' @export
-print.step_epi_lag <- function(x, ...) {
-  NextMethod(title = "Lagging ", shift = abs(x$shift))
+bake.step_epi_ahead <- function(object, new_data, ...) {
+  grid <- tidyr::expand_grid(col = object$columns, ahead = object$ahead) %>%
+    dplyr::mutate(newname = glue::glue("{object$prefix}{ahead}_{col}"),
+                  shift = -object$ahead,
+                  ahead = NULL)
+
+  ## ensure no name clashes
+  new_data_names <- colnames(new_data)
+  intersection <- new_data_names %in% grid$newname
+  if (any(intersection)) {
+    rlang::abort(
+      paste0("Name collision occured in `", class(object)[1],
+             "`. The following variable names already exists: ",
+             paste0(new_data_names[intersection], collapse = ", "),
+             "."))
+  }
+  ok <- object$keys
+  shifted <- reduce(
+    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
+    dplyr::full_join,
+    by = ok
+  )
+
+  dplyr::full_join(new_data, shifted, by = ok) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
+    dplyr::arrange(time_value) %>%
+    dplyr::ungroup()
+
+}
+
+
+#' @export
+print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
+  print_step_shift(x$columns, x$terms, x$trained, "Lagging ", shift = x$lag)
+  invisible(x)
 }
 
 #' @export
-print.step_epi_ahead <- function(x, ...) {
-  NextMethod(title = "Leading ", shift = abs(x$shift))
-}
-
-#' @export
-print.step_epi_shift <- function(x,
-                                 width = max(20, options()$width - 30),
-                                 title = "Shifting ",
-                                 shift = x$shift,
-                                 ...) {
-  print_step_shift(x$columns, x$terms, x$trained, title, width, shift = shift)
+print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {
+  print_step_shift(x$columns, x$terms, x$trained, "Leading ", shift = x$ahead)
   invisible(x)
 }
 

@@ -11,8 +11,8 @@ x <- tibble(geo_value = rep("place",200),
   as_epi_df()
 
 slm_fit <- function(recipe, data = x) {
-  workflow() %>%
-    add_recipe(recipe) %>%
+  epi_workflow() %>%
+    add_epi_recipe(recipe) %>%
     add_model(linear_reg()) %>%
     fit(data = data)
 }
