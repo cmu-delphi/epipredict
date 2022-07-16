@@ -31,6 +31,7 @@ epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
 }
 
 epi_shift_single <- function(x, col, shift_val, newname, key_cols) {
+  # browser()
   x %>%
     dplyr::select(tidyselect::all_of(c(key_cols, col))) %>%
     dplyr::mutate(time_value = time_value + shift_val) %>%

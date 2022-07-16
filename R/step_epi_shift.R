@@ -160,7 +160,7 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     lag = x$lag,
     prefix = x$prefix,
     default = x$default,
-    keys = intersect(x$keys, epi_keys(training)),
+    keys = x$keys, #intersect(x$keys, epi_keys(training)),
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
@@ -176,7 +176,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     ahead = x$ahead,
     prefix = x$prefix,
     default = x$default,
-    keys = intersect(x$keys, epi_keys(training)),
+    keys = x$keys,
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
@@ -189,7 +189,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 bake.step_epi_lag <- function(object, new_data, ...) {
   grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{lag}_{col}"),
-                  shift = object$lag,
+                  shift_val = object$lag,
                   lag = NULL)
 
   ## ensure no name clashes
@@ -220,7 +220,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
 bake.step_epi_ahead <- function(object, new_data, ...) {
   grid <- tidyr::expand_grid(col = object$columns, ahead = object$ahead) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{ahead}_{col}"),
-                  shift = -object$ahead,
+                  shift_val = -object$ahead,
                   ahead = NULL)
 
   ## ensure no name clashes
