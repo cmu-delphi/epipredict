@@ -263,3 +263,12 @@ norm_tail_q <- function(p, q, target) {
   stats::qnorm(target, ms$m, ms$s)
 }
 
+#' @method vec_math dist_quantiles
+#' @export
+vec_math.dist_quantiles <- function(.fn, .x, ...) {
+  tau <- field(x, "tau")
+  qvals <- field(x, "q")
+  qvals <- vec_math(.fn, qvals, ...)
+  new_quantiles(q = qvals, tau = tau)
+}
+
