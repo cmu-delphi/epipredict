@@ -22,8 +22,8 @@ test_that("epi_keys_mold extracts time_value and geo_value, but not raw",{
     step_epi_lag(case_rate, lag = c(0,7,14)) %>%
     step_epi_naomit()
 
-  my_workflow <- workflow() %>%
-    add_recipe(my_recipe) %>%
+  my_workflow <- epi_workflow() %>%
+    add_epi_recipe(my_recipe) %>%
     add_model(linear_reg()) %>%
     fit(data = case_death_rate_subset)
 
