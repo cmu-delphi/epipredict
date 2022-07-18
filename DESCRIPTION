@@ -4,7 +4,7 @@ Version: 0.0.1
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut","cre")),
     person("Jacob", "Bien", role = "aut"),
-    person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = c("aut", "cre")),
+    person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
     person("Logan", "Brooks", role = "aut"),
     person("Rachel", "Lobay", role = "ctb"),
     person("Ken", "Mawer", role = "ctb"),
