@@ -24,8 +24,8 @@ Extract an argument made to a frosting layer or recipe step
 \examples{
 f <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantile(probs = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
+  layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
   layer_naomit(.pred)
 
-extract_argument(f, "layer_residual_quantile", "symmetrize")
+extract_argument(f, "layer_residual_quantiles", "symmetrize")
 }
