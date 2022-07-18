@@ -29,6 +29,17 @@ map_chr <- function(.x, .f, ...) {
   out
 }
 
+.rlang_purrr_args_recycle <- function(args) {
+  lengths <- map_int(args, length)
+  n <- max(lengths)
+
+  stopifnot(all(lengths == 1L | lengths == n))
+  to_recycle <- lengths == 1L
+  args[to_recycle] <- map(args[to_recycle], function(x) rep.int(x, n))
+
+  args
+}
+
 map2 <- function(.x, .y, .f, ...) {
   .f <- rlang::as_function(.f, env = rlang::global_env())
   out <- mapply(.f, .x, .y, MoreArgs = list(...), SIMPLIFY = FALSE)
@@ -62,4 +73,9 @@ pmap <- function(.l, .f, ...) {
     args, MoreArgs = quote(list(...)),
     SIMPLIFY = FALSE, USE.NAMES = FALSE
   ))
+}
+
+reduce <- function(.x, .f, ..., .init) {
+  f <- function(x, y) .f(x, y, ...)
+  Reduce(f, .x, init = .init)
 }

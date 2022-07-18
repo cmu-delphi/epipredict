@@ -46,7 +46,7 @@ epi_recipe.default <- function(x, ...) {
 #' library(recipes)
 #'
 #' jhu <- case_death_rate_subset %>%
-#'   filter(time_value > "2021-08-01") %>%
+#'   dplyr::filter(time_value > "2021-08-01") %>%
 #'   dplyr::arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
