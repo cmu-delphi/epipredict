@@ -60,11 +60,6 @@ dist_quantiles <- function(x, tau) {
 }
 
 
-# format.dist_quantiles <- function(x, ...) {
-#   sprintf("quantiles[%s]", length(x))
-# }
-
-
 #' Summarize a distribution with a set of quantiles
 #'
 #' @param x a `distribution` vector
@@ -213,24 +208,6 @@ tail_extrapolate <- function(tau_out, Qfun, type, tail) {
   out
 }
 
-mean.dist_quantiles <- function(x, ...,
-                                left_tail = c("normal", "exponential"),
-                                right_tail = c("normal", "exponential")) {
-  # TODO: currently nonfunctional
-  tau <- field(x, "tau")
-  qvals <- field(x, "q")
-  r <- range(tau, na.rm = TRUE)
-
-  if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
-    warning(paste("Mean approximation is not advised with fewer than",
-                  "3 quantiles or when the probs don't span [.25, .75]"))
-    return(NA)
-  }
-
-  # trapz <-
-
-
-}
 
 exp_q_par <- function(q) {
   # tau should always be c(.75, .5) or c(.25, .5)
