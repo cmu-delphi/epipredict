@@ -48,3 +48,30 @@ test_that("quantile extrapolator works", {
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
   expect_length(parameters(qq[1])$q[[1]], 7L)
 })
+
+test_that("unary math works on quantiles", {
+  dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+  dstn2 <- dist_quantiles(list(log(1:4), log(8:11)), list(c(.2,.4,.6,.8)))
+  expect_identical(log(dstn), dstn2)
+
+  dstn2 <- dist_quantiles(list(cumsum(1:4), cumsum(8:11)), list(c(.2,.4,.6,.8)))
+  expect_identical(cumsum(dstn), dstn2)
+})
+
+test_that("arithmetic works on quantiles", {
+  dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+  dstn2 <- dist_quantiles(list(1:4+1, 8:11+1), list(c(.2,.4,.6,.8)))
+  expect_identical(dstn + 1, dstn2)
+  expect_identical(1 + dstn, dstn2)
+
+  dstn2 <- dist_quantiles(list(1:4 / 4, 8:11 / 4), list(c(.2,.4,.6,.8)))
+  expect_identical(dstn / 4, dstn2)
+  expect_identical((1/4) * dstn, dstn2)
+
+  expect_identical(parameters(sum(dstn))$q[[1]], as.double(1:4 + 8:11))
+  expect_error(suppressWarnings(dstn + distributional::dist_normal()))
+  dstn2 <- dist_quantiles(1:5, 1:5/6)
+  ddd <- dstn + dstn2
+  expect_equal(parameters(ddd[[1]])$tau[[1]], c(1/6,.2,1/3,.4,.5,.6,2/3,.8,5/6))
+  expect_equal(parameters(ddd[[2]])$tau[[1]], c(1/6,.2,1/3,.4,.5,.6,2/3,.8,5/6))
+})

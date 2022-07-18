@@ -148,15 +148,15 @@ median.dist_quantiles <- function(x, ..., middle = c("cubic", "linear")) {
 #' @export
 #' @importFrom stats quantile
 #' @import distributional
-quantile.dist_quantiles <- function(x, p, ...,
+quantile.dist_quantiles <- function(x, probs, ...,
                                     middle = c("cubic", "linear"),
                                     left_tail = c("normal", "exponential"),
                                     right_tail = c("normal", "exponential")) {
-  arg_is_probabilities(p)
+  arg_is_probabilities(probs)
   middle = match.arg(middle)
   left_tail = match.arg(left_tail)
   right_tail = match.arg(right_tail)
-  quantile_extrapolate(x, p, middle, left_tail, right_tail)
+  quantile_extrapolate(x, probs, middle, left_tail, right_tail)
 }
 
 
@@ -263,12 +263,45 @@ norm_tail_q <- function(p, q, target) {
   stats::qnorm(target, ms$m, ms$s)
 }
 
-#' @method vec_math dist_quantiles
+#' @method Math dist_quantiles
 #' @export
-vec_math.dist_quantiles <- function(.fn, .x, ...) {
+Math.dist_quantiles <- function(x, ...) {
   tau <- field(x, "tau")
-  qvals <- field(x, "q")
-  qvals <- vec_math(.fn, qvals, ...)
-  new_quantiles(q = qvals, tau = tau)
+  q <- field(x, "q")
+  q <- vctrs::vec_math(.Generic, q, ...)
+  new_quantiles(q = q, tau = tau)
+}
+
+#' @method Ops dist_quantiles
+#' @export
+Ops.dist_quantiles <- function(e1, e2) {
+  is_quantiles <- c(inherits(e1, "dist_quantiles"),
+                    inherits(e2, "dist_quantiles"))
+  is_dist <- c(inherits(e1, "dist_default"), inherits(e2, "dist_default"))
+  tau1 <- tau2 <- NULL
+  if (is_quantiles[1]) {
+    q1 <- field(e1, "q")
+    tau1 <- field(e1, "tau")
+  }
+  if (is_quantiles[2]) {
+    q2 <- field(e2, "q")
+    tau2 <- field(e2, "tau")
+  }
+  tau <- union(tau1, tau2)
+  if (all(is_dist)) {
+    if (all(is_quantiles)) {
+      q1 <- quantile(e1, probs = tau)
+      q2 <- quantile(e2, probs = tau)
+    } else if (is_quantiles[1]) {
+      q2 <- quantile(e2, probs = tau)
+    } else {
+      q1 <- quantile(e1, probs = tau)
+    }
+  } else {
+    if (is_quantiles[1]) q2 <- e2
+    else q1 <- e1
+  }
+  q <- vctrs::vec_arith(.Generic, q1, q2)
+  new_quantiles(q = q, tau = tau)
 }
 
