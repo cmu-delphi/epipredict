@@ -8,14 +8,14 @@
 #'
 #' @param recipe A recipe object. The step will be added to the sequence of operations for this recipe. The recipe should contain information about the `epi_df` such as column names.
 #' @param df a data frame that contains the population data used for scaling.
-#' @param by A character vector of variables to join by.
+#' @param by A character vector of variables to join by. Column names should be in lower case.
 #' If `NULL`, the default will perform a natural join, using all variables in common across the `epi_df` and `df`.
 #' A message lists the variables so that you can check they're correct; suppress the message by supplying by explicitly.
 #'
 #' To join by different variables on the `epi_df` and `df`, use a named vector. For example, by = c("geo_value" = "states") will match `epi_df$geo_value` to `df$states`.
 #' To join by multiple variables, use a vector with length > 1. For example, by = c("geo_value" = "states", "county" = "county") will match `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
-#' @param df_pop_col the name of the column in the data frame `df` that contains the population data and will be used for scaling. This should be one column.
+#' @param df_pop_col the name of the column in the data frame `df` that contains the population data and will be used for scaling. This should be one column, and column names should be in lower case.
 #' @param ... the corresponding column(s) in the `epi_df` that will be scaled.
 #' @param inputs Quosure(s) of `...`.
 #' @param create_new TRUE to create a new column and keep the original column in the `epi_df`
@@ -32,8 +32,21 @@
 #'
 #' @return Creates a population scaled column in training time to fit the model.
 #' @export
-#' @examples TO-DO
-#' TO-DO
+#' @examples
+#' pop_data = data.frame(states = c("ak","al","ar","as","az","ca"),
+#' value = c(1000, 2000, 3000, 4000, 5000, 6000))
+#'
+#' newdata = case_death_rate_subset %>% filter(geo_value %in%  c("ak","al","ar","as","az","ca"))
+#'
+#' r <- epi_recipe(newdata) %>%
+#'  step_population_scaling(df = pop_data,
+#'  df_pop_col = "value",
+#'  by = c("geo_value" = "states"),
+#'  case_rate, death_rate)
+#'
+#'  prep <- prep(r, newdata)
+#'
+#'  bake(prep, newdata)
 step_population_scaling <-
   function(recipe,
           df,
@@ -47,7 +60,6 @@ step_population_scaling <-
           trained = FALSE,
           skip = FALSE,
           id = rand_id("population_scaling")){
-
   add_step(
     recipe,
     step_population_scaling_new(
@@ -86,7 +98,6 @@ step_population_scaling_new <-
 
 #' @export
 prep.step_population_scaling <- function(x, training, info = NULL, ...) {
-  # prep function calculates the statistics, to keep around the information used both on training and testing like centering
   step_population_scaling_new(
     df = x$df,
     by = x$by,
@@ -107,17 +118,28 @@ bake.step_population_scaling <- function(object,
                                  new_data,
                                  ...) {
 
-  ## add checks here too
+  stopifnot("Only one population column allowed for scaling" =
+              length(object$df_pop_col) == 1)
+
+  if(object$suffix != "_scaled" && object$create_new == FALSE){
+    message("`suffix` not used to generate new column in `step_population_scaling`")
+  }
+
+  object$df <- object$df %>% dplyr::mutate(dplyr::across(where(is.character), tolower))
 
   pop_col = sym(object$df_pop_col)
   suffix = ifelse(object$create_new, object$suffix, "")
-  #browser()
-  dplyr::left_join(new_data, object$df, by= object$by) %>%
-    mutate(across(all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}"))
+
+  dplyr::left_join(new_data, object$df, by= tolower(object$by)) %>%
+    dplyr::mutate(dplyr::across(dplyr::all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}"))
 
 }
 
 
-print.step_population_scaling <- function(){
-  # to-do
+print.step_population_scaling <-  function(x, width = max(20, options()$width - 35), ...) {
+  title <- "Population scaling"
+  recipes::print_step(x$inputs, x$inputs, x$trained, title, width)
+  invisible(x)
 }
+
+
