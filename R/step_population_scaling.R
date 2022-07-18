@@ -33,10 +33,11 @@
 #' @return Creates a population scaled column in training time to fit the model.
 #' @export
 #' @examples
+#' library(dplyr)
 #' pop_data = data.frame(states = c("ak","al","ar","as","az","ca"),
 #' value = c(1000, 2000, 3000, 4000, 5000, 6000))
 #'
-#' newdata = case_death_rate_subset %>% filter(geo_value %in%  c("ak","al","ar","as","az","ca"))
+#' newdata = case_death_rate_subset %>% dplyr::filter(geo_value %in%  c("ak","al","ar","as","az","ca"))
 #'
 #' r <- epi_recipe(newdata) %>%
 #'  step_population_scaling(df = pop_data,
