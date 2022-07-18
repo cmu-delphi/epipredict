@@ -56,8 +56,7 @@ test_that("layer_predict is added by default if missing", {
   r <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    step_epi_naomit()
 
   wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 
@@ -65,12 +64,12 @@ test_that("layer_predict is added by default if missing", {
 
   f1 <- frosting() %>%
     layer_naomit(.pred) %>%
-    layer_residual_quantile()
+    layer_residual_quantiles()
 
   f2 <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
-    layer_residual_quantile()
+    layer_residual_quantiles()
 
   wf1 <- wf %>% add_frosting(f1)
   wf2 <- wf %>% add_frosting(f2)

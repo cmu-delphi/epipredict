@@ -28,7 +28,7 @@ get_test_data <- function(recipe, x){
   }
   ## CHECK if it is epi_df?
 
-  max_lags <- max(map_dbl(recipe$steps, ~ max(.x$shift %||% 0)))
+  max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)))
 
   # CHECK: Return NA if insufficient training data
   if (dplyr::n_distinct(x$time_value) < max_lags) {
