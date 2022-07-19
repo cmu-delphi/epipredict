@@ -104,27 +104,7 @@ detect_layer.workflow <- function(x, name, ...) {
   detect_layer(x$post$actions$frosting$frosting, name)
 }
 
-#' @export
-#' @rdname layer-processors
-extract_layers <- function(x, ...) {
-  UseMethod("extract_layers")
-}
 
-
-#' @export
-#' @rdname layer-processors
-extract_layers.frosting <- function(x, ...) {
-  rlang::check_dots_empty()
-  x$layers
-}
-
-#' @export
-#' @rdname layer-processors
-extract_layers.workflow <- function(x, ...) {
-  rlang::check_dots_empty()
-  validate_has_postprocessor(x)
-  extract_layers(x$post$actions$frosting$frosting)
-}
 
 #' Spread a layer of frosting on a fitted workflow
 #'

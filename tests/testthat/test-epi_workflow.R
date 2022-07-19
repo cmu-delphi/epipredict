@@ -19,14 +19,13 @@ test_that("outcome of the two methods are the same", {
     step_epi_lag(death_rate, lag = c(0, 7)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(case_rate, lag = c(7)) %>%
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes())
+    step_epi_naomit()
 
   s <- parsnip::linear_reg()
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
-    layer_residual_quantile()
+    layer_residual_quantiles()
 
   ef <- epi_workflow(r, s, f)
   ef2 <- epi_workflow(r, s) %>% add_frosting(f)
