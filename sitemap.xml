@@ -10,15 +10,6 @@
     <loc>https://cmu-delphi.github.io/epipredict/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://cmu-delphi.github.io/epipredict/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://cmu-delphi.github.io/epipredict/articles/knn-forecasts.html</loc>
-  </url>
-  <url>
-    <loc>https://cmu-delphi.github.io/epipredict/articles/simple-forecasts.html</loc>
-  </url>
-  <url>
     <loc>https://cmu-delphi.github.io/epipredict/authors.html</loc>
   </url>
   <url>
@@ -29,6 +20,12 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/add_epi_recipe.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/add_frosting.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/add_layer.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/apply_frosting.html</loc>
@@ -49,13 +46,19 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/case_death_rate_subset.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/check_pname.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/create_lags_and_leads.html</loc>
   </url>
   <url>
-    <loc>https://cmu-delphi.github.io/epipredict/reference/default_epi_recipe_blueprint.html</loc>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/create_layer.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/df_mat_mul.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/dist_quantiles.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/epi_keys.html</loc>
@@ -68,6 +71,15 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/epi_workflow.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/extract_argument.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/extrapolate_quantiles.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/frosting.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/get_precision.html</loc>
@@ -100,10 +112,37 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/knnarx_forecaster.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer-processors.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_add_forecast_date.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_add_target_date.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_naomit.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_predict.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_predictive_distn.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_residual_quantiles.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_threshold.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/nested_quantiles.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/new_epi_recipe_blueprint.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/pipe.html</loc>
@@ -121,6 +160,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/smooth_arx_forecaster.html</loc>
   </url>
   <url>
-    <loc>https://cmu-delphi.github.io/epipredict/reference/step_epi_ahead.html</loc>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/step_epi_naomit.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/step_epi_shift.html</loc>
   </url>
 </urlset>

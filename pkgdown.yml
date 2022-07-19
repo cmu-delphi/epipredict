@@ -1,10 +1,8 @@
 pandoc: 2.14.2
-pkgdown: 2.0.4
+pkgdown: 2.0.6
 pkgdown_sha: ~
-articles:
-  knn-forecasts: knn-forecasts.html
-  simple-forecasts: simple-forecasts.html
-last_built: 2022-06-15T22:36Z
+articles: {}
+last_built: 2022-07-19T15:30Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles
