@@ -75,21 +75,3 @@ load a dataset that contains county population, and join to an \code{epi_df}
 that currently only contains number of new cases by county. Once scaled,
 predictions can be made on case rate.
 }
-\examples{
-library(dplyr)
-pop_data <- data.frame(states = c("ak","al","ar","as","az","ca"),
-value = c(1000, 2000, 3000, 4000, 5000, 6000))
-
-newdata <- case_death_rate_subset \%>\%
-dplyr::filter(geo_value \%in\%  c("ak","al","ar","as","az","ca"))
-
-r <- epi_recipe(newdata) \%>\%
- step_population_scaling(df = pop_data,
- df_pop_col = "value",
- by = c("geo_value" = "states"),
- case_rate, death_rate)
-
- prep <- prep(r, newdata)
-
- bake(prep, newdata)
-}
