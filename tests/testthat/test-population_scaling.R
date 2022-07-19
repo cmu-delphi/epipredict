@@ -72,7 +72,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
 })
 
 ## Postprocessing
-test_that("Postprocessing works", {
+test_that("Postprocessing workflow works and values correct", {
   jhu <- epiprocess::jhu_csse_daily_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, cases)
@@ -113,6 +113,52 @@ test_that("Postprocessing works", {
   expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
+  expect_equal(p$.pred_original, p$.pred * c(20000, 30000))
 })
+
+test_that("Postprocessing to get cases from case rate", {
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+    dplyr::select(geo_value, time_value, case_rate)
+
+  reverse_pop_data = data.frame(states = c("ca", "ny"),
+                        value = c(1/20000, 1/30000))
+
+  r <- epi_recipe(jhu) %>%
+    step_population_scaling(df = reverse_pop_data,
+                            df_pop_col = "value",
+                            by = c("geo_value" = "states"),
+                            case_rate, suffix = "_scaled") %>%
+    step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
+    step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = reverse_pop_data,
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+
+  wf <- epi_workflow(r,
+                     parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(recipe = r,
+                          x = case_death_rate_subset %>%
+                            dplyr::filter(time_value > "2021-11-01",
+                                          geo_value %in% c("ca", "ny")) %>%
+                            dplyr::select(geo_value, time_value, case_rate))
+
+
+  expect_silent(p <- predict(wf, latest))
+  expect_equal(nrow(p), 2L)
+  expect_equal(ncol(p), 4L)
+  expect_equal(p$.pred_original, p$.pred * c(1/20000, 1/30000))
+})
+
 
 

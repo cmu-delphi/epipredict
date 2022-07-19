@@ -24,6 +24,45 @@
 #' @return an updated `frosting` postprocessor with population scaled variables
 #' reverted back to the original variable.
 #' @export
+#' @examples
+#' library(epiprocess)
+#' jhu <- epiprocess::jhu_csse_daily_subset %>%
+#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+#'   dplyr::select(geo_value, time_value, cases)
+#'
+#' pop_data = data.frame(states = c("ca", "ny"),
+#'                       value = c(20000, 30000))
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_population_scaling(df = pop_data,
+#'                           df_pop_col = "value",
+#'                           by = c("geo_value" = "states"),
+#'                           cases, suffix = "_scaled") %>%
+#'   step_epi_lag(cases_scaled, lag = c(7, 14)) %>%
+#'   step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
+#'   step_epi_naomit()
+#'
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_threshold(.pred) %>%
+#'   layer_naomit(.pred) %>%
+#'   layer_population_scaling(.pred, df = pop_data,
+#'                            by =  c("geo_value" = "states"),
+#'                            df_pop_col = "value")
+#'
+#' wf <- epi_workflow(r,
+#'                    parsnip::linear_reg()) %>%
+#'   parsnip::fit(jhu) %>%
+#'   add_frosting(f)
+#'
+#' latest <- get_test_data(recipe = r,
+#'                         x = epiprocess::jhu_csse_daily_subset %>%
+#'                           dplyr::filter(time_value > "2021-11-01",
+#'                                         geo_value %in% c("ca", "ny")) %>%
+#'                           dplyr::select(geo_value, time_value, cases))
+#'
+#'
+#' predict(wf, latest)
 layer_population_scaling <- function(frosting,
                            ...,
                            df,
@@ -71,7 +110,7 @@ slather.layer_population_scaling <-
     object$df <- object$df %>%
       dplyr::mutate(dplyr::across(where(is.character), tolower))
 
-    pop_col = sym(object$df_pop_col)
+    pop_col = rlang::sym(object$df_pop_col)
 
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
