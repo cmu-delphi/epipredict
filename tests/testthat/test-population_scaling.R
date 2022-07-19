@@ -111,10 +111,8 @@ test_that("Postprocessing works", {
 
 
   expect_silent(p <- predict(wf, latest))
-#  expect_equal(nrow(p), 2L)
-#  expect_equal(ncol(p), 3L)
-
-
+  expect_equal(nrow(p), 2L)
+  expect_equal(ncol(p), 4L)
 })
 
 

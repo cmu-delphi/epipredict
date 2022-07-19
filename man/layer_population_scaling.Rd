@@ -52,7 +52,3 @@ reverted back to the original variable.
 \description{
 Revert population scaled prediction
 }
-\examples{
-TO-DO
-TO_DO
-}

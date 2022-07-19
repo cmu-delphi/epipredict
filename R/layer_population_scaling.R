@@ -24,8 +24,6 @@
 #' @return an updated `frosting` postprocessor with population scaled variables
 #' reverted back to the original variable.
 #' @export
-#' @examples TO-DO
-#' TO_DO
 layer_population_scaling <- function(frosting,
                            ...,
                            df,
