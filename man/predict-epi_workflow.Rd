@@ -5,14 +5,7 @@
 \alias{predict.epi_workflow}
 \title{Predict from an epi_workflow}
 \usage{
-\method{predict}{epi_workflow}(
-  object,
-  new_data,
-  type = NULL,
-  opts = list(),
-  forecast_date = NULL,
-  ...
-)
+\method{predict}{epi_workflow}(object, new_data, ...)
 }
 \arguments{
 \item{object}{An epi_workflow that has been fit by
@@ -20,18 +13,6 @@
 
 \item{new_data}{A data frame containing the new predictors to preprocess
 and predict on}
-
-\item{type}{A single character value or \code{NULL}. Possible values
-are "numeric", "class", "prob", "conf_int", "pred_int", "quantile", "time",
-"hazard", "survival", or "raw". When \code{NULL}, \code{predict()} will choose an
-appropriate value based on the model's mode.}
-
-\item{opts}{A list of optional arguments to the underlying
-predict function that will be used when \code{type = "raw"}. The
-list should not include options for the model object or the
-new data being predicted.}
-
-\item{forecast_date}{The date on which the forecast is (was) made.}
 
 \item{...}{Arguments to the underlying model's prediction
 function cannot be passed here (see \code{opts}). There are some
@@ -75,15 +56,11 @@ possible. Specifically, the output will have \code{time_value} and
 }
 \examples{
 
-library(epiprocess)
 library(dplyr)
 library(parsnip)
 library(recipes)
 
-jhu <- jhu_csse_daily_subset \%>\%
-  filter(time_value > "2021-08-01") \%>\%
-  select(geo_value:death_rate_7d_av) \%>\%
-  rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+jhu <- case_death_rate_subset
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
@@ -94,13 +71,9 @@ r <- epi_recipe(jhu) \%>\%
 
 wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
-jhu_latest <- jhu \%>\%
-  filter(!is.na(case_rate), !is.na(death_rate)) \%>\%
-  group_by(geo_value) \%>\%
-  slice_tail(n = 15) \%>\% # have lags 0,...,14, so need 15 for a complete case
-  ungroup()
+latest <- jhu \%>\% filter(time_value >= max(time_value) - 14)
 
-preds <- predict(wf, jhu_latest, forecast_date = "2021-12-31") \%>\%
+preds <- predict(wf, latest) \%>\%
   filter(!is.na(.pred))
 
 preds

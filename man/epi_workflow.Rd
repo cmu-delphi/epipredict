@@ -4,18 +4,21 @@
 \alias{epi_workflow}
 \title{Create an epi_workflow}
 \usage{
-epi_workflow(preprocessor = NULL, spec = NULL)
+epi_workflow(preprocessor = NULL, spec = NULL, postprocessor = NULL)
 }
 \arguments{
 \item{preprocessor}{An optional preprocessor to add to the workflow. One of:
 \itemize{
 \item A formula, passed on to \code{\link[workflows:add_formula]{add_formula()}}.
 \item A recipe, passed on to \code{\link[workflows:add_recipe]{add_recipe()}}.
-\item A \code{\link[workflows:workflow_variables]{workflow_variables()}} object, passed on to \code{\link[workflows:add_variables]{add_variables()}}.
+\item A \code{\link[workflows:add_variables]{workflow_variables()}} object, passed on to \code{\link[workflows:add_variables]{add_variables()}}.
 }}
 
 \item{spec}{An optional parsnip model specification to add to the workflow.
 Passed on to \code{\link[workflows:add_model]{add_model()}}.}
+
+\item{postprocessor}{An optional postprocessor to add to the workflow.
+Currently only \code{frosting} is allowed using, \code{add_frosting()}.}
 }
 \value{
 A new \code{epi_workflow} object.
@@ -30,15 +33,11 @@ this operates exactly like a \code{\link[workflows:workflow]{workflows::workflow
 and numerous examples, see there.
 }
 \examples{
-library(epiprocess)
 library(dplyr)
 library(parsnip)
 library(recipes)
 
-jhu <- jhu_csse_daily_subset \%>\%
-  filter(time_value > "2021-08-01") \%>\%
-  select(geo_value:death_rate_7d_av) \%>\%
-  rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+jhu <- case_death_rate_subset
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%

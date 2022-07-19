@@ -2,8 +2,8 @@ library(tidyverse)
 library(covidcast)
 library(delphi.epidata)
 library(epiprocess)
-# library(epipredict)
 library(tidymodels)
+
 x <- covidcast(
   data_source = "jhu-csse",
   signals = "confirmed_7dav_incidence_prop",
@@ -40,10 +40,7 @@ r <- epi_recipe(x) %>% # if we add this as a class, maybe we get better
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-  step_naomit(all_predictors()) %>%
-  # below, `skip` means we don't do this at predict time
-  # we should probably do something useful here to avoid user error
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
 # specify trainer, this uses stats::lm() by default, but doing
 # slm <- linear_reg() %>% use_engine("glmnet", penalty = 0.1)

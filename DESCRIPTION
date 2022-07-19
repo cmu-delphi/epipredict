@@ -1,33 +1,47 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: c(
+    person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut","cre")),
     person("Jacob", "Bien", role = "aut"),
-    person("Daniel", "McDonald", role = "aut"),
-    person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = c("aut", "cre"))
+    person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
+    person("Logan", "Brooks", role = "aut"),
+    person("Rachel", "Lobay", role = "ctb"),
+    person("Ken", "Mawer", role = "ctb"),
+    person("Chloe", "You", role = "ctb"),
+    person("Quang", "Nguyen", role = "ctb"),
+    person("Dmitry", "Shemetov", role = "ctb")
   )
-Description: What the package does (one paragraph).
+Description: A forecasting "framework" for creating epidemiological forecasts
+  from versioned data. The framework is designed to be modular so that 
+  different components can exchanged, enabling a large amount of flexibility.
+  Some simple baseline models formed from these components are included.
 License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
-    https://cmu-delphi.github.io/epiprocess
+    https://cmu-delphi.github.io/epipredict
 Depends: 
     R (>= 3.5.0)
 Imports: 
     assertthat,
     cli,
+    distributional,
     dplyr,
     epiprocess,
+    fs,
+    generics,
     glue,
-    hardhat (>= 1.0.0.9000),
+    hardhat (>= 1.2.0),
     magrittr,
     purrr,
-    recipes (>= 0.2.0.9001),
+    recipes (>= 1.0.0),
     rlang,
     stats,
     tensr,
     tibble,
     tidyr,
     tidyselect,
+    usethis,
+    vctrs,
     workflows
 Suggests: 
     covidcast,
@@ -35,17 +49,14 @@ Suggests:
     ggplot2,
     knitr,
     lubridate,
-    parsnip (>= 0.2.1.9001),
+    parsnip (>= 1.0.0),
     RcppRoll,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: 
     knitr
 Remotes:
-    dajmcdon/epiprocess,
-    tidymodels/hardhat,
-    tidymodels/parsnip,
-    tidymodels/recipes
+    dajmcdon/epiprocess
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
