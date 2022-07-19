@@ -5,13 +5,9 @@ S3method(Ops,dist_quantiles)
 S3method(apply_frosting,default)
 S3method(apply_frosting,epi_workflow)
 S3method(augment,epi_workflow)
-<<<<<<< HEAD
-S3method(bake,step_epi_shift)
-S3method(bake,step_population_scaling)
-=======
 S3method(bake,step_epi_ahead)
 S3method(bake,step_epi_lag)
->>>>>>> 86a11261ce8c265f39dd91cfe1c3e7272d76361c
+S3method(bake,step_population_scaling)
 S3method(detect_layer,frosting)
 S3method(detect_layer,workflow)
 S3method(epi_keys,default)
@@ -34,13 +30,9 @@ S3method(format,dist_quantiles)
 S3method(median,dist_quantiles)
 S3method(predict,epi_workflow)
 S3method(prep,epi_recipe)
-<<<<<<< HEAD
-S3method(prep,step_epi_shift)
-S3method(prep,step_population_scaling)
-=======
 S3method(prep,step_epi_ahead)
 S3method(prep,step_epi_lag)
->>>>>>> 86a11261ce8c265f39dd91cfe1c3e7272d76361c
+S3method(prep,step_population_scaling)
 S3method(print,epi_workflow)
 S3method(print,frosting)
 S3method(print,step_epi_ahead)
@@ -112,11 +104,7 @@ export(smooth_arx_forecaster)
 export(step_epi_ahead)
 export(step_epi_lag)
 export(step_epi_naomit)
-<<<<<<< HEAD
-export(step_epi_shift)
 export(step_population_scaling)
-=======
->>>>>>> 86a11261ce8c265f39dd91cfe1c3e7272d76361c
 export(validate_layer)
 import(distributional)
 import(recipes)
