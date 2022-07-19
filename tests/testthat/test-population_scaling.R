@@ -2,6 +2,7 @@ library(recipes)
 library(parsnip)
 library(workflows)
 
+## Preprocessing
 test_that("Column names can be passed with and without the tidy way", {
   pop_data = data.frame(states = c("ak","al","ar","as","az","ca"),
                         value = c(1000, 2000, 3000, 4000, 5000, 6000))
@@ -49,7 +50,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
   prep <- prep(r, newdata)
 
   expect_silent(b <- bake(prep, newdata))
-  expect_equal(ncol(b), 8L)
+  expect_equal(ncol(b), 7L)
   expect_true("case_rate" %in% colnames(b))
   expect_true("death_rate" %in% colnames(b))
 
@@ -66,9 +67,54 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
   prep <- prep(r, newdata)
 
   expect_message(b <- bake(prep, newdata))
-  expect_equal(ncol(b), 6L)
+  expect_equal(ncol(b), 5L)
 
 })
 
+## Postprocessing
+test_that("Postprocessing works", {
+  jhu <- epiprocess::jhu_csse_daily_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+    dplyr::select(geo_value, time_value, cases)
+
+  pop_data = data.frame(states = c("ca", "ny"),
+                        value = c(20000, 30000))
+
+  r <- epi_recipe(jhu) %>%
+    step_population_scaling(df = pop_data,
+                            df_pop_col = "value",
+                            by = c("geo_value" = "states"),
+                            cases, suffix = "_scaled") %>%
+    step_epi_lag(cases_scaled, lag = c(7, 14)) %>%
+    step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = pop_data,
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+
+  wf <- epi_workflow(r,
+                     parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(recipe = r,
+                x = epiprocess::jhu_csse_daily_subset %>%
+                  dplyr::filter(time_value > "2021-11-01",
+                                geo_value %in% c("ca", "ny")) %>%
+                  dplyr::select(geo_value, time_value, cases))
+
+
+  expect_silent(p <- predict(wf, latest))
+#  expect_equal(nrow(p), 2L)
+#  expect_equal(ncol(p), 3L)
+
+
+})
 
 

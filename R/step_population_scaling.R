@@ -6,22 +6,33 @@
 #' that currently only contains number of new cases by county. Once scaled,
 #' predictions can be made on case rate.
 #'
-#' @param recipe A recipe object. The step will be added to the sequence of operations for this recipe. The recipe should contain information about the `epi_df` such as column names.
+#' @param recipe A recipe object. The step will be added to the sequence of
+#' operations for this recipe. The recipe should contain information about the
+#' `epi_df` such as column names.
 #' @param df a data frame that contains the population data used for scaling.
-#' @param by A character vector of variables to join by. Column names should be in lower case.
-#' If `NULL`, the default will perform a natural join, using all variables in common across the `epi_df` and `df`.
-#' A message lists the variables so that you can check they're correct; suppress the message by supplying by explicitly.
+##' @param by A character vector of variables to join by. Column names should be
+#' in lower case.
+#' To join by different variables on the `epi_df` and `df`, use a named vector.
+#' For example, by = c("geo_value" = "states") will match `epi_df$geo_value`
+#' to `df$states`. To join by multiple variables, use a vector with length > 1.
+#' For example, by = c("geo_value" = "states", "county" = "county") will match
+#' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
-#' To join by different variables on the `epi_df` and `df`, use a named vector. For example, by = c("geo_value" = "states") will match `epi_df$geo_value` to `df$states`.
-#' To join by multiple variables, use a vector with length > 1. For example, by = c("geo_value" = "states", "county" = "county") will match `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
-#'
-#' @param df_pop_col the name of the column in the data frame `df` that contains the population data and will be used for scaling. This should be one column, and column names should be in lower case.
+#' @param df_pop_col the name of the column in the data frame `df` that
+#' contains the population data and will be used for scaling.
+#' This should be one column, and column names should be in lower case.
 #' @param ... the corresponding column(s) in the `epi_df` that will be scaled.
 #' @param inputs Quosure(s) of `...`.
-#' @param create_new TRUE to create a new column and keep the original column in the `epi_df`
-#' @param suffix a character. The suffix added to the column name if `crete_new = TRUE`. Default to "_scaled".
-#' @param role For model terms created by this step, what analysis role should they be assigned? By default, the new columns created by this step from the original variables will be used as predictors in a model. Other options can be ard are not limited to "outcome".
-#' @param trained A logical to indicate if the quantities for preprocessing have been estimated.
+#' @param create_new TRUE to create a new column and keep the original column
+#' in the `epi_df`
+#' @param suffix a character. The suffix added to the column name if
+#' `crete_new = TRUE`. Default to "_scaled".
+#' @param role For model terms created by this step, what analysis role should
+#' they be assigned? By default, the new columns created by this step from the
+#' original variables will be used as predictors in a model. Other options can
+#' be ard are not limited to "outcome".
+#' @param trained A logical to indicate if the quantities for preprocessing
+#' have been estimated.
 #' @param skip A logical. Should the step be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
 #'  when [prep()] is run, some operations may not be able to be
@@ -34,10 +45,11 @@
 #' @export
 #' @examples
 #' library(dplyr)
-#' pop_data = data.frame(states = c("ak","al","ar","as","az","ca"),
+#' pop_data <- data.frame(states = c("ak","al","ar","as","az","ca"),
 #' value = c(1000, 2000, 3000, 4000, 5000, 6000))
 #'
-#' newdata = case_death_rate_subset %>% dplyr::filter(geo_value %in%  c("ak","al","ar","as","az","ca"))
+#' newdata <- case_death_rate_subset %>%
+#' dplyr::filter(geo_value %in%  c("ak","al","ar","as","az","ca"))
 #'
 #' r <- epi_recipe(newdata) %>%
 #'  step_population_scaling(df = pop_data,
@@ -80,7 +92,8 @@ step_population_scaling <-
 }
 
 step_population_scaling_new <-
-  function(df, by, df_pop_col, terms, inputs, create_new, suffix, role, trained, skip, id) {
+  function(df, by, df_pop_col, terms, inputs, create_new,
+           suffix, role, trained, skip, id) {
     step(
       subclass = "population_scaling",
       df = df,
@@ -132,7 +145,8 @@ bake.step_population_scaling <- function(object,
   suffix = ifelse(object$create_new, object$suffix, "")
 
   dplyr::left_join(new_data, object$df, by= tolower(object$by)) %>%
-    dplyr::mutate(dplyr::across(dplyr::all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}"))
+    dplyr::mutate(dplyr::across(dplyr::all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}")) %>%
+    dplyr::select(- !!pop_col) # removed so the models do not use the population column
 
 }
 

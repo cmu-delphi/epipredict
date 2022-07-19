@@ -20,30 +20,41 @@ step_population_scaling(
 )
 }
 \arguments{
-\item{recipe}{A recipe object. The step will be added to the sequence of operations for this recipe. The recipe should contain information about the \code{epi_df} such as column names.}
+\item{recipe}{A recipe object. The step will be added to the sequence of
+operations for this recipe. The recipe should contain information about the
+\code{epi_df} such as column names.}
 
 \item{df}{a data frame that contains the population data used for scaling.}
 
-\item{by}{A character vector of variables to join by. Column names should be in lower case.
-If \code{NULL}, the default will perform a natural join, using all variables in common across the \code{epi_df} and \code{df}.
-A message lists the variables so that you can check they're correct; suppress the message by supplying by explicitly.
+\item{by}{A character vector of variables to join by. Column names should be
+in lower case.
+To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
+For example, by = c("geo_value" = "states") will match \code{epi_df$geo_value}
+to \code{df$states}. To join by multiple variables, use a vector with length > 1.
+For example, by = c("geo_value" = "states", "county" = "county") will match
+\code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.}
 
-To join by different variables on the \code{epi_df} and \code{df}, use a named vector. For example, by = c("geo_value" = "states") will match \code{epi_df$geo_value} to \code{df$states}.
-To join by multiple variables, use a vector with length > 1. For example, by = c("geo_value" = "states", "county" = "county") will match \code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.}
-
-\item{df_pop_col}{the name of the column in the data frame \code{df} that contains the population data and will be used for scaling. This should be one column, and column names should be in lower case.}
+\item{df_pop_col}{the name of the column in the data frame \code{df} that
+contains the population data and will be used for scaling.
+This should be one column, and column names should be in lower case.}
 
 \item{...}{the corresponding column(s) in the \code{epi_df} that will be scaled.}
 
 \item{inputs}{Quosure(s) of \code{...}.}
 
-\item{create_new}{TRUE to create a new column and keep the original column in the \code{epi_df}}
+\item{create_new}{TRUE to create a new column and keep the original column
+in the \code{epi_df}}
 
-\item{suffix}{a character. The suffix added to the column name if \code{crete_new = TRUE}. Default to "_scaled".}
+\item{suffix}{a character. The suffix added to the column name if
+\code{crete_new = TRUE}. Default to "_scaled".}
 
-\item{role}{For model terms created by this step, what analysis role should they be assigned? By default, the new columns created by this step from the original variables will be used as predictors in a model. Other options can be ard are not limited to "outcome".}
+\item{role}{For model terms created by this step, what analysis role should
+they be assigned? By default, the new columns created by this step from the
+original variables will be used as predictors in a model. Other options can
+be ard are not limited to "outcome".}
 
-\item{trained}{A logical to indicate if the quantities for preprocessing have been estimated.}
+\item{trained}{A logical to indicate if the quantities for preprocessing
+have been estimated.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
@@ -66,10 +77,11 @@ predictions can be made on case rate.
 }
 \examples{
 library(dplyr)
-pop_data = data.frame(states = c("ak","al","ar","as","az","ca"),
+pop_data <- data.frame(states = c("ak","al","ar","as","az","ca"),
 value = c(1000, 2000, 3000, 4000, 5000, 6000))
 
-newdata = case_death_rate_subset \%>\% dplyr::filter(geo_value \%in\%  c("ak","al","ar","as","az","ca"))
+newdata <- case_death_rate_subset \%>\%
+dplyr::filter(geo_value \%in\%  c("ak","al","ar","as","az","ca"))
 
 r <- epi_recipe(newdata) \%>\%
  step_population_scaling(df = pop_data,
