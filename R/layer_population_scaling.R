@@ -88,7 +88,8 @@ layer_population_scaling <- function(frosting,
   )
 }
 
-layer_population_scaling_new <- function(df, by, df_pop_col, terms, create_new, suffix, id) {
+layer_population_scaling_new <-
+  function(df, by, df_pop_col, terms, create_new, suffix, id) {
   layer("population_scaling",
         df = df,
         by = by,

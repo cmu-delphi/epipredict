@@ -162,19 +162,29 @@ bake.step_population_scaling <- function(object,
     message("`suffix` not used to generate new column in `step_population_scaling`")
   }
 
-  object$df <- object$df %>% dplyr::mutate(dplyr::across(where(is.character), tolower))
+  object$df <- object$df %>%
+    dplyr::mutate(
+      dplyr::across(
+        where(is.character),
+        tolower))
 
   pop_col = rlang::sym(object$df_pop_col)
   suffix = ifelse(object$create_new, object$suffix, "")
 
   dplyr::left_join(new_data, object$df, by= tolower(object$by)) %>%
-    dplyr::mutate(dplyr::across(dplyr::all_of(object$inputs), ~.x/!!pop_col , .names = "{.col}{suffix}")) %>%
-    dplyr::select(- !!pop_col) # removed so the models do not use the population column
+    dplyr::mutate(
+      dplyr::across(
+        dplyr::all_of(object$inputs),
+        ~.x/!!pop_col ,
+        .names = "{.col}{suffix}")) %>%
+    # removed so the models do not use the population column
+    dplyr::select(- !!pop_col)
 
 }
 
 
-print.step_population_scaling <-  function(x, width = max(20, options()$width - 35), ...) {
+print.step_population_scaling <-
+  function(x, width = max(20, options()$width - 35), ...) {
   title <- "Population scaling"
   recipes::print_step(x$inputs, x$inputs, x$trained, title, width)
   invisible(x)
