@@ -136,32 +136,6 @@ predict.epi_workflow <- function(object, new_data, ...) {
   components$predictions
 }
 
-grab_forged_keys <- function(forged, mold, new_data) {
-  keys <- c("time_value", "geo_value", "key")
-  forged_roles <- names(forged$extras$roles)
-  extras <- dplyr::bind_cols(forged$extras$roles[forged_roles %in% keys])
-  # 1. these are the keys in the test data after prep/bake
-  new_keys <- names(extras)
-  # 2. these are the keys in the training data
-  old_keys <- epi_keys_mold(mold)
-  # 3. these are the keys in the test data as input
-  new_df_keys <- epi_keys(new_data)
-  if (! (setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
-    rlang::warn(c(
-      "Not all epi keys that were present in the training data are available",
-      "in `new_data`. Predictions will have only the available keys.")
-    )
-  }
-  if (epiprocess::is_epi_df(new_data)) {
-    extras <- epiprocess::as_epi_df(extras)
-    attr(extras, "metadata") <- attr(new_data, "metadata")
-  } else if (keys[1:2] %in% new_keys) {
-    l <- list()
-    if (length(new_keys) > 2) l <- list(other_keys = new_keys[-c(1:2)])
-    extras <- epiprocess::as_epi_df(extras, additional_metadata = l)
-  }
-  extras
-}
 
 
 #' Augment data with predictions
