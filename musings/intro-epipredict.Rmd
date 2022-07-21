@@ -20,21 +20,53 @@ library(epipredict)
 
 # Goals for the package
 
+At a high level, our goal with `epipredict` is to make running simple Machine Learning / Statistical simple. However, this package is extremely extensible (and that is part of the utility). Our hope is that it is easy for users with epi training and some statistics to fit baseline models while still allowing those with more nuanced statistical understanding to create complicated specializations within the same framework.
 
-1. Provide a set of basic, easy-to-use forecasters that work out of the box. 
-You should be able to do a reasonably limited amount of customization on them. (Any serious customization happens with point number 2.) 
-For the basic forecasters, we should provide, at least: 
+Serving both populations is the main motivation for our efforts, but at the same time, we have tried hard to make it useful.
+
+
+## Baseline models
+
+We provide a set of basic, easy-to-use forecasters that work out of the box. 
+You should be able to do a reasonably limited amount of customization on them. Any serious customization happens with the framework discussed below).
+
+For the basic forecasters, we provide, at least: 
     * Baseline flat-line forecaster 
     * Autoregressive forecaster
     * Autoregressive classifier
-Forcasters we provide should be built on our framework.
-2. A framework for creating custom forecasters out of modular components. There are four types of components:
+
+All the forcasters we provide are built on our framework. So we will use these basic models to illustrate its flexibility.
+
+## Forecasting framework
+
+Our framework for creating custom forecasters views the prediction task as a set of modular components. There are four types of components:
     * Preprocessor: do things to the data before model training
     * Trainer: train a model on data, resulting in a fitted model object
     * Predictor: make predictions, using a fitted model object
     * Postprocessor: do things to the predictions before returning
+    
+Users familiar with `{tidymodels}` and especially the `{workflows}` package will notice a lot of overlap. This is by design, and is in fact a feature. The truth is that `epipredict` is a wrapper around everything in these packages. Therefore, if you want something from this -verse, it should "just work" (we hope).
 
-# Why doesn't this exist?
+The reason for the overlap is that tidymodels _already implements_ the first three steps. And it does this very well. However, it is missing the postprocessing and currently has no plans for such an implementation. And this feature is important. The baseline forecaster we provide _requires_ postprocessing. Anything more complicated needs this as well.
+
+The second omission from `{tidymodels}` is support for panel data. Besides epidemiological data, economics, psychology, sociology, and many other areas frequently deal with data of this type. So the framework of behind `epipredict` implements this. In principle, this has nothing to do with epidemiology, and one could simply use this package as a solution for the missing functionality in tidymodels. Again, this should "just work".
+
+All of the _panel data_ functionality is implemented through the `epi_df` data type in the companion `{epiprocess}` library. There is much more to see there, but for the moment, it's enough to look at a simple one:
+
+```{r epidf}
+jhu <- case_death_rate_subset
+jhu
+```
+
+This data is built into the package and contains the measured variables `case_rate` and `death_rate` at the daily level for each US state for the year 2021. The "panel" part is because we have repeated measurements across a number of locations. The `epi_df` encodes the timestamp as `time_value` and the `key` as `geo_value`. While these names are required, the values don't need to actually represent such objects. Additional `key`'s are also supported (like age group, ethnicity, taxonomy, etc.). 
+
+The `epi_df` also contains some metadata that describes the keys as well as the vintage of the data. It's possible that data collected at different times for the _same set_ of `geo_value`s and `time_value`s could actually be different. For more details, see `{epiprocess}`.
+
+
+
+## Why doesn't this package already exist?
+
+As described above:
 
 * Parts actually DO exist. There's a universe called `{tidymodels}`. It handles 
 preprocessing, training, and prediction, bound together, through a package called
@@ -46,77 +78,94 @@ use almost everything they provide.
 * The tidy-team doesn't have plans to do either of these things. (We checked).
 
 * There is a package that does _time series_ built on `{tidymodels}`, but it's
-"basic" time series: 1-step AR models, exponential smoothing, STL decomposition, etc.
+"basic" time series: 1-step AR models, exponential smoothing, STL decomposition, etc. We have never found these models to be particularly helpful for epidemic forecasting, but one could also integrate these methods into our framework.
 
 
+# Show me the basics
 
-# How does it work?
+We start with the `jhu` `epi_df` object displayed above.
+One of the "canned" forecasters we provide is an autoregressive forecaster with (or without) covariates that _directly_ trains on the response. This is in contrast to a typical "iterative" AR model that trains to predict one-step-ahead, and then plugs in the predictions to "leverage up" to larger horizons.
 
-Suppose you want to ... 
+We'll estimate the model jointly across all locations using only the most recent 30 days.
 
 ```{r demo-workflow}
-
-
+jhu <- jhu %>% filter(time_value >= max(time_value) - 30)
+out <- arx_epi_forecaster(
+  jhu,
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate")
+)
 ```
 
+This call produces a warning, which we'll ignore for now. But essentially, it's telling us that our data comes from May 2022 but we're trying to do a forecast for January 2022. The result is likely not an accurate measure of real-time forecast performance.
 
-```{r small-data}
-jhu <- case_death_rate_subset %>%
-  filter(time_value > "2021-08-01") %>%
-  dplyr::arrange(geo_value, time_value)
+The `out` object has two components: 
+  1. The predictions which is just another `epi_df`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was made) and the `target_date` (the date for which the forecast is being made).
+  ```{r}
+  out$predictions
+  ```
+  2. An list object of class `epi_workflow`. This object encapsulates all the instructions necessary to create the prediction. More details on this below.
 
-jhu_latest <- jhu %>%
-  filter(!is.na(case_rate), !is.na(death_rate)) %>%
-  group_by(geo_value) %>%
-  slice_tail(n = 15) %>% # have lags 0,...,14, so need 15 for a complete case
-  ungroup()
+By default, the forecaster predicts the outcome (`death_rate`) 1-week ahead, using 3 lags of each predictor (`case_rate` and `death_rate`) at 0 (today), 1 week back and 2 weeks back. The predictors and outcome can be changed directly. The rest of the defaults are encapsulated into a list of arguments. This list is produced by `arx_args_list()`.
+
+## Simple adjustments
+
+Basic adjustments can be made through the `args_list`.
+
+```{r kill-warnings, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
-The recipe encodes how to process training/testing data. S3 object.
-
-```{r recipe}
-r <- epi_recipe(jhu) %>%
-  step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-  step_epi_ahead(death_rate, ahead = 7) %>%
-  step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-  step_naomit(all_predictors()) %>%
-  step_naomit(all_outcomes(), skip = TRUE)
+```{r differential-lags}
+out2week <- arx_epi_forecaster(
+  jhu, 
+  "death_rate", 
+  c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0,1,2,3,7,14), c(0,7,14)),
+    ahead = 14)
+  )
 ```
 
-The workflow combines a recipe and a model specification. Fit, estimates
-the model, adds the resulting object to the workflow.
+Here, we've used different lags on the `case_rate` and are now predicting 2 weeks ahead.
 
-```{r workflow}
-wf <- epi_workflow(r, linear_reg()) %>% 
-  fit(jhu)
+Another property of the basic model is the predictive interval. We describe this in more detail in a different vignette, but it is easy to request multiple quantiles.
 
-wf
+```{r differential-levels}
+out_q <- arx_epi_forecaster(
+  jhu, 
+  "death_rate", 
+  c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    levels = c(.01,.025, seq(.05,.95, by=.05), .975,.99))
+  )
 ```
 
-The workflow also has slots for post-processing. (Currently unimplemented.)
+The column `.pred_dstn` in the `predictions` object is actually a "distribution" here parameterized by its quantiles. For this default forecaster, these are created using the quantiles of the residuals of the predictive model (possibly symmetrized). Here, we used 23 quantiles, but one can grab a particular quantile
 
-```{r workflow2}
-names(wf) # 3 lists and a flag
+```{r q1}
+quantile(out_q$predictions$.pred_distn, p = .4)
 ```
 
-Predict gives a new `epi_df`
+Or extract the entire distribution into a "long" `epi_df`
 
-```{r predict}
-pp <- predict(wf, new_data = jhu_latest)
-pp 
+```{r q2}
+out_q$predictions %>% 
+  mutate(
+    .pred_distn = nested_quantiles(.pred_distn) # "nested" list-col
+  ) %>% unnest(.pred_distn)
 ```
 
-Can add a `forecast_date` (should be a post processing step)
+## Changing the engine
 
-```{r predict2}
-# Want: 
-# predict(wf, new_data = jhu_latest, forecast_date = "2021-12-31") %>%
-#  filter(!is.na(.pred))
+So far, our forecasts have been produced using simple linear regression. But this is not the only way to estimate such a model.
+The `trainer` argument determines the type of model we want. 
+This takes a `parsnip` model. The default is linear regression, but we could instead use a random forest with the `{ranger}` package:
 
-# Intended output:
-predict(wf, new_data = jhu_latest) %>% 
-  mutate(forecast_date = as.Date("2021-12-31")) %>% 
-  filter(!is.na(.pred))
+```{r ranger, eval = FALSE}
+out_rf <- arx_epi_forecaster(
+  jhu,
+  "death_rate",
+  c("case_rate", "death_rate"),
+  parsnip::rand_forest(mode = "regression"))
 ```
-
-

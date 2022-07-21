@@ -83,11 +83,12 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
 #' arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
-arx_args_list <- function(lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
-                          levels = c(0.05, 0.95), intercept = TRUE,
+arx_args_list <- function(lags = c(0, 7, 14),
+                          ahead = 7,
+                          min_train_window = 20,
+                          levels = c(0.05, 0.95),
                           symmetrize = TRUE,
-                          nonneg = TRUE,
-                          quantile_by_key = FALSE) {
+                          nonneg = TRUE) {
 
   # error checking if lags is a list
   .lags <- lags
@@ -95,7 +96,7 @@ arx_args_list <- function(lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
 
   arg_is_scalar(ahead, min_train_window)
   arg_is_nonneg_int(ahead, min_train_window, lags)
-  arg_is_lgl(intercept, symmetrize, nonneg)
+  arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
 
   max_lags <- max(lags)
@@ -103,7 +104,7 @@ arx_args_list <- function(lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
   list(
     lags = .lags, ahead = as.integer(ahead),
     min_train_window = min_train_window,
-    levels = levels, intercept = intercept,
+    levels = levels,
     symmetrize = symmetrize, nonneg = nonneg,
     max_lags = max_lags
   )

@@ -125,7 +125,7 @@ arg_is_function = function(..., allow_null = FALSE) {
     ...,
     tests = function(name, value) {
       if (!is.function(value) | (is.null(value) & !allow_null))
-        cli_stop("All {.val {name}} must be in [0,1].")
+        cli_stop("{value} must be a `parsnip` function.")
     }
   )
 }

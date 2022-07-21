@@ -9,10 +9,8 @@ arx_args_list(
   ahead = 7,
   min_train_window = 20,
   levels = c(0.05, 0.95),
-  intercept = TRUE,
   symmetrize = TRUE,
-  nonneg = TRUE,
-  quantile_by_key = FALSE
+  nonneg = TRUE
 )
 }
 \arguments{
@@ -30,14 +28,14 @@ data needed to produce a forecast. If smaller, the forecaster will return
 prediction intervals. These are created by computing the quantiles of
 training residuals. A \code{NULL} value will result in point forecasts only.}
 
-\item{intercept}{Logical. The default \code{TRUE} includes intercept in the
-forecaster.}
-
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
 symmetric prediction intervals.}
 
 \item{nonneg}{Logical. The default \code{TRUE} enforeces nonnegative predictions
 by hard-thresholding at 0.}
+
+\item{intercept}{Logical. The default \code{TRUE} includes intercept in the
+forecaster.}
 
 \item{quantile_by_key}{Not currently implemented}
 }
