@@ -124,7 +124,7 @@ slather.layer_population_scaling <-
                                                suffix = c("", ".df")) %>%
       dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
                                   ~.x * !!pop_col ,
-                                  .names = "{.col}{suffix}")) #%>%
+                                  .names = "{.col}{suffix}")) %>%
      dplyr::select(- !!pop_col)
     components
 }
