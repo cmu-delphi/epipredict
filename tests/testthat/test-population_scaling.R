@@ -10,14 +10,14 @@ test_that("Column names can be passed with and without the tidy way", {
   newdata = case_death_rate_subset %>% filter(geo_value %in%  c("ak","al","ar","as","az","ca"))
 
   r1 <- epi_recipe(newdata) %>%
-    step_population_scaling(df = pop_data,
-                            df_pop_col = "value", by = c("geo_value" = "states"),
-                             c("case_rate", "death_rate"))
+    step_population_scaling(c("case_rate", "death_rate"),
+                            df = pop_data,
+                            df_pop_col = "value", by = c("geo_value" = "states"))
 
   r2 <- epi_recipe(newdata) %>%
-    step_population_scaling(df = pop_data,
-                            df_pop_col = "value", by = c("geo_value" = "states"),
-                            case_rate, death_rate)
+    step_population_scaling(case_rate, death_rate,
+                            df = pop_data,
+                            df_pop_col = "value", by = c("geo_value" = "states"))
 
   prep1 <- prep(r1, newdata)
   prep2 <- prep(r2, newdata)
@@ -43,9 +43,10 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
     epiprocess::as_epi_df()
 
   r <-epi_recipe(newdata) %>%
-    step_population_scaling(df = pop_data,
+    step_population_scaling(c("case", "death"),
+                            df = pop_data,
                             df_pop_col = "value", by = c("geo_value" = "states", "county" = "counties"),
-                            c("case", "death"), suffix = "_rate")
+                            suffix = "_rate")
 
   prep <- prep(r, newdata)
 
@@ -81,10 +82,11 @@ test_that("Postprocessing workflow works and values correct", {
                         value = c(20000, 30000))
 
   r <- epi_recipe(jhu) %>%
-    step_population_scaling(df = pop_data,
+    step_population_scaling(cases,
+                            df = pop_data,
                             df_pop_col = "value",
                             by = c("geo_value" = "states"),
-                            cases, suffix = "_scaled") %>%
+                            suffix = "_scaled") %>%
     step_epi_lag(cases_scaled, lag = c(7, 14)) %>%
     step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
     step_naomit(all_predictors()) %>%
@@ -161,4 +163,51 @@ test_that("Postprocessing to get cases from case rate", {
 })
 
 
+test_that("test joining by default columns", {
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+    dplyr::select(geo_value, time_value, case_rate)
+
+  reverse_pop_data = data.frame(geo_value = c("ca", "ny"),
+                                values = c(1/20000, 1/30000))
+
+  r <- epi_recipe(jhu) %>%
+    step_population_scaling(case_rate,
+                            df = reverse_pop_data,
+                            df_pop_col = "values",
+                            by = NULL,
+                            suffix = "_scaled") %>%
+    step_rm(geo_value.df) %>% # additional join columns added so need to remove
+    step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
+    step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+
+  prep <- prep(r, jhu)
+
+  expect_silent(b <- bake(prep, jhu))
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = reverse_pop_data,
+                             by =  NULL,
+                             df_pop_col = "values")
+
+  wf <- epi_workflow(r,
+                     parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(recipe = r,
+                          x = case_death_rate_subset %>%
+                            dplyr::filter(time_value > "2021-11-01",
+                                          geo_value %in% c("ca", "ny")) %>%
+                            dplyr::select(geo_value, time_value, case_rate))
+
+
+  expect_silent(p <- predict(wf, latest))
+
+})
 

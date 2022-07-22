@@ -6,10 +6,10 @@
 \usage{
 step_population_scaling(
   recipe,
+  ...,
   df,
   by = NULL,
   df_pop_col,
-  ...,
   inputs = NULL,
   create_new = TRUE,
   suffix = "_scaled",
@@ -24,10 +24,17 @@ step_population_scaling(
 operations for this recipe. The recipe should contain information about the
 \code{epi_df} such as column names.}
 
+\item{...}{the corresponding column(s) in the \code{epi_df} that will be scaled.}
+
 \item{df}{a data frame that contains the population data used for scaling.}
 
-\item{by}{A character vector of variables to join by. Column names should be
-in lower case.
+\item{by}{A character vector of variables to join by.
+
+If \code{NULL}, the default, the function will perform a natural join, using all
+variables in common across the \code{epi_df} and the user-provided dataset.
+If columns in \code{epi_df} and \code{df} have the same name (and aren't
+included in by), suffixes \code{.x} and \code{.y} are added to disambiguate.
+
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
 For example, by = c("geo_value" = "states") will match \code{epi_df$geo_value}
 to \code{df$states}. To join by multiple variables, use a vector with length > 1.
@@ -37,8 +44,6 @@ For example, by = c("geo_value" = "states", "county" = "county") will match
 \item{df_pop_col}{the name of the column in the data frame \code{df} that
 contains the population data and will be used for scaling.
 This should be one column, and column names should be in lower case.}
-
-\item{...}{the corresponding column(s) in the \code{epi_df} that will be scaled.}
 
 \item{inputs}{Quosure(s) of \code{...}.}
 
@@ -66,14 +71,16 @@ the computations for subsequent operations.}
 \item{id}{A unique identifier for the step}
 }
 \value{
-Creates a population scaled column in training time to fit the model.
+Scales raw data by the population
 }
 \description{
 \code{step_population_scaling} creates a specification of a recipe step
 that will add a population scaled column in the data. For example,
 load a dataset that contains county population, and join to an \code{epi_df}
 that currently only contains number of new cases by county. Once scaled,
-predictions can be made on case rate.
+predictions can be made on case rate. Although worth noting that there is
+nothing special about "population". The function can be used to scale by any
+variable. Population is simply the most natural and common use case.
 }
 \examples{
 library(epiprocess)

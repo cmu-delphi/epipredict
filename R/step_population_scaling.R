@@ -4,19 +4,28 @@
 #' that will add a population scaled column in the data. For example,
 #' load a dataset that contains county population, and join to an `epi_df`
 #' that currently only contains number of new cases by county. Once scaled,
-#' predictions can be made on case rate.
+#' predictions can be made on case rate. Although worth noting that there is
+#' nothing special about "population". The function can be used to scale by any
+#' variable. Population is simply the most natural and common use case.
 #'
 #' @param recipe A recipe object. The step will be added to the sequence of
 #' operations for this recipe. The recipe should contain information about the
 #' `epi_df` such as column names.
 #' @param df a data frame that contains the population data used for scaling.
-##' @param by A character vector of variables to join by. Column names should be
-#' in lower case.
+#' @param by A character vector of variables to join by.
+#'
+#' If `NULL`, the default, the function will perform a natural join, using all
+#' variables in common across the `epi_df` and the user-provided dataset.
+#' If columns in `epi_df` and `df` have the same name (and aren't
+#' included in by), `.df` is added to the one from the user-provided data
+#' to disambiguate.
+#'
 #' To join by different variables on the `epi_df` and `df`, use a named vector.
 #' For example, by = c("geo_value" = "states") will match `epi_df$geo_value`
 #' to `df$states`. To join by multiple variables, use a vector with length > 1.
 #' For example, by = c("geo_value" = "states", "county" = "county") will match
 #' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
+#'
 #'
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and will be used for scaling.
@@ -41,7 +50,7 @@
 #'  the computations for subsequent operations.
 #' @param id A unique identifier for the step
 #'
-#' @return Creates a population scaled column in training time to fit the model.
+#' @return Scales raw data by the population
 #' @export
 #' @examples
 #' library(epiprocess)
@@ -85,10 +94,10 @@
 #' predict(wf, latest)
 step_population_scaling <-
   function(recipe,
+          ...,
           df,
           by = NULL,
           df_pop_col,
-          ...,
           inputs = NULL,
           create_new = TRUE,
           suffix = "_scaled",
@@ -171,14 +180,16 @@ bake.step_population_scaling <- function(object,
   pop_col = rlang::sym(object$df_pop_col)
   suffix = ifelse(object$create_new, object$suffix, "")
 
-  dplyr::left_join(new_data, object$df, by= tolower(object$by)) %>%
+  dplyr::left_join(new_data, object$df,
+                   by= tolower(object$by),
+                   suffix = c("", ".df")) %>%
     dplyr::mutate(
       dplyr::across(
         dplyr::all_of(object$inputs),
         ~.x/!!pop_col ,
         .names = "{.col}{suffix}")) %>%
     # removed so the models do not use the population column
-    dplyr::select(- !!pop_col)
+   dplyr::select(- !!pop_col)
 
 }
 
