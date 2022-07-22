@@ -23,18 +23,21 @@ layer_population_scaling(
 
 \item{df}{a data frame that contains the population data used for scaling.}
 
-\item{by}{A character vector of variables to join by.
+\item{by}{A character vector of variables to left join by.
 
 If \code{NULL}, the default, the function will perform a natural join, using all
 variables in common across the \code{epi_df} and the user-provided dataset.
 If columns in \code{epi_df} and \code{df} have the same name (and aren't
-included in by), suffixes \code{.x} and \code{.y} are added to disambiguate.
+included in by), \code{.df} is added to the one from the user-provided data
+to disambiguate.
 
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
 For example, by = c("geo_value" = "states") will match \code{epi_df$geo_value}
 to \code{df$states}. To join by multiple variables, use a vector with length > 1.
 For example, by = c("geo_value" = "states", "county" = "county") will match
-\code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.}
+\code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.
+
+See \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} for more details.}
 
 \item{df_pop_col}{the name of the column in the data frame \code{df} that
 contains the population data and used for scaling.}

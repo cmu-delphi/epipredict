@@ -12,7 +12,7 @@
 #' operations for this recipe. The recipe should contain information about the
 #' `epi_df` such as column names.
 #' @param df a data frame that contains the population data used for scaling.
-#' @param by A character vector of variables to join by.
+#' @param by A character vector of variables to left join by.
 #'
 #' If `NULL`, the default, the function will perform a natural join, using all
 #' variables in common across the `epi_df` and the user-provided dataset.
@@ -26,7 +26,7 @@
 #' For example, by = c("geo_value" = "states", "county" = "county") will match
 #' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
-#'
+#' See [dplyr::left_join()] for more details.
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and will be used for scaling.
 #' This should be one column, and column names should be in lower case.
