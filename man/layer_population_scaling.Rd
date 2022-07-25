@@ -17,9 +17,11 @@ layer_population_scaling(
 )
 }
 \arguments{
-\item{frosting}{a \code{frosting} postprocessor}
+\item{frosting}{a \code{frosting} postprocessor. The layer will be added to the
+sequence of operations  for this frosting.}
 
-\item{...}{the column(s) in the \code{epi_df} to scale back.}
+\item{...}{One or more selector functions to scale variables
+for this step. See \code{\link[=selections]{selections()}} for more details.}
 
 \item{df}{a data frame that contains the population data used for scaling.}
 
@@ -57,7 +59,13 @@ in the \code{epi_df}.}
 an updated \code{frosting} postprocessor
 }
 \description{
-Revert population scaled prediction
+\code{layer_population_scaling} creates a specification of a frosting layer
+that will add a population scaled column in the data. For example,
+load a dataset that contains county population, and join to an \code{epi_df}
+that currently predicts number of new cases by county to obtain case rates.
+Although worth noting that there is nothing special about "population".
+The function can be used to scale by any variable. Population is simply the
+most natural and common use case.
 }
 \examples{
 library(epiprocess)

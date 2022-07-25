@@ -1,7 +1,17 @@
 #' Revert population scaled prediction
 #'
-#' @param frosting a `frosting` postprocessor
-#' @param ... the column(s) in the `epi_df` to scale back.
+#' `layer_population_scaling` creates a specification of a frosting layer
+#' that will add a population scaled column in the data. For example,
+#' load a dataset that contains county population, and join to an `epi_df`
+#' that currently predicts number of new cases by county to obtain case rates.
+#' Although worth noting that there is nothing special about "population".
+#' The function can be used to scale by any variable. Population is simply the
+#' most natural and common use case.
+#'
+#' @param frosting a `frosting` postprocessor. The layer will be added to the
+#'  sequence of operations  for this frosting.
+#' @param ... One or more selector functions to scale variables
+#'  for this step. See [selections()] for more details.
 #' @param df a data frame that contains the population data used for scaling.
 #' @param by A character vector of variables to left join by.
 #'
@@ -112,6 +122,12 @@ slather.layer_population_scaling <-
     stopifnot("Only one population column allowed for scaling" =
                 length(object$df_pop_col) == 1)
 
+    t <- try(dplyr::left_join(components$predictions, object$df,
+                              by= tolower(object$by)),
+             silent = TRUE)
+    if (any(grepl("Join columns must be present in data", unlist(t)))){
+      stop("columns in `by` selectors of `layer_population_scaling` must be present in data and match")}
+
     object$df <- object$df %>%
       dplyr::mutate(dplyr::across(where(is.character), tolower))
     pop_col = rlang::sym(object$df_pop_col)
@@ -119,6 +135,8 @@ slather.layer_population_scaling <-
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)
     suffix = ifelse(object$create_new, object$suffix, "")
+
+
     components$predictions <- dplyr::left_join(components$predictions,
                                                object$df,
                                                by= tolower(object$by),

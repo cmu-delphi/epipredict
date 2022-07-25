@@ -11,6 +11,14 @@
 #' @param recipe A recipe object. The step will be added to the sequence of
 #' operations for this recipe. The recipe should contain information about the
 #' `epi_df` such as column names.
+#' @param ... One or more selector functions to scale variables
+#'  for this step. See [selections()] for more details.
+#' @param role For model terms created by this step, what analysis role should
+#' they be assigned? By default, the new columns created by this step from the
+#' original variables will be used as predictors in a model. Other options can
+#' be ard are not limited to "outcome".
+#' @param trained A logical to indicate if the quantities for preprocessing
+#' have been estimated.
 #' @param df a data frame that contains the population data used for scaling.
 #' @param by A character vector of variables to left join by.
 #'
@@ -29,19 +37,13 @@
 #' See [dplyr::left_join()] for more details.
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and will be used for scaling.
-#' This should be one column, and column names should be in lower case.
-#' @param ... the corresponding column(s) in the `epi_df` that will be scaled.
-#' @param inputs Quosure(s) of `...`.
+#' This should be one column.
 #' @param create_new TRUE to create a new column and keep the original column
 #' in the `epi_df`
 #' @param suffix a character. The suffix added to the column name if
 #' `crete_new = TRUE`. Default to "_scaled".
-#' @param role For model terms created by this step, what analysis role should
-#' they be assigned? By default, the new columns created by this step from the
-#' original variables will be used as predictors in a model. Other options can
-#' be ard are not limited to "outcome".
-#' @param trained A logical to indicate if the quantities for preprocessing
-#' have been estimated.
+#' @param columns A character string of variable names that will
+#'  be populated (eventually) by the `terms` argument.
 #' @param skip A logical. Should the step be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
 #'  when [prep()] is run, some operations may not be able to be
@@ -95,28 +97,28 @@
 step_population_scaling <-
   function(recipe,
           ...,
+          role = "predictor",
+          trained = FALSE,
           df,
           by = NULL,
           df_pop_col,
-          inputs = NULL,
           create_new = TRUE,
           suffix = "_scaled",
-          role = "predictor",
-          trained = FALSE,
+          columns = NULL,
           skip = FALSE,
           id = rand_id("population_scaling")){
   add_step(
     recipe,
     step_population_scaling_new(
+      terms = dplyr::enquos(...),
+      role = role,
+      trained = trained,
       df = df,
       by = by,
       df_pop_col = df_pop_col,
-      terms = dplyr::enquos(...),
-      inputs = inputs,
       create_new = create_new,
       suffix = suffix,
-      role = role,
-      trained = trained,
+      columns = columns,
       skip = skip,
       id = id
     )
@@ -124,19 +126,19 @@ step_population_scaling <-
 }
 
 step_population_scaling_new <-
-  function(df, by, df_pop_col, terms, inputs, create_new,
-           suffix, role, trained, skip, id) {
+  function(role, trained, df, by, df_pop_col, terms, create_new,
+           suffix, columns, skip, id) {
     step(
       subclass = "population_scaling",
+      terms = terms,
+      role = role,
+      trained = trained,
       df = df,
       by = by,
       df_pop_col = df_pop_col,
-      terms = terms,
-      inputs= inputs,
       create_new = create_new,
       suffix = suffix,
-      role = role,
-      trained = trained,
+      columns = columns,
       skip = skip,
       id = id
     )
@@ -145,15 +147,15 @@ step_population_scaling_new <-
 #' @export
 prep.step_population_scaling <- function(x, training, info = NULL, ...) {
   step_population_scaling_new(
+    terms = x$terms,
+    role = x$role,
+    trained = TRUE,
     df = x$df,
     by = x$by,
     df_pop_col = x$df_pop_col,
-    terms = x$terms,
-    inputs = recipes_eval_select(x$terms, training, info),
     create_new = x$create_new,
     suffix = x$suffix,
-    role = x$role,
-    trained = TRUE,
+    columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
   )
@@ -166,6 +168,12 @@ bake.step_population_scaling <- function(object,
 
   stopifnot("Only one population column allowed for scaling" =
               length(object$df_pop_col) == 1)
+
+  t <- try(dplyr::left_join(new_data, object$df,
+                            by= tolower(object$by)),
+                silent = TRUE)
+  if (any(grepl("Join columns must be present in data", unlist(t)))){
+      stop("columns in `by` selectors of `step_population_scaling` must be present in data and match")}
 
   if(object$suffix != "_scaled" && object$create_new == FALSE){
     message("`suffix` not used to generate new column in `step_population_scaling`")
@@ -185,7 +193,7 @@ bake.step_population_scaling <- function(object,
                    suffix = c("", ".df")) %>%
     dplyr::mutate(
       dplyr::across(
-        dplyr::all_of(object$inputs),
+        dplyr::all_of(object$columns),
         ~.x/!!pop_col ,
         .names = "{.col}{suffix}")) %>%
     # removed so the models do not use the population column

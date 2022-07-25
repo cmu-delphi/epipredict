@@ -7,14 +7,14 @@
 step_population_scaling(
   recipe,
   ...,
+  role = "predictor",
+  trained = FALSE,
   df,
   by = NULL,
   df_pop_col,
-  inputs = NULL,
   create_new = TRUE,
   suffix = "_scaled",
-  role = "predictor",
-  trained = FALSE,
+  columns = NULL,
   skip = FALSE,
   id = rand_id("population_scaling")
 )
@@ -24,7 +24,16 @@ step_population_scaling(
 operations for this recipe. The recipe should contain information about the
 \code{epi_df} such as column names.}
 
-\item{...}{the corresponding column(s) in the \code{epi_df} that will be scaled.}
+\item{...}{One or more selector functions to scale variables
+for this step. See \code{\link[=selections]{selections()}} for more details.}
+
+\item{role}{For model terms created by this step, what analysis role should
+they be assigned? By default, the new columns created by this step from the
+original variables will be used as predictors in a model. Other options can
+be ard are not limited to "outcome".}
+
+\item{trained}{A logical to indicate if the quantities for preprocessing
+have been estimated.}
 
 \item{df}{a data frame that contains the population data used for scaling.}
 
@@ -46,9 +55,7 @@ See \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} for more details.}
 
 \item{df_pop_col}{the name of the column in the data frame \code{df} that
 contains the population data and will be used for scaling.
-This should be one column, and column names should be in lower case.}
-
-\item{inputs}{Quosure(s) of \code{...}.}
+This should be one column.}
 
 \item{create_new}{TRUE to create a new column and keep the original column
 in the \code{epi_df}}
@@ -56,13 +63,8 @@ in the \code{epi_df}}
 \item{suffix}{a character. The suffix added to the column name if
 \code{crete_new = TRUE}. Default to "_scaled".}
 
-\item{role}{For model terms created by this step, what analysis role should
-they be assigned? By default, the new columns created by this step from the
-original variables will be used as predictors in a model. Other options can
-be ard are not limited to "outcome".}
-
-\item{trained}{A logical to indicate if the quantities for preprocessing
-have been estimated.}
+\item{columns}{A character string of variable names that will
+be populated (eventually) by the \code{terms} argument.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
