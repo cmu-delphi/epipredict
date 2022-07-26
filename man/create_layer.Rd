@@ -9,9 +9,9 @@ create_layer(name = NULL, open = rlang::is_interactive())
 \arguments{
 \item{name}{Either a name without extension, or \code{NULL} to create the
 paired file based on currently open file in the script editor. If
-the R file is open, \code{use_test()} will create/open the corresponding
+the \verb{R/} file is open, \code{use_test()} will create/open the corresponding
 test file; if the test file is open, \code{use_r()} will create/open the
-corresponding R file.}
+corresponding \verb{R/} file.}
 
 \item{open}{Whether to open the file for interactive editing.}
 }

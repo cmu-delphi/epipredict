@@ -9,8 +9,8 @@ residual_quantiles <- function(r, point, levels, symmetrize) {
 }
 
 
-residual_quantiles_normlized <- function(r, point, levels, symmetrize) {
-  # use relative rediduals for sampling
+residual_quantiles_normalized <- function(r, point, levels, symmetrize) {
+  # use relative residuals for sampling
   # this will help the performance for residuals with different magnitudes
   if (is.null(levels)) return(data.frame(point = point))
   s <- ifelse(symmetrize, -1, NA)
