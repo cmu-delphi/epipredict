@@ -163,9 +163,6 @@ The `trainer` argument determines the type of model we want.
 This takes a `parsnip` model. The default is linear regression, but we could instead use a random forest with the `{ranger}` package:
 
 ```{r ranger, eval = FALSE}
-out_rf <- arx_epi_forecaster(
-  jhu,
-  "death_rate",
-  c("case_rate", "death_rate"),
+out_rf <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   parsnip::rand_forest(mode = "regression"))
 ```

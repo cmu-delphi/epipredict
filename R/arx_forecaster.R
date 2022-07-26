@@ -83,9 +83,9 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
 #' arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
-arx_args_list <- function(lags = c(0, 7, 14),
-                          ahead = 7,
-                          min_train_window = 20,
+arx_args_list <- function(lags = c(0L, 7L, 14L),
+                          ahead = 7L,
+                          min_train_window = 20L,
                           levels = c(0.05, 0.95),
                           symmetrize = TRUE,
                           nonneg = TRUE) {

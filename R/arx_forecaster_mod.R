@@ -65,9 +65,7 @@ arx_epi_forecaster <- function(epi_data,
 
   latest <- get_test_data(r, epi_data)
 
-  wf <- epi_workflow(r, trainer) %>% # bug, issue 72
-    add_frosting(f) %>%
-    fit(epi_data)
+  wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
   list(
     predictions = predict(wf, new_data = latest),
     epi_workflow = wf
