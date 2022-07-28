@@ -1,0 +1,116 @@
+---
+title: Apply other steps and models from recipes and parsnip packages
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Apply other steps and models from recipes and parsnip packages}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+The `epipredict` package utilizes the `tidymodels` framework, namely 
+[`recipes`](https://recipes.tidymodels.org/) for 
+[dplyr](https://dplyr.tidyverse.org/)-like pipeable sequences 
+of feature engineering and [`parsnip`](https://parsnip.tidymodels.org/) for a 
+unified interface to a range of models. 
+
+`epipredict` has additional customized feature engineering and preprocessing steps 
+tailored to fit the needs of epidemiology forecasting, such as `step_epi_shift()`, 
+`step_population_scaling()`, `step_epi_naomit()`. They can be used along with 
+steps from the `recipes` package for more feature engineering. 
+
+In this vignette, we will demonstrate how to weave `recipes` steps and `parsnip`
+models into the `epipredict` workflow. 
+
+```{r, warning=FALSE, message =FALSE}
+library(epipredict)
+library(epiprocess)
+library(recipes)
+library(parsnip)
+library(workflows)
+```
+
+We will use the built-in dataset `case_death_rate_subset` and apply feature 
+engineering steps and fit a few models from `parsnip` to predict future death 
+rates by states. 
+```{r}
+x <- case_death_rate_subset
+head(x)
+```
+There are `r dim(x)[1]` rows and `r dim(x)[2]` columns in the data, with dates
+ranging from `r min(x$time_value)` to `r max(x$time_value)` in 
+`r n_distinct(x$geo_value)` states in the U.S.
+
+# Preprocessing and Feature Engineering
+
+In this section, we focus on showing how `step_*()` functions from the `recipes`
+package can also be applied in our `epipredict` workflows. 
+
+First, create a recipe object from the original data and then specify the 
+preprocessing steps. Steps are then sequentially added.
+
+```{r create-recipe-object}
+r <- epi_recipe(x)
+r
+```
+
+The function automatically categorizes roles into `geo_value`, `time_value` and 
+`raw` based on variable names, where `raw` includes `case_rate` and `death_rate`. 
+
+We first create a made-up population dataset by states to allow the conversion
+from `case_rate` and `death_rate` into `cases` and  `deaths`. The binary variable
+`social_distancing` indicates whether the state followed social distancing rules.
+A 'throw-away' column with all ones is also created to show that `step_rm()` 
+can be used to remove unwanted columns.
+```{r madeup-population-data}
+pop_data <- data.frame(states = unique(x$geo_value),
+                       pop = seq(1e5, 1e7, length.out = n_distinct(x$geo_value)),
+                       social_distancing = rbinom(n = n_distinct(x$geo_value), 
+                                                  size = 1,
+                                                  prob = 0.5),
+                       throw_away = 1)
+
+head(pop_data)
+```
+
+Next, we will feature engineer `case_rate` and `death_rate` into `cases` and 
+`deaths`and create lags and leads based on them. 
+
+```{r create-new-columns-in-recipe}
+r <- r %>%
+  step_population_scaling(case_rate, death_rate, df = pop_data, 
+                          by = c("geo_value" = "states"),
+                          create_new = FALSE,
+                          df_pop_col = "pop") %>%
+  step_rename(cases = case_rate, deaths = death_rate) %>%
+  step_rm(throw_away) %>%
+  step_epi_lag(cases, lag = c(0, 7, 14), role = "predictor") %>%
+  step_epi_lag(deaths, lag = c(0, 7, 14), role = "predictor") %>%
+  step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
+  step_epi_naomit()
+```
+
+Notice that `step_rename()` was used for renaming of the variables, and `step_rm()`
+was used to remove redundant columns.
+
+A quick view of what the prepossessed data looks like on training data:
+
+```{r peak-data-1}
+slice_sample(bake(prep(r, x),x), n = 6)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
