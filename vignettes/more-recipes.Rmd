@@ -62,7 +62,7 @@ A 'throw-away' column with all ones is also created to show that `step_rm()`
 can be used to remove unwanted columns.
 ```{r madeup-population-data}
 pop_data <- data.frame(states = unique(x$geo_value),
-                       pop = seq(1e5, 1e7, length.out = n_distinct(x$geo_value)),
+                       inv_pop = 1/seq(1e5, 1e7, length.out = n_distinct(x$geo_value)),
                        social_distancing = rbinom(n = n_distinct(x$geo_value), 
                                                   size = 1,
                                                   prob = 0.5),
@@ -79,7 +79,7 @@ r <- r %>%
   step_population_scaling(case_rate, death_rate, df = pop_data, 
                           by = c("geo_value" = "states"),
                           create_new = FALSE,
-                          df_pop_col = "pop") %>%
+                          df_pop_col = "inv_pop") %>%
   step_rename(cases = case_rate, deaths = death_rate) %>%
   step_rm(throw_away) %>%
   step_epi_lag(cases, lag = c(0, 7, 14), role = "predictor") %>%
