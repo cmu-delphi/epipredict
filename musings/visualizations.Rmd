@@ -1,0 +1,16 @@
+---
+title: "Visualizations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualizations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+`epipredict` supports visualizations features. However, it is not intended for
+those who use third-party data visualization software such as Power BI and
+Tableau.
+
+```{r}
+library(covidcast)
+```
