@@ -40,8 +40,6 @@ baseline_epi_forecaster <- function(epi_data,
 
   wf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(train_data)
 
-  latest <-
-
   list(
     predictions = suppressWarnings(predict(wf, new_data = latest)),
     epi_workflow = wf
