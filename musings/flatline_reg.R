@@ -2,23 +2,23 @@ make_flatline_reg <- function() {
   parsnip::set_model_engine("linear_reg", "regression", eng = "flatline")
   parsnip::set_dependency("linear_reg", eng = "flatline", pkg = "epipredict")
 
-  flatline_reg <- function(mode = "regression") {
-    if (mode  != "regression") {
-      rlang::abort("`mode` should be 'regression'")
-    }
-
-    parsnip::new_model_spec(
-      "flatline_reg",
-      args = NULL,
-      eng_args = NULL,
-      mode = mode,
-      method = NULL,
-      engine = NULL
-    )
-  }
+  # flatline_reg <- function(mode = "regression") {
+  #   if (mode  != "regression") {
+  #     rlang::abort("`mode` should be 'regression'")
+  #   }
+  #
+  #   parsnip::new_model_spec(
+  #     "flatline_reg",
+  #     args = NULL,
+  #     eng_args = NULL,
+  #     mode = mode,
+  #     method = NULL,
+  #     engine = NULL
+  #   )
+  # }
 
   parsnip::set_fit(
-    model = "flatline_reg",
+    model = "linear_reg",
     eng = "flatline",
     mode = "regression",
     value = list(
@@ -29,7 +29,7 @@ make_flatline_reg <- function() {
     ))
 
   parsnip::set_encoding(
-    model = "flatline_reg",
+    model = "linear_reg",
     eng = "flatline",
     mode = "regression",
     options = list(
@@ -41,7 +41,7 @@ make_flatline_reg <- function() {
   )
 
   parsnip::set_pred(
-    model = "flatline_reg",
+    model = "linear_reg",
     eng = "flatline",
     mode = "regression",
     type = "numeric",
