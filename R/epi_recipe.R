@@ -45,10 +45,9 @@ epi_recipe.default <- function(x, ...) {
 #' library(dplyr)
 #' library(recipes)
 #'
-#' jhu <- jhu_csse_daily_subset %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   select(geo_value:death_rate_7d_av) %>%
-#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value > "2021-08-01") %>%
+#'   dplyr::arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -257,10 +256,9 @@ is_epi_recipe <- function(x) {
 #' library(dplyr)
 #' library(recipes)
 #'
-#' jhu <- jhu_csse_daily_subset %>%
+#' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-08-01") %>%
-#'   select(geo_value:death_rate_7d_av) %>%
-#'   rename(case_rate = case_rate_7d_av, death_rate = death_rate_7d_av)
+#'   dplyr::arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -279,24 +277,6 @@ add_epi_recipe <- function(
 }
 
 
-
-#' Recipe blueprint that accounts for `epi_df` panel data
-#'
-#' Used for simplicity. See [hardhat::default_recipe_blueprint()] for more
-#' details.
-#'
-#' @inheritParams hardhat::default_recipe_blueprint
-#'
-#' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
-#' @return A recipe blueprint.
-#' @export
-default_epi_recipe_blueprint <-
-  function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
-           bake_dependent_roles = c("time_value", "geo_value", "key", "raw"),
-           composition = "tibble") {
-    hardhat::default_recipe_blueprint(
-      intercept, allow_novel_levels, fresh, bake_dependent_roles, composition)
-  }
 
 
 # unfortunately, everything the same as in prep.recipe except string/fctr handling
@@ -375,7 +355,7 @@ prep.epi_recipe <- function(
   if (retain) {
     if (verbose) {
       cat("The retained training set is ~",
-          format(object.size(training), units = "Mb", digits = 2),
+          format(utils::object.size(training), units = "Mb", digits = 2),
           " in memory.\n\n")
     }
     x$template <- training
@@ -402,14 +382,4 @@ prep.epi_recipe <- function(
 kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
   x
-}
-
-#' @importFrom tibble as_tibble
-#' @export
-as_tibble.epi_df <- function(x, ...) {
-  # so that downstream calls to as_tibble don't clobber our metadata
-  # this avoids infinite recursion inside dplyr::dplyr_col_modify
-  # TODO: this needs a different approach, long-term
-  class(x) <- class(x)[class(x) != "grouped_df"]
-  return(x)
 }
