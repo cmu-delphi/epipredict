@@ -20,20 +20,24 @@ steps from the `recipes` package for more feature engineering.
 In this vignette, we will demonstrate how to weave `recipes` steps and `parsnip`
 models into the `epipredict` workflow. 
 
+First, let's load the necessary packages:
+
 ```{r, warning=FALSE, message =FALSE}
 library(epipredict)
 library(epiprocess)
 library(recipes)
 library(parsnip)
 library(workflows)
+library(poissonreg)
 ```
 
 We will use the built-in dataset `case_death_rate_subset` and apply feature 
 engineering steps and fit a few models from `parsnip` to predict future death 
-rates by states. 
+rates by states 7 days ahead from Dec 31, 2021.
+
 ```{r}
 x <- case_death_rate_subset
-head(x)
+tail(x)
 ```
 There are `r dim(x)[1]` rows and `r dim(x)[2]` columns in the data, with dates
 ranging from `r min(x$time_value)` to `r max(x$time_value)` in 
@@ -62,7 +66,8 @@ A 'throw-away' column with all ones is also created to show that `step_rm()`
 can be used to remove unwanted columns.
 ```{r madeup-population-data}
 pop_data <- data.frame(states = unique(x$geo_value),
-                       inv_pop = 1/seq(1e5, 1e7, length.out = n_distinct(x$geo_value)),
+                       inv_pop = 1/seq(1e5, 1e7, 
+                                       length.out = n_distinct(x$geo_value)),
                        social_distancing = rbinom(n = n_distinct(x$geo_value), 
                                                   size = 1,
                                                   prob = 0.5),
@@ -85,36 +90,31 @@ r <- r %>%
   step_epi_lag(cases, lag = c(0, 7, 14), role = "predictor") %>%
   step_epi_lag(deaths, lag = c(0, 7, 14), role = "predictor") %>%
   step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
-  step_epi_naomit() 
+  step_epi_naomit() %>%
+  step_rm(cases, deaths)
 
 ```
 
-Notice that `step_rename()` was used for renaming of the variables, and `step_rm()`
-was used to remove redundant columns.
+Notice that `step_rename()` was used for renaming of the variables, and 
+`step_rm()` was used to remove redundant columns.
 
-A quick view of what the prepossessed data looks like on training data:
+A quick view of what columns exist in the the prepossessed data so far:
 
 ```{r peak-data-1}
-slice_sample(bake(prep(r, x),x), n = 6)
+names(bake(prep(r, x),x))
 ```
+
 There are also many functions in the `recipes` package that allow for 
-spline transformation or other types of function transformations. 
+[function transformations](https://recipes.tidymodels.org/reference/#step-functions-individual-transformations),
+such as log transformations and spline transformations. 
 
-```{r, warning=FALSE}
-r <- r %>% 
-  step_sqrt(contains("lag_")) %>%
-  step_rm(cases, deaths)
-  
+Sometimes, the exact counts are desired, therefore fitting a linear regression 
+or poisson regression would be a good idea. 
 
-slice_sample(bake(prep(r, x),x), n = 6)
-```
-
-
-Sometimes, the exact counts are desired so fitting a linear regression would be 
-a good idea. On the other hand, instead of predicting 
-7-day ahead death counts, we would like to predict if the death counts 7 days 
-from the latest date fall into some categories. For the purpose of illustration, 
-we define two categories: less than 10K(low) and more than 10K(high). 
+On the other hand, say instead of predicting 7-day ahead death counts, we would 
+like to predict if the counts are high or low based on some given threshold. 
+For the purpose of illustration, we define two categories: less than 10K(low) 
+and more than 10K(high). 
 
 We can resort to the `recipes` package again:
 
@@ -133,86 +133,110 @@ r_categorical <- r %>%
                   transform = binner, 
                   levels = inc)
 
-slice_sample(bake(prep(r_categorical, x),x), n = 6)
 ```
 
+As a sanity check we can see now that the preprocessed data has a categorical 
+outcome in `ahead_7_deaths`
+```{r, warning FALSE, echo = FALSE}
+glimpse(slice_sample(bake(prep(r_categorical, x),x), n = 6))
+```
 
-
-# Model Fitting
+# Model Fitting and Post-processing
 
 Once the pre-processing steps are done, we can move on to model fitting using 
 the `parsnip` package. 
 
+### Linear Regression
+
 First, we can try fitting a linear regression:
 
-```{r linear-fit}
+```{r linear-fit-workflow, warning = FALSE}
 wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(x) 
-# the fit
-wf$fit
+
 latest <- get_test_data(recipe = r, x = x)
+```
+
+We take a look at the linear regression fit and the values of the coefficients.
+
+```{r linear-fit, warning = FALSE}
+wf$fit$fit # look at the model fit and coefficients
+
 p <- predict(wf, latest) %>% filter(!is.na(.pred))
+
 p
 ```
 
+The predictions are saved in the `.pred` column and represents the squared roots
+of predicted death counts 7 days from Dec 31. 2021. 
 
-Logistic Regression
-```{r poisson}
+Some post-processing can be done to revert back to death rates
+
+```{r linear-reg-post-process}
+f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = pop_data,
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "inv_pop")
+
+wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(x) %>%
+    add_frosting(f)
+
+predict(wf, latest) %>% select( - social_distancing, - throw_away)
+```
+
+### Poisson regression
+
+For count data, we can use poisson regression. Although the counts here are not 
+integer since they were calculated from case rates multiplying population, some 
+extra preprocessing steps can help us round them to integers to allow fitting a 
+poisson regression.
+
+We will also apply post-processing steps to the workflow similar to the ones above.
+
+```{r poisson-fit}
+r <- r %>% step_mutate(ahead_7_deaths = round(ahead_7_deaths, 0), 
+                       role = "predictor") %>%
+  step_filter(ahead_7_deaths > 0)
+
+latest <- get_test_data(recipe = r, x = x)
+
+wf <- epi_workflow(r, parsnip::poisson_reg()) %>%
+    fit(x) %>%
+    add_frosting(f)
+
+predict(wf, latest) %>% select( - social_distancing, - throw_away)
+```
+
+Let's also take a look at the poisson regression fit:
+```{r, echo =FALSE}
+wf$fit$fit
+```
+
+### Logistic Regression
+
+We use a logistic regression to predict whether 7-day ahead death counts are high
+or low. Post-processing steps do not need to be applied here. 
+```{r logistic, warning = FALSE}
 wf <- epi_workflow(r_categorical, parsnip::logistic_reg()) %>%
     fit(x) 
-# the fit
-wf$fit
 latest <- get_test_data(recipe = r_categorical, x = x)
 p <- predict(wf, latest) %>% filter(!is.na(.pred_class))
 p
 ```
 
-
-
-## Issues from vignette
-1. `step_cut()` did not work
-```{r, error=TRUE}
-r_test1 <- epi_recipe(x) %>%
-  step_population_scaling(case_rate, death_rate, df = pop_data, 
-                          by = c("geo_value" = "states"),
-                          create_new = FALSE,
-                          df_pop_col = "inv_pop") %>%
-  step_rename(cases = case_rate, deaths = death_rate) %>%
-  step_rm(throw_away) %>%
-  step_epi_lag(cases, lag = c(0, 7, 14), role = "predictor") %>%
-  step_epi_lag(deaths, lag = c(0, 7, 14), role = "predictor") %>%
-  step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
-  step_epi_naomit() %>%
-  step_cut(ahead_7_deaths, role = "outcome", breaks= c(0, 10000, Inf))
-
-slice_sample(bake(prep(r_test1, x),x), n = 6)
-```
-2. Predictions are not produced, despite different models applied to it. Perhaps
-something wrong with the preprocessing steps?
-Maybe without `step_population_scaling()`:
-```{r}
-r_test2 <- epi_recipe(x) %>%
-  step_epi_lag(case_rate, lag = c(0, 7, 14), role = "predictor") %>%
-  step_epi_lag(death_rate, lag = c(0, 7, 14), role = "predictor") %>%
-  step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
-  step_naomit(all_predictors()) %>%
-  step_naomit(all_outcomes(), skip = TRUE)
-
-slice_sample(bake(prep(r_test2, x),x), n = 6)
-
-wf <- epi_workflow(r_test2, parsnip::linear_reg()) %>%
-    fit(x) 
-# the fit
-wf$fit
-latest <- get_test_data(recipe = r_test2, x = x)
-# latest <- x %>%
-#   filter(!is.na(case_rate), !is.na(death_rate)) %>%
-#   group_by(geo_value) %>%
-#   slice_tail(n = 15) %>% # have lags 0,...,14, so need 15 for a complete case
-#   ungroup()
-p <- predict(wf, latest)  %>% filter(!is.na(.pred))
-p
-
+The model fit is as follows:
+```{r echo=FALSE}
+wf$fit$fit
 ```
 
+# Attribution
+
+This object contains a modified part of the [COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) as [republished in the COVIDcast Epidata API.](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html)
+
+This data set is licensed under the terms of the [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) by the Johns Hopkins University 
+on behalf of its Center for Systems Science in Engineering. Copyright Johns Hopkins University 2020.
 
