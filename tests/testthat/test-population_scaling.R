@@ -177,7 +177,6 @@ test_that("test joining by default columns", {
                             df_pop_col = "values",
                             by = NULL,
                             suffix = "_scaled") %>%
-    step_rm(geo_value.df) %>% # additional join columns added so need to remove
     step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
@@ -185,7 +184,7 @@ test_that("test joining by default columns", {
 
   prep <- prep(r, jhu)
 
-  expect_silent(b <- bake(prep, jhu))
+  expect_message(b <- bake(prep, jhu))
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -207,7 +206,7 @@ test_that("test joining by default columns", {
                             dplyr::select(geo_value, time_value, case_rate))
 
 
-  expect_silent(p <- predict(wf, latest))
+  expect_message(p <- predict(wf, latest))
 
 })
 
