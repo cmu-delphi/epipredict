@@ -37,19 +37,37 @@ plot(cc)
 We need not use a dataset that's already stored on epipredict or epiprocess.
 
 ```{r}
+library(tidyr)
 z <- read.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv")
 
 z2 <- z %>%
   select(iso_code,date,total_cases_per_million) %>%
-  filter(date <= "2021-12-31")
+  filter(date <= "2021-12-31") %>%
+  drop_na() %>%
+  as_tibble()
+
+z_stdev <- z2 %>%
+  group_by(iso_code) %>%
+  summarize(stdev = sd(total_cases_per_million)) %>%
+  filter(stdev > 0)
+
+z_combined <- inner_join(z2,z_stdev)
 
 iso_country_codes <- read.csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv") %>%
   select(alpha.2,alpha.3)
 
 z3 <- z2 %>%
   inner_join(iso_country_codes,c("iso_code" = "alpha.3")) %>%
-  select(-iso_code,geo_value = alpha.2, value = total_cases_per_million)
+  select(-iso_code,geo_value = alpha.2,
+         time_value = date, value = total_cases_per_million) %>%
+  mutate(geo_value = tolower(geo_value), time_value = as.Date(time_value))
   
+cc <- as.covidcast_signal(z3,
+                          geo_type = "nation",
+                          data_source = "covid-tracking",
+                          signal = "covid_cases_per_million")
+
+plot(cc)
 
 ```
 
