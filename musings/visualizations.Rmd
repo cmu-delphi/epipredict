@@ -36,6 +36,12 @@ plot(cc)
 
 We need not use a dataset that's already stored on epipredict or epiprocess.
 
+Keep in mind that only 'county', 'state', 'hrr' and 'msa' are supported
+for map plots; 'nation', for example, is NOT supported for a covidcast_signal 
+plot. Thus, one would need to load separate packages, etc., do a plot of
+something such as a world map or a map of Canada (as not even "province"
+is an option for covidcast_signal's geo_type).
+
 ```{r}
 library(tidyr)
 z <- read.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv")
@@ -71,5 +77,8 @@ plot(cc)
 
 ```
 
-If you want to map something such as Canadian provinces or Australian states,
-you will need to install a separate package and use features outside of.
+If you want to map something such as Canadian provinces,
+you will need to install a separate package and use features outside of
+covidcast_signal, as those are not recognized geo_type's.
+
+epipredict's epi_df and epi_archive both recognize custom geo_type's, though.
