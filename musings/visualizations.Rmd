@@ -7,7 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-`epipredict` supports visualizations features. However, it is not intended for
+`epipredict` supports visualizations features that are a part of COVIDcast.
+However, it is not intended for
 those who use third-party data visualization software such as Power BI and
 Tableau.
 
