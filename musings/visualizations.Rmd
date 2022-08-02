@@ -13,4 +13,25 @@ Tableau.
 
 ```{r}
 library(covidcast)
+library(dplyr)
+x <- case_death_rate_subset %>%
+  filter(!(geo_value %in% c("as","cm","gu","mp","vi")),
+         time_value >= "2021-06-24", time_value <= "2021-06-30")
+
+cc <- x %>%
+  select(-death_rate, value = case_rate) %>%
+  as.covidcast_signal(geo_type = "state",
+                      data_source = "covid-tracking",
+                      signal = "case_rate")
+
+plot(cc)
 ```
+
+```{r}
+x_total <- case_death_rate_subset %>%
+  filter(!(geo_value %in% c("as","cm","gu","mp","vi"))) %>%
+  group_by(geo_value) %>%
+  summarize(total_case_rate = sum(case_rate))
+arrange(x_total,desc(total_case_rate))
+```
+
