@@ -10,29 +10,48 @@ vignette: >
 `epipredict` supports visualizations features that are a part of COVIDcast.
 However, it is not intended for
 those who use third-party data visualization software such as Power BI and
-Tableau.
+Tableau. Despite that, visualizations go alongside cmu-delphi's covidcast
+library.
+
+For the first example, we are tracking the cumulative number of COVID cases
+by state up until 2021-12-31.
 
 ```{r}
 library(covidcast)
 library(dplyr)
 x <- case_death_rate_subset %>%
   filter(!(geo_value %in% c("as","cm","gu","mp","vi")),
-         time_value >= "2021-06-24", time_value <= "2021-06-30")
+         time_value <= "2021-12-31") %>%
+  group_by(geo_value) %>%
+  summarize(value = sum(case_rate) / 1000) %>%
+  mutate(time_value = as.Date("2021-12-31"))
 
-cc <- x %>%
-  select(-death_rate, value = case_rate) %>%
-  as.covidcast_signal(geo_type = "state",
-                      data_source = "covid-tracking",
-                      signal = "case_rate")
+cc <- as.covidcast_signal(x,
+                          geo_type = "state",
+                          data_source = "covid-tracking",
+                          signal = "cumulative_case_rate_thousands")
 
 plot(cc)
 ```
 
+We need not use a dataset that's already stored on epipredict or epiprocess.
+
 ```{r}
-x_total <- case_death_rate_subset %>%
-  filter(!(geo_value %in% c("as","cm","gu","mp","vi"))) %>%
-  group_by(geo_value) %>%
-  summarize(total_case_rate = sum(case_rate))
-arrange(x_total,desc(total_case_rate))
+z <- read.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv")
+
+z2 <- z %>%
+  select(iso_code,date,total_cases_per_million) %>%
+  filter(date <= "2021-12-31")
+
+iso_country_codes <- read.csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv") %>%
+  select(alpha.2,alpha.3)
+
+z3 <- z2 %>%
+  inner_join(iso_country_codes,c("iso_code" = "alpha.3")) %>%
+  select(-iso_code,geo_value = alpha.2, value = total_cases_per_million)
+  
+
 ```
 
+If you want to map something such as Canadian provinces or Australian states,
+you will need to install a separate package and use features outside of.
