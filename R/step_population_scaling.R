@@ -169,10 +169,10 @@ bake.step_population_scaling <- function(object,
   stopifnot("Only one population column allowed for scaling" =
               length(object$df_pop_col) == 1)
 
-  t <- try(dplyr::left_join(new_data, object$df,
-                            by= tolower(object$by)),
+  try_join <- try(dplyr::left_join(new_data, object$df,
+                            by= object$by),
                 silent = TRUE)
-  if (any(grepl("Join columns must be present in data", unlist(t)))){
+  if (any(grepl("Join columns must be present in data", unlist(try_join)))){
       stop("columns in `by` selectors of `step_population_scaling` must be present in data and match")}
 
   if(object$suffix != "_scaled" && object$create_new == FALSE){
@@ -189,7 +189,7 @@ bake.step_population_scaling <- function(object,
   suffix = ifelse(object$create_new, object$suffix, "")
 
   dplyr::left_join(new_data, object$df,
-                   by= tolower(object$by),
+                   by= object$by,
                    suffix = c("", ".df")) %>%
     dplyr::mutate(
       dplyr::across(

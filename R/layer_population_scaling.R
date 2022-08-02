@@ -122,10 +122,10 @@ slather.layer_population_scaling <-
     stopifnot("Only one population column allowed for scaling" =
                 length(object$df_pop_col) == 1)
 
-    t <- try(dplyr::left_join(components$predictions, object$df,
-                              by= tolower(object$by)),
+    try_join <- try(dplyr::left_join(components$predictions, object$df,
+                              by= object$by),
              silent = TRUE)
-    if (any(grepl("Join columns must be present in data", unlist(t)))){
+    if (any(grepl("Join columns must be present in data", unlist(try_join)))){
       stop("columns in `by` selectors of `layer_population_scaling` must be present in data and match")}
 
     object$df <- object$df %>%
@@ -139,7 +139,7 @@ slather.layer_population_scaling <-
 
     components$predictions <- dplyr::left_join(components$predictions,
                                                object$df,
-                                               by= tolower(object$by),
+                                               by= object$by,
                                                suffix = c("", ".df")) %>%
       dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
                                   ~.x * !!pop_col ,
