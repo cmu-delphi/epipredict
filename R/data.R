@@ -56,3 +56,27 @@
 #'   \url{https://www.census.gov/data/tables/time-series/demo/popest/2010s-total-puerto-rico-municipios.html},
 #'   and \url{https://www.census.gov/data/tables/2010/dec/2010-island-areas.html}
 "state_census"
+
+#' Subset of Statistics Canada employment numbers by industry and province
+#' 
+#' @format A tibble with 109,388 rows and 6 variables:
+#' \describe{
+#'   \item{geo_value}{The province in Canada associated with each 
+#'      row of measurements.}
+#'   \item{time_value}{The time value, in YYYY-MM-01 format, 
+#'      associated with each row of measurements.}
+#'   \item{ppl_count}{The number of people employed, seasonally 
+#'      adjusted.}
+#'   \item{employee_type}{The type of employee}
+#'   \item{naics_industry}{The industry name and associated code 
+#'      according to \href{https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=1181553}{NAICS}}
+#' }
+#' @source This object contains modified data from the following Statistics Canada
+#' data table: \href{https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022001#data}{Table 14-10-0220-01  Employment and average weekly earnings (including overtime) for all employees by industry, monthly, seasonally adjusted, Canada}
+#' 
+#' Modifications:
+#' * From the given Statistics Canada table, the employee counts
+#'   are taken as-is. Only \href{https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=1181553}{NAICS} codes at hierarchy level 2 are 
+#'   filtered in. Only data rows that are \href{https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol}{good quality or higher and not missing}
+#'   according to Statistics Canada are removed.
+"statcan_employ_subset"
