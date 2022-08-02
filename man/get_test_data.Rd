@@ -18,8 +18,8 @@ and other variables in the original dataset.
 }
 \description{
 Based on the longest lag period in the recipe,
-\code{get_test_data()} creates a tibble in \link[epiprocess:epi_df]{epiprocess::epi_df}
-format with columns \code{geo_value}, \code{time_value}
+\code{get_test_data()} creates an \link[epiprocess:epi_df]{epiprocess::epi_df}
+with columns \code{geo_value}, \code{time_value}
 and other variables in the original dataset,
 which will be used to create test data.
 }

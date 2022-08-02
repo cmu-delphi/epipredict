@@ -35,10 +35,8 @@ arx_epi_forecaster <- function(epi_data,
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!is.list(trainer) || trainer$mode != "regression")
     cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
-
   lags <- arx_lags_validator(predictors, args_list$lags)
 
-  ## Recipe
   r <- epi_recipe(epi_data)
   for (l in seq_along(lags)) {
     p <- predictors[l]
@@ -50,18 +48,17 @@ arx_epi_forecaster <- function(epi_data,
   # should limit the training window here (in an open PR)
   # What to do if insufficient training data? Add issue.
 
-  fd <- max(epi_data$time_value)
-  td <- fd + args_list$ahead
+  forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
+  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
     layer_residual_quantiles(
       probs = args_list$levels,
       symmetrize = args_list$symmetrize) %>%
-    layer_add_forecast_date(forecast_date = fd) %>%
-    layer_add_target_date(target_date = td)
+    layer_add_forecast_date(forecast_date = forecast_date) %>%
+    layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
-  # need the target date processing here
 
   latest <- get_test_data(r, epi_data)
 

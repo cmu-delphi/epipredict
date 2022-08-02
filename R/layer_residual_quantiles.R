@@ -68,12 +68,17 @@ slather.layer_residual_quantiles <-
     if (is.null(object$probs)) return(components)
 
     s <- ifelse(object$symmetrize, -1, NA)
-    r <- grab_residuals(the_fit, components)
-    q <- quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)
+    r <- dplyr::bind_cols(
+      r = grab_residuals(the_fit, components),
+      geo_value = components$mold$extras$roles$geo_value,
+      components$mold$extras$roles$key) %>%
+      dplyr::group_by(dplyr::across(-r)) %>%
+      dplyr::summarise(
+        q = list(quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)))
 
     estimate <- components$predictions$.pred
     res <- tibble::tibble(
-      .pred_distn = dist_quantiles(map(estimate, "+", q), object$probs))
+      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$probs))
     res <- check_pname(res, components$predictions, object)
     components$predictions <- dplyr::mutate(components$predictions, !!!res)
     components
@@ -82,7 +87,7 @@ slather.layer_residual_quantiles <-
 grab_residuals <- function(the_fit, components) {
   if (the_fit$spec$mode != "regression")
     rlang::abort("For meaningful residuals, the predictor should be a regression model.")
-  r_generic <- attr(utils::methods(class = class(the_fit)), "info")$generic
+  r_generic <- attr(utils::methods(class = class(the_fit)[1]), "info")$generic
   if ("residuals" %in% r_generic) {
     r <- residuals(the_fit)
   } else {

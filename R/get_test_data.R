@@ -1,8 +1,8 @@
 #' Get test data for prediction based on longest lag period
 #'
 #' Based on the longest lag period in the recipe,
-#' `get_test_data()` creates a tibble in [epiprocess::epi_df]
-#' format with columns `geo_value`, `time_value`
+#' `get_test_data()` creates an [epiprocess::epi_df]
+#' with columns `geo_value`, `time_value`
 #' and other variables in the original dataset,
 #' which will be used to create test data.
 #'
@@ -21,14 +21,11 @@
 #'  get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @export
 
-get_test_data <- function(recipe, x){
-  # TO-DO: SOME CHECKS OF THE DATASET
-  if (any(!(c('geo_value','time_value') %in% colnames(x)))) {
-    rlang::abort("`geo_value`, `time_value` does not exist in data")
-  }
-  ## CHECK if it is epi_df?
-
-  max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)))
+get_test_data <- function(recipe, x) {
+  stopifnot(is.data.frame(x))
+  if (! all(colnames(x) %in% colnames(recipe$template)))
+    cli_stop("some variables used for training are not available in `x`.")
+  max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
 
   # CHECK: Return NA if insufficient training data
   if (dplyr::n_distinct(x$time_value) < max_lags) {
@@ -36,7 +33,7 @@ get_test_data <- function(recipe, x){
              "You need at least {max_lags} distinct time_values.")
   }
 
-  groups <- epi_keys(recipe)[epi_keys(recipe) != "time_value"]
+  groups <- epi_keys(recipe)[-1]
 
   x %>%
     dplyr::filter(
