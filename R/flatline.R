@@ -13,6 +13,8 @@
 #'   ```
 #'   form <- as.formula(lead7_y ~ state + age + y)
 #'   ```
+#'   Note that this function doesn't DO the shifting, that has to be done
+#'   outside.
 #' @param data A data frame containing at least the variables used in the
 #'   formula. It must also contain a column `time_value` giving the observed
 #'   time points.

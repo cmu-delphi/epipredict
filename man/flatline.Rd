@@ -14,7 +14,10 @@ panel data separated by plus. The observed time series must come last.
 For example
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{form <- as.formula(lead7_y ~ state + age + y)
-}\if{html}{\out{</div>}}}
+}\if{html}{\out{</div>}}
+
+Note that this function doesn't DO the shifting, that has to be done
+outside.}
 
 \item{data}{A data frame containing at least the variables used in the
 formula. It must also contain a column \code{time_value} giving the observed

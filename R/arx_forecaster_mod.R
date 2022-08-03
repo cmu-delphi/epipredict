@@ -52,7 +52,7 @@ arx_epi_forecaster <- function(epi_data,
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
   f <- frosting() %>%
     layer_predict() %>%
-    layer_naomit(.pred) %>%
+    # layer_naomit(.pred) %>%
     layer_residual_quantiles(
       probs = args_list$levels,
       symmetrize = args_list$symmetrize) %>%

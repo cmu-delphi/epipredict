@@ -42,7 +42,6 @@ flatline_epi_forecaster <- function(epi_data,
     recipes::update_role(!!outcome, new_role = "predictor") %>%
     recipes::add_role(dplyr::all_of(keys), new_role = "predictor")
 
-
   latest <- get_test_data(epi_recipe(epi_data), epi_data)
 
   forecast_date <- args_list$forecast_date %||% max(latest$time_value)
@@ -50,7 +49,6 @@ flatline_epi_forecaster <- function(epi_data,
 
   f <- frosting() %>%
     layer_predict() %>%
-    layer_naomit(.pred) %>%
     layer_residual_quantiles(
       probs = args_list$levels,
       symmetrize = args_list$symmetrize) %>%

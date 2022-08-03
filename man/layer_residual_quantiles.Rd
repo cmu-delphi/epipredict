@@ -9,6 +9,7 @@ layer_residual_quantiles(
   ...,
   probs = c(0.0275, 0.975),
   symmetrize = TRUE,
+  by_key = TRUE,
   name = ".pred_distn",
   .flag = TRUE,
   id = rand_id("residual_quantiles")
@@ -23,6 +24,9 @@ layer_residual_quantiles(
 referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
+
+\item{by_key}{logical. If \code{TRUE} then quantiles will be computed separately
+for each combination of the keys.}
 
 \item{name}{character. The name for the output column.}
 

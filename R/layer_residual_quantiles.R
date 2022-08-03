@@ -5,6 +5,8 @@
 #' @param probs numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
+#' @param by_key logical. If `TRUE` then quantiles will be computed separately
+#'   for each combination of the keys.
 #' @param name character. The name for the output column.
 #' @param .flag a logical to determine if the layer is added. Passed on to
 #'   `add_layer()`. Default `TRUE`.
@@ -38,18 +40,21 @@
 layer_residual_quantiles <- function(frosting, ...,
                                      probs = c(0.0275, 0.975),
                                      symmetrize = TRUE,
+                                     by_key = TRUE,
                                      name = ".pred_distn",
                                      .flag = TRUE,
                                      id = rand_id("residual_quantiles")) {
   rlang::check_dots_empty()
+  arg_is_scalar(symmetrize, by_key, .flag)
   arg_is_chr_scalar(name, id)
   arg_is_probabilities(probs)
-  arg_is_lgl(symmetrize)
+  arg_is_lgl(symmetrize, by_key, .flag)
   add_layer(
     frosting,
     layer_residual_quantiles_new(
       probs = probs,
       symmetrize = symmetrize,
+      by_key = by_key,
       name = name,
       id = id
     ),
@@ -57,9 +62,9 @@ layer_residual_quantiles <- function(frosting, ...,
   )
 }
 
-layer_residual_quantiles_new <- function(probs, symmetrize, name, id) {
+layer_residual_quantiles_new <- function(probs, symmetrize, by_key, name, id) {
   layer("residual_quantiles", probs = probs, symmetrize = symmetrize,
-        name = name, id = id)
+        by_key = by_key, name = name, id = id)
 }
 
 #' @export
