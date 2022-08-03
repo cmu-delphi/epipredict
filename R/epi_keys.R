@@ -29,7 +29,8 @@ epi_keys.recipe <- function(x) {
 epi_keys_mold <- function(mold) {
   keys <- c("time_value", "geo_value", "key")
   molded_names <- names(mold$extras$roles)
+  
   mold_keys <- map(mold$extras$roles[molded_names %in% keys], names)
-  unname(unlist(mold_keys))
+  unlist(unname(mold_keys))
 }
 
