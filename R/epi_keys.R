@@ -29,7 +29,7 @@ epi_keys.recipe <- function(x) {
 epi_keys_mold <- function(mold) {
   keys <- c("time_value", "geo_value", "key")
   molded_names <- names(mold$extras$roles)
-  mold_keys <- purrr::map_chr(mold$extras$roles[molded_names %in% keys], names)
+  mold_keys <- map_chr(mold$extras$roles[molded_names %in% keys], names)
   unname(mold_keys)
 }
 

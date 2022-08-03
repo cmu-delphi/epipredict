@@ -176,6 +176,13 @@ frosting <- function(layers = NULL, requirements = NULL) {
   out <- new_frosting()
 }
 
+
+#' Extract the frosting object from a workflow
+#'
+#' @param x an `epi_workflow` object
+#' @param ... not used
+#'
+#' @return a `frosting` object
 #' @export
 extract_frosting <- function(x, ...) {
   UseMethod("extract_frosting")

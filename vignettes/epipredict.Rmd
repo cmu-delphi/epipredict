@@ -16,8 +16,10 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, message=FALSE}
-library(tidyverse)
-library(tidymodels)
+library(dplyr)
+library(parsnip)
+library(workflows)
+library(recipes)
 library(epiprocess)
 # remotes::install_github("cmu-delphi/epipredict")
 library(epipredict)

@@ -5,23 +5,45 @@ map <- function(.x, .f, ...) {
   .f <- rlang::as_function(.f, env = rlang::global_env())
   lapply(.x, .f, ...)
 }
+
 walk <- function(.x, .f, ...) {
   map(.x, .f, ...)
+  invisible(.x)
+}
+
+walk2 <- function(.x, .y, .f, ...) {
+  map2(.x, .y, .f, ...)
   invisible(.x)
 }
 
 map_lgl <- function(.x, .f, ...) {
   .rlang_purrr_map_mold(.x, .f, logical(1), ...)
 }
+
 map_int <- function(.x, .f, ...) {
   .rlang_purrr_map_mold(.x, .f, integer(1), ...)
 }
+
 map_dbl <- function(.x, .f, ...) {
   .rlang_purrr_map_mold(.x, .f, double(1), ...)
 }
+
 map_chr <- function(.x, .f, ...) {
   .rlang_purrr_map_mold(.x, .f, character(1), ...)
 }
+
+map_dfr <- function(.x, .f, ..., .id = NULL) {
+  .f <- rlang::as_function(.f, env = global_env())
+  res <- map(.x, .f, ...)
+  dplyr::bind_rows(res, .id = .id)
+}
+
+map2_dfr <- function(.x, .y, .f, ..., .id = NULL) {
+  .f <- rlang::as_function(.f, env = global_env())
+  res <- map2(.x, .y, .f, ...)
+  dplyr::bind_rows(res, .id = .id)
+}
+
 .rlang_purrr_map_mold <- function(.x, .f, .mold, ...) {
   .f <- rlang::as_function(.f, env = rlang::global_env())
   out <- vapply(.x, .f, .mold, ..., USE.NAMES = FALSE)
