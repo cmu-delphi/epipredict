@@ -99,7 +99,9 @@ z <- read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/publi
 
 We don't even need to look at COVID-related data. Here is an example of such,
 finding the relationship between Human Development Index and the logarithm of
-the number of hospital beds per thousand people on 2022-06-01.
+the number of hospital beds per thousand people on 2022-06-01. There is moderate
+positive correlation between the how developed a country is and the number
+of hospital beds a country has.
 
 ```{r}
 z2 <- z %>%
@@ -107,7 +109,7 @@ z2 <- z %>%
   select(location,date,hospital_beds_per_thousand,human_development_index) %>%
   filter(date == "2022-06-01") 
 
-ggplot(z2,aes(x=log(hospital_beds_per_thousand),y=human_development_index)) +
+ggplot(z2,aes(x=human_development_index,y=log(hospital_beds_per_thousand))) +
   geom_point()
 ```
 
@@ -119,22 +121,20 @@ z3 <- z %>%
   drop_na(continent) %>%
   select(location,date,total_cases_per_million,total_vaccinations_per_hundred,
          human_development_index)  %>%
-  filter(date == "2021-06-01") %>%
+  filter(date == "2021-07-01") %>%
   drop_na(total_vaccinations_per_hundred) %>%
   mutate(log_cases_pm = log(total_cases_per_million),
          log_vacs_pm = log(10000 * total_vaccinations_per_hundred))
 
-ggplot(z3,aes(x=log_cases_pm,y=log_vacs_pm)) +
-  geom_point()
-
-ggplot(z3,aes(x=human_development_index,y=log_vacs_pm)) +
-  geom_point()
+ggplot(z3,aes(x=human_development_index,y=log_vacs_pm,colour=log_cases_pm)) +
+  geom_point() +
+  scale_colour_viridis_c()
 
 z4 <- z3 %>%
   drop_na() %>%
-  filter(total_cases_per_million > 0, total_vaccinations_per_hundred >0)
+  filter(total_cases_per_million > 0, total_vaccinations_per_hundred > 0)
 
-lm1 <- lm(log_vacs_pm ~ log_cases_pm * human_development_index,z4)
+lm1 <- lm(log_vacs_pm ~ human_development_index,z4)
 
 qplot(lm1$fitted.values,lm1$residuals) +
   labs(x = "Fitted values", y = "Residuals",
@@ -143,13 +143,14 @@ qplot(lm1$fitted.values,lm1$residuals) +
 summary(lm1)
 ```
 
+This chart shows that the percentage of people vaccinated as of 2022-07-01.
+Countries with higher COVID cases per capita may tend to be able to afford more
+tests, although we may not be able to conclude that from the limited information
+we have.
+
+
 Trying to find a meaningful relationship between various parameters is easier
 said than done when you have to account for things such as heteroskedasticity,
 collinearity and non-linear relationships. In addition, one cannot conclude that
 correlation implies causality.
-
-```{r}
-
-```
-
 
