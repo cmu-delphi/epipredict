@@ -130,9 +130,6 @@ ggplot(z3,aes(x=log_cases_pm,y=log_vacs_pm)) +
 ggplot(z3,aes(x=human_development_index,y=log_vacs_pm)) +
   geom_point()
 
-ggplot(z3,aes(x=human_development_index,y=log_cases_pm)) +
-  geom_point()
-
 z4 <- z3 %>%
   drop_na() %>%
   filter(total_cases_per_million > 0, total_vaccinations_per_hundred >0)
@@ -150,4 +147,9 @@ Trying to find a meaningful relationship between various parameters is easier
 said than done when you have to account for things such as heteroskedasticity,
 collinearity and non-linear relationships. In addition, one cannot conclude that
 correlation implies causality.
+
+```{r}
+
+```
+
 
