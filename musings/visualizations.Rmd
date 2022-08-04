@@ -7,6 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+## USA maps
+
 `epipredict` supports visualizations features that are a part of COVIDcast.
 However, it is not intended for
 those who use third-party data visualization software such as Power BI and
@@ -42,39 +44,35 @@ plot. Thus, one would need to load separate packages, etc., do a plot of
 something such as a world map or a map of Canada (as not even "province"
 is an option for covidcast_signal's geo_type).
 
+As a matter of fact, it's possible to use data unrelated to COVID,
+such as data relating to the 2020 elections. As always, one should follow
+guidelines relating to good data visualizations, such as by making colours
+match with blue for Democrat and red for Republican.
+
+This chart shows the percentage of people under the age of 18 in each state.
+Alaska and Hawaii are included in this map, as well as Washington D.C. and
+Puerto Rico. However, it may be hard to see Washington D.C. in this map.
+
 ```{r}
+library(readr)
 library(tidyr)
-z <- read.csv("https://covid.ourworldindata.org/data/owid-covid-data.csv")
 
-z2 <- z %>%
-  select(iso_code,date,total_cases_per_million) %>%
-  filter(date <= "2021-12-31") %>%
-  drop_na() %>%
-  as_tibble()
+y <- read_csv("https://raw.githubusercontent.com/jakevdp/data-USstates/master/state-population.csv")
 
-z_stdev <- z2 %>%
-  group_by(iso_code) %>%
-  summarize(stdev = sd(total_cases_per_million)) %>%
-  filter(stdev > 0)
+y2 <- y %>%
+  rename(geo_value = 1, time_value = year) %>%
+  spread(ages,population) %>%
+  mutate(value = under18 / total * 100, geo_value = tolower(geo_value)) %>%
+  select(-total,-under18) %>%
+  filter(time_value >= 2009)
 
-z_combined <- inner_join(z2,z_stdev)
+cc2 <- as.covidcast_signal(y2,
+                          geo_type = "state",
+                          data_source = "census",
+                          signal = "percent_under_18")
 
-iso_country_codes <- read.csv("https://raw.githubusercontent.com/lukes/ISO-3166-Countries-with-Regional-Codes/master/all/all.csv") %>%
-  select(alpha.2,alpha.3)
-
-z3 <- z2 %>%
-  inner_join(iso_country_codes,c("iso_code" = "alpha.3")) %>%
-  select(-iso_code,geo_value = alpha.2,
-         time_value = date, value = total_cases_per_million) %>%
-  mutate(geo_value = tolower(geo_value), time_value = as.Date(time_value))
-  
-cc <- as.covidcast_signal(z3,
-                          geo_type = "nation",
-                          data_source = "covid-tracking",
-                          signal = "covid_cases_per_million")
-
-plot(cc)
-
+plot(cc2,choro_col = c("#C040C0", "#C04040", "#C08040", "#C0C040",
+                       "#40C040", "#40C0C0", "#4040C0"))
 ```
 
 If you want to map something such as Canadian provinces,
@@ -82,3 +80,74 @@ you will need to install a separate package and use features outside of
 covidcast_signal, as those are not recognized geo_type's.
 
 epipredict's epi_df and epi_archive both recognize custom geo_type's, though.
+
+## Other plots
+
+A plot of the USA is just one plot; there are other plots, such as line plots,
+bar plots, etc. This is helpful if we want to plot something that is not
+recognized under `plot.covidcast_signal`, such as a plot of European countries.
+(However, it may be better to just use a different map feature for plotting
+other countries, etc., even if it is more complicated.)
+
+For this, we are looking to observe COVID-related data around the world.
+
+```{r}
+library(ggplot2)
+
+z <- read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv")
+```
+
+We don't even need to look at COVID-related data. Here is an example of such,
+finding the relationship between Human Development Index and the logarithm of
+the number of hospital beds per thousand people on 2022-06-01.
+
+```{r}
+z2 <- z %>%
+  drop_na(continent) %>%
+  select(location,date,hospital_beds_per_thousand,human_development_index) %>%
+  filter(date == "2022-06-01") 
+
+ggplot(z2,aes(x=log(hospital_beds_per_thousand),y=human_development_index)) +
+  geom_point()
+```
+
+We can grab COVID-related data, such as with vaccination rates of different
+countries.
+
+```{r}
+z3 <- z %>%
+  drop_na(continent) %>%
+  select(location,date,total_cases_per_million,total_vaccinations_per_hundred,
+         human_development_index)  %>%
+  filter(date == "2021-06-01") %>%
+  drop_na(total_vaccinations_per_hundred) %>%
+  mutate(log_cases_pm = log(total_cases_per_million),
+         log_vacs_pm = log(10000 * total_vaccinations_per_hundred))
+
+ggplot(z3,aes(x=log_cases_pm,y=log_vacs_pm)) +
+  geom_point()
+
+ggplot(z3,aes(x=human_development_index,y=log_vacs_pm)) +
+  geom_point()
+
+ggplot(z3,aes(x=human_development_index,y=log_cases_pm)) +
+  geom_point()
+
+z4 <- z3 %>%
+  drop_na() %>%
+  filter(total_cases_per_million > 0, total_vaccinations_per_hundred >0)
+
+lm1 <- lm(log_vacs_pm ~ log_cases_pm * human_development_index,z4)
+
+qplot(lm1$fitted.values,lm1$residuals) +
+  labs(x = "Fitted values", y = "Residuals",
+       title = "Fitted values vs. residuals of a linear model with interaction")
+
+summary(lm1)
+```
+
+Trying to find a meaningful relationship between various parameters is easier
+said than done when you have to account for things such as heteroskedasticity,
+collinearity and non-linear relationships. In addition, one cannot conclude that
+correlation implies causality.
+

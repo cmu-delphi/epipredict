@@ -33,6 +33,7 @@ Imports:
     hardhat (>= 1.2.0),
     magrittr,
     purrr,
+    readr,
     recipes (>= 1.0.0),
     rlang,
     stats,
