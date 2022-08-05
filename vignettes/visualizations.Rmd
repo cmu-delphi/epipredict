@@ -28,6 +28,8 @@ by state up until 2021-12-31.
 ```{r}
 library(covidcast)
 library(dplyr)
+library(epipredict)
+
 x <- case_death_rate_subset %>%
   filter(!(geo_value %in% c("as","cm","gu","mp","vi")),
          time_value <= "2021-12-31") %>%
