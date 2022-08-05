@@ -1,6 +1,6 @@
 library(tidyverse)
 library(covidcast)
-library(delphi.epidata)
+library(epidatr)
 library(epiprocess)
 library(tidymodels)
 

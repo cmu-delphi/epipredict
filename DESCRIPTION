@@ -46,6 +46,7 @@ Imports:
 Suggests: 
     covidcast,
     data.table,
+    epidatr,
     ggplot2,
     knitr,
     lubridate,
@@ -56,7 +57,8 @@ Suggests:
 VignetteBuilder: 
     knitr
 Remotes:
-    dajmcdon/epiprocess
+    cmu-delphi/epiprocess,
+    cmu-delphi/epidatr
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
