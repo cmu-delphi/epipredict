@@ -103,7 +103,9 @@ that it is a part of the well-used `tidyverse` package.
 ## Other plots using ggplot2
 
 `ggplot2` is a part of `tidyverse` that enables users to do plots outside of
-base R's plots that may not look as nice.
+base R's plots.
+
+### A basic plot
 
 A plot of the USA is just one plot; there are other plots, such as line plots,
 bar plots, etc. This is helpful if we want to plot something that is not
@@ -135,6 +137,8 @@ ggplot(z2,aes(x=human_development_index,y=log(hospital_beds_per_thousand))) +
 As we can see, there is moderate
 positive correlation between the how developed a country is and the number
 of hospital beds a country has.
+
+### Capabilities of ggplot2
 
 We can grab COVID-related data, such as with vaccination rates of different
 countries.
@@ -174,6 +178,35 @@ Trying to find a meaningful relationship between various parameters is easier
 said than done when you have to account for things such as heteroskedasticity,
 collinearity and non-linear relationships. In addition, one cannot conclude that
 correlation implies causality.
+
+### Time series
+
+Often times on the news, you will see charts of a time series that will
+illustrate trends of COVID. Given limitations on the number of tests available,
+this may not be fully accurate.
+
+Note that while it may preferable to convert this data into an `epi_df`,
+we want to keep it tidy (i.e. one observation per row) as to facilitate its
+use with `ggplot`, and having converting it to an `epi_df` rather than using
+`gather` to make it tidy will take out this property.
+
+```{r}
+hosp <- read_csv("https://raw.githubusercontent.com/ccodwg/CovidTimelineCanada/main/data/pt/hospitalizations_pt.csv")
+icu <- read_csv("https://raw.githubusercontent.com/ccodwg/CovidTimelineCanada/main/data/pt/icu_pt.csv")
+
+hosp_icu <- inner_join(hosp,icu,by=c("region","date")) %>%
+  select(region, date,hospitalizations = value.x, icu = value.y) %>%
+  gather("type","value",-region,-date)
+
+hosp_icu2 <- filter(hosp_icu,region %in% c("BC","ON","QC","AB"))
+
+ggplot(hosp_icu2,aes(x=date,y=value,colour=type)) +
+  geom_line() +
+  facet_wrap(~region)
+```
+
+This is a time series for the hospitalizations and ICU admissions of the four
+most populated provinces in Canada.
 
 ## Beyond COVIDcast and ggplot2
 
