@@ -7,7 +7,14 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-## USA maps
+Good visualizations help the user understand what is going on. One may use
+`plot.covidcast_signal` from the `covidcast` package to plot US maps, including
+county maps. However, `covidcast` will not support maps unrelated to the US.
+One may use `plot` and `ggplot` for various plots
+including scatterplots. Finally, users can add animation and interactive
+features on the plot.
+
+## covidcast_signal maps
 
 `epipredict` supports visualizations features that are a part of COVIDcast.
 However, it is not intended for
@@ -50,8 +57,7 @@ guidelines relating to good data visualizations, such as by making colours
 match with blue for Democrat and red for Republican.
 
 This chart shows the percentage of people under the age of 18 in each state.
-Alaska and Hawaii are included in this map, as well as Washington D.C. and
-Puerto Rico. However, it may be hard to see Washington D.C. in this map.
+This map includes all 50 states, Washington D.C. and Puerto Rico.
 
 ```{r}
 library(readr)
@@ -75,13 +81,29 @@ plot(cc2,choro_col = c("#C040C0", "#C04040", "#C08040", "#C0C040",
                        "#40C040", "#40C0C0", "#4040C0"))
 ```
 
-If you want to map something such as Canadian provinces,
-you will need to install a separate package and use features outside of
+## Non-USA plots
+
+If a user wants to map something such as Canadian provinces or a world map,
+they will need to install a separate package and use features outside of
 covidcast_signal, as those are not recognized geo_type's.
 
-epipredict's epi_df and epi_archive both recognize custom geo_type's, though.
+There may be multiple ways to achieve this, whether it is downloading a package
+or drawing areas with a package that supports ArcGIS.
 
-## Other plots
+Note that both epipredict's epi_df and epi_archive both recognize custom
+geo_type's. However, this does not mean they enable different types of maps
+without downloading other packages.
+
+## Base R plotting
+
+Base R has its own plotting with `plot`. However, we will not cover this here
+as `ggplot` arguably looks nicer and is a common feature to learn about given
+that it is a part of the well-used `tidyverse` package.
+
+## Other plots using ggplot2
+
+`ggplot2` is a part of `tidyverse` that enables users to do plots outside of
+base R's plots that may not look as nice.
 
 A plot of the USA is just one plot; there are other plots, such as line plots,
 bar plots, etc. This is helpful if we want to plot something that is not
@@ -99,9 +121,7 @@ z <- read_csv("https://raw.githubusercontent.com/owid/covid-19-data/master/publi
 
 We don't even need to look at COVID-related data. Here is an example of such,
 finding the relationship between Human Development Index and the logarithm of
-the number of hospital beds per thousand people on 2022-06-01. There is moderate
-positive correlation between the how developed a country is and the number
-of hospital beds a country has.
+the number of hospital beds per thousand people on 2022-06-01.
 
 ```{r}
 z2 <- z %>%
@@ -112,6 +132,9 @@ z2 <- z %>%
 ggplot(z2,aes(x=human_development_index,y=log(hospital_beds_per_thousand))) +
   geom_point()
 ```
+As we can see, there is moderate
+positive correlation between the how developed a country is and the number
+of hospital beds a country has.
 
 We can grab COVID-related data, such as with vaccination rates of different
 countries.
@@ -142,15 +165,20 @@ qplot(lm1$fitted.values,lm1$residuals) +
 
 summary(lm1)
 ```
-
 This chart shows that the percentage of people vaccinated as of 2022-07-01.
 Countries with higher COVID cases per capita may tend to be able to afford more
 tests, although we may not be able to conclude that from the limited information
 we have.
-
 
 Trying to find a meaningful relationship between various parameters is easier
 said than done when you have to account for things such as heteroskedasticity,
 collinearity and non-linear relationships. In addition, one cannot conclude that
 correlation implies causality.
 
+## Beyond COVIDcast and ggplot2
+
+Note that many things can be done with R that are beyond the scope of the
+audience, such as animation and interactive visualizations. However, one may
+learn about packages that support these here:
+
+https://r-graph-gallery.com/
