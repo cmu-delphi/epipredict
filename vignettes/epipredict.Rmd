@@ -358,3 +358,5 @@ and predicting procedure.
 ```{r}
 preds
 ```
+
+## Using the workflow object
