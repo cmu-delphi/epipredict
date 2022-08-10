@@ -7,4 +7,18 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-NOTE: This had intentionally been placed in `musings` as it is still a draft.
+NOTE: This is intentionally placed in `musings` as it is still a draft.
+
+Good visualizations help the user understand what is going on. One may use
+`plot.covidcast_signal` from the `covidcast` package to plot US maps, including
+county maps. However, `covidcast` will not support maps unrelated to the US.
+One may use `plot` and `ggplot` for various plots
+including scatterplots. Finally, users can add animation and interactive
+features on the plot.
+
+`epipredict` supports visualizations features that are a part of COVIDcast.
+However, it is not intended for
+those who use third-party data visualization software such as Power BI and
+Tableau. Despite that, visualizations go alongside cmu-delphi's covidcast
+library.
+
