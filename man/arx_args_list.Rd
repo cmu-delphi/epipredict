@@ -18,14 +18,14 @@ arx_args_list(
 }
 \arguments{
 \item{lags}{Vector or List. Positive integers enumerating lags to use
-in autoregressive-type models.}
+in autoregressive-type models (in days).}
 
-\item{ahead}{Integer. Number of time steps ahead of the forecast date
-for which forecasts should be produced.}
+\item{ahead}{Integer. Number of time steps ahead (in days) of the forecast
+date for which forecasts should be produced.}
 
 \item{min_train_window}{Integer. The minimal amount of training
-data needed to produce a forecast. If smaller, the forecaster will return
-\code{NA} predictions.}
+data (in the time unit of the \code{epi_df}) needed to produce a forecast.
+If smaller, the forecaster will return \code{NA} predictions.}
 
 \item{forecast_date}{The date on which the forecast is created. The default
 \code{NULL} will attempt to determine this automatically.}
