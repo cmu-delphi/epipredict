@@ -33,7 +33,8 @@ get_test_data <- function(recipe, x) {
              "You need at least {max_lags} distinct time_values.")
   }
 
-  groups <- epi_keys(recipe)[-1]
+  groups <- epi_keys(recipe)
+  groups <- groups[groups != "time_value"]
 
   x %>%
     dplyr::filter(

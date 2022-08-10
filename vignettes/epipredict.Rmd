@@ -50,10 +50,10 @@ All the forcasters we provide are built on our framework. So we will use these b
 
 Our framework for creating custom forecasters views the prediction task as a set of modular components. There are four types of components:
     
-1. Preprocessor: do things to the data before model training
+1. Preprocessor: make transformations to the data before model training
 2. Trainer: train a model on data, resulting in a fitted model object
 3. Predictor: make predictions, using a fitted model object and processed test data
-4. Postprocessor: do things to the predictions before returning
+4. Postprocessor: manipulate or transform the predictions before returning
     
 Users familiar with [`{tidymodels}`](https://www.tidymodels.org) and especially the [`{workflows}`](https://workflows.tidymodels.org) package will notice a lot of overlap. This is by design, and is in fact a feature. The truth is that `epipredict` is a wrapper around much that is contained in these packages. Therefore, if you want something from this -verse, it should "just work" (we hope).
 

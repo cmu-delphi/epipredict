@@ -67,16 +67,24 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 #'
 #' Constructs a list of arguments for [arx_forecaster()].
 #'
-#' @template param-lags
-#' @template param-ahead
-#' @template param-min_train_window
+#' @param lags Vector or List. Positive integers enumerating lags to use
+#'   in autoregressive-type models (in days).
+#' @param ahead Integer. Number of time steps ahead (in days) of the forecast
+#'   date for which forecasts should be produced.
+#' @param min_train_window Integer. The minimal amount of training
+#'   data (in the time unit of the `epi_df`) needed to produce a forecast.
+#'   If smaller, the forecaster will return `NA` predictions.
 #' @param forecast_date The date on which the forecast is created. The default
 #'   `NULL` will attempt to determine this automatically.
 #' @param target_date The date for which the forecast is intended. The default
 #'   `NULL` will attempt to determine this automatically.
-#' @template param-levels
-#' @template param-symmetrize
-#' @template param-nonneg
+#' @param levels Vector or `NULL`. A vector of probabilities to produce
+#'   prediction intervals. These are created by computing the quantiles of
+#'   training residuals. A `NULL` value will result in point forecasts only.
+#' @param symmetrize Logical. The default `TRUE` calculates
+#'      symmetric prediction intervals.
+#' @param nonneg Logical. The default `TRUE` enforeces nonnegative predictions
+#'   by hard-thresholding at 0.
 #' @param quantile_by_key Should separate quantiles be produced for each
 #'   `geo_value` (and additional `keys`) combination
 #'
