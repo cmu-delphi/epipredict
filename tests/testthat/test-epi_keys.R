@@ -40,7 +40,7 @@ test_that("epi_keys_mold extracts additional keys when they are present", {
     state = rep(c("ca", "fl", "pa"), each = 3), # extra key
     value = 1:length(geo_value) + 0.01 * rnorm(length(geo_value))
   ) %>%
-    as_epi_df(additional_metadata = list(other_keys = c("state", "pol")))
+    epiprocess::as_epi_df(additional_metadata = list(other_keys = c("state", "pol")))
 
   my_recipe <- epi_recipe(my_data) %>%
     step_epi_ahead(value , ahead = 7) %>%
