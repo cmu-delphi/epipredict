@@ -62,6 +62,7 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
+
 #' Predict from an epi_workflow
 #'
 #' @description

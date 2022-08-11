@@ -32,7 +32,6 @@ Imports:
     glue,
     hardhat (>= 1.2.0),
     magrittr,
-    purrr,
     recipes (>= 1.0.0),
     rlang,
     stats,
@@ -42,7 +41,7 @@ Imports:
     tidyselect,
     usethis,
     vctrs,
-    workflows
+    workflows (>= 1.0.0)
 Suggests: 
     covidcast,
     data.table,
@@ -51,9 +50,11 @@ Suggests:
     knitr,
     lubridate,
     parsnip (>= 1.0.0),
+    ranger,
     RcppRoll,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    xgboost
 VignetteBuilder: 
     knitr
 Remotes:

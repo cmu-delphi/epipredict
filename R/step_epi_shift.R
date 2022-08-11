@@ -188,7 +188,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 bake.step_epi_lag <- function(object, new_data, ...) {
   grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{lag}_{col}"),
-                  shift_val = object$lag,
+                  shift_val = lag,
                   lag = NULL)
 
   ## ensure no name clashes
@@ -219,7 +219,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
 bake.step_epi_ahead <- function(object, new_data, ...) {
   grid <- tidyr::expand_grid(col = object$columns, ahead = object$ahead) %>%
     dplyr::mutate(newname = glue::glue("{object$prefix}{ahead}_{col}"),
-                  shift_val = -object$ahead,
+                  shift_val = -ahead,
                   ahead = NULL)
 
   ## ensure no name clashes

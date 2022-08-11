@@ -19,7 +19,7 @@ epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
     tidyr::unchop(shift) %>% # what is chop
     dplyr::mutate(name = paste0(out_name, 1:nrow(.))) %>%
     # One list element for each shifted feature
-    purrr::pmap(function(i, shift, name) {
+    pmap(function(i, shift, name) {
       tibble(keys,
              time_value = time_value + shift, # Shift back
              !!name := x[[i]])
@@ -27,7 +27,7 @@ epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
   if (is.data.frame(keys)) common_names <- c(names(keys), "time_value")
   else common_names <- c("keys", "time_value")
 
-  purrr::reduce(out_list, dplyr::full_join, by = common_names)
+  reduce(out_list, dplyr::full_join, by = common_names)
 }
 
 epi_shift_single <- function(x, col, shift_val, newname, key_cols) {

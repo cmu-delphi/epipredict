@@ -6,9 +6,9 @@ handle_arg_list = function(..., tests) {
   values = list(...)
   #names = names(values)
   names = eval(substitute(alist(...)))
-  names = purrr::map(names, deparse)
+  names = map(names, deparse)
 
-  purrr::walk2(names, values, tests)
+  walk2(names, values, tests)
 }
 
 arg_is_scalar = function(...,  allow_null = FALSE, allow_na = FALSE) {
@@ -125,7 +125,7 @@ arg_is_function = function(..., allow_null = FALSE) {
     ...,
     tests = function(name, value) {
       if (!is.function(value) | (is.null(value) & !allow_null))
-        cli_stop("All {.val {name}} must be in [0,1].")
+        cli_stop("{value} must be a `parsnip` function.")
     }
   )
 }

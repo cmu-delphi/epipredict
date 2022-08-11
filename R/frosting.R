@@ -176,21 +176,29 @@ frosting <- function(layers = NULL, requirements = NULL) {
   out <- new_frosting()
 }
 
+
+#' Extract the frosting object from a workflow
+#'
+#' @param x an `epi_workflow` object
+#' @param ... not used
+#'
+#' @return a `frosting` object
+#' @export
 extract_frosting <- function(x, ...) {
   UseMethod("extract_frosting")
 }
 
+#' @export
 extract_frosting.default <- function(x, ...) {
   abort(c("Frosting is only available for epi_workflows currently.",
           i = "Can you use `epi_workflow()` instead of `workflow()`?"))
   invisible(x)
 }
 
+#' @export
 extract_frosting.epi_workflow <- function(x, ...) {
-  if (has_postprocessor_frosting(x)) {
-    return(x$post$actions$frosting$frosting)
-  }
-  abort("The epi_workflow does not have a preprocessor.")
+  if (has_postprocessor_frosting(x)) return(x$post$actions$frosting$frosting)
+  else cli_stop("The epi_workflow does not have a postprocessor.")
 }
 
 #' Apply postprocessing to a fitted workflow

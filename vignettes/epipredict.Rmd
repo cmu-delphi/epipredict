@@ -1,0 +1,362 @@
+---
+title: "Get started with epipredict"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{epipredict}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "100%")
+```
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(parsnip)
+library(workflows)
+library(recipes)
+library(epiprocess)
+# remotes::install_github("cmu-delphi/epipredict")
+library(epipredict)
+```
+
+
+# Goals for the package
+
+At a high level, our goal with `epipredict` is to make running simple Machine Learning / Statistical forecasters for epidemiology easy. However, this package is extremely extensible, and that is part of the utility. Our hope is that it is easy for users with epi training and some statistics to fit baseline models while still allowing those with more nuanced statistical understanding to create complicated specializations within the same framework.
+
+Serving both populations is the main motivation for our efforts, but at the same time, we have tried hard to make it useful.
+
+
+## Baseline models
+
+We provide a set of basic, easy-to-use forecasters that work out of the box. 
+You should be able to do a reasonably limited amount of customization on them. Any serious customization happens with the framework discussed below).
+
+For the basic forecasters, we provide, at least: 
+    
+* Baseline flat-line forecaster 
+* Autoregressive forecaster
+* Autoregressive classifier
+
+All the forcasters we provide are built on our framework. So we will use these basic models to illustrate its flexibility.
+
+## Forecasting framework
+
+Our framework for creating custom forecasters views the prediction task as a set of modular components. There are four types of components:
+    
+1. Preprocessor: make transformations to the data before model training
+2. Trainer: train a model on data, resulting in a fitted model object
+3. Predictor: make predictions, using a fitted model object and processed test data
+4. Postprocessor: manipulate or transform the predictions before returning
+    
+Users familiar with [`{tidymodels}`](https://www.tidymodels.org) and especially the [`{workflows}`](https://workflows.tidymodels.org) package will notice a lot of overlap. This is by design, and is in fact a feature. The truth is that `epipredict` is a wrapper around much that is contained in these packages. Therefore, if you want something from this -verse, it should "just work" (we hope).
+
+The reason for the overlap is that `{workflows}` _already implements_ the first three steps. And it does this very well. However, it is missing the postprocessing stage and currently has no plans for such an implementation. And this feature is important. The baseline forecaster we provide _requires_ postprocessing. Anything more complicated needs this as well.
+
+The second omission from `{tidymodels}` is support for panel data. Besides epidemiological data, economics, psychology, sociology, and many other areas frequently deal with data of this type. So the framework of behind `epipredict` implements this. In principle, this has nothing to do with epidemiology, and one could simply use this package as a solution for the missing functionality in `{tidymodels}`. Again, this should "just work".
+
+All of the _panel data_ functionality is implemented through the `epi_df` data type in the companion [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) package. There is much more to see there, but for the moment, it's enough to look at a simple one:
+
+```{r epidf}
+jhu <- case_death_rate_subset
+jhu
+```
+
+This data is built into the package and contains the measured variables `case_rate` and `death_rate` for COVID-19 at the daily level for each US state for the year 2021. The "panel" part is because we have repeated measurements across a number of locations. 
+
+The `epi_df` encodes the timestamp as `time_value` and the `key` as `geo_value`. While these 2 names are required, the values don't need to actually represent such objects. Additional `key`'s are also supported (like age group, ethnicity, taxonomy, etc.). 
+
+The `epi_df` also contains some metadata that describes the keys as well as the vintage of the data. It's possible that data collected at different times for the _same set_ of `geo_value`'s and `time_value`'s could actually be different. For more details, see [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/articles/epiprocess.html).
+
+
+
+## Why doesn't this package already exist?
+
+As described above:
+
+* Parts actually DO exist. There's a universe called `{tidymodels}`. It handles 
+preprocessing, training, and prediction, bound together, through a package called
+`{workflows}`. We built `{epipredict}` on top of that setup. In this way, you CAN
+use almost everything they provide.
+
+* However, `{workflows}` doesn't do postprocessing. And nothing in the -verse handles _panel data_.
+
+* The tidy-team doesn't have plans to do either of these things. (We checked).
+
+* There are two packages that do _time series_ built on `{tidymodels}`, but it's
+"basic" time series: 1-step AR models, exponential smoothing, STL decomposition, etc.[^2] We have never found these models to be particularly helpful for epidemic forecasting, but one could also integrate these methods into our framework.
+
+[^2]: These are [`{timetk}`](https://business-science.github.io/timetk/index.html) and [`{modeltime}`](https://business-science.github.io/timetk/index.html). There are _lots_ of useful methods there than can be used to do fairly complex machine learning methodology.
+
+# Show me the basics
+
+We start with the `jhu` data displayed above.
+One of the "canned" forecasters we provide is an autoregressive forecaster with (or without) covariates that _directly_ trains on the response. This is in contrast to a typical "iterative" AR model that trains to predict one-step-ahead, and then plugs in the predictions to "leverage up" to longer horizons.
+
+We'll estimate the model jointly across all locations using only the most recent 30 days.
+
+```{r demo-workflow}
+jhu <- jhu %>% filter(time_value >= max(time_value) - 30)
+out <- arx_epi_forecaster(jhu, outcome = "death_rate",
+  predictors = c("case_rate", "death_rate")
+)
+```
+
+This call produces a warning, which we'll ignore for now. But essentially, it's telling us that our data comes from May 2022 but we're trying to do a forecast for January 2022. The result is likely not an accurate measure of real-time forecast performance, because the data have been revised over time. 
+
+The `out` object has two components: 
+  
+  1. The predictions which is just another `epi_df`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was putatively made) and the `target_date` (the date for which the forecast is being made).
+  ```{r}
+  out$predictions
+  ```
+  2. A list object of class `epi_workflow`. This object encapsulates all the instructions necessary to create the prediction. More details on this below.
+
+Note that the `time_value` in the predictions is not necessarily meaningful.
+
+By default, the forecaster predicts the outcome (`death_rate`) 1-week ahead, using 3 lags of each predictor (`case_rate` and `death_rate`) at 0 (today), 1 week back and 2 weeks back. The predictors and outcome can be changed directly. The rest of the defaults are encapsulated into a list of arguments. This list is produced by `arx_args_list()`.
+
+## Simple adjustments
+
+Basic adjustments can be made through the `args_list`.
+
+```{r kill-warnings, echo=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+```{r differential-lags}
+out2week <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0,1,2,3,7,14), c(0,7,14)),
+    ahead = 14)
+  )
+```
+
+Here, we've used different lags on the `case_rate` and are now predicting 2 weeks ahead. This example also illustrates a major difficulty with the "iterative" versions of AR models. This model doesn't produce forecasts for `case_rate`, and so, would not have data to "plug in" for the necessary lags.[^1]
+
+[^1]: An obvious fix is to instead use a VAR and predict both, but would likely increase the variance, and may lead to less accurate forecasts for the variable of interest.
+
+Another property of the basic model is the predictive interval. We describe this in more detail in a different vignette, but it is easy to request multiple quantiles.
+
+```{r differential-levels}
+out_q <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    levels = c(.01,.025, seq(.05,.95, by=.05), .975,.99))
+  )
+```
+
+The column `.pred_dstn` in the `predictions` object is actually a "distribution" here parameterized by its quantiles. For this default forecaster, these are created using the quantiles of the residuals of the predictive model (possibly symmetrized). Here, we used 23 quantiles, but one can grab a particular quantile
+
+```{r q1}
+quantile(out_q$predictions$.pred_distn, p = .4)
+```
+
+Or extract the entire distribution into a "long" `epi_df` with `tau` being the probability and `q` being the value associated to that quantile.
+
+```{r q2}
+out_q$predictions %>% 
+  mutate(
+    .pred_distn = nested_quantiles(.pred_distn) # "nested" list-col
+  ) %>% unnest(.pred_distn)
+```
+
+Further simple adjustments can be made using the function.
+
+```{r, eval = FALSE}
+arx_args_list(
+  lags = c(0L, 7L, 14L), ahead = 7L, min_train_window = 20L, 
+  forecast_date = NULL, target_date = NULL, levels = c(0.05, 0.95),
+  symmetrize = TRUE, nonneg = TRUE, quantile_by_key = TRUE
+)
+```
+
+## Changing the engine
+
+So far, our forecasts have been produced using simple linear regression. But this is not the only way to estimate such a model.
+The `trainer` argument determines the type of model we want. 
+This takes a [`{parsnip}`](https://parsnip.tidymodels.org) model. The default is linear regression, but we could instead use a random forest with the `{ranger}` package:
+
+```{r ranger, warning = FALSE}
+out_rf <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+  rand_forest(mode = "regression"))
+```
+
+Or boosted regression trees with `{xgboost}`:
+
+```{r xgboost, warning = FALSE}
+out_gb <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+  boost_tree(mode = "regression", trees = 20))
+```
+
+## Inner workings
+
+Underneath the hood, this forecaster creates (and returns) an `epi_workflow`. 
+Essentially, this is a big S3 object that wraps up the 4 modular steps 
+(preprocessing - postprocessing) described above.
+
+### Preprocessing
+
+Preprocessing is accomplished through a `recipe` (imagine baking a cake) as 
+provided in the [`{recipes}`](https://recipes.tidymodels.org) package. 
+We've made a few modifications (to handle
+panel data) as well as added some additional options. The recipe gives a
+specification of how to handle training data. Think of it like a fancified
+`formula` that you would pass to `lm()`: `y ~ x1 + log(x2)`. In general, 
+there are 2 extensions to the `formula` that `{recipes}` handles: 
+
+  1. Doing transformations of both training and test data that can always be 
+  applied. These are things like taking the log of a variable, leading or 
+  lagging, filtering out rows, handling dummy variables, etc.
+  2. Using statistics from the training data to eventually process test data. 
+    This is a major benefit of `{recipes}`. It prevents what the tidy team calls
+    "data leakage". A simple example is centering a predictor by it's mean. We
+    need to store the mean of the predictor from the training data and use that
+    value on the test data rather than accidentally calculating the mean of
+    the test predictor.
+    
+A recipe is processed in 2 steps, first it is "prepped". This calculates and
+stores the result as necessary for use on the test data. Then it is "baked"
+resulting in training data ready for passing into a statistical model (like `lm`).
+
+We have introduced an `epi_recipe`. It's just a `recipe` that knows how to handle
+the `time_value`, `geo_value`, and any additional keys so that these are available
+when necessary.
+
+The `epi_recipe` from `out_gb` can be extracted from the result:
+```{r}
+extract_recipe(out_gb$epi_workflow)
+```
+
+The "Inputs" are the original `epi_df` and the "roles" that these are assigned.
+None of these are predictors or outcomes. Those will be created 
+by the recipe when it is prepped. The "Operations" are the sequence of 
+instructions to create the cake.
+Here we create lagged predictors, lead the outcome, and then remove NA's.
+Some models like `lm` internally handle NA's, but not everything does, so we
+deal with them explicitly. The code to do this (inside the forecaster) is
+
+```{r}
+er <- epi_recipe(jhu) %>%
+  step_epi_lag(case_rate, death_rate, lag = c(0,7,14)) %>%
+  step_epi_ahead(death_rate, ahead = 7) %>%
+  step_epi_naomit()
+```
+
+While `{recipes}` provides a function `step_lag()`, it assumes that the data
+have no breaks in the sequence of `time_values`. This is a bit dangerous, so
+we avoid that behaviour. Our `lag/ahead` functions also appropriately adjust the
+amount of data to avoid accidently dropping recent predictors from the test
+data.
+
+### The model specification
+
+Users with familiarity with the `{parsnip}` package will have no trouble here.
+Basically, `{parsnip}` unifies the function signature across statistical models.
+For example, `lm()` "likes" to work with formulas, but `glmnet::glmnet()` uses
+`x` and `y` for predictors and response. `{parsnip}` is agnostic. Both of these
+do "linear regression". Above we switched from `lm()` to `xgboost()` without 
+any issue despite the fact that these functions couldn't be more different.
+
+```{r, eval = FALSE}
+lm(formula, data, subset, weights, na.action, method = "qr", 
+    model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE, 
+    contrasts = NULL, offset, ...)
+xgboost(data = NULL, label = NULL, missing = NA, weight = NULL, 
+    params = list(), nrounds, verbose = 1, print_every_n = 1L, 
+    early_stopping_rounds = NULL, maximize = NULL, save_period = NULL, 
+    save_name = "xgboost.model", xgb_model = NULL, callbacks = list(), 
+    ...) 
+```
+
+`{epipredict}` provides a few engines/modules (the flatline forecaster and 
+quantile regression), but you should be able to use any available models
+listed [here](https://www.tidymodels.org/find/parsnip/).
+
+To estimate (fit) a preprocessed model, one calls `fit()` on the `epi_workflow`.
+
+```{r}
+ewf <- epi_workflow(er, linear_reg()) %>% fit(jhu)
+```
+
+### Postprocessing
+
+To stretch the metaphor of preparing a cake to its natural limits, we have
+created postprocessing functionality called "frosting". Much like the recipe,
+each postprocessing operation is a "layer" and we "slather" these onto our 
+baked cake. To fix ideas, below is the postprocessing `frosting` for 
+`arx_epi_forecaster()`
+
+```{r}
+extract_frosting(out_q$epi_workflow)
+```
+
+Here we have 5 layers of frosting. The first generates the forecasts from the test data.
+The second uses quantiles of the residuals (by `geo_value`) to create distributional
+forecasts. The next two add columns for the date the forecast was made and the
+date for which it is intended to occur. Because we are predicting rates, they 
+should be non-negative, so the last layer thresholds both predicted values and
+intervals at 0. The code to do this (inside the forecaster) is
+
+```{r}
+f <- frosting() %>%
+  layer_predict() %>%
+  layer_residual_quantiles(
+    probs = c(.01,.025, seq(.05,.95, by=.05), .975,.99), 
+    symmetrize = TRUE) %>%
+  layer_add_forecast_date() %>%
+  layer_add_target_date() %>%
+  layer_threshold(starts_with(".pred"))
+```
+
+At predict time, we add this object onto the `epi_workflow` and call `predict()`
+
+```{r, warning=FALSE}
+test_data <- get_test_data(er, jhu)
+ewf %>% add_frosting(f) %>% predict(test_data)
+```
+
+## Conclusion
+
+Internally, we provide some simple functions to create reasonable forecasts.
+But ideally, a user could create their own forecasters by building up the 
+components we provide. In other vignettes, we try to walk through some of these
+customizations.
+
+To illustrate everything above, here is (roughly) the code for the `flatline_epi_forecaster()` applied to the `case_rate`.
+
+```{r}
+r <- epi_recipe(jhu) %>%
+  step_epi_ahead(case_rate, ahead = 7, skip = TRUE) %>%
+  update_role(case_rate, new_role = "predictor") %>%
+  add_role(all_of(epi_keys(jhu)), new_role = "predictor")
+
+# bit of a weird hack to get the latest values per key
+latest <- get_test_data(epi_recipe(jhu), jhu) 
+
+f <- frosting() %>%
+  layer_predict() %>%
+  layer_residual_quantiles() %>%
+  layer_add_forecast_date() %>%
+  layer_add_target_date() %>%
+  layer_threshold(starts_with(".pred"))
+
+eng <- linear_reg() %>% set_engine("flatline")
+wf <- epi_workflow(r, eng, f) %>% fit(jhu)
+preds <- predict(wf, latest)
+```
+
+All that really differs from the `arx_forecaster()` is the `recipe`, the 
+test data, and the engine. The `frosting` is identical, as is the fitting 
+and predicting procedure.
+
+```{r}
+preds
+```
+
+## Using the workflow object
