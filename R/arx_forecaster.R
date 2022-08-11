@@ -83,10 +83,12 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 #'   training residuals. A `NULL` value will result in point forecasts only.
 #' @param symmetrize Logical. The default `TRUE` calculates
 #'      symmetric prediction intervals.
-#' @param nonneg Logical. The default `TRUE` enforeces nonnegative predictions
+#' @param nonneg Logical. The default `TRUE` enforces nonnegative predictions
 #'   by hard-thresholding at 0.
-#' @param quantile_by_key Should separate quantiles be produced for each
-#'   `geo_value` (and additional `keys`) combination
+#' @param quantile_by_key Character vector. Groups residuals by listed keys
+#'   before calculating residual quantiles. See the `by_key` argument to
+#'   [layer_residual_quantiles()] for more information. The default,
+#'   `character(0)` performs no grouping.
 #'
 #' @return A list containing updated parameter choices.
 #' @export
@@ -103,27 +105,28 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
                           levels = c(0.05, 0.95),
                           symmetrize = TRUE,
                           nonneg = TRUE,
-                          quantile_by_key = TRUE) {
+                          quantile_by_key = character(0L)) {
 
   # error checking if lags is a list
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
 
-  arg_is_scalar(ahead, min_train_window, symmetrize, nonneg, quantile_by_key)
+  arg_is_scalar(ahead, min_train_window, symmetrize, nonneg)
+  arg_is_chr(quantile_by_key, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, min_train_window, lags)
-  arg_is_lgl(symmetrize, nonneg, quantile_by_key)
+  arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
 
   max_lags <- max(lags)
-
-  list(
-    lags = .lags, ahead = as.integer(ahead),
-    min_train_window = min_train_window,
-    levels = levels,
-    forecast_date = forecast_date, target_date = target_date,
-    symmetrize = symmetrize, nonneg = nonneg,
-    max_lags = max_lags,
-    quantile_by_key = quantile_by_key
-  )
+  enlist(lags = .lags,
+         ahead,
+         min_train_window,
+         levels,
+         forecast_date,
+         target_date,
+         symmetrize,
+         nonneg,
+         max_lags,
+         quantile_by_key)
 }

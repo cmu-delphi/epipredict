@@ -5,8 +5,8 @@
 #' @param probs numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
-#' @param by_key logical. If `TRUE` then quantiles will be computed separately
-#'   for each combination of the keys.
+#' @param by_key A character vector of keys to group the residuls by before
+#'   calculating quantiles. The default, `c()` performs no grouping.
 #' @param name character. The name for the output column.
 #' @param .flag a logical to determine if the layer is added. Passed on to
 #'   `add_layer()`. Default `TRUE`.
@@ -36,19 +36,27 @@
 #' wf1 <- wf %>% add_frosting(f)
 #'
 #' p <- predict(wf1, latest)
-#' p
+#'
+#' f2 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_residual_quantiles(probs = c(0.3, 0.7), by_key = "geo_value") %>%
+#'   layer_naomit(.pred)
+#' wf2 <- wf %>% add_frosting(f2)
+#'
+#' p2 <- predict(wf2, latest)
 layer_residual_quantiles <- function(frosting, ...,
                                      probs = c(0.0275, 0.975),
                                      symmetrize = TRUE,
-                                     by_key = TRUE,
+                                     by_key = character(0L),
                                      name = ".pred_distn",
                                      .flag = TRUE,
                                      id = rand_id("residual_quantiles")) {
   rlang::check_dots_empty()
-  arg_is_scalar(symmetrize, by_key, .flag)
+  arg_is_scalar(symmetrize, .flag)
   arg_is_chr_scalar(name, id)
+  arg_is_chr(by_key, allow_null = TRUE)
   arg_is_probabilities(probs)
-  arg_is_lgl(symmetrize, by_key, .flag)
+  arg_is_lgl(symmetrize, .flag)
   add_layer(
     frosting,
     layer_residual_quantiles_new(
@@ -72,18 +80,35 @@ slather.layer_residual_quantiles <-
   function(object, components, the_fit, the_recipe, ...) {
     if (is.null(object$probs)) return(components)
 
+
     s <- ifelse(object$symmetrize, -1, NA)
     r <- dplyr::bind_cols(
       r = grab_residuals(the_fit, components),
       geo_value = components$mold$extras$roles$geo_value,
-      components$mold$extras$roles$key) %>%
-      dplyr::group_by(dplyr::across(-r)) %>%
+      components$mold$extras$roles$key)
+
+    ## Handle any grouping requests
+    if (length(object$by_key) > 0L) {
+      common <- intersect(object$by_key, names(r))
+      excess <- setdiff(object$by_key, names(r))
+      if (length(excess) > 0L) {
+        cli_warn("Requested residual grouping key(s) {excess} unavailable ",
+            "in the original data. Grouping by the remainder {common}.")
+
+      }
+      if (length(common) > 0L)
+        r <- r %>% dplyr::group_by(!!!rlang::syms(common))
+    }
+
+    r <- r %>%
       dplyr::summarise(
-        q = list(quantile(c(r, s * r), probs = object$probs, na.rm = TRUE)))
+        q = list(quantile(c(r, s * r), probs = object$probs, na.rm = TRUE))
+      )
 
     estimate <- components$predictions$.pred
     res <- tibble::tibble(
-      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$probs))
+      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$probs)
+    )
     res <- check_pname(res, components$predictions, object)
     components$predictions <- dplyr::mutate(components$predictions, !!!res)
     components

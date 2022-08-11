@@ -11,7 +11,8 @@ flatline_args_list(
   target_date = NULL,
   levels = c(0.05, 0.95),
   symmetrize = TRUE,
-  nonneg = TRUE
+  nonneg = TRUE,
+  quantile_by_key = character(0L)
 )
 }
 \arguments{
@@ -35,8 +36,13 @@ training residuals. A \code{NULL} value will result in point forecasts only.}
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
 symmetric prediction intervals.}
 
-\item{nonneg}{Logical. The default \code{TRUE} enforeces nonnegative predictions
+\item{nonneg}{Logical. The default \code{TRUE} enforces nonnegative predictions
 by hard-thresholding at 0.}
+
+\item{quantile_by_key}{Character vector. Groups residuals by listed keys
+before calculating residual quantiles. See the \code{by_key} argument to
+\code{\link[=layer_residual_quantiles]{layer_residual_quantiles()}} for more information. The default,
+\code{character(0)} performs no grouping.}
 }
 \value{
 A list containing updated parameter choices.

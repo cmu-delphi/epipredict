@@ -51,7 +51,8 @@ flatline_epi_forecaster <- function(epi_data,
     layer_predict() %>%
     layer_residual_quantiles(
       probs = args_list$levels,
-      symmetrize = args_list$symmetrize) %>%
+      symmetrize = args_list$symmetrize,
+      by_key = args_list$quantile_by_key) %>%
     layer_add_forecast_date(forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
@@ -87,19 +88,24 @@ flatline_args_list <- function(ahead = 7L,
                                target_date = NULL,
                                levels = c(0.05, 0.95),
                                symmetrize = TRUE,
-                               nonneg = TRUE) {
+                               nonneg = TRUE,
+                               quantile_by_key = character(0L)) {
 
   arg_is_scalar(ahead, min_train_window)
+  arg_is_chr(quantile_by_key, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, min_train_window)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
 
-  list(ahead = ahead,
-       min_train_window = min_train_window,
-       forecast_date = forecast_date, target_date = target_date,
-       levels = levels,
-       symmetrize = symmetrize, nonneg = nonneg)
+  enlist(ahead,
+         min_train_window,
+         forecast_date,
+         target_date,
+         levels,
+         symmetrize,
+         nonneg,
+         quantile_by_key)
 }
 
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
