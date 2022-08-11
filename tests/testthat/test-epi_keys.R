@@ -36,7 +36,7 @@ test_that("epi_keys_mold extracts additional keys when they are present", {
     sample_n(6) %>%
     tsibble::as_tsibble() %>% # add 2 extra keys
     mutate(state = rep("MA", 6), pol = rep("blue", 6)) %>%
-    as_epi_df(additional_metadata = list(other_keys=c("state", "pol"))) # <-- metadata constructed here
+    epiprocess::as_epi_df(additional_metadata = list(other_keys=c("state", "pol"))) # <-- metadata constructed here
 
   my_recipe <- epi_recipe(my_data) %>%
     step_epi_ahead(death_rate , ahead = 7) %>%
