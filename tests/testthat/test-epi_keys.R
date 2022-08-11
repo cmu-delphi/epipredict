@@ -32,19 +32,23 @@ test_that("epi_keys_mold extracts time_value and geo_value, but not raw",{
 })
 
 test_that("epi_keys_mold extracts additional keys when they are present", {
-  my_data <- case_death_rate_subset %>%
-    sample_n(6) %>%
-    tsibble::as_tsibble() %>% # add 2 extra keys
-    mutate(state = rep("MA", 6), pol = rep("blue", 6)) %>%
-    epiprocess::as_epi_df(additional_metadata = list(other_keys=c("state", "pol"))) # <-- metadata constructed here
+  my_data <- tibble::tibble(
+    geo_value = rep(c("ca", "fl", "pa"), each = 3),
+    time_value = rep(seq(as.Date("2020-06-01"), as.Date("2020-06-03"),
+                         by = "day"), length.out = length(geo_value)),
+    pol = rep(c("blue", "swing", "swing"), each = 3), # extra key
+    state = rep(c("ca", "fl", "pa"), each = 3), # extra key
+    value = 1:length(geo_value) + 0.01 * rnorm(length(geo_value))
+  ) %>%
+    as_epi_df(additional_metadata = list(other_keys = c("state", "pol")))
 
   my_recipe <- epi_recipe(my_data) %>%
-    step_epi_ahead(death_rate , ahead = 7) %>%
+    step_epi_ahead(value , ahead = 7) %>%
     step_epi_naomit()
 
   my_workflow <- epi_workflow(my_recipe, linear_reg()) %>% fit(my_data)
 
-  expect_equal(
+  expect_setequal(
     epi_keys_mold(my_workflow$pre$mold),
     c("time_value", "geo_value", "state", "pol"))
 })
