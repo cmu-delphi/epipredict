@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut","cre")),
     person("Jacob", "Bien", role = "aut"),
