@@ -36,15 +36,13 @@
 #' wf <- epi_workflow(r, linear_reg())
 #'
 #' wf
-epi_workflow <- function(preprocessor = NULL, spec = NULL,
-                         postprocessor = NULL) {
+epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL) {
   out <- workflows::workflow(spec = spec)
   class(out) <- c("epi_workflow", class(out))
 
   if (is_epi_recipe(preprocessor)) {
-    return(add_epi_recipe(out, preprocessor))
-  }
-  if (!is_null(preprocessor)) {
+    out <- add_epi_recipe(out, preprocessor)
+  } else if (!is_null(preprocessor)) {
     out <- workflows:::add_preprocessor(out, preprocessor)
   }
   if (!is_null(postprocessor)) {
@@ -63,6 +61,7 @@ epi_workflow <- function(preprocessor = NULL, spec = NULL,
 is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
+
 
 #' Predict from an epi_workflow
 #'
@@ -128,41 +127,16 @@ predict.epi_workflow <- function(object, new_data, ...) {
   }
   components <- list()
   the_fit <- workflows::extract_fit_parsnip(object)
+  the_recipe <- workflows::extract_recipe(object)
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
                                       blueprint = components$mold$blueprint)
   components$keys <- grab_forged_keys(components$forged,
                                       components$mold, new_data)
-  components <- apply_frosting(object, components, the_fit, ...)
+  components <- apply_frosting(object, components, the_fit, the_recipe, ...)
   components$predictions
 }
 
-grab_forged_keys <- function(forged, mold, new_data) {
-  keys <- c("time_value", "geo_value", "key")
-  forged_roles <- names(forged$extras$roles)
-  extras <- dplyr::bind_cols(forged$extras$roles[forged_roles %in% keys])
-  # 1. these are the keys in the test data after prep/bake
-  new_keys <- names(extras)
-  # 2. these are the keys in the training data
-  old_keys <- epi_keys_mold(mold)
-  # 3. these are the keys in the test data as input
-  new_df_keys <- epi_keys(new_data)
-  if (! (setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
-    rlang::warn(c(
-      "Not all epi keys that were present in the training data are available",
-      "in `new_data`. Predictions will have only the available keys.")
-    )
-  }
-  if (epiprocess::is_epi_df(new_data)) {
-    extras <- epiprocess::as_epi_df(extras)
-    attr(extras, "metadata") <- attr(new_data, "metadata")
-  } else if (keys[1:2] %in% new_keys) {
-    l <- list()
-    if (length(new_keys) > 2) l <- list(other_keys = new_keys[-c(1:2)])
-    extras <- epiprocess::as_epi_df(extras, additional_metadata = l)
-  }
-  extras
-}
 
 
 #' Augment data with predictions
@@ -199,3 +173,58 @@ new_epi_workflow <- function(
     pre = pre, fit = fit, post = post, trained = trained)
   class(out) <- c("epi_workflow", class(out))
 }
+
+
+#' @export
+print.epi_workflow <- function(x, ...) {
+  print_header(x)
+  workflows:::print_preprocessor(x)
+  #workflows:::print_case_weights(x)
+  workflows:::print_model(x)
+  print_postprocessor(x)
+  invisible(x)
+}
+
+print_header <- function(x) {
+  # same as in workflows but with a postprocessor
+  trained <- ifelse(workflows::is_trained_workflow(x), " [trained]", "")
+
+  header <- glue::glue("Epi Workflow{trained}")
+  header <- cli::rule(header, line = 2)
+  cat_line(header)
+
+  preprocessor_msg <- cli::style_italic("Preprocessor:")
+
+  if (workflows:::has_preprocessor_formula(x)) {
+    preprocessor <- "Formula"
+  } else if (workflows:::has_preprocessor_recipe(x)) {
+    preprocessor <- "Recipe"
+  } else if (workflows:::has_preprocessor_variables(x)) {
+    preprocessor <- "Variables"
+  } else {
+    preprocessor <- "None"
+  }
+
+  preprocessor_msg <- glue::glue("{preprocessor_msg} {preprocessor}")
+  cat_line(preprocessor_msg)
+
+  spec_msg <- cli::style_italic("Model:")
+
+  if (workflows:::has_spec(x)) {
+    spec <- class(workflows::extract_spec_parsnip(x))[[1]]
+    spec <- glue::glue("{spec}()")
+  } else {
+    spec <- "None"
+  }
+
+  spec_msg <- glue::glue("{spec_msg} {spec}")
+  cat_line(spec_msg)
+
+  postprocessor_msg <- cli::style_italic("Postprocessor:")
+  postprocessor <- ifelse(has_postprocessor_frosting(x), "Frosting", "None")
+  postprocessor_msg <- glue::glue("{postprocessor_msg} {postprocessor}")
+  cat_line(postprocessor_msg)
+
+  invisible(x)
+}
+

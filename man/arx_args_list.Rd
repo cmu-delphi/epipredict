@@ -5,41 +5,48 @@
 \title{ARX forecaster argument constructor}
 \usage{
 arx_args_list(
-  lags = c(0, 7, 14),
-  ahead = 7,
-  min_train_window = 20,
+  lags = c(0L, 7L, 14L),
+  ahead = 7L,
+  min_train_window = 20L,
+  forecast_date = NULL,
+  target_date = NULL,
   levels = c(0.05, 0.95),
-  intercept = TRUE,
   symmetrize = TRUE,
   nonneg = TRUE,
-  quantile_by_key = FALSE
+  quantile_by_key = character(0L)
 )
 }
 \arguments{
 \item{lags}{Vector or List. Positive integers enumerating lags to use
-in autoregressive-type models.}
+in autoregressive-type models (in days).}
 
-\item{ahead}{Integer. Number of time steps ahead of the forecast date
-for which forecasts should be produced.}
+\item{ahead}{Integer. Number of time steps ahead (in days) of the forecast
+date for which forecasts should be produced.}
 
 \item{min_train_window}{Integer. The minimal amount of training
-data needed to produce a forecast. If smaller, the forecaster will return
-\code{NA} predictions.}
+data (in the time unit of the \code{epi_df}) needed to produce a forecast.
+If smaller, the forecaster will return \code{NA} predictions.}
+
+\item{forecast_date}{The date on which the forecast is created. The default
+\code{NULL} will attempt to determine this automatically.}
+
+\item{target_date}{The date for which the forecast is intended. The default
+\code{NULL} will attempt to determine this automatically.}
 
 \item{levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of
 training residuals. A \code{NULL} value will result in point forecasts only.}
 
-\item{intercept}{Logical. The default \code{TRUE} includes intercept in the
-forecaster.}
-
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
 symmetric prediction intervals.}
 
-\item{nonneg}{Logical. The default \code{TRUE} enforeces nonnegative predictions
+\item{nonneg}{Logical. The default \code{TRUE} enforces nonnegative predictions
 by hard-thresholding at 0.}
 
-\item{quantile_by_key}{Not currently implemented}
+\item{quantile_by_key}{Character vector. Groups residuals by listed keys
+before calculating residual quantiles. See the \code{by_key} argument to
+\code{\link[=layer_residual_quantiles]{layer_residual_quantiles()}} for more information. The default,
+\code{character(0)} performs no grouping.}
 }
 \value{
 A list containing updated parameter choices.

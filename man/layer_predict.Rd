@@ -9,11 +9,14 @@ layer_predict(
   type = NULL,
   opts = list(),
   ...,
+  .flag = TRUE,
   id = rand_id("predict_default")
 )
 }
 \arguments{
-\item{frosting}{a frosting object}
+\item{frosting}{a frosting object
+#' @param .flag a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
 
 \item{type}{A single character value or \code{NULL}. Possible values
 are "numeric", "class", "prob", "conf_int", "pred_int", "quantile", "time",
@@ -44,6 +47,9 @@ and "pred_int". Default value is \code{FALSE}.
 (not implemented yet)
 \item \code{time}: the time(s) for hazard and survival probability estimates.
 }}
+
+\item{.flag}{a logical to determine if the layer is added. Passed on to
+\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a string identifying the layer}
 }

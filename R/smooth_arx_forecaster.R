@@ -24,10 +24,10 @@ smooth_arx_forecaster <- function(x, y, key_vars, time_value,
 
   if (length(y) < min_train_window + max_lags + max(ahead)) {
     qnames <- probs_to_string(levels)
-    out <- purrr::map_dfr(ahead, ~ distinct_keys, .id = "ahead") %>%
+    out <- map_dfr(ahead, ~ distinct_keys, .id = "ahead") %>%
       dplyr::mutate(ahead = magrittr::extract(!!ahead, as.integer(ahead)),
                     point = NA) %>%
-      dplyr::select(!any_of(".dump"))
+      dplyr::select(!dplyr::any_of(".dump"))
     return(enframer(out, qnames))
   }
 
@@ -46,15 +46,15 @@ smooth_arx_forecaster <- function(x, y, key_vars, time_value,
     as.data.frame() %>%
     magrittr::set_names(ahead)
 
-  q <- purrr::map2_dfr(
+  q <- map2_dfr(
     r, point, ~ residual_quantiles(.x, .y, levels, symmetrize), .id = "ahead"
   ) %>% mutate(ahead = as.integer(ahead))
 
   if (nonneg) q <- dplyr::mutate(q, dplyr::across(!ahead, ~ pmax(.x, 0)))
 
   return(
-    purrr::map_dfr(ahead, ~ distinct_keys) %>%
-      dplyr::select(!any_of(".dump")) %>%
+    map_dfr(ahead, ~ distinct_keys) %>%
+      dplyr::select(!dplyr::any_of(".dump")) %>%
       dplyr::bind_cols(q) %>%
       dplyr::relocate(ahead)
   )
