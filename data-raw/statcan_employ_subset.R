@@ -80,7 +80,7 @@ employ <- statcan_employ %>%
 statcan_employ_subset <- employ %>%
     tsibble::as_tsibble(index=time_value, key=c(geo_value, employee_type, naics_industry)) %>%
     as_epi_df(
-        additional_metadata=c(other_keys=c("employee_type", "naics_industry")))
+        additional_metadata=c(other_keys=list("employee_type", "naics_industry")))
 
 usethis::use_data(statcan_employ_subset, overwrite = TRUE)
 
