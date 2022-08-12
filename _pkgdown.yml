@@ -2,3 +2,39 @@ url: https://cmu-delphi.github.io/epipredict/
 template:
   bootstrap: 5
 
+
+reference:
+  - title: Simple forecasters
+    desc: Complete forecasters that produce reasonable baselines
+    contents:
+    - contains("flatline")
+    - contains("arx")
+  - title: Custom panel data forecasting workflows
+    contents:
+    - epi_recipe
+    - epi_workflow
+    - add_epi_recipe
+    - predict.epi_workflow
+    - augment.epi_workflow
+  - title: Epi recipe preprocessing steps
+    contents:
+    - starts_with("step_")
+  - title: Forecast postprocessing
+    desc: Create a series of postprocessing operations
+    contents:
+    - contains("frosting")
+    - get_test_data
+  - title: Frosting layers
+    contents:
+    - contains("layer")
+    - contains("slather")
+  - title: Utilities for quantile distribution processing
+    contents:
+    - dist_quantiles
+    - extrapolate_quantiles
+    - nested_quantiles
+  - title: Included datasets
+    contents:
+    - case_death_rate_subset
+
+

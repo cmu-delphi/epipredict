@@ -21,3 +21,4 @@ $name element}
 newly created variable names don't overlap with existing names.
 Throws an warning if check fails, and creates a random string.
 }
+\keyword{internal}

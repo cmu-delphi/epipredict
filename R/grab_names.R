@@ -12,6 +12,7 @@
 #'   be used to select a range of variables.
 #'
 #' @export
+#' @keywords internal
 #' @return a character vector
 #' @examples
 #' df <- data.frame(a = 1, b = 2, cc = rep(NA, 3))
