@@ -54,6 +54,3 @@ epi_juice <- function(object, ..., composition = "tibble") {
 
   new_data
 }
-
-environment(epi_juice) <- asNamespace('recipes')
-assignInNamespace("juice", epi_juice, ns = "recipes")
