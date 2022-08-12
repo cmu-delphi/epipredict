@@ -28,6 +28,7 @@ library(epipredict)
 library(epiprocess)
 library(ggplot2)
 library(tidyr)
+library(tidymodels)
 ```
 
 
@@ -38,17 +39,81 @@ COVID tested on weekends, or if a place doesn't do COVID updates on weekends.
 This makes the daily case count jagged.
 
 ```{r}
-x <- jhu_csse_daily_subset  %>%
+x <- jhu_csse_daily_subset   %>%
   filter(geo_value == "ca",
-         time_value >= "2020-07-01", time_value < "2022-01-01") %>%
+         time_value >= "2020-10-01", time_value < "2021-10-01") %>%
+  dplyr::arrange(geo_value, time_value) %>%
   select(geo_value,time_value,cases,cases_7d_av)
 
-x2 <- x %>%
+x_gather <- x %>%
   select(-geo_value) %>%
   gather("type","count",-1)
 
-ggplot(x2,aes(x=time_value,y=count,colour=type)) +
+ggplot(x_gather,aes(x=time_value,y=count,colour=type)) +
   geom_line(alpha=0.8,size=1)
 ```
 
-`fable` has plotting features. However, these do not meet these needs.
+`fable` has plotting features. However, these do not meet these needs in terms
+of forecasting COVID cases.
+
+
+```{r}
+xx <- jhu_csse_daily_subset %>%
+  filter(geo_value == "ca",
+         time_value >= "2020-10-01", time_value < "2021-10-01") %>%
+  dplyr::arrange(geo_value, time_value) %>%
+  select(geo_value,time_value,death_rate_7d_av,case_rate_7d_av) %>%
+  mutate(interaction = death_rate_7d_av * case_rate_7d_av)
+
+r1 <- epi_recipe(xx) %>%
+  step_epi_lag(case_rate_7d_av,lag = c(0,7,14)) %>%
+  step_epi_ahead(case_rate_7d_av,ahead = 7) %>%
+  step_epi_naomit()
+
+wf <- epi_workflow(r1, linear_reg()) %>% 
+  fit(xx)
+
+p1 <- predict(wf,new_data = xx)
+
+
+r2 <- epi_recipe(xx) %>%
+  step_epi_lag(case_rate_7d_av,lag = c(0,7,14)) %>%
+  step_epi_lag(death_rate_7d_av,lag = c(0,7,14)) %>%
+  step_epi_lag(interaction,lag = c(0,7,14)) %>%
+  step_epi_ahead(case_rate_7d_av,ahead = 7) %>%
+  step_epi_naomit()
+
+
+wf <- epi_workflow(r2, linear_reg()) %>% 
+  fit(xx)
+
+p2 <- predict(wf,new_data = xx)
+
+pred_vs_actual <- xx %>%
+  select(-death_rate_7d_av, -interaction) %>%
+  full_join(p1) %>%
+  rename(pred1 = .pred) %>%
+  full_join(p2) %>%
+  rename(pred2 = .pred)
+
+pva_gather <- pred_vs_actual %>%
+  select(-geo_value) %>%
+  gather("type","count",-1)
+
+ggplot(pva_gather,aes(x=time_value,y=count,colour=type)) +
+  geom_line()
+
+inaccuracy <- pred_vs_actual %>%
+  drop_na() %>%
+  mutate(p1_inaccuracy = log(pred1) - log(case_rate_7d_av),
+         p2_inaccuracy = log(pred2) - log(case_rate_7d_av)) %>%
+  select(-geo_value,-case_rate_7d_av,-pred1,-pred2)
+
+i_gather <- gather(inaccuracy,"prediction","log_divided_error",-time_value)
+
+ggplot(i_gather,aes(x=time_value,y=log_divided_error,colour=prediction)) +
+  geom_line()
+```
+
+
+
