@@ -72,10 +72,10 @@ r1 <- epi_recipe(xx) %>%
   step_epi_ahead(case_rate_7d_av,ahead = 7) %>%
   step_epi_naomit()
 
-wf <- epi_workflow(r1, linear_reg()) %>% 
+wf1 <- epi_workflow(r1, linear_reg()) %>% 
   fit(xx)
 
-p1 <- predict(wf,new_data = xx)
+p1 <- predict(wf1,new_data = xx)
 ```
 
 Here's another prediction that uses death rate and the interaction with
@@ -89,11 +89,14 @@ r2 <- epi_recipe(xx) %>%
   step_epi_ahead(case_rate_7d_av,ahead = 7) %>%
   step_epi_naomit()
 
-wf <- epi_workflow(r2, linear_reg()) %>% 
+wf2 <- epi_workflow(r2, linear_reg()) %>% 
   fit(xx)
 
-p2 <- predict(wf,new_data = xx)
+p2 <- predict(wf2,new_data = xx)
 ```
+
+We want to understand how predictions are different from what actual happens,
+as this may enable us to know why a model is not fully accurate.
 
 ```{r}
 pred_vs_actual <- xx %>%
@@ -108,8 +111,15 @@ pva_gather <- pred_vs_actual %>%
   gather("type","count",-1)
 
 ggplot(pva_gather,aes(x=time_value,y=log(count),colour=type)) +
-  geom_line()
+  geom_line(alpha=0.8,size=1) +
+  labs(x="Date",y="Log 7-day case rate")
+```
 
+This chart shows how the predictions differ from the actual values, but it
+is rather cluttered. Here, we use a log scale and calculate the difference
+between the prediction from the actual value.
+
+```{r}
 inaccuracy <- pred_vs_actual %>%
   drop_na() %>%
   mutate(p1_inaccuracy = log(pred1) - log(case_rate_7d_av),
@@ -119,8 +129,13 @@ inaccuracy <- pred_vs_actual %>%
 i_gather <- gather(inaccuracy,"prediction","log_divided_error",-time_value)
 
 ggplot(i_gather,aes(x=time_value,y=log_divided_error,colour=prediction)) +
-  geom_line()
+  geom_line(alpha=0.8,size=1)
 ```
 
+Here, we can see that p1 appears to be biased between around April to July 2021,
+which may imply underfitting.
+While p2 appears to be much less biased, it has jitters when predicting around
+that period, which may imply overfitting.
 
-
+One may want to take out non-statistically significant parameters or 
+use LASSO regression to take out unnecessary parameters.
