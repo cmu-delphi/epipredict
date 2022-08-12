@@ -7,6 +7,6 @@
 .onLoad <- function(libname, pkgname) {
   make_flatline_reg()
 
-  environment(epi_juice) <- asNamespace('recipes')
+  environment(epi_juice) <<- asNamespace('recipes')
   assignInNamespace("juice", epi_juice, ns = "recipes")
 }
