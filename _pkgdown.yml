@@ -22,7 +22,8 @@ reference:
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:
-    - contains("frosting")
+    - frosting
+    - ends_with("_frosting")
     - get_test_data
   - title: Frosting layers
     contents:

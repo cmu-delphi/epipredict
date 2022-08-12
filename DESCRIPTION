@@ -19,6 +19,7 @@ Description: A forecasting "framework" for creating epidemiological forecasts
 License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
+BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends: 
     R (>= 3.5.0)
 Imports: 
