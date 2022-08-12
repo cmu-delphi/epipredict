@@ -328,7 +328,7 @@ But ideally, a user could create their own forecasters by building up the
 components we provide. In other vignettes, we try to walk through some of these
 customizations.
 
-To illustrate everything above, here is (roughly) the code for the `flatline_epi_forecaster()` applied to the `case_rate`.
+To illustrate everything above, here is (roughly) the code for the `flatline_forecaster()` applied to the `case_rate`.
 
 ```{r}
 r <- epi_recipe(jhu) %>%
