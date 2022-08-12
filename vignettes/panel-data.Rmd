@@ -1,13 +1,13 @@
 ---
-title: "Using epipredict on panel data from other contexts"
+title: "Using epipredict on non-epidemic panel data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using epipredict on panel data from other contexts}
+  %\VignetteIndexEntry{Using epipredict on non-epidemic panel data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = F}
+```{r setup, include=F}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
@@ -16,23 +16,22 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r load-data, include = F}
-# TODO: temp - remove me when I figure out how to run this rmd without loading
-# perhaps need to commit statcan_employ_subset.rda first?
-devtools::load_all() 
-```
-
 ```{r libraries}
 library(epiprocess)
 library(epipredict)
 library(dplyr)
 library(stringr)
 library(parsnip)
+library(recipes)
 ```
 
-[Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, contains cross-sectional measurements of subjects over time. The `epipredict` package is most suitable for running forecasters on epidemiological data. However, other datasets with similar structures are also valid candidates for `epipredict` functionality.
+[Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
+contains cross-sectional measurements of subjects over time. The `epipredict` 
+package is most suitable for running forecasters on epidemiological data. 
+However, other datasets with similar structures are also valid candidates for 
+`epipredict` functionality.
 
-```{r employ-stats, include = F}
+```{r employ-stats, include=F}
 date_format <- "%B %Y"
 date_start <- format(as.Date(min(statcan_employ_subset$time_value)), date_format)
 date_end <- format(as.Date(max(statcan_employ_subset$time_value)), date_format)
@@ -41,9 +40,19 @@ uniq_employee_type <- paste(unique(statcan_employ_subset$employee_type), collaps
 
 ## Example panel data overview
 
-In this vignette, we will demonstrate using `epipredict` with employment data from Statistics Canada. We will be using [Table 14-10-0220-01: Employment and average weekly earnings (including overtime) for all employees by industry, monthly, seasonally adjusted, Canada](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022001#data). The full dataset contains monthly employment counts from `r date_start` to `r date_end`, and presents employment data stratified by geographic region, [NAICS industries](https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=1181553), and employee type. The full dataset also contains metadata that describes the quality of data collected. For demonstration purposes, we make the following modifications to get a subset of the full dataset:
+In this vignette, we will demonstrate using `epipredict` with employment data from 
+Statistics Canada. We will be using 
+[Table 14-10-0220-01: Employment and average weekly earnings (including overtime) for all employees by industry, monthly, seasonally adjusted, Canada](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022001#data). 
+The full dataset contains monthly employment counts from `r date_start` to `r date_end`, 
+and presents employment data stratified by geographic region, 
+[NAICS industries](https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=1181553), 
+and employee type. The full dataset also contains metadata that describes the quality 
+of data collected. For demonstration purposes, we make the following modifications to 
+get a subset of the full dataset:
 
-* Only keep level 1 industries (2-digit codes) in the [NAICS hierarchy](https://www23.statcan.gc.ca/imdb/pUtil.pl?Function=getNote&Id=1181553&NT=45) and remove aggregated industry codes.
+* Only keep level 1 industries (2-digit codes) in the 
+[NAICS hierarchy](https://www23.statcan.gc.ca/imdb/pUtil.pl?Function=getNote&Id=1181553&NT=45) 
+and remove aggregated industry codes.
 * Only keep province-level geographic region (the full data also has "Canada" as a region)
 * Only keep "good" or better quality data rows, as indicated by the [`STATUS`](https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
 
@@ -84,14 +93,19 @@ statcan_employ_subset_input <- statcan_employ %>%
   mutate(naics_industry = factor(naics_industry))
 ```
 
-To use this data with `epipredict`, we need to convert it into `epi_df` format using `as_epi_df` with additional keys. In our case, the additional keys are `employee_type` and `naics_industry`. Note that in the above modifications, we encoded `time_value` as type `tsibble::yearmonth`. This allows us to set `time_type` to `"yearmonth"` below, and to ensure lag and ahead modifications later on are using the correct time units.
+To use this data with `epipredict`, we need to convert it into `epi_df` format using 
+`as_epi_df` with additional keys. In our case, the additional keys are `employee_type` 
+and `naics_industry`. Note that in the above modifications, we encoded `time_value` 
+as type `tsibble::yearmonth`. This allows us to set `time_type` to `"yearmonth"` below, 
+and to ensure lag and ahead modifications later on are using the correct time units.
 
 ```{r convert-to-epidf, eval=F}
 statcan_employ_subset <- statcan_employ_subset_input %>%
   tsibble::as_tsibble(
     index=time_value, 
     key=c(geo_value, employee_type, naics_industry)) %>%
-  as_epi_df(time_type = "yearmonth", as_of="2022-07-22")
+  as_epi_df(
+    additional_metadata=c(other_keys=list("employee_type", "naics_industry")))
 ```
 
 ```{r data-dim, include=F}
@@ -99,45 +113,109 @@ employ_rowcount <- format(nrow(statcan_employ_subset), big.mark=",")
 employ_colcount <- length(names(statcan_employ_subset))
 ```
 
-The data contains `r employ_rowcount` rows and `r employ_colcount` columns. Now, we are ready to use `statcan_employ_subset` with `epipredict`. 
+The data contains `r employ_rowcount` rows and `r employ_colcount` columns. Now, we are 
+ready to use `statcan_employ_subset` with `epipredict`. 
 
 ```{r preview-data, include=T}
-head(statcan_employ_subset)
+# Rename for simplicity
+employ <- statcan_employ_subset
+head(employ)
 ```
 
-In the following sections, we will go over preprocessing the data in the `epi_recipe` framework, fitting 3 types of models from the `parsnip` package, and making future predictions.
+In the following sections, we will go over preprocessing the data in the `epi_recipe` 
+framework, fitting 3 types of models from the `parsnip` package, and making future 
+predictions.
 
 ## Preprocessing 
 
 We will create a recipe that adds one `ahead` column and 3 `lag` columns.
 
-```{r make-recipe, include = T}
-r <- epi_recipe(statcan_employ_subset) %>%
+```{r make-recipe, include=T}
+r <- epi_recipe(employ) %>%
   step_epi_ahead(ppl_count, ahead = 6) %>% # lag & ahead units in months
   step_epi_lag(ppl_count, lag = c(0, 6, 12)) %>%
   step_epi_naomit() 
 r
 ```
 
-There is one `raw` role which includes our value column `ppl_count`, and two `key` roles which include our additional keys `employee_type` and `naics_industry`. Let's take a look at what these additional columns look like.
+There is one `raw` role which includes our value column `ppl_count`, and two `key` 
+roles which include our additional keys `employee_type` and `naics_industry`. Let's 
+take a look at what these additional columns look like.
 
-```{r view-preprocessed, include = T}
-latest <- statcan_employ_subset %>% filter(time_value >= max(time_value) - 12)
+```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
-r %>% prep() %>% bake(new_data = latest) %>% sample_n(5)
+baked_sample <- r %>% prep() %>% bake(new_data = employ) %>% sample_n(5)
+baked_sample
 ```
 
 ## Model fitting and prediction
 
-First we will look at a simple model: `parsnip::linear_reg()` with default engine `lm`. We can use `epi_workflow` with the above `epi_recipe` to fit a linear model using lags at time $t$ (current), $t-6$ months, and $t-12$ months.
-```{r linearreg-wf, include = T}
-wf_linreg <- epi_workflow(r, linear_reg()) %>% fit(statcan_employ_subset)
-wf_linreg
+### With direct forecasters
 
+Even though we aren't working with epidemiological data, the `arx_epi_forecaster` 
+still works out of the box. And specifying `args_list` still works in the same way.
+
+```{r arx-epi, include=T, warning=F}
+demo_args_list = arx_args_list(lags = c(0L, 6L, 12L), ahead = 6L)
+
+out_lr <- arx_epi_forecaster(
+  employ, 
+  outcome = "ppl_count",
+  predictors = c("ppl_count"), 
+  args_list = demo_args_list)
+
+out_lr$predictions 
+```
+
+Other changes to the forecaster, like changing the engine, also work as expected.
+
+```{r arx-epi-rf, include=T, warning=F}
+out_rf <- arx_epi_forecaster(
+  employ, 
+  outcome = "ppl_count",
+  predictors = c("ppl_count"), 
+  trainer = parsnip::rand_forest(mode="regression", trees=100),
+  args_list = demo_args_list)
+
+out_rf$predictions 
+```
+
+### Within recipes framework 
+
+First we will look at a simple model: `parsnip::linear_reg()` with default engine 
+`lm`. We can use `epi_workflow` with the above `epi_recipe` to fit an autoregressive
+linear model using lags at time $t$ (current), $t-6$ months, and $t-12$ months. 
+
+```{r linearreg-wf, include=T}
+wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>% fit(employ)
+wf_linreg
+```
+
+Now that we have our workflow, we can generate predictions from a subset of our data. 
+For this demo, we will predict the employment counts from the last 12 months of our dataset.
+
+```{r linearreg-predict, include=T}
+latest <- employ %>% filter(time_value >= max(time_value) - 15)
 preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
 # Display a sample of the prediction values
 preds %>% sample_n(5)
 ```
 
-<!-- TODO: ggplot the above predictions against the actual values -->
-<!-- TODO: fit more complex AR model -->
+Notice that `predict` returns an `epi_df` with all of the keys that were present in the original dataset. 
+
+```{r plot-pred, include=F}
+# library(ggplot2)
+# joined <- full_join(statcan_employ_subset, preds, by=c("geo_value", "time_value", "employee_type", "naics_industry"))
+
+# joined %>% filter(!is.na(.pred)) %>% select(time_value) %>% unique()
+# joined %>% dplyr::filter(
+#   geo_value %in% c("British Columbia", "Ontario") &
+#   naics_industry == "Real estate and rental and leasing [53]" &
+#   employee_type == "All employees") %>%
+#   ggplot() +
+#   geom_line(aes(x = time_value, y = ppl_count)) +
+#   geom_line(aes(x = time_value, y = preds)) +
+#   facet_wrap(vars(geo_value), scales = "free_y", ncol = 1) +
+#   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+#   labs(x = "Date", y = "Number employed")
+```
