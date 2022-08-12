@@ -7,7 +7,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-NOTE: This is intentionally placed in `musings` as it is still a draft.
+**NOTE: This is intentionally placed in `musings` as it is still a draft.**
 
 Good visualizations help the user understand what is going on. One may use
 `plot.covidcast_signal` from the `covidcast` package to plot US maps, including
@@ -22,3 +22,33 @@ those who use third-party data visualization software such as Power BI and
 Tableau. Despite that, visualizations go alongside cmu-delphi's covidcast
 library.
 
+```{r,include=FALSE,echo=FALSE}
+library(dplyr)
+library(epipredict)
+library(epiprocess)
+library(ggplot2)
+library(tidyr)
+```
+
+
+## Visualizing 7-day averages
+
+COVID cases may be underreported on certain dates if fewer people get
+COVID tested on weekends, or if a place doesn't do COVID updates on weekends.
+This makes the daily case count jagged.
+
+```{r}
+x <- jhu_csse_daily_subset  %>%
+  filter(geo_value == "ca",
+         time_value >= "2020-07-01", time_value < "2022-01-01") %>%
+  select(geo_value,time_value,cases,cases_7d_av)
+
+x2 <- x %>%
+  select(-geo_value) %>%
+  gather("type","count",-1)
+
+ggplot(x2,aes(x=time_value,y=count,colour=type)) +
+  geom_line(alpha=0.8,size=1)
+```
+
+`fable` has plotting features. However, these do not meet these needs.
