@@ -9,6 +9,7 @@ layer_residual_quantiles(
   ...,
   probs = c(0.0275, 0.975),
   symmetrize = TRUE,
+  by_key = character(0L),
   name = ".pred_distn",
   .flag = TRUE,
   id = rand_id("residual_quantiles")
@@ -23,6 +24,9 @@ layer_residual_quantiles(
 referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
+
+\item{by_key}{A character vector of keys to group the residuls by before
+calculating quantiles. The default, \code{c()} performs no grouping.}
 
 \item{name}{character. The name for the output column.}
 
@@ -59,5 +63,12 @@ f <- frosting() \%>\%
 wf1 <- wf \%>\% add_frosting(f)
 
 p <- predict(wf1, latest)
-p
+
+f2 <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_residual_quantiles(probs = c(0.3, 0.7), by_key = "geo_value") \%>\%
+  layer_naomit(.pred)
+wf2 <- wf \%>\% add_frosting(f2)
+
+p2 <- predict(wf2, latest)
 }

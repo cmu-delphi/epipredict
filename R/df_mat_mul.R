@@ -13,6 +13,7 @@
 #' @return A data.frame with the new columns at the right. Original
 #'   columns are removed.
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' df <- data.frame(matrix(1:200, ncol = 10))

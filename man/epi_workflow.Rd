@@ -11,7 +11,7 @@ epi_workflow(preprocessor = NULL, spec = NULL, postprocessor = NULL)
 \itemize{
 \item A formula, passed on to \code{\link[workflows:add_formula]{add_formula()}}.
 \item A recipe, passed on to \code{\link[workflows:add_recipe]{add_recipe()}}.
-\item A \code{\link[workflows:add_variables]{workflow_variables()}} object, passed on to \code{\link[workflows:add_variables]{add_variables()}}.
+\item A \code{\link[workflows:workflow_variables]{workflow_variables()}} object, passed on to \code{\link[workflows:add_variables]{add_variables()}}.
 }}
 
 \item{spec}{An optional parsnip model specification to add to the workflow.

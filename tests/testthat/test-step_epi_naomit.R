@@ -20,7 +20,7 @@ test_that("Argument must be a recipe", {
 
 z1 <- step_epi_naomit(r)
 z2 <- r %>%
-  step_naomit(all_predictors()) %>%
+  step_naomit(all_predictors(), skip = FALSE) %>%
   step_naomit(all_outcomes(), skip = TRUE)
 
 # Checks the behaviour of a step function, omitting the quosure and id that

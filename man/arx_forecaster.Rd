@@ -2,27 +2,45 @@
 % Please edit documentation in R/arx_forecaster.R
 \name{arx_forecaster}
 \alias{arx_forecaster}
-\title{AR forecaster with optional covariates}
+\title{Direct autoregressive forecaster with covariates}
 \usage{
-arx_forecaster(x, y, key_vars, time_value, args = arx_args_list())
+arx_forecaster(
+  epi_data,
+  outcome,
+  predictors,
+  trainer = parsnip::linear_reg(),
+  args_list = arx_args_list()
+)
 }
 \arguments{
-\item{x}{Covariates. Allowed to be missing (resulting in AR on \code{y}).}
+\item{epi_data}{An \code{epi_df} object}
 
-\item{y}{Response.}
+\item{outcome}{A character (scalar) specifying the outcome (in the
+\code{epi_df}).}
 
-\item{key_vars}{Factor(s). A prediction will be made for each unique
-combination.}
+\item{predictors}{A character vector giving column(s) of predictor
+variables.}
 
-\item{time_value}{the time value associated with each row of measurements.}
+\item{trainer}{A \code{{parsnip}} model describing the type of estimation.
+For now, we enforce \code{mode = "regression"}.}
 
-\item{args}{Additional arguments specifying the forecasting task. Created
-by calling \code{arx_args_list()}.}
+\item{args_list}{A list of customization arguments to determine
+the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
 }
 \value{
-A data frame of point (and optionally interval) forecasts at a single
-ahead (unique horizon) for each unique combination of \code{key_vars}.
+A list with (1) \code{predictions} an \code{epi_df} of predicted values
+and (2) \code{epi_workflow}, a list that encapsulates the entire estimation
+workflow
 }
 \description{
-AR forecaster with optional covariates
+This is an autoregressive forecasting model for
+\link[epiprocess:epi_df]{epiprocess::epi_df} data. It does "direct" forecasting, meaning
+that it estimates a model for a particular target horizon.
+}
+\examples{
+jhu <- case_death_rate_subset \%>\%
+  dplyr::filter(time_value >= as.Date("2021-12-01"))
+
+out <- arx_forecaster(jhu, "death_rate",
+  c("case_rate", "death_rate"))
 }

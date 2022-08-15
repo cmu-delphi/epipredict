@@ -32,3 +32,4 @@ df <- data.frame(matrix(1:200, ncol = 10))
 mat <- matrix(1:10, ncol = 2)
 df_mat_mul(df, mat, "z", dplyr::num_range("X", 2:6))
 }
+\keyword{internal}

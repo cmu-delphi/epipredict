@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut","cre")),
     person("Jacob", "Bien", role = "aut"),
@@ -19,6 +19,7 @@ Description: A forecasting "framework" for creating epidemiological forecasts
 License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
+BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends: 
     R (>= 3.5.0)
 Imports: 
@@ -32,7 +33,6 @@ Imports:
     glue,
     hardhat (>= 1.2.0),
     magrittr,
-    purrr,
     recipes (>= 1.0.0),
     rlang,
     stats,
@@ -42,21 +42,25 @@ Imports:
     tidyselect,
     usethis,
     vctrs,
-    workflows
+    workflows (>= 1.0.0)
 Suggests: 
     covidcast,
     data.table,
+    epidatr,
     ggplot2,
     knitr,
     lubridate,
     parsnip (>= 1.0.0),
+    ranger,
     RcppRoll,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    xgboost
 VignetteBuilder: 
     knitr
 Remotes:
-    dajmcdon/epiprocess
+    cmu-delphi/epiprocess,
+    cmu-delphi/epidatr
 Config/testthat/edition: 3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

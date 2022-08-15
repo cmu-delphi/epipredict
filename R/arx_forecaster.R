@@ -1,80 +1,113 @@
-#' AR forecaster with optional covariates
+#' Direct autoregressive forecaster with covariates
 #'
-#' @param x Covariates. Allowed to be missing (resulting in AR on `y`).
-#' @param y Response.
-#' @param key_vars Factor(s). A prediction will be made for each unique
-#'   combination.
-#' @param time_value the time value associated with each row of measurements.
-#' @param args Additional arguments specifying the forecasting task. Created
-#'   by calling `arx_args_list()`.
+#' This is an autoregressive forecasting model for
+#' [epiprocess::epi_df] data. It does "direct" forecasting, meaning
+#' that it estimates a model for a particular target horizon.
 #'
-#' @return A data frame of point (and optionally interval) forecasts at a single
-#'   ahead (unique horizon) for each unique combination of `key_vars`.
+#'
+#' @param epi_data An `epi_df` object
+#' @param outcome A character (scalar) specifying the outcome (in the
+#'   `epi_df`).
+#' @param predictors A character vector giving column(s) of predictor
+#'   variables.
+#' @param trainer A `{parsnip}` model describing the type of estimation.
+#'   For now, we enforce `mode = "regression"`.
+#' @param args_list A list of customization arguments to determine
+#'   the type of forecasting model. See [arx_args_list()].
+#'
+#' @return A list with (1) `predictions` an `epi_df` of predicted values
+#'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
+#'   workflow
 #' @export
-arx_forecaster <- function(x, y, key_vars, time_value,
-                           args = arx_args_list()) {
+#'
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value >= as.Date("2021-12-01"))
+#'
+#' out <- arx_forecaster(jhu, "death_rate",
+#'   c("case_rate", "death_rate"))
+arx_forecaster <- function(epi_data,
+                               outcome,
+                               predictors,
+                               trainer = parsnip::linear_reg(),
+                               args_list = arx_args_list()) {
 
-  # TODO: function to verify standard forecaster signature inputs
+  validate_forecaster_inputs(epi_data, outcome, predictors)
+  if (!is.list(trainer) || trainer$mode != "regression")
+    cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
+  lags <- arx_lags_validator(predictors, args_list$lags)
 
-  assign_arg_list(args)
-  if (is.null(key_vars)) { # this is annoying/repetitive, seemingly necessary?
-    keys <- NULL
-    distinct_keys <- tibble(.dump = NA)
-  } else {
-    keys <- tibble::tibble(key_vars)
-    distinct_keys <- dplyr::distinct(keys)
+  r <- epi_recipe(epi_data)
+  for (l in seq_along(lags)) {
+    p <- predictors[l]
+    r <- step_epi_lag(r, !!p, lag = lags[[l]])
   }
+  r <- r %>%
+    step_epi_ahead(dplyr::all_of(!!outcome), ahead = args_list$ahead) %>%
+    step_epi_naomit()
+  # should limit the training window here (in an open PR)
+  # What to do if insufficient training data? Add issue.
 
-  # Return NA if insufficient training data
-  if (length(y) < min_train_window + max_lags + ahead) {
-    qnames <- probs_to_string(levels)
-    out <- dplyr::bind_cols(distinct_keys, point = NA) %>%
-      dplyr::select(!dplyr::any_of(".dump"))
-    return(enframer(out, qnames))
-  }
+  forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
+  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  f <- frosting() %>%
+    layer_predict() %>%
+    # layer_naomit(.pred) %>%
+    layer_residual_quantiles(
+      probs = args_list$levels,
+      symmetrize = args_list$symmetrize) %>%
+    layer_add_forecast_date(forecast_date = forecast_date) %>%
+    layer_add_target_date(target_date = target_date)
+  if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
-  dat <- create_lags_and_leads(x, y, lags, ahead, time_value, keys)
-  if (intercept) dat$x0 <- 1
+  latest <- get_test_data(r, epi_data)
 
-  obj <- stats::lm(
-    y1 ~ . + 0,
-    data = dat %>% dplyr::select(starts_with(c("x", "y")))
-  )
-
-  point <- make_predictions(obj, dat, time_value, keys)
-
-  # Residuals, simplest case, requires
-  # 1. same quantiles for all keys
-  # 2. `residuals(obj)` works
-  r <- residuals(obj)
-  q <- residual_quantiles(r, point, levels, symmetrize)
-
-  # Harder case requires handling failures of 1 and or 2, neither implemented
-  # 1. different quantiles by key, need to bind the keys, then group_modify
-  # 2 fails. need to bind the keys, grab, y and yhat, subtract
-  if (nonneg) {
-    q <- dplyr::mutate(q, dplyr::across(dplyr::everything(), ~ pmax(.x, 0)))
-  }
-
-  return(
-    dplyr::bind_cols(distinct_keys, q) %>%
-      dplyr::select(!dplyr::any_of(".dump"))
+  wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
+  list(
+    predictions = predict(wf, new_data = latest),
+    epi_workflow = wf
   )
 }
 
+
+arx_lags_validator <- function(predictors, lags) {
+  p <- length(predictors)
+  if (!is.list(lags)) lags <- list(lags)
+  if (length(lags) == 1) lags <- rep(lags, p)
+  else if (length(lags) < p) {
+    cli_stop(
+      "You have requested {p} predictors but lags cannot be recycled to match."
+    )
+  }
+  lags
+}
 
 #' ARX forecaster argument constructor
 #'
 #' Constructs a list of arguments for [arx_forecaster()].
 #'
-#' @template param-lags
-#' @template param-ahead
-#' @template param-min_train_window
-#' @template param-levels
-#' @template param-intercept
-#' @template param-symmetrize
-#' @template param-nonneg
-#' @param quantile_by_key Not currently implemented
+#' @param lags Vector or List. Positive integers enumerating lags to use
+#'   in autoregressive-type models (in days).
+#' @param ahead Integer. Number of time steps ahead (in days) of the forecast
+#'   date for which forecasts should be produced.
+#' @param min_train_window Integer. The minimal amount of training
+#'   data (in the time unit of the `epi_df`) needed to produce a forecast.
+#'   If smaller, the forecaster will return `NA` predictions.
+#' @param forecast_date The date on which the forecast is created. The default
+#'   `NULL` will attempt to determine this automatically.
+#' @param target_date The date for which the forecast is intended. The default
+#'   `NULL` will attempt to determine this automatically.
+#' @param levels Vector or `NULL`. A vector of probabilities to produce
+#'   prediction intervals. These are created by computing the quantiles of
+#'   training residuals. A `NULL` value will result in point forecasts only.
+#' @param symmetrize Logical. The default `TRUE` calculates
+#'      symmetric prediction intervals.
+#' @param nonneg Logical. The default `TRUE` enforces nonnegative predictions
+#'   by hard-thresholding at 0.
+#' @param quantile_by_key Character vector. Groups residuals by listed keys
+#'   before calculating residual quantiles. See the `by_key` argument to
+#'   [layer_residual_quantiles()] for more information. The default,
+#'   `character(0)` performs no grouping.
 #'
 #' @return A list containing updated parameter choices.
 #' @export
@@ -83,28 +116,36 @@ arx_forecaster <- function(x, y, key_vars, time_value,
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
 #' arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
-arx_args_list <- function(lags = c(0, 7, 14), ahead = 7, min_train_window = 20,
-                          levels = c(0.05, 0.95), intercept = TRUE,
+arx_args_list <- function(lags = c(0L, 7L, 14L),
+                          ahead = 7L,
+                          min_train_window = 20L,
+                          forecast_date = NULL,
+                          target_date = NULL,
+                          levels = c(0.05, 0.95),
                           symmetrize = TRUE,
                           nonneg = TRUE,
-                          quantile_by_key = FALSE) {
+                          quantile_by_key = character(0L)) {
 
   # error checking if lags is a list
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
 
-  arg_is_scalar(ahead, min_train_window)
+  arg_is_scalar(ahead, min_train_window, symmetrize, nonneg)
+  arg_is_chr(quantile_by_key, allow_null = TRUE)
+  arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, min_train_window, lags)
-  arg_is_lgl(intercept, symmetrize, nonneg)
+  arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
 
   max_lags <- max(lags)
-
-  list(
-    lags = .lags, ahead = as.integer(ahead),
-    min_train_window = min_train_window,
-    levels = levels, intercept = intercept,
-    symmetrize = symmetrize, nonneg = nonneg,
-    max_lags = max_lags
-  )
+  enlist(lags = .lags,
+         ahead,
+         min_train_window,
+         levels,
+         forecast_date,
+         target_date,
+         symmetrize,
+         nonneg,
+         max_lags,
+         quantile_by_key)
 }

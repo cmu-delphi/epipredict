@@ -57,10 +57,12 @@ epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL)
 #' @param x An object.
 #' @return `TRUE` if the object inherits from `epi_workflow`.
 #'
+#' @keywords internal
 #' @export
 is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
+
 
 #' Predict from an epi_workflow
 #'
