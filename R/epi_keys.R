@@ -3,8 +3,8 @@
 #' @param x a data.frame, tibble, or epi_df
 #'
 #' @return If an `epi_df`, this returns all "keys". Otherwise `NULL`
+#' @keywords internal
 #' @export
-#'
 epi_keys <- function(x) {
   UseMethod("epi_keys")
 }

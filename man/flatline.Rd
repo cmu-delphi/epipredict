@@ -13,7 +13,7 @@ horizon. The right hand side must contain any keys (locations) for the
 panel data separated by plus. The observed time series must come last.
 For example
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{form <- as.formula(lead7_y ~ state + age + y)
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{form <- as.formula(lead7_y ~ state + age + y)
 }\if{html}{\out{</div>}}
 
 Note that this function doesn't DO the shifting, that has to be done
@@ -45,3 +45,4 @@ tib <- data.frame(y = runif(100),
 flat <- flatline(y2 ~ j + k + y, tib) # predictions for 20 locations
 sum(!is.na(flat$residuals$.resid)) # 100 residuals, but 40 are NA
 }
+\keyword{internal}

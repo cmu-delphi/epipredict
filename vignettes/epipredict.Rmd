@@ -103,7 +103,7 @@ We'll estimate the model jointly across all locations using only the most recent
 
 ```{r demo-workflow}
 jhu <- jhu %>% filter(time_value >= max(time_value) - 30)
-out <- arx_epi_forecaster(jhu, outcome = "death_rate",
+out <- arx_forecaster(jhu, outcome = "death_rate",
   predictors = c("case_rate", "death_rate")
 )
 ```
@@ -131,7 +131,7 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ```
 
 ```{r differential-lags}
-out2week <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+out2week <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0,1,2,3,7,14), c(0,7,14)),
     ahead = 14)
@@ -145,7 +145,7 @@ Here, we've used different lags on the `case_rate` and are now predicting 2 week
 Another property of the basic model is the predictive interval. We describe this in more detail in a different vignette, but it is easy to request multiple quantiles.
 
 ```{r differential-levels}
-out_q <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+out_q <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(
     levels = c(.01,.025, seq(.05,.95, by=.05), .975,.99))
   )
@@ -183,14 +183,14 @@ The `trainer` argument determines the type of model we want.
 This takes a [`{parsnip}`](https://parsnip.tidymodels.org) model. The default is linear regression, but we could instead use a random forest with the `{ranger}` package:
 
 ```{r ranger, warning = FALSE}
-out_rf <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+out_rf <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   rand_forest(mode = "regression"))
 ```
 
 Or boosted regression trees with `{xgboost}`:
 
 ```{r xgboost, warning = FALSE}
-out_gb <- arx_epi_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+out_gb <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   boost_tree(mode = "regression", trees = 20))
 ```
 
@@ -290,7 +290,7 @@ To stretch the metaphor of preparing a cake to its natural limits, we have
 created postprocessing functionality called "frosting". Much like the recipe,
 each postprocessing operation is a "layer" and we "slather" these onto our 
 baked cake. To fix ideas, below is the postprocessing `frosting` for 
-`arx_epi_forecaster()`
+`arx_forecaster()`
 
 ```{r}
 extract_frosting(out_q$epi_workflow)
@@ -328,7 +328,7 @@ But ideally, a user could create their own forecasters by building up the
 components we provide. In other vignettes, we try to walk through some of these
 customizations.
 
-To illustrate everything above, here is (roughly) the code for the `flatline_epi_forecaster()` applied to the `case_rate`.
+To illustrate everything above, here is (roughly) the code for the `flatline_forecaster()` applied to the `case_rate`.
 
 ```{r}
 r <- epi_recipe(jhu) %>%
