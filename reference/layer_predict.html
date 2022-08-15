@@ -16,7 +16,7 @@ postprocessor."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,7 +24,10 @@ postprocessor."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/l
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="nav-item">
@@ -154,7 +157,7 @@ and "pred_int". Default value is <code>FALSE</code>.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf1</span>, <span class="va">latest</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">p1</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, with metadata:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 108 x 3 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2022-05-31 19:08:25</span>
@@ -173,6 +176,7 @@ and "pred_int". Default value is <code>FALSE</code>.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> ny        2021-12-12    <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> ak        2021-12-13    <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 98 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Prediction with interval</span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu">layer_predict</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"pred_int"</span><span class="op">)</span></span></span>
@@ -180,7 +184,7 @@ and "pred_int". Default value is <code>FALSE</code>.</p></li>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf2</span>, <span class="va">latest</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">p2</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, with metadata:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 108 x 4 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2022-05-31 19:08:25</span>
@@ -199,6 +203,7 @@ and "pred_int". Default value is <code>FALSE</code>.</p></li>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> ny        2021-12-12          <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> ak        2021-12-13          <span style="color: #BB0000;">NA</span>          <span style="color: #BB0000;">NA</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 98 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

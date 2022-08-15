@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="nav-item">
@@ -56,6 +59,7 @@
 <span>  <span class="va">...</span>,</span>
 <span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.0275</span>, <span class="fl">0.975</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">".pred_distn"</span>,</span>
 <span>  .flag <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  id <span class="op">=</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"residual_quantiles"</span><span class="op">)</span></span>
@@ -79,6 +83,11 @@ referring to the desired quantile.</p></dd>
 
 <dt>symmetrize</dt>
 <dd><p>logical. If <code>TRUE</code> then interval will be symmetric.</p></dd>
+
+
+<dt>by_key</dt>
+<dd><p>A character vector of keys to group the residuls by before
+calculating quantiles. The default, <code><a href="https://rdrr.io/r/base/c.html" class="external-link">c()</a></code> performs no grouping.</p></dd>
 
 
 <dt>name</dt>
@@ -124,18 +133,14 @@ residual quantiles added to the prediction</p>
 <span class="r-in"><span><span class="va">wf1</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf1</span>, <span class="va">latest</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">p</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, with metadata:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2022-05-31 19:08:25</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   geo_value time_value .pred         .pred_distn</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> ak        2021-12-31 0.245 [0.03, 0.98]&lt;q-rng&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> ca        2021-12-31 0.313 [0.03, 0.98]&lt;q-rng&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> ny        2021-12-31 0.295 [0.03, 0.98]&lt;q-rng&gt;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">layer_residual_quantiles</span><span class="op">(</span>probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.7</span><span class="op">)</span>, by_key <span class="op">=</span> <span class="st">"geo_value"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="layer_naomit.html">layer_naomit</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">wf2</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf2</span>, <span class="va">latest</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

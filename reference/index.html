@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -18,7 +18,10 @@
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
-      <ul class="navbar-nav me-auto"><li class="active nav-item">
+      <ul class="navbar-nav me-auto"><li class="nav-item">
+  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
+</li>
+<li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
 <li class="nav-item">
@@ -44,7 +47,38 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="simple-forecasters">Simple forecasters<a class="anchor" aria-label="anchor" href="#simple-forecasters"></a></h2>
+      
+      <p class="section-desc"></p><p>Complete forecasters that produce reasonable baselines</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="flatline_args_list.html">flatline_args_list()</a></code> 
+        </dt>
+        <dd>Flatline forecaster argument constructor</dd>
+      </dl><dl><dt>
+          
+          <code><a href="flatline_forecaster.html">flatline_forecaster()</a></code> 
+        </dt>
+        <dd>Predict the future with today's value</dd>
+      </dl><dl><dt>
+          
+          <code><a href="arx_args_list.html">arx_args_list()</a></code> 
+        </dt>
+        <dd>ARX forecaster argument constructor</dd>
+      </dl><dl><dt>
+          
+          <code><a href="arx_forecaster.html">arx_forecaster()</a></code> 
+        </dt>
+        <dd>Direct autoregressive forecaster with covariates</dd>
+      </dl></div><div class="section level2">
+      <h2 id="custom-panel-data-forecasting-workflows">Custom panel data forecasting workflows<a class="anchor" aria-label="anchor" href="#custom-panel-data-forecasting-workflows"></a></h2>
       
       
 
@@ -56,89 +90,9 @@
 
       <dl><dt>
           
-          <code><a href="add_epi_recipe.html">add_epi_recipe()</a></code> 
-        </dt>
-        <dd>Add an epi_recipe to a workflow</dd>
-      </dl><dl><dt>
-          
-          <code><a href="add_frosting.html">add_frosting()</a></code> <code><a href="add_frosting.html">remove_frosting()</a></code> 
-        </dt>
-        <dd>Add frosting to a workflow</dd>
-      </dl><dl><dt>
-          
-          <code><a href="add_layer.html">add_layer()</a></code> 
-        </dt>
-        <dd>Add layer to a frosting object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="apply_frosting.html">apply_frosting()</a></code> 
-        </dt>
-        <dd>Apply postprocessing to a fitted workflow</dd>
-      </dl><dl><dt>
-          
-          <code><a href="arx_args_list.html">arx_args_list()</a></code> 
-        </dt>
-        <dd>ARX forecaster argument constructor</dd>
-      </dl><dl><dt>
-          
-          <code><a href="arx_forecaster.html">arx_forecaster()</a></code> 
-        </dt>
-        <dd>AR forecaster with optional covariates</dd>
-      </dl><dl><dt>
-          
-          <code><a href="assign_arg_list.html">assign_arg_list()</a></code> 
-        </dt>
-        <dd>Assign argument list to inside an environment</dd>
-      </dl><dl><dt>
-          
-          <code><a href="augment.epi_workflow.html">augment(<i>&lt;epi_workflow&gt;</i>)</a></code> 
-        </dt>
-        <dd>Augment data with predictions</dd>
-      </dl><dl><dt>
-          
-          <code><a href="case_death_rate_subset.html">case_death_rate_subset</a></code> 
-        </dt>
-        <dd>Subset of JHU daily state cases and deaths</dd>
-      </dl><dl><dt>
-          
-          <code><a href="check_pname.html">check_pname()</a></code> 
-        </dt>
-        <dd>Check that newly created variable names don't overlap</dd>
-      </dl><dl><dt>
-          
-          <code><a href="create_lags_and_leads.html">create_lags_and_leads()</a></code> 
-        </dt>
-        <dd>Create lags and leads of predictors and response</dd>
-      </dl><dl><dt>
-          
-          <code><a href="create_layer.html">create_layer()</a></code> 
-        </dt>
-        <dd>Create a new layer</dd>
-      </dl><dl><dt>
-          
-          <code><a href="df_mat_mul.html">df_mat_mul()</a></code> 
-        </dt>
-        <dd>Multiply columns of a <code>data.frame</code> by a matrix</dd>
-      </dl><dl><dt>
-          
-          <code><a href="dist_quantiles.html">dist_quantiles()</a></code> 
-        </dt>
-        <dd>A distribution parameterized by a set of quantiles</dd>
-      </dl><dl><dt>
-          
-          <code><a href="epi_keys.html">epi_keys()</a></code> 
-        </dt>
-        <dd>Grab any keys associated to an epi_df</dd>
-      </dl><dl><dt>
-          
           <code><a href="epi_recipe.html">epi_recipe()</a></code> 
         </dt>
         <dd>Create a epi_recipe for preprocessing data</dd>
-      </dl><dl><dt>
-          
-          <code><a href="epi_shift.html">epi_shift()</a></code> 
-        </dt>
-        <dd>Shift predictors while maintaining grouping and time_value ordering</dd>
       </dl><dl><dt>
           
           <code><a href="epi_workflow.html">epi_workflow()</a></code> 
@@ -146,64 +100,102 @@
         <dd>Create an epi_workflow</dd>
       </dl><dl><dt>
           
-          <code><a href="extract_argument.html">extract_argument()</a></code> 
+          <code><a href="add_epi_recipe.html">add_epi_recipe()</a></code> 
         </dt>
-        <dd>Extract an argument made to a frosting layer or recipe step</dd>
+        <dd>Add an epi_recipe to a workflow</dd>
       </dl><dl><dt>
           
-          <code><a href="extrapolate_quantiles.html">extrapolate_quantiles()</a></code> 
+          <code><a href="predict-epi_workflow.html">predict(<i>&lt;epi_workflow&gt;</i>)</a></code> 
         </dt>
-        <dd>Summarize a distribution with a set of quantiles</dd>
+        <dd>Predict from an epi_workflow</dd>
       </dl><dl><dt>
+          
+          <code><a href="augment.epi_workflow.html">augment(<i>&lt;epi_workflow&gt;</i>)</a></code> 
+        </dt>
+        <dd>Augment data with predictions</dd>
+      </dl></div><div class="section level2">
+      <h2 id="epi-recipe-preprocessing-steps">Epi recipe preprocessing steps<a class="anchor" aria-label="anchor" href="#epi-recipe-preprocessing-steps"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="step_epi_naomit.html">step_epi_naomit()</a></code> 
+        </dt>
+        <dd>Unified NA omission wrapper function for recipes</dd>
+      </dl><dl><dt>
+          
+          <code><a href="step_epi_shift.html">step_epi_lag()</a></code> <code><a href="step_epi_shift.html">step_epi_ahead()</a></code> 
+        </dt>
+        <dd>Create a shifted predictor</dd>
+      </dl><dl><dt>
+          
+          <code><a href="step_population_scaling.html">step_population_scaling()</a></code> 
+        </dt>
+        <dd>Create a recipe step that scales variables using population data</dd>
+      </dl></div><div class="section level2">
+      <h2 id="forecast-postprocessing">Forecast postprocessing<a class="anchor" aria-label="anchor" href="#forecast-postprocessing"></a></h2>
+      
+      <p class="section-desc"></p><p>Create a series of postprocessing operations</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
           <code><a href="frosting.html">frosting()</a></code> 
         </dt>
         <dd>Create frosting for postprocessing predictions</dd>
       </dl><dl><dt>
           
-          <code><a href="get_precision.html">get_precision()</a></code> 
+          <code><a href="add_frosting.html">add_frosting()</a></code> <code><a href="add_frosting.html">remove_frosting()</a></code> 
         </dt>
-        <dd>Determine the precision of a number</dd>
+        <dd>Add frosting to a workflow</dd>
+      </dl><dl><dt>
+          
+          <code><a href="apply_frosting.html">apply_frosting()</a></code> 
+        </dt>
+        <dd>Apply postprocessing to a fitted workflow</dd>
+      </dl><dl><dt>
+          
+          <code><a href="extract_frosting.html">extract_frosting()</a></code> 
+        </dt>
+        <dd>Extract the frosting object from a workflow</dd>
       </dl><dl><dt>
           
           <code><a href="get_test_data.html">get_test_data()</a></code> 
         </dt>
         <dd>Get test data for prediction based on longest lag period</dd>
+      </dl></div><div class="section level2">
+      <h2 id="frosting-layers">Frosting layers<a class="anchor" aria-label="anchor" href="#frosting-layers"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="add_layer.html">add_layer()</a></code> 
+        </dt>
+        <dd>Add layer to a frosting object</dd>
       </dl><dl><dt>
           
-          <code><a href="grab_names.html">grab_names()</a></code> 
+          <code><a href="create_layer.html">create_layer()</a></code> 
         </dt>
-        <dd>Get the names from a data frame via tidy select</dd>
-      </dl><dl><dt>
-          
-          <code><a href="is_epi_recipe.html">is_epi_recipe()</a></code> 
-        </dt>
-        <dd>Test for <code>epi_recipe</code></dd>
-      </dl><dl><dt>
-          
-          <code><a href="is_epi_workflow.html">is_epi_workflow()</a></code> 
-        </dt>
-        <dd>Test for an <code>epi_workflow</code></dd>
-      </dl><dl><dt>
-          
-          <code><a href="knn_iteraive_ar_args_list.html">knn_iteraive_ar_args_list()</a></code> 
-        </dt>
-        <dd>KNN enhanced iterative AR forecaster argument constructor</dd>
-      </dl><dl><dt>
-          
-          <code><a href="knn_iteraive_ar_forecaster.html">knn_iteraive_ar_forecaster()</a></code> 
-        </dt>
-        <dd>KNN enhanced iterative AR forecaster with optional covariates</dd>
-      </dl><dl><dt>
-          
-          <code><a href="knnarx_args_list.html">knnarx_args_list()</a></code> 
-        </dt>
-        <dd>KNN enhanced ARX forecaster argument constructor</dd>
-      </dl><dl><dt>
-          
-          <code><a href="knnarx_forecaster.html">knnarx_forecaster()</a></code> 
-        </dt>
-        <dd>KNN enhanced ARX forecaster with optional covariates</dd>
+        <dd>Create a new layer</dd>
       </dl><dl><dt>
           
           <code><a href="layer-processors.html">extract_layers()</a></code> <code><a href="layer-processors.html">is_layer()</a></code> <code><a href="layer-processors.html">validate_layer()</a></code> <code><a href="layer-processors.html">detect_layer()</a></code> 
@@ -226,6 +218,11 @@
         <dd>Omit <code>NA</code>s from predictions or other columns</dd>
       </dl><dl><dt>
           
+          <code><a href="layer_population_scaling.html">layer_population_scaling()</a></code> 
+        </dt>
+        <dd>Revert population scaled prediction</dd>
+      </dl><dl><dt>
+          
           <code><a href="layer_predict.html">layer_predict()</a></code> 
         </dt>
         <dd>Prediction layer for postprocessing</dd>
@@ -246,46 +243,54 @@
         <dd>Lower and upper thresholds for predicted values</dd>
       </dl><dl><dt>
           
-          <code><a href="nested_quantiles.html">nested_quantiles()</a></code> 
-        </dt>
-        <dd>Turn a a vector of quantile distributions into a list-col</dd>
-      </dl><dl><dt>
-          
-          <code><a href="new_epi_recipe_blueprint.html">new_epi_recipe_blueprint()</a></code> <code><a href="new_epi_recipe_blueprint.html">epi_recipe_blueprint()</a></code> <code><a href="new_epi_recipe_blueprint.html">default_epi_recipe_blueprint()</a></code> <code><a href="new_epi_recipe_blueprint.html">new_default_epi_recipe_blueprint()</a></code> 
-        </dt>
-        <dd>Recipe blueprint that accounts for <code>epi_df</code> panel data</dd>
-      </dl><dl><dt>
-          
-          <code><a href="predict-epi_workflow.html">predict(<i>&lt;epi_workflow&gt;</i>)</a></code> 
-        </dt>
-        <dd>Predict from an epi_workflow</dd>
-      </dl><dl><dt>
-          
           <code><a href="slather.html">slather()</a></code> 
         </dt>
         <dd>Spread a layer of frosting on a fitted workflow</dd>
+      </dl></div><div class="section level2">
+      <h2 id="utilities-for-quantile-distribution-processing">Utilities for quantile distribution processing<a class="anchor" aria-label="anchor" href="#utilities-for-quantile-distribution-processing"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="dist_quantiles.html">dist_quantiles()</a></code> 
+        </dt>
+        <dd>A distribution parameterized by a set of quantiles</dd>
       </dl><dl><dt>
           
-          <code><a href="smooth_arx_args_list.html">smooth_arx_args_list()</a></code> 
+          <code><a href="extrapolate_quantiles.html">extrapolate_quantiles()</a></code> 
         </dt>
-        <dd>Smooth ARX forecaster argument constructor</dd>
+        <dd>Summarize a distribution with a set of quantiles</dd>
       </dl><dl><dt>
           
-          <code><a href="smooth_arx_forecaster.html">smooth_arx_forecaster()</a></code> 
+          <code><a href="nested_quantiles.html">nested_quantiles()</a></code> 
         </dt>
-        <dd>Smooth AR forecaster with optional covariates</dd>
-      </dl><dl><dt>
+        <dd>Turn a a vector of quantile distributions into a list-col</dd>
+      </dl></div><div class="section level2">
+      <h2 id="included-datasets">Included datasets<a class="anchor" aria-label="anchor" href="#included-datasets"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
-          <code><a href="step_epi_naomit.html">step_epi_naomit()</a></code> 
+          <code><a href="case_death_rate_subset.html">case_death_rate_subset</a></code> 
         </dt>
-        <dd>Unified NA omission wrapper function for recipes</dd>
-      </dl><dl><dt>
-          
-          <code><a href="step_epi_shift.html">step_epi_lag()</a></code> <code><a href="step_epi_shift.html">step_epi_ahead()</a></code> 
-        </dt>
-        <dd>Create a shifted predictor</dd>
+        <dd>Subset of JHU daily state cases and deaths</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
