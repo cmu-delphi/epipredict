@@ -52,9 +52,24 @@ package can also be applied in our `epipredict` workflows.
 First, create a recipe object from the original data and then specify the 
 preprocessing steps. Steps are then sequentially added.
 
+`recipes` package also allows [manual alterations of roles](https://recipes.tidymodels.org/reference/roles.html) 
+in bulk. There are a couple handy functions that can be used together to help us 
+manipulate variable roles easily. 
+
+`update_role()` alters an existing role in the recipe or assigns an initial role 
+to variables that do not yet have a declared role.
+
+`add_role()` adds an additional role to variables that already have a role in 
+the recipe, without overwriting old roles.
+
+`remove_role()` eliminates a single existing role in the recipe.
+
+Here, we will add an additional `predictor` role to both `case_rate` and 
+`death_rate` variables. They currently have roles as `raw`.
+
 ```{r create-recipe-object}
-r <- epi_recipe(x)
-r
+r <- epi_recipe(x) %>% 
+  add_role(- epi_keys(x), new_role = "predictor") 
 ```
 
 The function automatically categorizes roles into `geo_value`, `time_value` and 
@@ -88,8 +103,8 @@ r <- r %>%
                           df_pop_col = "inv_pop") %>%
   step_rename(cases = case_rate, deaths = death_rate) %>%
   step_rm(throw_away) %>%
-  step_epi_lag(cases, lag = c(0, 7, 14), role = "predictor") %>%
-  step_epi_lag(deaths, lag = c(0, 7, 14), role = "predictor") %>%
+  step_epi_lag(cases, lag = c(0, 7, 14)) %>%
+  step_epi_lag(deaths, lag = c(0, 7, 14)) %>%
   step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
   step_epi_naomit() %>%
   step_rm(cases, deaths)
@@ -105,6 +120,7 @@ A quick view of what columns exist in the the prepossessed data so far:
 names(bake(prep(r, x),x))
 ```
 
+
 There are also many functions in the `recipes` package that allow for 
 [function transformations](https://recipes.tidymodels.org/reference/#step-functions-individual-transformations),
 such as log transformations and spline transformations. In our case, we will 
@@ -112,14 +128,15 @@ center the numerical predictors to allow for meaningful interpretation of the
 intercept. 
 
 ```{r}
-r <- r %>% step_center(contains("lag"))
+r <- r %>% step_center(contains("lag"), role = "predictor")
 ```
 
 Since the current outcomes are positive, but the linear regression assumes the 
-outcome to be in full support, we will consider a log-transformation.
+outcome to be in full support, we will consider a log-transformation with an 
+offset value of 1 to ensure `log(0)` does not occur. 
 
 ```{r}
-r_lin <- r %>% step_log(ahead_7_deaths, role = "outcome")
+r_lin <- r %>% step_log(ahead_7_deaths, role = "outcome", offset = 1)
 ```
 
 Other useful functionalities include creating a set of binary dummy variables 
@@ -216,17 +233,17 @@ poisson regression.
 
 
 ```{r poisson-fit}
-r <- r %>% step_mutate(ahead_7_deaths = round(ahead_7_deaths, 0), 
+r <- r %>% 
+  step_mutate(ahead_7_deaths = round(ahead_7_deaths, 0), 
                        role = "predictor") %>%
   step_filter(ahead_7_deaths > 0)
 
 latest <- get_test_data(recipe = r, x = x)
 
 wf <- epi_workflow(r, parsnip::poisson_reg()) %>%
-    fit(x) %>%
-    add_frosting(f)
+    fit(x) 
 
-predict(wf, latest) %>% select( - social_distancing, - throw_away)
+predict(wf, latest) %>% filter(!is.na(.pred))
 ```
 
 Let's also take a look at the poisson regression fit:
@@ -237,7 +254,7 @@ wf$fit$fit
 ### Logistic Regression
 
 We use a logistic regression to predict whether 7-day ahead death counts are high
-or low. Post-processing steps do not need to be applied here. 
+or low. 
 ```{r logistic, warning = FALSE}
 wf <- epi_workflow(r_categorical, parsnip::logistic_reg()) %>%
     fit(x) 
