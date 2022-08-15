@@ -184,8 +184,7 @@ test_that("test joining by default columns", {
 
   prep <- prep(r, jhu)
 
-  expect_message(b <- bake(prep, jhu)) # a message of which column was joined by default
-
+  expect_message(b <- bake(prep, jhu))
 
   f <- frosting() %>%
     layer_predict() %>%
