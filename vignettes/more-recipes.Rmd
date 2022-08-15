@@ -37,6 +37,7 @@ rates by states 7 days ahead from Dec 31, 2021.
 
 ```{r}
 x <- case_death_rate_subset
+x$geo_value <- as.factor(x$geo_value)
 tail(x)
 ```
 There are `r dim(x)[1]` rows and `r dim(x)[2]` columns in the data, with dates
@@ -106,17 +107,55 @@ names(bake(prep(r, x),x))
 
 There are also many functions in the `recipes` package that allow for 
 [function transformations](https://recipes.tidymodels.org/reference/#step-functions-individual-transformations),
-such as log transformations and spline transformations. 
+such as log transformations and spline transformations. In our case, we will 
+center the numerical predictors to allow for meaningful interpretation of the 
+intercept. 
 
-Sometimes, the exact counts are desired, therefore fitting a linear regression 
+```{r}
+r <- r %>% step_center(contains("lag"))
+```
+
+Since the current outcomes are positive, but the linear regression assumes the 
+outcome to be in full support, we will consider a log-transformation.
+
+```{r}
+r_lin <- r %>% step_log(ahead_7_deaths, role = "outcome")
+```
+
+Other useful functionalities include creating a set of binary dummy variables 
+from a factor variable. As an illustration that will not affect the models, we 
+will show how states in `geo_value` become dummy variables so that each state 
+as a dummy variable has a differential intercept coefficient.
+
+```{r dummy-variable}
+length(unique(x$geo_value))
+
+dummies <- r %>% 
+  step_dummy(geo_value) %>%
+  prep(training = x) 
+
+dummy_data <- bake(dummies, x)
+
+names(dummy_data)
+```
+
+Once the pre-processing steps are done, we can move on to model fitting using 
+the `parsnip` package. 
+
+
+# Model Fitting and Post-processing
+
+Sometimes, the exact values are desired, therefore fitting a linear regression 
 or poisson regression would be a good idea. 
 
 On the other hand, say instead of predicting 7-day ahead death counts, we would 
-like to predict if the counts are high or low based on some given threshold. 
+like to classify if the future predictions are high or low based on some given threshold. 
+In this case, a logistic regression among other classification models can be used.
 For the purpose of illustration, we define two categories: less than 10K(low) 
 and more than 10K(high). 
 
-We can resort to the `recipes` package again:
+We resort to the `recipes` package again to change the numerical outcomes to 
+categorical for the purpose of classification:
 
 ```{r, warning = FALSE}
 binner <- function(x) {
@@ -136,25 +175,22 @@ r_categorical <- r %>%
 ```
 
 As a sanity check we can see now that the preprocessed data has a categorical 
-outcome in `ahead_7_deaths`
+outcome in `ahead_7_deaths`. 
+
 ```{r, warning FALSE, echo = FALSE}
 glimpse(slice_sample(bake(prep(r_categorical, x),x), n = 6))
 ```
 
-# Model Fitting and Post-processing
-
-Once the pre-processing steps are done, we can move on to model fitting using 
-the `parsnip` package. 
 
 ### Linear Regression
 
 First, we can try fitting a linear regression:
 
 ```{r linear-fit-workflow, warning = FALSE}
-wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+wf <- epi_workflow(r_lin, parsnip::linear_reg()) %>%
     fit(x) 
 
-latest <- get_test_data(recipe = r, x = x)
+latest <- get_test_data(recipe = r_lin, x = x)
 ```
 
 We take a look at the linear regression fit and the values of the coefficients.
@@ -167,26 +203,9 @@ p <- predict(wf, latest) %>% filter(!is.na(.pred))
 p
 ```
 
-The predictions are saved in the `.pred` column and represents the squared roots
-of predicted death counts 7 days from Dec 31. 2021. 
+The predictions are saved in the `.pred` column and represents the log-transformed 
+predicted death counts 7 days from Dec 31. 2021. 
 
-Some post-processing can be done to revert back to death rates
-
-```{r linear-reg-post-process}
-f <- frosting() %>%
-    layer_predict() %>%
-    layer_threshold(.pred) %>%
-    layer_naomit(.pred) %>%
-    layer_population_scaling(.pred, df = pop_data,
-                             by =  c("geo_value" = "states"),
-                             df_pop_col = "inv_pop")
-
-wf <- epi_workflow(r, parsnip::linear_reg()) %>%
-    fit(x) %>%
-    add_frosting(f)
-
-predict(wf, latest) %>% select( - social_distancing, - throw_away)
-```
 
 ### Poisson regression
 
@@ -195,7 +214,6 @@ integer since they were calculated from case rates multiplying population, some
 extra preprocessing steps can help us round them to integers to allow fitting a 
 poisson regression.
 
-We will also apply post-processing steps to the workflow similar to the ones above.
 
 ```{r poisson-fit}
 r <- r %>% step_mutate(ahead_7_deaths = round(ahead_7_deaths, 0), 
