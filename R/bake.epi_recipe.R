@@ -1,30 +1,35 @@
 #' Bake an epi_recipe
 #'
+#' @param object A trained object such as a [recipe()] with at least
+#'   one preprocessing operation.
+#' @param new_data An `epi_df` for whom the preprocessing will be
+#'   applied. If `NULL` is given to `new_data`, the pre-processed _training
+#'   data_ will be returned.
+#' @param ... One or more selector functions to choose which variables will be
+#'   returned by the function. See \code{\link[selections]{recipes}} for more details.
+#'   If no selectors are given, the default is to use [everything()].
+#' @return An `epi_df` that may have different columns than the
+#' original columns in `new_data`.
 #' @importFrom rlang is_empty quos
 #' @importFrom tibble is_tibble
 #' @rdname bake
 #' @export
-bake.epi_recipe <- function(object, new_data, ..., composition = "tibble") {
+bake.epi_recipe <- function(object, new_data, ...) {
 
   if (rlang::is_missing(new_data)) {
-    rlang::abort("'new_data' must be either a data frame or NULL. No value is not allowed.")
+    rlang::abort("'new_data' must be either an epi_df or NULL. No value is not allowed.")
   }
 
   if (is.null(new_data)) {
-    return(epi_juice(object, ..., composition = composition))
+    return(epi_juice(object, ...))
+  }
+
+  if (!is_epi_df(new_data)) {
+    rlang::abort("'new_data' must be either an epi_df or NULL.")
   }
 
   if (!fully_trained(object)) {
     rlang::abort("At least one step has not been trained. Please run `prep`.")
-  }
-
-  if (!any(composition == formats)) {
-    rlang::abort(
-      paste0(
-        "`composition` should be one of: ",
-        paste0("'", formats, "'", collapse = ",")
-      )
-    )
   }
 
   terms <- quos(...)
@@ -98,15 +103,7 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "tibble") {
     }
   }
 
-  if (composition == "dgCMatrix") {
-    new_data <- convert_matrix(new_data, sparse = TRUE)
-  } else if (composition == "matrix") {
-    new_data <- convert_matrix(new_data, sparse = FALSE)
-  } else if (composition == "data.frame") {
-    new_data <- base::as.data.frame(new_data)
-  }
-
   new_data
 }
 
-formats <- c("tibble", "dgCMatrix", "matrix", "data.frame")
+# formats <- c("tibble")

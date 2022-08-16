@@ -4,7 +4,15 @@
 \alias{epi_juice}
 \title{Extract transformed training set}
 \usage{
-epi_juice(object, ..., composition = "tibble")
+epi_juice(object, ...)
+}
+\arguments{
+\item{object}{A trained object such as a \code{\link[=recipe]{recipe()}} with at least
+one preprocessing operation.}
+
+\item{...}{One or more selector functions to choose which variables will be
+returned by the function. See \code{\link[selections]{recipes}} for more details.
+If no selectors are given, the default is to use \code{\link[=everything]{everything()}}.}
 }
 \description{
 Extract transformed training set

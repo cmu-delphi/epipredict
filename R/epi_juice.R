@@ -1,7 +1,7 @@
 #' Extract transformed training set
 #'
 #' @inheritParams bake.epi_recipe
-epi_juice <- function(object, ..., composition = "tibble") {
+epi_juice <- function(object, ...) {
   if (!fully_trained(object)) {
     rlang::abort("At least one step has not been trained. Please run `prep()`.")
   }
@@ -10,13 +10,6 @@ epi_juice <- function(object, ..., composition = "tibble") {
     rlang::abort(paste0(
       "Use `retain = TRUE` in `prep()` to be able ",
       "to extract the training set"
-    ))
-  }
-
-  if (!any(composition == formats)) {
-    rlang::abort(paste0(
-      "`composition` should be one of: ",
-      paste0("'", formats, "'", collapse = ",")
     ))
   }
 
@@ -43,16 +36,6 @@ epi_juice <- function(object, ..., composition = "tibble") {
     if (length(var_levels) > 0) {
       new_data <- strings2factors(new_data, var_levels)
     }
-  }
-
-  if (composition == "dgCMatrix") {
-    new_data <- convert_matrix(new_data, sparse = TRUE)
-  } else if (composition == "matrix") {
-    new_data <- convert_matrix(new_data, sparse = FALSE)
-  } else if (composition == "data.frame") {
-    new_data <- base::as.data.frame(new_data)
-  } else if (composition == "tibble") {
-    new_data <- new_data
   }
 
   new_data
