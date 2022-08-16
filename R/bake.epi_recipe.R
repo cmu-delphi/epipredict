@@ -1,6 +1,7 @@
 #' Bake an epi_recipe
 #'
 #' @import recipes
+#' @importFrom rlang is_empty
 #' @rdname bake
 #' @export
 bake.epi_recipe <- function(object, new_data, ..., composition = "tibble") {
