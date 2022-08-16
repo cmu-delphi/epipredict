@@ -242,7 +242,7 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
       epi_slide(function(x, ...) 
         arx_forecaster(x, outcome = "case_rate", 
                        predictors = "case_rate",
-                       args_l
+                       args_list = arx_args_list(ahead = ahead))$predictions %>%
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(as_of = as_of)
