@@ -2,12 +2,13 @@
 #'
 #' @param object A trained object such as a [recipe()] with at least
 #'   one preprocessing operation.
-#' @param new_data An `epi_df` for whom the preprocessing will be
-#'   applied. If `NULL` is given to `new_data`, the pre-processed _training
-#'   data_ will be returned.
+#' @param new_data An `epi_df`, data frame or tibble for whom the
+#'   preprocessing will be applied. If `NULL` is given to `new_data`,
+#'   the pre-processed _training data_ will be returned.
 #' @param ... One or more selector functions to choose which variables will be
-#'   returned by the function. See \code{\link[selections]{recipes}} for more details.
-#'   If no selectors are given, the default is to use [everything()].
+#'   returned by the function. See \code{\link[selections]{recipes}} for
+#'   more details. If no selectors are given, the default is to
+#'   use [everything()].
 #' @return An `epi_df` that may have different columns than the
 #' original columns in `new_data`.
 #' @importFrom rlang is_empty quos
@@ -22,10 +23,6 @@ bake.epi_recipe <- function(object, new_data, ...) {
 
   if (is.null(new_data)) {
     return(epi_juice(object, ...))
-  }
-
-  if (!is_epi_df(new_data)) {
-    rlang::abort("'new_data' must be either an epi_df or NULL.")
   }
 
   if (!fully_trained(object)) {
