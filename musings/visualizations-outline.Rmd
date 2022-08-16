@@ -15,12 +15,18 @@ Abstract
 
 ## Other maps
 
-# Plots
+# Basic plots
 
-## ggplot2 time series plots
+## Time series plots
 
 ## Understanding plots
 
 ## Other plots
+
+# More plots
+
+## evalcast
+
+## covidHUButils
 
 # Beyond the basics

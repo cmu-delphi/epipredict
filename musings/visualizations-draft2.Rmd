@@ -142,7 +142,13 @@ that period, which may imply overfitting.
 One may want to take out non-statistically significant parameters or 
 use LASSO regression to take out unnecessary parameters.
 
-## And beyond...
+## evalcast
 
-For users who have considerable visualization experience, they may implement
-features far beyond the scope of this vignette.
+```{r}
+remotes::install_github("cmu-delphi/covidcast", ref = "main",
+                         subdir = "R-packages/evalcast")
+```
+
+## covidHUButils
+
+
