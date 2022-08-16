@@ -77,7 +77,7 @@ k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
   if(engine_type == "linear_reg"){
     x_latest %>%
       epi_slide(function(x, ...) 
-        arx_epi_forecaster(x, outcome = "case_rate", 
+        arx_forecaster(x, outcome = "case_rate", 
                            predictors = c("case_rate", "percent_cli"),
                            args = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
@@ -86,7 +86,7 @@ k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
   } else if (engine_type == "random_forest"){
     x_latest %>%
       epi_slide(function(x, ...) 
-        arx_epi_forecaster(x, outcome = "case_rate", 
+        arx_forecaster(x, outcome = "case_rate", 
                            predictors = c("case_rate", "percent_cli"),
                            rand_forest(mode = "regression"), 
                            args = arx_args_list(ahead = ahead))$predictions %>% 
@@ -107,7 +107,7 @@ fc <- bind_rows(
   tidyr::spread(tau, q) 
 ```
 
-Here, `arx_epi_forecaster()` does all the heavy lifting. It creates leads of the target (respecting time stamps and locations) along with lags of the features (here, the response and doctors visits), estimates a forecasting model using the specified engine, creates predictions, and non-parametric confidence bands. All of these are tunable parameters.
+Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the target (respecting time stamps and locations) along with lags of the features (here, the response and doctors visits), estimates a forecasting model using the specified engine, creates predictions, and non-parametric confidence bands. All of these are tunable parameters.
 
 Now we plot them on top of the latest case rates to see how the predictions compare.
 
@@ -151,7 +151,7 @@ can_k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
   if(engine_type == "linear_reg"){
     can_latest %>%
       epi_slide(function(x, ...) 
-        arx_epi_forecaster(x, outcome = "cr_7dav", 
+        arx_forecaster(x, outcome = "cr_7dav", 
                            predictors = "cr_7dav",
                            args = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
@@ -160,7 +160,7 @@ can_k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
   } else if (engine_type == "boosted_reg_trees"){
   can_latest %>% 
     epi_slide(function(x, ...) 
-      arx_epi_forecaster(x, outcome = "cr_7dav", 
+      arx_forecaster(x, outcome = "cr_7dav", 
                          predictors = c("cr_7dav"),
                          boost_tree(mode = "regression", trees = 20), 
                          args = arx_args_list(ahead = ahead))$predictions %>% 
@@ -216,7 +216,7 @@ ggplot(can_fc %>% filter(engine_type == "boosted_reg_trees"),
   theme(legend.position = "none")  
 ```
 
-Both approaches tend to produce quite volatile forecasts (point predictions) and/or are overly confident (very narrow bands), particular when boosted regression trees were used. As this is meant to be a simple demonstration of sliding with different engines in `arx_epi_forecaster`, we may devote another vignette to work on improving the predictive modelling using the suite of tools available in epipredict.
+Both approaches tend to produce quite volatile forecasts (point predictions) and/or are overly confident (very narrow bands), particular when boosted regression trees were used. As this is meant to be a simple demonstration of sliding with different engines in `arx_forecaster`, we may devote another vignette to work on improving the predictive modelling using the suite of tools available in epipredict.
 
 ## Version-aware and unaware forecasting
 
@@ -230,7 +230,7 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
   if (as_of) {
     x %>% 
       epix_slide(function(x, ...) 
-        arx_epi_forecaster(x, outcome = "case_rate", 
+        arx_forecaster(x, outcome = "case_rate", 
                            predictors = "case_rate",
                            args = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
@@ -239,7 +239,7 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
   } else {
     x_latest %>%
       epi_slide(function(x, ...) 
-        arx_epi_forecaster(x, outcome = "case_rate", 
+        arx_forecaster(x, outcome = "case_rate", 
                            predictors = "case_rate",
                            args = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
