@@ -139,3 +139,8 @@ that period, which may imply overfitting.
 
 One may want to take out non-statistically significant parameters or 
 use LASSO regression to take out unnecessary parameters.
+
+## And beyond...
+
+For users who have considerable visualization experience, they may implemnet
+features far beyond the scope of this vignette.
