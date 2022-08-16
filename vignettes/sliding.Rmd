@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```{r pkgs}
 library(epipredict)
 library(epiprocess)
-library(covidcast)
+#library(covidcast)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -40,18 +40,19 @@ First, we download the version history (ie. archive) of the percentage of doctor
 
 ```{r grab-epi-data}
 theme_set(theme_bw())
- y <- covidcast_signals(
-   c("doctor-visits", "jhu-csse"),
-   c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
-   start_day = "2020-06-01", 
-   end_day = "2021-12-01",
-   issues = c("2020-06-01", "2021-12-01"),
-   geo_type = "state", 
-   geo_values = c("ca", "fl")) 
-# saveRDS(y, "inst/extdata/epi_archive.rds")
-#y <- readRDS(
-#  system.file("extdata", "epi_archive.rds", package = "epipredict", mustWork = TRUE)
-#)
+#%% Remove below covidcast code and library(covidcast) 
+# y <- covidcast_signals(
+#   c("doctor-visits", "jhu-csse"),
+#   c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
+#   start_day = "2020-06-01", 
+#   end_day = "2021-12-01",
+#   issues = c("2020-06-01", "2021-12-01"),
+#   geo_type = "state", 
+#   geo_values = c("ca", "fl")) 
+# saveRDS(y, "/inst/extdata/ca_fl_covidcast_signals.rds")
+y <- readRDS(
+  system.file("extdata", "ca_fl_covidcast_signals.rds", package = "epipredict", mustWork = TRUE)
+)
  
 y1 <- y[[1]] %>% 
   select(geo_value, time_value, version = issue, percent_cli = value) %>%
@@ -241,7 +242,7 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
       epi_slide(function(x, ...) 
         arx_forecaster(x, outcome = "case_rate", 
                        predictors = "case_rate",
-                       args_list = arx_args_list(ahead = ahead))$predictions %>% 
+                       args_l
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(as_of = as_of)
