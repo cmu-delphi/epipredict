@@ -23,6 +23,7 @@ Depends:
     R (>= 3.5.0)
 Imports: 
     assertthat,
+    car,
     cli,
     distributional,
     dplyr,

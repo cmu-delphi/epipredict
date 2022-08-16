@@ -1,3 +1,6 @@
+#' Extract transformed training set
+#'
+#' @inheritParams bake.epi_recipe
 epi_juice <- function(object, ..., composition = "tibble") {
   if (!fully_trained(object)) {
     rlang::abort("At least one step has not been trained. Please run `prep()`.")
