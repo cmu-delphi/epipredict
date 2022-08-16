@@ -104,5 +104,3 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "tibble") {
 }
 
 formats <- c("tibble", "dgCMatrix", "matrix", "data.frame")
-
-utils::globalVariables(c("number"))
