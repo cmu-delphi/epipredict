@@ -22,7 +22,7 @@ library(workflows)
 library(recipes)
 library(epiprocess)
 # remotes::install_github("cmu-delphi/epipredict")
-library(epipredict)
+library(epipredict) # %% Note - change back remotes for epipredict after epix_slide() as_tibble() fixed
 ```
 
 

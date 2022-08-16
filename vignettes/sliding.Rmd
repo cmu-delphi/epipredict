@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 ```{r pkgs}
 library(epipredict)
 library(epiprocess)
-library(covidcast)
+# library(covidcast)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -78,8 +78,8 @@ k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
     x_latest %>%
       epi_slide(function(x, ...) 
         arx_forecaster(x, outcome = "case_rate", 
-                       predictors = c("case_rate", "percent_cli"),
-                       args = arx_args_list(ahead = ahead))$predictions %>% 
+                       predictors = c("case_rate", "percent_cli"),  
+                       args_list = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(engine_type = "linear_reg")
@@ -89,7 +89,7 @@ k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
         arx_forecaster(x, outcome = "case_rate", 
                        predictors = c("case_rate", "percent_cli"),
                        rand_forest(mode = "regression"), 
-                       args = arx_args_list(ahead = ahead))$predictions %>% 
+                       args_list = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(engine_type = "random_forest")
@@ -153,7 +153,7 @@ can_k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
       epi_slide(function(x, ...) 
         arx_forecaster(x, outcome = "cr_7dav", 
                        predictors = "cr_7dav",
-                       args = arx_args_list(ahead = ahead))$predictions %>% 
+                       args_list = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(engine_type = "linear_reg")
@@ -163,7 +163,7 @@ can_k_week_ahead <- function(ahead = 7, engine_type = "linear_reg") {
       arx_forecaster(x, outcome = "cr_7dav", 
                      predictors = c("cr_7dav"),
                      boost_tree(mode = "regression", trees = 20), 
-                     args = arx_args_list(ahead = ahead))$predictions %>% 
+                     args_list = arx_args_list(ahead = ahead))$predictions %>% 
                 select(-c(geo_value, time_value)),
               n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
     mutate(engine_type = "boosted_reg_trees")
@@ -232,7 +232,7 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
       epix_slide(function(x, ...) 
         arx_forecaster(x, outcome = "case_rate", 
                        predictors = "case_rate",
-                       args = arx_args_list(ahead = ahead))$predictions %>% 
+                       args_list = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(as_of = as_of)
@@ -241,7 +241,7 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
       epi_slide(function(x, ...) 
         arx_forecaster(x, outcome = "case_rate", 
                        predictors = "case_rate",
-                       args = arx_args_list(ahead = ahead))$predictions %>% 
+                       args_List = arx_args_list(ahead = ahead))$predictions %>% 
           select(-c(geo_value, time_value)),
         n = 120, ref_time_values = fc_time_values, new_col_name = "fc") %>% 
       mutate(as_of = as_of)
