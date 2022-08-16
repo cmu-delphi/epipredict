@@ -56,6 +56,8 @@ ggplot(x_gather,aes(x=time_value,y=count,colour=type)) +
   geom_line(alpha=0.8,size=1)
 ```
 
+## Understanding predictions and prediction accuracy
+
 Visualizations allow us to understand how predictions work. We will use two
 different forecasts to understand why it is useful to be able to visualize.
 
@@ -142,5 +144,5 @@ use LASSO regression to take out unnecessary parameters.
 
 ## And beyond...
 
-For users who have considerable visualization experience, they may implemnet
+For users who have considerable visualization experience, they may implement
 features far beyond the scope of this vignette.

@@ -1,0 +1,26 @@
+---
+title: "Visualizations outline"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Visualizations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Abstract
+
+# Maps
+
+## USA maps with covidcast_signal
+
+## Other maps
+
+# Plots
+
+## ggplot2 time series plots
+
+## Understanding plots
+
+## Other plots
+
+# Beyond the basics
