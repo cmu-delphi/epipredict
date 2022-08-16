@@ -26,10 +26,10 @@
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
-#' out <- flatline_epi_forecaster(jhu, "death_rate")
-flatline_epi_forecaster <- function(epi_data,
-                                    outcome,
-                                    args_list = flatline_args_list()) {
+#' out <- flatline_forecaster(jhu, "death_rate")
+flatline_forecaster <- function(epi_data,
+                                outcome,
+                                args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   keys <- epi_keys(epi_data)
@@ -71,7 +71,7 @@ flatline_epi_forecaster <- function(epi_data,
 
 #' Flatline forecaster argument constructor
 #'
-#' Constructs a list of arguments for [flatline_epi_forecaster()].
+#' Constructs a list of arguments for [flatline_forecaster()].
 #'
 #' @inheritParams arx_args_list
 #'

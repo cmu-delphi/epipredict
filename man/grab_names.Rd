@@ -28,3 +28,4 @@ As this is an internal function, no checks are performed.
 df <- data.frame(a = 1, b = 2, cc = rep(NA, 3))
 grab_names(df, dplyr::starts_with("c"))
 }
+\keyword{internal}

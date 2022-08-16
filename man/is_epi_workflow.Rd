@@ -15,3 +15,4 @@ is_epi_workflow(x)
 \description{
 Test for an \code{epi_workflow}
 }
+\keyword{internal}

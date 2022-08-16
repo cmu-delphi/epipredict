@@ -8,6 +8,8 @@
 #' @param object A layer object passed to [slather()].
 #' @param newname A string of variable names if the object doesn't contain a
 #'   $name element
+#'
+#' @keywords internal
 check_pname <- function(res, preds, object, newname = NULL) {
   if (is.null(newname)) newname <- object$name
   new_preds_names <- colnames(preds)

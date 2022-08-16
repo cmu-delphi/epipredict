@@ -8,6 +8,8 @@
 #' @return An object originally passed as an argument to a layer or step
 #' @export
 #'
+#' @keywords internal
+#'
 #' @examples
 #' f <- frosting() %>%
 #'   layer_predict() %>%
