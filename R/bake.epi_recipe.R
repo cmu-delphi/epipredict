@@ -1,3 +1,8 @@
+#' Bake an epi_recipe
+#'
+#' @import recipes
+#' @rdname bake
+#' @export
 bake.epi_recipe <- function(object, new_data, ..., composition = "tibble") {
 
   if (rlang::is_missing(new_data)) {
