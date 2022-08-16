@@ -85,8 +85,8 @@ bake.epi_recipe <- function(object, new_data, ...) {
                                    check_case_weights = FALSE)
   new_data <- new_data[, out_names]
 
-  ## The levels are not null when no nominal data are present or
-  ## if strings_as_factors = FALSE in `prep`
+  # The levels are not null when no nominal data are present or
+  # if strings_as_factors = FALSE in `prep`
   if (!is.null(object$levels)) {
     var_levels <- object$levels
     var_levels <- var_levels[out_names]
@@ -102,5 +102,3 @@ bake.epi_recipe <- function(object, new_data, ...) {
 
   new_data
 }
-
-# formats <- c("tibble")
