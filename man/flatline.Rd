@@ -14,6 +14,7 @@ panel data separated by plus. The observed time series must come last.
 For example\preformatted{form <- as.formula(lead7_y ~ state + age + y)
 }
 
+
 Note that this function doesn't DO the shifting, that has to be done
 outside.}
 
@@ -43,3 +44,4 @@ tib <- data.frame(y = runif(100),
 flat <- flatline(y2 ~ j + k + y, tib) # predictions for 20 locations
 sum(!is.na(flat$residuals$.resid)) # 100 residuals, but 40 are NA
 }
+\keyword{internal}

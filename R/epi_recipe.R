@@ -215,6 +215,7 @@ epi_form2args <- function(formula, data, ...) {
 #' @param x An object.
 #' @return `TRUE` if the object inherits from `epi_recipe`.
 #'
+#' @keywords internal
 #' @export
 is_epi_recipe <- function(x) {
   inherits(x, "epi_recipe")

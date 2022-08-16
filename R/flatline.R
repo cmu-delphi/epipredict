@@ -10,7 +10,7 @@
 #'   horizon. The right hand side must contain any keys (locations) for the
 #'   panel data separated by plus. The observed time series must come last.
 #'   For example
-#'   ```
+#'   ```r
 #'   form <- as.formula(lead7_y ~ state + age + y)
 #'   ```
 #'   Note that this function doesn't DO the shifting, that has to be done
@@ -26,6 +26,7 @@
 #'   predictions for future data (the last observed of the outcome for each
 #'   combination of keys.
 #' @export
+#' @keywords internal
 #'
 #' @examples
 #' tib <- data.frame(y = runif(100),

@@ -29,3 +29,4 @@ f <- frosting() \%>\%
 
 extract_argument(f, "layer_residual_quantiles", "symmetrize")
 }
+\keyword{internal}

@@ -89,3 +89,4 @@ Used for simplicity. See \code{\link[hardhat:new-blueprint]{hardhat::new_recipe_
 \details{
 The \code{bake_dependent_roles} are automatically set to \code{epi_df} defaults.
 }
+\keyword{internal}

@@ -10,6 +10,8 @@
 #' @param keys Data frame, vector, or `NULL`. Additional grouping vars.
 #' @param out_name Chr. The output list will use this as a prefix.
 #'
+#' @keywords internal
+#'
 #' @return a list of tibbles
 epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
   if (!is.data.frame(x)) x <- data.frame(x)
