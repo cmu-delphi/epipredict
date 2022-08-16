@@ -34,7 +34,7 @@ epi_juice <- function(object, ...) {
       }, c(all = TRUE))
     var_levels <- var_levels[check_values]
     if (length(var_levels) > 0) {
-      new_data <- strings2factors(new_data, var_levels)
+      new_data <- recipes:::strings2factors(new_data, var_levels)
     }
   }
 
