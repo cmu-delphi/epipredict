@@ -24,7 +24,7 @@ epi_juice <- function(object, ...) {
                                    check_case_weights = FALSE)
   new_data <- new_data[, out_names]
 
-  ## Since most models require factors, do the conversion from character
+  # Since most models require factors, do the conversion from character
   if (!is.null(object$levels)) {
     var_levels <- object$levels
     var_levels <- var_levels[out_names]
