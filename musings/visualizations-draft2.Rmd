@@ -144,7 +144,9 @@ use LASSO regression to take out unnecessary parameters.
 
 # More covidcast plots
 
-`covidcast` has other packages.
+`covidcast` has other packages. Note that some ofthese packages can be rather
+large, meaning that the downloads may fail if the default timeout of 60 seconds
+is left unchanges.
 
 ## evalcast
 
@@ -157,14 +159,16 @@ remotes::install_github("cmu-delphi/covidcast", ref = "main",
 
 
 
+
 ## covidHUButils
 
 ```{r, eval = FALSE}
 options(timeout = 3600) # Times out after 1 hour rather than 1 minute
 
-devtools::install_github("reichlab/zoltr",force=TRUE)
-remotes::install_github("epiforecasts/scoringutils",force=TRUE)
+# Use `force=TRUE` if needed for the downloads below:
+devtools::install_github("reichlab/zoltr")
+remotes::install_github("epiforecasts/scoringutils")
 remotes::install_github("reichlab/covidData")
-remotes::install_github("reichlab/covidHubUtils",force=TRUE)
+remotes::install_github("reichlab/covidHubUtils")
 ```
 
