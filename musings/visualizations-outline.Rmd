@@ -23,7 +23,7 @@ Abstract
 
 ## Other plots
 
-# More plots
+# More covidcast plots
 
 ## evalcast
 
