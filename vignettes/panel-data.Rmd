@@ -45,10 +45,8 @@ are also valid candidates for `epipredict` functionality. Specifically, the
 data, as long as it's in `epi_df` format, 
 
 ```{r employ-stats, include=F}
-date_format <- "%B %Y"
-date_start <- format(as.Date(min(statcan_employ_subset$time_value)), date_format)
-date_end <- format(as.Date(max(statcan_employ_subset$time_value)), date_format)
-uniq_employee_type <- paste(unique(statcan_employ_subset$employee_type), collapse=", ")
+year_start <- min(grad_employ_subset$time_value)
+year_end <- max(grad_employ_subset$time_value)
 ```
 
 ## Example panel data overview
@@ -56,27 +54,25 @@ uniq_employee_type <- paste(unique(statcan_employ_subset$employee_type), collaps
 In this vignette, we will demonstrate using `epipredict` with employment data 
 from Statistics Canada. We will be using 
 [
-  Table 14-10-0220-01: Employment and average weekly earnings 
-  (including \overtime) for all employees by industry, monthly, 
-  seasonally adjusted, Canada
-](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=1410022001#data). 
-The full dataset contains monthly employment counts from `r date_start` to 
-`r date_end`, and presents employment data stratified by geographic region
-on the Canadian province level, 
-[NAICS industries](
-  https://www23.statcan.gc.ca/imdb/p3VD.pl?Function=getVD&TVD=1181553), 
-and employee type. The full dataset also contains metadata that describes the 
+  Table 37-10-0115-01: Characteristics and median employment income of 
+  longitudinal cohorts of postsecondary graduates two and five years after 
+  graduation, by educational qualification and field of study (primary 
+  groupings)
+](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710011501). 
+The full dataset contains yearly median employment income two and five years 
+after graduation, and number of graduates. The data is further stratified by 
+variables such as geographic region (Canadian province), field of study, and 
+age group. The year range of the dataset is `r year_start` to `r year_end`, 
+inclusive. The full dataset also contains metadata that describes the 
 quality of data collected. For demonstration purposes, we make the following 
 modifications to get a subset of the full dataset:
 
-* Only keep level 1 industries (2-digit codes) in the 
-[NAICS hierarchy](
-  https://www23.statcan.gc.ca/imdb/pUtil.pl?Function=getNote&Id=1181553&NT=45) 
-and remove aggregated industry codes.
 * Only keep provincial-level geographic region (the full data also has 
 "Canada" as a region)
 * Only keep "good" or better quality data rows, as indicated by the [`STATUS`]
 (https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
+* Choose a subset of covariates and aggregate across the remaining ones. The 
+chosen covariates are age group, field of study, and educational qualification.
 
 Below is the query for obtaining the full data and code for subsetting it as we 
 just described:
@@ -84,77 +80,92 @@ just described:
 ```{r employ-query, eval=F}
 library(cansim)
 
-statcan_employ <- get_cansim("14-10-0201-01")
-
-# for readability; this string is very long
-naics_code <- 
-  "Classification Code for North American Industry Classification System (NAICS)"
-
-statcan_employ_subset_input <- statcan_employ %>%
-  select(c(
-    "REF_DATE", "GEO", "VALUE", "STATUS", "Type of employee",
-    naics_code, "North American Industry Classification System (NAICS)")) %>%
+statcan_grad_employ <- get_cansim("37-10-0115-01")
+gemploy <- statcan_grad_employ %>% 
+  select(c("REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification", 
+    "Field of study", "Gender", "Age group", "Status of student in Canada", 
+    "Characteristics after graduation", "Graduate statistics")) %>%
   rename(
     "geo_value" = "GEO",
     "time_value" = "REF_DATE",
-    "ppl_count" = "VALUE",
+    "value" = "VALUE",
     "status" = "STATUS",
-    "employee_type" = "Type of employee",
-    "naics_industry" = "North American Industry Classification System (NAICS)",
-    "naics_code" = naics_code) %>%
-  mutate(time_value = tsibble::yearmonth(time_value, "%Y-%m")) %>%
+    "edu_qual" = "Educational qualification",
+    "fos" = "Field of study",
+    "gender" = "Gender",
+    "age_group" = "Age group",
+    "student_status" = "Status of student in Canada",
+    "grad_charac" = "Characteristics after graduation",
+    "grad_stat" = "Graduate statistics") %>%
+  # The original `VALUE` column contain the statistic indicated by 
+  # `Graduate statistics` in the original data. Below we pivot the data 
+  # wider so that each unique statistic can have its own column.
+  mutate(
+    grad_stat = recode_factor(
+      grad_stat, 
+      `Number of graduates` = "num_graduates", 
+      `Median employment income two years after graduation` = "med_income_2y",
+      `Median employment income five years after graduation` = "med_income_5y"),
+    time_value = as.integer(time_value)
+  ) %>%
+  pivot_wider(names_from = grad_stat, values_from = value) %>%
   filter(
-    # Reference: https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol
-    # A, B, C, D, NA indicate "good" or better data quality
-    status %in% c("A", "B", "C", "D", NA) & 
-    # Drop aggregated rows; only keep provinces
+    # Drop aggregates for some columns
     geo_value != "Canada" & 
-    # Drop aggregated industry rows
-    !str_detect(naics_code, "N") &
-    # Only keep level 1 NAICS codes; corresponds to either [##] or [##-##]
-    str_detect(naics_code, "(\\[[0-9]{2}\\])|(\\[[0-9]{2}-[0-9]{2}\\])") &
-    # [00] corresponds to unclassified; drop these rows
-    naics_code != "[00]") %>% 
-  select(-c(status, naics_code)) %>%
-  # re-level the industry column because we dropped factors
-  mutate(naics_industry = factor(naics_industry))
+    age_group != "15 to 64 years" &
+    fos != "Total, field of study" &
+    edu_qual != "Total, educational qualification" &
+    # Keep aggregates for keys we don't want to keep
+    gender == "Total, gender" &
+    student_status == "Canadian and international students" &
+    # Since we're looking at 2y and 5y employment income, the only 
+    # characteristics remaining are:
+    # - Graduates reporting employment income
+    # - Graduates reporting wages, salaries, and commissions only
+    # For simplicity, keep the first one only 
+    grad_charac == "Graduates reporting employment income" &
+    # Only keep "good" data
+    is.na(status) & 
+    # Drop NA value rows 
+    !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
+  select(-c(status, gender, student_status, grad_charac))
 ```
 
 To use this data with `epipredict`, we need to convert it into `epi_df` format 
 using [`as_epi_df`](
   https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html) 
-with additional keys. In our case, the additional keys are `employee_type` and 
-`naics_industry`. Note that in the above modifications, we encoded `time_value` 
-as type `tsibble::yearmonth`. This allows us to set `time_type` to `"yearmonth"`
-below, and to ensure lag and ahead modifications later on are using the correct 
-time units.
+with additional keys. In our case, the additional keys are `age_group`, `fos` 
+and `edu_qual`. Note that in the above modifications, we encoded `time_value` 
+as type `integer`. This allows us to set `time_type` to `"year"`, and to ensure 
+lag and ahead modifications later on are using the correct time units.
 
 ```{r convert-to-epidf, eval=F}
-statcan_employ_subset <- statcan_employ_subset_input %>%
+grad_employ_subset <- gemploy %>%
   tsibble::as_tsibble(
     index=time_value, 
-    key=c(geo_value, employee_type, naics_industry)) %>%
+    key=c(geo_value, age_group, fos, edu_qual)) %>%
   as_epi_df(
-    additional_metadata=c(other_keys=list("employee_type", "naics_industry")))
+    geo_type = "custom", time_type = "year",
+    additional_metadata=c(other_keys=list("age_group", "fos", "edu_qual")))
 ```
 
 ```{r data-dim, include=F}
-employ_rowcount <- format(nrow(statcan_employ_subset), big.mark=",")
-employ_colcount <- length(names(statcan_employ_subset))
+employ_rowcount <- format(nrow(grad_employ_subset), big.mark=",")
+employ_colcount <- length(names(grad_employ_subset))
 ```
 
 The data contains `r employ_rowcount` rows and `r employ_colcount` columns. Now, 
-we are ready to use `statcan_employ_subset` with `epipredict`. 
+we are ready to use `grad_employ_subset` with `epipredict`. 
 
 ```{r preview-data, include=T}
 # Rename for simplicity
-employ <- statcan_employ_subset
-head(employ)
+employ <- grad_employ_subset
+sample_n(employ, 6)
 ```
 
 In the following sections, we will go over preprocessing the data in the 
-`epi_recipe` framework, fitting 3 types of models from the `parsnip` package, 
-and making future predictions.
+`epi_recipe` framework, and fitting a model and making predictions within the 
+`epipredict` framework and using the package's canned forecasters.
 
 ## Preprocessing 
 
@@ -162,15 +173,15 @@ We will create a recipe that adds one `ahead` column and 3 `lag` columns.
 
 ```{r make-recipe, include=T}
 r <- epi_recipe(employ) %>%
-  step_epi_ahead(ppl_count, ahead = 6) %>% # lag & ahead units in months
-  step_epi_lag(ppl_count, lag = c(0, 6, 12)) %>%
+  step_epi_ahead(num_graduates, ahead = 1) %>% # lag & ahead units in years
+  step_epi_lag(num_graduates, lag = c(0, 1, 1)) %>%
   step_epi_naomit() 
 r
 ```
 
-There is one `raw` role which includes our value column `ppl_count`, and two 
-`key` roles which include our additional keys `employee_type` and 
-`naics_industry`. Let's take a look at what these additional columns look like.
+There is one `raw` role which includes our value column `num_graduates`, and two 
+`key` roles which include our additional keys `age_group`, `fos` and 
+`edu_qual`. Let's take a look at what these additional columns look like.
 
 ```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
@@ -185,7 +196,7 @@ baked_sample
 We will look at a simple model: `parsnip::linear_reg()` with default engine 
 `lm`. We can use `epi_workflow` with the `epi_recipe` we defined in the 
 preprocessing section to fit an autoregressive linear model using lags at
-time $t$ (current), $t-6$ months, and $t-12$ months. 
+time $t$ (current), $t-1$ (last year), and $t-2$ (2 years ago).
 
 ```{r linearreg-wf, include=T}
 wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>% fit(employ)
@@ -200,29 +211,11 @@ months of our dataset.
 latest <- employ %>% filter(time_value >= max(time_value) - 12)
 preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
 # Display a sample of the prediction values
-preds %>% sample_n(5)
+head(preds)
 ```
 
 Notice that `predict` still returns an `epi_df` with all of the keys that were 
 present in the original dataset. 
-
-```{r plot-pred, include=F}
-# this doesn't work. don't include
-# library(ggplot2)
-# joined <- full_join(statcan_employ_subset, preds, by=c("geo_value", "time_value", "employee_type", "naics_industry"))
-
-# joined %>% filter(!is.na(.pred)) %>% select(time_value) %>% unique()
-# joined %>% dplyr::filter(
-#   geo_value %in% c("British Columbia", "Ontario") &
-#   naics_industry == "Real estate and rental and leasing [53]" &
-#   employee_type == "All employees") %>%
-#   ggplot() +
-#   geom_line(aes(x = time_value, y = ppl_count)) +
-#   geom_line(aes(x = time_value, y = preds)) +
-#   facet_wrap(vars(geo_value), scales = "free_y", ncol = 1) +
-#   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
-#   labs(x = "Date", y = "Number employed")
-```
 
 ### With canned forecasters
 
@@ -235,17 +228,20 @@ and the direct autoregressive (AR) forecaster
   https://cmu-delphi.github.io/epipredict/reference/arx_forecaster.html).
 
 ```{r flatline, include=T}
-out_fl <- flatline_forecaster(
-  employ, "ppl_count", args_list = flatline_args_list(ahead=6L))
+out_fl <- flatline_forecaster(employ, "med_income_2y", 
+  args_list = flatline_args_list(
+    ahead=1L, forecast_date = as.Date("2022-08-16")))
 
 augment(out_fl$epi_workflow, employ)
 ```
 
 ```{r arx, include=T}
-args = arx_args_list(
-  lags = c(0L, 6L, 12L), ahead = 6L, forecast_date = as.Date("2022-08-01"))
+arx_args <- arx_args_list(
+    lags = c(0L, 1L, 2L), ahead = 1L, forecast_date = as.Date("2022-08-01"))
+out_arx <- arx_forecaster(employ, "med_income_2y", 
+  c("med_income_2y", "med_income_5y", "num_graduates"), 
+  args_list = arx_args)
 
-out_arx <- arx_forecaster(employ, "ppl_count", c("ppl_count"), args_list = args)
 out_arx$predictions 
 ```
 
@@ -253,7 +249,8 @@ Other changes to the direct AR forecaster, like changing the engine, also work
 as expected.
 
 ```{r arx-epi-rf, include=F, warning=F}
-out_rf <- arx_forecaster(employ, "ppl_count", c("ppl_count"), 
+out_rf <- arx_forecaster(
+  employ, "med_income_2y", c("med_income_2y", "med_income_5y"), 
   trainer = parsnip::rand_forest(mode="regression", trees=100),
   args_list = args)
 
