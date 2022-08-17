@@ -144,7 +144,7 @@ use LASSO regression to take out unnecessary parameters.
 
 ## evalcast
 
-```{r, message = FALSE}
+```{r, eval = FALSE}
 options(timeout = 3600) # Times out after 1 hour rather than 1 minute
 
 remotes::install_github("cmu-delphi/covidcast", ref = "main",
@@ -153,7 +153,7 @@ remotes::install_github("cmu-delphi/covidcast", ref = "main",
 
 ## covidHUButils
 
-```{r, message = FALSE}
+```{r, eval = FALSE}
 options(timeout = 3600) # Times out after 1 hour rather than 1 minute
 
 devtools::install_github("reichlab/zoltr",force=TRUE)
