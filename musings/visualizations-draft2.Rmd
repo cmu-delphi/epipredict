@@ -142,6 +142,10 @@ that period, which may imply overfitting.
 One may want to take out non-statistically significant parameters or 
 use LASSO regression to take out unnecessary parameters.
 
+# More covidcast plots
+
+`covidcast` has other packages.
+
 ## evalcast
 
 ```{r, eval = FALSE}
@@ -150,6 +154,8 @@ options(timeout = 3600) # Times out after 1 hour rather than 1 minute
 remotes::install_github("cmu-delphi/covidcast", ref = "main",
                          subdir = "R-packages/evalcast")
 ```
+
+
 
 ## covidHUButils
 
