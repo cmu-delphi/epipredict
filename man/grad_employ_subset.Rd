@@ -20,7 +20,11 @@ row of measurements.}
 }
 \source{
 This object contains modified data from the following Statistics Canada
-data table: \href{https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710011501}
+data table: \href{https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710011501}{
+Characteristics and median employment income of longitudinal cohorts of postsecondary
+graduates two and five years after graduation, by educational qualification and
+field of study (primary groupings)
+}
 
 Modifications:
 \itemize{
