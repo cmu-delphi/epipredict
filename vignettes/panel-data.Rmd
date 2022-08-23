@@ -238,7 +238,8 @@ our recipe.
 The model is represented algebraically as follows:
 
 \[
-  y_{t+1} = \alpha_1 x_{t} + \alpha_2 x_{t-1} + \alpha_3 x_{t-2} + \epsilon_t  
+  y_{t+1} = 
+  \beta_0 + \beta_1 x_{t} + \beta_2 x_{t-1} + \beta_3 x_{t-2} + \epsilon_t  
 \]
 
 We will use `epi_workflow` with the `epi_recipe` we defined in the 
