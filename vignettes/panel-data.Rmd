@@ -250,15 +250,7 @@ wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>% fit(employ)
 wf_linreg
 ```
 
-Let's take a look at the model object
-
-```{r linearreg-fit, include=T}
-# extract the parsnip model object
-wf_lr_fit <- wf_linreg$fit$fit 
-wf_lr_fit
-```
-
-<!-- TODO add diagnostics  -->
+<!-- TODO comment on the coefficients, say something about beta_i = lag_{i-1}_num_graduates -->
 
 Now that we have our workflow, we can generate predictions from a subset of our 
 data. For this demo, we will predict the number of graduates from the last 2 
@@ -274,7 +266,7 @@ head(preds)
 Notice that `predict` still returns an `epi_df` with all of the keys that were 
 present in the original dataset. 
 
-<!-- (TODO: residuals, predictions commentary) -->
+<!-- TODO: residuals, predictions commentary -->
 
 ## With canned forecasters
 
