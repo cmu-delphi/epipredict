@@ -17,11 +17,11 @@ knitr::opts_chunk$set(
 ```
 
 ```{r libraries}
-library(epiprocess)
-library(epipredict)
 library(dplyr)
 library(parsnip)
 library(recipes)
+library(epiprocess)
+library(epipredict)
 ```
 
 [Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
@@ -33,22 +33,21 @@ dataset, which contains daily state-wise measures of `case_rate` and
 `death_rate` for COVID-19 in 2021:
 
 ```{r epi-panel-ex, include=T}
-head(case_death_rate_subset)
+head(case_death_rate_subset, 3)
 ```
 
 `epipredict` functions work with data in [`epi_df`](
   https://cmu-delphi.github.io/epiprocess/reference/epi_df.html) 
 format. Despite the stated goal and name of the package, other panel datasets 
-are also valid candidates for `epipredict` functionality. Specifically, the 
-`epipredict` framework and direct forecasters can work with any panel data, as 
-long as it's in `epi_df` format.
+are also valid candidates for `epipredict` functionality, as long as they are 
+in `epi_df` format.
 
 ```{r employ-stats, include=F}
 year_start <- min(grad_employ_subset$time_value)
 year_end <- max(grad_employ_subset$time_value)
 ```
 
-## Example panel data overview
+# Example panel data overview
 
 In this vignette, we will demonstrate using `epipredict` with employment data 
 from Statistics Canada. We will be using 
@@ -80,7 +79,7 @@ just described:
 ```{r employ-query, eval=F}
 library(cansim)
 
-# Get original dataset 
+# Get statcan data using get_cansim, which returns a tibble
 statcan_grad_employ <- get_cansim("37-10-0115-01")
 
 gemploy <- statcan_grad_employ %>% 
@@ -141,12 +140,11 @@ using [`as_epi_df`](
   https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html) 
 with additional keys. In our case, the additional keys are `age_group`, `fos` 
 and `edu_qual`. Note that in the above modifications, we encoded `time_value` 
-as type `integer`. This allows us to set `time_type` to `"year"`, and to ensure 
+as type `integer`. This lets us set `time_type = "year"`, and ensures that
 lag and ahead modifications later on are using the correct time units. See the
 [`epi_df` documentation](
   https://cmu-delphi.github.io/epiprocess/reference/epi_df.html#time-types) for 
 a list of all the `type_type`s available.
-
 
 ```{r convert-to-epidf, eval=F}
 grad_employ_subset <- gemploy %>%
@@ -163,8 +161,22 @@ employ_rowcount <- format(nrow(grad_employ_subset), big.mark=",")
 employ_colcount <- length(names(grad_employ_subset))
 ```
 
-The data contains `r employ_rowcount` rows and `r employ_colcount` columns. Now, 
-we are ready to use `grad_employ_subset` with `epipredict`. 
+Now, we are ready to use `grad_employ_subset` with `epipredict`. 
+Our `epi_df` contains `r employ_rowcount` rows and `r employ_colcount` columns.
+Here is a quick summary of the columns in our `epi_df`:
+
+* `time_value` (time value): year in YYYY format 
+* `geo_value` (geo value): province in Canada
+* `num_graduates` (raw, time series value): number of graduates 
+* `med_income_2y` (raw, time series value): median employment income 2 years 
+after graduation 
+* `med_income_5y` (raw, time series value): median employment income 5 years 
+after graduation  
+* `age_group` (key): one of two age groups, either 15 to 34 years, or 35 to 64 
+years 
+* `fos` (key): one of 60 unique fields of study 
+* `edu_qual` (key): one of 32 unique educational qualifications, e.g., 
+"Master's disploma"
 
 ```{r preview-data, include=T}
 # Rename for simplicity
@@ -176,21 +188,30 @@ In the following sections, we will go over preprocessing the data in the
 `epi_recipe` framework, and fitting a model and making predictions within the 
 `epipredict` framework and using the package's canned forecasters.
 
-## Preprocessing 
+# Preprocessing 
 
-We will create a recipe that adds one `ahead` column and 3 `lag` columns.
+We will create an `epi_recipe` that adds one `ahead` column and 3 `lag` columns. 
+The `ahead` column tells us how many time units ahead to predict, and the `lag`
+columns tell us how many previous time points to include as covariates. We will 
+just work with one of the time series in our data for now: `num_graduates`.
+
+In this preprocessing step, no computation really happens. It just provides 
+a series of steps that will be applied when using `epi_workflow` later. And note
+that since we specified our `time_type` to be `year`, our `lag` and `lead`
+values are both in years. 
 
 ```{r make-recipe, include=T}
 r <- epi_recipe(employ) %>%
   step_epi_ahead(num_graduates, ahead = 1) %>% # lag & ahead units in years
-  step_epi_lag(num_graduates, lag = c(0, 1, 1)) %>%
+  step_epi_lag(num_graduates, lag = 0:2) %>%
   step_epi_naomit() 
 r
 ```
 
-There is one `raw` role which includes our value column `num_graduates`, and two 
-`key` roles which include our additional keys `age_group`, `fos` and 
-`edu_qual`. Let's take a look at what these additional columns look like.
+There are 3 `raw` roles which are our three lagged `num_graduates` columns, and 
+three `key` roles which are our additional keys `age_group`, `fos` and 
+`edu_qual`. Let's apply this recipe using `prep` and `bake` to see all of the 
+additional `lag` and `ahead` columns created.
 
 ```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
@@ -198,26 +219,52 @@ baked_sample <- r %>% prep() %>% bake(new_data = employ) %>% sample_n(5)
 baked_sample
 ```
 
-## Model fitting and prediction
+# Model fitting and prediction
 
-### Within recipes framework 
+## Within recipes framework 
 
-We will look at a simple model: `parsnip::linear_reg()` with default engine 
-`lm`. We can use `epi_workflow` with the `epi_recipe` we defined in the 
-preprocessing section to fit an autoregressive linear model using lags at
-time $t$ (current), $t-1$ (last year), and $t-2$ (2 years ago).
+We will look at a simple model: [`parsnip::linear_reg()`](
+  https://parsnip.tidymodels.org/reference/linear_reg.html) with the default 
+engine `lm`, which fits a linear regression using ordinary least squares. 
+Specifically, our model will be an autoregressive linear model with: 
+
+* Outcome $y_{t}$, the number of graduates at time $t$. Corresponds to 
+setting `ahead = 1` in our recipe. 
+<!-- TODO i don't like the wording i used here -->
+* Predictors $x_{t-1}$, $x_{t-2}$, and $x_{t-3}$, the number of graduates in the
+three consecutive years prior to time $t$. Corresponds to setting `lag = 0:2` in
+our recipe.
+
+The model is represented algebraically as follows:
+
+\[
+  y_{t+1} = \alpha_1 x_{t} + \alpha_2 x_{t-1} + \alpha_3 x_{t-2} + \epsilon_t  
+\]
+
+We will use `epi_workflow` with the `epi_recipe` we defined in the 
+preprocessing section to fit this model. 
 
 ```{r linearreg-wf, include=T}
 wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>% fit(employ)
 wf_linreg
 ```
 
+Let's take a look at the model object
+
+```{r linearreg-fit, include=T}
+# extract the parsnip model object
+wf_lr_fit <- wf_linreg$fit$fit 
+wf_lr_fit
+```
+
+<!-- TODO add diagnostics  -->
+
 Now that we have our workflow, we can generate predictions from a subset of our 
-data. For this demo, we will predict the employment counts from the last 12
-months of our dataset.
+data. For this demo, we will predict the number of graduates from the last 2 
+years of our dataset.
 
 ```{r linearreg-predict, include=T}
-latest <- employ %>% filter(time_value >= max(time_value) - 12)
+latest <- employ %>% filter(time_value >= max(time_value) - 2)
 preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
 # Display a sample of the prediction values
 head(preds)
@@ -226,7 +273,9 @@ head(preds)
 Notice that `predict` still returns an `epi_df` with all of the keys that were 
 present in the original dataset. 
 
-### With canned forecasters
+<!-- (TODO: residuals, predictions commentary) -->
+
+## With canned forecasters
 
 Even though we aren't working with epidemiological data, canned forecasters 
 still work as expected, out of the box. We will demonstrate this with the simple
