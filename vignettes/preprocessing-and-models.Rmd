@@ -55,6 +55,7 @@ regression, the textbook example for modeling count data, as an illustration
 for using the `epipredict` package with other existing tidymodel packages. 
 
 ```{r poisson-reg-data}
+## NOTE: built-in data? or use epiprocess built-in data and save code here
 x <- covidcast(
   data_source = "jhu-csse",
   signals = "confirmed_incidence_num",
@@ -144,7 +145,7 @@ case_death_counts_subset <- case_death_counts_subset %>%
                             mutate(geo_value_factor = as.factor(geo_value)) %>%
                             as_epi_df()
 
-epi_recipe(case_death_counts_subset) 
+epi_recipe(case_death_counts_subset)
                
 r <- epi_recipe(case_death_counts_subset) %>%
       add_role(geo_value_factor, new_role = "predictor") %>%
@@ -155,7 +156,7 @@ r <- epi_recipe(case_death_counts_subset) %>%
       step_epi_lag(cases, lag = c(0, 7)) %>%
       step_epi_lag(deaths, lag = c(0, 7)) %>%
       step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
-      step_epi_naomit()       
+      step_epi_naomit()
 ```
 
 After specifying the preprocessing steps, we will use the `parsnip` package for
@@ -197,15 +198,28 @@ However, by doing so we lose the ability to use the `recipes` framework to
 create new variables since new variables that do not exist in the 
 original dataset such as lag and leads cannot be called directly in `fit()`. 
 
-Alternatively, `step_population_scaling()` in the `epipredict` package can 
-perform the population scaling if we provide the population data, and we can 
-model this using other models such as linear regression, which we will 
-illustrate in the next section.
+Alternatively, `step_population_scaling()` and `layer_population_scaling()` 
+in the `epipredict` package can perform the population scaling if we provide the 
+population data, and we can model this using other models such as linear 
+regression, which we will illustrate in the next section.
 
 
 ## Linear Regression 
-We wish to predict the 7-day ahead death counts with lagged cases and deaths, 
-along with extra behaviour indicator inputs. Namely, we will use survey data 
+
+The CDC requires submission of case and death count predictions. However, it is
+often the case that rate data is easier to model as the outcome as it need not 
+be an integer. We can use a liner regression to predict the death rates and
+use state population data to scale the rates to counts. We will do so using 
+`layer_population_scaling()` from the `epipredict` package. 
+
+Additionally, when forecasts are submitted, prediction intervals should be 
+provided along with the point estimates. This can be obtained via postprocessing
+`layer_residual_quantiles()`. Although worth pointing out that 
+`layer_residual_quantiles()` should be used before population scaling or else 
+the transformation will make the results uninterpretable. 
+
+We wish to predict the 7-day ahead death counts with lagged case rates and death
+rates, along with extra behaviour indicator inputs. Namely, we will use survey data 
 from [COVID-19 Trends and Impact Survey](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/fb-survey.html#behavior-indicators).
 
 The survey data shows the estimated percentage of people who wore a mask for 
@@ -214,7 +228,10 @@ percentage of respondents who reported that all or most people they enountered
 in public in the past 7 days maintained a distance of at least 6 feet. We will 
 convert these percentages into indicator variables as follows:
 
+State-wise population data is obtained from `covidcast::state_census` and will
+be used in `layer_population_scaling()`. 
 ```{r}
+## NOTE: need to put in package?
 behav_ind_mask <- covidcast(data_source = "fb-survey",
                         signals = "smoothed_wwearing_mask_7d",
                         time_type = "day",
@@ -240,9 +257,45 @@ behav_ind_distancing <- covidcast(data_source = "fb-survey",
             mutate(distancing_indicator = case_when(percentage < 20 ~ 0, 
                                               TRUE ~  1)) %>%
             select(geo_value, time_value, distancing_indicator) 
+
+pop_dat <- covidcast::state_census %>% 
+          select(POPESTIMATE2019, ABBR) %>%
+          mutate(ABBR = tolower(ABBR)) %>%
+          filter(ABBR %in% c("ca","fl","tx","ny","nj"))
+
 behav_ind <- behav_ind_mask %>%
-  full_join(behav_ind_distancing, by = c("geo_value", "time_value")) %>%
-  as_epi_df()                                
+  full_join(behav_ind_distancing, by = c("geo_value", "time_value")) 
+
+dim(behav_ind)
+```
+
+We will take a subset of death rate and case rate data from our built-in dataset 
+`case_death_rate_subset`.
+```{r}
+jhu <- case_death_rate_subset %>%
+  dplyr::filter(time_value >= "2021-06-04", 
+                time_value <= "2021-12-31",
+  geo_value %in% c("ca","fl","tx","ny","nj"))
+
+dim(jhu)
+```
+
+Preprocessing steps will rely on functions from the `epipredict` package as well
+as the `recipes` package:
+
+```{r}
+jhu <- jhu %>%
+      mutate(geo_value_factor = as.factor(geo_value)) %>%
+      full_join(behav_ind, by = c("geo_value", "time_value")) %>%
+      as_epi_df()
+            
+r <- epi_recipe(jhu) %>%
+      add_role(geo_value_factor, new_role = "predictor") %>%
+      recipes::step_dummy(geo_value_factor) %>%
+      step_epi_lag(case_rate, lag = c(0, 7)) %>%
+      step_epi_lag(death_rate, lag = c(0, 7)) %>%
+      step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
+      step_epi_naomit()
 ```
 
 ## Classification
