@@ -1,0 +1,260 @@
+---
+title: Examples of Preprocessing and Models
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Examples of Preprocessing and Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction 
+
+The `epipredict` package utilizes the `tidymodels` framework, namely 
+[`recipes`](https://recipes.tidymodels.org/) for 
+[dplyr](https://dplyr.tidyverse.org/)-like pipeable sequences 
+of feature engineering and [`parsnip`](https://parsnip.tidymodels.org/) for a 
+unified interface to a range of models. 
+
+`epipredict` has additional customized feature engineering and preprocessing 
+steps, such as `step_epi_shift()`, `step_population_scaling()`, 
+`step_epi_naomit()`. They can be used along with 
+steps from the `recipes` package for more feature engineering. 
+
+In this vignette, we will illustrate some examples of how to use `epipredict`
+with `recipes` and `parsnip` for different purposes of epidemiology forecasting.
+
+The remaining vignette will be split into three sections. The first section, we 
+will use a Poisson regression to predict death counts. In the second section,
+we will use a linear regression to predict death rates. Last but not least, we
+will create a classification model for hotspot predictions. 
+
+```{r, warning=FALSE, message=FALSE}
+library(tidyverse)
+library(covidcast)
+library(epidatr)
+library(epiprocess)
+library(epipredict)
+library(recipes)
+library(poissonreg)
+```
+
+## Poisson Regression 
+
+During COVID-19, Center for Disease Control and Prevention (CDC) gathered models
+and forecasts to characterize the state of an outbreak and its course. They use
+it to inform public health decision makers on potential consequences of 
+deploying control measures.
+
+One of the outcomes that the CDC forecasts is [death counts from COVID-19](https://www.cdc.gov/coronavirus/2019-ncov/science/forecasting/forecasting-us.html).
+Although there are many state-of-the-art models, we choose to use Poisson 
+regression, the textbook example for modeling count data, as an illustration
+for using the `epipredict` package with other existing tidymodel packages. 
+
+```{r poisson-reg-data}
+x <- covidcast(
+  data_source = "jhu-csse",
+  signals = "confirmed_incidence_num",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20210604, 20211231),
+  geo_values = "ca,fl,tx,ny,nj"
+) %>%
+  fetch_tbl() %>%
+  select(geo_value, time_value, cases = value)
+
+y <- covidcast(
+  data_source = "jhu-csse",
+  signals = "deaths_incidence_num",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20210604, 20211231),
+  geo_values = "ca,fl,tx,ny,nj"
+) %>%
+  fetch_tbl() %>%
+  select(geo_value, time_value, deaths = value)
+
+case_death_counts_subset <- x %>%
+  full_join(y, by = c("geo_value", "time_value")) %>%
+  as_epi_df()
+
+```
+
+The `case_death_counts_subset` dataset comes from the `covidcast` package,and 
+contains the number of confirmed cases and deaths from June 4, 2021 to 
+Dec 31, 2021 in some U.S. states. 
+
+We wish to predict the 7-day ahead death counts with lagged cases and deaths.
+Furthermore, we will let each state be a dummy variable. Using differential 
+intercept coefficients, we can allow for an intercept shift between states.
+
+The model takes the form of
+\begin{aligned}
+\text{log}\left( \mu_{t+7} \right) = \beta_0 + \delta_1 s_{\text{state_1}} +
+\delta_2 s_{\text{state_2}} + ... +  \beta_1 \text{deaths}_{t} + \nonumber \\
+\beta_2 \text{deaths}_{t-7}  + \beta_3 \text{cases}_{t} + 
+\beta_4 \text{cases}_{t-7}
+\end{aligned}
+
+
+where $\mu_{t+7} = \mathbb{E}(y_{t+7})$, and $y_{t+7}$ is assumed to follow a 
+Poisson distribution with mean $\mu_{t+7}$; $s_{\text{state}}$ are dummy 
+variables for each state and take values of either 0 or 1. 
+
+Preprocessing steps will be performed using the `recipes` functions to get the 
+data ready for modeling. 
+
+But before diving into them, it will be helpful to understand what `roles` are
+in the `recipes` framework. 
+
+> `recipes` can assign one or more roles to each column in the data. The roles 
+> are not restricted to a predefined set; they can be anything. 
+> For most conventional situations, they are typically “predictor” and/or 
+> “outcome”. Additional roles enable targeted step operations on specific 
+> variables or groups of variables.
+>
+> In our case, the role `predictor` is given to explanatory variable that go to the 
+> left-hand side of the model. The role `outcome` is the response variable 
+> that we wish to predict. `geo_value` and `time_value` are predefined roles 
+> that are unique to the `epipredict` package. Since we work with `epi_df` 
+> objects, all datasets should have `geo_value` and `time_value` passed through
+> automatically with these two roles assigned to the appropriate columns.
+> 
+> `recipes` package also allows [manual alterations of roles](https://recipes.tidymodels.org/reference/roles.html) 
+> in bulk. There are a couple handy functions that can be used together to help us 
+> manipulate variable roles easily. 
+> 
+>> `update_role()` alters an existing role in the recipe or assigns an initial role 
+>> to variables that do not yet have a declared role.
+> 
+>> `add_role()` adds an additional role to variables that already have a role in 
+>> the recipe, without overwriting old roles.
+> 
+>> `remove_role()` eliminates a single existing role in the recipe.
+
+Notice in the following preprocessing steps, we used `add_role()` on 
+`geo_value_factor` since currently the default role for it is `raw` and 
+we would like the dummified variables to automatically be of role `predictor`. 
+
+```{r}
+case_death_counts_subset <- case_death_counts_subset %>%
+                            mutate(geo_value_factor = as.factor(geo_value)) %>%
+                            as_epi_df()
+
+epi_recipe(case_death_counts_subset) 
+               
+r <- epi_recipe(case_death_counts_subset) %>%
+      add_role(geo_value_factor, new_role = "predictor") %>%
+      recipes::step_dummy(geo_value_factor) %>%
+      step_mutate(cases = case_when(cases < 0 ~ 0, TRUE ~ cases)) %>%  
+      ## NOTE: why are there negative numbers in here?
+      step_mutate(deaths = case_when(deaths < 0 ~ 0, TRUE ~ deaths)) %>%
+      step_epi_lag(cases, lag = c(0, 7)) %>%
+      step_epi_lag(deaths, lag = c(0, 7)) %>%
+      step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
+      step_epi_naomit()       
+```
+
+After specifying the preprocessing steps, we will use the `parsnip` package for
+modeling and getting the prediction for the 7-day ahead death counts of the 
+latest available date in the dataset. 
+
+```{r}
+latest <- get_test_data(recipe = r, x = case_death_counts_subset)
+
+wf <- epi_workflow(r, parsnip::poisson_reg()) %>% 
+      fit(case_death_counts_subset)
+
+predict(wf, latest) %>% filter(!is.na(.pred))
+```
+
+Let's take a look at the fit:
+```{r, echo =FALSE}
+wf$fit$fit
+```
+
+Up to now, we've used the Poisson regression to model count data. Poisson 
+regression can also be used to model rate data, such as case rates or death
+rates, by incorporating offset terms in the model. 
+
+To model death rates, the Poisson regression would be expressed as:
+\begin{aligned}
+\text{log}\left( \mu_{t+7} \right) = \text{log(population)} + 
+\beta_0 + \delta_1 s_{\text{state_1}} +
+\delta_2 s_{\text{state_2}} + ... +  \beta_1 \text{deaths}_{t} + \nonumber \\
+\beta_2 \text{deaths}_{t-7}  + \beta_3 \text{cases}_{t} + 
+\beta_4 \text{cases}_{t-7}
+\end{aligned}
+where $\text{log(population)}$ is the log of the state population that was 
+used to scale the count data on the left-hand side of the equation.
+
+There are several ways to model rate data given count and population data. 
+First, in the `parsnip` framework, we can specify the formula in `fit()`. 
+However, by doing so we lose the ability to use the `recipes` framework to 
+create new variables since new variables that do not exist in the 
+original dataset such as lag and leads cannot be called directly in `fit()`. 
+
+Alternatively, `step_population_scaling()` in the `epipredict` package can 
+perform the population scaling if we provide the population data, and we can 
+model this using other models such as linear regression, which we will 
+illustrate in the next section.
+
+
+## Linear Regression 
+We wish to predict the 7-day ahead death counts with lagged cases and deaths, 
+along with extra behaviour indicator inputs. Namely, we will use survey data 
+from [COVID-19 Trends and Impact Survey](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/fb-survey.html#behavior-indicators).
+
+The survey data shows the estimated percentage of people who wore a mask for 
+most or all of the time while in public in the past 7 days and the estimated 
+percentage of respondents who reported that all or most people they enountered 
+in public in the past 7 days maintained a distance of at least 6 feet. We will 
+convert these percentages into indicator variables as follows:
+
+```{r}
+behav_ind_mask <- covidcast(data_source = "fb-survey",
+                        signals = "smoothed_wwearing_mask_7d",
+                        time_type = "day",
+                        geo_type = "state",
+                        time_values = epirange(20210604, 20211231),
+                        geo_values = "ca,fl,tx,ny,nj"
+                        )  %>%
+            fetch_tbl() %>%
+            select(geo_value, time_value, percentage = value) %>%
+            mutate(mask_indicator = case_when(percentage < 50 ~ 0, 
+                                              TRUE ~  1)) %>%
+            select(geo_value, time_value, mask_indicator)  
+
+behav_ind_distancing <- covidcast(data_source = "fb-survey",
+                        signals = "smoothed_wothers_distanced_public",
+                        time_type = "day",
+                        geo_type = "state",
+                        time_values = epirange(20210604, 20211231),
+                        geo_values = "ca,fl,tx,ny,nj"
+                        )  %>%
+            fetch_tbl() %>%
+            select(geo_value, time_value, percentage = value) %>%
+            mutate(distancing_indicator = case_when(percentage < 20 ~ 0, 
+                                              TRUE ~  1)) %>%
+            select(geo_value, time_value, distancing_indicator) 
+behav_ind <- behav_ind_mask %>%
+  full_join(behav_ind_distancing, by = c("geo_value", "time_value")) %>%
+  as_epi_df()                                
+```
+
+## Classification
+
+## Reference
+* McDonald, Daniel J., et al. "Can auxiliary indicators improve COVID-19 
+forecasting and hotspot prediction?." Proceedings of the National Academy of 
+Sciences 118.51 (2021): e2111453118.
+
+## Attribution
+
+This object contains a modified part of the [COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) as [republished in the COVIDcast Epidata API.](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html)
+
+This data set is licensed under the terms of the [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) by the Johns Hopkins University 
+on behalf of its Center for Systems Science in Engineering. Copyright Johns Hopkins University 2020.
