@@ -379,6 +379,7 @@ is categorized as 'down', it suggests that there has been at least a 25%
 decrease in newly reported cases over the past 7 days. Otherwise, we will 
 consider the trends to be flat. 
 
+TODO: try logistic regression on two categories and see if it works?
 <!-- 
 
 Preprocessing steps are similar to the previous models with an additional step 
@@ -434,14 +435,14 @@ new_dat = bake(r, new_data = jhu)
 ```
 
 We will use linear discriminant analysis and take a look at the predictions:
-```{r}
-library(discrim)
+# ```{r}
+# library(discrim)
 
-lda = discrim_linear() %>% 
-  set_engine("MASS") 
+# lda = discrim_linear() %>% 
+#   set_engine("MASS") 
 
-epi_workflow(r, spec= lda) %>%
-    parsnip::fit(data = jhu)
+# epi_workflow(r, spec= lda) %>%
+#     parsnip::fit(data = jhu)
 
 # wf <- workflow() %>% 
 #   add_recipe(r) %>% 
@@ -452,13 +453,14 @@ epi_workflow(r, spec= lda) %>%
 
 # predict(wf, latest)
 
-using_formula <-
-  discrim_linear() %>% 
-  set_engine("MASS") %>%
-  fit_xy(x = new_dat%>% 
-  select(-trend,-mask_indicator,-distancing_indicator,-time_value,-geo_value),
-          y= new_dat$trend)
-``` -->
+# using_formula <-
+#   discrim_linear() %>% 
+#   set_engine("MASS") %>%
+#   fit_xy(x = new_dat%>% 
+#   select(-trend,-mask_indicator,-distancing_indicator,-time_value,-geo_value),
+#           y= new_dat$trend)
+#``` 
+-->
 
 ## Reference
 * McDonald, Daniel J., et al. "Can auxiliary indicators improve COVID-19 
