@@ -9,6 +9,7 @@
 #' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
 #' @return A recipe blueprint.
 #'
+#' @keywords internal
 #' @export
 new_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,

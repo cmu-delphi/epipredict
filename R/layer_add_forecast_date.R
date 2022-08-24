@@ -83,10 +83,15 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
   as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
 
   if (object$forecast_date < as_of_date) {
-    warning("forecast_date is less than the most recent update date of the data.")
+    cli_warn(
+      c("The forecast_date is less than the most ",
+        "recent update date of the data.",
+        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}.")
+    )
   }
-
-  components$predictions <- dplyr::bind_cols(components$predictions,
-                                             forecast_date = as.Date(object$forecast_date))
+  components$predictions <- dplyr::bind_cols(
+    components$predictions,
+    forecast_date = as.Date(object$forecast_date)
+  )
   components
 }
