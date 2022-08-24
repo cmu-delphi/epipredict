@@ -68,6 +68,6 @@ test_that("arithmetic works on quantiles", {
   expect_identical(dstn / 4, dstn2)
   expect_identical((1/4) * dstn, dstn2)
 
-  expect_identical(parameters(sum(dstn))$q[[1]], as.double(1:4 + 8:11))
+  expect_error(sum(dstn))
   expect_error(suppressWarnings(dstn + distributional::dist_normal()))
 })
