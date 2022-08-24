@@ -367,20 +367,17 @@ $$
  Z_{\ell, t}=
     \begin{cases}
       \text{up}, & \text{if}\ Y^{\Delta}_{\ell, t} > 0.25 \\ 
-      \text{down}, & \text{if}\  Y^{\Delta}_{\ell, t} < -0.25\\
-      \text{flat}, & \text{otherwise}
+      \text{other}, & \text{otherwise}
     \end{cases}
 $$
 where $Y^{\Delta}_{\ell, t} = (Y_{\ell, t}- Y_{\ell, t-7})/(Y_{\ell, t-7})$. 
 We say location $\ell$ is a hotspot at time $t$ when $Z_{\ell,t}$ is categorized
 as 'up', meaning the number of newly reported cases over the past 7 days has 
-increased by at least 25% compared to the preceding week. w\When $Z_{\ell,t}$ 
-is categorized as 'down', it suggests that there has been at least a 25% 
-decrease in newly reported cases over the past 7 days. Otherwise, we will 
-consider the trends to be flat. 
+increased by at least 25% compared to the preceding week. 
+
+TODO: add model expression here. (after code works?)
 
 TODO: try logistic regression on two categories and see if it works?
-<!-- 
 
 Preprocessing steps are similar to the previous models with an additional step 
 of categorizing the response variables. 
@@ -388,29 +385,20 @@ of categorizing the response variables.
 We will take a subset of death rate and case rate data from our built-in dataset 
 `case_death_rate_subset`.
 ```{r}
-jhu <- case_death_rate_subset %>%
-      dplyr::filter(time_value >= "2021-06-04", 
-                    time_value <= "2021-12-31",
-      geo_value %in% c("ca","fl","tx","ny","nj")) %>%
-      select(geo_value, time_value, case_rate) %>%
-      mutate(geo_value_factor = as.factor(geo_value)) %>%
-      full_join(behav_ind, by = c("geo_value", "time_value")) %>%
-      as_epi_df()
-
 binner <- function(x) {
-  x <- cut(x, breaks = c(-Inf, -0.25, 0.25, Inf), include.lowest = TRUE)
+  x <- cut(x, breaks = c(-Inf, 0.25, Inf), include.lowest = TRUE)
   # now return the group number
   as.numeric(x)
 }
 
-inc <- c("down", "flat", "up")
+inc <- c("other", "up")
 
 
 r <- epi_recipe(jhu) %>%
-     # add_role(time_value, new_role = "predictor") %>%
+      add_role(time_value, new_role = "predictor") %>%
       step_dummy(geo_value_factor) %>%
       step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-      step_epi_ahead(case_rate, ahead = 7) %>%
+      step_epi_ahead(case_rate, ahead = 7, role = "predictor") %>%
       step_mutate(pct_diff1 = 
       (lag_0_case_rate - lag_7_case_rate)/lag_7_case_rate) %>%
       step_mutate(pct_diff2 = 
@@ -420,47 +408,25 @@ r <- epi_recipe(jhu) %>%
       step_num2factor(trend, 
                   role = "outcome", 
                   transform = binner, 
-                  levels = inc) %>%
+                  levels = inc)  %>%
       step_rm(case_rate,
               lag_0_case_rate, 
               lag_7_case_rate, 
               lag_14_case_rate, 
-              ahead_7_case_rate) %>%
-      step_naomit(all_predictors(), skip = FALSE) %>%
-      step_naomit(all_outcomes(), skip = FALSE) %>%
-      prep()
+              ahead_7_case_rate) 
+                  
 
-
-new_dat = bake(r, new_data = jhu)
 ```
 
 We will use linear discriminant analysis and take a look at the predictions:
-# ```{r}
-# library(discrim)
 
-# lda = discrim_linear() %>% 
-#   set_engine("MASS") 
-
-# epi_workflow(r, spec= lda) %>%
-#     parsnip::fit(data = jhu)
-
-# wf <- workflow() %>% 
-#   add_recipe(r) %>% 
-#   add_model(lda)
+```{r, eval=FALSE, echo=FALSE}
+# wf <- epi_workflow(r, parsnip::logistic_reg()) %>%
+#     fit(jhu)
 
 # latest <- get_test_data(recipe = r, x = jhu)
-# the_fit  <- fit(wf, data = latest)
-
 # predict(wf, latest)
-
-# using_formula <-
-#   discrim_linear() %>% 
-#   set_engine("MASS") %>%
-#   fit_xy(x = new_dat%>% 
-#   select(-trend,-mask_indicator,-distancing_indicator,-time_value,-geo_value),
-#           y= new_dat$trend)
-#``` 
--->
+``` 
 
 ## Reference
 * McDonald, Daniel J., et al. "Can auxiliary indicators improve COVID-19 
