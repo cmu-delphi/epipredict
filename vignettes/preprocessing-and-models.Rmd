@@ -321,7 +321,6 @@ obtain the death counts instead of death rates.
 ```{r}
 f <- frosting() %>%
     layer_predict() %>%
-    # layer_add_target_date() %>% ## NOTE: this gives 2022-01-21 instead of 2022-01-07?
     layer_add_target_date("2022-01-07") %>% # max(jhu$time_value) + 7
     layer_threshold(.pred, lower = 0) %>%
     layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
@@ -335,8 +334,20 @@ wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     add_frosting(f)
 
 latest <- get_test_data(recipe = r, x = jhu)
-predict(wf, latest)
-nested_quantiles(predict(wf, latest)$.pred_distn_original)
+p <- predict(wf, latest)
+p
+```
+
+To look at the prediction intervals:
+```{r}
+# method 1
+nested_quantiles(p$.pred_distn_original)
+# method 2
+dstn = p$.pred_distn_original
+q = distributional::parameters(dstn)$q # a list of length nrow(p)
+q
+tau = distributional::parameters(dstn)$tau
+tau
 ```
 
 The point estimate of death counts on Jan 7, 2022 is returned in column 
@@ -355,8 +366,8 @@ Sometimes predictive model for future trends are of interest. In other words,
 the target is to predict if the future will have increasing case rates(up),
 decreasing case rates (down), or flat case rates (flat). Such model are often 
 referred to as hotspot prediction models. We will refer to the model notations 
-from McDonald et al. and illustrate how modeling can be streamlined in our 
-framework with other classifcations. 
+from McDonald et al. but extend the application to predict three categories 
+instead of two. 
 
 Hotspot prediction predicts a categorical variable defined in terms of the 
 relative change of $Y_{\ell, t+a}$ compared to $Y_{\ell, t}$. 
@@ -367,17 +378,18 @@ $$
  Z_{\ell, t}=
     \begin{cases}
       \text{up}, & \text{if}\ Y^{\Delta}_{\ell, t} > 0.25 \\ 
-      \text{other}, & \text{otherwise}
+      \text{down}, & \text{if}\  Y^{\Delta}_{\ell, t} < -0.25\\
+      \text{flat}, & \text{otherwise}
     \end{cases}
 $$
+
 where $Y^{\Delta}_{\ell, t} = (Y_{\ell, t}- Y_{\ell, t-7})/(Y_{\ell, t-7})$. 
 We say location $\ell$ is a hotspot at time $t$ when $Z_{\ell,t}$ is categorized
 as 'up', meaning the number of newly reported cases over the past 7 days has 
-increased by at least 25% compared to the preceding week. 
-
-TODO: add model expression here. (after code works?)
-
-TODO: try logistic regression on two categories and see if it works?
+increased by at least 25% compared to the preceding week. w\When $Z_{\ell,t}$ 
+is categorized as 'down', it suggests that there has been at least a 25% 
+decrease in newly reported cases over the past 7 days. Otherwise, we will 
+consider the trends to be flat. 
 
 Preprocessing steps are similar to the previous models with an additional step 
 of categorizing the response variables. 
@@ -385,50 +397,53 @@ of categorizing the response variables.
 We will take a subset of death rate and case rate data from our built-in dataset 
 `case_death_rate_subset`.
 ```{r}
-binner <- function(x) {
-  x <- cut(x, breaks = c(-Inf, 0.25, Inf), include.lowest = TRUE)
-  # now return the group number
-  as.numeric(x)
-}
-
-inc <- c("other", "up")
-
+jhu <- case_death_rate_subset %>%
+  dplyr::filter(time_value >= "2021-06-04", 
+                time_value <= "2021-12-31",
+  geo_value %in% c("ca","fl","tx","ny","nj")) %>%
+  mutate(geo_value_factor = as.factor(geo_value)) %>%
+  as_epi_df()
 
 r <- epi_recipe(jhu) %>%
       add_role(time_value, new_role = "predictor") %>%
       step_dummy(geo_value_factor) %>%
       step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
       step_epi_ahead(case_rate, ahead = 7, role = "predictor") %>%
-      step_mutate(pct_diff1 = 
-      (lag_0_case_rate - lag_7_case_rate)/lag_7_case_rate) %>%
-      step_mutate(pct_diff2 = 
-      (lag_7_case_rate - lag_14_case_rate)/lag_14_case_rate) %>%
-      step_epi_naomit() %>%
-      step_mutate(trend = pct_diff1) %>%
-      step_num2factor(trend, 
-                  role = "outcome", 
-                  transform = binner, 
-                  levels = inc)  %>%
-      step_rm(case_rate,
+      step_mutate(pct_diff1 =  case_when(lag_7_case_rate == 0 ~ 0, 
+      TRUE ~ (lag_0_case_rate - lag_7_case_rate)/lag_7_case_rate) ) %>%
+      step_mutate(pct_diff2 = case_when(lag_14_case_rate == 0 ~ 0,
+      TRUE ~ (lag_7_case_rate - lag_14_case_rate)/lag_14_case_rate)) %>%
+      step_mutate(trend = case_when(pct_diff1 < -0.25 ~ "down",
+                                    pct_diff1 > 0.25 ~ "up",
+                                    TRUE ~ "flat"), 
+                                    role = "outcome") %>% 
+      step_rm(death_rate,
+              case_rate,
               lag_0_case_rate, 
               lag_7_case_rate, 
               lag_14_case_rate, 
-              ahead_7_case_rate) 
+              ahead_7_case_rate) %>%
+      step_epi_naomit()
                   
-
 ```
 
-We will use linear discriminant analysis and take a look at the predictions:
+We will use a multinomial regression and take a look at the predictions:
 
-```{r, eval=FALSE, echo=FALSE}
-# wf <- epi_workflow(r, parsnip::logistic_reg()) %>%
-#     fit(jhu)
+```{r, warning=FALSE}
+wf <- epi_workflow(r, parsnip::multinom_reg()) %>%
+    fit(jhu)
 
-# latest <- get_test_data(recipe = r, x = jhu)
-# predict(wf, latest)
-``` 
+latest <- get_test_data(recipe = r, x = jhu)
+predict(wf, latest) %>% filter(!is.na(.pred_class))
+```
+
+We can also take a look at the fit:
+```{r}
+wf$fit$fit
+```
 
 ## Reference
+
 * McDonald, Daniel J., et al. "Can auxiliary indicators improve COVID-19 
 forecasting and hotspot prediction?." Proceedings of the National Academy of 
 Sciences 118.51 (2021): e2111453118.
