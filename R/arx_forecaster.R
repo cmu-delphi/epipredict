@@ -93,10 +93,10 @@ arx_lags_validator <- function(predictors, lags) {
 #' @param min_train_window Integer. The minimal amount of training
 #'   data (in the time unit of the `epi_df`) needed to produce a forecast.
 #'   If smaller, the forecaster will return `NA` predictions.
-#' @param forecast_date The date on which the forecast is created. The default
-#'   `NULL` will attempt to determine this automatically.
-#' @param target_date The date for which the forecast is intended. The default
-#'   `NULL` will attempt to determine this automatically.
+#' @param forecast_date Date. The date on which the forecast is created.
+#'   The default `NULL` will attempt to determine this automatically.
+#' @param target_date Date. The date for which the forecast is intended.
+#'   The default `NULL` will attempt to determine this automatically.
 #' @param levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
@@ -133,6 +133,7 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
   arg_is_scalar(ahead, min_train_window, symmetrize, nonneg)
   arg_is_chr(quantile_by_key, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
+  arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, min_train_window, lags)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
