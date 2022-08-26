@@ -321,7 +321,7 @@ obtain the death counts instead of death rates.
 ```{r}
 f <- frosting() %>%
     layer_predict() %>%
-    layer_add_target_date("2022-01-07") %>% # max(jhu$time_value) + 7
+    layer_add_target_date("2022-01-07") %>% 
     layer_threshold(.pred, lower = 0) %>%
     layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
     layer_naomit(.pred)  %>%
@@ -401,16 +401,16 @@ $$g_0(x) = 0$$
 
 \begin{aligned}
 g_1(x)= \text{ln}(\frac{Pr(Y=1|x)}{Pr(Y=0|x)}) = 
-\beta_{10} + \beta_{11}* x_{\text{time_value}} + \delta_10 s_{\text{state_1}} +
-\delta_11 s_{\text{state_2}} + ... \nonumber \\
+\beta_{10} + \beta_{11}* x_{\text{time_value}} + \delta_{10} s_{\text{state_1}} +
+\delta_{11} s_{\text{state_2}} + ... \nonumber \\
 + \beta_{12} Y^{\Delta}_{\ell, t} +
 \beta_{13} Y^{\Delta}_{\ell, t-7}
 \end{aligned}
 
 \begin{aligned}
 g_2(x)= \text{ln}(\frac{Pr(Y=2|x)}{Pr(Y=0|x)}) = 
-\beta_{20} + \beta_{21}* x_{\text{time_value}} + \delta_20 s_{\text{state_1}} +
-\delta_21 s_{\text{state_2}} + ... \nonumber \\
+\beta_{20} + \beta_{21}* x_{\text{time_value}} + \delta_{20} s_{\text{state_1}} +
+\delta_{21} s_{\text{state_2}} + ... \nonumber \\
 + \beta_{22} Y^{\Delta}_{\ell, t} +
 \beta_{23} Y^{\Delta}_{\ell, t-7}
 \end{aligned}
@@ -478,16 +478,74 @@ b <- bake(prep(r,jhu),jhu)
 m_reg <-  parsnip::multinom_reg()
 
 epi_workflow() %>%
-add_formula(trend ~ time_value + geo_value + pct_diff1 + pct_diff2 )%>%
+add_formula(trend ~ time_value + geo_value + pct_diff1 + pct_diff2) %>%
 add_model(m_reg) %>%
 fit(data = b)
 ```
 
-## Reference
+## Benefits of Lagging and Leading in `epipredict`
 
-* McDonald, Daniel J., et al. "Can auxiliary indicators improve COVID-19 
+The `step_epi_ahead` and `step_epi_lag` functions in the `epipredict` package
+is handy for creating correct lags and leads for future predictions. 
+
+Let's start with a simple dataset and preprocessing:
+```{r}
+ex <- case_death_rate_subset %>%
+  dplyr::filter(time_value >= "2021-12-01", 
+                time_value <= "2021-12-31",
+  geo_value == "ca")
+
+dim(ex)
+```
+
+We want to predict death rates on 2022-01-07, which 7 days ahead from the last 
+available date in our dataset. 
+
+We will compare two methods of trying to create lags and leads:
+```{r}
+##########
+r1 <- epi_recipe(ex) %>%
+      step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+      step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+      step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
+      step_epi_naomit() %>%
+      prep()
+
+b1 <- bake(r1, ex)
+dim(b1)
+##########
+r2 <- epi_recipe(ex) %>%
+    step_mutate(lag0case_rate = lag(case_rate, 0),
+                lag7case_rate = lag(case_rate, 7),
+                lag14case_rate = lag(case_rate, 14),
+                lag0death_rate = lag(death_rate, 0),
+                lag7death_rate = lag(death_rate, 7),
+                lag14death_rate = lag(death_rate, 14),
+                ahead7death_rate = lead(death_rate, 7)) %>%
+    step_epi_naomit() %>%
+                prep()
+
+b2 <- bake(r2, ex)
+dim(b2)
+```
+
+Notice the difference in number of rows `b1` and `b2` returns. This is because 
+the recipe that doesn't use `step_epi_ahead` and `step_epi_lag` is missing dates
+compared to the one that used the `epipredict` functions. Therefore the model 
+that is trained is predicting 7 days ahead from `r max(unique(b2$time_value))`
+instead of 7 days ahead from `r max(unique(b1$time_value))` which is what we want.
+```{r}
+unique(b1$time_value)
+unique(b2$time_value)
+```
+
+## References
+
+::: {#refs}
+McDonald, Daniel J., et al. "Can auxiliary indicators improve COVID-19 
 forecasting and hotspot prediction?." Proceedings of the National Academy of 
 Sciences 118.51 (2021): e2111453118.
+:::
 
 ## Attribution
 
