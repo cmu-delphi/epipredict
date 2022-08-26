@@ -391,6 +391,32 @@ is categorized as 'down', it suggests that there has been at least a 25%
 decrease in newly reported cases over the past 7 days. Otherwise, we will 
 consider the trends to be flat. 
 
+The expression of the multinomial regression we will model is as follows:
+
+$$
+\pi_{j}(x) = \text{Pr}(Y = j|x) = \frac{e^{g_j(x)}}{\sum_{k=0}^2 g_j(x) }
+$$
+where $j$ is either down(Y=0), flat(Y=1), or up (Y=2),
+$$g_0(x) = 0$$
+
+\begin{aligned}
+g_1(x)= \text{ln}(\frac{Pr(Y=1|x)}{Pr(Y=0|x)}) = 
+\beta_{10} + \beta_{11}* x_{\text{time_value}} + \delta_10 s_{\text{state_1}} +
+\delta_11 s_{\text{state_2}} + ... \nonumber \\
++ \beta_{12} Y^{\Delta}_{\ell, t} +
+\beta_{13} Y^{\Delta}_{\ell, t-7}
+\end{aligned}
+
+\begin{aligned}
+g_2(x)= \text{ln}(\frac{Pr(Y=2|x)}{Pr(Y=0|x)}) = 
+\beta_{20} + \beta_{21}* x_{\text{time_value}} + \delta_20 s_{\text{state_1}} +
+\delta_21 s_{\text{state_2}} + ... \nonumber \\
++ \beta_{22} Y^{\Delta}_{\ell, t} +
+\beta_{23} Y^{\Delta}_{\ell, t-7}
+\end{aligned}
+
+
+
 Preprocessing steps are similar to the previous models with an additional step 
 of categorizing the response variables. 
 
@@ -427,7 +453,7 @@ r <- epi_recipe(jhu) %>%
                   
 ```
 
-We will use a multinomial regression and take a look at the predictions:
+We will fit the multinomial regression and take a look at the predictions:
 
 ```{r, warning=FALSE}
 wf <- epi_workflow(r, parsnip::multinom_reg()) %>%
@@ -440,6 +466,21 @@ predict(wf, latest) %>% filter(!is.na(.pred_class))
 We can also take a look at the fit:
 ```{r}
 wf$fit$fit
+```
+
+One could also use formula in `epi_recipe()` to achieve the same results as 
+above. However, only one of `add_formula()`, `add_recipe()`, or 
+`workflow_variables()` must be specified. For the purpose of using `add_formula`
+over `add_recipes`, we will prep and bake our recipe to return a dataset that 
+will be used for model fitting.
+```{r}
+b <- bake(prep(r,jhu),jhu)
+m_reg <-  parsnip::multinom_reg()
+
+epi_workflow() %>%
+add_formula(trend ~ time_value + geo_value + pct_diff1 + pct_diff2 )%>%
+add_model(m_reg) %>%
+fit(data = b)
 ```
 
 ## Reference
