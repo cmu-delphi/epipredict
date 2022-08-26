@@ -498,12 +498,11 @@ ex <- case_death_rate_subset %>%
 dim(ex)
 ```
 
-We want to predict death rates on 2022-01-07, which 7 days ahead from the last 
+We want to predict death rates on 2022-01-07, which is 7 days ahead from the last 
 available date in our dataset. 
 
 We will compare two methods of trying to create lags and leads:
 ```{r}
-##########
 r1 <- epi_recipe(ex) %>%
       step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
       step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -513,7 +512,8 @@ r1 <- epi_recipe(ex) %>%
 
 b1 <- bake(r1, ex)
 dim(b1)
-##########
+
+
 r2 <- epi_recipe(ex) %>%
     step_mutate(lag0case_rate = lag(case_rate, 0),
                 lag7case_rate = lag(case_rate, 7),
@@ -531,13 +531,22 @@ dim(b2)
 
 Notice the difference in number of rows `b1` and `b2` returns. This is because 
 the recipe that doesn't use `step_epi_ahead` and `step_epi_lag` is missing dates
-compared to the one that used the `epipredict` functions. Therefore the model 
-that is trained is predicting 7 days ahead from `r max(unique(b2$time_value))`
-instead of 7 days ahead from `r max(unique(b1$time_value))` which is what we want.
+compared to the one that used the `epipredict` functions.
 ```{r}
-unique(b1$time_value)
-unique(b2$time_value)
+dates_used_in_training1 <-
+ b1 %>% select(- ahead_7_death_rate) %>% na.omit() %>% select(time_value)
+
+dates_used_in_training1
+
+dates_used_in_training2 <- 
+  b2 %>% select(- ahead7death_rate) %>% na.omit() %>% select(time_value)
+
+dates_used_in_training2
 ```
+
+The model that is trained without the functions is predicting 7 days ahead from 
+`r max(dates_used_in_training2$time_value)`
+instead of 7 days ahead from `r max(dates_used_in_training1$time_value)`.
 
 ## References
 
