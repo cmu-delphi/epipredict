@@ -100,7 +100,7 @@ get_prediction <- function(model, assessment_date, recipe, data){
   preprocessed <- bake(prep(recipe, data), data) 
   assess <- preprocessed %>% 
     filter(time_value == assessment_date) %>%
-    select(broom::tidy(model), time_value, geo_value)
+    select(broom::tidy(model)$term[-1], time_value, geo_value)
 
   return(predict(model$fit$fit, new_data = assess))
 }
