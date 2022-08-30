@@ -46,7 +46,7 @@ Imports:
 Suggests: 
     timetk,
     broom,
-    tune
+    tune,
     rsample,
     dials,
     covidcast,
