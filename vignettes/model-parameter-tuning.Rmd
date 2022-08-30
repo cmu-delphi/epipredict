@@ -19,6 +19,7 @@ library(yardstick)
 library(timetk)
 library(rsample)
 library(dials)
+library(purrr, include.only = 'pluck')
 ```
 
 Take a peak at the dataset we will use:
@@ -106,7 +107,7 @@ get_prediction <- function(model, assessment_date, recipe, data){
 }
 
 assessment_date_list <- epipredict:::map(lapply(folds$splits, assessment),
-                  ~ epipredict:::pluck( . ,"time_value")) 
+                  ~ purrr::pluck( . ,"time_value")) 
 
 assessment_date <- do.call("c", assessment_date_list)
 
