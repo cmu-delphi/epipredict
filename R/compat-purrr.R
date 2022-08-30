@@ -101,3 +101,15 @@ reduce <- function(.x, .f, ..., .init) {
   f <- function(x, y) .f(x, y, ...)
   Reduce(f, .x, init = .init)
 }
+
+pluck <- function(.x, ..., .default = NULL) {
+  check_dots_unnamed()
+
+  .Call(
+    pluck_impl,
+    x = .x,
+    index = list2(...),
+    missing = .default,
+    strict = FALSE
+  )
+}
