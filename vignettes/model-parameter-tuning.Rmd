@@ -1,0 +1,194 @@
+---
+title: Model Parameter Tuning
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Parameter Tuning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(epiprocess)
+library(epipredict)
+library(tidymodels)
+library(yardstick)
+library(timetk)
+library(rsample)
+library(dials)
+```
+
+Take a peak at the dataset we will use:
+```{r}
+x <- case_death_rate_subset %>%
+  dplyr::filter(time_value >= "2021-10-01", 
+                time_value <= "2021-12-31",
+  geo_value %in% c("ca"))
+
+glimpse(x)
+```
+
+Say we want to compare whether having more lags is useful in predicting 
+7 day ahead death rates. Using a k-fold cross validation will help us determine
+that. First, we construct two recipes:
+
+```{r}
+r_less <- epi_recipe(x) %>%
+      step_epi_lag(case_rate, lag = c(0, 7)) %>%
+      step_epi_lag(death_rate, lag = c(0, 7)) %>%
+      step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
+      step_epi_naomit()
+
+r_more <- epi_recipe(x) %>%
+      step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+      step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+      step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
+      step_epi_naomit()
+```
+
+Next we resample the time-series data. We will use 1-month consecutive data
+to train the models and hold the next day as assessment data. 
+There are multiple packages that split time series data. The more common one is
+`rsample`, some other choices include the `timetk` package, which is also built
+on the tidyverse. `time_series_cv()` function from `timetk` package comes 
+in handy for cross-validation. We will illustrate it here.
+Additionally, `time_series_split()` returns a single time series split and can
+be used when the user only wants to split the data once, e.g for train/test data.
+
+```{r}
+folds <- x %>%
+  timetk::time_series_cv(initial = "1 month",
+                 assess = 1,
+                 point_forecast = TRUE)
+```
+
+There are `r nrow(folds)` folds. And we can do a sanity check of the date range 
+for each training set in the splits. 
+
+```{r}
+training_window <- as.data.frame(c(), c())
+for(i in 1:nrow(folds)){
+  training_window[i,1] <- min(analysis(folds$splits[[i]])$time_value)
+  training_window[i,2] <- max(analysis(folds$splits[[i]])$time_value)
+}
+training_window
+```
+
+Now for model fitting:
+
+```{r}
+
+fit_model <- function(x,r) {
+ epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(x %>% analysis())
+}
+
+models_less = lapply(folds$splits, fit_model, r = r_less)
+models_more = lapply(folds$splits, fit_model, r = r_more)
+
+```
+
+The tricky part is to use some functions such as `rsample::analysis()` and 
+`rsample::assessment()` to format the cross-validation data sets.
+
+```{r}
+
+get_prediction <- function(model, assessment_date, recipe, data){
+  preprocessed <- bake(prep(recipe, data), data) 
+  assess <- preprocessed %>% 
+    filter(time_value == assessment_date) %>%
+    select(yardstick::tidy(model)$term[-1], time_value, geo_value)
+
+  return(predict(model$fit$fit, new_data = assess))
+}
+
+assessment_date_list <- map(lapply(folds$splits, assessment),
+                  ~ pluck( . ,"time_value")) 
+
+assessment_date <- do.call("c", assessment_date_list)
+
+pred_less <- map2(models_less, assessment_date, get_prediction,
+             data = x, recipe = r_less) 
+pred_more <- map2(models_more, assessment_date, get_prediction,
+             data = x, recipe = r_more) 
+
+pred_less <- do.call(rbind, pred_less)
+pred_more <- do.call(rbind, pred_more)
+
+
+predictions <- data.frame(assessment_date, pred_less , pred_more) 
+colnames(predictions) <- c("time_value", "pred_less", "pred_more")
+
+real_outcome_df <- x %>% filter(time_value %in% (assessment_date + 7)) %>%
+    mutate(real_outcome= lead(death_rate, 7)) %>%
+      select(time_value, real_outcome)
+
+# compare MSPE
+predictions %>%
+  left_join( real_outcome_df) %>%
+  na.omit() %>%
+  mutate(spe_less = (real_outcome - pred_less)^2,
+         spe_more = (real_outcome - pred_more)^2) %>%
+  summarize(mspe_less=mean(spe_less),
+            mspe_more= mean(spe_more))
+```
+
+It seems like the model that does not use 14 day lag of case rate and death rate
+have a lower mean squared prediction error, therefore we will go with the model
+with the lower MSPE.
+
+The next example, we will use the `rsample` package for cross-validation data 
+splitting and we'll use it for hyperparameter tuning:
+
+```{r}
+tune_spec <- 
+  linear_reg(penalty = tune(), mixture = tune()) %>% 
+  set_engine("glmnet")
+
+tune_spec
+```
+
+Think of `tune()` here as a placeholder. After the tuning process, we will 
+select a single numeric value for each of these hyperparameters. 
+For now, we specify our parsnip model object and identify the hyperparameters
+we will `tune()`.
+
+```{r}
+grid <- dials::grid_random(extract_parameter_set_dials(tune_spec), 
+                           size=10)
+
+grid
+```
+
+The data needs to be preprocessed before passed into the workflow:
+
+```{r}
+preprocessed <- bake(prep(r_less, x), x) %>% na.omit()
+
+roll_rs <- rsample::rolling_origin(
+  preprocessed, 
+  initial = 60, 
+  assess = 1,
+  cumulative = FALSE
+  )
+
+wf = epi_workflow() %>%
+add_formula(ahead_7_death_rate ~  lag_0_case_rate + lag_7_case_rate  +
+              lag_0_death_rate  + lag_7_death_rate  ) %>%
+add_model(tune_spec)  %>% 
+tune_grid(
+  resamples = roll_rs,
+  grid = grid
+)
+
+```
+
+The metrics tied to each set of hyperparamaters can be accessed via:
+```{r}
+wf$.metrics
+```
+

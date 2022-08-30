@@ -44,6 +44,10 @@ Imports:
     vctrs,
     workflows (>= 1.0.0)
 Suggests: 
+    timetk,
+    yardstick,
+    rsample,
+    dials,
     covidcast,
     data.table,
     epidatr,
