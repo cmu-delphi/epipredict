@@ -45,6 +45,7 @@ Imports:
     workflows (>= 1.0.0)
 Suggests: 
     timetk,
+    broom,
     rsample,
     dials,
     covidcast,
