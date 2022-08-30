@@ -21,6 +21,7 @@ library(dials)
 library(purrr, include.only = 'pluck')
 library(broom, include.only = 'tidy')
 library(tune)
+library(glmnet)
 ```
 
 Take a peak at the dataset we will use:

@@ -47,6 +47,7 @@ Suggests:
     timetk,
     broom,
     tune,
+    glmnet,
     rsample,
     dials,
     covidcast,
