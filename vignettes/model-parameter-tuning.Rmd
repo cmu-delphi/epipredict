@@ -96,7 +96,6 @@ The tricky part is to use some functions such as `rsample::analysis()` and
 `rsample::assessment()` to format the cross-validation data sets.
 
 ```{r}
-models[[1]]$fit$fit
 get_prediction <- function(model, assessment_date, recipe, data){
   preprocessed <- bake(prep(recipe, data), data) 
   assess <- preprocessed %>% 
