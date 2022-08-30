@@ -20,6 +20,7 @@ library(rsample)
 library(dials)
 library(purrr, include.only = 'pluck')
 library(broom, include.only = 'tidy')
+library(tune)
 ```
 
 Take a peak at the dataset we will use:
@@ -179,7 +180,7 @@ wf = epi_workflow() %>%
 add_formula(ahead_7_death_rate ~  lag_0_case_rate + lag_7_case_rate  +
               lag_0_death_rate  + lag_7_death_rate  ) %>%
 add_model(tune_spec)  %>% 
-tune_grid(
+tune::tune_grid(
   resamples = roll_rs,
   grid = grid
 )
