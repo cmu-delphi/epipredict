@@ -19,6 +19,7 @@ library(timetk)
 library(rsample)
 library(dials)
 library(purrr, include.only = 'pluck')
+library(broom, include.only = 'tidy')
 ```
 
 Take a peak at the dataset we will use:
@@ -95,12 +96,12 @@ The tricky part is to use some functions such as `rsample::analysis()` and
 `rsample::assessment()` to format the cross-validation data sets.
 
 ```{r}
-
+models[[1]]$fit$fit
 get_prediction <- function(model, assessment_date, recipe, data){
   preprocessed <- bake(prep(recipe, data), data) 
   assess <- preprocessed %>% 
     filter(time_value == assessment_date) %>%
-    select(rsample::tidy(model)$term[-1], time_value, geo_value)
+    select(broom::tidy(model), time_value, geo_value)
 
   return(predict(model$fit$fit, new_data = assess))
 }
