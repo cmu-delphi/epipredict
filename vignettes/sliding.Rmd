@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 ```{r pkgs}
 library(epipredict)
 library(epiprocess)
-#library(covidcast)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -29,9 +28,9 @@ library(parsnip)
 
 # Demonstrations of sliding AR and ARX forecasters
 
-An key function from the epiprocess package is `epi_slide()`, which allows the user to apply a function or formula-based computation an `epi_df` over a running window of `n` time steps that may or may not be grouped (see [`epiprocess` "Slide a computation over signal values" vignette](https://cmu-delphi.github.io/epiprocess/articles/advanced.html#version-aware-forecasting-revisited-1) to go over the basics of this function). The equivalent sliding method for an `epi_archive` object can be called by using the wrapper function `epix_slide()` The key difference from `epi_slide()` is that it performs version-aware computations. That is, the function only uses data that would have been available as of time t, for that reference time. 
+A key function from the epiprocess package is `epi_slide()`, which allows the user to apply a function or formula-based computation over variables in an `epi_df` over a running window of `n` time steps (see [`epiprocess` "Slide a computation over signal values" vignette](https://cmu-delphi.github.io/epiprocess/articles/slide.html) to go over the basics of this function). The equivalent sliding method for an `epi_archive` object can be called by using the wrapper function `epix_slide()` The key difference from `epi_slide()` is that it performs version-aware computations. That is, the function only uses data that would have been available as of time t for that reference time. 
 
-In this vignette, we use `epi_slide` and `epix_slide` for backtesting our `arx_forecaster` on historical COVID-19 case data from the US and from Canada. More precisely, we first demonstrate using `epi_slide()` to slide ARX forecasters over an `epi_df` object and compare the results obtained from using different forecasting engines. We then compare the results from version-aware and unaware forecasting, where the former is obtained from applying `epix_slide()` to the `epi_archive` object, while the latter is from applying `epi_slide()` to the latest snapshot of the data.
+In this vignette, we use `epi_slide()` and `epix_slide()` for backtesting our `arx_forecaster` on historical COVID-19 case data from the US and from Canada. More precisely, we first demonstrate using `epi_slide()` to slide ARX forecasters over an `epi_df` object and compare the results obtained from using different forecasting engines. We then compare the results from version-aware and unaware forecasting, where the former is obtained from applying `epix_slide()` to the `epi_archive` object, while the latter is obtained from applying `epi_slide()` to the latest snapshot of the data.
 
 ## Comparing different forecasting engines
 
@@ -41,16 +40,7 @@ First, we download the version history (ie. archive) of the percentage of doctor
 
 ```{r grab-epi-data}
 theme_set(theme_bw())
-#%% Remove below covidcast code and library(covidcast) 
-# y <- covidcast_signals(
-#   c("doctor-visits", "jhu-csse"),
-#   c("smoothed_adj_cli", "confirmed_7dav_incidence_prop"),
-#   start_day = "2020-06-01", 
-#   end_day = "2021-12-01",
-#   issues = c("2020-06-01", "2021-12-01"),
-#   geo_type = "state", 
-#   geo_values = tolower(state.abb)) 
-# saveRDS(y, "/extdata/all_states_covidcast_signals.rds")
+
 y <- readRDS(
   system.file("extdata", "all_states_covidcast_signals.rds", package = "epipredict", mustWork = TRUE)
 ) 
@@ -65,9 +55,9 @@ x <- epix_merge(
     as_epi_archive(), sync = "locf")
 ```
 
-After obtaining the latest snapshot of the data, we produce forecasts on that data using the default engine of simple linear regression and compare to a random forest (as were introduced in the Getting started with epipredict vignette). #%% Add link to getting started vignette once html file is there!
+After obtaining the latest snapshot of the data, we produce forecasts on that data using the default engine of simple linear regression and compare to a random forest.
 
-Note that all of the warnings about `forecast_date` being less than the most recent update date of the data have been suppressed to avoid cluttering the output.
+Note that all of the warnings about the forecast date being less than the most recent update date of the data have been suppressed to avoid cluttering the output.
 
 ```{r make-arx-kweek, warning = FALSE}
 # Latest snapshot of data, and forecast dates
@@ -106,7 +96,7 @@ fc <- bind_rows(
 
 Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the target (respecting time stamps and locations) along with lags of the features (here, the response and doctors visits), estimates a forecasting model using the specified engine, creates predictions, and non-parametric confidence bands. All of these are tunable parameters.
 
-Now we plot them on top of the latest case rates to see how the predictions compare. Even though we've fitted on all states, we'll just display the results for two states, California (CA) and Florida (FL), to get a sense of the model performance while keeping it simple. So feel free to modify the code to look over the results for other states.
+To see how the predictions compare, we plot them on top of the latest case rates. Note that even though we've fitted on all states, we'll just display the results for two states, California (CA) and Florida (FL), to get a sense of the model performance while keeping it simple. So feel free to modify the code to look over the results for other states.
 
 ```{r plot-arx, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
 fc_cafl = fc %>% filter(geo_value %in% c("ca", "fl"))
@@ -128,11 +118,11 @@ For the two states of interest, simple linear regression clearly performs better
 
 ### Example using case data from Canada
 
-By leveraging the flexibility of `epiprocess`, we can apply the same techniques to data from other sources. Since some collaborators are in British Columbia, Canada, we'll do the same thing for Canada.
+By leveraging the flexibility of `epiprocess`, we can apply the same techniques to data from other sources. Since some collaborators are in British Columbia, Canada, we'll do essentially the same thing for Canada as we did above.
 
 The [COVID-19 Canada Open Data Working Group](https://opencovid.ca/) collects daily time series data on COVID-19 cases, deaths, recoveries, testing and vaccinations at the health region and province levels. Data are collected from publicly available sources such as government datasets and news releases. Unfortunately, there is no simple versioned source, so we have created our own from the Commit history.
 
-First, we load versioned case rates at the provincial level. After converting these to 7-day averages (due to highly variable provincial reporting mismatches), we then convert the data to an `epi_archive` object, and extract the latest version from it. Finally, we run the same forcasting exercise as for the American data, but here we compare producing the forcasts by using simple linear regression with using boosted regression trees.
+First, we load versioned case rates at the provincial level. After converting these to 7-day averages (due to highly variable provincial reporting mismatches), we then convert the data to an `epi_archive` object, and extract the latest version from it. Finally, we run the same forcasting exercise as for the American data, but here we compare the forecasts produced from using simple linear regression with those from using boosted regression trees.
 
 ```{r get-can-fc, warning = FALSE}
 # source("drafts/canada-case-rates.R)
@@ -199,13 +189,13 @@ ggplot(can_fc %>% filter(engine_type == "boosted_reg_trees"),
   theme(legend.position = "none")  
 ```
 
-Both approaches tend to produce quite volatile forecasts (point predictions) and/or are overly confident (very narrow bands), particularly when boosted regression trees were used. As this is meant to be a simple demonstration of sliding with different engines in `arx_forecaster`, we may devote another vignette to work on improving the predictive modelling using the suite of tools available in epipredict.
+Both approaches tend to produce quite volatile forecasts (point predictions) and/or are overly confident (very narrow bands), particularly when boosted regression trees are used. But as this is meant to be a simple demonstration of sliding with different engines in `arx_forecaster`, we may devote another vignette to work on improving the predictive modelling using the suite of tools available in epipredict.
 
 ## Version-aware and unaware forecasting
 
 ### Example using case data from US states 
 
-We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast future COVID-19 case rates from current and past COVID-19 case rates for all states. That is, we can make forecasts on the archive, `x`, and compare to forecasts on the latest data, `x_latest` using the same general set-up as above. For version-aware forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into `epi_slide()`. #%% update to include percent_cli after that issue is fixed? 
+We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast future COVID-19 case rates from current and past COVID-19 case rates for all states. That is, we can make forecasts on the archive, `x`, and compare those to forecasts on the latest data, `x_latest` using the same general set-up as above. For version-aware forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into `epi_slide()`. #%% update to include percent_cli after that issue is fixed? 
 
 ```{r make-ar-kweek-asof}
 
@@ -259,6 +249,6 @@ ggplot(fc_cafl, aes(x = fc_target_date, group = time_value, fill = as_of)) +
   theme(legend.position = "none")
 ```
 
-Again, we observe that the results are not great for these two states, but that's likely due to the simplicity of the model (ex. the omission of key factors such as age and public health measures amongst others) and the quality of the data (ex. we have not personally corrected for anomalies in the data).
+Again, we observe that the results are not great for these two states, but that's likely due to the simplicity of the model (ex. the omission of key factors such as age and public health measures) and the quality of the data (ex. we have not personally corrected for anomalies in the data).
 
 We shall leave it to the reader to try the above version aware and unaware forecasting exercise on the Canadian case rate data. The above code for the American state data should be readily adaptable for this purpose.  
