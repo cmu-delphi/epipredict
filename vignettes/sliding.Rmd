@@ -35,7 +35,7 @@ In this vignette, we use `epi_slide` and `epix_slide` for backtesting our `arx_f
 
 ## Comparing different forecasting engines
 
-### Example using CLI and case data from all US states 
+### Example using CLI and case data from US states 
 
 First, we download the version history (ie. archive) of the percentage of doctor’s visits with CLI (COVID-like illness) computed from medical insurance claims and the number of new confirmed COVID-19 cases per 100,000 population (daily) for all 50 states from the COVIDcast API. We process as before, with the modification that we use `sync = locf` in `epix_merge()` so that the last version of each observation can be carried forward to extrapolate unavailable versions for the less up-to-date input archive.
 
@@ -203,7 +203,7 @@ Both approaches tend to produce quite volatile forecasts (point predictions) and
 
 ## Version-aware and unaware forecasting
 
-### Example using case data from all US states 
+### Example using case data from US states 
 
 We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast future COVID-19 case rates from current and past COVID-19 case rates for all states. That is, we can make forecasts on the archive, `x`, and compare to forecasts on the latest data, `x_latest` using the same general set-up as above. For version-aware forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into `epi_slide()`. #%% update to include percent_cli after that issue is fixed? 
 
