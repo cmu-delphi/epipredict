@@ -150,10 +150,10 @@ can_latest <- epix_as_of(can, max_version = max(can$DT$version))
 
 # Generate the forecasts, and bind them together
 can_fc <- bind_rows(
-  purrr:::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "cr_7dav", 
+  purrr:::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = can_latest, outcome = "cr_7dav", 
                                         predictors = "cr_7dav", 
                                         engine = "linear_reg()")),
-  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "cr_7dav", 
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = can_latest, outcome = "cr_7dav", 
                                         predictors = "cr_7dav", 
                                         engine = "boost_tree(mode = 'regression', trees = 20)"))
   ) %>% 
