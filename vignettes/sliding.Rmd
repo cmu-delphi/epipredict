@@ -91,10 +91,10 @@ k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
 
 # Generate the forecasts, and bind them together
 fc <- bind_rows(
-  map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "case_rate", 
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "case_rate", 
                                         predictors = c("case_rate", "percent_cli"), 
                                         engine = "linear_reg()")),
-  map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "case_rate", 
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "case_rate", 
                                         predictors = c("case_rate", "percent_cli"), 
                                         engine = "rand_forest(mode='regression')"))
   ) %>% 
@@ -150,10 +150,10 @@ can_latest <- epix_as_of(can, max_version = max(can$DT$version))
 
 # Generate the forecasts, and bind them together
 can_fc <- bind_rows(
-  map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "cr_7dav", 
+  purrr:::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "cr_7dav", 
                                         predictors = "cr_7dav", 
                                         engine = "linear_reg()")),
-  map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "cr_7dav", 
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead(.x, epi_df = x_latest, outcome = "cr_7dav", 
                                         predictors = "cr_7dav", 
                                         engine = "boost_tree(mode = 'regression', trees = 20)"))
   ) %>% 
@@ -231,8 +231,8 @@ k_week_ahead_as_of <- function(ahead = 7, as_of = TRUE) {
 
 # Generate the forecasts, and bind them together
 fc <- bind_rows(
-  map_dfr(c(7,14,21,28), ~ k_week_ahead_as_of(.x, as_of = TRUE)),
-  map_dfr(c(7,14,21,28), ~ k_week_ahead_as_of(.x, as_of = FALSE))
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead_as_of(.x, as_of = TRUE)),
+  purrr::map_dfr(c(7,14,21,28), ~ k_week_ahead_as_of(.x, as_of = FALSE))
   ) %>% 
   mutate(
     .pred_distn = nested_quantiles(fc_.pred_distn) # "nested" list-col
