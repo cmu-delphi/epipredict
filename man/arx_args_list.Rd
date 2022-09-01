@@ -27,11 +27,11 @@ date for which forecasts should be produced.}
 data (in the time unit of the \code{epi_df}) needed to produce a forecast.
 If smaller, the forecaster will return \code{NA} predictions.}
 
-\item{forecast_date}{The date on which the forecast is created. The default
-\code{NULL} will attempt to determine this automatically.}
+\item{forecast_date}{Date. The date on which the forecast is created.
+The default \code{NULL} will attempt to determine this automatically.}
 
-\item{target_date}{The date for which the forecast is intended. The default
-\code{NULL} will attempt to determine this automatically.}
+\item{target_date}{Date. The date for which the forecast is intended.
+The default \code{NULL} will attempt to determine this automatically.}
 
 \item{levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of

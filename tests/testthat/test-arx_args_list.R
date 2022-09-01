@@ -15,5 +15,11 @@ test_that("arx_args checks inputs", {
   expect_error(arx_args_list(levels = -.1))
   expect_error(arx_args_list(levels = 1.1))
   expect_type(arx_args_list(levels = NULL), "list")
+
+  expect_error(arx_args_list(target_date = "2022-01-01"))
+  expect_identical(
+    arx_args_list(target_date = as.Date("2022-01-01"))$target_date,
+    as.Date("2022-01-01")
+  )
 })
 
