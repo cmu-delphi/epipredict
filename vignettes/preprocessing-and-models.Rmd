@@ -36,7 +36,9 @@ we will use a linear regression to predict death rates. Last but not least, we
 will create a classification model for hotspot predictions. 
 
 ```{r, warning=FALSE, message=FALSE}
-library(covidcast)
+# library(covidcast)
+library(tidyr)
+library(dplyr)
 library(epidatr)
 library(epiprocess)
 library(epipredict)
@@ -62,33 +64,21 @@ for using the `epipredict` package with other existing tidymodel packages.
 ## NOTE: built-in data? or use epiprocess built-in data and save code here
 x <- covidcast(
   data_source = "jhu-csse",
-  signals = "confirmed_incidence_num",
+  signals = "confirmed_incidence_num,deaths_incidence_num",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj"
-) %>%
-  fetch_tbl() %>%
-  select(geo_value, time_value, cases = value)
-
-y <- covidcast(
-  data_source = "jhu-csse",
-  signals = "deaths_incidence_num",
-  time_type = "day",
-  geo_type = "state",
-  time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj"
-) %>%
-  fetch_tbl() %>%
-  select(geo_value, time_value, deaths = value)
+  geo_values = "ca,fl,tx,ny,nj") %>%
+  fetch_tbl() 
 
 case_death_counts_subset <- x %>%
-  full_join(y, by = c("geo_value", "time_value")) %>%
+  pivot_wider(names_from = signal, values_from = value) %>%
+  rename(cases = confirmed_incidence_num, deaths = deaths_incidence_num) %>%
+  select(geo_value, time_value, cases, deaths) %>%
   as_epi_df()
-
 ```
 
-The `case_death_counts_subset` dataset comes from the `covidcast` package,and 
+The `case_death_counts_subset` dataset comes from the `epidatr` package,and 
 contains the number of confirmed cases and deaths from June 4, 2021 to 
 Dec 31, 2021 in some U.S. states. 
 
@@ -115,30 +105,38 @@ data ready for modeling.
 But before diving into them, it will be helpful to understand what `roles` are
 in the `recipes` framework. 
 
-> `recipes` can assign one or more roles to each column in the data. The roles 
-> are not restricted to a predefined set; they can be anything. 
-> For most conventional situations, they are typically “predictor” and/or 
-> “outcome”. Additional roles enable targeted step operations on specific 
-> variables or groups of variables.
->
-> In our case, the role `predictor` is given to explanatory variable that go to the 
-> left-hand side of the model. The role `outcome` is the response variable 
-> that we wish to predict. `geo_value` and `time_value` are predefined roles 
-> that are unique to the `epipredict` package. Since we work with `epi_df` 
-> objects, all datasets should have `geo_value` and `time_value` passed through
-> automatically with these two roles assigned to the appropriate columns.
+---
+
+#### Aside on `recipes`
+
+`recipes` can assign one or more roles to each column in the data. The roles 
+are not restricted to a predefined set; they can be anything. 
+For most conventional situations, they are typically “predictor” and/or 
+"outcome". Additional roles enable targeted `step_*()` operations on specific 
+variables or groups of variables.
+
+In our case, the role `predictor` is given to explanatory variable that go to the 
+left-hand side of the model. The role `outcome` is the response variable 
+that we wish to predict. `geo_value` and `time_value` are predefined roles 
+that are unique to the `epipredict` package. Since we work with `epi_df` 
+objects, all datasets should have `geo_value` and `time_value` passed through
+automatically with these two roles assigned to the appropriate columns.
+ 
+The `recipes` package also allows [manual alterations of roles](https://recipes.tidymodels.org/reference/roles.html) 
+in bulk. There are a couple handy functions that can be used together to help us 
+manipulate variable roles easily. 
+
+> `update_role()` alters an existing role in the recipe or assigns an initial role 
+> to variables that do not yet have a declared role.
 > 
-> `recipes` package also allows [manual alterations of roles](https://recipes.tidymodels.org/reference/roles.html) 
-> in bulk. There are a couple handy functions that can be used together to help us 
-> manipulate variable roles easily. 
+> `add_role()` adds an additional role to variables that already have a role in 
+> the recipe, without overwriting old roles.
 > 
->> `update_role()` alters an existing role in the recipe or assigns an initial role 
->> to variables that do not yet have a declared role.
-> 
->> `add_role()` adds an additional role to variables that already have a role in 
->> the recipe, without overwriting old roles.
-> 
->> `remove_role()` eliminates a single existing role in the recipe.
+> `remove_role()` eliminates a single existing role in the recipe.
+
+#### End aside
+
+---
 
 Notice in the following preprocessing steps, we used `add_role()` on 
 `geo_value_factor` since currently the default role for it is `raw` and 
@@ -168,7 +166,7 @@ modeling and getting the prediction for the 7-day ahead death counts of the
 latest available date in the dataset. 
 
 ```{r}
-latest <- get_test_data(recipe = r, x = case_death_counts_subset)
+latest <- get_test_data(r, case_death_counts_subset)
 
 wf <- epi_workflow(r, parsnip::poisson_reg()) %>% 
       fit(case_death_counts_subset)
