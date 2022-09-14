@@ -22,6 +22,7 @@ library(parsnip)
 library(recipes)
 library(epiprocess)
 library(epipredict)
+library(ggplot2)
 ```
 
 [Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
@@ -68,8 +69,8 @@ modifications to get a subset of the full dataset:
 
 * Only keep provincial-level geographic region (the full data also has 
 "Canada" as a region)
-* Only keep "good" or better quality data rows, as indicated by the [`STATUS`]
-(https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
+* Only keep "good" or better quality data rows, as indicated by the [`STATUS`](
+  https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
 * Choose a subset of covariates and aggregate across the remaining ones. The 
 chosen covariates are age group, field of study, and educational qualification.
 
@@ -82,11 +83,13 @@ library(cansim)
 # Get statcan data using get_cansim, which returns a tibble
 statcan_grad_employ <- get_cansim("37-10-0115-01")
 
-gemploy <- statcan_grad_employ %>% 
+gemploy <- statcan_grad_employ %>%
   # Drop some columns and rename the ones we keep
-  select(c("REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification", 
-    "Field of study", "Gender", "Age group", "Status of student in Canada", 
-    "Characteristics after graduation", "Graduate statistics")) %>%
+  select(c(
+    "REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification",
+    "Field of study", "Gender", "Age group", "Status of student in Canada",
+    "Characteristics after graduation", "Graduate statistics"
+  )) %>%
   rename(
     "geo_value" = "GEO",
     "time_value" = "REF_DATE",
@@ -98,40 +101,43 @@ gemploy <- statcan_grad_employ %>%
     "age_group" = "Age group",
     "student_status" = "Status of student in Canada",
     "grad_charac" = "Characteristics after graduation",
-    "grad_stat" = "Graduate statistics") %>%
-  # The original `VALUE` column contain the statistic indicated by 
-  # `Graduate statistics` in the original data. Below we pivot the data 
+    "grad_stat" = "Graduate statistics"
+  ) %>%
+  # The original `VALUE` column contain the statistic indicated by
+  # `Graduate statistics` in the original data. Below we pivot the data
   # wider so that each unique statistic can have its own column.
   mutate(
     # Recode for easier pivoting
     grad_stat = recode_factor(
-      grad_stat, 
-      `Number of graduates` = "num_graduates", 
+      grad_stat,
+      `Number of graduates` = "num_graduates",
       `Median employment income two years after graduation` = "med_income_2y",
-      `Median employment income five years after graduation` = "med_income_5y"),
+      `Median employment income five years after graduation` = "med_income_5y"
+    ),
     # They are originally strings but want ints for conversion to epi_df later
     time_value = as.integer(time_value)
   ) %>%
   pivot_wider(names_from = grad_stat, values_from = value) %>%
   filter(
     # Drop aggregates for some columns
-    geo_value != "Canada" & 
-    age_group != "15 to 64 years" &
-    fos != "Total, field of study" &
-    edu_qual != "Total, educational qualification" &
-    # Keep aggregates for keys we don't want to keep
-    gender == "Total, gender" &
-    student_status == "Canadian and international students" &
-    # Since we're looking at 2y and 5y employment income, the only 
-    # characteristics remaining are:
-    # - Graduates reporting employment income
-    # - Graduates reporting wages, salaries, and commissions only
-    # For simplicity, keep the first one only 
-    grad_charac == "Graduates reporting employment income" &
-    # Only keep "good" data
-    is.na(status) & 
-    # Drop NA value rows 
-    !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
+    geo_value != "Canada" &
+      age_group != "15 to 64 years" &
+      fos != "Total, field of study" &
+      edu_qual != "Total, educational qualification" &
+      # Keep aggregates for keys we don't want to keep
+      gender == "Total, gender" &
+      student_status == "Canadian and international students" &
+      # Since we're looking at 2y and 5y employment income, the only
+      # characteristics remaining are:
+      # - Graduates reporting employment income
+      # - Graduates reporting wages, salaries, and commissions only
+      # For simplicity, keep the first one only
+      grad_charac == "Graduates reporting employment income" &
+      # Only keep "good" data
+      is.na(status) &
+      # Drop NA value rows
+      !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)
+  ) %>%
   select(-c(status, gender, student_status, grad_charac))
 ```
 
@@ -149,15 +155,17 @@ a list of all the `type_type`s available.
 ```{r convert-to-epidf, eval=F}
 grad_employ_subset <- gemploy %>%
   tsibble::as_tsibble(
-    index=time_value, 
-    key=c(geo_value, age_group, fos, edu_qual)) %>%
+    index = time_value,
+    key = c(geo_value, age_group, fos, edu_qual)
+  ) %>%
   as_epi_df(
     geo_type = "custom", time_type = "year",
-    additional_metadata=c(other_keys=list("age_group", "fos", "edu_qual")))
+    additional_metadata = c(other_keys = list("age_group", "fos", "edu_qual"))
+  )
 ```
 
 ```{r data-dim, include=F}
-employ_rowcount <- format(nrow(grad_employ_subset), big.mark=",")
+employ_rowcount <- format(nrow(grad_employ_subset), big.mark = ",")
 employ_colcount <- length(names(grad_employ_subset))
 ```
 
@@ -190,83 +198,160 @@ In the following sections, we will go over preprocessing the data in the
 
 # Preprocessing 
 
-We will create an `epi_recipe` that adds one `ahead` column and 3 `lag` columns. 
-The `ahead` column tells us how many time units ahead to predict, and the `lag`
-columns tell us how many previous time points to include as covariates. We will 
-just work with one of the time series in our data for now: `num_graduates`.
+As a simple example, let's work with the `num_graduates` column for now.
 
-In this preprocessing step, no computation really happens. It just provides 
-a series of steps that will be applied when using `epi_workflow` later. And note
-that since we specified our `time_type` to be `year`, our `lag` and `lead`
+```{r employ-small, include=T}
+employ_small <- employ %>%
+  group_by(geo_value, time_value, age_group, edu_qual) %>%
+  summarise_if(is.numeric, sum) %>%
+  ungroup() %>%
+  # Incomplete data - exclude
+  filter(geo_value != "Territories") %>%
+  # Select groups where there are complete timeseries values
+  group_by(geo_value, age_group, edu_qual) %>%
+  filter(n() >= 6) %>%
+  mutate(
+    num_graduates_prop = num_graduates / sum(num_graduates)
+  ) %>%
+  # med_income_2y_prop = med_income_2y / sum(med_income_2y),
+  # med_income_5y_prop = med_income_5y / sum(med_income_5y)) %>%
+  ungroup() %>%
+  # select(-c(med_income_2y, med_income_5y, num_graduates)) %>%
+  # Bug: shouldn't have to cast back to epi_df
+  as_epi_df(
+    geo_type = "custom",
+    time_type = "year",
+    additional_metadata = c(other_keys = list("age_group", "edu_qual")))
+head(employ_small)
+```
+
+Below is a visualization for a sample of the small data. Note that some groups 
+do not have any time series information since we filtered out all timeseries 
+with incomplete dates.
+
+```{r employ-small-graph, include=F, eval=F}
+employ_small %>%
+  filter(geo_value %in% c("British Columbia", "Ontario")) %>%
+  filter(grepl("degree", edu_qual, fixed = T)) %>%
+  ggplot(aes(x = time_value, y = num_graduates_prop, color = geo_value)) +
+  geom_line() +
+  facet_grid(rows = vars(edu_qual), cols = vars(age_group)) +
+  xlab("Year") +
+  ylab("# of graduates as proportion of sum within group") +
+  ggtitle("Trend in # of Graduates by Age Group and Education in BC and ON")
+```
+
+We will predict the number of graduates in the next year (time $t+1$) using an 
+autoregressive model with three lags (i.e., an AR(3) model). Such a model is 
+represented algebraically like this: 
+
+\[
+  x_{t+1} = 
+  \phi_0 + \phi_1 x_{t} + \phi_2 x_{t-1} + \phi_3 x_{t-2} + \epsilon_t  
+\]
+
+where $x_i$ is the number of graduates at time $i$, and the current time is $t$.
+
+In the preprocessing step, we need to create additional columns in `employ` for 
+each of $x_{t+1}$, $x_{t}$, $x_{t-1}$, and $x_{t-2}$. We do this via an 
+`epi_recipe`. Note that creating an `epi_recipe` alone doesn't add these 
+outcome and predictor columns; the recipe just stores the instructions for 
+adding them. 
+
+Our `epi_recipe` should add one `ahead` column representing $x_{t+1}$ and 
+3 `lag` columns representing $x_{t}$, $x_{t-1}$, and $x_{t-2}$. Also note that 
+since we specified our `time_type` to be `year`, our `lag` and `lead`
 values are both in years. 
 
-```{r make-recipe, include=T}
-r <- epi_recipe(employ) %>%
-  step_epi_ahead(num_graduates, ahead = 1) %>% # lag & ahead units in years
-  step_epi_lag(num_graduates, lag = 0:2) %>%
-  step_epi_naomit() 
+```{r make-recipe, include=T, eval=F}
+# r <- epi_recipe(employ) %>%
+#   step_epi_ahead(num_graduates, ahead = 1) %>% # lag & ahead units in years
+#   step_epi_lag(num_graduates, lag = 0:2) %>%
+#   step_epi_naomit()
+# r
+
+r <- epi_recipe(employ_small) %>%
+  step_epi_ahead(num_graduates_prop, ahead = 1) %>% # lag & ahead units in years
+  step_epi_lag(num_graduates_prop, lag = 0:2) %>%
+  step_epi_naomit()
 r
 ```
 
 There are 3 `raw` roles which are our three lagged `num_graduates` columns, and 
 three `key` roles which are our additional keys `age_group`, `fos` and 
-`edu_qual`. Let's apply this recipe using `prep` and `bake` to see all of the 
-additional `lag` and `ahead` columns created.
+`edu_qual`. 
+
+Let's apply this recipe using `prep` and `bake` to generate and view the `lag` 
+and `ahead` columns.
 
 ```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
-baked_sample <- r %>% prep() %>% bake(new_data = employ) %>% sample_n(5)
-baked_sample
+baked_sample <- r %>%
+  prep() %>%
+  bake(new_data = employ_small) %>%
+  sample_n(5)
+# baked_sample
 ```
+
+We can see that the `prep` and `bake` steps created new columns according to 
+our `epi_recipe`:
+
+- `ahead_1_num_graduates` corresponds to $x_{t+1}$
+- `lag_0_num_graduates`, `lag_1_num_graduates`, and `lag_2_num_graduates` 
+correspond to $x_{t}$, $x_{t-1}$, and $x_{t-2}$ respectively.
 
 # Model fitting and prediction
 
 ## Within recipes framework 
 
-We will look at a simple model: [`parsnip::linear_reg()`](
+Since our goal for now is to fit a simple autoregressive model, we can use
+[`parsnip::linear_reg()`](
   https://parsnip.tidymodels.org/reference/linear_reg.html) with the default 
 engine `lm`, which fits a linear regression using ordinary least squares. 
-Specifically, our model will be an autoregressive linear model with: 
-
-* Outcome $y_{t}$, the number of graduates at time $t$. Corresponds to 
-setting `ahead = 1` in our recipe. 
-<!-- TODO i don't like the wording i used here -->
-* Predictors $x_{t-1}$, $x_{t-2}$, and $x_{t-3}$, the number of graduates in the
-three consecutive years prior to time $t$. Corresponds to setting `lag = 0:2` in
-our recipe.
-
-The model is represented algebraically as follows:
-
-\[
-  y_{t+1} = 
-  \beta_0 + \beta_1 x_{t} + \beta_2 x_{t-1} + \beta_3 x_{t-2} + \epsilon_t  
-\]
 
 We will use `epi_workflow` with the `epi_recipe` we defined in the 
-preprocessing section to fit this model. 
+preprocessing section along with the `parsnip::linear_reg()` model. Note again 
+that `epi_workflow` is a container and doesn't actually do the fitting. We have 
+to pass the workflow into `fit()` to get our model coefficients 
+$\phi_i, i=0,...,3$.
 
 ```{r linearreg-wf, include=T}
-wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>% fit(employ)
+wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>%
+  parsnip::fit(employ_small)
 wf_linreg
 ```
 
-<!-- TODO comment on the coefficients, say something about beta_i = lag_{i-1}_num_graduates -->
+This output tells us the coefficients of the fitted model; for instance, 
+the intercept is $\phi_0 = -2.2426$ and the coefficient for $x_{t}$ is 
+$\phi_1 = 1.14401$.
 
 Now that we have our workflow, we can generate predictions from a subset of our 
-data. For this demo, we will predict the number of graduates from the last 2 
+data. For this demo, we will predict the number of graduates using the last 2 
 years of our dataset.
 
 ```{r linearreg-predict, include=T}
-latest <- employ %>% filter(time_value >= max(time_value) - 2)
+latest <- employ_small %>% filter(time_value >= max(time_value) - 2)
 preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
-# Display a sample of the prediction values
-head(preds)
+# Display a sample of the prediction values, excluding NAs
+preds %>% head()
 ```
 
-Notice that `predict` still returns an `epi_df` with all of the keys that were 
-present in the original dataset. 
+We can do this using the `augment` function too:
+```{r linearreg-augment, include=T}
+employ_small_with_preds <- augment(wf_linreg, latest)
+employ_small_with_preds %>% head()
 
-<!-- TODO: residuals, predictions commentary -->
+employ_small_with_preds %>%
+  mutate(resid = med_income_2y - .pred) %>%
+  ggplot(aes(x = .pred, y = resid, color = geo_value)) +
+  geom_point() +
+  xlab("Fitted values") +
+  ylab("Residuals") +
+  ggtitle("Plot of fitted values vs. residuals")
+```
+
+Notice that `predict` and `augment` both still returns an `epi_df` with all of 
+the keys that were present in the original dataset. 
 
 ## With canned forecasters
 
@@ -278,33 +363,52 @@ and the direct autoregressive (AR) forecaster
 [`arx_forecaster`](
   https://cmu-delphi.github.io/epipredict/reference/arx_forecaster.html).
 
-```{r flatline, include=T}
-out_fl <- flatline_forecaster(employ, "med_income_2y", 
-  args_list = flatline_args_list(
-    ahead=1L, forecast_date = as.Date("2022-08-16")))
+With canned forecasters, we don't need to manually create a recipe and workflow;
+we just need to specify the lags, aheads, and some additional arguments that 
+are passed in a forecast-specific way that we'll see below.
 
-augment(out_fl$epi_workflow, employ)
+In this first example, we'll use `flatline_forecaster` to make a simple
+prediction of the 2-year median income for the next year, based on one previous 
+time point. This model is representated algebraically as:
+\[y_{t+1} = \phi_0 + \phi_1 y_{t}\]
+where $y_i$ is the 2-year median income at time $i$.
+
+```{r flatline, include=T, warning=F}
+out_fl <- flatline_forecaster(employ_small, "med_income_2y",
+  args_list = flatline_args_list(
+    ahead = 1L, forecast_date = as.Date("2015-01-01")))
+
+augment(out_fl$epi_workflow, employ_small) %>% head()
 ```
 
-```{r arx-lr, include=T}
-arx_args <- arx_args_list(
-    lags = c(0L, 1L), ahead = 1L, forecast_date = as.Date("2022-08-01"))
+In this second example, we'll use `arx_forecaster` to make a prediction of the 
+2-year median income based on the previous two time points' 2-year median 
+income _and_ 5-year median income. This model is represented algebraically as:
+\[
+  y_{t+1} = 
+  \phi_0 + \phi_1 y_{t} + \phi_2 y_{t-1} + \phi_3 z_{t} + \phi_4 z_{t-1} 
+\]
+where $y_i$ is as before, and $z_i$ is the 5-year median income at time $i$.
 
-out_arx_lr <- arx_forecaster(employ, "med_income_2y", 
-  c("med_income_2y", "med_income_5y", "num_graduates"), 
+```{r arx-lr, include=T, warning=F}
+arx_args <- arx_args_list(
+  lags = c(0L, 1L), ahead = 1L, forecast_date = as.Date("2015-01-01"))
+
+out_arx_lr <- arx_forecaster(employ_small, "med_income_2y",
+  c("med_income_2y", "med_income_5y"),
   args_list = arx_args)
 
-out_arx_lr$predictions 
+out_arx_lr$predictions %>% head()
 ```
 
 Other changes to the direct AR forecaster, like changing the engine, also work 
-as expected.
+as expected. Below we use a boosted tree model instead of a linear regression.
 
-```{r arx-rf, include=F, warning=F}
+```{r arx-rf, include=T, warning=F}
 out_arx_rf <- arx_forecaster(
-  employ, "med_income_2y", c("med_income_2y", "med_income_5y", "num_graduates"), 
+  employ_small, "med_income_2y", c("med_income_2y", "med_income_5y"),
   trainer = parsnip::boost_tree(mode = "regression", trees = 20),
   args_list = arx_args)
 
-out_arx_rf$predictions 
+out_arx_rf$predictions %>% head()
 ```
