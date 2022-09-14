@@ -196,7 +196,8 @@ In the following sections, we will go over preprocessing the data in the
 `epi_recipe` framework, and fitting a model and making predictions within the 
 `epipredict` framework and using the package's canned forecasters.
 
-# A simple example
+# A Simple AR(3) Model Example
+
 ## Preprocessing 
 
 As a simple example, let's work with the `num_graduates` column for now. We will 
@@ -212,7 +213,8 @@ employ_small <- employ %>%
   mutate(
     num_graduates_prop = num_graduates / sum(num_graduates),
     med_income_2y_prop = med_income_2y / sum(med_income_2y),
-    med_income_5y_prop = med_income_5y / sum(med_income_5y)) %>%
+    med_income_5y_prop = med_income_5y / sum(med_income_5y)
+  ) %>%
   ungroup()
 head(employ_small)
 ```
@@ -269,7 +271,9 @@ and `ahead` columns.
 
 ```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
-baked_sample <- r %>% prep() %>% bake(new_data = employ_small) %>%
+baked_sample <- r %>%
+  prep() %>%
+  bake(new_data = employ_small) %>%
   sample_n(5)
 baked_sample
 ```
@@ -325,25 +329,27 @@ employ_small_with_preds <- augment(wf_linreg, latest)
 employ_small_with_preds %>% head()
 ```
 
-## AR(3) Model Diagnostics 
+## Model Diagnostics 
 
 First, we'll plot the residuals (that is, $y_{t} - \hat{y}_{t}$) against the 
 fitted values ($\hat{y}_{t}$).
 
 ```{r lienarreg-resid-plot, include=T, warning=F}
-employ_small_with_preds <- employ_small_with_preds %>% 
-  mutate(resid = num_graduates_prop - .pred) 
-  
+employ_small_with_preds <- employ_small_with_preds %>%
+  mutate(resid = num_graduates_prop - .pred)
+
 p1 <- employ_small_with_preds %>%
-  ggplot(aes(x = .pred, y = resid)) + 
+  ggplot(aes(x = .pred, y = resid)) +
   geom_point(size = 1.5, alpha = .8) +
-  geom_smooth(method = "loess", color = "red", linetype = "dashed", size = .7) + 
+  geom_smooth(method = "loess", color = "red", linetype = "dashed", size = .7) +
   xlab("Fitted values") +
   ylab("Residuals") +
   ggtitle("Plot of Fitted Values vs. Residuals in AR(3) Model")
 
-p2 <- employ_small_with_preds %>% 
-  ggplot(aes(sample = resid)) + stat_qq(alpha = .6) + stat_qq_line() +
+p2 <- employ_small_with_preds %>%
+  ggplot(aes(sample = resid)) +
+  stat_qq(alpha = .6) +
+  stat_qq_line() +
   ggtitle("Q-Q Plot of Residuals")
 
 grid.arrange(p1, p2, ncol = 2)
@@ -378,7 +384,9 @@ where $y_i$ is the 2-year median income at time $i$.
 ```{r flatline, include=T, warning=F}
 out_fl <- flatline_forecaster(employ_small, "med_income_2y",
   args_list = flatline_args_list(
-    ahead = 1L, forecast_date = as.Date("2015-01-01")))
+    ahead = 1L, forecast_date = as.Date("2015-01-01")
+  )
+)
 
 augment(out_fl$epi_workflow, employ_small) %>% head()
 ```
@@ -394,11 +402,13 @@ where $y_i$ is as before, and $z_i$ is the 5-year median income at time $i$.
 
 ```{r arx-lr, include=T, warning=F}
 arx_args <- arx_args_list(
-  lags = c(0L, 1L), ahead = 1L, forecast_date = as.Date("2015-01-01"))
+  lags = c(0L, 1L), ahead = 1L, forecast_date = as.Date("2015-01-01")
+)
 
 out_arx_lr <- arx_forecaster(employ_small, "med_income_2y",
   c("med_income_2y", "med_income_5y"),
-  args_list = arx_args)
+  args_list = arx_args
+)
 
 out_arx_lr$predictions %>% head()
 ```
@@ -410,7 +420,8 @@ as expected. Below we use a boosted tree model instead of a linear regression.
 out_arx_rf <- arx_forecaster(
   employ_small, "med_income_2y", c("med_income_2y", "med_income_5y"),
   trainer = parsnip::boost_tree(mode = "regression", trees = 20),
-  args_list = arx_args)
+  args_list = arx_args
+)
 
 out_arx_rf$predictions %>% head()
 ```
