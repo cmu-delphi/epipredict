@@ -83,13 +83,12 @@
 
 #' Subset of Statistics Canada median employment income for postsecondary graduates
 #' 
-#' @format A tibble with 10193 rows and 8 variables:
+#' @format A tibble with 1607 rows and 7 variables:
 #' \describe{
 #'   \item{geo_value}{The province in Canada associated with each 
 #'      row of measurements.}
 #'   \item{time_value}{The time value, a year integer in YYYY format}
 #'   \item{edu_qual}{The education qualification}
-#'   \item{fos}{The field of study}
 #'   \item{age_group}{The age group; either 15 to 34 or 35 to 64}
 #'   \item{num_graduates}{The number of graduates for the given row of characteristics}
 #'   \item{med_income_2y}{The median employment income two years after graduation}
