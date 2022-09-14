@@ -116,6 +116,22 @@ test_that("Postprocessing workflow works and values correct", {
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_original, p$.pred * c(20000, 30000))
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = pop_data, rate_rescaling = 10000,
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+  expect_silent(p <- predict(wf, latest))
+  expect_equal(nrow(p), 2L)
+  expect_equal(ncol(p), 4L)
+  expect_equal(p$.pred_original, p$.pred * c(2, 3))
+
 })
 
 test_that("Postprocessing to get cases from case rate", {
