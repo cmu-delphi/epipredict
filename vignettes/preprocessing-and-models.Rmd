@@ -36,7 +36,6 @@ we will use a linear regression to predict death rates. Last but not least, we
 will create a classification model for hotspot predictions. 
 
 ```{r, warning=FALSE, message=FALSE}
-# library(covidcast)
 library(tidyr)
 library(dplyr)
 library(epidatr)

@@ -143,7 +143,7 @@ slather.layer_population_scaling <-
                               by= object$by),
              silent = TRUE)
     if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
-      cli_stop(c("columns in `by` selectors of `layer_population_scaling`",
+      cli_stop(c("columns in `by` selectors of `layer_population_scaling` ",
                  "must be present in data and match"))}
 
     object$df <- object$df %>%
