@@ -59,7 +59,7 @@ arg_is_pos_int = function(..., allow_null = FALSE) {
     ...,
     tests = function(name, value) {
       if (!((is.numeric(value) && all(value > 0) && all(value%%1 == 0)) |
-            (is.null(value) & !allow_null)))
+            (is.null(value) & allow_null)))
         cli_stop("All {.val {name}} must be whole positive number(s).")
     }
   )

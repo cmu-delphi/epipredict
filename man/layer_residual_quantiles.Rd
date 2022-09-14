@@ -7,7 +7,7 @@
 layer_residual_quantiles(
   frosting,
   ...,
-  probs = c(0.0275, 0.975),
+  probs = c(0.05, 0.95),
   symmetrize = TRUE,
   by_key = character(0L),
   name = ".pred_distn",
@@ -25,7 +25,7 @@ referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
 
-\item{by_key}{A character vector of keys to group the residuls by before
+\item{by_key}{A character vector of keys to group the residuals by before
 calculating quantiles. The default, \code{c()} performs no grouping.}
 
 \item{name}{character. The name for the output column.}

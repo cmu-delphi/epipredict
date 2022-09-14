@@ -10,13 +10,14 @@
 \item{object}{A trained object such as a \code{\link[=recipe]{recipe()}} with at least
 one preprocessing operation.}
 
-\item{new_data}{An \code{epi_df} for whom the preprocessing will be
-applied. If \code{NULL} is given to \code{new_data}, the pre-processed \emph{training
-data} will be returned.}
+\item{new_data}{An \code{epi_df}, data frame or tibble for whom the
+preprocessing will be applied. If \code{NULL} is given to \code{new_data},
+the pre-processed \emph{training data} will be returned.}
 
 \item{...}{One or more selector functions to choose which variables will be
-returned by the function. See \code{\link[selections]{recipes}} for more details.
-If no selectors are given, the default is to use \code{\link[=everything]{everything()}}.}
+returned by the function. See \code{\link[selections]{recipes}} for
+more details. If no selectors are given, the default is to
+use \code{\link[=everything]{everything()}}.}
 }
 \value{
 An \code{epi_df} that may have different columns than the
