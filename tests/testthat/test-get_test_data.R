@@ -68,7 +68,7 @@ test_that("NA fill behaves as desired", {
 
  df1 <- df2
  df1$x1[1:4] <- 1:4
- td1 <- get_test_data(r, df, TRUE, n_recent = 6)
+ td1 <- get_test_data(r, df1, TRUE, n_recent = 7)
  expect_true(!any(is.na(td1)))
 
  df2$x1[7:8] <- 1:2
