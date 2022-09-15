@@ -395,7 +395,9 @@ bake_and_show_sample(rx, employ_small)
 ## Model fitting & postprocessing
 
 Before fitting our model and making predictions, let's add some post-processing
-steps using a few `frosting` layers to do a few things:
+steps using a few [`frosting`](
+  https://cmu-delphi.github.io/epipredict/reference/frosting.html) layers to do 
+a few things:
 
 1. Convert our predictions back to income values and number of graduates, 
 rather than standardized proportions. We do this via the frosting layer 
