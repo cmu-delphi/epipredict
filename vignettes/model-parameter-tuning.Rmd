@@ -68,8 +68,8 @@ to train the models and hold the next day as assessment data.
 There are multiple packages that split time series data. The more common one is
 `rsample`, some other choices include the `timetk` package, which is also built
 on the tidyverse. The `time_series_cv()` function from `timetk` package comes 
-in handy for doing time series cross-validation. We will illustrate using that 
-function below to get the cross-validation folds:
+in handy for doing time series cross-validation. We will demonstrate using that 
+function below to get the cross-validation folds for our time series:
 
 ```{r}
 folds <- x %>%
@@ -78,8 +78,8 @@ folds <- x %>%
                  point_forecast = TRUE)
 ```
 
-In total, there are `nrow(folds)` folds. And we can do a sanity check of the date range 
-for each training set in the splits. 
+In total, there are `nrow(folds)` folds. And we can do a sanity check of the 
+date range for each training set in the splits. 
 
 ```{r}
 training_window <- as.data.frame(c(), c())
@@ -104,9 +104,10 @@ models_more = lapply(folds$splits, fit_model, r = r_more)
 ```
 
 The tricky part is to use some functions such as `rsample::analysis()` and 
-`rsample::assessment()` to format the cross-validation data sets.
+`rsample::assessment()` to format the cross-validation data sets. 
 
 ```{r}
+# Function to get the model predictions
 get_prediction <- function(model, assessment_date, recipe, data){
   preprocessed <- bake(prep(recipe, data), data) 
   assess <- preprocessed %>% 
@@ -116,11 +117,13 @@ get_prediction <- function(model, assessment_date, recipe, data){
   return(predict(model$fit$fit, new_data = assess))
 }
 
+# Obtain assessment dates
 assessment_date_list <- epipredict:::map(lapply(folds$splits, assessment),
                   ~ purrr::pluck( . ,"time_value")) 
 
 assessment_date <- do.call("c", assessment_date_list)
 
+# Get the predictions from our two models
 pred_less <- epipredict:::map2(models_less, assessment_date, get_prediction,
              data = x, recipe = r_less) 
 pred_more <- epipredict:::map2(models_more, assessment_date, get_prediction,
@@ -133,11 +136,13 @@ pred_more <- do.call(rbind, pred_more)
 predictions <- data.frame(assessment_date, pred_less , pred_more) 
 colnames(predictions) <- c("time_value", "pred_less", "pred_more")
 
+# Format the real outcome values (like in the preprocessed data),
+# noting that the model predicts 7 day ahead for each date it's trained on
 real_outcome_df <- x %>% filter(time_value %in% (assessment_date + 7)) %>%
     mutate(real_outcome = lead(death_rate, 7)) %>%
       select(time_value, real_outcome)
 
-# compare MSPE
+# Compare the MSPE of the two models
 predictions %>%
   left_join(real_outcome_df) %>%
   na.omit() %>%
@@ -148,7 +153,7 @@ predictions %>%
 ```
 
 The model that does not include 14 day lag variables for case and death rates 
-has a lower mean squared prediction error (MSPE). We will go for that model
+has a lower mean squared prediction error (MSPE). We will go for the model
 with the lower MSPE.
 
 The next example, we will use `rolling_origin` from the `rsample` package for 
@@ -172,20 +177,23 @@ returned in the random grid.
 
 ```{r}
 grid <- dials::grid_random(extract_parameter_set_dials(tune_spec), 
-                           size=10)
+                           size = 10)
 
 grid
 ```
 Note that the data needs to be preprocessed before passed into the 
 workflow. We then using rolling origin forecast resampling to produce
-samples that take 60 days of data and assess on the day after. Finally,
-we do model tuning via grid search. The `tune_grid()` function computes 
-performance metrics (ex. RMSE) for the pre-defined set of tuning parameters 
-that correspond to a model or recipe across one or more resamples.
+samples that take 60 days of data and use the next day as assessment
+data. Finally, we do model tuning via grid search. The `tune_grid()` 
+function computes performance metrics (ex. RMSE) for our pre-defined 
+set of tuning parameters that correspond to the linear model (specified 
+below) across the resamples.
 
 ```{r}
+# Preprocess data
 preprocessed <- bake(prep(r_less, x), x) %>% na.omit()
 
+# Perform rolling origin forecast resampling
 roll_rs <- rsample::rolling_origin(
   preprocessed, 
   initial = 60, 
@@ -193,6 +201,7 @@ roll_rs <- rsample::rolling_origin(
   cumulative = FALSE
   )
 
+# Model tuning by grid search
 wf = epi_workflow() %>%
 workflows::add_formula(ahead_7_death_rate ~ lag_0_case_rate + lag_7_case_rate +
               lag_0_death_rate + lag_7_death_rate) %>%
