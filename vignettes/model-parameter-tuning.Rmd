@@ -235,7 +235,7 @@ numerically.
 ```{r}
 show_best(grid_res, metric = "rmse")
 
-select_best(grid_res, metric = "rmse")
+best_hyperparam <- select_best(grid_res, metric = "rmse")
 ```
 
 Now, we'll specify these parameters in a tibble and then use 
@@ -243,7 +243,8 @@ the `finalize_workflow()` function to integrate these into
 our workflow:
 
 ```{r}
-linear_param <- tibble(penalty = 0.000000377, mixture = 0.259)
+linear_param <- tibble(penalty = best_hyperparam$penalty,
+                       mixture = best_hyperparam$mixture)
 
 final_wf <- 
   wf %>% 
