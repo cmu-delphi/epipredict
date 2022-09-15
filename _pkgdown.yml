@@ -19,6 +19,8 @@ reference:
   - title: Epi recipe preprocessing steps
     contents:
     - starts_with("step_")
+    - contains("bake")
+    - contains("juice")
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:
@@ -37,5 +39,7 @@ reference:
   - title: Included datasets
     contents:
     - case_death_rate_subset
+    - state_census
+
 
 
