@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_population_scaling.R
 \name{layer_population_scaling}
 \alias{layer_population_scaling}
-\title{Revert population scaled prediction}
+\title{Convert per-capita predictions to raw scale}
 \usage{
 layer_population_scaling(
   frosting,
@@ -10,39 +10,46 @@ layer_population_scaling(
   df,
   by = NULL,
   df_pop_col,
+  rate_rescaling = 1,
   create_new = TRUE,
-  suffix = "_original",
+  suffix = "_scaled",
   .flag = TRUE,
   id = rand_id("population_scaling")
 )
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor. The layer will be added to the
-sequence of operations  for this frosting.}
+sequence of operations for this frosting.}
 
 \item{...}{One or more selector functions to scale variables
 for this step. See \code{\link[=selections]{selections()}} for more details.}
 
-\item{df}{a data frame that contains the population data used for scaling.}
+\item{df}{a data frame that contains the population data to be used for
+inverting the existing scaling.}
 
-\item{by}{A character vector of variables to left join by.
+\item{by}{A (possibly named) character vector of variables to join by.
 
 If \code{NULL}, the default, the function will perform a natural join, using all
-variables in common across the \code{epi_df} and the user-provided dataset.
-If columns in \code{epi_df} and \code{df} have the same name (and aren't
-included in by), \code{.df} is added to the one from the user-provided data
+variables in common across the \code{epi_df} produced by the \code{predict()} call
+and the user-provided dataset.
+If columns in that \code{epi_df} and \code{df} have the same name (and aren't
+included in \code{by}), \code{.df} is added to the one from the user-provided data
 to disambiguate.
 
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
-For example, by = c("geo_value" = "states") will match \code{epi_df$geo_value}
+For example, \code{by = c("geo_value" = "states")} will match \code{epi_df$geo_value}
 to \code{df$states}. To join by multiple variables, use a vector with length > 1.
-For example, by = c("geo_value" = "states", "county" = "county") will match
+For example, \code{by = c("geo_value" = "states", "county" = "county")} will match
 \code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.
 
 See \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} for more details.}
 
 \item{df_pop_col}{the name of the column in the data frame \code{df} that
 contains the population data and used for scaling.}
+
+\item{rate_rescaling}{Sometimes rates are "per 100K" or "per 1M" rather than
+"per person". Adjustments can be made here. For example, if the original
+rate is "per 100K", then set \code{rate_rescaling = 1e5} to get counts back.}
 
 \item{create_new}{TRUE to create a new column and keep the original column
 in the \code{epi_df}.}
@@ -60,12 +67,15 @@ an updated \code{frosting} postprocessor
 }
 \description{
 \code{layer_population_scaling} creates a specification of a frosting layer
-that will add a population scaled column in the data. For example,
-load a dataset that contains county population, and join to an \code{epi_df}
-that currently predicts number of new cases by county to obtain case rates.
-Although worth noting that there is nothing special about "population".
-The function can be used to scale by any variable. Population is simply the
-most natural and common use case.
+that will "undo" per-capita scaling. Typical usage would
+load a dataset that contains state-level population, and use it to convert
+predictions made from a rate-scale model to raw scale by multiplying by
+the population.
+Although, it is worth noting that there is nothing special about "population".
+The function can be used to scale by any variable. Population is the
+standard use case in the epidemiology forecasting scenario. Any value
+passed will \emph{multiply} the selected variables while the \code{rate_rescaling}
+argument is a common \emph{divisor} of the selected variables.
 }
 \examples{
 library(epiprocess)
@@ -73,8 +83,7 @@ jhu <- epiprocess::jhu_csse_daily_subset \%>\%
   dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   dplyr::select(geo_value, time_value, cases)
 
-pop_data = data.frame(states = c("ca", "ny"),
-                      value = c(20000, 30000))
+pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 
 r <- epi_recipe(jhu) \%>\%
   step_population_scaling(df = pop_data,
@@ -98,12 +107,12 @@ wf <- epi_workflow(r,
   parsnip::fit(jhu) \%>\%
   add_frosting(f)
 
-latest <- get_test_data(recipe = r,
-                        x = epiprocess::jhu_csse_daily_subset \%>\%
-                          dplyr::filter(time_value > "2021-11-01",
-                                        geo_value \%in\% c("ca", "ny")) \%>\%
-                          dplyr::select(geo_value, time_value, cases))
-
+latest <- get_test_data(
+  recipe = r,
+  x = epiprocess::jhu_csse_daily_subset \%>\%
+    dplyr::filter(time_value > "2021-11-01",
+                  geo_value \%in\% c("ca", "ny")) \%>\%
+    dplyr::select(geo_value, time_value, cases))
 
 predict(wf, latest)
 }

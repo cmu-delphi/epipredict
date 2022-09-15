@@ -6,12 +6,25 @@
 #' and other variables in the original dataset,
 #' which will be used to create test data.
 #'
+#' It also optionally fills missing values
+#' using the last-observation-carried-forward (LOCF) method. If this
+#' is not possible (say because there would be only `NA`'s in some location),
+#' it will produce an error suggesting alternative options to handle missing
+#' values with more advanced techniques.
+#'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
 #' @param x A data frame, tibble, or epi_df data set.
+#' @param fill_locf Logical. Should we use `locf` to fill in missing data?
+#' @param n_recent Integer or NULL. If filling missing data with `locf=TRUE`,
+#'   how far back are we willing to tolerate missing data? Larger values allow
+#'   more filling. The default `NULL` will determine this from the maximum
+#'   lags used in the `recipe`. For example, suppose n_recent = 3, then if the
+#'   3 most recent observations in some region are all `NA`’s, we won’t be able
+#'   to fill anything, and an error message will be thrown.
 #'
-#' @return A tibble with columns `geo_value`, `time_value`
-#' and other variables in the original dataset.
+#' @return A tibble with columns `geo_value`, `time_value`, any additional
+#'   keys, as well other variables in the original dataset.
 #' @examples
 #' # create recipe
 #'  rec <- epi_recipe(case_death_rate_subset) %>%
@@ -21,11 +34,17 @@
 #'  get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @export
 
-get_test_data <- function(recipe, x) {
+get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
   stopifnot(is.data.frame(x))
-  if (! all(colnames(x) %in% colnames(recipe$template)))
+  arg_is_lgl(fill_locf)
+  arg_is_scalar(fill_locf)
+  arg_is_pos_int(n_recent, allow_null = TRUE)
+  arg_is_scalar(n_recent, allow_null = TRUE)
+
+  if (!all(colnames(x) %in% colnames(recipe$template)))
     cli_stop("some variables used for training are not available in `x`.")
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
+  if (is.null(n_recent)) n_recent <- max_lags + 1
 
   # CHECK: Return NA if insufficient training data
   if (dplyr::n_distinct(x$time_value) < max_lags) {
@@ -36,15 +55,29 @@ get_test_data <- function(recipe, x) {
   groups <- epi_keys(recipe)
   groups <- groups[groups != "time_value"]
 
-  x %>%
-    dplyr::filter(
-      dplyr::if_any(
-        .cols = recipe$term_info$variable[which(recipe$var_info$role == 'raw')],
-        .fns = ~ !is.na(.x)
-      )
-    ) %>%
+  x <- x %>%
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
+    dplyr::slice_tail(n = max(n_recent, max_lags + 1))
+
+  if (fill_locf) {
+    cannot_be_used <- x %>%
+      dplyr::slice_tail(n = n_recent) %>%
+      dplyr::summarize(dplyr::across(
+        !time_value, ~ !is.na(.x[1])), .groups = "drop") %>%
+      dplyr::summarise(dplyr::across(-dplyr::all_of(groups), ~ any(!.x))) %>%
+      unlist()
+    if (any(cannot_be_used)) {
+      bad_vars <- names(cannot_be_used)[cannot_be_used]
+      cli_stop("The variables {bad_vars} have ",
+               "too many recent missing values to be filled automatically. ",
+               "You should either choose `n_recent` larger than its current ",
+               "value {n_recent}, or perform NA imputation manually, perhaps with ",
+               "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}.")
+    }
+    x <- x %>% tidyr::fill(!time_value)
+  }
+
+  x %>%
     dplyr::slice_tail(n = max_lags + 1) %>%
     epiprocess::ungroup()
-
 }
