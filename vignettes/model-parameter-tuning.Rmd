@@ -63,7 +63,7 @@ r_more <- epi_recipe(x) %>%
 ```
 
 Next, we'll resample the time series data. We will use 1-month consecutive data 
-to train the models and hold the next day as assessment data. 
+to train the models and hold the next day as assessment/testing data. 
 
 There are multiple packages that split time series data. The more common one is
 `rsample`, some other choices include the `timetk` package, which is also built
@@ -89,7 +89,7 @@ for(i in 1:nrow(folds)){
 }
 training_window
 ```
-Now onto the model fitting, where we're only using linear regression:
+Now onto the model fitting (where we're only using linear regression):
 
 ```{r}
 
@@ -184,7 +184,7 @@ grid <- dials::grid_random(extract_parameter_set_dials(tune_spec),
 
 grid
 ```
-Note that the data needs to be preprocessed before passed into the 
+Note that the data needs to be preprocessed before it is passed into the 
 workflow. We then using rolling origin forecast resampling to produce
 samples that take 60 days of data and use the next day as assessment
 data. Finally, we do model tuning via grid search. The `tune_grid()` 
