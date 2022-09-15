@@ -19,7 +19,9 @@
 #' @param n_recent Integer or NULL. If filling missing data with `locf=TRUE`,
 #'   how far back are we willing to tolerate missing data? Larger values allow
 #'   more filling. The default `NULL` will determine this from the maximum
-#'   lags used in the `recipe`.
+#'   lags used in the `recipe`. For example, suppose n_recent = 3, then if the
+#'   3 most recent observations in some region are all `NA`’s, we won’t be able
+#'   to fill anything, and an error message will be thrown.
 #'
 #' @return A tibble with columns `geo_value`, `time_value`, any additional
 #'   keys, as well other variables in the original dataset.
