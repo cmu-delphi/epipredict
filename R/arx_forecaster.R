@@ -27,10 +27,10 @@
 #' out <- arx_forecaster(jhu, "death_rate",
 #'   c("case_rate", "death_rate"))
 arx_forecaster <- function(epi_data,
-                               outcome,
-                               predictors,
-                               trainer = parsnip::linear_reg(),
-                               args_list = arx_args_list()) {
+                           outcome,
+                           predictors,
+                           trainer = parsnip::linear_reg(),
+                           args_list = arx_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!is.list(trainer) || trainer$mode != "regression")
@@ -60,7 +60,7 @@ arx_forecaster <- function(epi_data,
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
-  latest <- get_test_data(r, epi_data)
+  latest <- get_test_data(r, epi_data, TRUE)
 
   wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
   list(
