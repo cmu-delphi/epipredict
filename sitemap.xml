@@ -16,6 +16,12 @@
     <loc>https://cmu-delphi.github.io/epipredict/articles/index.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/articles/preprocessing-and-models.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/articles/sliding.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/authors.html</loc>
   </url>
   <url>
@@ -46,6 +52,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/augment.epi_workflow.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/bake.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/case_death_rate_subset.html</loc>
   </url>
   <url>
@@ -59,6 +68,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/dist_quantiles.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/epi_juice.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/epi_keys.html</loc>
@@ -154,6 +166,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/slather.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/state_census.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/step_epi_naomit.html</loc>
   </url>
   <url>
@@ -161,5 +176,8 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/step_population_scaling.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/step_training_window.html</loc>
   </url>
 </urlset>

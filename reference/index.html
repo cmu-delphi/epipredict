@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -23,6 +23,13 @@
 </li>
 <li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
+</li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
+    <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
+  </div>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
@@ -139,6 +146,21 @@
           <code><a href="step_population_scaling.html">step_population_scaling()</a></code> 
         </dt>
         <dd>Create a recipe step that scales variables using population data</dd>
+      </dl><dl><dt>
+          
+          <code><a href="step_training_window.html">step_training_window()</a></code> 
+        </dt>
+        <dd>Limits the size of the training window to the most recent observations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="bake.html">bake(<i>&lt;epi_recipe&gt;</i>)</a></code> 
+        </dt>
+        <dd>Bake an epi_recipe</dd>
+      </dl><dl><dt>
+          
+          <code><a href="epi_juice.html">epi_juice()</a></code> 
+        </dt>
+        <dd>Extract transformed training set</dd>
       </dl></div><div class="section level2">
       <h2 id="forecast-postprocessing">Forecast postprocessing<a class="anchor" aria-label="anchor" href="#forecast-postprocessing"></a></h2>
       
@@ -220,7 +242,7 @@
           
           <code><a href="layer_population_scaling.html">layer_population_scaling()</a></code> 
         </dt>
-        <dd>Revert population scaled prediction</dd>
+        <dd>Convert per-capita predictions to raw scale</dd>
       </dl><dl><dt>
           
           <code><a href="layer_predict.html">layer_predict()</a></code> 
@@ -288,6 +310,11 @@
           <code><a href="case_death_rate_subset.html">case_death_rate_subset</a></code> 
         </dt>
         <dd>Subset of JHU daily state cases and deaths</dd>
+      </dl><dl><dt>
+          
+          <code><a href="state_census.html">state_census</a></code> 
+        </dt>
+        <dd>State population data</dd>
       </dl></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>

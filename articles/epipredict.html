@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,13 @@
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
+</li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
+    <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
+  </div>
 </li>
 <li class="nav-item">
   <a class="nav-link" href="../news/index.html">Changelog</a>
@@ -137,8 +144,7 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2020-12-31      52.1      0.819</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2020-12-31      31.0      0.601</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2020-12-31      65.2      0.807</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 20,486 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 20,486 more rows</span></span></span></code></pre></div>
 <p>This data is built into the package and contains the measured variables <code>case_rate</code> and <code>death_rate</code> for COVID-19 at the daily level for each US state for the year 2021. The “panel” part is because we have repeated measurements across a number of locations.</p>
 <p>The <code>epi_df</code> encodes the timestamp as <code>time_value</code> and the <code>key</code> as <code>geo_value</code>. While these 2 names are required, the values don’t need to actually represent such objects. Additional <code>key</code>’s are also supported (like age group, ethnicity, taxonomy, etc.).</p>
 <p>The <code>epi_df</code> also contains some metadata that describes the keys as well as the vintage of the data. It’s possible that data collected at different times for the <em>same set</em> of <code>geo_value</code>’s and <code>time_value</code>’s could actually be different. For more details, see <a href="https://cmu-delphi.github.io/epiprocess/articles/epiprocess.html" class="external-link"><code>{epiprocess}</code></a>.</p>
@@ -192,8 +198,7 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 0.544  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 0.831  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 0.607  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>A list object of class <code>epi_workflow</code>. This object encapsulates all the instructions necessary to create the prediction. More details on this below.</li>
 </ol>
@@ -253,8 +258,7 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ak        2021-12-31 0.355 0.260  0.3   2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        2021-12-31 0.355 0.282  0.35  2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ak        2021-12-31 0.355 0.303  0.4   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 1,278 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 1,278 more rows</span></span></span></code></pre></div>
 <p>Further simple adjustments can be made using the function.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
@@ -381,8 +385,7 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 0.544  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 0.831  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 0.607  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span></code></pre></div>
 </div>
 </div>
 <div class="section level3">
@@ -420,18 +423,17 @@
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
 <span><span class="co">#&gt;    geo_value time_value .pred         .pred_distn forecast_date target_date</span></span>
 <span><span class="co">#&gt;  <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-12-31  36.4 [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> al        2021-12-31  89.9 [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ar        2021-12-31  82.6 [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> as        2021-12-31   0   [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> az        2021-12-31  58.3 [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ca        2021-12-31  84.4 [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> co        2021-12-31 106.  [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 143.  [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 295.  [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 150.  [0.03, 0.98]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-12-31  36.4 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> al        2021-12-31  89.9 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ar        2021-12-31  82.6 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> as        2021-12-31   0   [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> az        2021-12-31  58.3 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ca        2021-12-31  84.4 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> co        2021-12-31 106.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 143.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 295.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 150.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="using-the-workflow-object">Using the workflow object<a class="anchor" aria-label="anchor" href="#using-the-workflow-object"></a>
