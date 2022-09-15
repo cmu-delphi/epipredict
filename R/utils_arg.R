@@ -121,7 +121,7 @@ arg_is_chr = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = F
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!(is.character(value) | (is.null(value) & !allow_null)))
+      if (!(is.character(value) | (is.null(value) & allow_null)))
         cli_stop("Argument {.val {name}} must be of character type.")
 
       if (any(is.na(value)) & !allow_na)

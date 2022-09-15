@@ -115,7 +115,23 @@ test_that("Postprocessing workflow works and values correct", {
   expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
-  expect_equal(p$.pred_original, p$.pred * c(20000, 30000))
+  expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = pop_data, rate_rescaling = 10000,
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+  expect_silent(p <- predict(wf, latest))
+  expect_equal(nrow(p), 2L)
+  expect_equal(ncol(p), 4L)
+  expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
+
 })
 
 test_that("Postprocessing to get cases from case rate", {
@@ -144,8 +160,7 @@ test_that("Postprocessing to get cases from case rate", {
                              by =  c("geo_value" = "states"),
                              df_pop_col = "value")
 
-  wf <- epi_workflow(r,
-                     parsnip::linear_reg()) %>%
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
 
@@ -159,7 +174,7 @@ test_that("Postprocessing to get cases from case rate", {
   expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
-  expect_equal(p$.pred_original, p$.pred * c(1/20000, 1/30000))
+  expect_equal(p$.pred_scaled, p$.pred * c(1/20000, 1/30000))
 })
 
 
@@ -239,11 +254,11 @@ test_that("expect error if `by` selector does not match", {
                              by =  NULL,
                              df_pop_col = "values")
 
-  expect_error(wf <- epi_workflow(r,
-                                    parsnip::linear_reg()) %>%
-                   fit(jhu) %>%
-                   add_frosting(f),
-               "columns in `by` selectors of `step_population_scaling` must be present in data and match")
+  expect_error(
+    wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+      fit(jhu) %>%
+      add_frosting(f),
+    "columns in `by` selectors of `step_population_scaling` must be present in data and match")
 
   r <- epi_recipe(jhu) %>%
     step_population_scaling(case_rate,
@@ -271,8 +286,7 @@ test_that("expect error if `by` selector does not match", {
                                           geo_value %in% c("ca", "ny")) %>%
                             dplyr::select(geo_value, time_value, case_rate))
 
-  wf <- epi_workflow(r,
-                     parsnip::linear_reg()) %>%
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
 
