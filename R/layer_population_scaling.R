@@ -1,35 +1,43 @@
-#' Revert population scaled prediction
+#' Convert per-capita predictions to raw scale
 #'
 #' `layer_population_scaling` creates a specification of a frosting layer
-#' that will add a population scaled column in the data. For example,
-#' load a dataset that contains county population, and join to an `epi_df`
-#' that currently predicts number of new cases by county to obtain case rates.
-#' Although worth noting that there is nothing special about "population".
-#' The function can be used to scale by any variable. Population is simply the
-#' most natural and common use case.
+#' that will "undo" per-capita scaling. Typical usage would
+#' load a dataset that contains state-level population, and use it to convert
+#' predictions made from a rate-scale model to raw scale by multiplying by
+#' the population.
+#' Although, it is worth noting that there is nothing special about "population".
+#' The function can be used to scale by any variable. Population is the
+#' standard use case in the epidemiology forecasting scenario. Any value
+#' passed will *multiply* the selected variables while the `rate_rescaling`
+#' argument is a common *divisor* of the selected variables.
 #'
 #' @param frosting a `frosting` postprocessor. The layer will be added to the
-#'  sequence of operations  for this frosting.
+#'   sequence of operations for this frosting.
 #' @param ... One or more selector functions to scale variables
-#'  for this step. See [selections()] for more details.
-#' @param df a data frame that contains the population data used for scaling.
-#' @param by A character vector of variables to left join by.
+#'   for this step. See [selections()] for more details.
+#' @param df a data frame that contains the population data to be used for
+#'   inverting the existing scaling.
+#' @param by A (possibly named) character vector of variables to join by.
 #'
 #' If `NULL`, the default, the function will perform a natural join, using all
-#' variables in common across the `epi_df` and the user-provided dataset.
-#' If columns in `epi_df` and `df` have the same name (and aren't
-#' included in by), `.df` is added to the one from the user-provided data
+#' variables in common across the `epi_df` produced by the `predict()` call
+#' and the user-provided dataset.
+#' If columns in that `epi_df` and `df` have the same name (and aren't
+#' included in `by`), `.df` is added to the one from the user-provided data
 #' to disambiguate.
 #'
 #' To join by different variables on the `epi_df` and `df`, use a named vector.
-#' For example, by = c("geo_value" = "states") will match `epi_df$geo_value`
+#' For example, `by = c("geo_value" = "states")` will match `epi_df$geo_value`
 #' to `df$states`. To join by multiple variables, use a vector with length > 1.
-#' For example, by = c("geo_value" = "states", "county" = "county") will match
+#' For example, `by = c("geo_value" = "states", "county" = "county")` will match
 #' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
 #' See [dplyr::left_join()] for more details.
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and used for scaling.
+#' @param rate_rescaling Sometimes rates are "per 100K" or "per 1M" rather than
+#'   "per person". Adjustments can be made here. For example, if the original
+#'   rate is "per 100K", then set `rate_rescaling = 1e5` to get counts back.
 #' @param create_new TRUE to create a new column and keep the original column
 #' in the `epi_df`.
 #' @param suffix a character. The suffix added to the column name if
@@ -46,8 +54,7 @@
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   dplyr::select(geo_value, time_value, cases)
 #'
-#' pop_data = data.frame(states = c("ca", "ny"),
-#'                       value = c(20000, 30000))
+#' pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_population_scaling(df = pop_data,
@@ -71,12 +78,12 @@
 #'   parsnip::fit(jhu) %>%
 #'   add_frosting(f)
 #'
-#' latest <- get_test_data(recipe = r,
-#'                         x = epiprocess::jhu_csse_daily_subset %>%
-#'                           dplyr::filter(time_value > "2021-11-01",
-#'                                         geo_value %in% c("ca", "ny")) %>%
-#'                           dplyr::select(geo_value, time_value, cases))
-#'
+#' latest <- get_test_data(
+#'   recipe = r,
+#'   x = epiprocess::jhu_csse_daily_subset %>%
+#'     dplyr::filter(time_value > "2021-11-01",
+#'                   geo_value %in% c("ca", "ny")) %>%
+#'     dplyr::select(geo_value, time_value, cases))
 #'
 #' predict(wf, latest)
 layer_population_scaling <- function(frosting,
@@ -84,10 +91,18 @@ layer_population_scaling <- function(frosting,
                            df,
                            by = NULL,
                            df_pop_col,
+                           rate_rescaling = 1,
                            create_new = TRUE,
-                           suffix = "_original",
+                           suffix = "_scaled",
                            .flag = TRUE,
                            id = rand_id("population_scaling")) {
+
+  arg_is_scalar(df_pop_col, rate_rescaling, create_new, suffix, .flag, id)
+  arg_is_lgl(create_new, .flag)
+  arg_is_chr(df_pop_col, suffix, id)
+  arg_is_chr(by, allow_null = TRUE)
+  if (rate_rescaling <= 0)
+    cli_stop("`rate_rescaling` should be a positive number")
 
   add_layer(
     frosting,
@@ -95,6 +110,7 @@ layer_population_scaling <- function(frosting,
       df = df,
       by = by,
       df_pop_col = df_pop_col,
+      rate_rescaling = rate_rescaling,
       terms = dplyr::enquos(...),
       create_new = create_new,
       suffix = suffix,
@@ -105,11 +121,12 @@ layer_population_scaling <- function(frosting,
 }
 
 layer_population_scaling_new <-
-  function(df, by, df_pop_col, terms, create_new, suffix, id) {
+  function(df, by, df_pop_col, rate_rescaling, terms, create_new, suffix, id) {
   layer("population_scaling",
         df = df,
         by = by,
         df_pop_col = df_pop_col,
+        rate_rescaling = rate_rescaling,
         terms = terms,
         create_new = create_new,
         suffix = suffix,
@@ -125,8 +142,9 @@ slather.layer_population_scaling <-
     try_join <- try(dplyr::left_join(components$predictions, object$df,
                               by= object$by),
              silent = TRUE)
-    if (any(grepl("Join columns must be present in data", unlist(try_join)))){
-      stop("columns in `by` selectors of `layer_population_scaling` must be present in data and match")}
+    if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
+      cli_stop(c("columns in `by` selectors of `layer_population_scaling` ",
+                 "must be present in data and match"))}
 
     object$df <- object$df %>%
       dplyr::mutate(dplyr::across(where(is.character), tolower))
@@ -136,13 +154,12 @@ slather.layer_population_scaling <-
     col_names <- names(pos)
     suffix = ifelse(object$create_new, object$suffix, "")
 
-
     components$predictions <- dplyr::left_join(components$predictions,
                                                object$df,
                                                by= object$by,
                                                suffix = c("", ".df")) %>%
       dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
-                                  ~.x * !!pop_col ,
+                                  ~.x * !!pop_col / object$rate_rescaling ,
                                   .names = "{.col}{suffix}")) %>%
      dplyr::select(- !!pop_col)
     components

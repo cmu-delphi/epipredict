@@ -5,7 +5,7 @@
 #' @param probs numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
-#' @param by_key A character vector of keys to group the residuls by before
+#' @param by_key A character vector of keys to group the residuals by before
 #'   calculating quantiles. The default, `c()` performs no grouping.
 #' @param name character. The name for the output column.
 #' @param .flag a logical to determine if the layer is added. Passed on to
@@ -45,7 +45,7 @@
 #'
 #' p2 <- predict(wf2, latest)
 layer_residual_quantiles <- function(frosting, ...,
-                                     probs = c(0.0275, 0.975),
+                                     probs = c(0.05, 0.95),
                                      symmetrize = TRUE,
                                      by_key = character(0L),
                                      name = ".pred_distn",

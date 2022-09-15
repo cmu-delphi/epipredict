@@ -9,11 +9,21 @@ wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 latest <- jhu %>%
   dplyr::filter(time_value >= max(time_value) - 14)
 
+test_that("layer validation works",{
+  f <- frosting()
+  expect_error(layer_add_forecast_date(f, "a"))
+  expect_error(layer_add_forecast_date(f, "2022-05-31", id = c("a", "b")))
+  expect_silent(layer_add_forecast_date(f, "2022-05-31"))
+  expect_silent(layer_add_forecast_date(f))
+  expect_silent(layer_add_forecast_date(f, as.Date("2022-05-31")))
+  expect_silent(layer_add_forecast_date(f, as.Date("2022-05-31"), id="a"))
+})
+
 test_that("Specify a `forecast_date` that is greater than or equal to `as_of` date", {
 
   f <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date(forecast_date = "2022-05-31") %>%
+    layer_add_forecast_date(forecast_date = as.Date("2022-05-31")) %>%
     layer_naomit(.pred)
   wf1 <- wf %>% add_frosting(f)
 
@@ -29,7 +39,7 @@ test_that("Specify a `forecast_date` that is less than `as_of` date", {
 
   f2 <- frosting() %>%
     layer_predict() %>%
-    layer_add_forecast_date(forecast_date = "2021-12-31") %>%
+    layer_add_forecast_date(forecast_date = as.Date("2021-12-31")) %>%
     layer_naomit(.pred)
   wf2 <- wf %>% add_frosting(f2)
 

@@ -4,17 +4,26 @@
 \alias{get_test_data}
 \title{Get test data for prediction based on longest lag period}
 \usage{
-get_test_data(recipe, x)
+get_test_data(recipe, x, fill_locf = FALSE, n_recent = NULL)
 }
 \arguments{
 \item{recipe}{A recipe object. The step will be added to the
 sequence of operations for this recipe.}
 
 \item{x}{A data frame, tibble, or epi_df data set.}
+
+\item{fill_locf}{Logical. Should we use \code{locf} to fill in missing data?}
+
+\item{n_recent}{Integer or NULL. If filling missing data with \code{locf=TRUE},
+how far back are we willing to tolerate missing data? Larger values allow
+more filling. The default \code{NULL} will determine this from the maximum
+lags used in the \code{recipe}. For example, suppose n_recent = 3, then if the
+3 most recent observations in some region are all \code{NA}’s, we won’t be able
+to fill anything, and an error message will be thrown.}
 }
 \value{
-A tibble with columns \code{geo_value}, \code{time_value}
-and other variables in the original dataset.
+A tibble with columns \code{geo_value}, \code{time_value}, any additional
+keys, as well other variables in the original dataset.
 }
 \description{
 Based on the longest lag period in the recipe,
@@ -22,6 +31,13 @@ Based on the longest lag period in the recipe,
 with columns \code{geo_value}, \code{time_value}
 and other variables in the original dataset,
 which will be used to create test data.
+}
+\details{
+It also optionally fills missing values
+using the last-observation-carried-forward (LOCF) method. If this
+is not possible (say because there would be only \code{NA}'s in some location),
+it will produce an error suggesting alternative options to handle missing
+values with more advanced techniques.
 }
 \examples{
 # create recipe
