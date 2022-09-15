@@ -25,9 +25,14 @@ library(glmnet)
 library(dplyr)
 ```
 
-In this vignette, we're going to look at using k-fold cross validation to compare which of two models is more useful in predicting death rates and then we'll do some hyperparameter tuning on the chosen model.
+In this vignette, we're going to look at using k-fold cross validation to compare
+which of two models is more useful in predicting death rates and then we'll do 
+some hyperparameter tuning on the chosen model.
 
-The dataset we'll be using is `case_death_rate_subset`, which contains confirmed COVID-19 cases and deaths from Dec 31, 2020 to Dec 31, 2021 from reports made available by Johns Hopkins University. To simplify things, we'll just use the data for California from October 1, 2021 to December 31, 2021, inclusive:
+The dataset we'll be using is `case_death_rate_subset`, which contains confirmed 
+COVID-19 cases and deaths from Dec 31, 2020 to Dec 31, 2021 from reports made 
+available by Johns Hopkins University. To simplify things, we'll just use the 
+data for California from October 1, 2021 to December 31, 2021, inclusive:
 
 ```{r}
 x <- case_death_rate_subset %>%
@@ -161,9 +166,9 @@ tune_spec
 
 Think of `tune()` in the above as a placeholder. After the tuning process, 
 we will select a single numeric value for each of these hyperparameters. 
-To do this, we will create a random grid of parameter combinations. The size
-parameter controls the number of parameter combinations returned in the 
-random grid.
+We will now create a random grid of tuning parameter combinations to choose
+from. The size parameter controls the number of parameter combinations 
+returned in the random grid.
 
 ```{r}
 grid <- dials::grid_random(extract_parameter_set_dials(tune_spec), 
@@ -171,14 +176,19 @@ grid <- dials::grid_random(extract_parameter_set_dials(tune_spec),
 
 grid
 ```
-The data needs to be preprocessed before passed into the workflow:
+Note that the data needs to be preprocessed before passed into the 
+workflow. We then using rolling origin forecast resampling to produce
+samples that take 60 days of data and assess on the day after. Finally,
+we do model tuning via grid search. The `tune_grid()` function computes 
+performance metrics (ex. RMSE) for the pre-defined set of tuning parameters 
+that correspond to a model or recipe across one or more resamples.
 
 ```{r}
 preprocessed <- bake(prep(r_less, x), x) %>% na.omit()
 
 roll_rs <- rsample::rolling_origin(
   preprocessed, 
-  initial = 10, 
+  initial = 60, 
   assess = 1,
   cumulative = FALSE
   )
@@ -194,7 +204,7 @@ tune::tune_grid(
 
 ```
 
-The metrics tied to each set of hyperparamaters can be accessed via:
+Finally, the metrics tied to each set of hyperparamaters can be accessed via:
 ```{r}
 wf$.metrics
 ```
