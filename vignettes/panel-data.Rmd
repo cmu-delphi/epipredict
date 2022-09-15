@@ -190,7 +190,7 @@ In the following sections, we will go over preprocessing the data in the
 `epi_recipe` framework, and fitting a model and making predictions within the 
 `epipredict` framework and using the package's canned forecasters.
 
-# A Simple AR(3) Model Example
+# Simple autoregressive with 3 lags to predict number of graduates in a year 
 
 ## Preprocessing 
 
@@ -279,7 +279,7 @@ our `epi_recipe`:
 `lag_2_num_graduates_prop` correspond to $x_{t}$, $x_{t-1}$, and $x_{t-2}$ 
 respectively.
 
-## Model Fitting and Prediction
+## Model fitting and prediction
 
 Since our goal for now is to fit a simple autoregressive model, we can use
 [`parsnip::linear_reg()`](
@@ -330,41 +330,33 @@ in the original dataset.
 augment(wf_linreg, latest) %>% sample_n(5)
 ```
 
-## Model Diagnostics 
+## Model diagnostics 
 
 First, we'll plot the residuals (that is, $y_{t} - \hat{y}_{t}$) against the 
 fitted values ($\hat{y}_{t}$).
 
-```{r lienarreg-resid-plot, include=T, warning=F}
-employ_small_with_preds <- employ_small_with_preds %>%
-  mutate(resid = num_graduates_prop - .pred)
-
-employ_small_with_preds %>%
-  ggplot(aes(x = .pred, y = resid)) +
-  geom_point(size = 1.5, alpha = .8) +
-  geom_smooth(method = "loess", color = "red", linetype = "dashed", size = .7) +
-  xlab("Fitted values") +
-  ylab("Residuals") +
-  ggtitle("Plot of Fitted Values vs. Residuals in AR(3) Model")
+```{r lienarreg-resid-plot, include=T, fig.height=8}
+par(mfrow = c(2,2)); plot(extract_fit_engine(wf_linreg))
 ```
 
 The fitted values vs. residuals plot shows us that the residuals are mostly 
 clustered around zero, but do not form an even band around the zero line, 
-indicating that the variance of the residuals is not constant. 
-
-```{r linearreg-qqplot, include=T, warning=F}
-employ_small_with_preds %>%
-  ggplot(aes(sample = resid)) +
-  stat_qq(alpha = .6) +
-  stat_qq_line() +
-  ggtitle("Q-Q Plot of Residuals")
-```
+indicating that the variance of the residuals is not constant. Additionally,
+the fitted values vs. square root of standardized residuals makes this more 
+obvious - the spread of the square root of standardized residuals varies with 
+the fitted values. 
 
 The Q-Q plot shows us that the residuals have heavier tails than a Normal 
-distribution. So both the constant variance and normality assumptions of the 
-linear model have been violated.
+distribution. So the normality of residuals assumption doesn't hold either.
 
-# Autoregressive Linear Model with Exogenous Inputs
+Finally, the residuals vs. leverage plot shows us that we have a few influential
+points based on the Cooks distance (those outside the red dotted line). 
+
+Since we appear to be violating the linear model assumptions, we might consider 
+transforming our data differently, or considering a non-linear model, or 
+something else.
+
+# Autoregressive model with exogenous inputs
 
 Now suppose we want to model the 5-year employment income using 3 lags, while 
 also incorporating information from the other two time-series in our dataset: 
@@ -400,7 +392,7 @@ rx <- epi_recipe(employ_small) %>%
 bake_and_show_sample(rx, employ_small)
 ```
 
-## Model Fitting & Postprocessing
+## Model fitting & postprocessing
 
 Before fitting our model and making predictions, let's add some post-processing
 steps using a few `frosting` layers to do a few things:
@@ -480,7 +472,7 @@ For both illustrations, we will continue to use the `employ_small` dataset
 with the transformed numeric columns that are proportions within each group 
 by the keys in our `epi_df`.
 
-## Flatline Forecaster 
+## Flatline forecaster 
 
 In this first example, we'll use `flatline_forecaster` to make a simple
 prediction of the 2-year median income for the next year, based on one previous 
@@ -498,7 +490,7 @@ out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
 augment(out_fl$epi_workflow, employ_small) %>% sample_n(5)
 ```
 
-## Autoregressive Forecaster with Exogenous Inputs
+## Autoregressive forecaster with exogenous inputs
 
 In this second example, we'll use `arx_forecaster` to make a prediction of the 
 5-year median income based using two lags, _and_ using two lags on two exogenous
