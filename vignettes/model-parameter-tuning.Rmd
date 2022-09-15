@@ -204,20 +204,52 @@ roll_rs <- rsample::rolling_origin(
   cumulative = FALSE
   )
 
-# Model tuning by grid search
+# Add formula and model to workflow
 wf = epi_workflow() %>%
 workflows::add_formula(ahead_7_death_rate ~ lag_0_case_rate + lag_7_case_rate +
               lag_0_death_rate + lag_7_death_rate) %>%
-workflows::add_model(tune_spec)  %>% 
-tune::tune_grid(
+workflows::add_model(tune_spec) 
+
+# Model tuning by grid search
+grid_res <- tune::tune_grid(
+  object = wf,
   resamples = roll_rs,
   grid = grid
 )
 
 ```
 
-Finally, the metrics tied to each set of hyperparameters can be accessed via:
+The metrics tied to each set of hyperparameters can be accessed via:
 ```{r}
-wf$.metrics
+grid_res$.metrics
+```
+Although it may be good to see all performance estimates for each 
+hyperparameter, it can be rather cumbersome and not fun to comb through.
+
+Fortunately, we may use `show_best()` to display the top 5 models along 
+with estimates of their performance. Note that the models are sorted according 
+to a specified metric. In our case, we'll use RMSE. We may also use 
+`select_best()` to select the hyperparameters with the best results 
+numerically.
+
+```{r}
+show_best(grid_res, metric = "rmse")
+
+select_best(grid_res, metric = "rmse")
 ```
 
+Now, we'll specify these parameters in a tibble and then use 
+the `finalize_workflow()` function to integrate these into 
+our workflow:
+
+```{r}
+linear_param <- tibble(penalty = 0.000000377, mixture = 0.259)
+
+final_wf <- 
+  wf %>% 
+  finalize_workflow(linear_param)
+final_wf
+```
+
+We are now all set to fit the model to the training set and 
+to use that to make predictions.
