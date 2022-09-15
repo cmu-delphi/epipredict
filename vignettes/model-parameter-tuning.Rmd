@@ -22,21 +22,26 @@ library(purrr, include.only = 'pluck')
 library(broom, include.only = 'tidy')
 library(tune)
 library(glmnet)
+library(dplyr)
 ```
 
-Take a peak at the dataset we will use:
+In this vignette, we're going to look at using k-fold cross validation to compare which of two models is more useful in predicting death rates and then we'll do some hyperparameter tuning on the chosen model.
+
+The dataset we'll be using is `case_death_rate_subset`, which contains confirmed COVID-19 cases and deaths from Dec 31, 2020 to Dec 31, 2021 from reports made available by Johns Hopkins University. To simplify things, we'll just use the data for California from October 1, 2021 to December 31, 2021, inclusive:
+
 ```{r}
 x <- case_death_rate_subset %>%
-  dplyr::filter(time_value >= "2021-10-01", 
-                time_value <= "2021-12-31",
-  geo_value %in% c("ca"))
+  filter(time_value >= "2021-10-01", 
+         time_value <= "2021-12-31",
+         geo_value %in% c("ca"))
 
 glimpse(x)
 ```
 
-Say we want to compare whether having more lags is useful in predicting 
+Let's suppose we want to compare whether having more lags is useful in predicting 
 7 day ahead death rates. Using a k-fold cross validation will help us determine
-that. First, we construct two recipes:
+this. First, we construct two recipes that only differ in the inclusion of
+14 day lag predictors for case and death rates:
 
 ```{r}
 r_less <- epi_recipe(x) %>%
@@ -52,14 +57,14 @@ r_more <- epi_recipe(x) %>%
       step_epi_naomit()
 ```
 
-Next we resample the time-series data. We will use 1-month consecutive data
+Next, we'll resample the time series data. We will use 1-month consecutive data 
 to train the models and hold the next day as assessment data. 
+
 There are multiple packages that split time series data. The more common one is
 `rsample`, some other choices include the `timetk` package, which is also built
-on the tidyverse. `time_series_cv()` function from `timetk` package comes 
-in handy for cross-validation. We will illustrate it here.
-Additionally, `time_series_split()` returns a single time series split and can
-be used when the user only wants to split the data once, e.g for train/test data.
+on the tidyverse. The `time_series_cv()` function from `timetk` package comes 
+in handy for doing time series cross-validation. We will illustrate using that 
+function below to get the cross-validation folds:
 
 ```{r}
 folds <- x %>%
@@ -68,7 +73,7 @@ folds <- x %>%
                  point_forecast = TRUE)
 ```
 
-There are `r nrow(folds)` folds. And we can do a sanity check of the date range 
+In total, there are `nrow(folds)` folds. And we can do a sanity check of the date range 
 for each training set in the splits. 
 
 ```{r}
@@ -79,8 +84,7 @@ for(i in 1:nrow(folds)){
 }
 training_window
 ```
-
-Now for model fitting:
+Now onto the model fitting. Note that we're using linear regression here.
 
 ```{r}
 
@@ -125,38 +129,41 @@ predictions <- data.frame(assessment_date, pred_less , pred_more)
 colnames(predictions) <- c("time_value", "pred_less", "pred_more")
 
 real_outcome_df <- x %>% filter(time_value %in% (assessment_date + 7)) %>%
-    mutate(real_outcome= lead(death_rate, 7)) %>%
+    mutate(real_outcome = lead(death_rate, 7)) %>%
       select(time_value, real_outcome)
 
 # compare MSPE
 predictions %>%
-  left_join( real_outcome_df) %>%
+  left_join(real_outcome_df) %>%
   na.omit() %>%
   mutate(spe_less = (real_outcome - pred_less)^2,
          spe_more = (real_outcome - pred_more)^2) %>%
-  summarize(mspe_less=mean(spe_less),
-            mspe_more= mean(spe_more))
+  summarize(mspe_less = mean(spe_less),
+            mspe_more = mean(spe_more))
 ```
 
-It seems like the model that does not use 14 day lag of case rate and death rate
-have a lower mean squared prediction error, therefore we will go with the model
+The model that does not include 14 day lag variables for case and death rates 
+has a lower mean squared prediction error (MSPE). We will go for that model
 with the lower MSPE.
 
-The next example, we will use the `rsample` package for cross-validation data 
-splitting and we'll use it for hyperparameter tuning:
+The next example, we will use `rolling_origin` from the `rsample` package for 
+cross-validation data splitting and we'll use it for hyperparameter tuning.
+This model has 2 tuning parameters: penalty, which refers to the amount of
+regularization and mixture, which is the proportion of LASSO penalty.
 
 ```{r}
 tune_spec <- 
-  linear_reg(penalty = tune(), mixture = tune()) %>% 
-  set_engine("glmnet")
+  parsnip::linear_reg(penalty = tune(), mixture = tune()) %>% 
+  parsnip::set_engine("glmnet")
 
 tune_spec
 ```
 
-Think of `tune()` here as a placeholder. After the tuning process, we will 
-select a single numeric value for each of these hyperparameters. 
-For now, we specify our parsnip model object and identify the hyperparameters
-we will `tune()`.
+Think of `tune()` in the above as a placeholder. After the tuning process, 
+we will select a single numeric value for each of these hyperparameters. 
+To do this, we will create a random grid of parameter combinations. The size
+parameter controls the number of parameter combinations returned in the 
+random grid.
 
 ```{r}
 grid <- dials::grid_random(extract_parameter_set_dials(tune_spec), 
@@ -164,7 +171,6 @@ grid <- dials::grid_random(extract_parameter_set_dials(tune_spec),
 
 grid
 ```
-
 The data needs to be preprocessed before passed into the workflow:
 
 ```{r}
@@ -172,15 +178,15 @@ preprocessed <- bake(prep(r_less, x), x) %>% na.omit()
 
 roll_rs <- rsample::rolling_origin(
   preprocessed, 
-  initial = 60, 
+  initial = 10, 
   assess = 1,
   cumulative = FALSE
   )
 
 wf = epi_workflow() %>%
-add_formula(ahead_7_death_rate ~  lag_0_case_rate + lag_7_case_rate  +
-              lag_0_death_rate  + lag_7_death_rate  ) %>%
-add_model(tune_spec)  %>% 
+workflows::add_formula(ahead_7_death_rate ~ lag_0_case_rate + lag_7_case_rate +
+              lag_0_death_rate + lag_7_death_rate) %>%
+workflows::add_model(tune_spec)  %>% 
 tune::tune_grid(
   resamples = roll_rs,
   grid = grid
