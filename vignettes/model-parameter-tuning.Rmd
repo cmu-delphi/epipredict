@@ -135,7 +135,7 @@ pred_less <- do.call(rbind, pred_less)
 pred_more <- do.call(rbind, pred_more)
 
 
-predictions <- data.frame(assessment_date, pred_less , pred_more) 
+predictions <- data.frame(assessment_date, pred_less, pred_more) 
 colnames(predictions) <- c("time_value", "pred_less", "pred_more")
 
 # Format the real outcome values (like in the preprocessed data),
