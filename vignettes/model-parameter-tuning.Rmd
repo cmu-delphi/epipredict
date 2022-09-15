@@ -26,8 +26,8 @@ library(dplyr)
 ```
 
 In this vignette, we're going to look at using k-fold cross validation to compare
-which of two models is more useful in predicting death rates and then we'll do 
-some hyperparameter tuning on the chosen model.
+which of two models is more useful in predicting COVID-19 death rates and then 
+we'll do some hyperparameter tuning on the chosen model.
 
 The dataset we'll be using is `case_death_rate_subset`, which contains confirmed 
 COVID-19 cases and deaths from Dec 31, 2020 to Dec 31, 2021 from reports made 
@@ -44,9 +44,9 @@ glimpse(x)
 ```
 
 Let's suppose we want to compare whether having more lags is useful in predicting 
-7 day ahead death rates. Using a k-fold cross validation will help us determine
+7 day ahead death rates. Using k-fold cross validation will help us determine
 this. First, we construct two recipes that only differ in the inclusion of
-14 day lag predictors for case and death rates:
+14 day lag case and death rate predictors:
 
 ```{r}
 r_less <- epi_recipe(x) %>%
@@ -68,8 +68,8 @@ to train the models and hold the next day as assessment data.
 There are multiple packages that split time series data. The more common one is
 `rsample`, some other choices include the `timetk` package, which is also built
 on the tidyverse. The `time_series_cv()` function from `timetk` package comes 
-in handy for doing time series cross-validation. We will demonstrate using that 
-function below to get the cross-validation folds for our time series:
+in handy for doing time series cross-validation. We will now demonstrate using 
+that function to get the cross-validation folds for our time series:
 
 ```{r}
 folds <- x %>%
@@ -89,7 +89,7 @@ for(i in 1:nrow(folds)){
 }
 training_window
 ```
-Now onto the model fitting. Note that we're using linear regression here.
+Now onto the model fitting, where we're only using linear regression:
 
 ```{r}
 
@@ -103,8 +103,10 @@ models_more = lapply(folds$splits, fit_model, r = r_more)
 
 ```
 
-The tricky part is to use some functions such as `rsample::analysis()` and 
-`rsample::assessment()` to format the cross-validation data sets. 
+We'll now work to get the predictions from our two models and compare the
+model performance by using mean squared prediction error (MSPE).
+Notice that the tricky part is to use functions such as `rsample::analysis()`
+and `rsample::assessment()` to format the cross-validation data sets. 
 
 ```{r}
 # Function to get the model predictions
@@ -152,14 +154,15 @@ predictions %>%
             mspe_more = mean(spe_more))
 ```
 
-The model that does not include 14 day lag variables for case and death rates 
-has a lower mean squared prediction error (MSPE). We will go for the model
-with the lower MSPE.
+We can see that the model that does not include 14 day lag variables for 
+case and death rates has the lower MPSE. Hence, we'll choose that model.
 
-The next example, we will use `rolling_origin` from the `rsample` package for 
+In the next example, we will use `rolling_origin` from the `rsample` package for 
 cross-validation data splitting and we'll use it for hyperparameter tuning.
-This model has 2 tuning parameters: penalty, which refers to the amount of
-regularization and mixture, which is the proportion of LASSO penalty.
+
+Note that the model we're working with has two tuning parameters: penalty, 
+which refers to the amountof regularization and mixture, which is the 
+proportion of LASSO penalty.
 
 ```{r}
 tune_spec <- 
@@ -186,7 +189,7 @@ workflow. We then using rolling origin forecast resampling to produce
 samples that take 60 days of data and use the next day as assessment
 data. Finally, we do model tuning via grid search. The `tune_grid()` 
 function computes performance metrics (ex. RMSE) for our pre-defined 
-set of tuning parameters that correspond to the linear model (specified 
+set of tuning parameters that correspond to the model (specified 
 below) across the resamples.
 
 ```{r}
@@ -213,7 +216,7 @@ tune::tune_grid(
 
 ```
 
-Finally, the metrics tied to each set of hyperparamaters can be accessed via:
+Finally, the metrics tied to each set of hyperparameters can be accessed via:
 ```{r}
 wf$.metrics
 ```
