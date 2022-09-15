@@ -224,13 +224,14 @@ The metrics tied to each set of hyperparameters can be accessed via:
 grid_res$.metrics
 ```
 Although it may be good to see all performance estimates for each 
-hyperparameter, it can be rather cumbersome and not fun to comb through.
+hyperparameter combination, it can be rather cumbersome and not 
+fun to comb through.
 
 Fortunately, we may use `show_best()` to display the top 5 models along 
 with estimates of their performance. Note that the models are sorted according 
 to a specified metric. In our case, we'll use RMSE. We may also use 
-`select_best()` to select the hyperparameters with the best results 
-numerically.
+`select_best()` to select the combination of hyperparameters with the best 
+results numerically.
 
 ```{r}
 show_best(grid_res, metric = "rmse")
