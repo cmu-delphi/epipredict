@@ -295,3 +295,62 @@ test_that("expect error if `by` selector does not match", {
                 )
 })
 
+
+test_that("Rate rescaling behaves as expected", {
+  x <- tibble(geo_value = rep("place",50),
+              time_value = as.Date("2021-01-01") + 0:49,
+              case_rate = rep(0.0005, 50),
+              cases = rep(5000, 50)) %>%
+    as_epi_df()
+
+  reverse_pop_data = data.frame(states = c("place"),
+                                value = c(1/1000))
+
+  r <- epi_recipe(x) %>%
+    step_population_scaling(df = reverse_pop_data,
+                            df_pop_col = "value",
+                            rate_rescaling = 100, # cases per 100
+                            by = c("geo_value" = "states"),
+                            case_rate, suffix = "_scaled")
+
+  expect_equal(unique(bake(prep(r,x),x)$case_rate_scaled),
+               0.0005*(1/1000)*100) # done testing step_*
+
+  f <- frosting() %>%
+    layer_population_scaling(.pred, df = reverse_pop_data,
+                             rate_rescaling = 100, # revert back to case rate per 100
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+
+  x <- tibble(geo_value = rep("place",50),
+              time_value = as.Date("2021-01-01") + 0:49,
+              case_rate = rep(0.0005, 50)) %>%
+    as_epi_df()
+
+  r <- epi_recipe(x) %>%
+    step_epi_lag(case_rate, lag = c(7, 14)) %>% # cases
+    step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = reverse_pop_data,
+                             rate_rescaling = 100, # revert back to case rate per 100
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(x) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(recipe = r, x = x)
+
+  # suppress warning: prediction from a rank-deficient fit may be misleading
+  suppressWarnings(expect_equal(unique(predict(wf, latest)$.pred)*1000/100,
+               unique(predict(wf, latest)$.pred_scaled)))
+})
+
+

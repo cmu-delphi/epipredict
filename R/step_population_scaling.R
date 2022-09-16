@@ -1,12 +1,15 @@
-#' Create a recipe step that scales variables using population data
+#' Convert raw scale predictions to per-capita
 #'
 #' `step_population_scaling` creates a specification of a recipe step
-#' that will add a population scaled column in the data. For example,
-#' load a dataset that contains county population, and join to an `epi_df`
-#' that currently only contains number of new cases by county. Once scaled,
-#' predictions can be made on case rate. Although worth noting that there is
-#' nothing special about "population". The function can be used to scale by any
-#' variable. Population is simply the most natural and common use case.
+#' that will perform per-capita scaling. Typical usage would
+#' load a dataset that contains state-level population, and use it to convert
+#' predictions made from a raw scale model to rate-scale by dividing by
+#' the population.
+#' Although, it is worth noting that there is nothing special about "population".
+#' The function can be used to scale by any variable. Population is the
+#' standard use case in the epidemiology forecasting scenario. Any value
+#' passed will *divide* the selected variables while the `rate_rescaling`
+#' argument is a common *multiplier* of the selected variables.
 #'
 #' @param recipe A recipe object. The step will be added to the sequence of
 #' operations for this recipe. The recipe should contain information about the
@@ -19,25 +22,30 @@
 #' be ard are not limited to "outcome".
 #' @param trained A logical to indicate if the quantities for preprocessing
 #' have been estimated.
-#' @param df a data frame that contains the population data used for scaling.
-#' @param by A character vector of variables to left join by.
+#' @param df a data frame that contains the population data to be used for
+#'   inverting the existing scaling.
+#' @param by A (possibly named) character vector of variables to join by.
 #'
 #' If `NULL`, the default, the function will perform a natural join, using all
-#' variables in common across the `epi_df` and the user-provided dataset.
-#' If columns in `epi_df` and `df` have the same name (and aren't
-#' included in by), `.df` is added to the one from the user-provided data
+#' variables in common across the `epi_df` produced by the `predict()` call
+#' and the user-provided dataset.
+#' If columns in that `epi_df` and `df` have the same name (and aren't
+#' included in `by`), `.df` is added to the one from the user-provided data
 #' to disambiguate.
 #'
 #' To join by different variables on the `epi_df` and `df`, use a named vector.
-#' For example, by = c("geo_value" = "states") will match `epi_df$geo_value`
+#' For example, `by = c("geo_value" = "states")` will match `epi_df$geo_value`
 #' to `df$states`. To join by multiple variables, use a vector with length > 1.
-#' For example, by = c("geo_value" = "states", "county" = "county") will match
+#' For example, `by = c("geo_value" = "states", "county" = "county")` will match
 #' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
 #' See [dplyr::left_join()] for more details.
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and will be used for scaling.
 #' This should be one column.
+#' @param rate_rescaling Sometimes raw scales are "per 100K" or "per 1M".
+#' Adjustments can be made here. For example, if the original
+#' scale is "per 100K", then set `rate_rescaling = 1e5` to get rates.
 #' @param create_new TRUE to create a new column and keep the original column
 #' in the `epi_df`
 #' @param suffix a character. The suffix added to the column name if
@@ -61,8 +69,7 @@
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   dplyr::select(geo_value, time_value, cases)
 #'
-#' pop_data = data.frame(states = c("ca", "ny"),
-#'                       value = c(20000, 30000))
+#' pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_population_scaling(df = pop_data,
@@ -86,11 +93,12 @@
 #'   parsnip::fit(jhu) %>%
 #'   add_frosting(f)
 #'
-#' latest <- get_test_data(recipe = r,
-#'                         x = epiprocess::jhu_csse_daily_subset %>%
-#'                           dplyr::filter(time_value > "2021-11-01",
-#'                                         geo_value %in% c("ca", "ny")) %>%
-#'                           dplyr::select(geo_value, time_value, cases))
+#' latest <- get_test_data(
+#'    recipe = r,
+#'    x = epiprocess::jhu_csse_daily_subset %>%
+#'    dplyr::filter(time_value > "2021-11-01",
+#'    geo_value %in% c("ca", "ny")) %>%
+#'    dplyr::select(geo_value, time_value, cases))
 #'
 #'
 #' predict(wf, latest)
@@ -102,11 +110,19 @@ step_population_scaling <-
           df,
           by = NULL,
           df_pop_col,
+          rate_rescaling = 1,
           create_new = TRUE,
           suffix = "_scaled",
           columns = NULL,
           skip = FALSE,
           id = rand_id("population_scaling")){
+  arg_is_scalar(role, trained, df_pop_col, rate_rescaling, create_new, suffix, id)
+  arg_is_lgl(create_new, skip)
+  arg_is_chr(df_pop_col, suffix, id)
+  arg_is_chr(by, columns, allow_null = TRUE)
+  if (rate_rescaling <= 0)
+    cli_stop("`rate_rescaling` should be a positive number")
+
   add_step(
     recipe,
     step_population_scaling_new(
@@ -116,6 +132,7 @@ step_population_scaling <-
       df = df,
       by = by,
       df_pop_col = df_pop_col,
+      rate_rescaling = rate_rescaling,
       create_new = create_new,
       suffix = suffix,
       columns = columns,
@@ -126,7 +143,7 @@ step_population_scaling <-
 }
 
 step_population_scaling_new <-
-  function(role, trained, df, by, df_pop_col, terms, create_new,
+  function(role, trained, df, by, df_pop_col, rate_rescaling, terms, create_new,
            suffix, columns, skip, id) {
     step(
       subclass = "population_scaling",
@@ -136,6 +153,7 @@ step_population_scaling_new <-
       df = df,
       by = by,
       df_pop_col = df_pop_col,
+      rate_rescaling = rate_rescaling,
       create_new = create_new,
       suffix = suffix,
       columns = columns,
@@ -153,6 +171,7 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
     df = x$df,
     by = x$by,
     df_pop_col = x$df_pop_col,
+    rate_rescaling = x$rate_rescaling,
     create_new = x$create_new,
     suffix = x$suffix,
     columns = recipes_eval_select(x$terms, training, info),
@@ -172,8 +191,9 @@ bake.step_population_scaling <- function(object,
   try_join <- try(dplyr::left_join(new_data, object$df,
                             by= object$by),
                 silent = TRUE)
-  if (any(grepl("Join columns must be present in data", unlist(try_join)))){
-      stop("columns in `by` selectors of `step_population_scaling` must be present in data and match")}
+  if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
+    cli_stop(c("columns in `by` selectors of `layer_population_scaling` ",
+               "must be present in data and match"))}
 
   if(object$suffix != "_scaled" && object$create_new == FALSE){
     message("`suffix` not used to generate new column in `step_population_scaling`")
@@ -194,7 +214,7 @@ bake.step_population_scaling <- function(object,
     dplyr::mutate(
       dplyr::across(
         dplyr::all_of(object$columns),
-        ~.x/!!pop_col ,
+        ~.x * object$rate_rescaling /!!pop_col ,
         .names = "{.col}{suffix}")) %>%
     # removed so the models do not use the population column
    dplyr::select(- !!pop_col)
