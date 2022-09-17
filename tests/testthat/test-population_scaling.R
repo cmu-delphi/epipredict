@@ -314,7 +314,7 @@ test_that("Rate rescaling behaves as expected", {
                             case_rate, suffix = "_scaled")
 
   expect_equal(unique(bake(prep(r,x),x)$case_rate_scaled),
-               0.0005*(1/1000)*100) # done testing step_*
+               0.0005*100/(1/1000)) # done testing step_*
 
   f <- frosting() %>%
     layer_population_scaling(.pred, df = reverse_pop_data,
@@ -349,7 +349,7 @@ test_that("Rate rescaling behaves as expected", {
   latest <- get_test_data(recipe = r, x = x)
 
   # suppress warning: prediction from a rank-deficient fit may be misleading
-  suppressWarnings(expect_equal(unique(predict(wf, latest)$.pred)*1000/100,
+  suppressWarnings(expect_equal(unique(predict(wf, latest)$.pred)*(1/1000)/100,
                unique(predict(wf, latest)$.pred_scaled)))
 })
 
