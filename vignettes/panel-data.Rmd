@@ -443,14 +443,14 @@ Let's take a look at the predictions along with their 90% prediction intervals.
 latest <- get_test_data(recipe = rx, x = employ_small)
 predsx <- predict(wfx_linreg, latest)
 
-# Display values within prediction intervals 
+# Display values within prediction intervals
 predsx %>%
     select(
-      geo_value, time_value, edu_qual, age_group, 
-      .pred_original, .pred_distn_original) %>%
-    dplyr::mutate(.quantiles = nested_quantiles(.pred_distn_original)) %>%
+      geo_value, time_value, edu_qual, age_group,
+      .pred_scaled, .pred_distn_scaled) %>%
+    dplyr::mutate(.quantiles = nested_quantiles(.pred_distn_scaled)) %>%
     tidyr::unnest(.quantiles) %>% 
-    pivot_wider(names_from = tau, values_from = q) %>% 
+    pivot_wider(names_from = tau, values_from = q) %>%
     head()
  ```
 
