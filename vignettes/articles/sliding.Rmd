@@ -1,10 +1,5 @@
 ---
 title: "Demonstrations of sliding AR and ARX forecasters"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Demonstrations of sliding AR and ARX forecasters}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
