@@ -1,0 +1,256 @@
+---
+title: Model Parameter Tuning
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Model Parameter Tuning}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(epiprocess)
+library(epipredict)
+library(timetk)
+library(rsample)
+library(dials)
+library(purrr, include.only = 'pluck')
+library(broom, include.only = 'tidy')
+library(tune)
+library(glmnet)
+library(dplyr)
+```
+
+In this vignette, we're going to look at using k-fold cross validation to compare
+which of two models is more useful in predicting COVID-19 death rates and then 
+we'll do some hyperparameter tuning on the chosen model.
+
+The dataset we'll be using is `case_death_rate_subset`, which contains confirmed 
+COVID-19 cases and deaths from Dec 31, 2020 to Dec 31, 2021 from reports made 
+available by Johns Hopkins University. To simplify things, we'll just use the 
+data for California from October 1, 2021 to December 31, 2021, inclusive:
+
+```{r}
+x <- case_death_rate_subset %>%
+  filter(time_value >= "2021-10-01", 
+         time_value <= "2021-12-31",
+         geo_value %in% c("ca"))
+
+glimpse(x)
+```
+
+Let's suppose we want to compare whether having more lags is useful in predicting 
+7 day ahead death rates. Using k-fold cross validation will help us determine
+this. First, we construct two recipes that only differ in the inclusion of
+14 day lag case and death rate predictors:
+
+```{r}
+r_less <- epi_recipe(x) %>%
+      step_epi_lag(case_rate, lag = c(0, 7)) %>%
+      step_epi_lag(death_rate, lag = c(0, 7)) %>%
+      step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
+      step_epi_naomit()
+
+r_more <- epi_recipe(x) %>%
+      step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+      step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+      step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
+      step_epi_naomit()
+```
+
+Next, we'll resample the time series data. We will use 1-month consecutive data 
+to train the models and hold the next day as assessment/testing data. 
+
+There are multiple packages that split time series data. The more common one is
+`rsample`, some other choices include the `timetk` package, which is also built
+on the tidyverse. The `time_series_cv()` function from `timetk` package comes 
+in handy for doing time series cross-validation. We will now demonstrate using 
+that function to get the cross-validation folds for our time series:
+
+```{r}
+folds <- x %>%
+  timetk::time_series_cv(initial = "1 month",
+                 assess = 1,
+                 point_forecast = TRUE)
+```
+
+In total, there are `nrow(folds)` folds. And we can do a sanity check of the 
+date range for each training set in the splits. 
+
+```{r}
+training_window <- as.data.frame(c(), c())
+for(i in 1:nrow(folds)){
+  training_window[i,1] <- min(analysis(folds$splits[[i]])$time_value)
+  training_window[i,2] <- max(analysis(folds$splits[[i]])$time_value)
+}
+training_window
+```
+Now onto the model fitting (where we're only using linear regression):
+
+```{r}
+
+fit_model <- function(x,r) {
+ epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(x %>% analysis())
+}
+
+models_less = lapply(folds$splits, fit_model, r = r_less)
+models_more = lapply(folds$splits, fit_model, r = r_more)
+
+```
+
+We'll now work to get the predictions from our two models and compare the
+model performance by using mean squared prediction error (MSPE).
+Notice that the tricky part is to use functions such as `rsample::analysis()`
+and `rsample::assessment()` to format the cross-validation data sets. 
+
+```{r}
+# Function to get the model predictions
+get_prediction <- function(model, assessment_date, recipe, data){
+  preprocessed <- bake(prep(recipe, data), data) 
+  assess <- preprocessed %>% 
+    filter(time_value == assessment_date) %>%
+    select(broom::tidy(model)$term[-1], time_value, geo_value)
+
+  return(predict(model$fit$fit, new_data = assess))
+}
+
+# Obtain assessment dates
+assessment_date_list <- epipredict:::map(lapply(folds$splits, assessment),
+                  ~ purrr::pluck( . ,"time_value")) 
+
+assessment_date <- do.call("c", assessment_date_list)
+
+# Get the predictions from our two models
+pred_less <- epipredict:::map2(models_less, assessment_date, get_prediction,
+             data = x, recipe = r_less) 
+pred_more <- epipredict:::map2(models_more, assessment_date, get_prediction,
+             data = x, recipe = r_more) 
+
+pred_less <- do.call(rbind, pred_less)
+pred_more <- do.call(rbind, pred_more)
+
+
+predictions <- data.frame(assessment_date, pred_less, pred_more) 
+colnames(predictions) <- c("time_value", "pred_less", "pred_more")
+
+# Format the real outcome values (like in the preprocessed data),
+# noting that the model predicts 7 day ahead for each date it's trained on
+real_outcome_df <- x %>% filter(time_value %in% (assessment_date + 7)) %>%
+    mutate(real_outcome = lead(death_rate, 7)) %>%
+      select(time_value, real_outcome)
+
+# Compare the MSPE of the two models
+predictions %>%
+  left_join(real_outcome_df) %>%
+  na.omit() %>%
+  mutate(spe_less = (real_outcome - pred_less)^2,
+         spe_more = (real_outcome - pred_more)^2) %>%
+  summarize(mspe_less = mean(spe_less),
+            mspe_more = mean(spe_more))
+```
+
+We can see that the model that does not include 14 day lag variables for 
+case and death rates has the lower MPSE. Hence, we'll choose that model.
+
+In the next example, we will use `rolling_origin` from the `rsample` package for 
+cross-validation data splitting and we'll use it for hyperparameter tuning.
+
+Note that the model we're working with has two tuning parameters: penalty, 
+which refers to the amountof regularization and mixture, which is the 
+proportion of LASSO penalty.
+
+```{r}
+tune_spec <- 
+  parsnip::linear_reg(penalty = tune(), mixture = tune()) %>% 
+  parsnip::set_engine("glmnet")
+
+tune_spec
+```
+
+Think of `tune()` in the above as a placeholder. After the tuning process, 
+we will select a single numeric value for each of these hyperparameters. 
+We will now create a random grid of tuning parameter combinations to choose
+from. The size parameter controls the number of parameter combinations 
+returned in the random grid.
+
+```{r}
+grid <- dials::grid_random(extract_parameter_set_dials(tune_spec), 
+                           size = 10)
+
+grid
+```
+Note that the data needs to be preprocessed before it is passed into the 
+workflow. We then using rolling origin forecast resampling to produce
+samples that take 60 days of data and use the next day as assessment
+data. Finally, we do model tuning via grid search. The `tune_grid()` 
+function computes performance metrics (ex. RMSE) for our pre-defined 
+set of tuning parameters that correspond to the model (specified 
+below) across the resamples.
+
+```{r}
+# Preprocess data
+preprocessed <- bake(prep(r_less, x), x) %>% na.omit()
+
+# Perform rolling origin forecast resampling
+roll_rs <- rsample::rolling_origin(
+  preprocessed, 
+  initial = 60, 
+  assess = 1,
+  cumulative = FALSE
+  )
+
+# Add formula and model to workflow
+wf = epi_workflow() %>%
+workflows::add_formula(ahead_7_death_rate ~ lag_0_case_rate + lag_7_case_rate +
+              lag_0_death_rate + lag_7_death_rate) %>%
+workflows::add_model(tune_spec) 
+
+# Model tuning by grid search
+grid_res <- tune::tune_grid(
+  object = wf,
+  resamples = roll_rs,
+  grid = grid
+)
+
+```
+
+The metrics tied to each set of hyperparameters can be accessed via:
+```{r}
+grid_res$.metrics
+```
+Although it may be good to see all performance estimates for each 
+hyperparameter combination, it can be rather cumbersome and not 
+fun to comb through.
+
+Fortunately, we may use `show_best()` to display the top 5 models along 
+with estimates of their performance. Note that the models are sorted according 
+to a specified metric. In our case, we'll use RMSE. We may also use 
+`select_best()` to select the combination of hyperparameters with the best 
+results numerically.
+
+```{r}
+show_best(grid_res, metric = "rmse")
+
+best_hyperparam <- select_best(grid_res, metric = "rmse")
+```
+
+Now, we'll specify these parameters in a tibble and then use the
+`finalize_workflow()` function to integrate these into our workflow:
+
+```{r}
+linear_param <- tibble(penalty = best_hyperparam$penalty,
+                       mixture = best_hyperparam$mixture)
+
+final_wf <- 
+  wf %>% 
+  finalize_workflow(linear_param)
+final_wf
+```
+
+We are now all set to fit the model to a training set and 
+use that to make predictions.

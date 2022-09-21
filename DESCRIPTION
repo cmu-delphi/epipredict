@@ -44,6 +44,12 @@ Imports:
     vctrs,
     workflows (>= 1.0.0)
 Suggests: 
+    timetk,
+    broom,
+    tune,
+    glmnet,
+    rsample,
+    dials,
     poissonreg,
     covidcast,
     data.table,
