@@ -2,27 +2,27 @@ Package: epipredict
 Title: Basic epidemiology forecasting methods
 Version: 0.0.3
 Authors@R: c(
-    person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut","cre")),
-    person("Jacob", "Bien", role = "aut"),
+    person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
     person("Logan", "Brooks", role = "aut"),
-    person("Rachel", "Lobay", role = "ctb"),
-    person("Ken", "Mawer", role = "ctb"),
-    person("Chloe", "You", role = "ctb"),
-    person("Quang", "Nguyen", role = "ctb"),
-    person("Dmitry", "Shemetov", role = "ctb")
+    person("Rachel", "Lobay", role = "aut"),
+    person("Maggie", "Liu", role = "aut")
+    person("Ken", "Mawer", role = "aut"),
+    person("Chloe", "You", role = "aut")
+    person("Jacob", "Bien", role = "ctb"),
   )
-Description: A forecasting "framework" for creating epidemiological forecasts
-  from versioned data. The framework is designed to be modular so that 
-  different components can exchanged, enabling a large amount of flexibility.
-  Some simple baseline models formed from these components are included.
+Description: A forecasting "framework" for creating epidemiological
+    forecasts from versioned data. The framework is designed to be modular
+    so that different components can exchanged, enabling a large amount of
+    flexibility.  Some simple baseline models formed from these components
+    are included.
 License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends: 
-    R (>= 3.5.0),
-    epiprocess
+    epiprocess,
+    R (>= 3.5.0)
 Imports: 
     assertthat,
     cli,
@@ -44,7 +44,6 @@ Imports:
     vctrs,
     workflows (>= 1.0.0)
 Suggests: 
-    poissonreg,
     covidcast,
     data.table,
     epidatr,
@@ -52,6 +51,7 @@ Suggests:
     knitr,
     lubridate,
     parsnip (>= 1.0.0),
+    poissonreg,
     ranger,
     RcppRoll,
     rmarkdown,
@@ -60,10 +60,10 @@ Suggests:
 VignetteBuilder: 
     knitr
 Remotes:
-    cmu-delphi/epiprocess,
-    cmu-delphi/epidatr
+    cmu-delphi/epidatr,
+    cmu-delphi/epiprocess
 Config/testthat/edition: 3
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
-LazyData: true
