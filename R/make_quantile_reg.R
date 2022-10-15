@@ -27,6 +27,9 @@ quantile_reg <- function(mode = "regression",  tau = 0.5) {
   }
 
   # Capture the arguments in quosures
+  if (any(tau) > 1) rlang::abort("All `tau` must be less than 1.")
+  if (any(tau) < 0) rlang::abort("All `tau` must be greater than 0.")
+  tau <- sort(tau)
   args <- list(tau = rlang::enquo(tau))
 
   # Save some empty slots for future parts of the specification
