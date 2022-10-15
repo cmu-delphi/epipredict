@@ -20,7 +20,7 @@
 #' rq_spec <- quantile_reg(tau = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
-quantile_reg <- function(mode = "regression",  tau = 0.5) {
+quantile_reg <- function(mode = "regression",  engine = "rq", tau = 0.5) {
   # Check for correct mode
   if (mode  != "regression") {
     rlang::abort("`mode` should be 'regression'")
@@ -39,7 +39,7 @@ quantile_reg <- function(mode = "regression",  tau = 0.5) {
     eng_args = NULL,
     mode = mode,
     method = NULL,
-    engine = NULL
+    engine = engine
   )
 }
 
