@@ -4,11 +4,14 @@
 \alias{quantile_reg}
 \title{Quantile regression}
 \usage{
-quantile_reg(mode = "regression", tau = 0.5)
+quantile_reg(mode = "regression", engine = "rq", tau = 0.5)
 }
 \arguments{
 \item{mode}{A single character string for the type of model.
 The only possible value for this model is "regression".}
+
+\item{engine}{Character string naming the fitting function. Currently, only
+"rq" is supported.}
 
 \item{tau}{A scalar or vector of values in (0, 1) to determine which
 quantiles to estimate (default is 0.5).}

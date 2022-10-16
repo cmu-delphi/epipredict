@@ -8,6 +8,8 @@
 #'
 #' @param mode A single character string for the type of model.
 #'   The only possible value for this model is "regression".
+#' @param engine Character string naming the fitting function. Currently, only
+#'   "rq" is supported.
 #' @param tau A scalar or vector of values in (0, 1) to determine which
 #'   quantiles to estimate (default is 0.5).
 #'
@@ -69,7 +71,8 @@ make_quantile_reg <- function() {
       interface = "formula",
       protect = c("formula", "data"),
       func = c(pkg = "quantreg", fun = "rq"),
-      defaults = list(method = "br", na.action = na.omit, model = FALSE)
+      defaults = list(method = "br", na.action = stats::na.omit,
+                      model = FALSE)
     )
   )
 
