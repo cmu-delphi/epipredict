@@ -8,7 +8,7 @@ Authors@R: c(
     person("Rachel", "Lobay", role = "aut"),
     person("Maggie", "Liu", role = "aut"),
     person("Ken", "Mawer", role = "aut"),
-    person("Chloe", "You", role = "aut")
+    person("Chloe", "You", role = "aut"),
     person("Jacob", "Bien", role = "ctb")
   )
 Description: A forecasting "framework" for creating epidemiological
