@@ -119,8 +119,3 @@ make_quantile_reg <- function() {
   )
 }
 
-#tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
-#rq_spec <- quantile_reg(tau = c(.2, .8)) %>% set_engine("rq")
-#ff <- rq_spec %>% fit(y~., data = tib)
-#predict(ff, new_data = tib)
-

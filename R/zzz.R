@@ -8,3 +8,4 @@
   make_flatline_reg()
   make_quantile_reg()
 }
+

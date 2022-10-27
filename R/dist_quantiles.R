@@ -108,6 +108,8 @@ extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
 }
 
 
+
+
 #' Turn a a vector of quantile distributions into a list-col
 #'
 #' @param x a `distribution` containing `dist_quantiles`
@@ -161,6 +163,10 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
     qvals <- field(x, "q")
     r <- range(tau, na.rm = TRUE)
     qvals_out <- rep(NA, length(tau_out))
+
+    # short circuit if we aren't actually extrapolating
+    # matches to ~15 decimals
+    if (all(tau_out %in% tau)) return(qvals[match(tau_out, tau)])
 
     if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
       warning(paste("Quantile extrapolation is not possible with fewer than",
