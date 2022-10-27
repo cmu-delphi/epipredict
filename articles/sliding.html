@@ -44,8 +44,8 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
     <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
+    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
   </div>
 </li>
 <li class="nav-item">
@@ -78,7 +78,7 @@
       <img src="" class="logo" alt=""><h1>Demonstrations of sliding AR and ARX forecasters</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/HEAD/vignettes/sliding.Rmd" class="external-link"><code>vignettes/sliding.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/HEAD/vignettes/articles/sliding.Rmd" class="external-link"><code>vignettes/articles/sliding.Rmd</code></a></small>
       <div class="d-none name"><code>sliding.Rmd</code></div>
     </div>
 
@@ -96,15 +96,45 @@
 <div class="section level2">
 <h2 id="demonstrations-of-sliding-ar-and-arx-forecasters">Demonstrations of sliding AR and ARX forecasters<a class="anchor" aria-label="anchor" href="#demonstrations-of-sliding-ar-and-arx-forecasters"></a>
 </h2>
-<p>A key function from the epiprocess package is <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code>, which allows the user to apply a function or formula-based computation over variables in an <code>epi_df</code> over a running window of <code>n</code> time steps (see the following <code>epiprocess</code> vignette to go over the basics of the function: <a href="https://cmu-delphi.github.io/epiprocess/articles/slide.html" class="external-link">“Slide a computation over signal values”</a>). The equivalent sliding method for an <code>epi_archive</code> object can be called by using the wrapper function <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code> (refer to the following vignette for the basicsof the function: <a href="https://cmu-delphi.github.io/epiprocess/articles/archive.html" class="external-link">“Work with archive objects and data revisions”</a>). The key difference from <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> is that it performs version-aware computations. That is, the function only uses data that would have been available as of time t for that reference time.</p>
-<p>In this vignette, we use <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> and <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code> for backtesting our <code>arx_forecaster</code> on historical COVID-19 case data from the US and from Canada. More precisely, we first demonstrate using <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> to slide ARX forecasters over an <code>epi_df</code> object and compare the results obtained from using different forecasting engines. We then compare the results from version-aware and unaware forecasting, where the former is obtained from applying <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code> to the <code>epi_archive</code> object, while the latter is obtained from applying <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> to the latest snapshot of the data.</p>
+<p>A key function from the epiprocess package is
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code>, which allows the user to apply a function or
+formula-based computation over variables in an <code>epi_df</code> over
+a running window of <code>n</code> time steps (see the following
+<code>epiprocess</code> vignette to go over the basics of the function:
+<a href="https://cmu-delphi.github.io/epiprocess/articles/slide.html" class="external-link">“Slide
+a computation over signal values”</a>). The equivalent sliding method
+for an <code>epi_archive</code> object can be called by using the
+wrapper function <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code> (refer to the following
+vignette for the basicsof the function: <a href="https://cmu-delphi.github.io/epiprocess/articles/archive.html" class="external-link">“Work
+with archive objects and data revisions”</a>). The key difference from
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> is that it performs version-aware computations.
+That is, the function only uses data that would have been available as
+of time t for that reference time.</p>
+<p>In this vignette, we use <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> and
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code> for backtesting our
+<code>arx_forecaster</code> on historical COVID-19 case data from the US
+and from Canada. More precisely, we first demonstrate using
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> to slide ARX forecasters over an
+<code>epi_df</code> object and compare the results obtained from using
+different forecasting engines. We then compare the results from
+version-aware and unaware forecasting, where the former is obtained from
+applying <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code> to the <code>epi_archive</code>
+object, while the latter is obtained from applying
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code> to the latest snapshot of the data.</p>
 <div class="section level3">
 <h3 id="comparing-different-forecasting-engines">Comparing different forecasting engines<a class="anchor" aria-label="anchor" href="#comparing-different-forecasting-engines"></a>
 </h3>
 <div class="section level4">
 <h4 id="example-using-cli-and-case-data-from-us-states">Example using CLI and case data from US states<a class="anchor" aria-label="anchor" href="#example-using-cli-and-case-data-from-us-states"></a>
 </h4>
-<p>First, we download the version history (ie. archive) of the percentage of doctor’s visits with CLI (COVID-like illness) computed from medical insurance claims and the number of new confirmed COVID-19 cases per 100,000 population (daily) for all 50 states from the COVIDcast API. We process as before, with the modification that we use <code>sync = locf</code> in <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_merge.html" class="external-link">epix_merge()</a></code> so that the last version of each observation can be carried forward to extrapolate unavailable versions for the less up-to-date input archive.</p>
+<p>First, we download the version history (ie. archive) of the
+percentage of doctor’s visits with CLI (COVID-like illness) computed
+from medical insurance claims and the number of new confirmed COVID-19
+cases per 100,000 population (daily) for all 50 states from the
+COVIDcast API. We process as before, with the modification that we use
+<code>sync = locf</code> in <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_merge.html" class="external-link">epix_merge()</a></code> so that the last
+version of each observation can be carried forward to extrapolate
+unavailable versions for the less up-to-date input archive.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme_get.html" class="external-link">theme_set</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
@@ -121,8 +151,12 @@
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, version <span class="op">=</span> <span class="va">issue</span>, case_rate <span class="op">=</span> <span class="va">value</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_archive.html" class="external-link">as_epi_archive</a></span><span class="op">(</span><span class="op">)</span>, </span>
 <span>  sync <span class="op">=</span> <span class="st">"locf"</span><span class="op">)</span></span></code></pre></div>
-<p>After obtaining the latest snapshot of the data, we produce forecasts on that data using the default engine of simple linear regression and compare to a random forest.</p>
-<p>Note that all of the warnings about the forecast date being less than the most recent update date of the data have been suppressed to avoid cluttering the output.</p>
+<p>After obtaining the latest snapshot of the data, we produce forecasts
+on that data using the default engine of simple linear regression and
+compare to a random forest.</p>
+<p>Note that all of the warnings about the forecast date being less than
+the most recent update date of the data have been suppressed to avoid
+cluttering the output.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Latest snapshot of data, and forecast dates</span></span>
 <span><span class="va">x_latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">x</span>, max_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">versions_end</span><span class="op">)</span><span class="op">)</span> </span>
@@ -161,8 +195,17 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>.pred_distn <span class="op">=</span> <span class="fu"><a href="../reference/nested_quantiles.html">nested_quantiles</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="co"># "nested" list-col</span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">tau</span>, values_from <span class="op">=</span> <span class="va">q</span><span class="op">)</span> </span></code></pre></div>
-<p>Here, <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> does all the heavy lifting. It creates leads of the target (respecting time stamps and locations) along with lags of the features (here, the response and doctors visits), estimates a forecasting model using the specified engine, creates predictions, and non-parametric confidence bands. All of these are tunable parameters.</p>
-<p>To see how the predictions compare, we plot them on top of the latest case rates. Note that even though we’ve fitted on all states, we’ll just display the results for two states, California (CA) and Florida (FL), to get a sense of the model performance while keeping it simple. So feel free to modify the code to look over the results for other states.</p>
+<p>Here, <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> does all the heavy lifting. It
+creates leads of the target (respecting time stamps and locations) along
+with lags of the features (here, the response and doctors visits),
+estimates a forecasting model using the specified engine, creates
+predictions, and non-parametric confidence bands. All of these are
+tunable parameters.</p>
+<p>To see how the predictions compare, we plot them on top of the latest
+case rates. Note that even though we’ve fitted on all states, we’ll just
+display the results for two states, California (CA) and Florida (FL), to
+get a sense of the model performance while keeping it simple. So feel
+free to modify the code to look over the results for other states.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fc_cafl</span> <span class="op">&lt;-</span> <span class="va">fc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">x_latest_cafl</span> <span class="op">&lt;-</span> <span class="va">x_latest</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span><span class="op">)</span><span class="op">)</span></span>
@@ -180,14 +223,38 @@
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"Reported COVID-19 case rates"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sliding_files/figure-html/plot-arx-1.png" width="864"></p>
-<p>For the two states of interest, simple linear regression clearly performs better than random forest in terms of accuracy of the predictions and not does not result in such in overconfident predictions (too narrow confidence bands). Though, in general, both approaches do not perform great. This could be because the behaviour is rather different across states and the effects of other notable factors such as age and public health measures may be important to account for in such forecasting. Including such factors as well as making enhancements such as correcting for outliers are some improvements one could make to our simple model in the future.</p>
+<p>For the two states of interest, simple linear regression clearly
+performs better than random forest in terms of accuracy of the
+predictions and not does not result in such in overconfident predictions
+(too narrow confidence bands). Though, in general, both approaches do
+not perform great. This could be because the behaviour is rather
+different across states and the effects of other notable factors such as
+age and public health measures may be important to account for in such
+forecasting. Including such factors as well as making enhancements such
+as correcting for outliers are some improvements one could make to our
+simple model in the future.</p>
 </div>
 <div class="section level4">
 <h4 id="example-using-case-data-from-canada">Example using case data from Canada<a class="anchor" aria-label="anchor" href="#example-using-case-data-from-canada"></a>
 </h4>
-<p>By leveraging the flexibility of <code>epiprocess</code>, we can apply the same techniques to data from other sources. Since some collaborators are in British Columbia, Canada, we’ll do essentially the same thing for Canada as we did above.</p>
-<p>The <a href="https://opencovid.ca/" class="external-link">COVID-19 Canada Open Data Working Group</a> collects daily time series data on COVID-19 cases, deaths, recoveries, testing and vaccinations at the health region and province levels. Data are collected from publicly available sources such as government datasets and news releases. Unfortunately, there is no simple versioned source, so we have created our own from the Commit history.</p>
-<p>First, we load versioned case rates at the provincial level. After converting these to 7-day averages (due to highly variable provincial reporting mismatches), we then convert the data to an <code>epi_archive</code> object, and extract the latest version from it. Finally, we run the same forcasting exercise as for the American data, but here we compare the forecasts produced from using simple linear regression with those from using boosted regression trees.</p>
+<p>By leveraging the flexibility of <code>epiprocess</code>, we can
+apply the same techniques to data from other sources. Since some
+collaborators are in British Columbia, Canada, we’ll do essentially the
+same thing for Canada as we did above.</p>
+<p>The <a href="https://opencovid.ca/" class="external-link">COVID-19 Canada Open Data Working
+Group</a> collects daily time series data on COVID-19 cases, deaths,
+recoveries, testing and vaccinations at the health region and province
+levels. Data are collected from publicly available sources such as
+government datasets and news releases. Unfortunately, there is no simple
+versioned source, so we have created our own from the Commit
+history.</p>
+<p>First, we load versioned case rates at the provincial level. After
+converting these to 7-day averages (due to highly variable provincial
+reporting mismatches), we then convert the data to an
+<code>epi_archive</code> object, and extract the latest version from it.
+Finally, we run the same forcasting exercise as for the American data,
+but here we compare the forecasts produced from using simple linear
+regression with those from using boosted regression trees.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># source("drafts/canada-case-rates.R)</span></span>
 <span><span class="va">can</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span></span>
@@ -249,7 +316,13 @@
 <span>       y <span class="op">=</span> <span class="st">"Reported COVID-19 case rates"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>  </span></code></pre></div>
 <p><img src="sliding_files/figure-html/plot-can-fc-boost-1.png" width="864"></p>
-<p>Both approaches tend to produce quite volatile forecasts (point predictions) and/or are overly confident (very narrow bands), particularly when boosted regression trees are used. But as this is meant to be a simple demonstration of sliding with different engines in <code>arx_forecaster</code>, we may devote another vignette to work on improving the predictive modelling using the suite of tools available in epipredict.</p>
+<p>Both approaches tend to produce quite volatile forecasts (point
+predictions) and/or are overly confident (very narrow bands),
+particularly when boosted regression trees are used. But as this is
+meant to be a simple demonstration of sliding with different engines in
+<code>arx_forecaster</code>, we may devote another vignette to work on
+improving the predictive modelling using the suite of tools available in
+epipredict.</p>
 </div>
 </div>
 <div class="section level3">
@@ -258,7 +331,16 @@
 <div class="section level4">
 <h4 id="example-using-case-data-from-us-states">Example using case data from US states<a class="anchor" aria-label="anchor" href="#example-using-case-data-from-us-states"></a>
 </h4>
-<p>We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast future COVID-19 case rates from current and past COVID-19 case rates for all states. That is, we can make forecasts on the archive, <code>x</code>, and compare those to forecasts on the latest data, <code>x_latest</code> using the same general set-up as above. For version-aware forecasting, note that <code>x</code> is fed into <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code>, while for version-unaware forecasting, <code>x_latest</code> is fed into <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code>. #%% update to include percent_cli after that issue is fixed?</p>
+<p>We will now employ a forecaster that uses properly-versioned data
+(that would have been available in real-time) to forecast future
+COVID-19 case rates from current and past COVID-19 case rates for all
+states. That is, we can make forecasts on the archive, <code>x</code>,
+and compare those to forecasts on the latest data, <code>x_latest</code>
+using the same general set-up as above. For version-aware forecasting,
+note that <code>x</code> is fed into <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html" class="external-link">epix_slide()</a></code>, while
+for version-unaware forecasting, <code>x_latest</code> is fed into
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epi_slide()</a></code>. #%% update to include percent_cli after that
+issue is fixed?</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">k_week_ahead_as_of</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">ahead</span> <span class="op">=</span> <span class="fl">7</span>, <span class="va">version_aware</span> <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw">if</span> <span class="op">(</span><span class="va">version_aware</span><span class="op">)</span> <span class="op">{</span></span>
@@ -286,7 +368,9 @@
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>.pred_distn <span class="op">=</span> <span class="fu"><a href="../reference/nested_quantiles.html">nested_quantiles</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">tau</span>, values_from <span class="op">=</span> <span class="va">q</span><span class="op">)</span> </span></code></pre></div>
-<p>Now we can plot the results on top of the latest case rates. As before, we will only display and focus on the results for FL and CA for simplicity.</p>
+<p>Now we can plot the results on top of the latest case rates. As
+before, we will only display and focus on the results for FL and CA for
+simplicity.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fc_cafl</span> <span class="op">=</span> <span class="va">fc</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">x_latest_cafl</span> <span class="op">=</span> <span class="va">x_latest</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span><span class="op">)</span><span class="op">)</span></span>
@@ -304,8 +388,15 @@
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set1"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="sliding_files/figure-html/plot-ar-asof-1.png" width="864"></p>
-<p>Again, we observe that the results are not great for these two states, but that’s likely due to the simplicity of the model (ex. the omission of key factors such as age and public health measures) and the quality of the data (ex. we have not personally corrected for anomalies in the data).</p>
-<p>We shall leave it to the reader to try the above version aware and unaware forecasting exercise on the Canadian case rate data. The above code for the American state data should be readily adaptable for this purpose.</p>
+<p>Again, we observe that the results are not great for these two
+states, but that’s likely due to the simplicity of the model (ex. the
+omission of key factors such as age and public health measures) and the
+quality of the data (ex. we have not personally corrected for anomalies
+in the data).</p>
+<p>We shall leave it to the reader to try the above version aware and
+unaware forecasting exercise on the Canadian case rate data. The above
+code for the American state data should be readily adaptable for this
+purpose.</p>
 </div>
 </div>
 </div>
@@ -317,7 +408,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Daniel McDonald, Jacob Bien, Ryan Tibshirani, Logan Brooks.</p>
+<p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay, Maggie Liu, Ken Mawer, Chloe You.</p>
 </div>
 
 <div class="pkgdown-footer-right">
