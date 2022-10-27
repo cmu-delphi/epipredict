@@ -11,7 +11,7 @@ new_quantiles <- function(q = double(), tau = double()) {
     tau <- tau[o]
   }
   if (is.unsorted(q, na.rm = TRUE))
-    rlang::abort("q[order(tau)] produces unsorted quantiles.")
+    rlang::abort("`q[order(tau)]` produces unsorted quantiles.")
 
   new_rcrd(list(q = q, tau = tau),
            class = c("dist_quantiles", "dist_default"))
