@@ -2,7 +2,7 @@
 % Please edit documentation in R/step_population_scaling.R
 \name{step_population_scaling}
 \alias{step_population_scaling}
-\title{Create a recipe step that scales variables using population data}
+\title{Convert raw scale predictions to per-capita}
 \usage{
 step_population_scaling(
   recipe,
@@ -12,6 +12,7 @@ step_population_scaling(
   df,
   by = NULL,
   df_pop_col,
+  rate_rescaling = 1,
   create_new = TRUE,
   suffix = "_scaled",
   columns = NULL,
@@ -35,20 +36,22 @@ be ard are not limited to "outcome".}
 \item{trained}{A logical to indicate if the quantities for preprocessing
 have been estimated.}
 
-\item{df}{a data frame that contains the population data used for scaling.}
+\item{df}{a data frame that contains the population data to be used for
+inverting the existing scaling.}
 
-\item{by}{A character vector of variables to left join by.
+\item{by}{A (possibly named) character vector of variables to join by.
 
 If \code{NULL}, the default, the function will perform a natural join, using all
-variables in common across the \code{epi_df} and the user-provided dataset.
-If columns in \code{epi_df} and \code{df} have the same name (and aren't
-included in by), \code{.df} is added to the one from the user-provided data
+variables in common across the \code{epi_df} produced by the \code{predict()} call
+and the user-provided dataset.
+If columns in that \code{epi_df} and \code{df} have the same name (and aren't
+included in \code{by}), \code{.df} is added to the one from the user-provided data
 to disambiguate.
 
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
-For example, by = c("geo_value" = "states") will match \code{epi_df$geo_value}
+For example, \code{by = c("geo_value" = "states")} will match \code{epi_df$geo_value}
 to \code{df$states}. To join by multiple variables, use a vector with length > 1.
-For example, by = c("geo_value" = "states", "county" = "county") will match
+For example, \code{by = c("geo_value" = "states", "county" = "county")} will match
 \code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.
 
 See \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} for more details.}
@@ -56,6 +59,10 @@ See \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} for more details.}
 \item{df_pop_col}{the name of the column in the data frame \code{df} that
 contains the population data and will be used for scaling.
 This should be one column.}
+
+\item{rate_rescaling}{Sometimes raw scales are "per 100K" or "per 1M".
+Adjustments can be made here. For example, if the original
+scale is "per 100K", then set \code{rate_rescaling = 1e5} to get rates.}
 
 \item{create_new}{TRUE to create a new column and keep the original column
 in the \code{epi_df}}
@@ -80,12 +87,15 @@ Scales raw data by the population
 }
 \description{
 \code{step_population_scaling} creates a specification of a recipe step
-that will add a population scaled column in the data. For example,
-load a dataset that contains county population, and join to an \code{epi_df}
-that currently only contains number of new cases by county. Once scaled,
-predictions can be made on case rate. Although worth noting that there is
-nothing special about "population". The function can be used to scale by any
-variable. Population is simply the most natural and common use case.
+that will perform per-capita scaling. Typical usage would
+load a dataset that contains state-level population, and use it to convert
+predictions made from a raw scale model to rate-scale by dividing by
+the population.
+Although, it is worth noting that there is nothing special about "population".
+The function can be used to scale by any variable. Population is the
+standard use case in the epidemiology forecasting scenario. Any value
+passed will \emph{divide} the selected variables while the \code{rate_rescaling}
+argument is a common \emph{multiplier} of the selected variables.
 }
 \examples{
 library(epiprocess)
@@ -94,8 +104,7 @@ jhu <- epiprocess::jhu_csse_daily_subset \%>\%
   dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   dplyr::select(geo_value, time_value, cases)
 
-pop_data = data.frame(states = c("ca", "ny"),
-                      value = c(20000, 30000))
+pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 
 r <- epi_recipe(jhu) \%>\%
   step_population_scaling(df = pop_data,
@@ -119,11 +128,12 @@ wf <- epi_workflow(r,
   parsnip::fit(jhu) \%>\%
   add_frosting(f)
 
-latest <- get_test_data(recipe = r,
-                        x = epiprocess::jhu_csse_daily_subset \%>\%
-                          dplyr::filter(time_value > "2021-11-01",
-                                        geo_value \%in\% c("ca", "ny")) \%>\%
-                          dplyr::select(geo_value, time_value, cases))
+latest <- get_test_data(
+   recipe = r,
+   x = epiprocess::jhu_csse_daily_subset \%>\%
+   dplyr::filter(time_value > "2021-11-01",
+   geo_value \%in\% c("ca", "ny")) \%>\%
+   dplyr::select(geo_value, time_value, cases))
 
 
 predict(wf, latest)
