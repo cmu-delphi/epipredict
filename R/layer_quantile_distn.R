@@ -79,7 +79,7 @@ slather.layer_quantile_distn <-
     if (!inherits(dstn, "distribution")) {
       rlang::abort(
         c("`layer_quantile_distn` requires distributional predictions.",
-          "These are of class {class(pred_dstn)}."))
+          "These are of class {class(dstn)}."))
     }
     dstn <- dist_quantiles(quantile(dstn, object$levels), object["levels"])
 
