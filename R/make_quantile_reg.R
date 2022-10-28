@@ -29,9 +29,12 @@ quantile_reg <- function(mode = "regression",  engine = "rq", tau = 0.5) {
   }
 
   # Capture the arguments in quosures
-  if (any(tau) > 1) rlang::abort("All `tau` must be less than 1.")
-  if (any(tau) < 0) rlang::abort("All `tau` must be greater than 0.")
-  tau <- sort(tau)
+  if (any(tau > 1)) rlang::abort("All `tau` must be less than 1.")
+  if (any(tau < 0)) rlang::abort("All `tau` must be greater than 0.")
+  if (is.unsorted(tau)) {
+    rlang::warn("Sorting tau to increasing order.")
+    tau <- sort(tau)
+  }
   args <- list(tau = rlang::enquo(tau))
 
   # Save some empty slots for future parts of the specification
@@ -91,17 +94,20 @@ make_quantile_reg <- function() {
   process_rq_preds <- function(x, object) {
     object <- parsnip::extract_fit_engine(object)
     type <- class(object)[1]
-    # can't make a method because object is second?
+
+
+    # can't make a method because object is second
     out <- switch(
       type,
-      rq = dist_quantiles(as.list(x), object$tau),
+      rq = dist_quantiles(x, object$tau), # one quantile
       rqs = {
-        x <- unname(split(x, seq.int(nrow(x))))
+        x <- unname(apply(x, 1, function(q) unname(sort(q)), simplify = FALSE))
         dist_quantiles(x, list(object$tau))
       },
-      rlang::abort("prediction not implemented for this `rq` type.")
+      rlang::abort(c("Prediction not implemented for this `rq` type.",
+                     i = "See `?quantreg::rq`."))
     )
-    return(out)
+    return(data.frame(.pred = out))
   }
 
 
@@ -118,9 +124,4 @@ make_quantile_reg <- function() {
     )
   )
 }
-
-#tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
-#rq_spec <- quantile_reg(tau = c(.2, .8)) %>% set_engine("rq")
-#ff <- rq_spec %>% fit(y~., data = tib)
-#predict(ff, new_data = tib)
 
