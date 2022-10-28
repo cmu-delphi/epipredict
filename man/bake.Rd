@@ -4,7 +4,7 @@
 \alias{bake.epi_recipe}
 \title{Bake an epi_recipe}
 \usage{
-\method{bake}{epi_recipe}(object, new_data, ...)
+bake.epi_recipe(object, new_data, ...)
 }
 \arguments{
 \item{object}{A trained object such as a \code{\link[=recipe]{recipe()}} with at least
