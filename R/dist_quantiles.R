@@ -165,52 +165,57 @@ quantile.dist_quantiles <- function(x, probs, ...,
 
 quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
 
-    tau <- field(x, "tau")
-    qvals <- field(x, "q")
-    r <- range(tau, na.rm = TRUE)
-    qvals_out <- rep(NA, length(tau_out))
+  tau <- field(x, "tau")
+  qvals <- field(x, "q")
+  r <- range(tau, na.rm = TRUE)
+  qvals_out <- rep(NA, length(tau_out))
 
-    # short circuit if we aren't actually extrapolating
-    # matches to ~15 decimals
-    if (all(tau_out %in% tau)) return(qvals[match(tau_out, tau)])
-
-    if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
-      rlang::warn(c("Quantile extrapolation is not possible with fewer than",
-                    "3 quantiles or when the probs don't span [.25, .75]"))
-      return(qvals_out)
-    }
-
-    indl <- which(tau_out < min(tau))
-    indr <- which(tau_out > max(tau))
-    indm <- which(tau_out >= min(tau) & tau_out <= max(tau))
-
-    if (length(indm) > 0) {
-      result <- NA # This will get set to 1 if cubic method fails
-      if (middle == "cubic") {
-        result <- tryCatch({
-          Q <- stats::splinefun(tau, qvals, method = "hyman")
-          qvals_out[indm] <- Q(tau_out[indm])
-          quartiles <- Q(c(.25, .5, .75))},
-          error = function(e) { return(NA) }
-        )
-      }
-      if (middle == "linear" || any(is.na(result))) {
-        # Fit quantile function via linear interpolation
-        qvals_out[indm] = stats::approx(tau, qvals, tau_out[indm])$y
-        quartiles <- stats::approx(tau, qvals, c(.25, .5, .75))$y
-      }
-    }
-    if (length(indl) > 0) {
-      qvals_out[indl] <- tail_extrapolate(tau_out[indl], quartiles, "left", left_tail)
-    }
-    if (length(indr) > 0) {
-      qvals_out[indr] <- tail_extrapolate(tau_out[indr], quartiles, "right", right_tail)
-    }
-
-    qvals_out
+  # short circuit if we aren't actually extrapolating
+  # matches to ~15 decimals
+  if (all(tau_out %in% tau)) return(qvals[match(tau_out, tau)])
+  if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
+    rlang::warn(c("Quantile extrapolation is not possible with fewer than",
+                  "3 quantiles or when the probs don't span [.25, .75]"))
+    return(qvals_out)
   }
 
-tail_extrapolate <- function(tau_out, quartiles, type, tail) {
+  indl <- tau_out < min(tau)
+  indr <- tau_out > max(tau)
+  indm <- !indl & !indr
+
+  if (middle == "cubic") {
+    method <- "cubic"
+    result <- tryCatch({
+      Q <- stats::splinefun(tau, qvals, method = "hyman")
+      qvals_out[indm] <- Q(tau_out[indm])
+      quartiles <- Q(c(.25, .5, .75))},
+      error = function(e) { return(NA) }
+    )
+  }
+  if (middle == "linear" || any(is.na(result))) {
+    method <- "linear"
+    quartiles <- stats::approx(tau, qvals, c(.25, .5, .75))$y
+  }
+
+
+  if (any(indm)) {
+    qvals_out[indm] <- switch(
+      method,
+      linear = stats::approx(tau, qvals, tau_out[indm])$y,
+      cubic = Q(tau_out[indm])
+    )}
+  if (any(indl)) {
+    qvals_out[indl] <- tail_extrapolate(
+      tau_out[indl], quartiles, "left", left_tail
+    )}
+  if (any(indr)) {
+      qvals_out[indr] <- tail_extrapolate(
+        tau_out[indr], quartiles, "right", right_tail
+      )}
+  qvals_out
+}
+
+tail_extrapolate <- function(tau_out, quartiles, tail, type) {
   if (tail == "left") {
     p <- c(.25, .5)
     par <- quartiles[1:2]
