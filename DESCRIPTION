@@ -34,6 +34,7 @@ Imports:
     glue,
     hardhat (>= 1.2.0),
     magrittr,
+    methods,
     quantreg,
     recipes (>= 1.0.0),
     rlang,

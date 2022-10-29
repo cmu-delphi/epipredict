@@ -15,9 +15,9 @@ preprocessing will be applied. If \code{NULL} is given to \code{new_data},
 the pre-processed \emph{training data} will be returned.}
 
 \item{...}{One or more selector functions to choose which variables will be
-returned by the function. See \code{\link[selections]{recipes}} for
+returned by the function. See \code{\link[recipes:selections]{recipes::selections()}} for
 more details. If no selectors are given, the default is to
-use \code{\link[=everything]{everything()}}.}
+use \code{\link[tidyselect:everything]{tidyselect::everything()}}.}
 }
 \value{
 An \code{epi_df} that may have different columns than the

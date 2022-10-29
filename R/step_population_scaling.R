@@ -15,7 +15,7 @@
 #' operations for this recipe. The recipe should contain information about the
 #' `epi_df` such as column names.
 #' @param ... One or more selector functions to scale variables
-#'  for this step. See [selections()] for more details.
+#'  for this step. See [recipes::selections()] for more details.
 #' @param role For model terms created by this step, what analysis role should
 #' they be assigned? By default, the new columns created by this step from the
 #' original variables will be used as predictors in a model. Other options can
@@ -200,24 +200,19 @@ bake.step_population_scaling <- function(object,
   }
 
   object$df <- object$df %>%
-    dplyr::mutate(
-      dplyr::across(
-        where(is.character),
-        tolower))
+    dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
 
   pop_col = rlang::sym(object$df_pop_col)
   suffix = ifelse(object$create_new, object$suffix, "")
 
-  dplyr::left_join(new_data, object$df,
-                   by= object$by,
-                   suffix = c("", ".df")) %>%
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::all_of(object$columns),
+  dplyr::left_join(new_data,
+                   object$df,
+                   by = object$by, suffix = c("", ".df")) %>%
+    dplyr::mutate(dplyr::across(dplyr::all_of(object$columns),
         ~.x * object$rate_rescaling /!!pop_col ,
         .names = "{.col}{suffix}")) %>%
     # removed so the models do not use the population column
-   dplyr::select(- !!pop_col)
+   dplyr::select(-!!pop_col)
 
 }
 

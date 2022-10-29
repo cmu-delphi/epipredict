@@ -27,7 +27,7 @@ df_mat_mul <- function(dat, mat, out_names = "out", ...) {
   else out_names = paste0(out_names, seq_len(ncol(mat)))
 
   dat_mat <- dplyr::select(dat, ...)
-  nm <- grab_names(dat_mat, everything())
+  nm <- grab_names(dat_mat, dplyr::everything())
   dat_neg <- dplyr::select(dat, !dplyr::all_of(nm))
   new_cols <- as.matrix(dat_mat) %*% mat
   colnames(new_cols) <- out_names

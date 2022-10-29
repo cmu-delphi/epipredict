@@ -6,13 +6,14 @@
 #'   preprocessing will be applied. If `NULL` is given to `new_data`,
 #'   the pre-processed _training data_ will be returned.
 #' @param ... One or more selector functions to choose which variables will be
-#'   returned by the function. See \code{\link[selections]{recipes}} for
+#'   returned by the function. See [recipes::selections()] for
 #'   more details. If no selectors are given, the default is to
-#'   use [everything()].
+#'   use [tidyselect::everything()].
 #' @return An `epi_df` that may have different columns than the
 #' original columns in `new_data`.
 #' @importFrom rlang is_empty quos
-#' @importFrom tibble is_tibble
+#' @importFrom tibble is_tibble as_tibble
+#' @importFrom methods is
 #' @rdname bake
 #' @export
 bake.epi_recipe <- function(object, new_data, ...) {
@@ -31,7 +32,7 @@ bake.epi_recipe <- function(object, new_data, ...) {
 
   terms <- quos(...)
   if (is_empty(terms)) {
-    terms <- quos(everything())
+    terms <- quos(tidyselect::everything())
   }
 
   # In case someone used the deprecated `newdata`:
