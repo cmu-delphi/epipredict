@@ -154,7 +154,7 @@ out_q <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
 The column `.pred_dstn` in the `predictions` object is actually a "distribution" here parameterized by its quantiles. For this default forecaster, these are created using the quantiles of the residuals of the predictive model (possibly symmetrized). Here, we used 23 quantiles, but one can grab a particular quantile
 
 ```{r q1}
-quantile(out_q$predictions$.pred_distn, p = .4)
+head(quantile(out_q$predictions$.pred_distn, p = .4))
 ```
 
 Or extract the entire distribution into a "long" `epi_df` with `tau` being the probability and `q` being the value associated to that quantile.
@@ -172,7 +172,7 @@ Further simple adjustments can be made using the function.
 arx_args_list(
   lags = c(0L, 7L, 14L), ahead = 7L, min_train_window = 20L, 
   forecast_date = NULL, target_date = NULL, levels = c(0.05, 0.95),
-  symmetrize = TRUE, nonneg = TRUE, quantile_by_key = TRUE
+  symmetrize = TRUE, nonneg = TRUE, quantile_by_key = "geo_value"
 )
 ```
 
