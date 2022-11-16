@@ -25,7 +25,6 @@ Depends:
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
 Imports: 
-    assertthat,
     cli,
     distributional,
     dplyr,

@@ -408,7 +408,7 @@ consider the trends to be flat.
 The expression of the multinomial regression we will model is as follows:
 
 $$
-\pi_{j}(x) = \text{Pr}(Y = j|x) = \frac{e^{g_j(x)}}{\sum_{k=0}^2 g_j(x) }
+\pi_{j}(x) = \text{Pr}(Y = j|x) = \frac{e^{g_j(x)}}{1 + \sum_{k=0}^2 g_j(x) }
 $$
 where $j$ is either down (`Y=0`), flat (`Y=1`), or up (`Y=2`),
 $$g_0(x) = 0$$
