@@ -321,17 +321,9 @@ For this default forecaster, these are created using the quantiles of
 the residuals of the predictive model (possibly symmetrized). Here, we
 used 23 quantiles, but one can grab a particular quantile</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span></span>
-<span><span class="co">#&gt;  [1] 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span>
-<span><span class="co">#&gt;  [7] 0.51430056 0.49120831 0.77848153 0.55495289 0.48839266 0.46180302</span></span>
-<span><span class="co">#&gt; [13] 0.07918930 0.43615338 0.40663040 0.28162468 0.57850502 0.56627752</span></span>
-<span><span class="co">#&gt; [19] 0.30001474 0.46951123 0.27225320 0.66554111 0.69608309 0.52042519</span></span>
-<span><span class="co">#&gt; [25] 0.70229211 0.46022990 0.41987177 0.79384854 0.26213745 0.22011830</span></span>
-<span><span class="co">#&gt; [31] 0.29346069 0.37322885 0.24361881 0.60897213 0.73297489 0.62186100</span></span>
-<span><span class="co">#&gt; [37] 0.29896242 0.82208954 0.94772676 0.34392120 0.23395627 0.73122297</span></span>
-<span><span class="co">#&gt; [43] 0.46576662 0.73187551 0.28782081 0.38799709 1.51371557 0.26602132</span></span>
-<span><span class="co">#&gt; [49] 0.24202363 0.49969641 0.42031752 0.38191502 0.24043297 0.58681706</span></span>
-<span><span class="co">#&gt; [55] 0.55890563 0.26891251</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;        40%        40%        40%        40%        40%        40% </span></span>
+<span><span class="co">#&gt; 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span></code></pre></div>
 <p>Or extract the entire distribution into a “long” <code>epi_df</code>
 with <code>tau</code> being the probability and <code>q</code> being the
 value associated to that quantile.</p>
@@ -364,7 +356,7 @@ value associated to that quantile.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
 <span>  lags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">7L</span>, <span class="fl">14L</span><span class="op">)</span>, ahead <span class="op">=</span> <span class="fl">7L</span>, min_train_window <span class="op">=</span> <span class="fl">20L</span>, </span>
 <span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>, target_date <span class="op">=</span> <span class="cn">NULL</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
-<span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>, nonneg <span class="op">=</span> <span class="cn">TRUE</span>, quantile_by_key <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>, nonneg <span class="op">=</span> <span class="cn">TRUE</span>, quantile_by_key <span class="op">=</span> <span class="st">"geo_value"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">

@@ -136,6 +136,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_naomit.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_point_from_distn.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_population_scaling.html</loc>
   </url>
   <url>
@@ -143,6 +146,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_predictive_distn.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_quantile_distn.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_residual_quantiles.html</loc>
@@ -161,6 +167,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/predict-epi_workflow.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/quantile_reg.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/slather.html</loc>
