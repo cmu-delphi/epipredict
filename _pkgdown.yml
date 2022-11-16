@@ -9,6 +9,10 @@ reference:
     contents:
     - contains("flatline")
     - contains("arx")
+  - title: Parsnip engines
+    desc: Prediction methods not available elsewhere
+    contents:
+    - quantile_reg
   - title: Custom panel data forecasting workflows
     contents:
     - epi_recipe

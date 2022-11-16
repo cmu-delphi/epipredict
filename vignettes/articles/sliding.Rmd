@@ -31,7 +31,7 @@ vignette to go over the basics of the function: ["Slide a computation over
 signal values"](https://cmu-delphi.github.io/epiprocess/articles/slide.html)).
 The equivalent sliding method for an `epi_archive` object can be called by using
 the wrapper function `epix_slide()` (refer to the following vignette for the
-basicsof the function: ["Work with archive objects and data
+basics of the function: ["Work with archive objects and data
 revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html)). The
 key difference from `epi_slide()` is that it performs version-aware
 computations. That is, the function only uses data that would have been
