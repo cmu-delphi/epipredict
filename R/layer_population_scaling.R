@@ -14,7 +14,7 @@
 #' @param frosting a `frosting` postprocessor. The layer will be added to the
 #'   sequence of operations for this frosting.
 #' @param ... One or more selector functions to scale variables
-#'   for this step. See [selections()] for more details.
+#'   for this step. See [recipes::selections()] for more details.
 #' @param df a data frame that contains the population data to be used for
 #'   inverting the existing scaling.
 #' @param by A (possibly named) character vector of variables to join by.
@@ -147,7 +147,7 @@ slather.layer_population_scaling <-
                  "must be present in data and match"))}
 
     object$df <- object$df %>%
-      dplyr::mutate(dplyr::across(where(is.character), tolower))
+      dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
     pop_col = rlang::sym(object$df_pop_col)
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)

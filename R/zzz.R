@@ -6,4 +6,6 @@
 
 .onLoad <- function(libname, pkgname) {
   make_flatline_reg()
+  make_quantile_reg()
 }
+

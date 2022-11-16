@@ -12,7 +12,7 @@
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
 #' @param ... One or more selector functions to choose variables
-#'  for this step. See [selections()] for more details.
+#'  for this step. See [recipes::selections()] for more details.
 #' @param role For model terms created by this step, what analysis role should
 #'  they be assigned? `lag` is default a predictor while `ahead` is an outcome.
 #' @param trained A logical to indicate if the quantities for

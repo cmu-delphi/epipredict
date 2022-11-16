@@ -43,4 +43,8 @@ jhu <- case_death_rate_subset \%>\%
 
 out <- arx_forecaster(jhu, "death_rate",
   c("case_rate", "death_rate"))
+
+out <- arx_forecaster(jhu, "death_rate",
+  c("case_rate", "death_rate"), trainer = quantile_reg(),
+  args_list = arx_args_list(levels = 1:9 / 10))
 }
