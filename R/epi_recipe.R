@@ -113,7 +113,7 @@ epi_recipe.epi_df <-
     )
 
     ## Add types
-    var_info <- dplyr::full_join(get_types(x), var_info, by = "variable")
+    var_info <- dplyr::full_join(recipes:::get_types(x), var_info, by = "variable")
     var_info$source <- "original"
 
     ## arrange to easy order
@@ -371,7 +371,7 @@ prep.epi_recipe <- function(
     dplyr::group_by(variable) %>%
     dplyr::arrange(dplyr::desc(number)) %>%
     dplyr::summarise(
-      type = dplyr::first(type),
+      type = list(dplyr::first(type)),
       role = as.list(unique(unlist(role))),
       source = dplyr::first(source),
       number = dplyr::first(number),
