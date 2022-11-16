@@ -36,19 +36,21 @@ test_that("epi_recipe formula works", {
   r <- epi_recipe(y ~ x, tib)
   ref_var_info <- tibble::tribble(
     ~ variable, ~ type, ~ role, ~ source,
-    "x", "numeric", "predictor", "original",
-    "y", "numeric", "outcome", "original",
+    "x", c("integer", "numeric"), "predictor", "original",
+    "y", c("integer", "numeric"), "outcome", "original",
     "time_value", "date", "time_value", "original",
-    "geo_value", "nominal", "geo_value", "original"
+    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 
   # with an epi_key as a predictor
   r <- epi_recipe(y ~ x + geo_value, tib)
-  ref_var_info <- ref_var_info %>% tibble::add_row(
-    variable = "geo_value", type = "nominal", role = "predictor",
-    source = "original", .after = 1)
+  ref_var_info <- ref_var_info %>%
+    tibble::add_row(
+      variable = "geo_value", type = list(c("string", "unordered", "nominal")),
+      role = "predictor",
+      source = "original", .after = 1)
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 
@@ -61,11 +63,13 @@ test_that("epi_recipe formula works", {
 
   # with an additional key
   r <- epi_recipe(y ~ x + geo_value, tib)
-  ref_var_info <- ref_var_info %>% tibble::add_row(
-    variable = "z", type = "nominal", role = "key",
-    source = "original")
+  ref_var_info <- ref_var_info %>%
+    tibble::add_row(
+      variable = "z", type = list(c("string", "unordered", "nominal")),
+      role = "key",
+      source = "original")
 
-  #expect_identical(r$var_info, ref_var_info)
+  expect_identical(r$var_info, ref_var_info)
 
 })
 
@@ -81,9 +85,9 @@ test_that("epi_recipe epi_df works", {
   ref_var_info <- tibble::tribble(
     ~ variable, ~ type, ~ role, ~ source,
     "time_value", "date", "time_value", "original",
-    "geo_value", "nominal", "geo_value", "original",
-    "x", "numeric", "raw", "original",
-    "y", "numeric", "raw", "original"
+    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original",
+    "x", c("integer", "numeric"), "raw", "original",
+    "y", c("integer", "numeric"), "raw", "original"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
@@ -91,10 +95,10 @@ test_that("epi_recipe epi_df works", {
   r <- epi_recipe(tib, formula = y ~ x)
   ref_var_info <- tibble::tribble(
     ~ variable, ~ type, ~ role, ~ source,
-    "x", "numeric", "predictor", "original",
-    "y", "numeric", "outcome", "original",
+    "x", c("integer", "numeric"), "predictor", "original",
+    "y", c("integer", "numeric"), "outcome", "original",
     "time_value", "date", "time_value", "original",
-    "geo_value", "nominal", "geo_value", "original"
+    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
@@ -106,7 +110,7 @@ test_that("epi_recipe epi_df works", {
   )
   ref_var_info <- ref_var_info %>%
     tibble::add_row(
-      variable = "time_value", type = "date", role = "funny_business",
+      variable = "time_value", type = list("date"), role = "funny_business",
       source = "original"
     )
   expect_identical(r$var_info, ref_var_info)
