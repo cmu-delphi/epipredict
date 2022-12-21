@@ -1,11 +1,11 @@
 pandoc: 2.19.2
-pkgdown: 2.0.6
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   sliding: sliding.html
   epipredict: epipredict.html
   preprocessing-and-models: preprocessing-and-models.html
-last_built: 2022-11-16T21:29Z
+last_built: 2022-12-21T18:04Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles
