@@ -55,14 +55,22 @@ step_epi_lag <-
            ...,
            role = "predictor",
            trained = FALSE,
-           lag = 1,
+           lag,
            prefix = "lag_",
            default = NA,
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
+    if (missing(lag)) {
+      rlang::abort(
+        c("The `lag` argument must not be empty.",
+          i = "Did you perhaps pass an integer in `...` accidentally?"))
+    }
     arg_is_nonneg_int(lag)
     arg_is_chr_scalar(prefix, id)
+    if (!is.null(columns))
+      rlang::abort(c("The `columns` argument must be `NULL.",
+                     i = "Use `tidyselect` methods to choose columns to lag."))
     add_step(recipe,
              step_epi_lag_new(
                terms = dplyr::enquos(...),
@@ -88,14 +96,22 @@ step_epi_ahead <-
            ...,
            role = "outcome",
            trained = FALSE,
-           ahead = 1,
+           ahead,
            prefix = "ahead_",
            default = NA,
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
+    if (missing(ahead)) {
+      rlang::abort(
+        c("The `ahead` argument must not be empty.",
+          i = "Did you perhaps pass an integer in `...` accidentally?"))
+    }
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id)
+    if (!is.null(columns))
+      rlang::abort(c("The `columns` argument must be `NULL.",
+                     i = "Use `tidyselect` methods to choose columns to lead."))
     add_step(recipe,
              step_epi_ahead_new(
                terms = dplyr::enquos(...),
