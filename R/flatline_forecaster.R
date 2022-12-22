@@ -32,6 +32,9 @@ flatline_forecaster <- function(epi_data,
                                 args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
+  if (!inherits(args_list, "flatline_alist")) {
+    cli_stop("args_list was not created using `flatline_args_list().")
+  }
   keys <- epi_keys(epi_data)
   ek <- keys[-1]
   outcome <- rlang::sym(outcome)
@@ -75,7 +78,7 @@ flatline_forecaster <- function(epi_data,
 #'
 #' @inheritParams arx_args_list
 #'
-#' @return A list containing updated parameter choices.
+#' @return A list containing updated parameter choices with class `flatline_alist`.
 #' @export
 #'
 #' @examples
@@ -99,14 +102,15 @@ flatline_args_list <- function(ahead = 7L,
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
 
-  enlist(ahead,
-         min_train_window,
-         forecast_date,
-         target_date,
-         levels,
-         symmetrize,
-         nonneg,
-         quantile_by_key)
+  structure(enlist(ahead,
+                   min_train_window,
+                   forecast_date,
+                   target_date,
+                   levels,
+                   symmetrize,
+                   nonneg,
+                   quantile_by_key),
+            class = "flatline_alist")
 }
 
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
