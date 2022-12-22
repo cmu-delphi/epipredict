@@ -61,11 +61,14 @@ articles](https://cmu-delphi.github.io/epipredict).
 
 The package comes with some built-in historical data for illustration,
 but up-to-date versions of this could be downloaded with the
-[`{epidata}` package]() and processed using [`{epiprocess}`]().
+[`{covidcast}`
+package](https://cmu-delphi.github.io/covidcast/covidcastR/index.html)
+and processed using
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
 
 ``` r
-suppressPackageStartupMessages(library(tidyverse))
-suppressPackageStartupMessages(library(epipredict))
+library(tidyverse)
+library(epipredict)
 jhu <- case_death_rate_subset
 jhu
 #> An `epi_df` object, 20,496 x 4 with metadata:
@@ -103,8 +106,6 @@ two_week_ahead <- arx_forecaster(
     ahead = 14
   )
 ) 
-#> Warning: The forecast_date is less than the most recent update date of the
-#> data.forecast_date = 2021-12-31 while data is from 2022-05-31.
 ```
 
 In this case, we have used a number of different lags for the case rate,
@@ -112,7 +113,7 @@ while only using 3 weekly lags for the death rate (as predictors). The
 result is both a fitted model object which could be used any time in the
 future to create different forecasts, as well as a set of predicted
 values (and prediction intervals) for each location 14 days after the
-last available time value in the data.[^1]
+last available time value in the data.
 
 ``` r
 two_week_ahead$epi_workflow
@@ -225,7 +226,7 @@ This is not a framework for SIR models. We intend to create some simple versions
 
 -->
 
-[^1]: The warning displayed above is because our built-in data was
-    downloaded in May of 2022 whereas we’re producing a forecast for
-    January of 2022. This is a retrospective forecast and should not be
-    construed to mimic real-time performance.
+[^1]: Other epidemiological signals for non-Covid related illnesses are
+    available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr)
+    which interfaces directly to Delphi’s [Epidata
+    API](https://cmu-delphi.github.io/delphi-epidata/)

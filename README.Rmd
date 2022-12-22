@@ -60,18 +60,20 @@ The Advanced user should find their task to be relatively easy. Examples of thes
 ## Intermediate example
 
 The package comes with some built-in historical data for illustration, but
-up-to-date versions of this could be downloaded with the [`{epidata}` package]() and processed using [`{epiprocess}`]().
+up-to-date versions of this could be downloaded with the [`{covidcast}` package](https://cmu-delphi.github.io/covidcast/covidcastR/index.html) and processed using [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
 
-```{r epidf}
-suppressPackageStartupMessages(library(tidyverse))
-suppressPackageStartupMessages(library(epipredict))
+[^1]: Other epidemiological signals for non-Covid related illnesses are available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which interfaces directly to Delphi's [Epidata API](https://cmu-delphi.github.io/delphi-epidata/)
+
+```{r epidf, message=FALSE}
+library(tidyverse)
+library(epipredict)
 jhu <- case_death_rate_subset
 jhu
 ```
 
 To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.
 
-```{r make-forecasts}
+```{r make-forecasts, warning=FALSE}
 two_week_ahead <- arx_forecaster(
   jhu, 
   outcome = "death_rate", 
@@ -83,9 +85,7 @@ two_week_ahead <- arx_forecaster(
 ) 
 ```
 
-In this case, we have used a number of different lags for the case rate, while only using 3 weekly lags for the death rate (as predictors). The result is both a fitted model object which could be used any time in the future to create different forecasts, as well as a set of predicted values (and prediction intervals) for each location 14 days after the last available time value in the data.[^1]
-
-[^1]: The warning displayed above is because our built-in data was downloaded in May of 2022 whereas we're producing a forecast for January of 2022. This is a retrospective forecast and should not be construed to mimic real-time performance.
+In this case, we have used a number of different lags for the case rate, while only using 3 weekly lags for the death rate (as predictors). The result is both a fitted model object which could be used any time in the future to create different forecasts, as well as a set of predicted values (and prediction intervals) for each location 14 days after the last available time value in the data.
 
 ```{r print-model}
 two_week_ahead$epi_workflow
