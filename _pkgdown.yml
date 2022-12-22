@@ -1,6 +1,10 @@
 url: https://cmu-delphi.github.io/epipredict/
 template:
   bootstrap: 5
+  bootswatch: cosmo
+
+navbar:
+  bg: dark
 
 home:
   links:
