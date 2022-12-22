@@ -205,7 +205,7 @@ out_gb <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
 
 Or quantile regression, using our custom forecasting engine `quantile_reg()`:
 
-```{r xgboost, warning = FALSE}
+```{r quantreg, warning = FALSE}
 out_gb <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   quantile_reg())
 ```
@@ -362,7 +362,7 @@ To illustrate everything above, here is (roughly) the code for the `flatline_for
 r <- epi_recipe(jhu) %>%
   step_epi_ahead(case_rate, ahead = 7, skip = TRUE) %>%
   update_role(case_rate, new_role = "predictor") %>%
-  add_role(all_of(epi_keys(jhu)), new_role = "predictor")
+  my_add_role(all_of(epi_keys(jhu)), new_role = "predictor")
 
 # bit of a weird hack to get the latest values per key
 latest <- get_test_data(epi_recipe(jhu), jhu) 
