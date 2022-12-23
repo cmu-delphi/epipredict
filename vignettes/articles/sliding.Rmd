@@ -93,10 +93,9 @@ fc_time_values <- seq(as.Date("2020-08-01"), as.Date("2021-12-01"),
 k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
   epi_df %>%
     epi_slide( 
-      ~arx_forecaster(
+      ~ arx_forecaster(
         .x, outcome, predictors, engine, 
-        args_list = arx_args_list(ahead = ahead)
-      ) %>%
+        args_list = arx_args_list(ahead = ahead)) %>%
         extract2("predictions") %>% 
         select(-c(geo_value, time_value)), 
       n = 120, 
@@ -107,19 +106,21 @@ k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
     mutate(engine_type = engine$engine)
 }
 
-# Generate the forecasts, and bind them together
+# Generate the forecasts and bind them together
 fc <- bind_rows(
   purrr::map_dfr(
     c(7,14,21,28), 
-    ~ k_week_ahead(x_latest, "case_rate", c("case_rate", "percent_cli"), .x,
-                   engine = linear_reg())
-    ),
+    ~ k_week_ahead(
+      x_latest, "case_rate", c("case_rate", "percent_cli"), .x,
+      engine = linear_reg())
+  ),
   purrr::map_dfr(
     c(7,14,21,28), 
-    ~ k_week_ahead(x_latest, "case_rate", c("case_rate", "percent_cli"), .x,
-                   engine = rand_forest(mode = "regression"))
-    )) %>% 
-  mutate(.pred_distn = nested_quantiles(fc_.pred_distn)) %>% # "nested" list-col
+    ~ k_week_ahead(
+      x_latest, "case_rate", c("case_rate", "percent_cli"), .x,
+      engine = rand_forest(mode = "regression"))
+  )) %>% 
+  mutate(.pred_distn = nested_quantiles(fc_.pred_distn)) %>%
   unnest(.pred_distn) %>% 
   pivot_wider(names_from = tau, values_from = q) 
 ```
@@ -127,20 +128,19 @@ fc <- bind_rows(
 Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the
 target (respecting time stamps and locations) along with lags of the features
 (here, the response and doctors visits), estimates a forecasting model using the
-specified engine, creates predictions, and non-parametric confidence bands. All
-of these are tunable parameters.
+specified engine, creates predictions, and non-parametric confidence bands. 
 
 To see how the predictions compare, we plot them on top of the latest case
-rates. Note that even though we've fitted on all states, we'll just display the
+rates. Note that even though we've fitted the model on all states, 
+we'll just display the
 results for two states, California (CA) and Florida (FL), to get a sense of the
-model performance while keeping it simple. So feel free to modify the code to
-look over the results for other states.
+model performance while keeping the graphic simple. 
 
 ```{r plot-arx, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
 fc_cafl <- fc %>% filter(geo_value %in% c("ca", "fl"))
 x_latest_cafl <- x_latest %>% filter(geo_value %in% c("ca", "fl"))
 
-ggplot(fc_cafl, aes(x = fc_target_date, group = time_value, fill = engine_type)) + 
+ggplot(fc_cafl, aes(fc_target_date, group = time_value, fill = engine_type)) + 
   geom_line(data = x_latest_cafl, aes(x = time_value, y = case_rate),
             inherit.aes = FALSE, color = "gray50") +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`), alpha = 0.4) +
@@ -155,14 +155,17 @@ ggplot(fc_cafl, aes(x = fc_target_date, group = time_value, fill = engine_type))
 ```
 
 For the two states of interest, simple linear regression clearly performs better
-than random forest in terms of accuracy of the predictions and not does not
-result in such in overconfident predictions (too narrow confidence bands).
-Though, in general, both approaches do not perform great. This could be because
+than random forest in terms of accuracy of the predictions and does not
+result in such in overconfident predictions (overly narrow confidence bands).
+Though, in general, neither approach produces amazingly accurate forecasts. 
+This could be because
 the behaviour is rather different across states and the effects of other notable
 factors such as age and public health measures may be important to account for
 in such forecasting. Including such factors as well as making enhancements such
-as correcting for outliers are some improvements one could make to our simple
-model in the future.
+as correcting for outliers are some improvements one could make to this simple
+model.[^1]
+
+[^1]: Note that, despite the above caveats, simple models like this tend to out-perform many far more complicated models in the online Covid forecasting due to those models high variance predictions.
 
 ### Example using case data from Canada
 
@@ -175,7 +178,7 @@ daily time series data on COVID-19 cases, deaths, recoveries, testing and
 vaccinations at the health region and province levels. Data are collected from
 publicly available sources such as government datasets and news releases.
 Unfortunately, there is no simple versioned source, so we have created our own
-from the Commit history.
+from the Github commit history.
 
 First, we load versioned case rates at the provincial level. After converting
 these to 7-day averages (due to highly variable provincial reporting

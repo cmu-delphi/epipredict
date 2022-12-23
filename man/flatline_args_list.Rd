@@ -45,7 +45,7 @@ before calculating residual quantiles. See the \code{by_key} argument to
 \code{character(0)} performs no grouping.}
 }
 \value{
-A list containing updated parameter choices.
+A list containing updated parameter choices with class \code{flatline_alist}.
 }
 \description{
 Constructs a list of arguments for \code{\link[=flatline_forecaster]{flatline_forecaster()}}.

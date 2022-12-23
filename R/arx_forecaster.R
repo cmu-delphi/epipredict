@@ -38,6 +38,9 @@ arx_forecaster <- function(epi_data,
 
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
+  if (!inherits(args_list, "arx_alist")) {
+    cli_stop("args_list was not created using `arx_args_list().")
+  }
   if (!is.list(trainer) || trainer$mode != "regression")
     cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
@@ -121,7 +124,7 @@ arx_lags_validator <- function(predictors, lags) {
 #'   [layer_residual_quantiles()] for more information. The default,
 #'   `character(0)` performs no grouping.
 #'
-#' @return A list containing updated parameter choices.
+#' @return A list containing updated parameter choices with class `arx_alist`.
 #' @export
 #'
 #' @examples
@@ -151,14 +154,15 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
   arg_is_probabilities(levels, allow_null = TRUE)
 
   max_lags <- max(lags)
-  enlist(lags = .lags,
-         ahead,
-         min_train_window,
-         levels,
-         forecast_date,
-         target_date,
-         symmetrize,
-         nonneg,
-         max_lags,
-         quantile_by_key)
+  structure(enlist(lags = .lags,
+                   ahead,
+                   min_train_window,
+                   levels,
+                   forecast_date,
+                   target_date,
+                   symmetrize,
+                   nonneg,
+                   max_lags,
+                   quantile_by_key),
+            class = "arx_alist")
 }

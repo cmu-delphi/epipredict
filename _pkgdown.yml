@@ -1,6 +1,20 @@
 url: https://cmu-delphi.github.io/epipredict/
 template:
   bootstrap: 5
+  bootswatch: cosmo
+
+navbar:
+  bg: dark
+
+home:
+  links:
+  - text: The epiprocess R package
+    href: https://cmu-delphi.github.io/epiprocess/
+  - text: The covidcast R package
+    href: https://cmu-delphi.github.io/covidcast/covidcastR/
+  - text: The epidatr R package
+    href: https://github.com/cmu-delphi/epidatr/
+
 
 
 reference:

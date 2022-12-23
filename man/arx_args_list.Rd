@@ -49,7 +49,7 @@ before calculating residual quantiles. See the \code{by_key} argument to
 \code{character(0)} performs no grouping.}
 }
 \value{
-A list containing updated parameter choices.
+A list containing updated parameter choices with class \code{arx_alist}.
 }
 \description{
 Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()}}.
