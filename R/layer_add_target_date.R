@@ -45,8 +45,8 @@
 #' p2
 layer_add_target_date <-
   function(frosting, target_date = NULL, id = rand_id("add_target_date")) {
+    target_date <- arg_to_date(target_date, allow_null = TRUE)
     arg_is_chr_scalar(id)
-    arg_is_date(target_date)
     add_layer(
       frosting,
       layer_add_target_date_new(
