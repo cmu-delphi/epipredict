@@ -34,11 +34,34 @@
 #'   inclusive.
 "case_death_rate_subset"
 
-#' Subset of Statistics Canada median employment income for postsecondary graduates
-#' 
-#' @format A tibble with 10193 rows and 8 variables:
+#' State population data
+#'
+#' Data set on state populations, from the 2019 US Census.
+#'
+#' @format Data frame with 57 rows (including one for the United States as a
+#'   whole, plus the District of Columbia, Puerto Rico Commonwealth,
+#'   American Samoa, Guam, the U.S. Virgin Islands, and the Northern Mariana,
+#'   Islands).
+#'
 #' \describe{
-#'   \item{geo_value}{The province in Canada associated with each 
+#'   \item{fips}{FIPS code}
+#'   \item{name}{Full name of the state or territory}
+#'   \item{pop}{Estimate of the location's resident population in
+#'      2019.}
+#'   \item{abbr}{Postal abbreviation for the location}
+#' }
+#'
+#' @source United States Census Bureau, at
+#'   \url{https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/co-est2019-alldata.pdf},
+#'   \url{https://www.census.gov/data/tables/time-series/demo/popest/2010s-total-puerto-rico-municipios.html},
+#'   and \url{https://www.census.gov/data/tables/2010/dec/2010-island-areas.html}
+"state_census"
+
+#' Subset of Statistics Canada median employment income for postsecondary graduates
+#'
+#' @format An [epiprocess::epi_df] with 10193 rows and 8 variables:
+#' \describe{
+#'   \item{geo_value}{The province in Canada associated with each
 #'      row of measurements.}
 #'   \item{time_value}{The time value, a year integer in YYYY format}
 #'   \item{edu_qual}{The education qualification}
@@ -48,17 +71,17 @@
 #'   \item{med_income_2y}{The median employment income two years after graduation}
 #'   \item{med_income_5y}{The median employment income five years after graduation}
 #' }
-#' @source This object contains modified data from the following Statistics Canada 
+#' @source This object contains modified data from the following Statistics Canada
 #' data table: \href{https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710011501}{
-#'  Characteristics and median employment income of longitudinal cohorts of postsecondary 
-#'  graduates two and five years after graduation, by educational qualification and 
+#'  Characteristics and median employment income of longitudinal cohorts of postsecondary
+#'  graduates two and five years after graduation, by educational qualification and
 #'  field of study (primary groupings)
 #' }
-#' 
+#'
 #' Modifications:
 #' * Only provincial-level geo_values are kept
-#' * Only age group, field of study, and educational qualification are kept as 
-#'   covariates. For the remaining covariates, we keep aggregated values and 
+#' * Only age group, field of study, and educational qualification are kept as
+#'   covariates. For the remaining covariates, we keep aggregated values and
 #'   drop the level-specific rows.
 #' * No modifications were made to the time range of the data
 "grad_employ_subset"

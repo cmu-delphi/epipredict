@@ -74,9 +74,15 @@ gemploy <- statcan_grad_employ %>%
     # Drop aggregates for some columns
     geo_value != "Canada" & 
     age_group != "15 to 64 years" &
+<<<<<<< HEAD
     fos != "Total, field of study" &
     edu_qual != "Total, educational qualification" &
     # Keep aggregates for keys we don't want to keep
+=======
+    edu_qual != "Total, educational qualification" &
+    # Keep aggregates for keys we don't want to keep
+    fos == "Total, field of study" &
+>>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
     gender == "Total, gender" &
     student_status == "Canadian and international students" &
     # Since we're looking at 2y and 5y employment income, the only 
@@ -89,6 +95,7 @@ gemploy <- statcan_grad_employ %>%
     is.na(status) & 
     # Drop NA value rows 
     !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
+<<<<<<< HEAD
   select(-c(status, gender, student_status, grad_charac))
 
 # gemploy$time_value %>% unique()
@@ -201,3 +208,18 @@ unique(statcan_grad_employ$`Age group`)
 unique(statcan_grad_employ$`Status of student in Canada`)
 unique(statcan_grad_employ$`Characteristics after graduation`)
 unique(statcan_grad_employ$`Graduate statistics`)
+=======
+  select(-c(status, gender, student_status, grad_charac, fos))
+
+nrow(gemploy)
+ncol(gemploy)
+
+grad_employ_subset <- gemploy %>%
+  tsibble::as_tsibble(
+    index=time_value, 
+    key=c(geo_value, age_group, edu_qual)) %>%
+  as_epi_df(
+    geo_type = "custom", time_type = "year", as_of = "2022-07-19",
+    additional_metadata = list(other_keys = c("age_group", "edu_qual")))
+usethis::use_data(grad_employ_subset, overwrite = TRUE)
+>>>>>>> d04e2b43c614c4209e754d267d003b60521ff715

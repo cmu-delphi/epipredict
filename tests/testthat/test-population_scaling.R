@@ -115,7 +115,23 @@ test_that("Postprocessing workflow works and values correct", {
   expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
-  expect_equal(p$.pred_original, p$.pred * c(20000, 30000))
+  expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = pop_data, rate_rescaling = 10000,
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+  expect_silent(p <- predict(wf, latest))
+  expect_equal(nrow(p), 2L)
+  expect_equal(ncol(p), 4L)
+  expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
+
 })
 
 test_that("Postprocessing to get cases from case rate", {
@@ -144,8 +160,7 @@ test_that("Postprocessing to get cases from case rate", {
                              by =  c("geo_value" = "states"),
                              df_pop_col = "value")
 
-  wf <- epi_workflow(r,
-                     parsnip::linear_reg()) %>%
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
 
@@ -159,7 +174,7 @@ test_that("Postprocessing to get cases from case rate", {
   expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
-  expect_equal(p$.pred_original, p$.pred * c(1/20000, 1/30000))
+  expect_equal(p$.pred_scaled, p$.pred * c(1/20000, 1/30000))
 })
 
 
@@ -239,11 +254,11 @@ test_that("expect error if `by` selector does not match", {
                              by =  NULL,
                              df_pop_col = "values")
 
-  expect_error(wf <- epi_workflow(r,
-                                    parsnip::linear_reg()) %>%
-                   fit(jhu) %>%
-                   add_frosting(f),
-               "columns in `by` selectors of `step_population_scaling` must be present in data and match")
+  expect_error(
+    wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+      fit(jhu) %>%
+      add_frosting(f),
+    "columns in `by` selectors of `step_population_scaling` must be present in data and match")
 
   r <- epi_recipe(jhu) %>%
     step_population_scaling(case_rate,
@@ -271,8 +286,7 @@ test_that("expect error if `by` selector does not match", {
                                           geo_value %in% c("ca", "ny")) %>%
                             dplyr::select(geo_value, time_value, case_rate))
 
-  wf <- epi_workflow(r,
-                     parsnip::linear_reg()) %>%
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
 
@@ -280,4 +294,63 @@ test_that("expect error if `by` selector does not match", {
                "columns in `by` selectors of `layer_population_scaling` must be present in data and match"
                 )
 })
+
+
+test_that("Rate rescaling behaves as expected", {
+  x <- tibble(geo_value = rep("place",50),
+              time_value = as.Date("2021-01-01") + 0:49,
+              case_rate = rep(0.0005, 50),
+              cases = rep(5000, 50)) %>%
+    as_epi_df()
+
+  reverse_pop_data = data.frame(states = c("place"),
+                                value = c(1/1000))
+
+  r <- epi_recipe(x) %>%
+    step_population_scaling(df = reverse_pop_data,
+                            df_pop_col = "value",
+                            rate_rescaling = 100, # cases per 100
+                            by = c("geo_value" = "states"),
+                            case_rate, suffix = "_scaled")
+
+  expect_equal(unique(bake(prep(r,x),x)$case_rate_scaled),
+               0.0005*100/(1/1000)) # done testing step_*
+
+  f <- frosting() %>%
+    layer_population_scaling(.pred, df = reverse_pop_data,
+                             rate_rescaling = 100, # revert back to case rate per 100
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+
+  x <- tibble(geo_value = rep("place",50),
+              time_value = as.Date("2021-01-01") + 0:49,
+              case_rate = rep(0.0005, 50)) %>%
+    as_epi_df()
+
+  r <- epi_recipe(x) %>%
+    step_epi_lag(case_rate, lag = c(7, 14)) %>% # cases
+    step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred, df = reverse_pop_data,
+                             rate_rescaling = 100, # revert back to case rate per 100
+                             by =  c("geo_value" = "states"),
+                             df_pop_col = "value")
+
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(x) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(recipe = r, x = x)
+
+  # suppress warning: prediction from a rank-deficient fit may be misleading
+  suppressWarnings(expect_equal(unique(predict(wf, latest)$.pred)*(1/1000)/100,
+               unique(predict(wf, latest)$.pred_scaled)))
+})
+
 

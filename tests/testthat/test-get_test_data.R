@@ -10,7 +10,7 @@ test_that("return expected number of rows and returned dataset is ungrouped", {
   test <- get_test_data(recipe = r, x = case_death_rate_subset)
 
   expect_equal(nrow(test),
-               dplyr::n_distinct(case_death_rate_subset$geo_value)* 29)
+               dplyr::n_distinct(case_death_rate_subset$geo_value) * 29)
 
   expect_false(dplyr::is.grouped_df(test))
 })
@@ -39,3 +39,41 @@ test_that("expect error that geo_value or time_value does not exist", {
   expect_error(get_test_data(recipe = r, x = wrong_epi_df))
 })
 
+
+test_that("NA fill behaves as desired", {
+ df <- tibble::tibble(
+   geo_value = rep(c("ca", "ny"), each = 10),
+   time_value = rep(1:10, times = 2),
+   x1 = rnorm(20),
+   x2 = rnorm(20)) %>%
+   epiprocess::as_epi_df()
+
+ r <- epi_recipe(df) %>%
+   step_epi_ahead(x1, ahead = 3) %>%
+   step_epi_lag(x1, x2, lag = c(1,3)) %>%
+   step_epi_naomit()
+
+ expect_silent(tt <- get_test_data(r, df))
+ expect_s3_class(tt, "epi_df")
+
+ expect_error(get_test_data(r, df, "A"))
+ expect_error(get_test_data(r, df, TRUE, -3))
+
+ df2 <- df
+ df2$x1[df2$geo_value == "ca"] <- NA
+
+ td <- get_test_data(r, df2)
+ expect_true(any(is.na(td)))
+ expect_error(get_test_data(r, df2, TRUE))
+
+ df1 <- df2
+ df1$x1[1:4] <- 1:4
+ td1 <- get_test_data(r, df1, TRUE, n_recent = 7)
+ expect_true(!any(is.na(td1)))
+
+ df2$x1[7:8] <- 1:2
+ td2 <- get_test_data(r, df2, TRUE)
+ expect_true(!any(is.na(td2)))
+
+
+})

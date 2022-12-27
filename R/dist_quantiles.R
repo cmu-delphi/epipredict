@@ -266,14 +266,9 @@ Ops.dist_quantiles <- function(e1, e2) {
   }
   tau <- union(tau1, tau2)
   if (all(is_dist)) {
-    if (all(is_quantiles)) {
-      q1 <- quantile(e1, probs = tau)
-      q2 <- quantile(e2, probs = tau)
-    } else if (is_quantiles[1]) {
-      q2 <- quantile(e2, probs = tau)
-    } else {
-      q1 <- quantile(e1, probs = tau)
-    }
+    rlang::abort(
+      "You can't perform arithmetic between two distributions like this."
+    )
   } else {
     if (is_quantiles[1]) q2 <- e2
     else q1 <- e1

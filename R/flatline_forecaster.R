@@ -94,6 +94,7 @@ flatline_args_list <- function(ahead = 7L,
   arg_is_scalar(ahead, min_train_window)
   arg_is_chr(quantile_by_key, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
+  arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, min_train_window)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
