@@ -11,7 +11,9 @@ flatline(formula, data)
 would actually be the observed time series shifted forward by the forecast
 horizon. The right hand side must contain any keys (locations) for the
 panel data separated by plus. The observed time series must come last.
-For example\if{html}{\out{<div class="sourceCode r">}}\preformatted{form <- as.formula(lead7_y ~ state + age + y)
+For example
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{form <- as.formula(lead7_y ~ state + age + y)
 }\if{html}{\out{</div>}}
 
 Note that this function doesn't DO the shifting, that has to be done
