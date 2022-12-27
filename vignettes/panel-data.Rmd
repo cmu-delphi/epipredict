@@ -17,13 +17,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r libraries}
-<<<<<<< HEAD
-library(epiprocess)
-library(epipredict)
-library(dplyr)
-library(parsnip)
-library(recipes)
-=======
 library(dplyr)
 library(tidyr)
 library(parsnip)
@@ -31,7 +24,6 @@ library(recipes)
 library(epiprocess)
 library(epipredict)
 library(ggplot2)
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 ```
 
 [Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
@@ -43,41 +35,25 @@ dataset, which contains daily state-wise measures of `case_rate` and
 `death_rate` for COVID-19 in 2021:
 
 ```{r epi-panel-ex, include=T}
-<<<<<<< HEAD
-head(case_death_rate_subset)
-=======
 head(case_death_rate_subset, 3)
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 ```
 
 `epipredict` functions work with data in [`epi_df`](
   https://cmu-delphi.github.io/epiprocess/reference/epi_df.html) 
 format. Despite the stated goal and name of the package, other panel datasets 
-<<<<<<< HEAD
-are also valid candidates for `epipredict` functionality. Specifically, the 
-`epipredict` framework and direct forecasters can work with any panel data, as 
-long as it's in `epi_df` format.
-=======
 are also valid candidates for `epipredict` functionality, as long as they are 
 in `epi_df` format.
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 
 ```{r employ-stats, include=F}
+data("grad_employ_subset")
 year_start <- min(grad_employ_subset$time_value)
 year_end <- max(grad_employ_subset$time_value)
 ```
 
-<<<<<<< HEAD
-## Example panel data overview
-
-In this vignette, we will demonstrate using `epipredict` with employment data 
-from Statistics Canada. We will be using 
-=======
 # Example panel data overview
 
 In this vignette, we will demonstrate using `epipredict` with employment panel
 data from Statistics Canada. We will be using 
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 [
   Table 37-10-0115-01: Characteristics and median employment income of 
   longitudinal cohorts of postsecondary graduates two and five years after 
@@ -87,11 +63,7 @@ data from Statistics Canada. We will be using
 
 The full dataset contains yearly median employment income two and five years 
 after graduation, and number of graduates. The data is stratified by 
-<<<<<<< HEAD
-variables such as geographic region (Canadian province), field of study, and 
-=======
 variables such as geographic region (Canadian province), education, and 
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 age group. The year range of the dataset is `r year_start` to `r year_end`, 
 inclusive. The full dataset also contains metadata that describes the 
 quality of data collected. For demonstration purposes, we make the following 
@@ -99,17 +71,10 @@ modifications to get a subset of the full dataset:
 
 * Only keep provincial-level geographic region (the full data also has 
 "Canada" as a region)
-<<<<<<< HEAD
-* Only keep "good" or better quality data rows, as indicated by the [`STATUS`]
-(https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
-* Choose a subset of covariates and aggregate across the remaining ones. The 
-chosen covariates are age group, field of study, and educational qualification.
-=======
 * Only keep "good" or better quality data rows, as indicated by the [`STATUS`](
   https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
 * Choose a subset of covariates and aggregate across the remaining ones. The 
 chosen covariates are age group, and educational qualification.
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 
 Below is the query for obtaining the full data and code for subsetting it as we 
 just described:
@@ -117,15 +82,6 @@ just described:
 ```{r employ-query, eval=F}
 library(cansim)
 
-<<<<<<< HEAD
-# Get original dataset 
-statcan_grad_employ <- get_cansim("37-10-0115-01")
-
-gemploy <- statcan_grad_employ %>% 
-  # Drop some columns and rename the ones we keep
-  select(c("REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification", 
-    "Field of study", "Gender", "Age group", "Status of student in Canada", 
-=======
 # Get statcan data using get_cansim, which returns a tibble
 statcan_grad_employ <- get_cansim("37-10-0115-01")
 
@@ -134,7 +90,6 @@ gemploy <- statcan_grad_employ %>%
   select(c(
     "REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification",
     "Field of study", "Gender", "Age group", "Status of student in Canada",
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
     "Characteristics after graduation", "Graduate statistics")) %>%
   rename(
     "geo_value" = "GEO",
@@ -148,47 +103,12 @@ gemploy <- statcan_grad_employ %>%
     "student_status" = "Status of student in Canada",
     "grad_charac" = "Characteristics after graduation",
     "grad_stat" = "Graduate statistics") %>%
-<<<<<<< HEAD
-  # The original `VALUE` column contain the statistic indicated by 
-  # `Graduate statistics` in the original data. Below we pivot the data 
-=======
   # The original `VALUE` column contain the statistic indicated by
   # `Graduate statistics` in the original data. Below we pivot the data
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
   # wider so that each unique statistic can have its own column.
   mutate(
     # Recode for easier pivoting
     grad_stat = recode_factor(
-<<<<<<< HEAD
-      grad_stat, 
-      `Number of graduates` = "num_graduates", 
-      `Median employment income two years after graduation` = "med_income_2y",
-      `Median employment income five years after graduation` = "med_income_5y"),
-    # They are originally strings but want ints for conversion to epi_df later
-    time_value = as.integer(time_value)
-  ) %>%
-  pivot_wider(names_from = grad_stat, values_from = value) %>%
-  filter(
-    # Drop aggregates for some columns
-    geo_value != "Canada" & 
-    age_group != "15 to 64 years" &
-    fos != "Total, field of study" &
-    edu_qual != "Total, educational qualification" &
-    # Keep aggregates for keys we don't want to keep
-    gender == "Total, gender" &
-    student_status == "Canadian and international students" &
-    # Since we're looking at 2y and 5y employment income, the only 
-    # characteristics remaining are:
-    # - Graduates reporting employment income
-    # - Graduates reporting wages, salaries, and commissions only
-    # For simplicity, keep the first one only 
-    grad_charac == "Graduates reporting employment income" &
-    # Only keep "good" data
-    is.na(status) & 
-    # Drop NA value rows 
-    !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
-  select(-c(status, gender, student_status, grad_charac))
-=======
       grad_stat,
       `Number of graduates` = "num_graduates",
       `Median employment income two years after graduation` = "med_income_2y",
@@ -217,46 +137,19 @@ gemploy <- statcan_grad_employ %>%
       # Drop NA value rows
       !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
   select(-c(status, gender, student_status, grad_charac, fos))
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 ```
 
 To use this data with `epipredict`, we need to convert it into `epi_df` format 
 using [`as_epi_df`](
   https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html) 
-<<<<<<< HEAD
-with additional keys. In our case, the additional keys are `age_group`, `fos` 
-and `edu_qual`. Note that in the above modifications, we encoded `time_value` 
-as type `integer`. This allows us to set `time_type` to `"year"`, and to ensure 
-=======
 with additional keys. In our case, the additional keys are `age_group`,
 and `edu_qual`. Note that in the above modifications, we encoded `time_value` 
 as type `integer`. This lets us set `time_type = "year"`, and ensures that
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 lag and ahead modifications later on are using the correct time units. See the
 [`epi_df` documentation](
   https://cmu-delphi.github.io/epiprocess/reference/epi_df.html#time-types) for 
 a list of all the `type_type`s available.
 
-<<<<<<< HEAD
-
-```{r convert-to-epidf, eval=F}
-grad_employ_subset <- gemploy %>%
-  tsibble::as_tsibble(
-    index=time_value, 
-    key=c(geo_value, age_group, fos, edu_qual)) %>%
-  as_epi_df(
-    geo_type = "custom", time_type = "year",
-    additional_metadata=c(other_keys=list("age_group", "fos", "edu_qual")))
-```
-
-```{r data-dim, include=F}
-employ_rowcount <- format(nrow(grad_employ_subset), big.mark=",")
-employ_colcount <- length(names(grad_employ_subset))
-```
-
-The data contains `r employ_rowcount` rows and `r employ_colcount` columns. Now, 
-we are ready to use `grad_employ_subset` with `epipredict`. 
-=======
 ```{r convert-to-epidf, eval=F}
 grad_employ_subset <- gemploy %>%
   tsibble::as_tsibble(
@@ -286,8 +179,7 @@ after graduation
 * `age_group` (key): one of two age groups, either 15 to 34 years, or 35 to 64 
 years 
 * `edu_qual` (key): one of 32 unique educational qualifications, e.g., 
-"Master's disploma"
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
+"Master's diploma"
 
 ```{r preview-data, include=T}
 # Rename for simplicity
@@ -299,62 +191,6 @@ In the following sections, we will go over preprocessing the data in the
 `epi_recipe` framework, and fitting a model and making predictions within the 
 `epipredict` framework and using the package's canned forecasters.
 
-<<<<<<< HEAD
-## Preprocessing 
-
-We will create a recipe that adds one `ahead` column and 3 `lag` columns.
-
-```{r make-recipe, include=T}
-r <- epi_recipe(employ) %>%
-  step_epi_ahead(num_graduates, ahead = 1) %>% # lag & ahead units in years
-  step_epi_lag(num_graduates, lag = c(0, 1, 1)) %>%
-  step_epi_naomit() 
-r
-```
-
-There is one `raw` role which includes our value column `num_graduates`, and two 
-`key` roles which include our additional keys `age_group`, `fos` and 
-`edu_qual`. Let's take a look at what these additional columns look like.
-
-```{r view-preprocessed, include=T}
-# Display a sample of the preprocessed data
-baked_sample <- r %>% prep() %>% bake(new_data = employ) %>% sample_n(5)
-baked_sample
-```
-
-## Model fitting and prediction
-
-### Within recipes framework 
-
-We will look at a simple model: `parsnip::linear_reg()` with default engine 
-`lm`. We can use `epi_workflow` with the `epi_recipe` we defined in the 
-preprocessing section to fit an autoregressive linear model using lags at
-time $t$ (current), $t-1$ (last year), and $t-2$ (2 years ago).
-
-```{r linearreg-wf, include=T}
-wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>% fit(employ)
-wf_linreg
-```
-
-Now that we have our workflow, we can generate predictions from a subset of our 
-data. For this demo, we will predict the employment counts from the last 12
-months of our dataset.
-
-```{r linearreg-predict, include=T}
-latest <- employ %>% filter(time_value >= max(time_value) - 12)
-preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
-# Display a sample of the prediction values
-head(preds)
-```
-
-Notice that `predict` still returns an `epi_df` with all of the keys that were 
-present in the original dataset. 
-
-### With canned forecasters
-
-Even though we aren't working with epidemiological data, canned forecasters 
-still work as expected, out of the box. We will demonstrate this with the simple
-=======
 # Simple autoregressive with 3 lags to predict number of graduates in a year 
 
 ## Preprocessing 
@@ -381,7 +217,7 @@ Below is a visualization for a sample of the small data. Note that some groups
 do not have any time series information since we filtered out all timeseries 
 with incomplete dates.
 
-```{r employ-small-graph, include=T, eval=T}
+```{r employ-small-graph, include=T, eval=T, fig.width=9, fig.height=6}
 employ_small %>%
   filter(geo_value %in% c("British Columbia", "Ontario")) %>%
   filter(grepl("degree", edu_qual, fixed = T)) %>%
@@ -629,44 +465,12 @@ fitting, and `frosting` for postprocessing.
 behind the scenes for some simple models. Even though we aren't working with 
 epidemiological data, canned forecasters still work as expected, out of the box.
 We will demonstrate this with the simple
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 [`flatline_forecaster`](
   https://cmu-delphi.github.io/epipredict/reference/flatline_forecaster.html) 
 and the direct autoregressive (AR) forecaster 
 [`arx_forecaster`](
   https://cmu-delphi.github.io/epipredict/reference/arx_forecaster.html).
 
-<<<<<<< HEAD
-```{r flatline, include=T}
-out_fl <- flatline_forecaster(employ, "med_income_2y", 
-  args_list = flatline_args_list(
-    ahead=1L, forecast_date = as.Date("2022-08-16")))
-
-augment(out_fl$epi_workflow, employ)
-```
-
-```{r arx-lr, include=T}
-arx_args <- arx_args_list(
-    lags = c(0L, 1L), ahead = 1L, forecast_date = as.Date("2022-08-01"))
-
-out_arx_lr <- arx_forecaster(employ, "med_income_2y", 
-  c("med_income_2y", "med_income_5y", "num_graduates"), 
-  args_list = arx_args)
-
-out_arx_lr$predictions 
-```
-
-Other changes to the direct AR forecaster, like changing the engine, also work 
-as expected.
-
-```{r arx-rf, include=F, warning=F}
-out_arx_rf <- arx_forecaster(
-  employ, "med_income_2y", c("med_income_2y", "med_income_5y", "num_graduates"), 
-  trainer = parsnip::boost_tree(mode = "regression", trees = 20),
-  args_list = arx_args)
-
-out_arx_rf$predictions 
-=======
 For both illustrations, we will continue to use the `employ_small` dataset 
 with the transformed numeric columns that are proportions within each group 
 by the keys in our `epi_df`.
@@ -723,5 +527,4 @@ out_arx_rf <- arx_forecaster(
   args_list = arx_args)
 
 augment(out_arx_rf$epi_workflow, employ_small) %>% sample_n(5)
->>>>>>> d04e2b43c614c4209e754d267d003b60521ff715
 ```
