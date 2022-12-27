@@ -13,7 +13,6 @@ layer_population_scaling(
   rate_rescaling = 1,
   create_new = TRUE,
   suffix = "_scaled",
-  .flag = TRUE,
   id = rand_id("population_scaling")
 )
 }
@@ -56,9 +55,6 @@ in the \code{epi_df}.}
 
 \item{suffix}{a character. The suffix added to the column name if
 \code{create_new = TRUE}. Default to "_original".}
-
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }
