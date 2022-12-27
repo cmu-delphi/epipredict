@@ -26,42 +26,57 @@
 #'
 #' out <- arx_forecaster(jhu, "death_rate",
 #'   c("case_rate", "death_rate"))
+#'
+#' out <- arx_forecaster(jhu, "death_rate",
+#'   c("case_rate", "death_rate"), trainer = quantile_reg(),
+#'   args_list = arx_args_list(levels = 1:9 / 10))
 arx_forecaster <- function(epi_data,
                            outcome,
                            predictors,
                            trainer = parsnip::linear_reg(),
                            args_list = arx_args_list()) {
 
+  # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
+  if (!inherits(args_list, "arx_alist")) {
+    cli_stop("args_list was not created using `arx_args_list().")
+  }
   if (!is.list(trainer) || trainer$mode != "regression")
     cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
 
+  # --- preprocessor
   r <- epi_recipe(epi_data)
   for (l in seq_along(lags)) {
     p <- predictors[l]
     r <- step_epi_lag(r, !!p, lag = lags[[l]])
   }
-  r <- r %>%
-    step_epi_ahead(dplyr::all_of(!!outcome), ahead = args_list$ahead) %>%
+  r <- step_epi_ahead(r, dplyr::all_of(!!outcome), ahead = args_list$ahead) %>%
     step_epi_naomit()
   # should limit the training window here (in an open PR)
   # What to do if insufficient training data? Add issue.
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
-  f <- frosting() %>%
-    layer_predict() %>%
-    # layer_naomit(.pred) %>%
-    layer_residual_quantiles(
-      probs = args_list$levels,
-      symmetrize = args_list$symmetrize) %>%
-    layer_add_forecast_date(forecast_date = forecast_date) %>%
+
+  # --- postprocessor
+  f <- frosting() %>% layer_predict() # %>% layer_naomit()
+  if (inherits(trainer, "quantile_reg")) {
+    # add all levels to the forecaster and update postprocessor
+    tau <- sort(union(args_list$levels, rlang::eval_tidy(trainer$args$tau)))
+    args_list$levels <- tau
+    trainer$args$tau <- rlang::enquo(tau)
+    f <- layer_quantile_distn(f, levels = tau) %>% layer_point_from_distn()
+  } else {
+    f <- layer_residual_quantiles(
+      f, probs = args_list$levels, symmetrize = args_list$symmetrize)
+  }
+  f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
+  # --- create test data, fit, and return
   latest <- get_test_data(r, epi_data, TRUE)
-
   wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
   list(
     predictions = predict(wf, new_data = latest),
@@ -109,7 +124,7 @@ arx_lags_validator <- function(predictors, lags) {
 #'   [layer_residual_quantiles()] for more information. The default,
 #'   `character(0)` performs no grouping.
 #'
-#' @return A list containing updated parameter choices.
+#' @return A list containing updated parameter choices with class `arx_alist`.
 #' @export
 #'
 #' @examples
@@ -139,14 +154,15 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
   arg_is_probabilities(levels, allow_null = TRUE)
 
   max_lags <- max(lags)
-  enlist(lags = .lags,
-         ahead,
-         min_train_window,
-         levels,
-         forecast_date,
-         target_date,
-         symmetrize,
-         nonneg,
-         max_lags,
-         quantile_by_key)
+  structure(enlist(lags = .lags,
+                   ahead,
+                   min_train_window,
+                   levels,
+                   forecast_date,
+                   target_date,
+                   symmetrize,
+                   nonneg,
+                   max_lags,
+                   quantile_by_key),
+            class = "arx_alist")
 }

@@ -15,7 +15,7 @@ epi_juice <- function(object, ...) {
 
   terms <- quos(...)
   if (is_empty(terms)) {
-    terms <- quos(everything())
+    terms <- quos(dplyr::everything())
   }
 
   # Get user requested columns

@@ -10,7 +10,7 @@ step_epi_lag(
   ...,
   role = "predictor",
   trained = FALSE,
-  lag = 1,
+  lag,
   prefix = "lag_",
   default = NA,
   columns = NULL,
@@ -23,7 +23,7 @@ step_epi_ahead(
   ...,
   role = "outcome",
   trained = FALSE,
-  ahead = 1,
+  ahead,
   prefix = "ahead_",
   default = NA,
   columns = NULL,
@@ -36,7 +36,7 @@ step_epi_ahead(
 sequence of operations for this recipe.}
 
 \item{...}{One or more selector functions to choose variables
-for this step. See \code{\link[=selections]{selections()}} for more details.}
+for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}

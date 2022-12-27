@@ -11,9 +11,9 @@ epi_juice(object, ...)
 one preprocessing operation.}
 
 \item{...}{One or more selector functions to choose which variables will be
-returned by the function. See \code{\link[selections]{recipes}} for
+returned by the function. See \code{\link[recipes:selections]{recipes::selections()}} for
 more details. If no selectors are given, the default is to
-use \code{\link[=everything]{everything()}}.}
+use \code{\link[tidyselect:everything]{tidyselect::everything()}}.}
 }
 \description{
 Extract transformed training set

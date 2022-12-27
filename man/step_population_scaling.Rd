@@ -26,7 +26,7 @@ operations for this recipe. The recipe should contain information about the
 \code{epi_df} such as column names.}
 
 \item{...}{One or more selector functions to scale variables
-for this step. See \code{\link[=selections]{selections()}} for more details.}
+for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? By default, the new columns created by this step from the

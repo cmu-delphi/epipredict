@@ -22,7 +22,7 @@ layer_population_scaling(
 sequence of operations for this frosting.}
 
 \item{...}{One or more selector functions to scale variables
-for this step. See \code{\link[=selections]{selections()}} for more details.}
+for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
 \item{df}{a data frame that contains the population data to be used for
 inverting the existing scaling.}

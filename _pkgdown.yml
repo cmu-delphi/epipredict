@@ -1,6 +1,20 @@
 url: https://cmu-delphi.github.io/epipredict/
 template:
   bootstrap: 5
+  bootswatch: cosmo
+
+navbar:
+  bg: dark
+
+home:
+  links:
+  - text: The epiprocess R package
+    href: https://cmu-delphi.github.io/epiprocess/
+  - text: The covidcast R package
+    href: https://cmu-delphi.github.io/covidcast/covidcastR/
+  - text: The epidatr R package
+    href: https://github.com/cmu-delphi/epidatr/
+
 
 
 reference:
@@ -9,6 +23,10 @@ reference:
     contents:
     - contains("flatline")
     - contains("arx")
+  - title: Parsnip engines
+    desc: Prediction methods not available elsewhere
+    contents:
+    - quantile_reg
   - title: Custom panel data forecasting workflows
     contents:
     - epi_recipe
@@ -19,6 +37,8 @@ reference:
   - title: Epi recipe preprocessing steps
     contents:
     - starts_with("step_")
+    - contains("bake")
+    - contains("juice")
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:
@@ -37,5 +57,7 @@ reference:
   - title: Included datasets
     contents:
     - case_death_rate_subset
+    - state_census
+
 
 
