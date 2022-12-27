@@ -25,10 +25,12 @@ create_layer <- function(name = NULL, open = rlang::is_interactive()) {
   name <- usethis:::slug(name, "R")
   usethis:::check_file_name(name)
   path <- fs::path("R", name)
-  if (! fs::file_exists(path)) {
-    usethis::use_template("layer.R", save_as = path,
-                          data = list(name = layer_name), open = FALSE,
-                          package = "epipredict")
+  if (!fs::file_exists(path)) {
+    usethis::use_template(
+      "layer.R", save_as = path,
+      data = list(name = layer_name), open = FALSE,
+      package = "epipredict"
+    )
   }
   usethis::edit_file(usethis::proj_path(path), open = open)
 }
