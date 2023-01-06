@@ -61,6 +61,9 @@ step_epi_lag <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
+    if (!is_epi_recipe(recipe))
+      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+
     if (missing(lag)) {
       rlang::abort(
         c("The `lag` argument must not be empty.",
@@ -102,6 +105,9 @@ step_epi_ahead <-
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
+    if (!is_epi_recipe(recipe))
+      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+
     if (missing(ahead)) {
       rlang::abort(
         c("The `ahead` argument must not be empty.",
