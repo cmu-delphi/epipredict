@@ -69,8 +69,18 @@ arg_is_int = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!((is.numeric(value) && all(value%%1 == 0)) |
+      if (!((is.numeric(value) && all(value %% 1 == 0)) |
             (is.null(value) & !allow_null)))
+        cli_stop("All {.val {name}} must be whole positive number(s).")
+    }
+  )
+}
+
+arg_is_numeric = function(..., allow_null = FALSE) {
+  handle_arg_list(
+    ...,
+    tests = function(name, value) {
+      if (!(is.numeric(value) | (is.null(value) & !allow_null)))
         cli_stop("All {.val {name}} must be whole positive number(s).")
     }
   )

@@ -93,4 +93,11 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
   step_epi_lag(death_rate, lag = c(0,7,14))
 r
 }
+\seealso{
+Other row operation steps: 
+\code{\link{step_growth_rate}()}
+
+Other row operation steps: 
+\code{\link{step_growth_rate}()}
+}
 \concept{row operation steps}
