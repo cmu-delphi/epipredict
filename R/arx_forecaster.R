@@ -38,10 +38,9 @@ arx_forecaster <- function(epi_data,
 
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, "arx_alist")) {
+  if (!inherits(args_list, "arx_alist"))
     cli_stop("args_list was not created using `arx_args_list().")
-  }
-  if (!is.list(trainer) || trainer$mode != "regression")
+  if (!is_regression(trainer))
     cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
 

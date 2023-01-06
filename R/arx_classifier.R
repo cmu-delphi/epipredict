@@ -4,18 +4,16 @@
 #' [epiprocess::epi_df] data. It does "direct" forecasting, meaning
 #' that it estimates a class at a particular target horizon.
 #'
-#'
-#' @param epi_data An `epi_df` object
-#' @param outcome A character (scalar) specifying the outcome (in the
-#'   `epi_df`).
-#' @param predictors A character vector giving column(s) of predictor
-#'   variables.
+#' @inheritParams arx_forecaster
 #' @param trainer A `{parsnip}` model describing the type of estimation.
-#'   For now, we enforce `mode = "regression"`.
+#'   For now, we enforce `mode = "classification"`. Typical values are
+#'   [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
+#'   trainers like [parsnip::naive_bayes()] or [parsnip::rand_forest()] can
+#'   also be used.
 #' @param args_list A list of customization arguments to determine
 #'   the type of forecasting model. See [arx_args_list()].
 #'
-#' @return A list with (1) `predictions` an `epi_df` of predicted values
+#' @return A list with (1) `predictions` an `epi_df` of predicted classes
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
 #'   workflow
 #' @export
@@ -24,12 +22,13 @@
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
-#' out <- arx_forecaster(jhu, "death_rate",
+#' out <- arx_classifier(jhu, "death_rate",
 #'   c("case_rate", "death_rate"))
 #'
 #' out <- arx_forecaster(jhu, "death_rate",
-#'   c("case_rate", "death_rate"), trainer = quantile_reg(),
-#'   args_list = arx_args_list(levels = 1:9 / 10))
+#'   c("case_rate", "death_rate"), trainer = parsnip::multinom_reg(),
+#'   args_list = arx_class_args_list(
+#'     breaks = c(-.2, .25), ahead = 14, horizon = 14, method = "linear_reg"))
 arx_classifier <- function(epi_data,
                            outcome,
                            predictors,
@@ -38,16 +37,19 @@ arx_classifier <- function(epi_data,
 
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, "arx_clist")) {
+  if (!inherits(args_list, "arx_clist"))
     cli_stop("args_list was not created using `arx_class_args_list().")
-  }
-  if (!is.list(trainer) || trainer$mode != "classification") # only checks cond1
+  if (!is_classification(trainer))
     cli_stop("{trainer} must be a `parsnip` method of mode 'classification'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
   r <- epi_recipe(epi_data) %>%
-    step_growth_rate(union(outcome, predictors), role = "gr",)
+    step_growth_rate(
+      union(outcome, predictors), role = "gr",
+      horizon = args_list$horizon, method = args_list$method,
+      log_scale = args_list$log_scale,
+      additional_gr_args_list = args_list$additional_gr_args)
   for (l in seq_along(lags)) {
     p <- predictors[l]
     p <- glue::glue("gr_{args_list$horizon}_{args_list$method}_{p}")
@@ -91,7 +93,8 @@ arx_classifier <- function(epi_data,
 #'   This coincides with the default `trainer = parsnip::logistic_reg()`
 #'   argument in [arx_classifier()]. However, multiclass classification is also
 #'   supported (e.g. with `breaks = c(-.2, .25)`) provided that
-#'   `trainer = parsnip::multinom_reg()` is used as well.
+#'   `trainer = parsnip::multinom_reg()` (or another multiclass predictor)
+#'   is used as well.
 #' @param horizon Scalar integer. This is passed to the `h` argument of
 #'   [epiprocess::growth_rate()]. It determines the amount of data used to
 #'   calculate the growth rate.
@@ -106,23 +109,24 @@ arx_classifier <- function(epi_data,
 #' @export
 #'
 #' @examples
-#' arx_args_list()
-#' arx_args_list(symmetrize = FALSE)
-#' arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
+#' arx_class_args_list()
+#'
+#' # 3-class classsification,
+#' # also needs arx_classifier(trainer = parsnip::multinom_reg())
+#' arx_class_args_list(breaks = c(-.2, .25))
 arx_class_args_list <- function(
     lags = c(0L, 7L, 14L),
     ahead = 7L,
     min_train_window = 20L,
     forecast_date = NULL,
     target_date = NULL,
-    breaks = .25,
+    breaks = 0.25,
     horizon = 7L,
     method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
     log_scale = FALSE,
     additional_gr_args = list()
 ) {
 
-  # error checking if lags is a list
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
   method <- match.arg(method)
@@ -139,7 +143,6 @@ arx_class_args_list <- function(
         i = "See `?epiprocess::growth_rate` for available arguments.")
     )
   }
-
 
   max_lags <- max(lags)
   structure(
