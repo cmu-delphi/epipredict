@@ -52,7 +52,7 @@ step_growth_rate <-
     if (!is_epi_recipe(recipe))
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
     method = match.arg(method)
-    arg_is_nonneg_int(horizon)
+    arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
     arg_is_chr(role)
     arg_is_chr_scalar(prefix, id)
