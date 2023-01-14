@@ -43,11 +43,20 @@ arg_is_lgl = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = T
   )
 }
 
+arg_is_lgl_scalar <- function(...,
+                              allow_null = FALSE,
+                              allow_na = FALSE,
+                              allow_empty = TRUE) {
+  arg_is_lgl(..., allow_null = allow_null, allow_na = allow_na,
+             allow_empty = allow_empty)
+  arg_is_scalar(..., allow_null = allow_null, allow_na = allow_na)
+}
+
 arg_is_nonneg_int = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!((is.numeric(value) && all(value >= 0) && all(value%%1 == 0)) |
+      if (!((is.numeric(value) && all(value >= 0) && all(value %% 1 == 0)) |
             (is.null(value) & !allow_null)))
         cli_stop("All {.val {name}} must be whole positive number(s).")
     }
@@ -58,7 +67,7 @@ arg_is_pos_int = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!((is.numeric(value) && all(value > 0) && all(value%%1 == 0)) |
+      if (!((is.numeric(value) && all(value > 0) && all(value %% 1 == 0)) |
             (is.null(value) & allow_null)))
         cli_stop("All {.val {name}} must be whole positive number(s).")
     }

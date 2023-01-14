@@ -34,25 +34,29 @@
 #'   step_growth_rate(case_rate, death_rate)
 #' r
 step_growth_rate <-
-  function(recipe,
-           ...,
-           role = "predictor",
-           trained = FALSE,
-           horizon = 7,
-           method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
-           log_scale = FALSE,
-           prefix = "gr_",
-           columns = NULL,
-           skip = FALSE,
-           id = rand_id("growth_rate"),
-           additional_gr_args_list = list()) {
+  function(
+    recipe,
+    ...,
+    role = "predictor",
+    trained = FALSE,
+    horizon = 7,
+    method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
+    log_scale = FALSE,
+    prefix = "gr_",
+    columns = NULL,
+    skip = FALSE,
+    id = rand_id("growth_rate"),
+    additional_gr_args_list = list()
+  ) {
+
     if (!is_epi_recipe(recipe))
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
     method = match.arg(method)
     arg_is_nonneg_int(horizon)
+    arg_is_scalar(horizon)
+    arg_is_chr(role)
     arg_is_chr_scalar(prefix, id)
-    arg_is_lgl(log_scale)
-    arg_is_scalar(log_scale)
+    arg_is_lgl_scalar(trained, log_scale, skip)
     if (!is.list(additional_gr_args_list)) {
       rlang::abort(
         c("`additional_gr_args_list` must be a list.",
