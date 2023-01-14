@@ -73,14 +73,12 @@ sequence of any existing operations.
 \code{step_growth_rate()} creates a \emph{specification} of a recipe step
 that will generate one or more new columns of derived data.
 }
-\details{
-The step assumes that the data are already \emph{in the proper sequential
-order}.
-}
 \examples{
 r <- epi_recipe(case_death_rate_subset) \%>\%
   step_growth_rate(case_rate, death_rate)
 r
+
+r \%>\% prep() \%>\% bake(case_death_rate_subset)
 }
 \seealso{
 Other row operation steps: 

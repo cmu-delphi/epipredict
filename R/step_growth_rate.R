@@ -22,9 +22,6 @@
 #'   with `dup_rm` and `na_rm`.
 #' @template step-return
 #'
-#' @details The step assumes that the data are already _in the proper sequential
-#'  order_.
-#'
 #'
 #' @family row operation steps
 #' @importFrom epiprocess growth_rate
@@ -33,6 +30,8 @@
 #' r <- epi_recipe(case_death_rate_subset) %>%
 #'   step_growth_rate(case_rate, death_rate)
 #' r
+#'
+#' r %>% prep() %>% bake(case_death_rate_subset)
 step_growth_rate <-
   function(
     recipe,
