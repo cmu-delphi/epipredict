@@ -32,7 +32,7 @@ test_that("step_growth_rate works for a single signal", {
   res <- r %>% step_growth_rate(value, horizon = 1) %>% prep() %>% bake(edf)
   expect_equal(res$gr_1_rel_change_value, c(NA, 1 / 6:9))
 
-  df <- bind_rows(
+  df <- dplyr::bind_rows(
     df,
     data.frame(time_value = 1:5, geo_value = rep("b", 5), value = 6:10)
   )
@@ -55,7 +55,7 @@ test_that("step_growth_rate works for a two signals", {
   expect_equal(res$gr_1_rel_change_v1, c(NA, 1 / 6:9))
   expect_equal(res$gr_1_rel_change_v2, c(NA, 1 / 1:4))
 
-  df <- bind_rows(
+  df <- dplyr::bind_rows(
     df,
     data.frame(time_value = 1:5, geo_value = rep("b", 5), v1 = 6:10, v2 = 1:5)
   )

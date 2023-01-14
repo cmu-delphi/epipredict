@@ -73,7 +73,7 @@ step_lag_difference_new <-
            skip,
            id) {
     step(
-      subclass = "lag_diff",
+      subclass = "lag_difference",
       terms = terms,
       role = role,
       trained = trained,
@@ -107,7 +107,7 @@ prep.step_lag_difference <- function(x, training, info = NULL, ...) {
 epi_shift_single_diff <- function(x, col, horizon, newname, key_cols) {
   x <- x %>% dplyr::select(tidyselect::all_of(c(key_cols, col)))
   y <- x %>%
-    dplyr::mutate(time_value = time_value + shift_val) %>%
+    dplyr::mutate(time_value = time_value + horizon) %>%
     dplyr::rename(!!newname := col)
   x <- dplyr::left_join(x, y, by = key_cols)
   x[ ,newname] <- x[ ,col] - x[ ,newname]
