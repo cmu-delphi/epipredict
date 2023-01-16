@@ -50,7 +50,8 @@ arx_forecaster <- function(epi_data,
     p <- predictors[l]
     r <- step_epi_lag(r, !!p, lag = lags[[l]])
   }
-  r <- step_epi_ahead(r, dplyr::all_of(!!outcome), ahead = args_list$ahead) %>%
+  r <- r %>%
+    step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
     step_epi_naomit()
   # should limit the training window here (in an open PR)
   # What to do if insufficient training data? Add issue.
