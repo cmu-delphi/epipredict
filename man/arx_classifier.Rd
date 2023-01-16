@@ -44,11 +44,16 @@ that it estimates a class at a particular target horizon.
 jhu <- case_death_rate_subset \%>\%
   dplyr::filter(time_value >= as.Date("2021-12-01"))
 
-out <- arx_classifier(jhu, "death_rate",
-  c("case_rate", "death_rate"))
+out <- arx_classifier(jhu, "death_rate", c("case_rate", "death_rate"))
 
-out <- arx_forecaster(jhu, "death_rate",
-  c("case_rate", "death_rate"), trainer = parsnip::multinom_reg(),
+out <- arx_classifier(
+  jhu,
+  "death_rate",
+  c("case_rate", "death_rate"),
+  trainer = parsnip::multinom_reg(),
   args_list = arx_class_args_list(
-    breaks = c(-.2, .25), ahead = 14, horizon = 14, method = "linear_reg"))
+    breaks = c(-.2, .25), ahead = 14,
+    horizon = 14, method = "linear_reg"
+  )
+)
 }
