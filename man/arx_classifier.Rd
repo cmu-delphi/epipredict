@@ -22,13 +22,16 @@ arx_classifier(
 variables.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation.
-For now, we enforce \code{mode = "regression"}.}
+For now, we enforce \code{mode = "classification"}. Typical values are
+\code{\link[parsnip:logistic_reg]{parsnip::logistic_reg()}} or \code{\link[parsnip:multinom_reg]{parsnip::multinom_reg()}}. More complicated
+trainers like \code{\link[parsnip:naive_Bayes]{parsnip::naive_Bayes()}} or \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}} can
+also be used.}
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
 }
 \value{
-A list with (1) \code{predictions} an \code{epi_df} of predicted values
+A list with (1) \code{predictions} an \code{epi_df} of predicted classes
 and (2) \code{epi_workflow}, a list that encapsulates the entire estimation
 workflow
 }
@@ -41,10 +44,11 @@ that it estimates a class at a particular target horizon.
 jhu <- case_death_rate_subset \%>\%
   dplyr::filter(time_value >= as.Date("2021-12-01"))
 
-out <- arx_forecaster(jhu, "death_rate",
+out <- arx_classifier(jhu, "death_rate",
   c("case_rate", "death_rate"))
 
 out <- arx_forecaster(jhu, "death_rate",
-  c("case_rate", "death_rate"), trainer = quantile_reg(),
-  args_list = arx_args_list(levels = 1:9 / 10))
+  c("case_rate", "death_rate"), trainer = parsnip::multinom_reg(),
+  args_list = arx_class_args_list(
+    breaks = c(-.2, .25), ahead = 14, horizon = 14, method = "linear_reg"))
 }
