@@ -9,10 +9,6 @@
 #'
 #' @inheritParams parsnip::predict.model_fit
 #' @param frosting a frosting object
-#' #' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
 #' @param id a string identifying the layer
 #'
 #'
@@ -49,8 +45,9 @@
 #' p2
 layer_predict <-
   function(frosting, type = NULL, opts = list(), ...,
-           .flag = TRUE,
            id = rand_id("predict_default")) {
+    arg_is_chr_scalar(id)
+    arg_is_chr_scalar(type, allow_null = TRUE)
     add_layer(
       frosting,
       layer_predict_new(
@@ -58,8 +55,7 @@ layer_predict <-
         opts = opts,
         dots_list = rlang::list2(...), # can't figure how to use this
         id = id
-      ),
-      flag = .flag
+      )
     )
   }
 
@@ -71,8 +67,11 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 #' @export
 slather.layer_predict <- function(object, components, the_fit, the_recipe, ...) {
 
-  components$predictions <- predict(the_fit, components$forged$predictors,
-                                    type = object$type, opts = object$opts)
-  components$predictions <- dplyr::bind_cols(components$keys, components$predictions)
+  components$predictions <- predict(
+    the_fit,
+    components$forged$predictors,
+    type = object$type, opts = object$opts)
+  components$predictions <- dplyr::bind_cols(
+    components$keys, components$predictions)
   components
 }

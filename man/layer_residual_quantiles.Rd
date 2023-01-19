@@ -11,7 +11,6 @@ layer_residual_quantiles(
   symmetrize = TRUE,
   by_key = character(0L),
   name = ".pred_distn",
-  .flag = TRUE,
   id = rand_id("residual_quantiles")
 )
 }
@@ -29,9 +28,6 @@ referring to the desired quantile.}
 calculating quantiles. The default, \code{c()} performs no grouping.}
 
 \item{name}{character. The name for the output column.}
-
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }

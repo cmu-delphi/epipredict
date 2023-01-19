@@ -58,8 +58,7 @@ layer_quantile_distn <- function(frosting,
       truncate = truncate,
       name = name,
       id = id
-    ),
-    flag = TRUE
+    )
   )
 }
 

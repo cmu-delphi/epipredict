@@ -12,8 +12,6 @@
 #' @param dist_type Gaussian or Student's t predictive intervals
 #' @param truncate Do we truncate the distribution to an interval
 #' @param name character. The name for the output column.
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor with additional columns of the
@@ -44,18 +42,17 @@
 #' p <- predict(wf1, latest)
 #' p
 layer_predictive_distn <- function(frosting,
-                                      ...,
-                                      dist_type = c("gaussian", "student_t"),
-                                      truncate = c(-Inf, Inf),
-                                      name = ".pred_distn",
-                                      .flag = TRUE, # mandatory
-                                      id = rand_id("predictive_distn")) {
+                                   ...,
+                                   dist_type = c("gaussian", "student_t"),
+                                   truncate = c(-Inf, Inf),
+                                   name = ".pred_distn",
+                                   id = rand_id("predictive_distn")) {
   rlang::check_dots_empty()
   arg_is_chr_scalar(name, id)
   dist_type <- match.arg(dist_type)
-  stopifnot(length(truncate) == 2L,
-            is.numeric(truncate),
-            truncate[1] < truncate[2])
+  stopifnot(
+    length(truncate) == 2L, is.numeric(truncate), truncate[1] < truncate[2]
+  )
 
   add_layer(
     frosting,
@@ -64,8 +61,7 @@ layer_predictive_distn <- function(frosting,
       truncate = truncate,
       name = name,
       id = id
-    ),
-    flag = .flag
+    )
   )
 }
 

@@ -8,8 +8,6 @@
 #' @param by_key A character vector of keys to group the residuals by before
 #'   calculating quantiles. The default, `c()` performs no grouping.
 #' @param name character. The name for the output column.
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor with additional columns of the
@@ -49,14 +47,13 @@ layer_residual_quantiles <- function(frosting, ...,
                                      symmetrize = TRUE,
                                      by_key = character(0L),
                                      name = ".pred_distn",
-                                     .flag = TRUE,
                                      id = rand_id("residual_quantiles")) {
   rlang::check_dots_empty()
-  arg_is_scalar(symmetrize, .flag)
+  arg_is_scalar(symmetrize)
   arg_is_chr_scalar(name, id)
   arg_is_chr(by_key, allow_null = TRUE)
   arg_is_probabilities(probs)
-  arg_is_lgl(symmetrize, .flag)
+  arg_is_lgl(symmetrize)
   add_layer(
     frosting,
     layer_residual_quantiles_new(
@@ -65,8 +62,7 @@ layer_residual_quantiles <- function(frosting, ...,
       by_key = by_key,
       name = name,
       id = id
-    ),
-    flag = .flag
+    )
   )
 }
 

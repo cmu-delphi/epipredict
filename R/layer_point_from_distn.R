@@ -64,8 +64,7 @@ layer_point_from_distn <- function(frosting,
       type = type,
       name = name,
       id = id
-    ),
-    flag = TRUE
+    )
   )
 }
 

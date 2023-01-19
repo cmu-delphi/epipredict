@@ -158,3 +158,13 @@ arg_is_sorted = function(..., allow_null = FALSE) {
 
     })
 }
+
+
+arg_to_date <- function(x, allow_null = FALSE, allow_na = FALSE) {
+  arg_is_scalar(x, allow_null = allow_null, allow_na = allow_na)
+  if (allow_null && !is.null(x)) {
+    x <- tryCatch(as.Date(x), error = function(e) NA)
+  }
+  arg_is_date(x, allow_null = allow_null, allow_na = allow_na)
+  x
+}
