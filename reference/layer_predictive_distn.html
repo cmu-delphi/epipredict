@@ -20,7 +20,7 @@ x* isn't too far from the bulk of the data."><!-- mathjax --><script src="https:
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.9999</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -82,7 +82,6 @@ should be reasonably accurate for models fit using <code>lm</code> when the new 
 <span>  dist_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gaussian"</span>, <span class="st">"student_t"</span><span class="op">)</span>,</span>
 <span>  truncate <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="cn">Inf</span>, <span class="cn">Inf</span><span class="op">)</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">".pred_distn"</span>,</span>
-<span>  .flag <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  id <span class="op">=</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"predictive_distn"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -107,11 +106,6 @@ should be reasonably accurate for models fit using <code>lm</code> when the new 
 
 <dt>name</dt>
 <dd><p>character. The name for the output column.</p></dd>
-
-
-<dt>.flag</dt>
-<dd><p>a logical to determine if the layer is added. Passed on to
-<code><a href="add_layer.html">add_layer()</a></code>. Default <code>TRUE</code>.</p></dd>
 
 
 <dt>id</dt>
