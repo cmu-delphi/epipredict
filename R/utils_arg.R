@@ -90,7 +90,7 @@ arg_is_numeric = function(..., allow_null = FALSE) {
     ...,
     tests = function(name, value) {
       if (!(is.numeric(value) | (is.null(value) & !allow_null)))
-        cli_stop("All {.val {name}} must be whole positive number(s).")
+        cli_stop("All {.val {name}} must numeric.")
     }
   )
 }
