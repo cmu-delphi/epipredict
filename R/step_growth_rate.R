@@ -17,6 +17,13 @@
 #'   details.
 #' @param log_scale Should growth rates be estimated using the parameterization
 #'   on the log scale? See details for an explanation. Default is `FALSE`.
+#' @param replace_Inf Sometimes, the growth rate calculation can result in
+#'   infinite values (if the denominator is zero, for example). In this case,
+#'   most prediction methods will fail. This argument specifies potential
+#'   replacement values. The default (`NA`) will likely result in these rows
+#'   being removed from the data. Alternatively, you could specify arbitrary
+#'   large values, or perhaps zero. Setting this argument to `NULL` will result
+#'   in no replacement.
 #' @param additional_gr_args_list A list of additional arguments used by
 #'   [epiprocess::growth_rate()]. All `...` arguments may be passed here along
 #'   with `dup_rm` and `na_rm`.
@@ -41,6 +48,7 @@ step_growth_rate <-
     horizon = 7,
     method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
     log_scale = FALSE,
+    replace_Inf = NA,
     prefix = "gr_",
     columns = NULL,
     skip = FALSE,
@@ -53,9 +61,14 @@ step_growth_rate <-
     method = match.arg(method)
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
+    arg_is_scalar(replace_Inf, allow_null = TRUE)
+    if (!is.null(replace_Inf) && !is.na(replace_Inf))
+      arg_is_numeric(replace_Inf)
     arg_is_chr(role)
     arg_is_chr_scalar(prefix, id)
     arg_is_lgl_scalar(trained, log_scale, skip)
+
+
     if (!is.list(additional_gr_args_list)) {
       rlang::abort(
         c("`additional_gr_args_list` must be a list.",
@@ -75,6 +88,7 @@ step_growth_rate <-
                horizon = horizon,
                method = method,
                log_scale = log_scale,
+               replace_Inf = replace_Inf,
                prefix = prefix,
                keys = epi_keys(recipe),
                columns = columns,
@@ -92,6 +106,7 @@ step_growth_rate_new <-
            horizon,
            method,
            log_scale,
+           replace_Inf,
            prefix,
            keys,
            columns,
@@ -106,6 +121,7 @@ step_growth_rate_new <-
       horizon = horizon,
       method = method,
       log_scale = log_scale,
+      replace_Inf = replace_Inf,
       prefix = prefix,
       keys = keys,
       columns = columns,
@@ -126,6 +142,7 @@ prep.step_growth_rate <- function(x, training, info = NULL, ...) {
     horizon = x$horizon,
     method = x$method,
     log_scale = x$log_scale,
+    replace_Inf = x$replace_Inf,
     prefix = x$prefix,
     keys = x$keys,
     columns = recipes_eval_select(x$terms, training, info),
@@ -171,6 +188,16 @@ bake.step_growth_rate <- function(object, new_data, ...) {
       )) %>%
     dplyr::mutate(time_value = time_value + object$horizon) # shift x0 right
 
+  if (!is.null(object$replace_Inf)) {
+    gr <- gr %>%
+      dplyr::mutate(
+        dplyr::across(
+          !dplyr::all_of(ok),
+          ~ vec_replace_inf(.x, object$replace_Inf)
+        )
+      )
+  }
+
   dplyr::left_join(new_data, gr, by = ok) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
     dplyr::arrange(time_value) %>%
@@ -183,4 +210,11 @@ print.step_growth_rate <- function(x, width = max(20, options()$width - 30), ...
   print_step_shift(x$columns, x$terms, x$trained, "Calculating growth_rate for ",
                    shift = x$method)
   invisible(x)
+}
+
+vec_replace_inf <- function(x, replacement) {
+  stopifnot(length(replacement) == 1L)
+  infs <- is.infinite(x)
+  if (any(is.infinite(x))) x[infs] <- replacement
+  x
 }
