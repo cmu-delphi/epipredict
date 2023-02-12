@@ -6,6 +6,7 @@
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/workflows/R-CMD-check/badge.svg)](https://github.com/cmu-delphi/epipredict/actions)
+[![R-CMD-check](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 **Note:** This package is currently in development and may not work as
