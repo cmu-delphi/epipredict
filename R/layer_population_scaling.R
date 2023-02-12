@@ -42,14 +42,11 @@
 #' in the `epi_df`.
 #' @param suffix a character. The suffix added to the column name if
 #' `create_new = TRUE`. Default to "_original".
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' library(epiprocess)
 #' jhu <- epiprocess::jhu_csse_daily_subset %>%
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   dplyr::select(geo_value, time_value, cases)
@@ -86,18 +83,17 @@
 #'
 #' predict(wf, latest)
 layer_population_scaling <- function(frosting,
-                                     ...,
-                                     df,
-                                     by = NULL,
-                                     df_pop_col,
-                                     rate_rescaling = 1,
-                                     create_new = TRUE,
-                                     suffix = "_scaled",
-                                     .flag = TRUE,
-                                     id = rand_id("population_scaling")) {
+                           ...,
+                           df,
+                           by = NULL,
+                           df_pop_col,
+                           rate_rescaling = 1,
+                           create_new = TRUE,
+                           suffix = "_scaled",
+                           id = rand_id("population_scaling")) {
 
-  arg_is_scalar(df_pop_col, rate_rescaling, create_new, suffix, .flag, id)
-  arg_is_lgl(create_new, .flag)
+  arg_is_scalar(df_pop_col, rate_rescaling, create_new, suffix, id)
+  arg_is_lgl(create_new)
   arg_is_chr(df_pop_col, suffix, id)
   arg_is_chr(by, allow_null = TRUE)
   if (rate_rescaling <= 0)
@@ -114,8 +110,7 @@ layer_population_scaling <- function(frosting,
       create_new = create_new,
       suffix = suffix,
       id = id
-    ),
-    flag = .flag
+    )
   )
 }
 

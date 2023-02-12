@@ -2,15 +2,14 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param object a `frosting` layer
-#' @param flag logical to determine if the layer is added. Default `TRUE`.
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
-add_layer <- function(frosting, object, flag = TRUE) {
+add_layer <- function(frosting, object) {
   validate_frosting(frosting)
   validate_layer(object)
 
-  if (flag) frosting$layers[[length(frosting$layers) + 1]] <- object
+  frosting$layers[[length(frosting$layers) + 1]] <- object
 
   frosting
 }

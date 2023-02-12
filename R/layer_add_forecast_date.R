@@ -68,13 +68,8 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-  arg_is_scalar(forecast_date, allow_null = TRUE)
-  if (!is.null(forecast_date)) {
-    forecast_date <- tryCatch(as.Date(forecast_date), error = function(e) NA)
-  }
-  arg_is_date(forecast_date, allow_null = TRUE)
+  forecast_date <- arg_to_date(forecast_date, allow_null = TRUE)
   arg_is_chr_scalar(id)
-
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 

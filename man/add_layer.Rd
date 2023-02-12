@@ -4,14 +4,12 @@
 \alias{add_layer}
 \title{Add layer to a frosting object}
 \usage{
-add_layer(frosting, object, flag = TRUE)
+add_layer(frosting, object)
 }
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{object}{a \code{frosting} layer}
-
-\item{flag}{logical to determine if the layer is added. Default \code{TRUE}.}
 }
 \value{
 an updated \code{frosting} postprocessor

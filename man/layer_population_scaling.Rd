@@ -13,7 +13,6 @@ layer_population_scaling(
   rate_rescaling = 1,
   create_new = TRUE,
   suffix = "_scaled",
-  .flag = TRUE,
   id = rand_id("population_scaling")
 )
 }
@@ -57,9 +56,6 @@ in the \code{epi_df}.}
 \item{suffix}{a character. The suffix added to the column name if
 \code{create_new = TRUE}. Default to "_original".}
 
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
-
 \item{id}{a random id string}
 }
 \value{
@@ -78,7 +74,6 @@ passed will \emph{multiply} the selected variables while the \code{rate_rescalin
 argument is a common \emph{divisor} of the selected variables.
 }
 \examples{
-library(epiprocess)
 jhu <- epiprocess::jhu_csse_daily_subset \%>\%
   dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   dplyr::select(geo_value, time_value, cases)
