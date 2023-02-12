@@ -48,10 +48,10 @@ tib <- tibble::tibble(
   time_value = rep(seq(as.Date("2020-01-01"), by = 1,
                      length.out = 5), times = 2),
   geo_value = rep(c("ca", "hi"), each = 5)) \%>\%
-  epiprocess::as_epi_df()
+  as_epi_df()
 
 epi_recipe(y ~ x, data = tib) \%>\%
   step_training_window(n_recent = 3) \%>\%
-  prep(tib) \%>\%
-  bake(new_data = NULL)
+  recipes::prep(tib) \%>\%
+  recipes::bake(new_data = NULL)
 }

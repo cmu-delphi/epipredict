@@ -59,7 +59,7 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
   step_lag_difference(case_rate, death_rate, horizon = c(7, 14))
 r
 
-r \%>\% prep() \%>\% bake(case_death_rate_subset)
+r \%>\% recipes::prep() \%>\% recipes::bake(case_death_rate_subset)
 }
 \seealso{
 Other row operation steps: 
