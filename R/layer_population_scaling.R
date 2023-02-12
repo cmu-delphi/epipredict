@@ -86,15 +86,15 @@
 #'
 #' predict(wf, latest)
 layer_population_scaling <- function(frosting,
-                           ...,
-                           df,
-                           by = NULL,
-                           df_pop_col,
-                           rate_rescaling = 1,
-                           create_new = TRUE,
-                           suffix = "_scaled",
-                           .flag = TRUE,
-                           id = rand_id("population_scaling")) {
+                                     ...,
+                                     df,
+                                     by = NULL,
+                                     df_pop_col,
+                                     rate_rescaling = 1,
+                                     create_new = TRUE,
+                                     suffix = "_scaled",
+                                     .flag = TRUE,
+                                     id = rand_id("population_scaling")) {
 
   arg_is_scalar(df_pop_col, rate_rescaling, create_new, suffix, .flag, id)
   arg_is_lgl(create_new, .flag)
@@ -139,8 +139,8 @@ slather.layer_population_scaling <-
                 length(object$df_pop_col) == 1)
 
     try_join <- try(dplyr::left_join(components$predictions, object$df,
-                              by= object$by),
-             silent = TRUE)
+                                     by = object$by),
+                    silent = TRUE)
     if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
       cli_stop(c("columns in `by` selectors of `layer_population_scaling` ",
                  "must be present in data and match"))}
@@ -155,11 +155,11 @@ slather.layer_population_scaling <-
 
     components$predictions <- dplyr::left_join(components$predictions,
                                                object$df,
-                                               by= object$by,
+                                               by = object$by,
                                                suffix = c("", ".df")) %>%
       dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
                                   ~.x * !!pop_col / object$rate_rescaling ,
                                   .names = "{.col}{suffix}")) %>%
-     dplyr::select(- !!pop_col)
+     dplyr::select(-!!pop_col)
     components
 }

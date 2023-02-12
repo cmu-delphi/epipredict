@@ -42,8 +42,7 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_naomit()
 
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
-latest <- jhu \%>\%
-  dplyr::filter(time_value >= max(time_value) - 14)
+latest <- get_test_data(r, jhu)
 
 # Use ahead from preprocessing
 f <- frosting() \%>\% layer_predict() \%>\%
@@ -57,8 +56,8 @@ p
 # Override default behaviour by specifying own target date
 f2 <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_add_target_date(target_date = "2022-01-08")
-  \%>\% layer_naomit(.pred)
+  layer_add_target_date(target_date = "2022-01-08") \%>\%
+  layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
 
 p2 <- predict(wf2, latest)

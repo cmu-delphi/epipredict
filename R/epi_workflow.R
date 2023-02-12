@@ -26,7 +26,7 @@
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_epi_naomit() %>%
+#'   step_epi_naomit()
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg())
 #'

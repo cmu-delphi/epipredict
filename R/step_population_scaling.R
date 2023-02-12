@@ -188,14 +188,13 @@ bake.step_population_scaling <- function(object,
   stopifnot("Only one population column allowed for scaling" =
               length(object$df_pop_col) == 1)
 
-  try_join <- try(dplyr::left_join(new_data, object$df,
-                            by= object$by),
+  try_join <- try(dplyr::left_join(new_data, object$df, by = object$by),
                 silent = TRUE)
   if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
     cli_stop(c("columns in `by` selectors of `step_population_scaling` ",
                "must be present in data and match"))}
 
-  if(object$suffix != "_scaled" && object$create_new == FALSE){
+  if (object$suffix != "_scaled" && object$create_new == FALSE) {
     message("`suffix` not used to generate new column in `step_population_scaling`")
   }
 
