@@ -33,20 +33,15 @@ this operates exactly like a \code{\link[workflows:workflow]{workflows::workflow
 and numerous examples, see there.
 }
 \examples{
-library(dplyr)
-library(parsnip)
-library(recipes)
-
 jhu <- case_death_rate_subset
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
-wf <- epi_workflow(r, linear_reg())
+wf <- epi_workflow(r, parsnip::linear_reg())
 
 wf
 }

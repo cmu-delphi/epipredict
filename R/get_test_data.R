@@ -27,11 +27,11 @@
 #'   keys, as well other variables in the original dataset.
 #' @examples
 #' # create recipe
-#'  rec <- epi_recipe(case_death_rate_subset) %>%
+#' rec <- epi_recipe(case_death_rate_subset) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14))
-#'  get_test_data(recipe = rec, x = case_death_rate_subset)
+#' get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @export
 
 get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
@@ -44,12 +44,14 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
   if (!all(colnames(x) %in% colnames(recipe$template)))
     cli_stop("some variables used for training are not available in `x`.")
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
-  if (is.null(n_recent)) n_recent <- max_lags + 1
+  max_horizon <- max(map_dbl(recipe$steps, ~ max(.x$horizon %||% 0)), 0)
+  min_required <- max_lags + max_horizon
+  if (is.null(n_recent)) n_recent <- min_required + 1
 
   # CHECK: Return NA if insufficient training data
-  if (dplyr::n_distinct(x$time_value) < max_lags) {
+  if (dplyr::n_distinct(x$time_value) < min_required) {
     cli_stop("You supplied insufficient training data for this recipe. ",
-             "You need at least {max_lags} distinct time_values.")
+             "You need at least {min_required} distinct time_values.")
   }
 
   groups <- epi_keys(recipe)
@@ -57,7 +59,7 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
 
   x <- x %>%
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
-    dplyr::slice_tail(n = max(n_recent, max_lags + 1))
+    dplyr::slice_tail(n = max(n_recent, min_required + 1))
 
   if (fill_locf) {
     cannot_be_used <- x %>%
@@ -78,6 +80,6 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
   }
 
   x %>%
-    dplyr::slice_tail(n = max_lags + 1) %>%
+    dplyr::slice_tail(n = min_required + 1) %>%
     epiprocess::ungroup()
 }

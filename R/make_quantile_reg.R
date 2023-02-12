@@ -17,6 +17,7 @@
 #'
 #' @seealso [fit.model_spec()], [set_engine()]
 #'
+#' @importFrom quantreg rq
 #' @examples
 #' tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
 #' rq_spec <- quantile_reg(tau = c(.2, .8)) %>% set_engine("rq")

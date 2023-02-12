@@ -88,17 +88,17 @@
 #'                            by =  c("geo_value" = "states"),
 #'                            df_pop_col = "value")
 #'
-#' wf <- epi_workflow(r,
-#'                    parsnip::linear_reg()) %>%
-#'   parsnip::fit(jhu) %>%
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+#'   fit(jhu) %>%
 #'   add_frosting(f)
 #'
 #' latest <- get_test_data(
-#'    recipe = r,
-#'    x = epiprocess::jhu_csse_daily_subset %>%
-#'    dplyr::filter(time_value > "2021-11-01",
-#'    geo_value %in% c("ca", "ny")) %>%
-#'    dplyr::select(geo_value, time_value, cases))
+#'   recipe = r,
+#'   epiprocess::jhu_csse_daily_subset %>%
+#'     dplyr::filter(time_value > "2021-11-01",
+#'       geo_value %in% c("ca", "ny")) %>%
+#'     dplyr::select(geo_value, time_value, cases)
+#' )
 #'
 #'
 #' predict(wf, latest)
@@ -188,14 +188,13 @@ bake.step_population_scaling <- function(object,
   stopifnot("Only one population column allowed for scaling" =
               length(object$df_pop_col) == 1)
 
-  try_join <- try(dplyr::left_join(new_data, object$df,
-                            by= object$by),
+  try_join <- try(dplyr::left_join(new_data, object$df, by = object$by),
                 silent = TRUE)
   if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
     cli_stop(c("columns in `by` selectors of `step_population_scaling` ",
                "must be present in data and match"))}
 
-  if(object$suffix != "_scaled" && object$create_new == FALSE){
+  if (object$suffix != "_scaled" && object$create_new == FALSE) {
     message("`suffix` not used to generate new column in `step_population_scaling`")
   }
 

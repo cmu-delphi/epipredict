@@ -9,9 +9,8 @@
 #' @export
 #' @examples
 #' case_death_rate_subset %>%
-#'  epi_recipe() %>%
-#'  step_epi_naomit()
-
+#'   epi_recipe() %>%
+#'   step_epi_naomit()
 step_epi_naomit <- function(recipe) {
   stopifnot(inherits(recipe, "recipe"))
   recipe %>%

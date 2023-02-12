@@ -22,23 +22,25 @@
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   recipes::step_naomit(recipes::all_predictors()) %>%
-#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% parsnip::fit(jhu)
-#' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'   step_epi_naomit()
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- get_test_data(r, jhu)
 #'
 #' # Use ahead from preprocessing
 #' f <- frosting() %>% layer_predict() %>%
-#'   layer_add_target_date() %>% layer_naomit(.pred)
+#'   layer_add_target_date() %>%
+#'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
 #' p <- predict(wf1, latest)
 #' p
 #'
 #' # Override default behaviour by specifying own target date
-#' f2 <- frosting() %>% layer_predict() %>%
-#' layer_add_target_date(target_date = "2022-01-08") %>% layer_naomit(.pred)
+#' f2 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_add_target_date(target_date = "2022-01-08") %>%
+#'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
 #' p2 <- predict(wf2, latest)

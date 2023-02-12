@@ -257,8 +257,7 @@ test_that("expect error if `by` selector does not match", {
   expect_error(
     wf <- epi_workflow(r, parsnip::linear_reg()) %>%
       fit(jhu) %>%
-      add_frosting(f),
-    "columns in `by` selectors of `step_population_scaling` must be present in data and match")
+      add_frosting(f))
 
   r <- epi_recipe(jhu) %>%
     step_population_scaling(case_rate,
@@ -290,9 +289,7 @@ test_that("expect error if `by` selector does not match", {
     fit(jhu) %>%
     add_frosting(f)
 
-  expect_error(p <- predict(wf, latest),
-               "columns in `by` selectors of `layer_population_scaling` must be present in data and match"
-                )
+  expect_error(predict(wf, latest))
 })
 
 

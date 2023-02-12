@@ -47,7 +47,6 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' library(epiprocess)
 #' jhu <- epiprocess::jhu_csse_daily_subset %>%
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   dplyr::select(geo_value, time_value, cases)
@@ -71,9 +70,8 @@
 #'                            by =  c("geo_value" = "states"),
 #'                            df_pop_col = "value")
 #'
-#' wf <- epi_workflow(r,
-#'                    parsnip::linear_reg()) %>%
-#'   parsnip::fit(jhu) %>%
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+#'   fit(jhu) %>%
 #'   add_frosting(f)
 #'
 #' latest <- get_test_data(
@@ -136,8 +134,8 @@ slather.layer_population_scaling <-
                 length(object$df_pop_col) == 1)
 
     try_join <- try(dplyr::left_join(components$predictions, object$df,
-                              by= object$by),
-             silent = TRUE)
+                                     by = object$by),
+                    silent = TRUE)
     if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
       cli_stop(c("columns in `by` selectors of `layer_population_scaling` ",
                  "must be present in data and match"))}
@@ -152,11 +150,11 @@ slather.layer_population_scaling <-
 
     components$predictions <- dplyr::left_join(components$predictions,
                                                object$df,
-                                               by= object$by,
+                                               by = object$by,
                                                suffix = c("", ".df")) %>%
       dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
                                   ~.x * !!pop_col / object$rate_rescaling ,
                                   .names = "{.col}{suffix}")) %>%
-     dplyr::select(- !!pop_col)
+     dplyr::select(-!!pop_col)
     components
 }

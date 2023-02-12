@@ -38,7 +38,6 @@ Imports:
     recipes (>= 1.0.0),
     rlang,
     stats,
-    tensr,
     tibble,
     tidyr,
     tidyselect,
