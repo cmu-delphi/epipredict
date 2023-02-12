@@ -12,6 +12,7 @@ step_growth_rate(
   horizon = 7,
   method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
   log_scale = FALSE,
+  replace_Inf = NA,
   prefix = "gr_",
   columns = NULL,
   skip = FALSE,
@@ -46,6 +47,14 @@ details.}
 
 \item{log_scale}{Should growth rates be estimated using the parameterization
 on the log scale? See details for an explanation. Default is \code{FALSE}.}
+
+\item{replace_Inf}{Sometimes, the growth rate calculation can result in
+infinite values (if the denominator is zero, for example). In this case,
+most prediction methods will fail. This argument specifies potential
+replacement values. The default (\code{NA}) will likely result in these rows
+being removed from the data. Alternatively, you could specify arbitrary
+large values, or perhaps zero. Setting this argument to \code{NULL} will result
+in no replacement.}
 
 \item{prefix}{A prefix to indicate what type of variable this is}
 

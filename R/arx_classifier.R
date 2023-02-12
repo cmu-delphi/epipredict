@@ -20,7 +20,7 @@
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value >= as.Date("2021-12-01"))
+#'   dplyr::filter(time_value >= as.Date("2021-11-01"))
 #'
 #' out <- arx_classifier(jhu, "death_rate", c("case_rate", "death_rate"))
 #'
@@ -30,7 +30,7 @@
 #'   c("case_rate", "death_rate"),
 #'   trainer = parsnip::multinom_reg(),
 #'   args_list = arx_class_args_list(
-#'     breaks = c(-.2, .25), ahead = 14,
+#'     breaks = c(-.05, .1), ahead = 14,
 #'     horizon = 14, method = "linear_reg"
 #'   )
 #' )

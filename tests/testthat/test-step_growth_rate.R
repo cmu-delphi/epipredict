@@ -20,6 +20,10 @@ test_that("step_growth_rate validates arguments", {
   expect_error(step_growth_rate(r, value, skip = 1))
   expect_error(step_growth_rate(r, value, additional_gr_args_list = 1:5))
   expect_error(step_growth_rate(r, value, columns = letters[1:5]))
+  expect_error(step_growth_rate(r, value, replace_Inf = "c"))
+  expect_error(step_growth_rate(r, value, replace_Inf = c(1, 2)))
+  expect_silent(step_growth_rate(r, value, replace_Inf = NULL))
+  expect_silent(step_growth_rate(r, value, replace_Inf = NA))
 
 })
 

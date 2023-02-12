@@ -61,9 +61,10 @@ step_growth_rate <-
     method = match.arg(method)
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
-    arg_is_scalar(replace_Inf, allow_null = TRUE)
-    if (!is.null(replace_Inf) && !is.na(replace_Inf))
-      arg_is_numeric(replace_Inf)
+    if (!is.null(replace_Inf)) {
+      if (length(replace_Inf) != 1L) rlang::abort("replace_Inf must be a scalar.")
+      if (!is.na(replace_Inf)) arg_is_numeric(replace_Inf)
+    }
     arg_is_chr(role)
     arg_is_chr_scalar(prefix, id)
     arg_is_lgl_scalar(trained, log_scale, skip)
@@ -186,6 +187,7 @@ bake.step_growth_rate <- function(object, new_data, ...) {
         ),
         .names = "{object$prefix}{object$horizon}_{object$method}_{.col}"
       )) %>%
+    dplyr::ungroup() %>%
     dplyr::mutate(time_value = time_value + object$horizon) # shift x0 right
 
   if (!is.null(object$replace_Inf)) {

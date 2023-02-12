@@ -140,7 +140,7 @@ bake.step_lag_difference <- function(object, new_data, ...) {
   )
 
   dplyr::left_join(new_data, shifted, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
+    dplyr::group_by(dplyr::across(tidyselect::all_of(ok[-1]))) %>%
     dplyr::arrange(time_value) %>%
     dplyr::ungroup()
 }
