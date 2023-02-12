@@ -134,11 +134,3 @@ detect_layer.workflow <- function(x, name, ...) {
 slather <- function(object, components, the_fit, the_recipe, ...) {
   UseMethod("slather")
 }
-
-# Possible types of steps
-# 1. mutate-like (apply a scalar transform to the .preds)
-# 2. Filtering (remove some rows from .preds)
-# 3. Imputation (fill the NA's in .preds, might need the training data)
-# 4. Quantiles (needs the_fit, residuals, .preds)
-# 5. add_target_date (needs the recipe, training data?)
-# requirements = c("predictions", "fit", "predictors", "outcomes", "extras"),

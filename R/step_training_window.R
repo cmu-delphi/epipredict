@@ -23,13 +23,13 @@
 #'
 #' @examples
 #' tib <- tibble::tibble(
-#' x = 1:10, y = 1:10,
-#' time_value = rep(seq(as.Date("2020-01-01"), by = 1,
+#'   x = 1:10,
+#'   y = 1:10,
+#'   time_value = rep(seq(as.Date("2020-01-01"), by = 1,
 #'                      length.out = 5), times = 2),
-#' geo_value = rep(c("ca", "hi"), each = 5)
-#' ) %>% epiprocess::as_epi_df()
+#'   geo_value = rep(c("ca", "hi"), each = 5)) %>%
+#'   epiprocess::as_epi_df()
 #'
-#' library(recipes)
 #' epi_recipe(y ~ x, data = tib) %>%
 #'   step_training_window(n_recent = 3) %>%
 #'   prep(tib) %>%
@@ -41,6 +41,10 @@ step_training_window <-
            n_recent = 50,
            id = rand_id("training_window")) {
 
+    arg_is_lgl_scalar(trained)
+    arg_is_scalar(n_recent, id)
+    arg_is_pos_int(n_recent)
+    arg_is_chr(id)
     add_step(
       recipe,
       step_training_window_new(
@@ -54,7 +58,7 @@ step_training_window <-
   }
 
 step_training_window_new <-
-  function(terms, role, trained, n_recent, skip, id = id) {
+  function(role, trained, n_recent, skip, id) {
     step(
       subclass = "training_window",
       role = role,

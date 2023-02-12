@@ -38,9 +38,9 @@
 #'  order_ for shifting.
 #'
 #' The `prefix` and `id` arguments are unchangeable to ensure that the code runs
-#'  properly and to avoid inconsistency with naming. For `step_epi_ahead`, they
-#'  are always set to `"ahead_"` and `"epi_ahead"` respectively, while for
-#'  `step_epi_lag`, they are set to `"lag_"` and `"epi_lag`, respectively.
+#' properly and to avoid inconsistency with naming. For `step_epi_ahead`, they
+#' are always set to `"ahead_"` and `"epi_ahead"` respectively, while for
+#' `step_epi_lag`, they are set to `"lag_"` and `"epi_lag`, respectively.
 #'
 #' @family row operation steps
 #' @rdname step_epi_shift
