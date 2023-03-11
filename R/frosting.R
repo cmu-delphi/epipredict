@@ -319,8 +319,8 @@ print_postprocessor <- function(x) {
   header <- cli::rule("Postprocessor")
   cat_line(header)
 
-  frosting <- extract_frosting(x)
-  print_frosting(x)
+  frost <- extract_frosting(x)
+  print_frosting(frost)
 
   invisible(x)
 }
