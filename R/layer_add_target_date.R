@@ -81,3 +81,15 @@ slather.layer_add_target_date <- function(object, components, the_fit, the_recip
                                              target_date = target_date)
   components
 }
+
+#' @export
+print.layer_add_target_date <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Adding target date"
+  td <- ifelse(is.null(x$target_date), "<calculated>",
+               as.character(x$target_date))
+  td <- rlang::enquos(td)
+  print_layer(td, title = title, width = width)
+}
+

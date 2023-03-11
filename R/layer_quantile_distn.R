@@ -90,3 +90,18 @@ slather.layer_quantile_distn <-
     components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
     components
   }
+
+#' @export
+print.layer_quantile_distn <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Creating predictive quantiles"
+  td <- "<calculated>"
+  td <- rlang::enquos(td)
+  ext <- x$levels
+  print_layer(td, title = title, width = width, conjunction = "levels",
+              extra_text = ext)
+}
+
+
+

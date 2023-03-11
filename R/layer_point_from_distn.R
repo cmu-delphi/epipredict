@@ -96,3 +96,19 @@ slather.layer_point_from_distn <-
     }
     components
   }
+
+#' @export
+print.layer_point_from_distn <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Extracting point predictions"
+  if (is.null(x$name)) {
+    cnj <- NULL
+    ext <- "<overwriting .pred>"
+  } else {
+    cnj <- "adding column"
+    ext <- x$name
+  }
+  print_layer(title = title, width = width, conjunction = cnj, extra_text = ext)
+}
+

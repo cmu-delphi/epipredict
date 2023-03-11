@@ -96,3 +96,15 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
   )
   components
 }
+
+#' @export
+print.layer_add_forecast_date <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Adding forecast date"
+  fd <- ifelse(is.null(x$forecast_date), "<calculated>",
+               as.character(x$forecast_date))
+  fd <- rlang::enquos(fd)
+  print_layer(fd, title = title, width = width)
+}
+

@@ -55,3 +55,13 @@ slather.layer_naomit <- function(object, components, the_fit, the_recipe, ...) {
     dplyr::filter(dplyr::if_any(dplyr::all_of(col_names), ~ !is.na(.x)))
   components
 }
+
+#' @export
+print.layer_naomit <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Removing na predictions from"
+  print_layer(x$terms, title = title, width = width)
+}
+
+

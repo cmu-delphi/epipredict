@@ -72,3 +72,15 @@ slather.layer_predict <- function(object, components, the_fit, the_recipe, ...) 
     components$keys, components$predictions)
   components
 }
+
+#' @export
+print.layer_predict <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Creating predictions"
+  td <- "<calculated>"
+  td <- rlang::enquos(td)
+  print_layer(td, title = title, width = width)
+}
+
+
