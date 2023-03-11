@@ -271,13 +271,15 @@ bake.step_epi_ahead <- function(object, new_data, ...) {
 
 #' @export
 print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
-  print_step_shift(x$columns, x$terms, x$trained, "Lagging ", shift = x$lag)
+  print_epi_step(x$columns, x$terms, x$trained, "Lagging", conjunction = "by",
+                 extra_text = x$lag)
   invisible(x)
 }
 
 #' @export
 print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {
-  print_step_shift(x$columns, x$terms, x$trained, "Leading ", shift = x$ahead)
+  print_epi_step(x$columns, x$terms, x$trained, "Leading", conjunction = "by",
+                 extra_text = x$ahead)
   invisible(x)
 }
 
