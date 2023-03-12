@@ -159,22 +159,21 @@ the recipe is trained.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_naomit.html" class="external-link">step_naomit</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_outcomes</a></span><span class="op">(</span><span class="op">)</span>, skip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Recipe</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Inputs:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        role #variables</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   geo_value          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         raw          2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  time_value          1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Operations:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Lagging death_rate by 0, 7, 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Leading death_rate by 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Lagging case_rate by 0, 7, 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Removing rows with NA values in all_predictors()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> Removing rows with NA values in all_outcomes()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────────</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Inputs </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of variables by role</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> raw:        2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> geo_value:  1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> time_value: 1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Operations </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Lagging: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">0, 7, 14</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Lagging: <span style="color: #0000BB;">case_rate</span> by <span style="color: #0000BB;">0, 7, 14</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

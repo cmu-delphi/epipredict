@@ -467,25 +467,7 @@ so that these are available when necessary.</p>
 <p>The <code>epi_recipe</code> from <code>out_gb</code> can be extracted
 from the result:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_recipe</a></span><span class="op">(</span><span class="va">out_gb</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Recipe</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Inputs:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;        role #variables</span></span>
-<span><span class="co">#&gt;   geo_value          1</span></span>
-<span><span class="co">#&gt;         raw          2</span></span>
-<span><span class="co">#&gt;  time_value          1</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Training data contained 1736 data points and no missing data.</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Operations:</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Lagging case_rate [trained] by 0, 7, 14</span></span>
-<span><span class="co">#&gt; Lagging death_rate [trained] by 0, 7, 14</span></span>
-<span><span class="co">#&gt; Leading death_rate [trained] by 7</span></span>
-<span><span class="co">#&gt; Removing rows with NA values in lag_0_case_rate, lag_7_case_rate, lag_14_case_r... [trained]</span></span>
-<span><span class="co">#&gt; Removing rows with NA values in ahead_7_death_rate [trained]</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_recipe</a></span><span class="op">(</span><span class="va">out_gb</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span></code></pre></div>
 <p>The “Inputs” are the original <code>epi_df</code> and the “roles”
 that these are assigned. None of these are predictors or outcomes. Those
 will be created by the recipe when it is prepped. The “Operations” are
@@ -545,14 +527,7 @@ the recipe, each postprocessing operation is a “layer” and we “slather”
 these onto our baked cake. To fix ideas, below is the postprocessing
 <code>frosting</code> for <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code></p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="../reference/extract_frosting.html">extract_frosting</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span>
-<span><span class="co">#&gt; 5 Frosting Layers</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; • layer_predict()</span></span>
-<span><span class="co">#&gt; • layer_residual_quantiles()</span></span>
-<span><span class="co">#&gt; • layer_add_forecast_date()</span></span>
-<span><span class="co">#&gt; • layer_add_target_date()</span></span>
-<span><span class="co">#&gt; • layer_threshold()</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="../reference/extract_frosting.html">extract_frosting</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span></code></pre></div>
 <p>Here we have 5 layers of frosting. The first generates the forecasts
 from the test data. The second uses quantiles of the residuals to create
 distributional forecasts. The next two add columns for the date the
