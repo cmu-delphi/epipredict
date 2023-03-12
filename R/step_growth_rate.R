@@ -209,8 +209,10 @@ bake.step_growth_rate <- function(object, new_data, ...) {
 
 #' @export
 print.step_growth_rate <- function(x, width = max(20, options()$width - 30), ...) {
-  print_step_shift(x$columns, x$terms, x$trained, "Calculating growth_rate for ",
-                   shift = x$method)
+  print_epi_step(
+    x$columns, x$terms, x$trained,
+    title = "Calculating growth_rate for ",
+    conjunction = "by", extra_text = x$method)
   invisible(x)
 }
 

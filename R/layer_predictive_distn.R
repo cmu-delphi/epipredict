@@ -95,3 +95,15 @@ slather.layer_predictive_distn <-
     components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
     components
   }
+
+#' @export
+print.layer_predictive_distn <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Creating approximate predictive intervals"
+  td <- "<calculated>"
+  td <- rlang::enquos(td)
+  print_layer(td, title = title, width = width, conjunction = "type",
+              extra_text = x$dist_type)
+}
+

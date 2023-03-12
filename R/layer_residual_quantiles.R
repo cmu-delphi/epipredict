@@ -121,3 +121,16 @@ grab_residuals <- function(the_fit, components) {
   }
   r
 }
+
+#' @export
+print.layer_residual_quantiles <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Resampling residuals for predictive quantiles"
+  td <- "<calculated>"
+  td <- rlang::enquos(td)
+  ext <- x$probs
+  print_layer(td, title = title, width = width, conjunction = "levels",
+              extra_text = ext)
+}
+

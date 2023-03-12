@@ -148,8 +148,9 @@ bake.step_lag_difference <- function(object, new_data, ...) {
 
 #' @export
 print.step_lag_difference <- function(x, width = max(20, options()$width - 30), ...) {
-  print_step_shift(x$columns, x$terms, x$trained,
-                   "Calculating lag_difference for ",
-                   shift = x$horizon)
+  print_epi_step(x$columns, x$terms, x$trained,
+                 title = "Calculating lag_difference for",
+                 conjunction = "by",
+                 extra_text = x$horizon)
   invisible(x)
 }

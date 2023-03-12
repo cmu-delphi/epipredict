@@ -266,9 +266,21 @@ apply_frosting.epi_workflow <-
     return(components)
   }
 
-
 #' @export
-print.frosting <- function(x, ...) {
+print.frosting <- function(x, form_width = 30, ...) {
+  cli::cli_div(
+    theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
+  )
+  cli::cli_h1("Frosting")
+
+  if (!is.null(x$layers)) cli::cli_h3("Layers")
+  for (layer in x$layers) print(layer, form_width = form_width)
+  cli::cli_end()
+  invisible(x)
+}
+
+# Currently only used in the workflow printing
+print_frosting <- function(x, ...) {
 
   layers <- x$layers
   n_layers <- length(layers)
@@ -307,8 +319,8 @@ print_postprocessor <- function(x) {
   header <- cli::rule("Postprocessor")
   cat_line(header)
 
-  frosting <- extract_frosting(x)
-  print(frosting)
+  frost <- extract_frosting(x)
+  print_frosting(frost)
 
   invisible(x)
 }

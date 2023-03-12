@@ -157,4 +157,14 @@ slather.layer_population_scaling <-
                                   .names = "{.col}{suffix}")) %>%
      dplyr::select(-!!pop_col)
     components
+  }
+
+#' @export
+print.layer_population_scaling <- function(
+    x, width = max(20, options()$width - 30), ...) {
+
+  title <- "Scaling predictions by population"
+  print_layer(x$terms, title = title, width = width)
 }
+
+
