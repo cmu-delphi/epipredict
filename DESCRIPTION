@@ -33,6 +33,7 @@ Imports:
     glue,
     hardhat (>= 1.2.0),
     magrittr,
+    MatrixModels (>= 0.5-1),
     methods,
     quantreg,
     recipes (>= 1.0.0),
