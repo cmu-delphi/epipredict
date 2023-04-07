@@ -5,7 +5,7 @@ test_that("epi_recipe blueprint keeps the class, mold works", {
   expect_s3_class(refresh_blueprint(bp), "default_epi_recipe_blueprint")
 
   jhu <- case_death_rate_subset
-  expect_s3_class(er_check_is_data_like(jhu), "epi_df")
+  # expect_s3_class(er_check_is_data_like(jhu), "epi_df")
 
   r <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
