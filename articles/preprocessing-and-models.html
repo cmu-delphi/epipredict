@@ -258,13 +258,16 @@ dataset.</p>
 <span><span class="co">##   always returns an ungrouped data frame and adjust accordingly.</span></span>
 <span><span class="co">## <span style="color: #00BBBB;">ℹ</span> The deprecated feature was likely used in the <span style="color: #0000BB;">epipredict</span> package.</span></span>
 <span><span class="co">##   Please report the issue at</span></span>
-<span><span class="co">##   <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/cmu-delphi/epipredict/issues/&gt;</span>.</span></span></code></pre>
+<span><span class="co">##   <span style="color: #0000BB; font-style: italic;">&lt;https://github.com/cmu-delphi/epipredict/issues/&gt;</span>.</span></span>
+<span><span class="co">## <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span></span>
+<span><span class="co">## <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was</span></span></span>
+<span><span class="co">## <span style="color: #555555;">generated.</span></span></span></code></pre>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">latest</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">## * geo_type  = state</span></span>
 <span><span class="co">## * time_type = day</span></span>
-<span><span class="co">## * as_of     = 2023-03-12 22:33:01</span></span>
+<span><span class="co">## * as_of     = 2023-04-07 22:11:59</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">##   geo_value time_value .pred</span></span>
@@ -418,23 +421,23 @@ data:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">jhu</span><span class="op">)</span>, <span class="va">jhu</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Rows: 6</span></span>
 <span><span class="co">## Columns: 17</span></span>
-<span><span class="co">## $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-11-28, 2021-10-23, 2021-06-25, 2021-07-01, 2…</span></span>
-<span><span class="co">## $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "fl", "tx", "ca", "fl", "nj", "fl"</span></span>
-<span><span class="co">## $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.000000, 14.840021, 3.375469, 7.262058, 21.223419…</span></span>
-<span><span class="co">## $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0433830, 0.6164691, 0.1037824, 0.1426382, 0.0932…</span></span>
-<span><span class="co">## $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "[42.7,52.8]", "(52.8,60.2]", "(63.9,69.7]", "[42.…</span></span>
-<span><span class="co">## $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "[13.9,18.4]", "[13.9,18.4]", "(27,43]", "(19.8,21…</span></span>
-<span><span class="co">## $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 0, 1, 0, 1</span></span>
-<span><span class="co">## $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 1, 0</span></span>
-<span><span class="co">## $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
-<span><span class="co">## $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 0, 0, 0</span></span>
-<span><span class="co">## $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -26.941662, -12.101641, -23.566194, -19.679604, -5…</span></span>
-<span><span class="co">## $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -20.440122, -6.026964, -24.559021, -20.306029, -8.…</span></span>
-<span><span class="co">## $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -20.1699644, -0.9978996, -24.2850504, -19.4127331,…</span></span>
-<span><span class="co">## $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.2384906, 0.3345955, -0.1780912, -0.1392354, -0.…</span></span>
-<span><span class="co">## $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.0301205, 0.6664281, -0.2444974, -0.0912512, -0.…</span></span>
-<span><span class="co">## $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.0426096, 0.3024826, -0.1875259, -0.0978243, -0.…</span></span>
-<span><span class="co">## $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.3641546, 0.4559049, 0.0751152, 0.1400089, 0.1511…</span></span></code></pre>
+<span><span class="co">## $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-10-16, 2021-08-30, 2021-11-19, 2021-06-26, 2…</span></span>
+<span><span class="co">## $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "fl", "fl", "nj", "ny", "ny", "fl"</span></span>
+<span><span class="co">## $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 12.362194, 98.014776, 21.069021, 1.614983, 102.207…</span></span>
+<span><span class="co">## $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.7835240, 1.2074946, 0.1463573, 0.0332453, 0.3235…</span></span>
+<span><span class="co">## $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(60.2,63.9]", "(63.9,69.7]", "(52.8,60.2]", "(52.…</span></span>
+<span><span class="co">## $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(18.4,19.8]", "(19.8,21.1]", "[13.9,18.4]", "(21.…</span></span>
+<span><span class="co">## $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 1, 0, 0, 0, 1</span></span>
+<span><span class="co">## $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 1, 0, 0, 0</span></span>
+<span><span class="co">## $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 1, 0</span></span>
+<span><span class="co">## $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
+<span><span class="co">## $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -14.579468, 71.073114, -5.872642, -25.326679, 75.2…</span></span>
+<span><span class="co">## $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -10.38775, 71.19866, -10.97585, -25.01639, 26.1732…</span></span>
+<span><span class="co">## $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -2.424329, 81.150468, -13.000726, -24.300507, 22.8…</span></span>
+<span><span class="co">## $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5016504, 0.9256210, -0.1355163, -0.2486283, 0.04…</span></span>
+<span><span class="co">## $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.6173385, 0.7652352, -0.1371246, -0.2338526, 0.01…</span></span>
+<span><span class="co">## $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.8480574, 0.6567776, -0.1194331, -0.2013461, -0.0…</span></span>
+<span><span class="co">## $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.6205089, 1.1641116, 0.1334907, 0.0317677, 0.3280…</span></span></code></pre>
 <p>Before directly predicting the results, we need to add postprocessing
 layers to obtain the death counts instead of death rates. Note that the
 rates used so far are “per 100K people” rather than “per person”. We’ll
@@ -475,7 +478,7 @@ rather than ordinary least squares to create median predictions and a
 <span><span class="co">## <span style="color: #BCBCBC;">3</span> nj        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">4</span> ny        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
 <span><span class="co">## <span style="color: #BCBCBC;">5</span> tx        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
-<span><span class="co">## <span style="color: #949494;"># … with 2 more variables: .pred_scaled &lt;dist&gt;, .pred_distn_scaled &lt;dist&gt;</span></span></span></code></pre>
+<span><span class="co">## <span style="color: #949494;"># ℹ 2 more variables: .pred_scaled &lt;dist&gt;, .pred_distn_scaled &lt;dist&gt;</span></span></span></code></pre>
 <p>The columns marked <code>*_scaled</code> have been rescaled to the
 correct units, in this case <code>deaths</code> rather than deaths per
 100K people (these remain in <code>.pred</code>).</p>
@@ -716,28 +719,27 @@ of the latest available date in our dataset.</p>
 <span><span class="va">b1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">p1</span>, <span class="va">ex</span><span class="op">)</span></span>
 <span><span class="va">b1</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 17 × 11</span></span></span>
-<span><span class="co">##    time_value geo_value case_r…¹ death…² lag_0…³ lag_7…⁴ lag_1…⁵ lag_0…⁶ lag_7…⁷</span></span>
-<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 2021-12-15 ca            15.8   0.157    15.8    18.0    12.5   0.157   0.183</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 2021-12-16 ca            16.3   0.155    16.3    17.4    15.5   0.155   0.179</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 2021-12-17 ca            16.9   0.158    16.9    17.4    16.0   0.158   0.164</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 2021-12-18 ca            17.6   0.164    17.6    17.2    16.6   0.164   0.165</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 2021-12-19 ca            19.1   0.165    19.1    16.3    16.7   0.165   0.167</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 2021-12-20 ca            20.6   0.164    20.6    16.0    17.3   0.164   0.167</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 2021-12-21 ca            22.6   0.165    22.6    16.6    16.9   0.165   0.169</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 2021-12-22 ca            26.2   0.163    26.2    15.8    18.0   0.163   0.157</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 2021-12-23 ca            30.8   0.167    30.8    16.3    17.4   0.167   0.155</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">10</span> 2021-12-24 ca            33.8   0.167    33.8    16.9    17.4   0.167   0.158</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">11</span> 2021-12-25 ca            32.6   0.153    32.6    17.6    17.2   0.153   0.164</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">12</span> 2021-12-26 ca            34.5   0.153    34.5    19.1    16.3   0.153   0.165</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">13</span> 2021-12-27 ca            48.4   0.132    48.4    20.6    16.0   0.132   0.164</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">14</span> 2021-12-28 ca            54.9   0.142    54.9    22.6    16.6   0.142   0.165</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">15</span> 2021-12-29 ca            63.7   0.140    63.7    26.2    15.8   0.140   0.163</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">16</span> 2021-12-30 ca            76.0   0.140    76.0    30.8    16.3   0.140   0.167</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">17</span> 2021-12-31 ca            84.4   0.142    84.4    33.8    16.9   0.142   0.167</span></span>
-<span><span class="co">## <span style="color: #949494;"># … with 2 more variables: lag_14_death_rate &lt;dbl&gt;, ahead_7_death_rate &lt;dbl&gt;,</span></span></span>
-<span><span class="co">## <span style="color: #949494;">#   and abbreviated variable names ¹​case_rate, ²​death_rate, ³​lag_0_case_rate,</span></span></span>
-<span><span class="co">## <span style="color: #949494;">#   ⁴​lag_7_case_rate, ⁵​lag_14_case_rate, ⁶​lag_0_death_rate, ⁷​lag_7_death_rate</span></span></span></code></pre>
+<span><span class="co">##    time_value geo_value case_rate death_rate lag_0_case_rate lag_7_case_rate</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 2021-12-15 ca             15.8      0.157            15.8            18.0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 2021-12-16 ca             16.3      0.155            16.3            17.4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 2021-12-17 ca             16.9      0.158            16.9            17.4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 2021-12-18 ca             17.6      0.164            17.6            17.2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 2021-12-19 ca             19.1      0.165            19.1            16.3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 2021-12-20 ca             20.6      0.164            20.6            16.0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 2021-12-21 ca             22.6      0.165            22.6            16.6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 2021-12-22 ca             26.2      0.163            26.2            15.8</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 2021-12-23 ca             30.8      0.167            30.8            16.3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 2021-12-24 ca             33.8      0.167            33.8            16.9</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">11</span> 2021-12-25 ca             32.6      0.153            32.6            17.6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">12</span> 2021-12-26 ca             34.5      0.153            34.5            19.1</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">13</span> 2021-12-27 ca             48.4      0.132            48.4            20.6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">14</span> 2021-12-28 ca             54.9      0.142            54.9            22.6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">15</span> 2021-12-29 ca             63.7      0.140            63.7            26.2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">16</span> 2021-12-30 ca             76.0      0.140            76.0            30.8</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">17</span> 2021-12-31 ca             84.4      0.142            84.4            33.8</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 5 more variables: lag_14_case_rate &lt;dbl&gt;, lag_0_death_rate &lt;dbl&gt;,</span></span></span>
+<span><span class="co">## <span style="color: #949494;">#   lag_7_death_rate &lt;dbl&gt;, lag_14_death_rate &lt;dbl&gt;, ahead_7_death_rate &lt;dbl&gt;</span></span></span></code></pre>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">ex</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span>lag0case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">0</span><span class="op">)</span>,</span>
@@ -753,21 +755,20 @@ of the latest available date in our dataset.</p>
 <span><span class="va">b2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">p2</span>, <span class="va">ex</span><span class="op">)</span></span>
 <span><span class="va">b2</span></span></code></pre></div>
 <pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 10 × 11</span></span></span>
-<span><span class="co">##    time_value geo_value case_r…¹ death…² lag0c…³ lag7c…⁴ lag14…⁵ lag0d…⁶ lag7d…⁷</span></span>
-<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 2021-12-15 ca            15.8   0.157    15.8    18.0    12.5   0.157   0.183</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 2021-12-16 ca            16.3   0.155    16.3    17.4    15.5   0.155   0.179</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 2021-12-17 ca            16.9   0.158    16.9    17.4    16.0   0.158   0.164</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 2021-12-18 ca            17.6   0.164    17.6    17.2    16.6   0.164   0.165</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 2021-12-19 ca            19.1   0.165    19.1    16.3    16.7   0.165   0.167</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 2021-12-20 ca            20.6   0.164    20.6    16.0    17.3   0.164   0.167</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 2021-12-21 ca            22.6   0.165    22.6    16.6    16.9   0.165   0.169</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 2021-12-22 ca            26.2   0.163    26.2    15.8    18.0   0.163   0.157</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 2021-12-23 ca            30.8   0.167    30.8    16.3    17.4   0.167   0.155</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">10</span> 2021-12-24 ca            33.8   0.167    33.8    16.9    17.4   0.167   0.158</span></span>
-<span><span class="co">## <span style="color: #949494;"># … with 2 more variables: lag14death_rate &lt;dbl&gt;, ahead7death_rate &lt;dbl&gt;, and</span></span></span>
-<span><span class="co">## <span style="color: #949494;">#   abbreviated variable names ¹​case_rate, ²​death_rate, ³​lag0case_rate,</span></span></span>
-<span><span class="co">## <span style="color: #949494;">#   ⁴​lag7case_rate, ⁵​lag14case_rate, ⁶​lag0death_rate, ⁷​lag7death_rate</span></span></span></code></pre>
+<span><span class="co">##    time_value geo_value case_rate death_rate lag0case_rate lag7case_rate</span></span>
+<span><span class="co">##    <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 1</span> 2021-12-15 ca             15.8      0.157          15.8          18.0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 2</span> 2021-12-16 ca             16.3      0.155          16.3          17.4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 3</span> 2021-12-17 ca             16.9      0.158          16.9          17.4</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 4</span> 2021-12-18 ca             17.6      0.164          17.6          17.2</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 5</span> 2021-12-19 ca             19.1      0.165          19.1          16.3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 6</span> 2021-12-20 ca             20.6      0.164          20.6          16.0</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 7</span> 2021-12-21 ca             22.6      0.165          22.6          16.6</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 8</span> 2021-12-22 ca             26.2      0.163          26.2          15.8</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;"> 9</span> 2021-12-23 ca             30.8      0.167          30.8          16.3</span></span>
+<span><span class="co">## <span style="color: #BCBCBC;">10</span> 2021-12-24 ca             33.8      0.167          33.8          16.9</span></span>
+<span><span class="co">## <span style="color: #949494;"># ℹ 5 more variables: lag14case_rate &lt;dbl&gt;, lag0death_rate &lt;dbl&gt;,</span></span></span>
+<span><span class="co">## <span style="color: #949494;">#   lag7death_rate &lt;dbl&gt;, lag14death_rate &lt;dbl&gt;, ahead7death_rate &lt;dbl&gt;</span></span></span></code></pre>
 <p>Notice the difference in number of rows <code>b1</code> and
 <code>b2</code> returns. This is because the second version, the one
 that doesn’t use <code>step_epi_ahead</code> and

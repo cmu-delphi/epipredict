@@ -179,7 +179,7 @@ enough to look at a simple one:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2020-12-31      52.1      0.819</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2020-12-31      31.0      0.601</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2020-12-31      65.2      0.807</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 20,486 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20,486 more rows</span></span></span></code></pre></div>
 <p>This data is built into the package and contains the measured
 variables <code>case_rate</code> and <code>death_rate</code> for
 COVID-19 at the daily level for each US state for the year 2021. The
@@ -278,7 +278,7 @@ the forecast is being made).</li>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 0.544  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 0.831  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 0.607  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>A list object of class <code>epi_workflow</code>. This object
 encapsulates all the instructions necessary to create the prediction.
@@ -391,7 +391,7 @@ value associated to that quantile.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ak        2021-12-31 0.355 0.260  0.3   2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        2021-12-31 0.355 0.282  0.35  2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ak        2021-12-31 0.355 0.303  0.4   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 1,278 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,278 more rows</span></span></span></code></pre></div>
 <p>Additional simple adjustments to the basic forecaster can be made
 using the function:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
@@ -567,7 +567,7 @@ to do this (inside the forecaster) is</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 0.544  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 0.831  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 0.607  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre></div>
 <p>The above <code><a href="../reference/get_test_data.html">get_test_data()</a></code> function examines the recipe
 and ensures that enough test data is available to create the necessary
 lags and produce a prediction for the desired future time point (after
@@ -630,7 +630,7 @@ procedure.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 143.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 295.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 150.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 46 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre></div>
 </div>
 </div>
 
