@@ -219,7 +219,7 @@ bake.step_population_scaling <- function(object,
 print.step_population_scaling <-
   function(x, width = max(20, options()$width - 35), ...) {
   title <- "Population scaling"
-  print_epi_step(x$terms, x$terms, x$trained, title)
+  print_epi_step(x$terms, x$terms, x$trained, title, extra_text = "to rates")
   invisible(x)
 }
 
