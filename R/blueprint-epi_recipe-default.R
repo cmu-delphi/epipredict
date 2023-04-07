@@ -99,12 +99,12 @@ refresh_blueprint.default_epi_recipe_blueprint <- function(blueprint) {
 
 
 ## removing this function?
-er_check_is_data_like <- function(.x, .x_nm) {
-  if (rlang::is_missing(.x_nm)) {
-    .x_nm <- rlang::as_label(rlang::enexpr(.x))
-  }
-  if (!hardhat:::is_new_data_like(.x)) {
-    hardhat:::glubort("`{.x_nm}` must be a data.frame or a matrix, not a {class1(.x)}.")
-  }
-  .x
-}
+# er_check_is_data_like <- function(.x, .x_nm) {
+#   if (rlang::is_missing(.x_nm)) {
+#     .x_nm <- rlang::as_label(rlang::enexpr(.x))
+#   }
+#   if (!hardhat:::is_new_data_like(.x)) {
+#     hardhat:::glubort("`{.x_nm}` must be a data.frame or a matrix, not a {class1(.x)}.")
+#   }
+#   .x
+# }
