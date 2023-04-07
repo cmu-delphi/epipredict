@@ -2,6 +2,9 @@ print_epi_step <- function(
     tr_obj = NULL, untr_obj = NULL, trained = FALSE, title = NULL,
     width = max(20, options()$width - 30), case_weights = NULL,
     conjunction = NULL, extra_text = NULL) {
+  theme_div_id <- cli::cli_div(
+         theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
+       )
   title <- trimws(title)
   trained_text <- dplyr::if_else(trained, "Trained", "")
   case_weights_text <- dplyr::case_when(
@@ -39,6 +42,7 @@ print_epi_step <- function(
   )
   more_dots <- ifelse(first_line == length(elements), "", ", ...")
   cli::cli_bullets(
-    c(`*` = "\n    {title}: \\\n    {.pkg {elements[seq_len(first_line)]}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}\\\n    {comma_seperator} \\\n    {.emph {case_weights_text}}\n    "))
+    c(`*` = "\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}\\\n    {comma_seperator} \\\n    {.emph {case_weights_text}}\n    "))
+  cli::cli_end(theme_div_id)
   invisible(NULL)
 }
