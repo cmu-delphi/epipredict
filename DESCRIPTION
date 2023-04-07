@@ -35,7 +35,7 @@ Imports:
     magrittr,
     methods,
     quantreg,
-    recipes (>= 1.0.0),
+    recipes (>= 1.0.4),
     rlang,
     stats,
     tibble,
