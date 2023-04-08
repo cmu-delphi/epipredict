@@ -86,7 +86,8 @@ run_mold.default_epi_recipe_blueprint <- function(blueprint, ..., data) {
 }
 
 mold_epi_recipe_default_clean <- function(blueprint, data) {
-  data <- er_check_is_data_like(data)
+  hardhat:::check_data_frame_or_matrix(data)
+  if (!is_epi_df(data)) data <- hardhat:::coerce_to_tibble(data)
   hardhat:::new_mold_clean(blueprint, data)
 }
 
@@ -96,12 +97,14 @@ refresh_blueprint.default_epi_recipe_blueprint <- function(blueprint) {
   do.call(new_default_epi_recipe_blueprint, as.list(blueprint))
 }
 
-er_check_is_data_like <- function(.x, .x_nm) {
-  if (rlang::is_missing(.x_nm)) {
-    .x_nm <- rlang::as_label(rlang::enexpr(.x))
-  }
-  if (!hardhat:::is_new_data_like(.x)) {
-    hardhat:::glubort("`{.x_nm}` must be a data.frame or a matrix, not a {class1(.x)}.")
-  }
-  .x
-}
+
+## removing this function?
+# er_check_is_data_like <- function(.x, .x_nm) {
+#   if (rlang::is_missing(.x_nm)) {
+#     .x_nm <- rlang::as_label(rlang::enexpr(.x))
+#   }
+#   if (!hardhat:::is_new_data_like(.x)) {
+#     hardhat:::glubort("`{.x_nm}` must be a data.frame or a matrix, not a {class1(.x)}.")
+#   }
+#   .x
+# }
