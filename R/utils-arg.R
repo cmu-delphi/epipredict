@@ -89,7 +89,7 @@ arg_is_numeric = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!(is.numeric(value) | (is.null(value) & !allow_null)))
+      if (!(is.numeric(value) | (is.null(value) & allow_null)))
         cli_stop("All {.val {name}} must numeric.")
     }
   )
