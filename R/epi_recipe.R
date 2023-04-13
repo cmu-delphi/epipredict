@@ -372,7 +372,7 @@ prep.epi_recipe <- function(
     dplyr::arrange(dplyr::desc(number)) %>%
     dplyr::summarise(
       type = list(dplyr::first(type)),
-      role = as.list(unique(unlist(role))),
+      role = list(unique(unlist(role))),
       source = dplyr::first(source),
       number = dplyr::first(number),
       skip = dplyr::first(skip),
