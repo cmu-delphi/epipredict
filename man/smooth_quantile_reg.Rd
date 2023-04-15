@@ -19,8 +19,16 @@ The only possible value for this model is "regression".}
 \item{engine}{Character string naming the fitting function. Currently, only
 "smooth_qr" is supported.}
 
+\item{outcome_locations}{Defaults to the vector \code{1:ncol(y)} but if the
+responses are observed at a different spacing (or appear in a different
+order), that information should be used here. This
+argument will be mapped to the \code{ahead} argument of \code{\link[smoothqr:smooth_qr]{smoothqr::smooth_qr()}}.}
+
 \item{tau}{A scalar or vector of values in (0, 1) to determine which
 quantiles to estimate (default is 0.5).}
+
+\item{degree}{the number of polynomials used for response smoothing. Must
+be no more than the number of responses.}
 }
 \description{
 \code{smooth_quantile_reg()} generates a quantile regression model \emph{specification} for
@@ -33,16 +41,19 @@ tib <- data.frame(
   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),
   x1 = rnorm(100), x2 = rnorm(100))
 qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 1:6)
-ff <- rqr_spec \%>\% fit(cbind(y1, y2 , y3 , y4 , y5 , y6) ~ ., data = tib)
+ff <- qr_spec \%>\% fit(cbind(y1, y2 , y3 , y4 , y5 , y6) ~ ., data = tib)
 p <- predict(ff, new_data = tib)
 
 x <- -99:99 / 100 * 2 * pi
 y <- sin(x) + rnorm(length(x), sd = .1)
 fd <- x[length(x) - 20]
 XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
-XY <- as_tibble(XY)
+XY <- tibble::as_tibble(XY)
 qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 20:1)
 tt <- qr_spec \%>\% fit_xy(x = XY[,21:41], y = XY[,1:20])
+
+library(tidyr)
+library(dplyr)
 pl <- predict(
         object = tt,
         new_data = XY[max(which(complete.cases(XY[,21:41]))), 21:41]
@@ -54,7 +65,13 @@ pl <- pl \%>\%
         mutate(x = x[length(x) - 20] + ahead / 100 * 2 * pi,
                ahead = NULL) \%>\%
         pivot_wider(names_from = tau, values_from = q)
-
+plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
+curve(sin(x), add = TRUE)
+abline(v = fd, lty = 2)
+lines(pl$x, pl$`0.2`, col = "blue")
+lines(pl$x, pl$`0.8`, col = "blue")
+lines(pl$x, pl$`0.5`, col = "red")
+\dontrun{
 ggplot(data.frame(x = x, y = y), aes(x)) +
   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
   geom_point(aes(y = y), colour = "grey") + # observed data
@@ -64,6 +81,7 @@ ggplot(data.frame(x = x, y = y), aes(x)) +
   theme_bw() +
   coord_cartesian(xlim = c(0, NA)) +
   ylab("y")
+}
 }
 \seealso{
 \code{\link[=fit.model_spec]{fit.model_spec()}}, \code{\link[=set_engine]{set_engine()}}
