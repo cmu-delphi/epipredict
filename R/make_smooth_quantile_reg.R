@@ -23,9 +23,38 @@
 #'   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
 #'   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),
 #'   x1 = rnorm(100), x2 = rnorm(100))
-#' rq_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 1:6)
-#' ff <- rq_spec %>% fit(cbind(y1, y2 , y3 , y4 , y5 , y6) ~ ., data = tib)
+#' qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 1:6)
+#' ff <- rqr_spec %>% fit(cbind(y1, y2 , y3 , y4 , y5 , y6) ~ ., data = tib)
 #' p <- predict(ff, new_data = tib)
+#'
+#' x <- -99:99 / 100 * 2 * pi
+#' y <- sin(x) + rnorm(length(x), sd = .1)
+#' fd <- x[length(x) - 20]
+#' XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
+#' XY <- as_tibble(XY)
+#' qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 20:1)
+#' tt <- qr_spec %>% fit_xy(x = XY[,21:41], y = XY[,1:20])
+#' pl <- predict(
+#'         object = tt,
+#'         new_data = XY[max(which(complete.cases(XY[,21:41]))), 21:41]
+#'       )
+#' pl <- pl %>%
+#'         unnest(.pred) %>%
+#'         mutate(distn = nested_quantiles(distn)) %>%
+#'         unnest(distn) %>%
+#'         mutate(x = x[length(x) - 20] + ahead / 100 * 2 * pi,
+#'                ahead = NULL) %>%
+#'         pivot_wider(names_from = tau, values_from = q)
+#'
+#' ggplot(data.frame(x = x, y = y), aes(x)) +
+#'   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
+#'   geom_point(aes(y = y), colour = "grey") + # observed data
+#'   geom_function(fun = sin, colour = "black") + # truth
+#'   geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
+#'   geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
+#'   theme_bw() +
+#'   coord_cartesian(xlim = c(0, NA)) +
+#'   ylab("y")
 smooth_quantile_reg <- function(
     mode = "regression",
     engine = "smoothqr",
