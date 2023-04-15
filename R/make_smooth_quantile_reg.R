@@ -124,15 +124,15 @@ make_smooth_quantile_reg <- function() {
   process_smooth_qr_preds <- function(x, object) {
     object <- parsnip::extract_fit_engine(object)
     list_of_pred_distns <- lapply(x, function(p) {
-      x <- unname(apply(x, 1, function(q) unname(sort(q)), simplify = FALSE))
+      x <- unname(apply(p, 1, function(q) unname(sort(q)), simplify = FALSE))
       dist_quantiles(x, list(object$tau))
     })
-    nx <- nrow(x)
+    n_preds <- length(list_of_pred_distns[[1]])
     nout <- length(list_of_pred_distns)
     tib <- tibble::tibble(
-      ids = rep(seq(nx), times = nout),
-      ahead = rep(object$aheads, each = nx),
-      distn = do.call(c, list_of_pred_distns)) %>%
+      ids = rep(seq(n_preds), times = nout),
+      ahead = rep(object$aheads, each = n_preds),
+      distn = do.call(c, unname(list_of_pred_distns))) %>%
       tidyr::nest(.pred = c(ahead, distn))
 
     return(tib[".pred"])
