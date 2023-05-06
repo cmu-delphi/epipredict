@@ -33,3 +33,7 @@ epi_keys_mold <- function(mold) {
   unname(unlist(mold_keys))
 }
 
+kill_time_value <- function(v) {
+  arg_is_chr(v)
+  v[v != "time_value"]
+}

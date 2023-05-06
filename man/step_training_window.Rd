@@ -9,6 +9,7 @@ step_training_window(
   role = NA,
   trained = FALSE,
   n_recent = 50,
+  epi_keys = NULL,
   id = rand_id("training_window")
 )
 }
@@ -22,8 +23,12 @@ sequence of operations for this recipe.}
 preprocessing have been estimated.}
 
 \item{n_recent}{An integer value that represents the number of most recent
-observations that are to be kept in the training window per location.
+observations that are to be kept in the training window per key
 The default value is 50.}
+
+\item{epi_keys}{An optional character vector for specifying "key" variables
+to group on. The default, \code{NULL}, ensures that every key combination is
+limited.}
 
 \item{id}{A character string that is unique to this step to identify it.}
 }
@@ -33,7 +38,7 @@ sequence of any existing operations.
 }
 \description{
 \code{step_training_window} creates a \emph{specification} of a recipe step that
-limit the size of the training window to the \code{n_recent} most recent
+limits the size of the training window to the \code{n_recent} most recent
 observations in \code{time_value} per group, where the groups are formed
 based on the remaining \code{epi_keys}.
 }
@@ -51,6 +56,12 @@ tib <- tibble::tibble(
   as_epi_df()
 
 epi_recipe(y ~ x, data = tib) \%>\%
+  step_training_window(n_recent = 3) \%>\%
+  recipes::prep(tib) \%>\%
+  recipes::bake(new_data = NULL)
+
+epi_recipe(y ~ x, data = tib) \%>\%
+  step_naomit() \%>\%
   step_training_window(n_recent = 3) \%>\%
   recipes::prep(tib) \%>\%
   recipes::bake(new_data = NULL)

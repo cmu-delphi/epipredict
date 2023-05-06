@@ -146,7 +146,7 @@ epi_recipe.formula <- function(formula, data, ...) {
   # we ensure that there's only 1 row in the template
   data <- data[1,]
   # check for minus:
-  if (! epiprocess::is_epi_df(data)) {
+  if (!epiprocess::is_epi_df(data)) {
     return(recipes::recipe(formula, data, ...))
   }
 
@@ -280,14 +280,16 @@ add_epi_recipe <- function(
 
 
 
-# unfortunately, everything the same as in prep.recipe except string/fctr handling
+# unfortunately, almost everything the same as in prep.recipe except string/fctr handling
 #' @export
 prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
   training <- recipes:::check_training_set(training, x, fresh)
+  training <- epi_check_training_set(training, x)
   tr_data <- recipes:::train_info(training)
-  keys <- epi_keys(training)
+  keys <- epi_keys(x)
+
   orig_lvls <- lapply(training, recipes:::get_levels)
   orig_lvls <- kill_levels(orig_lvls, keys)
   if (strings_as_factors) {
@@ -322,11 +324,18 @@ prep.epi_recipe <- function(
         cat(note, "[training]", "\n")
       }
       before_nms <- names(training)
+      before_template <- training[1, ]
       x$steps[[i]] <- prep(x$steps[[i]], training = training,
                            info = x$term_info)
       training <- bake(x$steps[[i]], new_data = training)
       if (!tibble::is_tibble(training)) {
         abort("bake() methods should always return tibbles")
+      }
+      if (!is_epi_df(training)) {
+        # tidymodels killed our class
+        # for now, we only allow step_epi_* to alter the metadata
+        training <- dplyr::dplyr_reconstruct(
+          epiprocess::as_epi_df(training), before_template)
       }
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
       if (!is.na(x$steps[[i]]$role)) {

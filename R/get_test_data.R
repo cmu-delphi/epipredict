@@ -54,8 +54,7 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
              "You need at least {min_required} distinct time_values.")
   }
 
-  groups <- epi_keys(recipe)
-  groups <- groups[groups != "time_value"]
+  groups <- kill_time_value(epi_keys(recipe))
 
   x <- x %>%
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
