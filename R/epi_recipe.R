@@ -287,6 +287,7 @@ prep.epi_recipe <- function(
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
+  training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
   tr_data <- recipes:::train_info(training)
   keys <- epi_keys(x)
 
@@ -337,6 +338,7 @@ prep.epi_recipe <- function(
         training <- dplyr::dplyr_reconstruct(
           epiprocess::as_epi_df(training), before_template)
       }
+      training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
       if (!is.na(x$steps[[i]]$role)) {
         new_vars <- setdiff(x$term_info$variable, running_info$variable)

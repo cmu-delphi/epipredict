@@ -72,9 +72,41 @@ test_that("step_training_window works with multiple keys", {
   expect_equal(ncol(p4), 5L)
   expect_s3_class(p4, "epi_df")
   expect_named(p4, c("x", "y", "time_value", "geo_value", "additional_key"))
-  expect_equal(p4$time_value,
-               rep(c(seq(as.Date("2020-02-17"), as.Date("2020-02-19"), length.out = 3),
-                                   seq(as.Date("2020-04-07"), as.Date("2020-04-09"),
-                                       length.out = 3)), times = 2))
+  expect_equal(
+    p4$time_value,
+    rep(c(seq(as.Date("2020-02-17"), as.Date("2020-02-19"), length.out = 3),
+          seq(as.Date("2020-04-07"), as.Date("2020-04-09"),
+              length.out = 3)), times = 2))
   expect_equal(p4$geo_value, rep(c("ca", "hi"), each = 6))
+})
+
+
+test_that("step_training_window and step_naomit interact", {
+  tib <- tibble::tibble(
+    x = 1:10,
+    y = 1:10,
+    time_value = rep(seq(as.Date("2020-01-01"), by = 1,
+                         length.out = 5), times = 2),
+    geo_value = rep(c("ca", "hi"), each = 5)) %>%
+    as_epi_df()
+
+  e1 <- epi_recipe(y ~ x, data = tib) %>%
+    step_training_window(n_recent = 3) %>%
+    recipes::prep(tib) %>%
+    recipes::bake(new_data = NULL)
+
+  e2 <- epi_recipe(y ~ x, data = tib) %>%
+    recipes::step_naomit() %>%
+    step_training_window(n_recent = 3) %>%
+    recipes::prep(tib) %>%
+    recipes::bake(new_data = NULL)
+
+  e3 <- epi_recipe(y ~ x, data = tib) %>%
+    step_training_window(n_recent = 3) %>%
+    recipes::step_naomit() %>%
+    recipes::prep(tib) %>%
+    recipes::bake(new_data = NULL)
+
+  expect_identical(e1, e2)
+  expect_identical(e2, e3)
 })

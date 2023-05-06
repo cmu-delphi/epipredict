@@ -2,6 +2,9 @@
 
 * add quantile_reg()
 * clean up documentation bugs
+* add smooth_quantile_reg()
+* add classifier
+* training window step handled
 
 # epipredict 0.0.3
 

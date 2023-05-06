@@ -105,7 +105,6 @@ bake.step_training_window <- function(object, new_data) {
 
   hardhat::validate_column_names(new_data, object$epi_keys)
 
-  browser()
   new_data %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(object$epi_keys))) %>%
     dplyr::arrange(time_value) %>%
