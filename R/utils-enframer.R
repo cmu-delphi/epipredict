@@ -9,7 +9,7 @@ enframer <- function(df, x, fill = NA) {
   df
 }
 
-enlist <- function (...) {
+enlist <- function(...) {
   # in epiprocess
   x = list(...)
   n = as.character(sys.call())[-1]

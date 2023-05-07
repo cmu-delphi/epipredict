@@ -35,14 +35,14 @@
 #'
 #' epi_recipe(y ~ x, data = tib) %>%
 #'   step_training_window(n_recent = 3) %>%
-#'   recipes::prep(tib) %>%
-#'   recipes::bake(new_data = NULL)
+#'   prep(tib) %>%
+#'   bake(new_data = NULL)
 #'
 #' epi_recipe(y ~ x, data = tib) %>%
-#'   step_naomit() %>%
+#'   recipes::step_naomit() %>%
 #'   step_training_window(n_recent = 3) %>%
-#'   recipes::prep(tib) %>%
-#'   recipes::bake(new_data = NULL)
+#'   prep(tib) %>%
+#'   bake(new_data = NULL)
 step_training_window <-
   function(recipe,
            role = NA,
@@ -53,7 +53,8 @@ step_training_window <-
 
     arg_is_lgl_scalar(trained)
     arg_is_scalar(n_recent, id)
-    arg_is_pos_int(n_recent)
+    arg_is_pos(n_recent)
+    if (is.finite(n_recent)) arg_is_pos_int(n_recent)
     arg_is_chr(id)
     arg_is_chr(epi_keys, allow_null = TRUE)
     add_step(
@@ -83,7 +84,7 @@ step_training_window_new <-
   }
 
 #' @export
-prep.step_training_window <- function(x, training, info = NULL) {
+prep.step_training_window <- function(x, training, info = NULL, ...) {
 
   ekt <- kill_time_value(epi_keys(training))
   ek <- x$epi_keys %||% ekt %||% character(0L)
@@ -101,15 +102,19 @@ prep.step_training_window <- function(x, training, info = NULL) {
 }
 
 #' @export
-bake.step_training_window <- function(object, new_data) {
+bake.step_training_window <- function(object, new_data, ...) {
 
   hardhat::validate_column_names(new_data, object$epi_keys)
 
-  new_data %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(object$epi_keys))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::slice_tail(n = object$n_recent) %>%
-    dplyr::ungroup()
+  if (object$n_recent < Inf) {
+    new_data <- new_data %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(object$epi_keys))) %>%
+      dplyr::arrange(time_value) %>%
+      dplyr::slice_tail(n = object$n_recent) %>%
+      dplyr::ungroup()
+  }
+
+  new_data
 }
 
 #' @export

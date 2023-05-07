@@ -57,12 +57,12 @@ tib <- tibble::tibble(
 
 epi_recipe(y ~ x, data = tib) \%>\%
   step_training_window(n_recent = 3) \%>\%
-  recipes::prep(tib) \%>\%
-  recipes::bake(new_data = NULL)
+  prep(tib) \%>\%
+  bake(new_data = NULL)
 
 epi_recipe(y ~ x, data = tib) \%>\%
-  step_naomit() \%>\%
+  recipes::step_naomit() \%>\%
   step_training_window(n_recent = 3) \%>\%
-  recipes::prep(tib) \%>\%
-  recipes::bake(new_data = NULL)
+  prep(tib) \%>\%
+  bake(new_data = NULL)
 }

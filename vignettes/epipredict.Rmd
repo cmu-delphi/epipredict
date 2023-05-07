@@ -178,7 +178,7 @@ Additional simple adjustments to the basic forecaster can be made using the func
 
 ```{r, eval = FALSE}
 arx_args_list(
-  lags = c(0L, 7L, 14L), ahead = 7L, min_train_window = 20L, 
+  lags = c(0L, 7L, 14L), ahead = 7L, n_training = Inf, 
   forecast_date = NULL, target_date = NULL, levels = c(0.05, 0.95),
   symmetrize = TRUE, nonneg = TRUE, quantile_by_key = "geo_value"
 )

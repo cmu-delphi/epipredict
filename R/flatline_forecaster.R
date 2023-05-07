@@ -27,9 +27,10 @@
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
 #' out <- flatline_forecaster(jhu, "death_rate")
-flatline_forecaster <- function(epi_data,
-                                outcome,
-                                args_list = flatline_args_list()) {
+flatline_forecaster <- function(
+    epi_data,
+    outcome,
+    args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, "flatline_alist")) {
@@ -43,7 +44,8 @@ flatline_forecaster <- function(epi_data,
   r <- epi_recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead, skip = TRUE) %>%
     recipes::update_role(!!outcome, new_role = "predictor") %>%
-    recipes::add_role(dplyr::all_of(keys), new_role = "predictor")
+    recipes::add_role(dplyr::all_of(keys), new_role = "predictor") %>%
+    step_training_window(n_recent = args_list$n_training)
 
   latest <- get_test_data(epi_recipe(epi_data), epi_data)
 
@@ -84,26 +86,29 @@ flatline_forecaster <- function(epi_data,
 #' @examples
 #' flatline_args_list()
 #' flatline_args_list(symmetrize = FALSE)
-#' flatline_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
-flatline_args_list <- function(ahead = 7L,
-                               min_train_window = 20L,
-                               forecast_date = NULL,
-                               target_date = NULL,
-                               levels = c(0.05, 0.95),
-                               symmetrize = TRUE,
-                               nonneg = TRUE,
-                               quantile_by_key = character(0L)) {
+#' flatline_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
+flatline_args_list <- function(
+    ahead = 7L,
+    n_training = Inf,
+    forecast_date = NULL,
+    target_date = NULL,
+    levels = c(0.05, 0.95),
+    symmetrize = TRUE,
+    nonneg = TRUE,
+    quantile_by_key = character(0L)) {
 
-  arg_is_scalar(ahead, min_train_window)
+  arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
-  arg_is_nonneg_int(ahead, min_train_window)
+  arg_is_nonneg_int(ahead)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
+  arg_is_pos(n_training)
+  if (is.finite(n_training)) arg_is_pos_int(n_training)
 
   structure(enlist(ahead,
-                   min_train_window,
+                   n_training,
                    forecast_date,
                    target_date,
                    levels,
@@ -114,14 +119,20 @@ flatline_args_list <- function(ahead = 7L,
 }
 
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
-  if (! epiprocess::is_epi_df(epi_data))
+  if (!epiprocess::is_epi_df(epi_data))
     cli_stop("epi_data must be an epi_df.")
   arg_is_chr(predictors)
   arg_is_chr_scalar(outcome)
-  if (! outcome %in% names(epi_data))
+  if (!outcome %in% names(epi_data))
     cli_stop("{outcome} was not found in the training data.")
-  if (! all(predictors %in% names(epi_data)))
+  if (!all(predictors %in% names(epi_data)))
     cli_stop("At least one predictor was not found in the training data.")
   invisible(TRUE)
 }
+
+#' @export
+print.flatline_alist <- function(x, ...) {
+  utils::str(x)
+}
+
 
