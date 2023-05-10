@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.9999</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -164,7 +164,7 @@ enough to look at a simple one:</p>
 <span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20,496 × 4</span></span></span>
 <span><span class="co">#&gt;    geo_value time_value case_rate death_rate</span></span>
@@ -263,7 +263,7 @@ the forecast is being made).</li>
 <span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
 <span><span class="co">#&gt;    geo_value time_value  .pred         .pred_distn forecast_date target_date</span></span>
@@ -292,13 +292,14 @@ More details on this below.</li>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> Frosting</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; 5 Recipe Steps</span></span>
+<span><span class="co">#&gt; 6 Recipe Steps</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; • step_epi_lag()</span></span>
 <span><span class="co">#&gt; • step_epi_lag()</span></span>
 <span><span class="co">#&gt; • step_epi_ahead()</span></span>
 <span><span class="co">#&gt; • step_naomit()</span></span>
 <span><span class="co">#&gt; • step_naomit()</span></span>
+<span><span class="co">#&gt; • step_training_window()</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -376,7 +377,7 @@ value associated to that quantile.</p>
 <span><span class="co">#&gt; An `epi_df` object, 1,288 x 7 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,288 × 7</span></span></span>
 <span><span class="co">#&gt;    geo_value time_value .pred      q   tau forecast_date target_date</span></span>
@@ -396,7 +397,7 @@ value associated to that quantile.</p>
 using the function:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
-<span>  lags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">7L</span>, <span class="fl">14L</span><span class="op">)</span>, ahead <span class="op">=</span> <span class="fl">7L</span>, min_train_window <span class="op">=</span> <span class="fl">20L</span>, </span>
+<span>  lags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">7L</span>, <span class="fl">14L</span><span class="op">)</span>, ahead <span class="op">=</span> <span class="fl">7L</span>, n_training <span class="op">=</span> <span class="cn">Inf</span>, </span>
 <span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>, target_date <span class="op">=</span> <span class="cn">NULL</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>, nonneg <span class="op">=</span> <span class="cn">TRUE</span>, quantile_by_key <span class="op">=</span> <span class="st">"geo_value"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -552,7 +553,7 @@ to do this (inside the forecaster) is</p>
 <span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
 <span><span class="co">#&gt;    geo_value time_value  .pred         .pred_distn forecast_date target_date</span></span>
@@ -615,7 +616,7 @@ procedure.</p>
 <span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
 <span><span class="co">#&gt;    geo_value time_value .pred         .pred_distn forecast_date target_date</span></span>

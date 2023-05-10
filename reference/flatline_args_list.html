@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.3.9999</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">flatline_args_list</span><span class="op">(</span></span>
 <span>  ahead <span class="op">=</span> <span class="fl">7L</span>,</span>
-<span>  min_train_window <span class="op">=</span> <span class="fl">20L</span>,</span>
+<span>  n_training <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
@@ -80,10 +80,10 @@
 date for which forecasts should be produced.</p></dd>
 
 
-<dt>min_train_window</dt>
-<dd><p>Integer. The minimal amount of training
-data (in the time unit of the <code>epi_df</code>) needed to produce a forecast.
-If smaller, the forecaster will return <code>NA</code> predictions.</p></dd>
+<dt>n_training</dt>
+<dd><p>Integer. An upper limit for the number of rows per
+key that are used for training
+(in the time unit of the <code>epi_df</code>).</p></dd>
 
 
 <dt>forecast_date</dt>
@@ -129,86 +129,38 @@ before calculating residual quantiles. See the <code>by_key</code> argument to
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ahead</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $min_train_window</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $forecast_date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $target_date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $levels</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $symmetrize</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $nonneg</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $quantile_by_key</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "flatline_alist"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ levels         : num [1:2] 0.05 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "flatline_alist"</span>
 <span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>symmetrize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ahead</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $min_train_window</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 20</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $forecast_date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $target_date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $levels</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $symmetrize</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $nonneg</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $quantile_by_key</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "flatline_alist"</span>
-<span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, min_train_window <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $ahead</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $min_train_window</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 120</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $forecast_date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $target_date</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $levels</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.1 0.3 0.7 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $symmetrize</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $nonneg</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> $quantile_by_key</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> character(0)</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "flatline_alist"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ levels         : num [1:2] 0.05 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "flatline_alist"</span>
+<span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, n_training <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num 120</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ levels         : num [1:4] 0.1 0.3 0.7 0.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr "flatline_alist"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
