@@ -97,7 +97,8 @@ arx_classifier <- function(epi_data,
     step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome") %>%
     step_mutate(outcome_class = cut(!!o2, breaks = args_list$breaks),
                 role = "outcome") %>%
-    step_epi_naomit()
+    step_epi_naomit() %>%
+    step_training_window(n_recent = args_list$n_training)
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
@@ -152,7 +153,7 @@ arx_classifier <- function(epi_data,
 #'   calculation. See [epiprocess::growth_rate()] and the related Vignette for
 #'   more details.
 #'
-#' @return A list containing updated parameter choices with class `arx_alist`.
+#' @return A list containing updated parameter choices with class `arx_clist`.
 #' @export
 #'
 #' @examples
@@ -164,7 +165,7 @@ arx_classifier <- function(epi_data,
 arx_class_args_list <- function(
     lags = c(0L, 7L, 14L),
     ahead = 7L,
-    min_train_window = 20L,
+    n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
     outcome_transform = c("growth_rate", "lag_difference"),
@@ -180,12 +181,14 @@ arx_class_args_list <- function(
   method <- match.arg(method)
   outcome_transform <- match.arg(outcome_transform)
 
-  arg_is_scalar(ahead, min_train_window, horizon, log_scale)
+  arg_is_scalar(ahead, n_training, horizon, log_scale)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
-  arg_is_nonneg_int(ahead, min_train_window, lags, horizon)
+  arg_is_nonneg_int(ahead, lags, horizon)
   arg_is_numeric(breaks)
   arg_is_lgl(log_scale)
+  arg_is_pos(n_training)
+  if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (!is.list(additional_gr_args)) {
     rlang::abort(
       c("`additional_gr_args` must be a list.",
@@ -202,7 +205,7 @@ arx_class_args_list <- function(
   structure(
     enlist(lags = .lags,
            ahead,
-           min_train_window,
+           n_training,
            breaks,
            forecast_date,
            target_date,
@@ -215,4 +218,9 @@ arx_class_args_list <- function(
     ),
     class = "arx_clist"
   )
+}
+
+#' @export
+print.arx_clist <- function(x, ...) {
+  utils::str(x)
 }
