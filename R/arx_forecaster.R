@@ -38,7 +38,7 @@ arx_forecaster <- function(epi_data,
 
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, "arx_alist"))
+  if (!inherits(args_list, "arx_flist"))
     cli_stop("args_list was not created using `arx_args_list().")
   if (!is_regression(trainer))
     cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
@@ -52,9 +52,8 @@ arx_forecaster <- function(epi_data,
   }
   r <- r %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
-    step_epi_naomit()
-  # should limit the training window here (in an open PR)
-  # What to do if insufficient training data? Add issue.
+    step_epi_naomit() %>%
+    step_training_window(n_recent = args_list$n_training)
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
@@ -105,9 +104,9 @@ arx_lags_validator <- function(predictors, lags) {
 #'   in autoregressive-type models (in days).
 #' @param ahead Integer. Number of time steps ahead (in days) of the forecast
 #'   date for which forecasts should be produced.
-#' @param min_train_window Integer. The minimal amount of training
-#'   data (in the time unit of the `epi_df`) needed to produce a forecast.
-#'   If smaller, the forecaster will return `NA` predictions.
+#' @param n_training Integer. An upper limit for the number of rows per
+#'   key that are used for training
+#'   (in the time unit of the `epi_df`).
 #' @param forecast_date Date. The date on which the forecast is created.
 #'   The default `NULL` will attempt to determine this automatically.
 #' @param target_date Date. The date for which the forecast is intended.
@@ -124,16 +123,16 @@ arx_lags_validator <- function(predictors, lags) {
 #'   [layer_residual_quantiles()] for more information. The default,
 #'   `character(0)` performs no grouping.
 #'
-#' @return A list containing updated parameter choices with class `arx_alist`.
+#' @return A list containing updated parameter choices with class `arx_flist`.
 #' @export
 #'
 #' @examples
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
-#' arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
+#' arx_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
 arx_args_list <- function(lags = c(0L, 7L, 14L),
                           ahead = 7L,
-                          min_train_window = 20L,
+                          n_training = Inf,
                           forecast_date = NULL,
                           target_date = NULL,
                           levels = c(0.05, 0.95),
@@ -145,18 +144,20 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
 
-  arg_is_scalar(ahead, min_train_window, symmetrize, nonneg)
+  arg_is_scalar(ahead, n_training, symmetrize, nonneg)
   arg_is_chr(quantile_by_key, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
-  arg_is_nonneg_int(ahead, min_train_window, lags)
+  arg_is_nonneg_int(ahead, lags)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(levels, allow_null = TRUE)
+  arg_is_pos(n_training)
+  if (is.finite(n_training)) arg_is_pos_int(n_training)
 
   max_lags <- max(lags)
   structure(enlist(lags = .lags,
                    ahead,
-                   min_train_window,
+                   n_training,
                    levels,
                    forecast_date,
                    target_date,
@@ -164,5 +165,10 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
                    nonneg,
                    max_lags,
                    quantile_by_key),
-            class = "arx_alist")
+            class = "arx_flist")
+}
+
+#' @export
+print.arx_flist <- function(x, ...) {
+  utils::str(x)
 }

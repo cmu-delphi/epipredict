@@ -7,7 +7,7 @@
 arx_args_list(
   lags = c(0L, 7L, 14L),
   ahead = 7L,
-  min_train_window = 20L,
+  n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
   levels = c(0.05, 0.95),
@@ -23,9 +23,9 @@ in autoregressive-type models (in days).}
 \item{ahead}{Integer. Number of time steps ahead (in days) of the forecast
 date for which forecasts should be produced.}
 
-\item{min_train_window}{Integer. The minimal amount of training
-data (in the time unit of the \code{epi_df}) needed to produce a forecast.
-If smaller, the forecaster will return \code{NA} predictions.}
+\item{n_training}{Integer. An upper limit for the number of rows per
+key that are used for training
+(in the time unit of the \code{epi_df}).}
 
 \item{forecast_date}{Date. The date on which the forecast is created.
 The default \code{NULL} will attempt to determine this automatically.}
@@ -49,7 +49,7 @@ before calculating residual quantiles. See the \code{by_key} argument to
 \code{character(0)} performs no grouping.}
 }
 \value{
-A list containing updated parameter choices with class \code{arx_alist}.
+A list containing updated parameter choices with class \code{arx_flist}.
 }
 \description{
 Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()}}.
@@ -57,5 +57,5 @@ Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()
 \examples{
 arx_args_list()
 arx_args_list(symmetrize = FALSE)
-arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
+arx_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
 }

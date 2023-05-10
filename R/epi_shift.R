@@ -36,5 +36,5 @@ epi_shift_single <- function(x, col, shift_val, newname, key_cols) {
   x %>%
     dplyr::select(tidyselect::all_of(c(key_cols, col))) %>%
     dplyr::mutate(time_value = time_value + shift_val) %>%
-    dplyr::rename(!!newname := col)
+    dplyr::rename(!!newname := {{ col }})
 }

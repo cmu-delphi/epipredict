@@ -148,13 +148,16 @@ slather.layer_population_scaling <-
     col_names <- names(pos)
     suffix = ifelse(object$create_new, object$suffix, "")
 
-    components$predictions <- dplyr::left_join(components$predictions,
-                                               object$df,
-                                               by = object$by,
-                                               suffix = c("", ".df")) %>%
-      dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
-                                  ~.x * !!pop_col / object$rate_rescaling ,
-                                  .names = "{.col}{suffix}")) %>%
+    components$predictions <- dplyr::left_join(
+      components$predictions,
+      object$df,
+      by = object$by,
+      suffix = c("", ".df")
+    ) %>%
+      dplyr::mutate(dplyr::across(
+        dplyr::all_of(col_names),
+        ~.x * !!pop_col / object$rate_rescaling ,
+        .names = "{.col}{suffix}")) %>%
      dplyr::select(-!!pop_col)
     components
   }

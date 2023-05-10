@@ -43,7 +43,7 @@ flatline <- function(formula, data) {
   ek <- rhs[-n]
   if (length(response) > 1)
     cli_stop("flatline forecaster can accept only 1 observed time series.")
-  keys <- ek[ek != "time_value"]
+  keys <- kill_time_value(ek)
 
   preds <- data %>%
     dplyr::mutate(.pred = !!rlang::sym(observed),
@@ -54,7 +54,7 @@ flatline <- function(formula, data) {
     dplyr::arrange(time_value) %>%
     dplyr::slice_tail(n = 1L) %>%
     dplyr::ungroup() %>%
-    dplyr::select(dplyr::all_of(c(keys, ".pred")))
+    dplyr::select(tidyselect::all_of(c(keys, ".pred")))
 
   structure(list(
     residuals = dplyr::select(preds, dplyr::all_of(c(keys, ".resid"))),
