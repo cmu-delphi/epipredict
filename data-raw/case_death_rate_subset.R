@@ -11,7 +11,7 @@ x <- covidcast(
   time_values = epirange(20201231, 20211231),
   geo_values = "*"
 ) %>%
-  fetch_tbl() %>%
+  fetch() %>%
   select(geo_value, time_value, case_rate = value)
 
 y <- covidcast(
@@ -22,7 +22,7 @@ y <- covidcast(
   time_values = epirange(20201231, 20211231),
   geo_values = "*"
 ) %>%
-  fetch_tbl() %>%
+  fetch() %>%
   select(geo_value, time_value, death_rate = value)
 
 case_death_rate_subset <- x %>%
