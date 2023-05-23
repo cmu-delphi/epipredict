@@ -139,7 +139,7 @@ packages.</p>
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
 <span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch_tbl</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, cases <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Warning: No API key found. You will be limited to non-complex queries and encounter rate</span></span>
 <span><span class="co">## limits if you proceed.</span></span>
@@ -159,7 +159,7 @@ packages.</p>
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
 <span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch_tbl</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, deaths <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">counts_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -266,7 +266,7 @@ dataset.</p>
 <pre><code><span><span class="co">## An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">## * geo_type  = state</span></span>
 <span><span class="co">## * time_type = day</span></span>
-<span><span class="co">## * as_of     = 2023-05-11 00:32:42.73767</span></span>
+<span><span class="co">## * as_of     = 2023-05-23 18:50:34.743937</span></span>
 <span><span class="co">## </span></span>
 <span><span class="co">## <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">##   geo_value time_value .pred</span></span>
@@ -362,7 +362,7 @@ this package and will be used in
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
 <span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span>  <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch_tbl</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, masking <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">behav_ind_distancing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/covidcast.html" class="external-link">covidcast</a></span><span class="op">(</span></span>
@@ -372,7 +372,7 @@ this package and will be used in
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
 <span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span>  <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch_tbl</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/epidatr/man/epidata_call.html" class="external-link">fetch</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, distancing <span class="op">=</span> <span class="va">value</span><span class="op">)</span> </span>
 <span></span>
 <span><span class="va">pop_dat</span> <span class="op">&lt;-</span> <span class="va">state_census</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">abbr</span>, <span class="va">pop</span><span class="op">)</span></span>
@@ -420,23 +420,23 @@ data:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">jhu</span><span class="op">)</span>, <span class="va">jhu</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">## Rows: 6</span></span>
 <span><span class="co">## Columns: 17</span></span>
-<span><span class="co">## $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-07-09, 2021-07-07, 2021-11-12, 2021-10-26, 2…</span></span>
-<span><span class="co">## $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "nj", "ny", "nj", "ca", "nj", "ny"</span></span>
-<span><span class="co">## $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 2.499333, 1.893505, 15.965814, 15.399351, 2.771139…</span></span>
-<span><span class="co">## $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0466413, 0.0280738, 0.1447490, 0.2779627, 0.0707…</span></span>
-<span><span class="co">## $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "[42.7,52.8]", "[42.7,52.8]", "(60.2,63.9]", "(69.…</span></span>
-<span><span class="co">## $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(21.1,27]", "(21.1,27]", "(21.1,27]", "(27,43]", …</span></span>
-<span><span class="co">## $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
-<span><span class="co">## $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 1, 0, 1, 0</span></span>
-<span><span class="co">## $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 0, 0, 1</span></span>
-<span><span class="co">## $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
-<span><span class="co">## $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.44233, -25.04816, -10.97585, -11.54231, -24.17…</span></span>
-<span><span class="co">## $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.56135, -25.21512, -13.00073, -13.28593, -23.74…</span></span>
-<span><span class="co">## $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.34744, -25.21365, -12.62277, -12.40015, -24.55…</span></span>
-<span><span class="co">## $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.235232304, -0.253799804, -0.137124604, -0.00391…</span></span>
-<span><span class="co">## $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.219149004, -0.252322204, -0.119433104, 0.008063…</span></span>
-<span><span class="co">## $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1853743, -0.2353302, -0.0679668, -0.0271349, -0…</span></span>
-<span><span class="co">## $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0562913, 0.0273350, 0.1463573, 0.2006702, 0.0964…</span></span></code></pre>
+<span><span class="co">## $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-10-18, 2021-10-07, 2021-11-16, 2021-08-23, 2…</span></span>
+<span><span class="co">## $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "fl", "tx", "nj", "tx", "nj", "tx"</span></span>
+<span><span class="co">## $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 12.362194, 27.839393, 18.852753, 58.934833, 21.506…</span></span>
+<span><span class="co">## $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.9695452, 0.8417455, 0.1302741, 0.4705017, 0.0916…</span></span>
+<span><span class="co">## $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(52.8,60.2]", "(60.2,63.9]", "(52.8,60.2]", "(63.…</span></span>
+<span><span class="co">## $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "[13.9,18.4]", "(19.8,21.1]", "[13.9,18.4]", "(18.…</span></span>
+<span><span class="co">## $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 0, 0, 0, 0</span></span>
+<span><span class="co">## $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 1, 0, 1, 0</span></span>
+<span><span class="co">## $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
+<span><span class="co">## $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 1, 0, 1</span></span>
+<span><span class="co">## $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -14.5794681, 0.8977307, -8.0889099, 31.9931705, -5…</span></span>
+<span><span class="co">## $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -10.387746, 10.221643, -12.736961, 22.822037, -8.1…</span></span>
+<span><span class="co">## $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -2.424329, 15.327583, -12.400822, 19.306655, -12.5…</span></span>
+<span><span class="co">## $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.6876716, 0.5598719, -0.1515995, 0.1886281, -0.19…</span></span>
+<span><span class="co">## $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.4069965, 0.6669146, -0.0969165, 0.0353623, -0.20…</span></span>
+<span><span class="co">## $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.7409144, 0.7145973, -0.1081748, -0.0882235, -0.2…</span></span>
+<span><span class="co">## $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5199392, 0.7463801, 0.1527906, 0.7113479, 0.1560…</span></span></code></pre>
 <p>Before directly predicting the results, we need to add postprocessing
 layers to obtain the death counts instead of death rates. Note that the
 rates used so far are “per 100K people” rather than “per person”. We’ll
