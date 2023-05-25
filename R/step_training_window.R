@@ -70,7 +70,7 @@ step_training_window_new <-
   }
 
 #' @export
-prep.step_training_window <- function(x, training, info = NULL) {
+prep.step_training_window <- function(x, training, info = NULL, ...) {
 
   step_training_window_new(
     role = x$role,
@@ -82,7 +82,7 @@ prep.step_training_window <- function(x, training, info = NULL) {
 }
 
 #' @export
-bake.step_training_window <- function(object, new_data) {
+bake.step_training_window <- function(object, new_data, ...) {
   if (!all(object$n_recent == as.integer(object$n_recent))) {
     rlang::abort("step_training_window requires 'n_recent' to be integer valued.")
   }
