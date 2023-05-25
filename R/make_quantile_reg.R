@@ -4,7 +4,7 @@
 #' @description
 #' `quantile_reg()` generates a quantile regression model _specification_ for
 #' the [tidymodels](https://www.tidymodels.org/) framework. Currently, the
-#' only supported engine is [quantreg::rq()].
+#' only supported engine is "rq" which uses [quantreg::rq()].
 #'
 #' @param mode A single character string for the type of model.
 #'   The only possible value for this model is "regression".
@@ -49,14 +49,14 @@ quantile_reg <- function(mode = "regression",  engine = "rq", tau = 0.5) {
   )
 }
 
-
 make_quantile_reg <- function() {
   parsnip::set_new_model("quantile_reg")
   parsnip::set_model_mode("quantile_reg", "regression")
+
+
+
   parsnip::set_model_engine("quantile_reg", "regression", eng = "rq")
   parsnip::set_dependency("quantile_reg", eng = "rq", pkg = "quantreg")
-
-
 
   parsnip::set_model_arg(
     model = "quantile_reg",
@@ -73,10 +73,12 @@ make_quantile_reg <- function() {
     mode = "regression",
     value = list(
       interface = "formula",
-      protect = c("formula", "data"),
+      protect = c("formula", "data", "weights"),
       func = c(pkg = "quantreg", fun = "rq"),
-      defaults = list(method = "br", na.action = stats::na.omit,
-                      model = FALSE)
+      defaults = list(
+        method = "br",
+        na.action = rlang::expr(stats::na.omit),
+        model = FALSE)
     )
   )
 

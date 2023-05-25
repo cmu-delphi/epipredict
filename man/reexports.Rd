@@ -4,6 +4,8 @@
 \name{reexports}
 \alias{reexports}
 \alias{fit}
+\alias{prep}
+\alias{bake}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -12,5 +14,7 @@ below to see their documentation.
 
 \describe{
   \item{generics}{\code{\link[generics]{fit}}}
+
+  \item{recipes}{\code{\link[recipes]{bake}}, \code{\link[recipes]{prep}}}
 }}
 

@@ -87,7 +87,7 @@ output.
 ```{r make-arx-kweek, warning = FALSE}
 # Latest snapshot of data, and forecast dates
 x_latest <- epix_as_of(x, max_version = max(x$versions_end)) 
-fc_time_values <- seq(as.Date("2020-08-01"), as.Date("2021-12-01"), 
+fc_time_values <- seq(as.Date("2020-08-01"), as.Date("2021-11-01"), 
                       by = "1 month")
 
 k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
@@ -98,7 +98,7 @@ k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
         args_list = arx_args_list(ahead = ahead)) %>%
         extract2("predictions") %>% 
         select(-c(geo_value, time_value)), 
-      n = 120, 
+      before = 120 - 1, 
       ref_time_values = fc_time_values, 
       new_col_name = "fc"
     ) %>% 
@@ -270,24 +270,25 @@ current and past COVID-19 case rates for all states. That is, we can make
 forecasts on the archive, `x`, and compare those to forecasts on the latest
 data, `x_latest` using the same general set-up as above. For version-aware
 forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware
-forecasting, `x_latest` is fed into `epi_slide()`. #%% update to include
-percent_cli after that issue is fixed?
+forecasting, `x_latest` is fed into `epi_slide()`. 
 
 ```{r make-ar-kweek-asof}
 k_week_ahead_as_of <- function(ahead = 7, version_aware = TRUE) {
   if (version_aware) {
     epix_slide(
       x,
-      ~ arx_forecaster(.x, "case_rate", "case_rate",
+      ~ arx_forecaster(.x, "case_rate", c("case_rate", "percent_cli"),
                        args_list = arx_args_list(ahead = ahead)) %>%
         extract2("predictions") %>%
-        select(-c(geo_value, time_value)),
-      n = 120, 
+        select(-time_value),
+      before = 120 - 1, 
       ref_time_values = fc_time_values, 
       new_col_name = "fc") %>% 
-      mutate(engine_type = "lm", version_aware = version_aware)
+      mutate(engine_type = "lm", version_aware = version_aware) %>%
+      rename(geo_value = fc_geo_value)
   } else {
-    k_week_ahead(x_latest, "case_rate", "case_rate", ahead, linear_reg()) %>%
+    k_week_ahead(x_latest, "case_rate", c("case_rate", "percent_cli"), 
+                 ahead, linear_reg()) %>%
       mutate(version_aware = version_aware)
   }
 }

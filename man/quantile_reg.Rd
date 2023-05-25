@@ -19,7 +19,7 @@ quantiles to estimate (default is 0.5).}
 \description{
 \code{quantile_reg()} generates a quantile regression model \emph{specification} for
 the \href{https://www.tidymodels.org/}{tidymodels} framework. Currently, the
-only supported engine is \code{\link[quantreg:rq]{quantreg::rq()}}.
+only supported engine is "rq" which uses \code{\link[quantreg:rq]{quantreg::rq()}}.
 }
 \examples{
 tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))

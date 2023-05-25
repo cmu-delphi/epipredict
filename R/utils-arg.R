@@ -63,6 +63,18 @@ arg_is_nonneg_int = function(..., allow_null = FALSE) {
   )
 }
 
+arg_is_pos = function(..., allow_null = FALSE) {
+  handle_arg_list(
+    ...,
+    tests = function(name, value) {
+      if (!((is.numeric(value) && all(value > 0)) |
+            (is.null(value) & allow_null)))
+        cli_stop("All {.val {name}} must be positive number(s).")
+    }
+  )
+}
+
+
 arg_is_pos_int = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
