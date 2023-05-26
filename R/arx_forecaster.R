@@ -68,7 +68,8 @@ arx_forecaster <- function(epi_data,
     f <- layer_quantile_distn(f, levels = tau) %>% layer_point_from_distn()
   } else {
     f <- layer_residual_quantiles(
-      f, probs = args_list$levels, symmetrize = args_list$symmetrize)
+      f, probs = args_list$levels, symmetrize = args_list$symmetrize,
+      by_key = args_list$quantile_by_key)
   }
   f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
@@ -115,13 +116,17 @@ arx_lags_validator <- function(predictors, lags) {
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
 #' @param symmetrize Logical. The default `TRUE` calculates
-#'      symmetric prediction intervals.
+#'   symmetric prediction intervals. This argument only applies when
+#'   residual quantiles are used. It is not applicable with
+#'   `trainer = quantile_reg()`, for example.
 #' @param nonneg Logical. The default `TRUE` enforces nonnegative predictions
 #'   by hard-thresholding at 0.
 #' @param quantile_by_key Character vector. Groups residuals by listed keys
 #'   before calculating residual quantiles. See the `by_key` argument to
 #'   [layer_residual_quantiles()] for more information. The default,
-#'   `character(0)` performs no grouping.
+#'   `character(0)` performs no grouping. This argument only applies when
+#'   residual quantiles are used. It is not applicable with
+#'   `trainer = quantile_reg()`, for example.
 #'
 #' @return A list containing updated parameter choices with class `arx_flist`.
 #' @export
