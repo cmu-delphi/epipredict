@@ -17,6 +17,7 @@
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
 #'   workflow
 #' @export
+#' @seealso [arxc_epi_workflow_template()]
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -34,18 +35,78 @@
 #'     horizon = 14, method = "linear_reg"
 #'   )
 #' )
-arx_classifier <- function(epi_data,
-                           outcome,
-                           predictors,
-                           trainer = parsnip::logistic_reg(),
-                           args_list = arx_class_args_list()) {
+arx_classifier <- function(
+    epi_data,
+    outcome,
+    predictors,
+    trainer = parsnip::logistic_reg(),
+    args_list = arx_class_args_list()) {
 
-  # --- validation
+  if (!is_classification(trainer))
+    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
+
+  wf <- arxc_epi_workflow_template(
+    epi_data, outcome, predictors, trainer, args_list
+  )
+
+  latest <- get_test_data(
+    workflows::extract_preprocessor(wf), epi_data, TRUE
+  )
+
+  wf <- generics::fit(wf, epi_data)
+  list(
+    predictions = predict(wf, new_data = latest),
+    epi_workflow = wf
+  )
+}
+
+
+#' Create a template `arx_classifier` workflow
+#'
+#' This function creates an unfit workflow for use with [arx_classifier()].
+#' It is useful if you want to make small modifications to that classifier
+#' before fitting and predicting. Supplying a trainer to the function
+#' may alter the returned `epi_workflow` object but can be omitted.
+#'
+#' @inheritParams arx_classifier
+#' @param trainer A `{parsnip}` model describing the type of estimation.
+#'  For now, we enforce `mode = "classification"`. Typical values are
+#'  [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
+#'  trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can
+#'  also be used. May be `NULL` (the default).
+#'
+#' @return An unfit `epi_workflow`.
+#' @export
+#' @seealso [arx_classifier()]
+#' @examples
+#'
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value >= as.Date("2021-11-01"))
+#'
+#' arxc_epi_workflow_template(jhu, "death_rate", c("case_rate", "death_rate"))
+#'
+#' arxc_epi_workflow_template(
+#'   jhu,
+#'   "death_rate",
+#'   c("case_rate", "death_rate"),
+#'   trainer = parsnip::multinom_reg(),
+#'   args_list = arx_class_args_list(
+#'     breaks = c(-.05, .1), ahead = 14,
+#'     horizon = 14, method = "linear_reg"
+#'   )
+#' )
+arxc_epi_workflow_template <- function(
+    epi_data,
+    outcome,
+    predictors,
+    trainer = NULL,
+    args_list = arx_class_args_list()) {
+
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, "arx_clist"))
-    cli_stop("args_list was not created using `arx_class_args_list().")
-  if (!is_classification(trainer))
-    cli_stop("{trainer} must be a `parsnip` method of mode 'classification'.")
+    rlang::abort("args_list was not created using `arx_class_args_list().")
+  if (!(is.null(trainer) || is_classification(trainer)))
+    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -108,17 +169,8 @@ arx_classifier <- function(epi_data,
   f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
 
-
-  # --- create test data, fit, and return
-  latest <- get_test_data(r, epi_data, TRUE)
-  wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
-  list(
-    predictions = predict(wf, new_data = latest),
-    epi_workflow = wf
-  )
+  epi_workflow(r, trainer, f)
 }
-
-
 
 #' ARX classifier argument constructor
 #'

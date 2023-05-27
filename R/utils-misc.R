@@ -60,9 +60,7 @@ grab_forged_keys <- function(forged, mold, new_data) {
 }
 
 get_parsnip_mode <- function(trainer) {
-  if (inherits(trainer, "model_spec")) {
-    return(trainer$mode)
-  }
+  if (inherits(trainer, "model_spec")) return(trainer$mode)
   cc <- class(trainer)
   cli::cli_abort(
     c("`trainer` must be a `parsnip` model.",

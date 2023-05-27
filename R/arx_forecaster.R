@@ -19,6 +19,7 @@
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
 #'   workflow
 #' @export
+#' @seealso [arxf_epi_workflow_template()]
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -36,12 +37,63 @@ arx_forecaster <- function(epi_data,
                            trainer = parsnip::linear_reg(),
                            args_list = arx_args_list()) {
 
+  if (!is_regression(trainer))
+    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'regression'.")
+
+  wf <- arxf_epi_workflow_template(
+    epi_data, outcome, predictors, trainer, args_list
+  )
+
+  latest <- get_test_data(
+    workflows::extract_preprocessor(wf), epi_data, TRUE
+  )
+
+  wf <- generics::fit(wf, epi_data)
+  list(
+    predictions = predict(wf, new_data = latest),
+    epi_workflow = wf
+  )
+}
+
+#' Create a template `arx_forecaster` workflow
+#'
+#' This function creates an unfit workflow for use with [arx_forecaster()].
+#' It is useful if you want to make small modifications to that forecaster
+#' before fitting and predicting. Supplying a trainer to the function
+#' may alter the returned `epi_workflow` object (e.g., if you intend to
+#' use [quantile_reg()]) but can be omitted.
+#'
+#' @inheritParams arx_forecaster
+#' @param trainer A `{parsnip}` model describing the type of estimation.
+#'   For now, we enforce `mode = "regression"`. May be `NULL` (the default).
+#'
+#' @return An unfitted `epi_workflow`.
+#' @export
+#' @seealso [arx_forecaster()]
+#'
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value >= as.Date("2021-12-01"))
+#'
+#' arxf_epi_workflow_template(jhu, "death_rate",
+#'   c("case_rate", "death_rate"))
+#'
+#' arxf_epi_workflow_template(jhu, "death_rate",
+#'   c("case_rate", "death_rate"), trainer = quantile_reg(),
+#'   args_list = arx_args_list(levels = 1:9 / 10))
+arxf_epi_workflow_template <- function(
+    epi_data,
+    outcome,
+    predictors,
+    trainer = NULL,
+    args_list = arx_args_list()) {
+
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, "arx_flist"))
-    cli_stop("args_list was not created using `arx_args_list().")
-  if (!is_regression(trainer))
-    cli_stop("{trainer} must be a `parsnip` method of mode 'regression'.")
+    cli::cli_abort("args_list was not created using `arx_args_list().")
+  if (!(is.null(trainer) || is_regression(trainer)))
+    cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -74,24 +126,20 @@ arx_forecaster <- function(epi_data,
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
-  # --- create test data, fit, and return
-  latest <- get_test_data(r, epi_data, TRUE)
-  wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
-  list(
-    predictions = predict(wf, new_data = latest),
-    epi_workflow = wf
-  )
+  epi_workflow(r, trainer, f)
 }
 
 
 arx_lags_validator <- function(predictors, lags) {
   p <- length(predictors)
   if (!is.list(lags)) lags <- list(lags)
-  if (length(lags) == 1) lags <- rep(lags, p)
-  else if (length(lags) < p) {
-    cli_stop(
-      "You have requested {p} predictors but lags cannot be recycled to match."
-    )
+  l <- length(lags)
+  if (l == 1) lags <- rep(lags, p)
+  else if (length(lags) != p) {
+    cli::cli_abort(c(
+      "You have requested {p} predictor(s) but {l} different lags.",
+      i = "Lags a vector or a list with length == number of predictors."
+    ))
   }
   lags
 }
