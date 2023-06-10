@@ -34,7 +34,7 @@ flatline_forecaster <- function(
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, "flatline_alist")) {
-    cli_stop("args_list was not created using `flatline_args_list().")
+    rlang::abort("args_list was not created using `flatline_args_list().")
   }
   keys <- epi_keys(epi_data)
   ek <- kill_time_value(keys)
@@ -120,13 +120,13 @@ flatline_args_list <- function(
 
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
   if (!epiprocess::is_epi_df(epi_data))
-    cli_stop("epi_data must be an epi_df.")
+    rlang::abort("`epi_data` must be an epi_df.")
   arg_is_chr(predictors)
   arg_is_chr_scalar(outcome)
   if (!outcome %in% names(epi_data))
-    cli_stop("{outcome} was not found in the training data.")
+    rlang::abort("{outcome} was not found in the training data.")
   if (!all(predictors %in% names(epi_data)))
-    cli_stop("At least one predictor was not found in the training data.")
+    rlang::abort("At least one predictor was not found in the training data.")
   invisible(TRUE)
 }
 
