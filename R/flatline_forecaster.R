@@ -37,14 +37,14 @@ flatline_forecaster <- function(
     cli_stop("args_list was not created using `flatline_args_list().")
   }
   keys <- epi_keys(epi_data)
-  ek <- keys[-1]
+  ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 
 
   r <- epi_recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead, skip = TRUE) %>%
     recipes::update_role(!!outcome, new_role = "predictor") %>%
-    recipes::add_role(dplyr::all_of(keys), new_role = "predictor") %>%
+    recipes::add_role(tidyselect::all_of(keys), new_role = "predictor") %>%
     step_training_window(n_recent = args_list$n_training)
 
   latest <- get_test_data(epi_recipe(epi_data), epi_data)
