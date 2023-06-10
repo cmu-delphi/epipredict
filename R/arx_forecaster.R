@@ -62,13 +62,17 @@ arx_forecaster <- function(epi_data,
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
   if (inherits(trainer, "quantile_reg")) {
     # add all levels to the forecaster and update postprocessor
-    tau <- sort(union(args_list$levels, rlang::eval_tidy(trainer$args$tau)))
+    tau <- sort(compare_quantile_args(
+      args_list$levels,
+      rlang::eval_tidy(trainer$args$tau))
+    )
     args_list$levels <- tau
     trainer$args$tau <- rlang::enquo(tau)
     f <- layer_quantile_distn(f, levels = tau) %>% layer_point_from_distn()
   } else {
     f <- layer_residual_quantiles(
-      f, probs = args_list$levels, symmetrize = args_list$symmetrize)
+      f, probs = args_list$levels, symmetrize = args_list$symmetrize,
+      by_key = args_list$quantile_by_key)
   }
   f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
@@ -115,13 +119,17 @@ arx_lags_validator <- function(predictors, lags) {
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
 #' @param symmetrize Logical. The default `TRUE` calculates
-#'      symmetric prediction intervals.
+#'   symmetric prediction intervals. This argument only applies when
+#'   residual quantiles are used. It is not applicable with
+#'   `trainer = quantile_reg()`, for example.
 #' @param nonneg Logical. The default `TRUE` enforces nonnegative predictions
 #'   by hard-thresholding at 0.
 #' @param quantile_by_key Character vector. Groups residuals by listed keys
 #'   before calculating residual quantiles. See the `by_key` argument to
 #'   [layer_residual_quantiles()] for more information. The default,
-#'   `character(0)` performs no grouping.
+#'   `character(0)` performs no grouping. This argument only applies when
+#'   residual quantiles are used. It is not applicable with
+#'   `trainer = quantile_reg()`, for example.
 #'
 #' @return A list containing updated parameter choices with class `arx_flist`.
 #' @export
@@ -171,4 +179,22 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
 #' @export
 print.arx_flist <- function(x, ...) {
   utils::str(x)
+}
+
+compare_quantile_args <- function(alist, tlist) {
+  default_alist <- eval(formals(arx_args_list)$levels)
+  default_tlist <- eval(formals(quantile_reg)$tau)
+  if (setequal(alist, default_alist)) {
+    if (setequal(tlist, default_tlist)) return(sort(unique(union(alist, tlist))))
+    else return(sort(unique(tlist)))
+  } else {
+    if (setequal(tlist, default_tlist)) return(sort(unique(alist)))
+    else {
+      if (setequal(alist, tlist)) return(sort(unique(alist)))
+      rlang::abort(c(
+        "You have specified different, non-default, quantiles in the trainier and `arx_args` options.",
+        i = "Please only specify quantiles in one location.")
+      )
+    }
+  }
 }

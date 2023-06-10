@@ -5,13 +5,19 @@
 #' that it estimates a class at a particular target horizon.
 #'
 #' @inheritParams arx_forecaster
+#' @param outcome A character (scalar) specifying the outcome (in the
+#'   `epi_df`). Note that as with [arx_forecaster()], this is expected to
+#'   be real-valued. Conversion of this data to unordered classes is handled
+#'   internally based on the `breaks` argument to [arx_class_args_list()].
+#'   If discrete classes are already in the `epi_df`, it is recommended to
+#'   code up a classifier from scratch using [epi_recipe()].
 #' @param trainer A `{parsnip}` model describing the type of estimation.
 #'   For now, we enforce `mode = "classification"`. Typical values are
 #'   [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
 #'   trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can
 #'   also be used.
 #' @param args_list A list of customization arguments to determine
-#'   the type of forecasting model. See [arx_args_list()].
+#'   the type of forecasting model. See [arx_class_args_list()].
 #'
 #' @return A list with (1) `predictions` an `epi_df` of predicted classes
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
@@ -126,11 +132,14 @@ arx_classifier <- function(epi_data,
 #'
 #' @inheritParams arx_args_list
 #' @param outcome_transform Scalar character. Whether the outcome should
-#'   be created using growth rates (as the predictors are) or lagged differences
-#'   or growth rates. The second case is closer to the requirements for the
+#'   be created using growth rates (as the predictors are) or lagged
+#'   differences. The second case is closer to the requirements for the
 #'   [2022-23 CDC Flusight Hospitalization Experimental Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md).
 #'   See the Classification Vignette for details of how to create a reasonable
-#'   baseline for this case.
+#'   baseline for this case. Selecting `"growth_rate"` (the default) uses
+#'   [epiprocess::growth_rate()] to create the outcome using some of the
+#'   additional arguments below. Choosing `"lag_difference"` instead simply
+#'   uses the change from the value at the selected `horizon`.
 #' @param breaks Vector. A vector of breaks to turn real-valued growth rates
 #'   into discrete classes. The default gives binary upswing classification
 #'   as in [McDonald, Bien, Green, Hu, et al.](https://doi.org/10.1073/pnas.2111453118).

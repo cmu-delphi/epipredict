@@ -24,3 +24,33 @@ test_that("arx_args checks inputs", {
   )
 })
 
+test_that("arx forecaster disambiguates quantiles", {
+  alist <- eval(formals(arx_args_list)$levels)
+  tlist <- eval(formals(quantile_reg)$tau)
+  expect_identical( # both default
+    compare_quantile_args(alist, tlist),
+    sort(c(alist, tlist))
+  )
+  alist <- c(.5, alist)
+  expect_identical( # tlist is default, should give alist
+    compare_quantile_args(alist, tlist),
+    sort(unique(alist))
+  )
+  alist <- eval(formals(arx_args_list)$levels)
+  tlist <- c(.05, .95, tlist)
+  expect_identical( # alist is default, should give tlist
+    compare_quantile_args(alist, tlist),
+    sort(unique(tlist))
+  )
+  alist <- c(.3, .5, .7)
+  tlist <- c(.3, .5, .5, .7)
+  expect_identical( # neither default, but identical, should run
+    compare_quantile_args(alist, tlist),
+    sort(unique(tlist))
+  )
+  alist <- c(.1, .3, .5, .7, .9) # neither default, and different,
+  expect_error(compare_quantile_args(alist, tlist))
+})
+
+
+
