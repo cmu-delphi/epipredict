@@ -84,7 +84,11 @@ that it estimates a class at a particular target horizon.</p>
 
 <dt>outcome</dt>
 <dd><p>A character (scalar) specifying the outcome (in the
-<code>epi_df</code>).</p></dd>
+<code>epi_df</code>). Note that as with <code><a href="arx_forecaster.html">arx_forecaster()</a></code>, this is expected to
+be real-valued. Conversion of this data to unordered classes is handled
+internally based on the <code>breaks</code> argument to <code><a href="arx_class_args_list.html">arx_class_args_list()</a></code>.
+If discrete classes are already in the <code>epi_df</code>, it is recommended to
+code up a classifier from scratch using <code><a href="epi_recipe.html">epi_recipe()</a></code>.</p></dd>
 
 
 <dt>predictors</dt>
@@ -102,7 +106,7 @@ also be used.</p></dd>
 
 <dt>args_list</dt>
 <dd><p>A list of customization arguments to determine
-the type of forecasting model. See <code><a href="arx_args_list.html">arx_args_list()</a></code>.</p></dd>
+the type of forecasting model. See <code><a href="arx_class_args_list.html">arx_class_args_list()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

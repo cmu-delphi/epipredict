@@ -106,11 +106,14 @@ The default <code>NULL</code> will attempt to determine this automatically.</p><
 
 <dt>outcome_transform</dt>
 <dd><p>Scalar character. Whether the outcome should
-be created using growth rates (as the predictors are) or lagged differences
-or growth rates. The second case is closer to the requirements for the
+be created using growth rates (as the predictors are) or lagged
+differences. The second case is closer to the requirements for the
 <a href="https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md" class="external-link">2022-23 CDC Flusight Hospitalization Experimental Target</a>.
 See the Classification Vignette for details of how to create a reasonable
-baseline for this case.</p></dd>
+baseline for this case. Selecting <code>"growth_rate"</code> (the default) uses
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html" class="external-link">epiprocess::growth_rate()</a></code> to create the outcome using some of the
+additional arguments below. Choosing <code>"lag_difference"</code> instead simply
+uses the change from the value at the selected <code>horizon</code>.</p></dd>
 
 
 <dt>breaks</dt>
