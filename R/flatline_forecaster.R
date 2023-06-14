@@ -64,7 +64,7 @@ flatline_forecaster <- function(
 
   eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
 
-  wf <- epi_workflow(r, eng, f) %>% fit(epi_data)
+  wf <- epi_workflow(r, eng, f) %>% generics::fit(epi_data)
 
   list(
     predictions = suppressWarnings(predict(wf, new_data = latest)),
