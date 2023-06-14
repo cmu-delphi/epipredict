@@ -107,15 +107,17 @@ flatline_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
 
-  structure(enlist(ahead,
-                   n_training,
-                   forecast_date,
-                   target_date,
-                   levels,
-                   symmetrize,
-                   nonneg,
-                   quantile_by_key),
-            class = "flatline_alist")
+  structure(
+    enlist(ahead,
+           n_training,
+           forecast_date,
+           target_date,
+           levels,
+           symmetrize,
+           nonneg,
+           quantile_by_key),
+    class = "flatline_alist"
+  )
 }
 
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
