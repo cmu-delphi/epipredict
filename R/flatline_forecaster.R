@@ -120,13 +120,13 @@ flatline_args_list <- function(
 
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
   if (!epiprocess::is_epi_df(epi_data))
-    rlang::abort("`epi_data` must be an epi_df.")
+    cli::cli_abort("`epi_data` must be an epi_df.")
   arg_is_chr(predictors)
   arg_is_chr_scalar(outcome)
   if (!outcome %in% names(epi_data))
-    rlang::abort("{outcome} was not found in the training data.")
+    cli::cli_abort("{outcome} was not found in `epi_data`.")
   if (!all(predictors %in% names(epi_data)))
-    rlang::abort("At least one predictor was not found in the training data.")
+    cli::cli_abort("At least one predictor was not found in `epi_data`.")
   invisible(TRUE)
 }
 
