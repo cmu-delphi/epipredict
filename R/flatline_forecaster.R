@@ -33,8 +33,8 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
-  if (!inherits(args_list, "flatline_alist")) {
-    rlang::abort("args_list was not created using `flatline_args_list().")
+  if (!inherits(args_list, c("flatline", "alist"))) {
+    cli_stop("args_list was not created using `flatline_args_list().")
   }
   keys <- epi_keys(epi_data)
   ek <- kill_time_value(keys)
@@ -64,11 +64,20 @@ flatline_forecaster <- function(
 
   eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
 
-  wf <- epi_workflow(r, eng, f) %>% generics::fit(epi_data)
+  wf <- epi_workflow(r, eng, f)
+  wf <- generics::fit(wf, epi_data)
+  preds <- suppressWarnings(predict(wf, new_data = latest)) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
 
-  list(
-    predictions = suppressWarnings(predict(wf, new_data = latest)),
-    epi_workflow = wf
+  structure(list(
+    predictions = preds,
+    epi_workflow = wf,
+    metadata = list(
+      training = attr(epi_data, "metadata"),
+      forecast_created = Sys.time()
+    )),
+    class = c("flatline", "canned_epipred")
   )
 }
 
@@ -116,25 +125,12 @@ flatline_args_list <- function(
            symmetrize,
            nonneg,
            quantile_by_key),
-    class = "flatline_alist"
+    class = c("flatline", "alist")
   )
 }
 
-validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
-  if (!epiprocess::is_epi_df(epi_data))
-    cli::cli_abort("`epi_data` must be an epi_df.")
-  arg_is_chr(predictors)
-  arg_is_chr_scalar(outcome)
-  if (!outcome %in% names(epi_data))
-    cli::cli_abort("{outcome} was not found in `epi_data`.")
-  if (!all(predictors %in% names(epi_data)))
-    cli::cli_abort("At least one predictor was not found in `epi_data`.")
-  invisible(TRUE)
-}
-
 #' @export
-print.flatline_alist <- function(x, ...) {
-  utils::str(x)
+print.flatline <- function(x, ...) {
+  name <- "flatline"
+  NextMethod(name = name, ...)
 }
-
-

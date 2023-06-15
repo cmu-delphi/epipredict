@@ -1,5 +1,7 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/master/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+#
+# Created with usethis + edited to use API key.
 on:
   push:
     branches: [main, master]
@@ -32,6 +34,8 @@ jobs:
           needs: website
 
       - name: Build site
+        env:
+          DELPHI_EPIDATA_KEY: ${{ secrets.SECRET_EPIPREDICT_GHACTIONS_DELPHI_EPIDATA_KEY }}
         run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
         shell: Rscript {0}
 
