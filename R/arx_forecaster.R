@@ -19,7 +19,7 @@
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
 #'   workflow
 #' @export
-#' @seealso [arxf_epi_workflow_template()]
+#' @seealso [arx_fcast_epi_workflow()], [arx_args_list()]
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -40,7 +40,7 @@ arx_forecaster <- function(epi_data,
   if (!is_regression(trainer))
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
 
-  wf <- arxf_epi_workflow_template(
+  wf <- arx_fcast_epi_workflow(
     epi_data, outcome, predictors, trainer, args_list
   )
 
@@ -84,13 +84,13 @@ arx_forecaster <- function(epi_data,
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
-#' arxf_epi_workflow_template(jhu, "death_rate",
+#' arx_fcast_epi_workflow(jhu, "death_rate",
 #'   c("case_rate", "death_rate"))
 #'
-#' arxf_epi_workflow_template(jhu, "death_rate",
+#' arx_fcast_epi_workflow(jhu, "death_rate",
 #'   c("case_rate", "death_rate"), trainer = quantile_reg(),
 #'   args_list = arx_args_list(levels = 1:9 / 10))
-arxf_epi_workflow_template <- function(
+arx_fcast_epi_workflow <- function(
     epi_data,
     outcome,
     predictors,

@@ -28,7 +28,7 @@ trainers like \code{\link[parsnip:naive_Bayes]{parsnip::naive_Bayes()}} or \code
 also be used.}
 
 \item{args_list}{A list of customization arguments to determine
-the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
+the type of forecasting model. See \code{\link[=arx_class_args_list]{arx_class_args_list()}}.}
 }
 \value{
 A list with (1) \code{predictions} an \code{epi_df} of predicted classes
@@ -58,5 +58,5 @@ out <- arx_classifier(
 )
 }
 \seealso{
-\code{\link[=arxc_epi_workflow_template]{arxc_epi_workflow_template()}}
+\code{\link[=arx_class_epi_workflow]{arx_class_epi_workflow()}}, \code{\link[=arx_class_args_list]{arx_class_args_list()}}
 }

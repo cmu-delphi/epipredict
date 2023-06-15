@@ -11,13 +11,13 @@
 #'   trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can
 #'   also be used.
 #' @param args_list A list of customization arguments to determine
-#'   the type of forecasting model. See [arx_args_list()].
+#'   the type of forecasting model. See [arx_class_args_list()].
 #'
 #' @return A list with (1) `predictions` an `epi_df` of predicted classes
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
 #'   workflow
 #' @export
-#' @seealso [arxc_epi_workflow_template()]
+#' @seealso [arx_class_epi_workflow()], [arx_class_args_list()]
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -45,7 +45,7 @@ arx_classifier <- function(
   if (!is_classification(trainer))
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
 
-  wf <- arxc_epi_workflow_template(
+  wf <- arx_class_epi_workflow(
     epi_data, outcome, predictors, trainer, args_list
   )
 
@@ -92,9 +92,9 @@ arx_classifier <- function(
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value >= as.Date("2021-11-01"))
 #'
-#' arxc_epi_workflow_template(jhu, "death_rate", c("case_rate", "death_rate"))
+#' arx_class_epi_workflow(jhu, "death_rate", c("case_rate", "death_rate"))
 #'
-#' arxc_epi_workflow_template(
+#' arx_class_epi_workflow(
 #'   jhu,
 #'   "death_rate",
 #'   c("case_rate", "death_rate"),
@@ -104,7 +104,7 @@ arx_classifier <- function(
 #'     horizon = 14, method = "linear_reg"
 #'   )
 #' )
-arxc_epi_workflow_template <- function(
+arx_class_epi_workflow <- function(
     epi_data,
     outcome,
     predictors,

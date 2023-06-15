@@ -49,5 +49,5 @@ out <- arx_forecaster(jhu, "death_rate",
   args_list = arx_args_list(levels = 1:9 / 10))
 }
 \seealso{
-\code{\link[=arxf_epi_workflow_template]{arxf_epi_workflow_template()}}
+\code{\link[=arx_fcast_epi_workflow]{arx_fcast_epi_workflow()}}, \code{\link[=arx_args_list]{arx_args_list()}}
 }
