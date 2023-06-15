@@ -43,7 +43,7 @@ arx_classifier <- function(
     args_list = arx_class_args_list()) {
 
   if (!is_classification(trainer))
-    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
+    cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
 
   wf <- arxc_epi_workflow_template(
     epi_data, outcome, predictors, trainer, args_list
@@ -242,8 +242,9 @@ arx_class_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (!is.list(additional_gr_args)) {
-    rlang::abort(
-      c("`additional_gr_args` must be a list.",
+    cli::cli_abort(
+      c("`additional_gr_args` must be a {.cls list}.",
+        "!" = "This is a {.cls {class(additional_gr_args)}}.",
         i = "See `?epiprocess::growth_rate` for available arguments.")
     )
   }
@@ -268,11 +269,6 @@ arx_class_args_list <- function(
            log_scale,
            additional_gr_args
     ),
-    class = "arx_clist"
+    class = c("arx_class", "alist")
   )
-}
-
-#' @export
-print.arx_clist <- function(x, ...) {
-  utils::str(x)
 }

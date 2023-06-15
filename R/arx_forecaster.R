@@ -38,7 +38,7 @@ arx_forecaster <- function(epi_data,
                            args_list = arx_args_list()) {
 
   if (!is_regression(trainer))
-    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'regression'.")
+    cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
 
   wf <- arxf_epi_workflow_template(
     epi_data, outcome, predictors, trainer, args_list
@@ -130,20 +130,6 @@ arxf_epi_workflow_template <- function(
 }
 
 
-arx_lags_validator <- function(predictors, lags) {
-  p <- length(predictors)
-  if (!is.list(lags)) lags <- list(lags)
-  l <- length(lags)
-  if (l == 1) lags <- rep(lags, p)
-  else if (length(lags) != p) {
-    cli::cli_abort(c(
-      "You have requested {p} predictor(s) but {l} different lags.",
-      i = "Lags a vector or a list with length == number of predictors."
-    ))
-  }
-  lags
-}
-
 #' ARX forecaster argument constructor
 #'
 #' Constructs a list of arguments for [arx_forecaster()].
@@ -178,15 +164,16 @@ arx_lags_validator <- function(predictors, lags) {
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
 #' arx_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
-arx_args_list <- function(lags = c(0L, 7L, 14L),
-                          ahead = 7L,
-                          n_training = Inf,
-                          forecast_date = NULL,
-                          target_date = NULL,
-                          levels = c(0.05, 0.95),
-                          symmetrize = TRUE,
-                          nonneg = TRUE,
-                          quantile_by_key = character(0L)) {
+arx_args_list <- function(
+    lags = c(0L, 7L, 14L),
+    ahead = 7L,
+    n_training = Inf,
+    forecast_date = NULL,
+    target_date = NULL,
+    levels = c(0.05, 0.95),
+    symmetrize = TRUE,
+    nonneg = TRUE,
+    quantile_by_key = character(0L)) {
 
   # error checking if lags is a list
   .lags <- lags
@@ -203,20 +190,17 @@ arx_args_list <- function(lags = c(0L, 7L, 14L),
   if (is.finite(n_training)) arg_is_pos_int(n_training)
 
   max_lags <- max(lags)
-  structure(enlist(lags = .lags,
-                   ahead,
-                   n_training,
-                   levels,
-                   forecast_date,
-                   target_date,
-                   symmetrize,
-                   nonneg,
-                   max_lags,
-                   quantile_by_key),
-            class = "arx_flist")
-}
-
-#' @export
-print.arx_flist <- function(x, ...) {
-  utils::str(x)
+  structure(
+    enlist(lags = .lags,
+           ahead,
+           n_training,
+           levels,
+           forecast_date,
+           target_date,
+           symmetrize,
+           nonneg,
+           max_lags,
+           quantile_by_key),
+    class = c("arx_fcast", "alist")
+  )
 }

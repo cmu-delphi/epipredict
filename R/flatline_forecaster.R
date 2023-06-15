@@ -107,32 +107,17 @@ flatline_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
 
-  structure(enlist(ahead,
-                   n_training,
-                   forecast_date,
-                   target_date,
-                   levels,
-                   symmetrize,
-                   nonneg,
-                   quantile_by_key),
-            class = "flatline_alist")
-}
-
-validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
-  if (!epiprocess::is_epi_df(epi_data))
-    cli_stop("epi_data must be an epi_df.")
-  arg_is_chr(predictors)
-  arg_is_chr_scalar(outcome)
-  if (!outcome %in% names(epi_data))
-    cli_stop("{outcome} was not found in the training data.")
-  if (!all(predictors %in% names(epi_data)))
-    cli_stop("At least one predictor was not found in the training data.")
-  invisible(TRUE)
-}
-
-#' @export
-print.flatline_alist <- function(x, ...) {
-  utils::str(x)
+  structure(
+    enlist(ahead,
+           n_training,
+           forecast_date,
+           target_date,
+           levels,
+           symmetrize,
+           nonneg,
+           quantile_by_key),
+    class = c("flatline", "alist")
+  )
 }
 
 
