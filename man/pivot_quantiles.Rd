@@ -27,7 +27,7 @@ a prefix.
 \examples{
 d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))
 d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
-tib <- tibble(g = c("a", "b"), d1 = d1, d2 = d2)
+tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 
 pivot_quantiles(tib, c("d1", "d2"))
 pivot_quantiles(tib, tidyselect::starts_with("d"))
