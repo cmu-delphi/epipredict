@@ -54,9 +54,18 @@ arx_classifier <- function(
   )
 
   wf <- generics::fit(wf, epi_data)
-  list(
-    predictions = predict(wf, new_data = latest),
-    epi_workflow = wf
+  preds <- predict(wf, new_data = latest) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
+
+  structure(list(
+    predictions = preds,
+    epi_workflow = wf,
+    metadata = list(
+      training = attr(epi_data, "metadata"),
+      forecast_created = Sys.time()
+    )),
+    class = c("arx_class", "canned_epipred")
   )
 }
 
@@ -103,7 +112,7 @@ arxc_epi_workflow_template <- function(
     args_list = arx_class_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, "arx_clist"))
+  if (!inherits(args_list, c("arx_class", "alist")))
     rlang::abort("args_list was not created using `arx_class_args_list().")
   if (!(is.null(trainer) || is_classification(trainer)))
     rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
@@ -272,3 +281,10 @@ arx_class_args_list <- function(
     class = c("arx_class", "alist")
   )
 }
+
+#' @export
+print.arx_class <- function(x, ...) {
+  name <- "ARX Classifier"
+  NextMethod(name = name, ...)
+}
+

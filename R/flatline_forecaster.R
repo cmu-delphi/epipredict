@@ -33,7 +33,7 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
-  if (!inherits(args_list, "flatline_alist")) {
+  if (!inherits(args_list, c("flatline", "alist"))) {
     cli_stop("args_list was not created using `flatline_args_list().")
   }
   keys <- epi_keys(epi_data)
@@ -64,11 +64,21 @@ flatline_forecaster <- function(
 
   eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
 
-  wf <- epi_workflow(r, eng, f) %>% fit(epi_data)
+  wf <- epi_workflow(r, eng, f)
 
-  list(
-    predictions = suppressWarnings(predict(wf, new_data = latest)),
-    epi_workflow = wf
+  wf <- generics::fit(wf, epi_data)
+  preds <- suppressWarnings(predict(wf, new_data = latest)) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
+
+  structure(list(
+    predictions = preds,
+    epi_workflow = wf,
+    metadata = list(
+      training = attr(epi_data, "metadata"),
+      forecast_created = Sys.time()
+    )),
+    class = c("flatline", "canned_epipred")
   )
 }
 
@@ -120,4 +130,8 @@ flatline_args_list <- function(
   )
 }
 
-
+#' @export
+print.flatline <- function(x, ...) {
+  name <- "flatline"
+  NextMethod(name = name, ...)
+}

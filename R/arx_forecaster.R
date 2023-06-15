@@ -49,9 +49,18 @@ arx_forecaster <- function(epi_data,
   )
 
   wf <- generics::fit(wf, epi_data)
-  list(
-    predictions = predict(wf, new_data = latest),
-    epi_workflow = wf
+  preds <- predict(wf, new_data = latest) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
+
+  structure(list(
+    predictions = preds,
+    epi_workflow = wf,
+    metadata = list(
+      training = attr(epi_data, "metadata"),
+      forecast_created = Sys.time()
+    )),
+    class = c("arx_fcast", "canned_epipred")
   )
 }
 
@@ -90,7 +99,7 @@ arxf_epi_workflow_template <- function(
 
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, "arx_flist"))
+  if (!inherits(args_list, c("arx_fcast", "alist")))
     cli::cli_abort("args_list was not created using `arx_args_list().")
   if (!(is.null(trainer) || is_regression(trainer)))
     cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
@@ -203,4 +212,11 @@ arx_args_list <- function(
            quantile_by_key),
     class = c("arx_fcast", "alist")
   )
+}
+
+
+#' @export
+print.arx_fcast <- function(x, ...) {
+  name <- "ARX Forecaster"
+  NextMethod(name = name, ...)
 }

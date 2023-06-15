@@ -39,3 +39,36 @@ arx_lags_validator <- function(predictors, lags) {
 print.alist <- function(x, ...) {
   utils::str(x)
 }
+
+#' @export
+print.canned_epipred <- function(x, name, ...) {
+  cat("\n")
+  cli::cli_rule("A basic forecaster of type {.pkg {name}}")
+
+  cat("\n")
+  cli::cli_text(
+    "This forecaster was fit on {.val {format(x$metadata$forecast_created)}}."
+  )
+  cat("\n")
+  cli::cli_text("Training data was an {.cls epi_df} with ")
+  cli::cli_ul(c(
+    "Geography: {.val {x$metadata$training$geo_type}},",
+    "Time type: {.val {x$metadata$training$time_type}},",
+    "Using data up-to-date as of: {.val {format(x$metadata$training$as_of)}}."
+  ))
+
+  cat("\n")
+  cli::cli_rule("Predictions")
+  n_geos <- dplyr::n_distinct(x$predictions$geo_value)
+  fds <- unique(x$predictions$forecast_date)
+  tds <- unique(x$predictions$target_date)
+
+  cat("\n")
+  cli::cli_text("A total of {nrow(x$predictions)} predictions are available for")
+  cli::cli_ul(c(
+    "{n_geos} unique geographic regions,",
+    "At forecast dates: {.val {fds}},",
+    "For target dates: {.val {tds}}."
+  ))
+  cat("\n")
+}
