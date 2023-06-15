@@ -107,7 +107,9 @@ extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
   new_quantiles(q = c(qvals, q), tau = c(tau, p))
 }
 
-
+is_dist_quantiles <- function(x) {
+  is_distribution(x) && all(stats::family(x) == "quantiles")
+}
 
 
 #' Turn a a vector of quantile distributions into a list-col
@@ -124,8 +126,7 @@ extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
 #' edf_nested <- edf %>% dplyr::mutate(q = nested_quantiles(q))
 #' edf_nested %>% tidyr::unnest(q)
 nested_quantiles <- function(x) {
-  stopifnot(is_distribution(x),
-            all(stats::family(x) == "quantiles"))
+  stopifnot(is_dist_quantiles(x))
   distributional:::dist_apply(x, .f = function(z) {
     tibble::as_tibble(vec_data(z)) %>%
       dplyr::mutate(dplyr::across(tidyselect::everything(), as.double)) %>%
