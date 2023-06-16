@@ -112,7 +112,7 @@ is_dist_quantiles <- function(x) {
 }
 
 
-#' Turn a a vector of quantile distributions into a list-col
+#' Turn a vector of quantile distributions into a list-col
 #'
 #' @param x a `distribution` containing `dist_quantiles`
 #'
