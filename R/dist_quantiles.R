@@ -360,3 +360,15 @@ Ops.dist_quantiles <- function(e1, e2) {
   new_quantiles(q = q, tau = tau)
 }
 
+#' @method is.na distribution
+#' @export
+is.na.distribution <- function(x) {
+  sapply(vctrs::vec_data(x), is.na)
+}
+
+#' @method is.na dist_quantiles
+#' @export
+is.na.dist_quantiles <- function(x) {
+  q <- field(x, "q")
+  all(is.na(q))
+}

@@ -32,7 +32,7 @@ arg_is_lgl = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = T
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!(is.logical(value) | (is.null(value) & !allow_null))) {
+      if (!(is.logical(value) | (is.null(value) & allow_null))) {
         cli::cli_abort("Argument {.val {name}} must be of logical type.")
       }
       if (any(is.na(value)) & !allow_na) {
@@ -62,7 +62,7 @@ arg_is_nonneg_int = function(..., allow_null = FALSE) {
     ...,
     tests = function(name, value) {
       if (!((is.numeric(value) && all(value >= 0) && all(value %% 1 == 0)) |
-            (is.null(value) & !allow_null)))
+            (is.null(value) & allow_null)))
         cli::cli_abort("All {.val {name}} must be whole positive number(s).")
     }
   )
@@ -96,7 +96,7 @@ arg_is_int = function(..., allow_null = FALSE) {
     ...,
     tests = function(name, value) {
       if (!((is.numeric(value) && all(value %% 1 == 0)) |
-            (is.null(value) & !allow_null)))
+            (is.null(value) & allow_null)))
         cli::cli_abort("All {.val {name}} must be whole positive number(s).")
     }
   )
@@ -106,7 +106,7 @@ arg_is_numeric = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!(is.numeric(value) | (is.null(value) & !allow_null)))
+      if (!(is.numeric(value) | (is.null(value) & allow_null)))
         cli::cli_abort("All {.val {name}} must numeric.")
     }
   )
@@ -117,7 +117,7 @@ arg_is_lgl = function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = T
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!(is.logical(value) | (is.null(value) & !allow_null)))
+      if (!(is.logical(value) | (is.null(value) & allow_null)))
         cli::cli_abort("Argument {.val {name}} must be of logical type.")
 
       if (any(is.na(value)) & !allow_na)
@@ -173,8 +173,8 @@ arg_is_function = function(..., allow_null = FALSE) {
   handle_arg_list(
     ...,
     tests = function(name, value) {
-      if (!is.function(value) | (is.null(value) & !allow_null))
-        cli::cli_abort("{value} must be a `parsnip` function.")
+      if (!is.function(value) | (is.null(value) & allow_null))
+        cli::cli_abort("{value} must be a function.")
     }
   )
 }
@@ -198,7 +198,7 @@ arg_is_sorted = function(..., allow_null = FALSE) {
 
 arg_to_date <- function(x, allow_null = FALSE, allow_na = FALSE) {
   arg_is_scalar(x, allow_null = allow_null, allow_na = allow_na)
-  if (allow_null && !is.null(x)) {
+  if (!is.null(x)) {
     x <- tryCatch(as.Date(x), error = function(e) NA)
   }
   arg_is_date(x, allow_null = allow_null, allow_na = allow_na)
