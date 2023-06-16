@@ -46,10 +46,12 @@ print.canned_epipred <- function(x, name, ...) {
   header <- glue::glue("A basic forecaster of type {name}")
   header <- cli::rule(header, line = 2)
   cat_line(header)
+  cat("\n")
 
   date_created <- glue::glue(
     "This forecaster was fit on {format(x$metadata$forecast_created)}")
   cat_line(date_created)
+  cat("\n")
 
   cat_line("Training data was an `epi_df` with")
   cat_line(glue::glue("• Geography: {x$metadata$training$geo_type},"))
@@ -59,6 +61,8 @@ print.canned_epipred <- function(x, name, ...) {
   cat("\n")
   header <- cli::rule("Predictions")
   cat_line(header)
+  cat("\n")
+
   n_geos <- dplyr::n_distinct(x$predictions$geo_value)
   fds <- unique(x$predictions$forecast_date)
   tds <- unique(x$predictions$target_date)
