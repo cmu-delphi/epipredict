@@ -197,7 +197,7 @@ arx_args_list <- function(
   if (is.list(lags)) lags <- unlist(lags)
 
   arg_is_scalar(ahead, n_training, symmetrize, nonneg)
-  arg_is_chr(quantile_by_key, allow_null = TRUE)
+  arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags)

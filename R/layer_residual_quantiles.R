@@ -50,7 +50,7 @@ layer_residual_quantiles <- function(frosting, ...,
   rlang::check_dots_empty()
   arg_is_scalar(symmetrize)
   arg_is_chr_scalar(name, id)
-  arg_is_chr(by_key, allow_null = TRUE)
+  arg_is_chr(by_key, allow_empty = TRUE)
   arg_is_probabilities(probs)
   arg_is_lgl(symmetrize)
   add_layer(
