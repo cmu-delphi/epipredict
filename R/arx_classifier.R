@@ -5,18 +5,25 @@
 #' that it estimates a class at a particular target horizon.
 #'
 #' @inheritParams arx_forecaster
+#' @param outcome A character (scalar) specifying the outcome (in the
+#'   `epi_df`). Note that as with [arx_forecaster()], this is expected to
+#'   be real-valued. Conversion of this data to unordered classes is handled
+#'   internally based on the `breaks` argument to [arx_class_args_list()].
+#'   If discrete classes are already in the `epi_df`, it is recommended to
+#'   code up a classifier from scratch using [epi_recipe()].
 #' @param trainer A `{parsnip}` model describing the type of estimation.
 #'   For now, we enforce `mode = "classification"`. Typical values are
 #'   [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
 #'   trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can
 #'   also be used.
 #' @param args_list A list of customization arguments to determine
-#'   the type of forecasting model. See [arx_args_list()].
+#'   the type of forecasting model. See [arx_class_args_list()].
 #'
 #' @return A list with (1) `predictions` an `epi_df` of predicted classes
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
 #'   workflow
 #' @export
+#' @seealso [arx_class_epi_workflow()], [arx_class_args_list()]
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -34,18 +41,87 @@
 #'     horizon = 14, method = "linear_reg"
 #'   )
 #' )
-arx_classifier <- function(epi_data,
-                           outcome,
-                           predictors,
-                           trainer = parsnip::logistic_reg(),
-                           args_list = arx_class_args_list()) {
+arx_classifier <- function(
+    epi_data,
+    outcome,
+    predictors,
+    trainer = parsnip::logistic_reg(),
+    args_list = arx_class_args_list()) {
 
-  # --- validation
-  validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, "arx_clist"))
-    cli_stop("args_list was not created using `arx_class_args_list().")
   if (!is_classification(trainer))
-    cli_stop("{trainer} must be a `parsnip` method of mode 'classification'.")
+    cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
+
+  wf <- arx_class_epi_workflow(
+    epi_data, outcome, predictors, trainer, args_list
+  )
+
+  latest <- get_test_data(
+    workflows::extract_preprocessor(wf), epi_data, TRUE
+  )
+
+  wf <- generics::fit(wf, epi_data)
+  preds <- predict(wf, new_data = latest) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
+
+  structure(list(
+    predictions = preds,
+    epi_workflow = wf,
+    metadata = list(
+      training = attr(epi_data, "metadata"),
+      forecast_created = Sys.time()
+    )),
+    class = c("arx_class", "canned_epipred")
+  )
+}
+
+
+#' Create a template `arx_classifier` workflow
+#'
+#' This function creates an unfit workflow for use with [arx_classifier()].
+#' It is useful if you want to make small modifications to that classifier
+#' before fitting and predicting. Supplying a trainer to the function
+#' may alter the returned `epi_workflow` object but can be omitted.
+#'
+#' @inheritParams arx_classifier
+#' @param trainer A `{parsnip}` model describing the type of estimation.
+#'  For now, we enforce `mode = "classification"`. Typical values are
+#'  [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
+#'  trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can
+#'  also be used. May be `NULL` (the default).
+#'
+#' @return An unfit `epi_workflow`.
+#' @export
+#' @seealso [arx_classifier()]
+#' @examples
+#'
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value >= as.Date("2021-11-01"))
+#'
+#' arx_class_epi_workflow(jhu, "death_rate", c("case_rate", "death_rate"))
+#'
+#' arx_class_epi_workflow(
+#'   jhu,
+#'   "death_rate",
+#'   c("case_rate", "death_rate"),
+#'   trainer = parsnip::multinom_reg(),
+#'   args_list = arx_class_args_list(
+#'     breaks = c(-.05, .1), ahead = 14,
+#'     horizon = 14, method = "linear_reg"
+#'   )
+#' )
+arx_class_epi_workflow <- function(
+    epi_data,
+    outcome,
+    predictors,
+    trainer = NULL,
+    args_list = arx_class_args_list()) {
+
+  validate_forecaster_inputs(epi_data, outcome, predictors)
+  if (!inherits(args_list, c("arx_class", "alist")))
+    rlang::abort("args_list was not created using `arx_class_args_list().")
+  if (!(is.null(trainer) || is_classification(trainer)))
+    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -108,17 +184,8 @@ arx_classifier <- function(epi_data,
   f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
 
-
-  # --- create test data, fit, and return
-  latest <- get_test_data(r, epi_data, TRUE)
-  wf <- epi_workflow(r, trainer, f) %>% generics::fit(epi_data)
-  list(
-    predictions = predict(wf, new_data = latest),
-    epi_workflow = wf
-  )
+  epi_workflow(r, trainer, f)
 }
-
-
 
 #' ARX classifier argument constructor
 #'
@@ -126,11 +193,14 @@ arx_classifier <- function(epi_data,
 #'
 #' @inheritParams arx_args_list
 #' @param outcome_transform Scalar character. Whether the outcome should
-#'   be created using growth rates (as the predictors are) or lagged differences
-#'   or growth rates. The second case is closer to the requirements for the
+#'   be created using growth rates (as the predictors are) or lagged
+#'   differences. The second case is closer to the requirements for the
 #'   [2022-23 CDC Flusight Hospitalization Experimental Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md).
 #'   See the Classification Vignette for details of how to create a reasonable
-#'   baseline for this case.
+#'   baseline for this case. Selecting `"growth_rate"` (the default) uses
+#'   [epiprocess::growth_rate()] to create the outcome using some of the
+#'   additional arguments below. Choosing `"lag_difference"` instead simply
+#'   uses the change from the value at the selected `horizon`.
 #' @param breaks Vector. A vector of breaks to turn real-valued growth rates
 #'   into discrete classes. The default gives binary upswing classification
 #'   as in [McDonald, Bien, Green, Hu, et al.](https://doi.org/10.1073/pnas.2111453118).
@@ -190,8 +260,9 @@ arx_class_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (!is.list(additional_gr_args)) {
-    rlang::abort(
-      c("`additional_gr_args` must be a list.",
+    cli::cli_abort(
+      c("`additional_gr_args` must be a {.cls list}.",
+        "!" = "This is a {.cls {class(additional_gr_args)}}.",
         i = "See `?epiprocess::growth_rate` for available arguments.")
     )
   }
@@ -216,11 +287,13 @@ arx_class_args_list <- function(
            log_scale,
            additional_gr_args
     ),
-    class = "arx_clist"
+    class = c("arx_class", "alist")
   )
 }
 
 #' @export
-print.arx_clist <- function(x, ...) {
-  utils::str(x)
+print.arx_class <- function(x, ...) {
+  name <- "ARX Classifier"
+  NextMethod(name = name, ...)
 }
+

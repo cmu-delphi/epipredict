@@ -1,5 +1,5 @@
 test_that("arx_class_args checks inputs", {
-  expect_s3_class(arx_class_args_list(), "arx_clist")
+  expect_s3_class(arx_class_args_list(), c("arx_class", "alist"))
   expect_error(arx_class_args_list(ahead = c(0, 4)))
   expect_error(arx_class_args_list(n_training = c(28, 65)))
 
