@@ -8,7 +8,11 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = FALSE,
+  comment = "#>",
+  out.width = "100%")
 ```
 
 ## Introduction 
@@ -39,10 +43,8 @@ will create a classification model for hotspot predictions.
 library(tidyr)
 library(dplyr)
 library(epidatr)
-library(epiprocess)
 library(epipredict)
 library(recipes)
-library(parsnip)
 library(workflows)
 library(poissonreg)
 ```
@@ -549,15 +551,15 @@ the second version, the one that doesn't use `step_epi_ahead` and `step_epi_lag`
 has omitted dates compared to the one that used the `epipredict` functions.
 ```{r}
 dates_used_in_training1 <- b1 %>% 
-  select(- ahead_7_death_rate) %>% 
+  select(-ahead_7_death_rate) %>% 
   na.omit() %>% 
-  select(time_value)
+  pull(time_value)
 dates_used_in_training1
 
 dates_used_in_training2 <- b2 %>% 
-  select(- ahead7death_rate) %>% 
+  select(-ahead7death_rate) %>% 
   na.omit() %>% 
-  select(time_value)
+  pull(time_value)
 dates_used_in_training2
 ```
 

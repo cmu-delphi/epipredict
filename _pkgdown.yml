@@ -2,18 +2,29 @@ url: https://cmu-delphi.github.io/epipredict/
 template:
   bootstrap: 5
   bootswatch: cosmo
+  bslib:
+    font_scale: 1.0
+    primary: '#C41230'
+    link-color: '#C41230'
+    navbar-bg: '#C41230'
+    navbar-fg: '#f8f8f8'
 
 navbar:
-  bg: dark
+  bg: '#C41230'
+  fg: '#f8f8f8'
 
 home:
   links:
+  - text: Introduction to Delphi's Tooling Work
+    href: https://cmu-delphi.github.io/delphi-tooling-book/
   - text: The epiprocess R package
     href: https://cmu-delphi.github.io/epiprocess/
-  - text: The covidcast R package
-    href: https://cmu-delphi.github.io/covidcast/covidcastR/
   - text: The epidatr R package
     href: https://github.com/cmu-delphi/epidatr/
+  - text: The epidatasets R package
+    href: https://cmu-delphi.github.io/epidatasets/
+  - text: The covidcast R package
+    href: https://cmu-delphi.github.io/covidcast/covidcastR/
 
 
 
@@ -27,6 +38,7 @@ reference:
     desc: Prediction methods not available elsewhere
     contents:
     - quantile_reg
+    - smooth_quantile_reg
   - title: Custom panel data forecasting workflows
     contents:
     - epi_recipe
@@ -54,6 +66,7 @@ reference:
     - dist_quantiles
     - extrapolate_quantiles
     - nested_quantiles
+    - pivot_quantiles
   - title: Included datasets
     contents:
     - case_death_rate_subset
