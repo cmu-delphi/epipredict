@@ -73,11 +73,31 @@ predict.flatline <- function(object, newdata, ...) {
   object <- object$.pred
   metadata <- names(object)[names(object) != ".pred"]
   ek <- names(newdata)
-  if (! all(metadata %in% ek)) {
+  if (!all(metadata %in% ek)) {
     cli_stop("`newdata` has different metadata than was used",
              "to fit the flatline forecaster")
   }
 
   dplyr::left_join(newdata, object, by = metadata) %>%
     dplyr::pull(.pred)
+}
+
+#' @export
+print.flatline <- function(x, ...) {
+  keys <- colnames(x$.pred)
+  keys <- paste(keys[!(keys %in% ".pred")], collapse = ", ")
+  nloc <- nrow(x$.pred)
+  nres <- nrow(x$residuals)
+  pmsg <- glue::glue(
+    "Predictions produced by {keys} resulting in {nloc} total forecasts."
+  )
+  rmsg <- glue::glue(
+    "A total of {nres} residuals are available from the training set."
+  )
+  cat("Flatline forecaster\n")
+  cat("\n")
+  cat(pmsg)
+  cat("\n")
+  cat(rmsg)
+  cat("\n\n")
 }
