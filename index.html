@@ -30,11 +30,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-#C41230"><div class="container">
     
     <a class="navbar-brand me-2" href="index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -135,28 +135,28 @@
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span></span>
 <span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span></span>
-<span><span class="va">jhu</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
-<span><span class="co">#&gt; * geo_type  = state</span></span>
-<span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 12:08:25</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # A tibble: 20,496 × 4</span></span>
-<span><span class="co">#&gt;    geo_value time_value case_rate death_rate</span></span>
-<span><span class="co">#&gt;  * &lt;chr&gt;     &lt;date&gt;         &lt;dbl&gt;      &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 ak        2020-12-31      35.9      0.158</span></span>
-<span><span class="co">#&gt;  2 al        2020-12-31      65.1      0.438</span></span>
-<span><span class="co">#&gt;  3 ar        2020-12-31      66.0      1.27 </span></span>
-<span><span class="co">#&gt;  4 as        2020-12-31       0        0    </span></span>
-<span><span class="co">#&gt;  5 az        2020-12-31      76.8      1.10 </span></span>
-<span><span class="co">#&gt;  6 ca        2020-12-31      96.0      0.751</span></span>
-<span><span class="co">#&gt;  7 co        2020-12-31      35.8      0.649</span></span>
-<span><span class="co">#&gt;  8 ct        2020-12-31      52.1      0.819</span></span>
-<span><span class="co">#&gt;  9 dc        2020-12-31      31.0      0.601</span></span>
-<span><span class="co">#&gt; 10 de        2020-12-31      65.2      0.807</span></span>
-<span><span class="co">#&gt; # … with 20,486 more rows</span></span></code></pre></div>
+<span><span class="va">jhu</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * geo_type  = state</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * time_type = day</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; * as_of     = 2022-05-31 12:08:25.791826</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 20,496 × 4</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    geo_value time_value case_rate death_rate</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  * &lt;chr&gt;     &lt;date&gt;         &lt;dbl&gt;      &lt;dbl&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1 ak        2020-12-31      35.9      0.158</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2 al        2020-12-31      65.1      0.438</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3 ar        2020-12-31      66.0      1.27 </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4 as        2020-12-31       0        0    </span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5 az        2020-12-31      76.8      1.10 </span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6 ca        2020-12-31      96.0      0.751</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7 co        2020-12-31      35.8      0.649</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8 ct        2020-12-31      52.1      0.819</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9 dc        2020-12-31      31.0      0.601</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10 de        2020-12-31      65.2      0.807</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ℹ 20,486 more rows</span></span></code></pre></div>
 <p>To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">two_week_ahead</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
 <span>  <span class="va">jhu</span>, </span>
 <span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>, </span>
@@ -167,78 +167,69 @@
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span> </span></code></pre></div>
 <p>In this case, we have used a number of different lags for the case rate, while only using 3 weekly lags for the death rate (as predictors). The result is both a fitted model object which could be used any time in the future to create different forecasts, as well as a set of predicted values (and prediction intervals) for each location 14 days after the last available time value in the data.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">two_week_ahead</span><span class="op">$</span><span class="va">epi_workflow</span></span>
-<span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
-<span><span class="co">#&gt; Preprocessor: Recipe</span></span>
-<span><span class="co">#&gt; Model: linear_reg()</span></span>
-<span><span class="co">#&gt; Postprocessor: Frosting</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; 5 Recipe Steps</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; • step_epi_lag()</span></span>
-<span><span class="co">#&gt; • step_epi_lag()</span></span>
-<span><span class="co">#&gt; • step_epi_ahead()</span></span>
-<span><span class="co">#&gt; • step_naomit()</span></span>
-<span><span class="co">#&gt; • step_naomit()</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Coefficients:</span></span>
-<span><span class="co">#&gt;       (Intercept)    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  </span></span>
-<span><span class="co">#&gt;        -0.0073358          0.0030365          0.0012467          0.0009536  </span></span>
-<span><span class="co">#&gt;   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  </span></span>
-<span><span class="co">#&gt;         0.0011425          0.0012481          0.0003041          0.1351769  </span></span>
-<span><span class="co">#&gt;  lag_7_death_rate  lag_14_death_rate  </span></span>
-<span><span class="co">#&gt;         0.1471127          0.1062473  </span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Postprocessor ───────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; 5 Frosting Layers</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; • layer_predict()</span></span>
-<span><span class="co">#&gt; • layer_residual_quantiles()</span></span>
-<span><span class="co">#&gt; • layer_add_forecast_date()</span></span>
-<span><span class="co">#&gt; • layer_add_target_date()</span></span>
-<span><span class="co">#&gt; • layer_threshold()</span></span></code></pre></div>
-<p>The fitted model here involved preprocessing the data to appropriately generate lagged predictors, estimating a linear model with <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> and then postprocessing the results to be meaningful for epidemiological tasks. We can also examine the predictions.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">two_week_ahead</span><span class="op">$</span><span class="va">predictions</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
-<span><span class="co">#&gt; * geo_type  = state</span></span>
-<span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 12:08:25</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; # A tibble: 56 × 6</span></span>
-<span><span class="co">#&gt;    geo_value time_value .pred         .pred_distn forecast_date target_date</span></span>
-<span><span class="co">#&gt;  * &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt;              &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     </span></span>
-<span><span class="co">#&gt;  1 ak        2021-12-31 0.449 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  2 al        2021-12-31 0.574 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  3 ar        2021-12-31 0.673 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  4 as        2021-12-31 0     [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  5 az        2021-12-31 0.679 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  6 ca        2021-12-31 0.575 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  7 co        2021-12-31 0.862 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  8 ct        2021-12-31 1.07  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  9 dc        2021-12-31 2.12  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt; 10 de        2021-12-31 1.09  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt; # … with 46 more rows</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">two_week_ahead</span><span class="op">$</span><span class="va">epi_workflow</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Preprocessor: Recipe</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Model: linear_reg()</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Postprocessor: Frosting</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 6 Recipe Steps</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_epi_lag()</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_epi_lag()</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_epi_ahead()</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_naomit()</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_naomit()</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • step_training_window()</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;       (Intercept)    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  </span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;        -0.0073358          0.0030365          0.0012467          0.0009536  </span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  </span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.0011425          0.0012481          0.0003041          0.1351769  </span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  lag_7_death_rate  lag_14_death_rate  </span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;         0.1471127          0.1062473  </span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ── Postprocessor ───────────────────────────────────────────────────────────────</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 5 Frosting Layers</span></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • layer_predict()</span></span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • layer_residual_quantiles()</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • layer_add_forecast_date()</span></span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • layer_add_target_date()</span></span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; • layer_threshold()</span></span></code></pre></div>
+<p>The fitted model here involved preprocessing the data to appropriately generate lagged predictors, estimating a linear model with <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">stats::lm()</a></code> and then postprocessing the results to be meaningful for epidemiological tasks. We can also examine the predictions.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">two_week_ahead</span><span class="op">$</span><span class="va">predictions</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # A tibble: 56 × 5</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    geo_value .pred         .pred_distn forecast_date target_date</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt;              &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     </span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  1 ak        0.449 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  2 al        0.574 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  3 ar        0.673 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  4 as        0     [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  5 az        0.679 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  6 ca        0.575 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  7 co        0.862 [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  8 ct        1.07  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  9 dc        2.12  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 10 de        1.09  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-14 </span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; # ℹ 46 more rows</span></span></code></pre></div>
 <p>The results above show a distributional forecast produced using data through the end of 2021 for the 14th of January 2022. A prediction for the death rate per 100K inhabitants is available for every state (<code>geo_value</code>) along with a 90% predictive interval.</p>
 <!--
-
-During a quiet period, a user decides they want to first predict whether a surge is about to occur, say using variant information from GISAID. Then for surging locations, they want to train an AR model using past surges in the same location. Everywhere else, they predict a flat line. We should be able to do this in a few lines of code.
-
-Delphi's own forecasts have been produced/evaluated in this way for a while now, but the code base is scattered and evolving. We want to consolidate, generalize, and simplify to allow others to benefit as well.
-
-The basic framework should allow for something like the following. This would
+&#10;During a quiet period, a user decides they want to first predict whether a surge is about to occur, say using variant information from GISAID. Then for surging locations, they want to train an AR model using past surges in the same location. Everywhere else, they predict a flat line. We should be able to do this in a few lines of code.
+&#10;Delphi's own forecasts have been produced/evaluated in this way for a while now, but the code base is scattered and evolving. We want to consolidate, generalize, and simplify to allow others to benefit as well.
+&#10;The basic framework should allow for something like the following. This would
 feel very familiar to anyone working in `R`+`{tidyverse}`.
-
-**Simple linear autoregressive model with scaling (modular)**
-
-
+&#10;**Simple linear autoregressive model with scaling (modular)**
+&#10;
 ```r
 my_fcaster = new_epi_predictor() %>%
   add_preprocessor(scaler, var = cases, by = pop) %>%
@@ -247,24 +238,17 @@ my_fcaster = new_epi_predictor() %>%
   add_predictor(lm.predict) %>%
   add_postprocessor(scaler, by = 1/pop)
 ```
-
-Then you could run this on an `epi_df` with one line.
-
-
+&#10;Then you could run this on an `epi_df` with one line.
+&#10;
 ```r
 my_fcaster(lead(cases, 7) ~ ., epi_df, key_vars, time_vars)
 ```
-
-The hypothetical example of first classifying, then fitting different models would also fit into this framework. And this isn't far from our current production models.
-
-
-
-
+&#10;The hypothetical example of first classifying, then fitting different models would also fit into this framework. And this isn't far from our current production models.
+&#10;
+&#10;
 ### What this isn't
-
-This is not a framework for SIR models. We intend to create some simple versions, but advanced models---those that use variants, hospitalizations, different types of immunity, age stratification, etc.---cannot be compartmentalized in the same way (though see [pypm](https://pypm.github.io/home/)). These types of models also are better at scenario modeling than short term forecasts unless they are quite complicated.
-
--->
+&#10;This is not a framework for SIR models. We intend to create some simple versions, but advanced models---those that use variants, hospitalizations, different types of immunity, age stratification, etc.---cannot be compartmentalized in the same way (though see [pypm](https://pypm.github.io/home/)). These types of models also are better at scenario modeling than short term forecasts unless they are quite complicated.
+&#10;-->
 </div>
 </div>
 
@@ -274,9 +258,11 @@ This is not a framework for SIR models. We intend to create some simple versions
 <ul class="list-unstyled">
 <li><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">Browse source code</a></li>
 <li><a href="https://github.com/cmu-delphi/epipredict/issues/" class="external-link">Report a bug</a></li>
+<li><a href="https://cmu-delphi.github.io/delphi-tooling-book/" class="external-link">Introduction to Delphi's Tooling Work</a></li>
 <li><a href="https://cmu-delphi.github.io/epiprocess/" class="external-link">The epiprocess R package</a></li>
-<li><a href="https://cmu-delphi.github.io/covidcast/covidcastR/" class="external-link">The covidcast R package</a></li>
 <li><a href="https://github.com/cmu-delphi/epidatr/" class="external-link">The epidatr R package</a></li>
+<li><a href="https://cmu-delphi.github.io/epidatasets/" class="external-link">The epidatasets R package</a></li>
+<li><a href="https://cmu-delphi.github.io/covidcast/covidcastR/" class="external-link">The covidcast R package</a></li>
 </ul>
 </div>
 

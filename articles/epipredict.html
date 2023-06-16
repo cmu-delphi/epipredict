@@ -22,11 +22,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-dark"><div class="container">
+    <nav class="navbar fixed-top navbar-dark navbar-expand-lg bg-#C41230"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -160,8 +160,8 @@ package. There is much more to see there, but for the moment, it’s
 enough to look at a simple one:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span></span>
-<span><span class="va">jhu</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
+<span><span class="va">jhu</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
@@ -179,7 +179,7 @@ enough to look at a simple one:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2020-12-31      52.1      0.819</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2020-12-31      31.0      0.601</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2020-12-31      65.2      0.807</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20,486 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20,486 more rows</span></span></span></code></pre>
 <p>This data is built into the package and contains the measured
 variables <code>case_rate</code> and <code>death_rate</code> for
 COVID-19 at the daily level for each US state for the year 2021. The
@@ -235,15 +235,15 @@ one-step-ahead, and then plugs in the predictions to “leverage up” to
 longer horizons.</p>
 <p>We’ll estimate the model jointly across all locations using only the
 most recent 30 days.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">jhu</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">time_value</span><span class="op">)</span> <span class="op">-</span> <span class="fl">30</span><span class="op">)</span></span>
 <span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
 <span>  <span class="va">jhu</span>, </span>
 <span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The forecast_date is less than the most recent update date of the</span></span>
-<span><span class="co">#&gt; data.forecast_date = 2021-12-31 while data is from 2022-05-31.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Warning: The forecast_date is less than the most recent update date of the</span></span>
+<span><span class="co">#&gt; data.forecast_date = 2021-12-31 while data is from 2022-05-31.</span></span></code></pre>
 <p>This call produces a warning, which we’ll ignore for now. But
 essentially, it’s telling us that our data comes from May 2022 but we’re
 trying to do a forecast for January 2022. The result is likely not an
@@ -258,35 +258,30 @@ columns. By default, these are a 90% predictive interval, the
 putatively made) and the <code>target_date</code> (the date for which
 the forecast is being made).</li>
 </ol>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="va">predictions</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
-<span><span class="co">#&gt; * geo_type  = state</span></span>
-<span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
-<span><span class="co">#&gt;    geo_value time_value  .pred         .pred_distn forecast_date target_date</span></span>
-<span><span class="co">#&gt;  <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-12-31 0.355  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> al        2021-12-31 0.325  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ar        2021-12-31 0.496  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> as        2021-12-31 0.083<span style="text-decoration: underline;">6</span> [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> az        2021-12-31 0.614  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ca        2021-12-31 0.327  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> co        2021-12-31 0.567  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 0.544  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 0.831  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 0.607  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="va">predictions</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 5</span></span></span>
+<span><span class="co">#&gt;    geo_value  .pred         .pred_distn forecast_date target_date</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        0.355  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> al        0.325  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ar        0.496  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> as        0.083<span style="text-decoration: underline;">6</span> [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> az        0.614  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ca        0.327  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> co        0.567  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        0.544  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        0.831  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        0.607  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>A list object of class <code>epi_workflow</code>. This object
 encapsulates all the instructions necessary to create the prediction.
 More details on this below.</li>
 </ol>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="va">epi_workflow</span></span>
-<span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="va">epi_workflow</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> linear_reg()</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> Frosting</span></span>
@@ -319,7 +314,7 @@ More details on this below.</li>
 <span><span class="co">#&gt; • layer_residual_quantiles()</span></span>
 <span><span class="co">#&gt; • layer_add_forecast_date()</span></span>
 <span><span class="co">#&gt; • layer_add_target_date()</span></span>
-<span><span class="co">#&gt; • layer_threshold()</span></span></code></pre></div>
+<span><span class="co">#&gt; • layer_threshold()</span></span></code></pre>
 <p>Note that the <code>time_value</code> in the predictions is not
 necessarily meaningful, but it is a required column in an
 <code>epi_df</code>, so it remains here.</p>
@@ -333,7 +328,7 @@ arguments. This list is produced by <code><a href="../reference/arx_args_list.ht
 <h3 id="simple-adjustments">Simple adjustments<a class="anchor" aria-label="anchor" href="#simple-adjustments"></a>
 </h3>
 <p>Basic adjustments can be made through the <code>args_list</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out2week</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
 <span>  <span class="va">jhu</span>, </span>
 <span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>, </span>
@@ -352,7 +347,7 @@ may lead to less accurate forecasts for the variable of interest.&lt;/p&gt;"><su
 <p>Another property of the basic model is the predictive interval. We
 describe this in more detail in a different vignette, but it is easy to
 request multiple quantiles.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
 <span>    levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.01</span>,<span class="fl">.025</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.05</span>,<span class="fl">.95</span>, by<span class="op">=</span><span class="fl">.05</span><span class="op">)</span>, <span class="fl">.975</span>,<span class="fl">.99</span><span class="op">)</span><span class="op">)</span></span>
@@ -362,40 +357,35 @@ object is actually a “distribution” here parameterized by its quantiles.
 For this default forecaster, these are created using the quantiles of
 the residuals of the predictive model (possibly symmetrized). Here, we
 used 23 quantiles, but one can grab a particular quantile,</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        40%        40%        40%        40%        40%        40% </span></span>
-<span><span class="co">#&gt; 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt;        40%        40%        40%        40%        40%        40% </span></span>
+<span><span class="co">#&gt; 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span></code></pre>
 <p>or extract the entire distribution into a “long” <code>epi_df</code>
 with <code>tau</code> being the probability and <code>q</code> being the
 value associated to that quantile.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="co"># first create a "nested" list-column</span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>.pred_distn <span class="op">=</span> <span class="fu"><a href="../reference/nested_quantiles.html">nested_quantiles</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span> <span class="co"># then unnest it</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 1,288 x 7 with metadata:</span></span>
-<span><span class="co">#&gt; * geo_type  = state</span></span>
-<span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,288 × 7</span></span></span>
-<span><span class="co">#&gt;    geo_value time_value .pred      q   tau forecast_date target_date</span></span>
-<span><span class="co">#&gt;  <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-12-31 0.355 0      0.01  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ak        2021-12-31 0.355 0      0.025 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ak        2021-12-31 0.355 0.037<span style="text-decoration: underline;">1</span> 0.05  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> ak        2021-12-31 0.355 0.123  0.1   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ak        2021-12-31 0.355 0.174  0.15  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ak        2021-12-31 0.355 0.211  0.2   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> ak        2021-12-31 0.355 0.237  0.25  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ak        2021-12-31 0.355 0.260  0.3   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        2021-12-31 0.355 0.282  0.35  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ak        2021-12-31 0.355 0.303  0.4   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,278 more rows</span></span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span> <span class="co"># then unnest it</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,288 × 6</span></span></span>
+<span><span class="co">#&gt;    geo_value .pred      q   tau forecast_date target_date</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        0.355 0      0.01  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ak        0.355 0      0.025 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ak        0.355 0.037<span style="text-decoration: underline;">1</span> 0.05  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> ak        0.355 0.123  0.1   2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ak        0.355 0.174  0.15  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ak        0.355 0.211  0.2   2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> ak        0.355 0.237  0.25  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ak        0.355 0.260  0.3   2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        0.355 0.282  0.35  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ak        0.355 0.303  0.4   2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,278 more rows</span></span></span></code></pre>
 <p>Additional simple adjustments to the basic forecaster can be made
 using the function:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
 <span>  lags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">7L</span>, <span class="fl">14L</span><span class="op">)</span>, ahead <span class="op">=</span> <span class="fl">7L</span>, n_training <span class="op">=</span> <span class="cn">Inf</span>, </span>
 <span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>, target_date <span class="op">=</span> <span class="cn">NULL</span>, levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
@@ -411,16 +401,16 @@ regression. But this is not the only way to estimate such a model. The
 takes a <a href="https://parsnip.tidymodels.org" class="external-link"><code>{parsnip}</code></a> model.
 The default is linear regression, but we could instead use a random
 forest with the <a href="https://github.com/imbs-hl/ranger" class="external-link">ranger</a> package:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Or boosted regression trees with <a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a>:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">boost_tree</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span>, trees <span class="op">=</span> <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Or quantile regression, using our custom forecasting engine
 <code><a href="../reference/quantile_reg.html">quantile_reg()</a></code>:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>FWIW, this last case (using quantile regression), is not far from
@@ -467,7 +457,7 @@ passing into a statistical model (like <code>lm</code>).</p>
 so that these are available when necessary.</p>
 <p>The <code>epi_recipe</code> from <code>out_gb</code> can be extracted
 from the result:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_recipe</a></span><span class="op">(</span><span class="va">out_gb</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span></code></pre></div>
 <p>The “Inputs” are the original <code>epi_df</code> and the “roles”
 that these are assigned. None of these are predictors or outcomes. Those
@@ -477,7 +467,7 @@ Here we create lagged predictors, lead the outcome, and then remove
 <code>NA</code>s. Some models like <code>lm</code> internally handle
 <code>NA</code>s, but not everything does, so we deal with them
 explicitly. The code to do this (inside the forecaster) is</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">er</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="va">death_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">death_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -501,7 +491,7 @@ predictors and response. <a href="https://github.com/tidymodels/parsnip" class="
 these do “linear regression”. Above we switched from <code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm()</a></code>
 to <code>xgboost()</code> without any issue despite the fact that these
 functions couldn’t be more different.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, <span class="va">subset</span>, <span class="va">weights</span>, <span class="va">na.action</span>, method <span class="op">=</span> <span class="st">"qr"</span>, </span>
 <span>    model <span class="op">=</span> <span class="cn">TRUE</span>, x <span class="op">=</span> <span class="cn">FALSE</span>, y <span class="op">=</span> <span class="cn">FALSE</span>, qr <span class="op">=</span> <span class="cn">TRUE</span>, singular.ok <span class="op">=</span> <span class="cn">TRUE</span>, </span>
 <span>    contrasts <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">offset</span>, <span class="va">...</span><span class="op">)</span></span>
@@ -516,7 +506,7 @@ flatline forecaster and quantile regression), but you should be able to
 use any available models listed <a href="https://www.tidymodels.org/find/parsnip/" class="external-link">here</a>.</p>
 <p>To estimate (fit) a preprocessed model, one calls <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code>
 on the <code>epi_workflow</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ewf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">er</span>, <span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level4">
@@ -527,7 +517,7 @@ have created postprocessing functionality called “frosting”. Much like
 the recipe, each postprocessing operation is a “layer” and we “slather”
 these onto our baked cake. To fix ideas, below is the postprocessing
 <code>frosting</code> for <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/extract_frosting.html">extract_frosting</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span></code></pre></div>
 <p>Here we have 5 layers of frosting. The first generates the forecasts
 from the test data. The second uses quantiles of the residuals to create
@@ -536,7 +526,7 @@ forecast was made and the date for which it is intended to occur.
 Because we are predicting rates, they should be non-negative, so the
 last layer thresholds both predicted values and intervals at 0. The code
 to do this (inside the forecaster) is</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles</a></span><span class="op">(</span></span>
@@ -547,10 +537,10 @@ to do this (inside the forecaster) is</p>
 <span>  <span class="fu"><a href="../reference/layer_threshold.html">layer_threshold</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">".pred"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>At predict time, we add this object onto the
 <code>epi_workflow</code> and call <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="va">er</span>, <span class="va">jhu</span><span class="op">)</span></span>
-<span><span class="va">ewf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
+<span><span class="va">ewf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
@@ -568,7 +558,7 @@ to do this (inside the forecaster) is</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 0.544  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 0.831  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 0.607  [0.01, 0.99]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre>
 <p>The above <code><a href="../reference/get_test_data.html">get_test_data()</a></code> function examines the recipe
 and ensures that enough test data is available to create the necessary
 lags and produce a prediction for the desired future time point (after
@@ -588,7 +578,7 @@ walk through some of these customizations.</p>
 <p>To illustrate everything above, here is (roughly) the code for the
 <code><a href="../reference/flatline_forecaster.html">flatline_forecaster()</a></code> applied to the
 <code>case_rate</code>.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">case_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span>, skip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">case_rate</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -611,9 +601,9 @@ walk through some of these customizations.</p>
 <code>recipe</code>, the test data, and the engine. The
 <code>frosting</code> is identical, as is the fitting and predicting
 procedure.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">preds</span></span>
-<span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">preds</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
@@ -631,7 +621,7 @@ procedure.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ct        2021-12-31 143.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> dc        2021-12-31 295.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> de        2021-12-31 150.  [0.05, 0.95]&lt;q-rng&gt; 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 46 more rows</span></span></span></code></pre>
 </div>
 </div>
 

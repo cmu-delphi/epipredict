@@ -49,7 +49,13 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/arx_class_args_list.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/arx_class_epi_workflow.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/arx_classifier.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/arx_fcast_epi_workflow.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/arx_forecaster.html</loc>
@@ -68,9 +74,6 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/create_layer.html</loc>
-  </url>
-  <url>
-    <loc>https://cmu-delphi.github.io/epipredict/reference/df_mat_mul.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/dist_quantiles.html</loc>
@@ -163,6 +166,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_threshold.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_unnest.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/nested_quantiles.html</loc>
   </url>
   <url>
@@ -170,6 +176,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/pipe.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/pivot_quantiles.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/predict-epi_workflow.html</loc>
@@ -182,6 +191,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/slather.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/smooth_quantile_reg.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/state_census.html</loc>
