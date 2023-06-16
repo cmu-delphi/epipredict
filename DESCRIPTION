@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.4
+Version: 0.0.5
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -37,6 +37,7 @@ Imports:
     quantreg,
     recipes (>= 1.0.4),
     rlang,
+    smoothqr,
     stats,
     tibble,
     tidyr,
@@ -61,7 +62,8 @@ VignetteBuilder:
     knitr
 Remotes:
     cmu-delphi/epidatr,
-    cmu-delphi/epiprocess@dev
+    cmu-delphi/epiprocess@dev,
+    dajmcdon/smoothqr
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true

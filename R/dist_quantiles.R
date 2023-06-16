@@ -107,10 +107,12 @@ extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
   new_quantiles(q = c(qvals, q), tau = c(tau, p))
 }
 
+is_dist_quantiles <- function(x) {
+  is_distribution(x) && all(stats::family(x) == "quantiles")
+}
 
 
-
-#' Turn a a vector of quantile distributions into a list-col
+#' Turn a vector of quantile distributions into a list-col
 #'
 #' @param x a `distribution` containing `dist_quantiles`
 #'
@@ -124,13 +126,74 @@ extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
 #' edf_nested <- edf %>% dplyr::mutate(q = nested_quantiles(q))
 #' edf_nested %>% tidyr::unnest(q)
 nested_quantiles <- function(x) {
-  stopifnot(is_distribution(x),
-            all(stats::family(x) == "quantiles"))
+  stopifnot(is_dist_quantiles(x))
   distributional:::dist_apply(x, .f = function(z) {
     tibble::as_tibble(vec_data(z)) %>%
       dplyr::mutate(dplyr::across(tidyselect::everything(), as.double)) %>%
       list_of()
   })
+}
+
+
+#' Pivot columns containing `dist_quantile` wider
+#'
+#' Any selected columns that contain `dist_quantiles` will be "widened" with
+#' the "taus" (quantile) serving as names and the values in the data frame.
+#' When pivoting multiple columns, the original column name will be used as
+#' a prefix.
+#'
+#' @param .data A data frame, or a data frame extension such as a tibble or
+#'   epi_df.
+#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> One or more unquoted
+#'   expressions separated by commas. Variable names can be used as if they
+#'   were positions in the data frame, so expressions like `x:y` can
+#'   be used to select a range of variables. Any selected columns should
+#'
+#' @return An object of the same class as `.data`
+#' @export
+#'
+#' @examples
+#' d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))
+#' d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
+#' tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
+#'
+#' pivot_quantiles(tib, c("d1", "d2"))
+#' pivot_quantiles(tib, tidyselect::starts_with("d"))
+#' pivot_quantiles(tib, d2)
+pivot_quantiles <- function(.data, ...) {
+  expr <- rlang::expr(c(...))
+  cols <- names(tidyselect::eval_select(expr, .data))
+  dqs <- map_lgl(cols, ~ is_dist_quantiles(.data[[.x]]))
+  if (!all(dqs)) {
+    nms <- cols[!dqs]
+    cli::cli_abort(
+      "Variables(s) {.var {nms}} are not `dist_quantiles`. Cannot pivot them."
+    )
+  }
+  .data <- .data %>%
+    dplyr::mutate(dplyr::across(tidyselect::all_of(cols), nested_quantiles))
+  checks <- map_lgl(cols, ~ diff(range(vctrs::list_sizes(.data[[.x]]))) == 0L)
+  if (!all(checks)) {
+    nms <- cols[!checks]
+    cli::cli_abort(
+      c("Quantiles must be the same length and have the same set of taus.",
+        i = "Check failed for variables(s) {.var {nms}}."))
+  }
+  if (length(cols) > 1L) {
+    for (col in cols) {
+      .data <- .data %>%
+        tidyr::unnest(tidyselect::all_of(col)) %>%
+        tidyr::pivot_wider(
+          names_from = "tau", values_from = "q",
+          names_prefix = paste0(col, "_")
+        )
+    }
+  } else {
+    .data <- .data %>%
+      tidyr::unnest(tidyselect::all_of(cols)) %>%
+      tidyr::pivot_wider(names_from = "tau", values_from = "q")
+  }
+  .data
 }
 
 
@@ -297,3 +360,15 @@ Ops.dist_quantiles <- function(e1, e2) {
   new_quantiles(q = q, tau = tau)
 }
 
+#' @method is.na distribution
+#' @export
+is.na.distribution <- function(x) {
+  sapply(vctrs::vec_data(x), is.na)
+}
+
+#' @method is.na dist_quantiles
+#' @export
+is.na.dist_quantiles <- function(x) {
+  q <- field(x, "q")
+  all(is.na(q))
+}

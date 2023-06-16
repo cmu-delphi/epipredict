@@ -11,3 +11,5 @@
 ^musings$
 ^data-raw$
 ^vignettes/articles$
+^doc$
+^Meta$

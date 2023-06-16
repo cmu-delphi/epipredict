@@ -2,7 +2,7 @@
 % Please edit documentation in R/dist_quantiles.R
 \name{nested_quantiles}
 \alias{nested_quantiles}
-\title{Turn a a vector of quantile distributions into a list-col}
+\title{Turn a vector of quantile distributions into a list-col}
 \usage{
 nested_quantiles(x)
 }
@@ -13,7 +13,7 @@ nested_quantiles(x)
 a list-col
 }
 \description{
-Turn a a vector of quantile distributions into a list-col
+Turn a vector of quantile distributions into a list-col
 }
 \examples{
 edf <- case_death_rate_subset[1:3,]

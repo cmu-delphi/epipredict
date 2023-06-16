@@ -1,5 +1,14 @@
 # epipredict (development)
 
+# epipredict 0.0.5
+
+* add `smooth_quantile_reg()`
+* improved printing of various methods / internals
+* canned forecasters get a class
+* fixed quantile bug in `flatline_forecaster()`
+* add functionality to output the unfit workflow from the canned forecasters
+* add `pivot_quantiles()` for easier plotting
+
 
 # epipredict 0.0.4
 

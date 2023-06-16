@@ -33,18 +33,18 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
-  if (!inherits(args_list, "flatline_alist")) {
+  if (!inherits(args_list, c("flatline", "alist"))) {
     cli_stop("args_list was not created using `flatline_args_list().")
   }
   keys <- epi_keys(epi_data)
-  ek <- keys[-1]
+  ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 
 
   r <- epi_recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead, skip = TRUE) %>%
     recipes::update_role(!!outcome, new_role = "predictor") %>%
-    recipes::add_role(dplyr::all_of(keys), new_role = "predictor") %>%
+    recipes::add_role(tidyselect::all_of(keys), new_role = "predictor") %>%
     step_training_window(n_recent = args_list$n_training)
 
   latest <- get_test_data(epi_recipe(epi_data), epi_data)
@@ -64,11 +64,20 @@ flatline_forecaster <- function(
 
   eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
 
-  wf <- epi_workflow(r, eng, f) %>% fit(epi_data)
+  wf <- epi_workflow(r, eng, f)
+  wf <- generics::fit(wf, epi_data)
+  preds <- suppressWarnings(predict(wf, new_data = latest)) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
 
-  list(
-    predictions = suppressWarnings(predict(wf, new_data = latest)),
-    epi_workflow = wf
+  structure(list(
+    predictions = preds,
+    epi_workflow = wf,
+    metadata = list(
+      training = attr(epi_data, "metadata"),
+      forecast_created = Sys.time()
+    )),
+    class = c("flatline", "canned_epipred")
   )
 }
 
@@ -98,7 +107,7 @@ flatline_args_list <- function(
     quantile_by_key = character(0L)) {
 
   arg_is_scalar(ahead, n_training)
-  arg_is_chr(quantile_by_key, allow_null = TRUE)
+  arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead)
@@ -107,32 +116,21 @@ flatline_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
 
-  structure(enlist(ahead,
-                   n_training,
-                   forecast_date,
-                   target_date,
-                   levels,
-                   symmetrize,
-                   nonneg,
-                   quantile_by_key),
-            class = "flatline_alist")
-}
-
-validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
-  if (!epiprocess::is_epi_df(epi_data))
-    cli_stop("epi_data must be an epi_df.")
-  arg_is_chr(predictors)
-  arg_is_chr_scalar(outcome)
-  if (!outcome %in% names(epi_data))
-    cli_stop("{outcome} was not found in the training data.")
-  if (!all(predictors %in% names(epi_data)))
-    cli_stop("At least one predictor was not found in the training data.")
-  invisible(TRUE)
+  structure(
+    enlist(ahead,
+           n_training,
+           forecast_date,
+           target_date,
+           levels,
+           symmetrize,
+           nonneg,
+           quantile_by_key),
+    class = c("flatline", "alist")
+  )
 }
 
 #' @export
-print.flatline_alist <- function(x, ...) {
-  utils::str(x)
+print.flatline <- function(x, ...) {
+  name <- "flatline"
+  NextMethod(name = name, ...)
 }
-
-
