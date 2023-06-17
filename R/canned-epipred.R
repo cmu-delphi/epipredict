@@ -43,32 +43,37 @@ print.alist <- function(x, ...) {
 #' @export
 print.canned_epipred <- function(x, name, ...) {
   cat("\n")
-  cli::cli_rule("A basic forecaster of type {.pkg {name}}")
+  bullet <- "\u2022"
+  header <- glue::glue("A basic forecaster of type {name}")
+  header <- cli::rule(header, line = 2)
+  cat_line(header)
+  cat("\n")
+
+  date_created <- glue::glue(
+    "This forecaster was fit on {format(x$metadata$forecast_created)}")
+  cat_line(date_created)
+  cat("\n")
+
+  cat_line("Training data was an `epi_df` with")
+  cat_line(glue::glue("\u2022 Geography: {x$metadata$training$geo_type},"))
+  cat_line(glue::glue("{bullet} Time type: {x$metadata$training$time_type},"))
+  cat_line(glue::glue("{bullet} Using data up-to-date as of: {format(x$metadata$training$as_of)}."))
 
   cat("\n")
-  cli::cli_text(
-    "This forecaster was fit on {.val {format(x$metadata$forecast_created)}}."
-  )
+  header <- cli::rule("Predictions")
+  cat_line(header)
   cat("\n")
-  cli::cli_text("Training data was an {.cls epi_df} with ")
-  cli::cli_ul(c(
-    "Geography: {.val {x$metadata$training$geo_type}},",
-    "Time type: {.val {x$metadata$training$time_type}},",
-    "Using data up-to-date as of: {.val {format(x$metadata$training$as_of)}}."
-  ))
 
-  cat("\n")
-  cli::cli_rule("Predictions")
   n_geos <- dplyr::n_distinct(x$predictions$geo_value)
   fds <- unique(x$predictions$forecast_date)
   tds <- unique(x$predictions$target_date)
 
-  cat("\n")
-  cli::cli_text("A total of {nrow(x$predictions)} predictions are available for")
-  cli::cli_ul(c(
-    "{n_geos} unique geographic regions,",
-    "At forecast dates: {.val {fds}},",
-    "For target dates: {.val {tds}}."
-  ))
+  cat_line(
+    glue::glue("A total of {nrow(x$predictions)} predictions are available for")
+  )
+  cat_line(glue::glue("{bullet} {n_geos} unique geographic regions,"))
+  cat_line(glue::glue("{bullet} At forecast dates: {fds},"))
+  cat_line(glue::glue("{bullet} For target dates: {tds}."))
+
   cat("\n")
 }
