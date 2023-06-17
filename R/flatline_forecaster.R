@@ -33,7 +33,7 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
 
   validate_forecaster_inputs(epi_data, outcome, "time_value")
-  if (!inherits(args_list, c("flatline", "alist"))) {
+  if (!inherits(args_list, c("flat_fcast", "alist"))) {
     cli_stop("args_list was not created using `flatline_args_list().")
   }
   keys <- epi_keys(epi_data)
@@ -77,7 +77,7 @@ flatline_forecaster <- function(
       training = attr(epi_data, "metadata"),
       forecast_created = Sys.time()
     )),
-    class = c("flatline", "canned_epipred")
+    class = c("flat_fcast", "canned_epipred")
   )
 }
 
@@ -125,12 +125,12 @@ flatline_args_list <- function(
            symmetrize,
            nonneg,
            quantile_by_key),
-    class = c("flatline", "alist")
+    class = c("flat_fcast", "alist")
   )
 }
 
 #' @export
-print.flatline <- function(x, ...) {
+print.flat_fcast <- function(x, ...) {
   name <- "flatline"
   NextMethod(name = name, ...)
 }
