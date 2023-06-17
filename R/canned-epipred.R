@@ -43,6 +43,7 @@ print.alist <- function(x, ...) {
 #' @export
 print.canned_epipred <- function(x, name, ...) {
   cat("\n")
+  bullet <- "\u2022"
   header <- glue::glue("A basic forecaster of type {name}")
   header <- cli::rule(header, line = 2)
   cat_line(header)
@@ -54,9 +55,9 @@ print.canned_epipred <- function(x, name, ...) {
   cat("\n")
 
   cat_line("Training data was an `epi_df` with")
-  cat_line(glue::glue("• Geography: {x$metadata$training$geo_type},"))
-  cat_line(glue::glue("• Time type: {x$metadata$training$time_type},"))
-  cat_line(glue::glue("• Using data up-to-date as of: {format(x$metadata$training$as_of)}."))
+  cat_line(glue::glue("\u2022 Geography: {x$metadata$training$geo_type},"))
+  cat_line(glue::glue("{bullet} Time type: {x$metadata$training$time_type},"))
+  cat_line(glue::glue("{bullet} Using data up-to-date as of: {format(x$metadata$training$as_of)}."))
 
   cat("\n")
   header <- cli::rule("Predictions")
@@ -70,9 +71,9 @@ print.canned_epipred <- function(x, name, ...) {
   cat_line(
     glue::glue("A total of {nrow(x$predictions)} predictions are available for")
   )
-  cat_line(glue::glue("• {n_geos} unique geographic regions,"))
-  cat_line(glue::glue("• At forecast dates: {fds},"))
-  cat_line(glue::glue("• For target dates: {tds}."))
+  cat_line(glue::glue("{bullet} {n_geos} unique geographic regions,"))
+  cat_line(glue::glue("{bullet} At forecast dates: {fds},"))
+  cat_line(glue::glue("{bullet} For target dates: {tds}."))
 
   cat("\n")
 }
