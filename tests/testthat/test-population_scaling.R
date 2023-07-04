@@ -112,7 +112,7 @@ test_that("Postprocessing workflow works and values correct", {
                   dplyr::select(geo_value, time_value, cases))
 
 
-  expect_silent(p <- predict(wf, latest)) # Consider to change to expect_silent() after Issue 212 is fixed
+  expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
@@ -127,7 +127,7 @@ test_that("Postprocessing workflow works and values correct", {
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
-  expect_silent(p <- predict(wf, latest)) # Consider to change to expect_silent() after Issue 212 is fixed
+  expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
@@ -171,7 +171,7 @@ test_that("Postprocessing to get cases from case rate", {
                             dplyr::select(geo_value, time_value, case_rate))
 
 
-  expect_silent(p <- predict(wf, latest)) # Conside to change to expect_silent() after Issue 212 is fixed
+  expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(1/20000, 1/30000))
@@ -221,7 +221,7 @@ test_that("test joining by default columns", {
                             dplyr::select(geo_value, time_value, case_rate))
 
 
-  expect_message(p <- predict(wf, latest)) # Consider to change to expect_message() after Issue 212 is fixed
+  expect_message(p <- predict(wf, latest))
 
 })
 
@@ -289,7 +289,7 @@ test_that("expect error if `by` selector does not match", {
     fit(jhu) %>%
     add_frosting(f)
 
-  expect_error(suppressWarnings(predict(wf, latest))) # Consider to take out suppressWarnings() after fix Issue 212
+  expect_error(predict(wf, latest))
 })
 
 
