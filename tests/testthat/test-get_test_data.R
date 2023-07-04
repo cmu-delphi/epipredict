@@ -80,6 +80,31 @@ test_that("NA fill behaves as desired", {
 })
 
 test_that("Omit end rows according to minimum lag when that’s not lag 0", {
+  # Simple toy ex
+
+  toy_epi_df <- tibble::tibble(
+    time_value = seq(as.Date("2020-01-01"), by = 1,
+                     length.out = 10),
+    geo_value = "ak",
+    x = 1:10
+  ) %>% epiprocess::as_epi_df()
+
+  toy_rec <- epi_recipe(toy_epi_df) %>%
+    step_epi_lag(x, lag = c(2, 4)) %>%
+    step_epi_ahead(x, ahead = 3) %>%
+    step_epi_naomit()
+
+  toy_td <- get_test_data(toy_rec, toy_epi_df)
+
+  toy_td_res <- bake(prep(toy_rec, toy_epi_df), toy_td)
+
+  expect_equal(nrow(toy_td_res), 1L)
+  expect_equal(toy_td_res$time_value, as.Date("2020-01-10"))
+  expect_equal(toy_epi_df[toy_epi_df$time_value == as.Date("2020-01-08"),]$x, toy_td_res$lag_2_x)
+  expect_equal(toy_epi_df[toy_epi_df$time_value == as.Date("2020-01-06"),]$x, toy_td_res$lag_4_x)
+
+  # Ex. using real built-in data
+
   ca <- case_death_rate_subset %>%
     filter(geo_value == "ca")
 
