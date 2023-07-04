@@ -98,10 +98,13 @@ test_that("Omit end rows according to minimum lag when that’s not lag 0", {
 
   toy_td_res <- bake(prep(toy_rec, toy_epi_df), toy_td)
 
+  expect_equal(ncol(toy_td_res), 6L)
   expect_equal(nrow(toy_td_res), 1L)
   expect_equal(toy_td_res$time_value, as.Date("2020-01-10"))
   expect_equal(toy_epi_df[toy_epi_df$time_value == as.Date("2020-01-08"),]$x, toy_td_res$lag_2_x)
   expect_equal(toy_epi_df[toy_epi_df$time_value == as.Date("2020-01-06"),]$x, toy_td_res$lag_4_x)
+  expect_equal(toy_td_res$x, NA_integer_)
+  expect_equal(toy_td_res$ahead_3_x, NA_integer_)
 
   # Ex. using real built-in data
 
