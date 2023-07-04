@@ -112,7 +112,7 @@ test_that("Postprocessing workflow works and values correct", {
                   dplyr::select(geo_value, time_value, cases))
 
 
-  expect_warning(p <- predict(wf, latest)) # Consider to change to expect_silent() after Issue 212 is fixed
+  p <- predict(wf, latest) # Consider to change to expect_silent() after Issue 212 is fixed
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
@@ -127,7 +127,7 @@ test_that("Postprocessing workflow works and values correct", {
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
-  expect_warning(p <- predict(wf, latest)) # Consider to change to expect_silent() after Issue 212 is fixed
+  expect_message(p <- predict(wf, latest)) # Consider to change to expect_silent() after Issue 212 is fixed
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
