@@ -96,4 +96,7 @@ test_that("Omit end rows according to minimum lag when that’s not lag 0", {
   expect_equal(td_res, td_row1to5_res)
   expect_equal(nrow(td_res), 1L)
   expect_equal(td_res$time_value, as.Date("2021-12-31"))
+  expect_equal(ca[ca$time_value == as.Date("2021-12-29"),]$case_rate, td_res$lag_2_case_rate)
+  expect_equal(ca[ca$time_value == as.Date("2021-12-27"),]$case_rate, td_res$lag_4_case_rate)
+  expect_equal(ca[ca$time_value == as.Date("2021-12-25"),]$case_rate, td_res$lag_6_case_rate)
 })
