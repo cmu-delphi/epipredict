@@ -86,7 +86,7 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
   if (object$forecast_date < as_of_date) {
     cli_warn(
       c("The forecast_date is less than the most ",
-        "recent update date of the data.",
+        "recent update date of the data: ",
         i = "forecast_date = {object$forecast_date} while data is from {as_of_date}.")
     )
   }
