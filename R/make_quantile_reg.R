@@ -104,7 +104,7 @@ make_quantile_reg <- function() {
       type,
       rq = dist_quantiles(unname(as.list(x)), object$tau), # one quantile
       rqs = {
-        x <- unname(as.list(as.data.frame(apply(x, 1, function(q) unname(sort(q))))))
+        x <- lapply(unname(split(x, seq(nrow(x)))), function(q) sort(q))
         dist_quantiles(x, list(object$tau))
       },
       rlang::abort(c("Prediction not implemented for this `rq` type.",
