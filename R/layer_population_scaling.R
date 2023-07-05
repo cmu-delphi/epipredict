@@ -58,7 +58,7 @@
 #'                           df_pop_col = "value",
 #'                           by = c("geo_value" = "states"),
 #'                           cases, suffix = "_scaled") %>%
-#'   step_epi_lag(cases_scaled, lag = c(7, 14)) %>%
+#'   step_epi_lag(cases_scaled, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
 #'   step_epi_naomit()
 #'

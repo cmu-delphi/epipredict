@@ -26,6 +26,7 @@ test_that("expect insufficient training data error", {
   expect_error(get_test_data(recipe = r, x = case_death_rate_subset))
 })
 
+
 test_that("expect error that geo_value or time_value does not exist", {
   r <-  epi_recipe(case_death_rate_subset) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
@@ -76,4 +77,54 @@ test_that("NA fill behaves as desired", {
  expect_true(!any(is.na(td2)))
 
 
+})
+
+test_that("Omit end rows according to minimum lag when that’s not lag 0", {
+  # Simple toy ex
+
+  toy_epi_df <- tibble::tibble(
+    time_value = seq(as.Date("2020-01-01"), by = 1,
+                     length.out = 10),
+    geo_value = "ak",
+    x = 1:10
+  ) %>% epiprocess::as_epi_df()
+
+  toy_rec <- epi_recipe(toy_epi_df) %>%
+    step_epi_lag(x, lag = c(2, 4)) %>%
+    step_epi_ahead(x, ahead = 3) %>%
+    step_epi_naomit()
+
+  toy_td <- get_test_data(toy_rec, toy_epi_df)
+
+  toy_td_res <- bake(prep(toy_rec, toy_epi_df), toy_td)
+
+  expect_equal(ncol(toy_td_res), 6L)
+  expect_equal(nrow(toy_td_res), 1L)
+  expect_equal(toy_td_res$time_value, as.Date("2020-01-10"))
+  expect_equal(toy_epi_df[toy_epi_df$time_value == as.Date("2020-01-08"),]$x, toy_td_res$lag_2_x)
+  expect_equal(toy_epi_df[toy_epi_df$time_value == as.Date("2020-01-06"),]$x, toy_td_res$lag_4_x)
+  expect_equal(toy_td_res$x, NA_integer_)
+  expect_equal(toy_td_res$ahead_3_x, NA_integer_)
+
+  # Ex. using real built-in data
+
+  ca <- case_death_rate_subset %>%
+    filter(geo_value == "ca")
+
+  rec <- epi_recipe(ca) %>%
+    step_epi_lag(case_rate, lag = c(2, 4, 6)) %>%
+    step_epi_ahead(case_rate, ahead = 7) %>%
+    step_epi_naomit()
+
+  td <- get_test_data(rec, ca)
+
+  td_res <- bake(prep(rec, ca), td)
+  td_row1to5_res <-  bake(prep(rec, ca), td[1:5, ])
+
+  expect_equal(td_res, td_row1to5_res)
+  expect_equal(nrow(td_res), 1L)
+  expect_equal(td_res$time_value, as.Date("2021-12-31"))
+  expect_equal(ca[ca$time_value == as.Date("2021-12-29"),]$case_rate, td_res$lag_2_case_rate)
+  expect_equal(ca[ca$time_value == as.Date("2021-12-27"),]$case_rate, td_res$lag_4_case_rate)
+  expect_equal(ca[ca$time_value == as.Date("2021-12-25"),]$case_rate, td_res$lag_6_case_rate)
 })

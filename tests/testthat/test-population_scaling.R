@@ -87,7 +87,7 @@ test_that("Postprocessing workflow works and values correct", {
                             df_pop_col = "value",
                             by = c("geo_value" = "states"),
                             suffix = "_scaled") %>%
-    step_epi_lag(cases_scaled, lag = c(7, 14)) %>%
+    step_epi_lag(cases_scaled, lag = c(0, 7, 14)) %>%
     step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
@@ -147,7 +147,7 @@ test_that("Postprocessing to get cases from case rate", {
                             df_pop_col = "value",
                             by = c("geo_value" = "states"),
                             case_rate, suffix = "_scaled") %>%
-    step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
@@ -192,7 +192,7 @@ test_that("test joining by default columns", {
                             df_pop_col = "values",
                             by = NULL,
                             suffix = "_scaled") %>%
-    step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
@@ -241,7 +241,7 @@ test_that("expect error if `by` selector does not match", {
                             df_pop_col = "values",
                             by = c("a" = "b"),
                             suffix = "_scaled") %>%
-    step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
@@ -265,7 +265,7 @@ test_that("expect error if `by` selector does not match", {
                             df_pop_col = "values",
                             by = c("geo_value" = "geo_value"),
                             suffix = "_scaled") %>%
-    step_epi_lag(case_rate_scaled, lag = c(7, 14)) %>% # cases
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
@@ -325,7 +325,7 @@ test_that("Rate rescaling behaves as expected", {
     as_epi_df()
 
   r <- epi_recipe(x) %>%
-    step_epi_lag(case_rate, lag = c(7, 14)) %>% # cases
+    step_epi_lag(case_rate, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
