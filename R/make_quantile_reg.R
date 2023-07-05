@@ -102,9 +102,9 @@ make_quantile_reg <- function() {
     # can't make a method because object is second
     out <- switch(
       type,
-      rq = dist_quantiles(x, object$tau), # one quantile
+      rq = dist_quantiles(unname(as.list(x)), object$tau), # one quantile
       rqs = {
-        x <- unname(apply(x, 1, function(q) unname(sort(q)), simplify = FALSE))
+        x <- lapply(unname(split(x, seq(nrow(x)))), function(q) sort(q))
         dist_quantiles(x, list(object$tau))
       },
       rlang::abort(c("Prediction not implemented for this `rq` type.",
