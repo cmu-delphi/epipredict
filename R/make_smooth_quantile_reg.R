@@ -168,10 +168,9 @@ make_smooth_quantile_reg <- function() {
   process_smooth_qr_preds <- function(x, object) {
     object <- parsnip::extract_fit_engine(object)
     list_of_pred_distns <- lapply(x, function(p) {
-      xbefore <<- x
       x <- lapply(unname(split(
         p, seq(nrow(p)))), function(q) unname(sort(q, na.last = TRUE)
-      ))
+        ))
       dist_quantiles(x, list(object$tau))
     })
     n_preds <- length(list_of_pred_distns[[1]])
