@@ -148,7 +148,8 @@ arx_fcast_epi_workflow <- function(
 #' Constructs a list of arguments for [arx_forecaster()].
 #'
 #' @param lags Vector or List. Positive integers enumerating lags to use
-#'   in autoregressive-type models (in days).
+#'   in autoregressive-type models (in days). By default, an unnamed list
+#'   of lags will be set to correspond to the order of the predictors.
 #' @param ahead Integer. Number of time steps ahead (in days) of the forecast
 #'   date for which forecasts should be produced.
 #' @param n_training Integer. An upper limit for the number of rows per

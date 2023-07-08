@@ -78,24 +78,21 @@ test_that("arx_lags_validator handles named & unnamed lists as expected", {
   # More lags than predictors - Error
   expect_error(arx_lags_validator(pred_vec, lags_finit_fn_switch2))
 
-  # Unnamed list of lags - Warning
+  # Unnamed list of lags
   lags_init_un <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
 
-  expect_warning(lags_aft_un <- arx_lags_validator(pred_vec, lags_init_un))
-  expect_equal(lags_aft_un, lags_init_un)
+  expect_equal(larx_lags_validator(pred_vec, lags_init_un), lags_init_un)
 
-  # Partially named list of lags - treat as unnamed - Warning
+  # Partially named list of lags - treat as unnamed
   lags_init_pn <- list(death_rate = c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
 
-  expect_warning(lags_aft_pn <- arx_lags_validator(pred_vec, lags_init_pn))
-  expect_equal(lags_aft_pn, lags_init_pn)
+  expect_equal(arx_lags_validator(pred_vec, lags_init_pn), lags_init_pn)
 
-  # NA name - treat as unnamed list - Warning
+  # NA name - treat as unnamed list
   lags_init_na <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
   names(lags_init_na) <- "death_rate"
 
-  expect_warning(lags_aft_na <- arx_lags_validator(pred_vec, lags_init_na))
-  expect_equal(lags_aft_na, lags_init_na)
+  expect_equal(arx_lags_validator(pred_vec, lags_init_na, lags_init_na)
 
   # Try use a name not in predictors - Error
   lags_init_other_name <- list(death_rate = c(0, 7, 14), test_var = c(0, 1, 2, 3, 7, 14))

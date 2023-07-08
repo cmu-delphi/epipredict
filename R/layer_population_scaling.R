@@ -41,7 +41,7 @@
 #' @param create_new TRUE to create a new column and keep the original column
 #' in the `epi_df`.
 #' @param suffix a character. The suffix added to the column name if
-#' `create_new = TRUE`. Default to "_original".
+#' `create_new = TRUE`. Default to "_scaled".
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor

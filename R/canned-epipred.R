@@ -31,20 +31,15 @@ arx_lags_validator <- function(predictors, lags) {
       "You have requested {p} predictor(s) but {l} different lags.",
       i = "Lags must be a vector or a list with length == number of predictors."
     ))
-  }else{
-    if(length(lags) == sum(names(lags) != "", na.rm = TRUE)){
-      if(!all(names(lags) %in% predictors)){
+  } else {
+    if(length(lags) == sum(names(lags) != "", na.rm = TRUE)) {
+      if (all(names(lags) %in% predictors)) {
+        lags <- lags[order(match(names(lags), predictors))]
+      } else {
         cli::cli_abort(
           "The names for the list of lags do not all correspond to the predictors."
         )
-      } else{
-        lags <- lags[order(match(names(lags), predictors))]
       }
-    } else{
-      cli::cli_warn(
-        "The unnamed list of lags has been set to correspond to the order
-          of the predictors.",
-      )
     }
   }
   lags

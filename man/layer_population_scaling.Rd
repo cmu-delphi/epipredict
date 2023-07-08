@@ -54,7 +54,7 @@ rate is "per 100K", then set \code{rate_rescaling = 1e5} to get counts back.}
 in the \code{epi_df}.}
 
 \item{suffix}{a character. The suffix added to the column name if
-\code{create_new = TRUE}. Default to "_original".}
+\code{create_new = TRUE}. Default to "_scaled".}
 
 \item{id}{a random id string}
 }

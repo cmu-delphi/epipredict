@@ -18,7 +18,8 @@ arx_args_list(
 }
 \arguments{
 \item{lags}{Vector or List. Positive integers enumerating lags to use
-in autoregressive-type models (in days).}
+in autoregressive-type models (in days). By default, an unnamed list
+of lags will be set to correspond to the order of the predictors.}
 
 \item{ahead}{Integer. Number of time steps ahead (in days) of the forecast
 date for which forecasts should be produced.}
