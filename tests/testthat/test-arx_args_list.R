@@ -81,7 +81,7 @@ test_that("arx_lags_validator handles named & unnamed lists as expected", {
   # Unnamed list of lags
   lags_init_un <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
 
-  expect_equal(larx_lags_validator(pred_vec, lags_init_un), lags_init_un)
+  expect_equal(arx_lags_validator(pred_vec, lags_init_un), lags_init_un)
 
   # Partially named list of lags - treat as unnamed
   lags_init_pn <- list(death_rate = c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
