@@ -22,6 +22,7 @@ validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
 
 arx_lags_validator <- function(predictors, lags) {
   p <- length(predictors)
+
   if (!is.list(lags)) lags <- list(lags)
   l <- length(lags)
   if (l == 1) lags <- rep(lags, p)
@@ -30,6 +31,21 @@ arx_lags_validator <- function(predictors, lags) {
       "You have requested {p} predictor(s) but {l} different lags.",
       i = "Lags must be a vector or a list with length == number of predictors."
     ))
+  }else{
+    if(length(lags) == sum(names(lags) != "", na.rm = TRUE)){
+      if(!all(names(lags) %in% predictors)){
+        cli::cli_abort(
+          "The names for the list of lags do not all correspond to the predictors."
+        )
+      } else{
+        lags <- lags[order(match(names(lags), predictors))]
+      }
+    } else{
+      cli::cli_warn(
+        "The unnamed list of lags has been set to correspond to the order
+          of the predictors.",
+      )
+    }
   }
   lags
 }
