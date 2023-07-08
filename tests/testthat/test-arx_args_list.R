@@ -52,5 +52,55 @@ test_that("arx forecaster disambiguates quantiles", {
   expect_error(compare_quantile_args(alist, tlist))
 })
 
+test_that("arx_lags_validator handles named & unnamed lists as expected", {
 
+  # Fully named list of lags in order of predictors
+  pred_vec <- c("death_rate", "case_rate")
+  lags_init_fn <- list(death_rate = c(0, 7, 14), case_rate = c(0, 1, 2, 3, 7, 14))
+
+  expect_equal(epipredict:::arx_lags_validator(pred_vec, lags_init_fn),
+               lags_init_fn)
+
+  # Fully named list of lags not in order of predictors
+  lags_finit_fn_switch <- list(case_rate = c(0, 1, 2, 3, 7, 14), death_rate = c(0, 7, 14))
+
+  expect_equal(epipredict:::arx_lags_validator(pred_vec, lags_finit_fn_switch),
+               list(death_rate = c(0, 7, 14), case_rate = c(0, 1, 2, 3, 7, 14)))
+
+  # Fully named list of lags not in order of predictors (longer ex.)
+  pred_vec2 <-  c("death_rate", "other_var", "case_rate")
+  lags_finit_fn_switch2 <- list(case_rate = c(0, 1, 2, 3, 7, 14), death_rate = c(0, 7, 14),
+                               other_var = c(0, 1))
+  expect_equal(epipredict:::arx_lags_validator(pred_vec2, lags_finit_fn_switch2),
+               list(death_rate = c(0, 7, 14),
+                    other_var = c(0, 1), case_rate = c(0, 1, 2, 3, 7, 14)))
+
+  # More lags than predictors - Error
+  expect_error(epipredict:::arx_lags_validator(pred_vec, lags_finit_fn_switch2))
+
+  # Unnamed list of lags - Warning
+  lags_init_un <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
+
+  expect_warning(lags_aft_un <- epipredict:::arx_lags_validator(pred_vec, lags_init_un))
+  expect_equal(lags_aft_un, lags_init_un)
+
+  # Partially named list of lags - treat as unnamed - Warning
+  lags_init_pn <- list(death_rate = c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
+
+  expect_warning(lags_aft_pn <- epipredict:::arx_lags_validator(pred_vec, lags_init_pn))
+  expect_equal(lags_aft_pn, lags_init_pn)
+
+  # NA name - treat as unnamed list - Warning
+  lags_init_na <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
+  names(lags_init_na) <- "death_rate"
+
+  expect_warning(lags_aft_na <- epipredict:::arx_lags_validator(pred_vec, lags_init_na))
+  expect_equal(lags_aft_na, lags_init_na)
+
+  # Try use a name not in predictors - Error
+  lags_init_other_name <- list(death_rate = c(0, 7, 14), test_var = c(0, 1, 2, 3, 7, 14))
+
+  expect_error(epipredict:::arx_lags_validator(pred_vec, lags_init_other_name))
+
+})
 
