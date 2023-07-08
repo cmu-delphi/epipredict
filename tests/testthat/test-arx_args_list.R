@@ -92,7 +92,7 @@ test_that("arx_lags_validator handles named & unnamed lists as expected", {
   lags_init_na <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
   names(lags_init_na) <- "death_rate"
 
-  expect_equal(arx_lags_validator(pred_vec, lags_init_na, lags_init_na))
+  expect_equal(arx_lags_validator(pred_vec, lags_init_na), lags_init_na)
 
   # Try use a name not in predictors - Error
   lags_init_other_name <- list(death_rate = c(0, 7, 14), test_var = c(0, 1, 2, 3, 7, 14))
