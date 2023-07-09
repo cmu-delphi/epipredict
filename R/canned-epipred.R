@@ -32,13 +32,16 @@ arx_lags_validator <- function(predictors, lags) {
       i = "Lags must be a vector or a list with length == number of predictors."
     ))
   } else {
-    if(length(lags) == sum(names(lags) != "", na.rm = TRUE)) {
-      if (all(names(lags) %in% predictors)) {
+    if (length(lags) == sum(names(lags) != "", na.rm = TRUE)) {
+      if (all(predictors %in% names(lags))) {
         lags <- lags[order(match(names(lags), predictors))]
       } else {
-        cli::cli_abort(
-          "The names for the list of lags do not all correspond to the predictors."
-        )
+        predictors_miss <- setdiff(predictors, names(lags))
+        cli::cli_abort(c(
+          "If lags is a named list, then all predictors must be present.",
+          i = "The predictors are '{predictors}'.",
+          i = "So lags is missing '{predictors_miss}'."
+        ))
       }
     }
   }
