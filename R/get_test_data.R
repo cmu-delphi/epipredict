@@ -49,38 +49,49 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
   min_required <- max_lags + max_horizon
   if (is.null(n_recent)) n_recent <- min_required + 1
 
-  # CHECK: Return NA if insufficient training data
-  if (dplyr::n_distinct(x$time_value) < min_required) {
+  # CHECK: Error out if insufficient training data
+  # Probably needs a fix based on the time_type of the epi_df
+  if (diff(range(x$time_value)) < min_required) {
+    time_type <- attr(recipe$template, "metadata")$time_type
     cli_stop("You supplied insufficient training data for this recipe. ",
-             "You need at least {min_required} distinct time_values.")
+             "You need at least {min_required} days of data.")
   }
 
   groups <- kill_time_value(epi_keys(recipe))
 
+  # If we prevent NA completion, remove undesireably early time values
   x <- x %>%
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
-    dplyr::slice_tail(n = max(n_recent, min_required + 1))
-  if(min_lags != 0 & min_lags < Inf) x <- x %>% slice_head(n = -min_lags)
+    dplyr::filter(time_value >= max(time_value) - max(n_recent, min_required + 1))
 
+  # If lags > 0, then we get rid of recent data
+  if (min_lags > 0 & min_lags < Inf) {
+    x <- x %>%
+      dplyr::filter(time_value <= max(time_value) - min_lags)
+  }
+
+  # Now, fill forward missing data if requested
   if (fill_locf) {
     cannot_be_used <- x %>%
-      dplyr::slice_tail(n = n_recent) %>%
+      dplyr::filter(time_value >= max(time_value) - n_recent) %>%
       dplyr::summarize(dplyr::across(
         !time_value, ~ !is.na(.x[1])), .groups = "drop") %>%
       dplyr::summarise(dplyr::across(-dplyr::all_of(groups), ~ any(!.x))) %>%
       unlist()
     if (any(cannot_be_used)) {
       bad_vars <- names(cannot_be_used)[cannot_be_used]
-      cli_stop("The variables {bad_vars} have ",
-               "too many recent missing values to be filled automatically. ",
-               "You should either choose `n_recent` larger than its current ",
-               "value {n_recent}, or perform NA imputation manually, perhaps with ",
-               "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}.")
+      cli_stop(
+        "The variables {bad_vars} have ",
+        "too many recent missing values to be filled automatically. ",
+        "You should either choose `n_recent` larger than its current ",
+        "value {n_recent}, or perform NA imputation manually, perhaps with ",
+        "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}."
+      )
     }
     x <- x %>% tidyr::fill(!time_value)
   }
 
   x %>%
-    dplyr::slice_tail(n = min_required + 1) %>%
+    dplyr::filter(time_value <= max(time_value) - min_required) %>%
     epiprocess::ungroup()
 }
