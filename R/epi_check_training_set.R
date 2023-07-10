@@ -40,7 +40,7 @@ validate_meta_match <- function(x, template, meta, warn_or_abort = "warn") {
   msg <- c(
     "The `{meta}` of the training data appears to be different from that",
     "used to construct the recipe. This may result in unexpected consequences.",
-    i = "Training `geo_type` is '{new_meta}'.",
+    i = "Training `{meta}` is '{new_meta}'.",
     i = "Originally, it was '{old_meta}'."
   )
   if (new_meta != old_meta) {

@@ -43,7 +43,7 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
 
   if (!all(colnames(x) %in% colnames(recipe$template)))
     cli_stop("some variables used for training are not available in `x`.")
-  min_lags <- max(map_dbl(recipe$steps, ~ min(.x$lag %||% 0)), 0)
+  min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% Inf)), Inf)
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
   max_horizon <- max(map_dbl(recipe$steps, ~ max(.x$horizon %||% 0)), 0)
   min_required <- max_lags + max_horizon
@@ -60,7 +60,7 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
   x <- x %>%
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
     dplyr::slice_tail(n = max(n_recent, min_required + 1))
-  if(min_lags != 0) x <- x %>% slice_head(n = -min_lags)
+  if(min_lags != 0 & min_lags < Inf) x <- x %>% slice_head(n = -min_lags)
 
   if (fill_locf) {
     cannot_be_used <- x %>%

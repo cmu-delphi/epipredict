@@ -22,6 +22,7 @@ validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
 
 arx_lags_validator <- function(predictors, lags) {
   p <- length(predictors)
+
   if (!is.list(lags)) lags <- list(lags)
   l <- length(lags)
   if (l == 1) lags <- rep(lags, p)
@@ -30,6 +31,19 @@ arx_lags_validator <- function(predictors, lags) {
       "You have requested {p} predictor(s) but {l} different lags.",
       i = "Lags must be a vector or a list with length == number of predictors."
     ))
+  } else {
+    if (length(lags) == sum(names(lags) != "", na.rm = TRUE)) {
+      if (all(predictors %in% names(lags))) {
+        lags <- lags[order(match(names(lags), predictors))]
+      } else {
+        predictors_miss <- setdiff(predictors, names(lags))
+        cli::cli_abort(c(
+          "If lags is a named list, then all predictors must be present.",
+          i = "The predictors are '{predictors}'.",
+          i = "So lags is missing '{predictors_miss}'."
+        ))
+      }
+    }
   }
   lags
 }
