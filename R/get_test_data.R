@@ -43,7 +43,7 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
 
   if (!all(colnames(x) %in% colnames(recipe$template)))
     cli_stop("some variables used for training are not available in `x`.")
-  min_lags <- max(map_dbl(recipe$steps, ~ min(.x$lag %||% 0)), 0)
+  min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% 0)), 0)
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
   max_horizon <- max(map_dbl(recipe$steps, ~ max(.x$horizon %||% 0)), 0)
   min_required <- max_lags + max_horizon
