@@ -39,8 +39,8 @@ arx_lags_validator <- function(predictors, lags) {
         predictors_miss <- setdiff(predictors, names(lags))
         cli::cli_abort(c(
           "If lags is a named list, then all predictors must be present.",
-          i = "The `predictors` are '{predictors}'.",
-          i = "So `lags` is missing '{predictors_miss}'."
+          i = "The predictors are '{predictors}'.",
+          i = "So lags is missing '{predictors_miss}'."
         ))
       }
     }
