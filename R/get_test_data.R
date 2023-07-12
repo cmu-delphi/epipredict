@@ -32,16 +32,23 @@
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14))
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
+#' @importFrom rlang `%@%`
 #' @export
 
-get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
+get_test_data <- function(
+    recipe,
+    x,
+    fill_locf = FALSE,
+    n_recent = NULL,
+    forecast_date = max(x$time_value)
+) {
   stopifnot(is.data.frame(x))
   arg_is_lgl(fill_locf)
   arg_is_scalar(fill_locf)
   arg_is_pos_int(n_recent, allow_null = TRUE)
   arg_is_scalar(n_recent, allow_null = TRUE)
 
-  if (!all(colnames(x) %in% colnames(recipe$template)))
+  if (!all(colnames(recipe$template) %in% colnames(x)))
     cli_stop("some variables used for training are not available in `x`.")
   min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% Inf)), Inf)
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
@@ -52,23 +59,25 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
   # CHECK: Error out if insufficient training data
   # Probably needs a fix based on the time_type of the epi_df
   if (diff(range(x$time_value)) < min_required) {
-    time_type <- attr(recipe$template, "metadata")$time_type
+    time_type <- (recipe$template %@% "metadata")$time_type
     cli_stop("You supplied insufficient training data for this recipe. ",
              "You need at least {min_required} days of data.")
   }
 
   groups <- kill_time_value(epi_keys(recipe))
 
-  # If we prevent NA completion, remove undesireably early time values
-  x <- x %>%
-    epiprocess::group_by(dplyr::across(dplyr::all_of(groups))) %>%
-    dplyr::filter(time_value >= max(time_value) - max(n_recent, min_required + 1))
+  # If we skip NA completion, we remove undesireably early time values
+  # Happens globally, over all groups
+  keep <- max(n_recent, min_required + 1)
+  x <- dplyr::filter(x, forecast_date - time_value >= keep)
 
-  # If lags > 0, then we get rid of recent data
-  if (min_lags > 0 & min_lags < Inf) {
-    x <- x %>%
-      dplyr::filter(time_value <= max(time_value) - min_lags)
-  }
+  # If all(lags > 0), then we get rid of recent data
+  if (min_lags > 0 && min_lags < Inf)
+    x <- dplyr::filter(x, forecast_date - time_value < min_lags)
+
+  # Pad with explicit missing values up to and including the forecast_date
+  x <- pad_to_end(x, groups, end_date)
+
 
   # Now, fill forward missing data if requested
   if (fill_locf) {
@@ -88,10 +97,30 @@ get_test_data <- function(recipe, x, fill_locf = FALSE, n_recent = NULL) {
         "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}."
       )
     }
-    x <- x %>% tidyr::fill(!time_value)
+    x <- tidyr::fill(x, !time_value)
   }
 
-  x %>%
-    dplyr::filter(time_value <= max(time_value) - min_required) %>%
+  dplyr::filter(x, time_value <= max(time_value) - min_required) %>%
     epiprocess::ungroup()
+}
+
+pad_to_end <- function(x, groups, end_date) {
+  itval <- epiprocess:::guess_period(c(x$time_value, end_date), "time_value")
+  completed_time_values <- x %>%
+    dplyr::group_by(dplyr::across(tidyselect::all_of(groups))) %>%
+    dplyr::summarise(
+      time_value = rlang::list2(
+        time_value = Seq(max(time_value) + itval, end_date, itval)
+      )
+    ) %>%
+    unnest("time_value") %>%
+    mutate(time_value = vctrs::vec_cast(time_value, x$time_value))
+
+  vctrs::vec_rbind(x, completed_time_values) %>%
+    dplyr::arrange(dplyr::across(tidyselect::all_of(c("time_value", groups))))
+}
+
+Seq <- function(from, to, by) {
+  if (from > to) return(NULL)
+  seq(from = from, to = to, by = by)
 }
