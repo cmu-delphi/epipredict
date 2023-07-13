@@ -42,7 +42,7 @@ grab_forged_keys <- function(forged, mold, new_data) {
   old_keys <- epi_keys_mold(mold)
   # 3. these are the keys in the test data as input
   new_df_keys <- epi_keys(new_data)
-  if (! (setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
+  if (!(setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
     cli::cli_warn(c(
       "Not all epi keys that were present in the training data are available",
       "in `new_data`. Predictions will have only the available keys.")
@@ -51,7 +51,7 @@ grab_forged_keys <- function(forged, mold, new_data) {
   if (epiprocess::is_epi_df(new_data)) {
     extras <- epiprocess::as_epi_df(extras)
     attr(extras, "metadata") <- attr(new_data, "metadata")
-  } else if (keys[1:2] %in% new_keys) {
+  } else if (all(keys[1:2] %in% new_keys)) {
     l <- list()
     if (length(new_keys) > 2) l <- list(other_keys = new_keys[-c(1:2)])
     extras <- epiprocess::as_epi_df(extras, additional_metadata = l)
