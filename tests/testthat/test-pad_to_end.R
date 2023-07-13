@@ -28,4 +28,8 @@ test_that("test set padding works", {
   expect_identical(p$gr2, rep(c("c", "d"), times = 4))
   expect_identical(p$time_value, rep(c(1, 2), each = 4))
   expect_identical(p$value, as.integer(c(1, 3, 4, 6, 2, NA, 5, 7)))
+
+  # make sure it maintains the epi_df
+  dat <- dat %>% dplyr::rename(geo_value = gr1) %>% as_epi_df(dat)
+  expect_s3_class(pad_to_end(dat, "geo_value", 2), "epi_df")
 })
