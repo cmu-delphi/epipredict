@@ -4,7 +4,13 @@
 \alias{get_test_data}
 \title{Get test data for prediction based on longest lag period}
 \usage{
-get_test_data(recipe, x, fill_locf = FALSE, n_recent = NULL)
+get_test_data(
+  recipe,
+  x,
+  fill_locf = FALSE,
+  n_recent = NULL,
+  forecast_date = max(x$time_value)
+)
 }
 \arguments{
 \item{recipe}{A recipe object. The step will be added to the

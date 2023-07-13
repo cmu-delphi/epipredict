@@ -78,7 +78,7 @@ get_test_data <- function(
   # Pad with explicit missing values up to and including the forecast_date
   # x is grouped here
   x <- pad_to_end(x, groups, forecast_date) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(groups)))
+    epiprocess::group_by(dplyr::across(dplyr::all_of(groups)))
 
 
   # Now, fill forward missing data if requested
@@ -118,7 +118,7 @@ pad_to_end <- function(x, groups, end_date) {
     unnest("time_value") %>%
     mutate(time_value = vctrs::vec_cast(time_value, x$time_value))
 
-  vctrs::vec_rbind(x, completed_time_values) %>%
+  dplyr::bind_rows(x, completed_time_values) %>%
     dplyr::arrange(dplyr::across(tidyselect::all_of(c("time_value", groups))))
 }
 
