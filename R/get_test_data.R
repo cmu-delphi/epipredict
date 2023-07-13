@@ -61,7 +61,7 @@ get_test_data <- function(
   if (diff(range(x$time_value)) < min_required) {
     time_type <- (recipe$template %@% "metadata")$time_type
     cli_stop("You supplied insufficient training data for this recipe. ",
-             "You need at least {min_required} days of data.")
+             i = "You need at least {min_required} days of data.")
   }
 
   groups <- kill_time_value(epi_keys(recipe))
@@ -69,22 +69,24 @@ get_test_data <- function(
   # If we skip NA completion, we remove undesireably early time values
   # Happens globally, over all groups
   keep <- max(n_recent, min_required + 1)
-  x <- dplyr::filter(x, forecast_date - time_value >= keep)
+  x <- dplyr::filter(x, forecast_date - time_value <= keep)
 
   # If all(lags > 0), then we get rid of recent data
   if (min_lags > 0 && min_lags < Inf)
     x <- dplyr::filter(x, forecast_date - time_value < min_lags)
 
   # Pad with explicit missing values up to and including the forecast_date
-  x <- pad_to_end(x, groups, end_date)
+  # x is grouped here
+  x <- pad_to_end(x, groups, forecast_date) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(groups)))
 
 
   # Now, fill forward missing data if requested
   if (fill_locf) {
     cannot_be_used <- x %>%
-      dplyr::filter(time_value >= max(time_value) - n_recent) %>%
-      dplyr::summarize(dplyr::across(
-        !time_value, ~ !is.na(.x[1])), .groups = "drop") %>%
+      dplyr::filter(forecast_date - time_value <= n_recent) %>%
+      dplyr::summarize(
+        dplyr::across(!time_value, ~ !is.na(.x[1])), .groups = "drop") %>%
       dplyr::summarise(dplyr::across(-dplyr::all_of(groups), ~ any(!.x))) %>%
       unlist()
     if (any(cannot_be_used)) {
@@ -100,7 +102,7 @@ get_test_data <- function(
     x <- tidyr::fill(x, !time_value)
   }
 
-  dplyr::filter(x, time_value <= max(time_value) - min_required) %>%
+  dplyr::filter(x, forecast_date - time_value <= min_required) %>%
     epiprocess::ungroup()
 }
 
