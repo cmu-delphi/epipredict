@@ -45,7 +45,7 @@ arx_forecaster <- function(epi_data,
   )
 
   latest <- get_test_data(
-    hardhat::extract_recipe(wf), epi_data, TRUE, args_list$nafill_buffer,
+    hardhat::extract_preprocessor(wf), epi_data, TRUE, args_list$nafill_buffer,
     args_list$forecast_date %||% max(epi_data$time_value)
   )
 

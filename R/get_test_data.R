@@ -48,13 +48,18 @@ get_test_data <- function(
   stopifnot(is.data.frame(x))
   arg_is_lgl(fill_locf)
   arg_is_scalar(fill_locf)
-  arg_is_pos_int(n_recent, allow_null = TRUE)
   arg_is_scalar(n_recent, allow_null = TRUE)
+  if (!is.null(n_recent) && is.finite(n_recent))
+    arg_is_pos_int(n_recent, allow_null = TRUE)
+  if (!is.null(n_recent)) n_recent <- abs(n_recent) # in case they passed -Inf
 
+
+  if (class(forecast_date) != class(x$time_value))
+    cli::cli_abort("`forecast_date` must be the same class as `x$time_value`.")
   if (!all(colnames(recipe$template) %in% colnames(x)))
     cli::cli_abort("some variables used for training are not available in `x`.")
 
-  arg_is_date(forecast_date)
+
   if (forecast_date < max(x$time_value))
     cli::cli_abort("`forecast_date` must be no earlier than `max(x$time_value)`")
 

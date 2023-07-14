@@ -141,7 +141,7 @@ out2week <- arx_forecaster(
   outcome = "death_rate", 
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
-    lags = list(c(0,1,2,3,7,14), c(0,7,14)),
+    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
     ahead = 14)
   )
 ```
@@ -180,7 +180,8 @@ Additional simple adjustments to the basic forecaster can be made using the func
 arx_args_list(
   lags = c(0L, 7L, 14L), ahead = 7L, n_training = Inf, 
   forecast_date = NULL, target_date = NULL, levels = c(0.05, 0.95),
-  symmetrize = TRUE, nonneg = TRUE, quantile_by_key = "geo_value"
+  symmetrize = TRUE, nonneg = TRUE, quantile_by_key = character(0L),
+  nafill_buffer = Inf
 )
 ```
 
