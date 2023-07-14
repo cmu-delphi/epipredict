@@ -47,7 +47,7 @@ flatline_forecaster <- function(
     recipes::add_role(tidyselect::all_of(keys), new_role = "predictor") %>%
     step_training_window(n_recent = args_list$n_training)
 
-  forecast_date <- args_list$forecast_date %||% max(latest$time_value)
+  forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
 
 
@@ -131,7 +131,8 @@ flatline_args_list <- function(
            levels,
            symmetrize,
            nonneg,
-           quantile_by_key),
+           quantile_by_key,
+           nafill_buffer),
     class = c("flat_fcast", "alist")
   )
 }
