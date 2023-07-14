@@ -53,11 +53,16 @@ get_test_data <- function(
     arg_is_pos_int(n_recent, allow_null = TRUE)
   if (!is.null(n_recent)) n_recent <- abs(n_recent) # in case they passed -Inf
 
+  check <- hardhat::check_column_names(x, colnames(recipe$template))
+  if (!check$ok) {
+    cli::cli_abort(c(
+      "Some variables used for training are not available in {.arg x}.",
+      i = "The following required columns are missing: {check$missing_names}"
+    ))
+  }
 
   if (class(forecast_date) != class(x$time_value))
     cli::cli_abort("`forecast_date` must be the same class as `x$time_value`.")
-  if (!all(colnames(recipe$template) %in% colnames(x)))
-    cli::cli_abort("some variables used for training are not available in `x`.")
 
 
   if (forecast_date < max(x$time_value))
@@ -72,12 +77,12 @@ get_test_data <- function(
 
   # CHECK: Error out if insufficient training data
   # Probably needs a fix based on the time_type of the epi_df
-  if (diff(range(x$time_value)) < min_required) {
-    time_type <- (recipe$template %@% "metadata")$time_type
-    cli::cli_abort(
-      "You supplied insufficient training data for this recipe. ",
-      i = "You need at least {min_required} days of data."
-    )
+  avail_recent <- diff(range(x$time_value))
+  if (avail_recent < min_required) {
+    cli::cli_abort(c(
+      "You supplied insufficient recent data for this recipe. ",
+      "!" = "You need at least {min_required} days of data,",
+      "!" = "but `x` contains only {avail_recent}."))
   }
 
   x <- arrange(x, time_value)
@@ -118,8 +123,8 @@ get_test_data <- function(
       bad_vars <- names(cannot_be_used)[cannot_be_used]
       if (recipes::is_trained(recipe))
       cli::cli_abort(c(
-        "The variables {bad_vars} have too many recent missing values to",
-        `!` = "be filled automatically. ",
+        "The variables {.var {bad_vars}} have too many recent missing",
+        `!` = "values to be filled automatically. ",
         i = "You should either choose `n_recent` larger than its current ",
         i = "value {n_recent}, or perform NA imputation manually, perhaps with ",
         i = "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}."
