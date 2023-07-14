@@ -26,6 +26,10 @@ more filling. The default \code{NULL} will determine this from the maximum
 lags used in the \code{recipe}. For example, suppose n_recent = 3, then if the
 3 most recent observations in some region are all \code{NA}’s, we won’t be able
 to fill anything, and an error message will be thrown.}
+
+\item{forecast_date}{Date. By default, this is set to the maximum
+\code{time_value} in \code{x}. But if there is data latency such that recent \code{NA}'s
+should be filled, this may be \emph{after} the last available \code{time_value}.}
 }
 \value{
 A tibble with columns \code{geo_value}, \code{time_value}, any additional

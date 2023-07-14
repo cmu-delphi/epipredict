@@ -155,7 +155,7 @@ Another property of the basic model is the predictive interval. We describe this
 ```{r differential-levels}
 out_q <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(
-    levels = c(.01,.025, seq(.05,.95, by=.05), .975,.99))
+    levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99))
   )
 ```
 
