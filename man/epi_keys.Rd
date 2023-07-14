@@ -4,10 +4,12 @@
 \alias{epi_keys}
 \title{Grab any keys associated to an epi_df}
 \usage{
-epi_keys(x)
+epi_keys(x, ...)
 }
 \arguments{
 \item{x}{a data.frame, tibble, or epi_df}
+
+\item{...}{additional arguments passed on to methods}
 }
 \value{
 If an \code{epi_df}, this returns all "keys". Otherwise \code{NULL}

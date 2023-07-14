@@ -45,7 +45,8 @@ arx_forecaster <- function(epi_data,
   )
 
   latest <- get_test_data(
-    workflows::extract_preprocessor(wf), epi_data, TRUE
+    hardhat::extract_recipe(wf), epi_data, TRUE, args_list$nafill_buffer,
+    args_list$forecast_date %||% max(epi_data$time_value)
   )
 
   wf <- generics::fit(wf, epi_data)
@@ -174,6 +175,16 @@ arx_fcast_epi_workflow <- function(
 #'   `character(0)` performs no grouping. This argument only applies when
 #'   residual quantiles are used. It is not applicable with
 #'   `trainer = quantile_reg()`, for example.
+#' @param nafill_buffer At predict time, recent values of the training data
+#'   are used to create a forecast. However, these can be `NA` due to, e.g.,
+#'   data latency issues. By default, any missing values will get filled with
+#'   less recent data. Setting this value to `NULL` will result in 1 extra
+#'   recent row (beyond those required for lag creation) to be used. Note that
+#'   we require at least `min(lags)` rows of recent data per `geo_value` to
+#'   create a prediction. For this reason, setting `nafill_buffer < min(lags)`
+#'   will be treated as _additional_ allowed recent data rather than the
+#'   total amount of recent data to examine.
+#'
 #'
 #' @return A list containing updated parameter choices with class `arx_flist`.
 #' @export
@@ -191,7 +202,8 @@ arx_args_list <- function(
     levels = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
-    quantile_by_key = character(0L)) {
+    quantile_by_key = character(0L),
+    nafill_buffer = Inf) {
 
   # error checking if lags is a list
   .lags <- lags
@@ -206,6 +218,7 @@ arx_args_list <- function(
   arg_is_probabilities(levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
+  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   max_lags <- max(lags)
   structure(
@@ -218,7 +231,8 @@ arx_args_list <- function(
            symmetrize,
            nonneg,
            max_lags,
-           quantile_by_key),
+           quantile_by_key,
+           nafill_buffer),
     class = c("arx_fcast", "alist")
   )
 }

@@ -47,10 +47,14 @@ flatline_forecaster <- function(
     recipes::add_role(tidyselect::all_of(keys), new_role = "predictor") %>%
     step_training_window(n_recent = args_list$n_training)
 
-  latest <- get_test_data(epi_recipe(epi_data), epi_data)
-
   forecast_date <- args_list$forecast_date %||% max(latest$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+
+
+  latest <- get_test_data(
+    epi_recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
+    forecast_date
+  )
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -104,7 +108,9 @@ flatline_args_list <- function(
     levels = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
-    quantile_by_key = character(0L)) {
+    quantile_by_key = character(0L),
+    nafill_buffer = Inf
+) {
 
   arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
@@ -115,6 +121,7 @@ flatline_args_list <- function(
   arg_is_probabilities(levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
+  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   structure(
     enlist(ahead,

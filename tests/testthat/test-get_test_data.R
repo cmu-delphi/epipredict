@@ -51,7 +51,7 @@ test_that("NA fill behaves as desired", {
 
  r <- epi_recipe(df) %>%
    step_epi_ahead(x1, ahead = 3) %>%
-   step_epi_lag(x1, x2, lag = c(1,3)) %>%
+   step_epi_lag(x1, x2, lag = c(1, 3)) %>%
    step_epi_naomit()
 
  expect_silent(tt <- get_test_data(r, df))
