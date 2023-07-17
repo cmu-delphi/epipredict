@@ -68,7 +68,7 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   the_recipe <- workflows::extract_recipe(workflow)
 
   if (is.null(object$target_date)) {
-    max_time_value <- max(components$keys$time_value)
+    max_time_value <- max(new_data$time_value)
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
 
     if (is.null(ahead)){
