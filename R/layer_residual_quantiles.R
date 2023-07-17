@@ -74,7 +74,7 @@ layer_residual_quantiles_new <- function(probs, symmetrize, by_key, name, id) {
 slather.layer_residual_quantiles <-
   function(object, components, workflow, new_data, ...) {
 
-    the_fit <- workflows::extract_fit_parsnip(object)
+    the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (is.null(object$probs)) return(components)
 
