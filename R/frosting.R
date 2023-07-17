@@ -260,7 +260,7 @@ apply_frosting.epi_workflow <-
 
     for (l in seq_along(layers)) {
       la <- layers[[l]]
-      components <- slather(la, components, the_fit, the_recipe, new_data)
+      components <- slather(la, components, the_fit, the_recipe, workflow, new_data)
     }
 
     return(components)

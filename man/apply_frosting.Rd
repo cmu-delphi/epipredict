@@ -36,7 +36,7 @@ here for ease.
 
 \item{the_recipe}{the \code{epi_recipe} preprocessor}
 
-\item{new_data}{A data frame containing the new predictors to preprocess
+\item{new_data}{a data frame containing the new predictors to preprocess
 and predict on}
 }
 \description{

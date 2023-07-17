@@ -4,7 +4,7 @@
 \alias{slather}
 \title{Spread a layer of frosting on a fitted workflow}
 \usage{
-slather(object, components, the_fit, the_recipe, new_data, ...)
+slather(object, components, the_fit, the_recipe, workflow, new_data, ...)
 }
 \arguments{
 \item{object}{a workflow with \code{frosting} postprocessing steps}
@@ -27,7 +27,9 @@ here for ease.
 
 \item{the_recipe}{the \code{epi_recipe} preprocessor}
 
-\item{new_data}{A data frame containing the new predictors to preprocess
+\item{workflow}{an object of class workflow}
+
+\item{new_data}{a data frame containing the new predictors to preprocess
 and predict on}
 
 \item{...}{additional arguments used by methods. Currently unused.}
