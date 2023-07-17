@@ -120,7 +120,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
                                       blueprint = components$mold$blueprint)
   components$keys <- grab_forged_keys(components$forged,
                                       components$mold, new_data)
-  components <- apply_frosting(object, components, the_fit, the_recipe, ...)
+  components <- apply_frosting(object, components, the_fit, the_recipe, new_data, ...)
   components$predictions
 }
 

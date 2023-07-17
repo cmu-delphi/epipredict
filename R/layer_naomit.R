@@ -46,7 +46,8 @@ layer_naomit_new <- function(terms, id) {
 }
 
 #' @export
-slather.layer_naomit <- function(object, components, the_fit, the_recipe, ...) {
+slather.layer_naomit <- function(object, components, the_fit, the_recipe, new_data, ...) {
+  newd1 <<- new_data
   exprs <- rlang::expr(c(!!!object$terms))
   pos <- tidyselect::eval_select(exprs, components$predictions)
   col_names <- names(pos)
