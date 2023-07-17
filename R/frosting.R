@@ -229,7 +229,7 @@ apply_frosting.default <- function(workflow, components, ...) {
 apply_frosting.epi_workflow <-
   function(workflow, components, new_data, ...) {
 
-    the_fit <- workflows::extract_fit_parsnip(object)
+    the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (!has_postprocessor(workflow)) {
       components$predictions <- predict(

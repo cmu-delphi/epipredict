@@ -45,6 +45,13 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
+ # Don't specify `forecast_date` (by default, this should be last date in latest)
+f <- frosting() \%>\% layer_predict() \%>\%
+   layer_naomit(.pred)
+wf0 <- wf \%>\% add_frosting(f)
+p0 <- predict(wf0, latest)
+p0
+
 # Specify a `forecast_date` that is greater than or equal to `as_of` date
 f <- frosting() \%>\% layer_predict() \%>\%
   layer_add_forecast_date(forecast_date = "2022-05-31") \%>\%

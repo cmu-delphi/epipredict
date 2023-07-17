@@ -65,6 +65,6 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
   expect_equal(ncol(p3), 4L)
   expect_s3_class(p3, "epi_df")
   expect_equal(nrow(p3), 3L)
-  expect_equal(p3$forecast_date, rep(as.Date("2022-01-14"), times = 3))
+  expect_equal(p3$forecast_date, rep(as.Date("2021-12-31"), times = 3))
   expect_named(p3, c("geo_value", "time_value", ".pred", "forecast_date"))
 })
