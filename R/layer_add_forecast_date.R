@@ -74,7 +74,7 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 }
 
 #' @export
-slather.layer_add_forecast_date <- function(object, components, the_fit, the_recipe, ...) {
+slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
 
   if (is.null(object$forecast_date)) {
     max_time_value <- max(components$keys$time_value)

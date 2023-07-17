@@ -71,7 +71,7 @@ layer_quantile_distn_new <- function(levels, truncate, name, id) {
 
 #' @export
 slather.layer_quantile_distn <-
-  function(object, components, the_fit, the_recipe, ...) {
+  function(object, components, workflow, new_data, ...) {
 
     dstn <- components$predictions$.pred
     if (!inherits(dstn, "distribution")) {

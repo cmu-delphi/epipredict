@@ -62,7 +62,9 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 }
 
 #' @export
-slather.layer_predict <- function(object, components, the_fit, the_recipe, ...) {
+slather.layer_predict <- function(object, components, workflow, new_data, ...) {
+
+  the_fit <- workflows::extract_fit_parsnip(workflow)
 
   components$predictions <- predict(
     the_fit,

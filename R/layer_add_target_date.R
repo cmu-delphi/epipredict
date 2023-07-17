@@ -63,7 +63,9 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 }
 
 #' @export
-slather.layer_add_target_date <- function(object, components, the_fit, the_recipe, ...) {
+slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
+
+  the_recipe <- workflows::extract_recipe(workflow)
 
   if (is.null(object$target_date)) {
     max_time_value <- max(components$keys$time_value)

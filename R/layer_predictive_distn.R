@@ -71,7 +71,9 @@ layer_predictive_distn_new <- function(dist_type, truncate, name, id) {
 
 #' @export
 slather.layer_predictive_distn <-
-  function(object, components, the_fit, the_recipe, ...) {
+  function(object, components, workflow, new_data, ...) {
+
+    the_fit <- workflows::extract_fit_parsnip(object)
 
     m <- components$predictions$.pred
     r <- grab_residuals(the_fit, components)
