@@ -70,7 +70,8 @@
 <span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nonneg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span></span>
+<span>  quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
+<span>  nafill_buffer <span class="op">=</span> <span class="cn">Inf</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -129,6 +130,18 @@ before calculating residual quantiles. See the <code>by_key</code> argument to
 residual quantiles are used. It is not applicable with
 <code>trainer = quantile_reg()</code>, for example.</p></dd>
 
+
+<dt>nafill_buffer</dt>
+<dd><p>At predict time, recent values of the training data
+are used to create a forecast. However, these can be <code>NA</code> due to, e.g.,
+data latency issues. By default, any missing values will get filled with
+less recent data. Setting this value to <code>NULL</code> will result in 1 extra
+recent row (beyond those required for lag creation) to be used. Note that
+we require at least <code>min(lags)</code> rows of recent data per <code>geo_value</code> to
+create a prediction. For this reason, setting <code>nafill_buffer &lt; min(lags)</code>
+will be treated as <em>additional</em> allowed recent data rather than the
+total amount of recent data to examine.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -140,7 +153,7 @@ residual quantiles are used. It is not applicable with
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">arx_args_list</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 11</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags           : int [1:3] 0 7 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
@@ -151,9 +164,10 @@ residual quantiles are used. It is not applicable with
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags       : int 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "arx_fcast" "alist"</span>
 <span class="r-in"><span><span class="fu">arx_args_list</span><span class="op">(</span>symmetrize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 11</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags           : int [1:3] 0 7 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
@@ -164,9 +178,10 @@ residual quantiles are used. It is not applicable with
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags       : int 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "arx_fcast" "alist"</span>
 <span class="r-in"><span><span class="fu">arx_args_list</span><span class="op">(</span>levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, n_training <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 11</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags           : int [1:3] 0 7 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num 120</span>
@@ -177,6 +192,7 @@ residual quantiles are used. It is not applicable with
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags       : int 14</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "arx_fcast" "alist"</span>
 </code></pre></div>
     </div>
