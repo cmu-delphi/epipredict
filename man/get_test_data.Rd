@@ -13,10 +13,10 @@ get_test_data(
 )
 }
 \arguments{
-\item{recipe}{A recipe object. The step will be added to the
-sequence of operations for this recipe.}
+\item{recipe}{A recipe object.}
 
-\item{x}{A data frame, tibble, or epi_df data set.}
+\item{x}{An epi_df. The typical usage is to
+pass the same data as that used for fitting the recipe.}
 
 \item{fill_locf}{Logical. Should we use \code{locf} to fill in missing data?}
 
@@ -24,15 +24,15 @@ sequence of operations for this recipe.}
 how far back are we willing to tolerate missing data? Larger values allow
 more filling. The default \code{NULL} will determine this from the
 the \code{recipe}. For example, suppose \code{n_recent = 3}, then if the
-3 most recent observations in some region are all \code{NA}’s, we won’t be able
-to fill anything, and an error message will be thrown. (See details.)}
+3 most recent observations in any \code{geo_value} are all \code{NA}’s, we won’t be
+able to fill anything, and an error message will be thrown. (See details.)}
 
-\item{forecast_date}{Date. By default, this is set to the maximum
+\item{forecast_date}{By default, this is set to the maximum
 \code{time_value} in \code{x}. But if there is data latency such that recent \code{NA}'s
 should be filled, this may be \emph{after} the last available \code{time_value}.}
 }
 \value{
-A tibble with columns \code{geo_value}, \code{time_value}, any additional
+An object of the same type as \code{x} with columns \code{geo_value}, \code{time_value}, any additional
 keys, as well other variables in the original dataset.
 }
 \description{
