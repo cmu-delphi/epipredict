@@ -252,7 +252,7 @@ apply_frosting.epi_workflow <-
     # Check if there's a predict layer, add it if not.
     if (rlang::is_null(layers)) {
       layers <- extract_layers(frosting() %>% layer_predict())
-    } else if (! detect_layer(workflow, "layer_predict")) {
+    } else if (!detect_layer(workflow, "layer_predict")) {
       layers <- c(list(
         layer_predict_new(NULL, list(), list(), rand_id("predict_default"))),
         layers)

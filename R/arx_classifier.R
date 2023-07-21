@@ -56,7 +56,8 @@ arx_classifier <- function(
   )
 
   latest <- get_test_data(
-    workflows::extract_preprocessor(wf), epi_data, TRUE
+    hardhat::extract_preprocessor(wf), epi_data, TRUE, args_list$nafill_buffer,
+    args_list$forecast_date %||% max(epi_data$time_value)
   )
 
   wf <- generics::fit(wf, epi_data)
@@ -243,7 +244,8 @@ arx_class_args_list <- function(
     horizon = 7L,
     method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
     log_scale = FALSE,
-    additional_gr_args = list()
+    additional_gr_args = list(),
+    nafill_buffer = Inf
 ) {
 
   .lags <- lags
@@ -259,6 +261,7 @@ arx_class_args_list <- function(
   arg_is_lgl(log_scale)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
+  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
   if (!is.list(additional_gr_args)) {
     cli::cli_abort(
       c("`additional_gr_args` must be a {.cls list}.",
@@ -285,7 +288,8 @@ arx_class_args_list <- function(
            horizon,
            method,
            log_scale,
-           additional_gr_args
+           additional_gr_args,
+           nafill_buffer
     ),
     class = c("arx_class", "alist")
   )

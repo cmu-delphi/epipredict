@@ -4,35 +4,50 @@
 \alias{get_test_data}
 \title{Get test data for prediction based on longest lag period}
 \usage{
-get_test_data(recipe, x, fill_locf = FALSE, n_recent = NULL)
+get_test_data(
+  recipe,
+  x,
+  fill_locf = FALSE,
+  n_recent = NULL,
+  forecast_date = max(x$time_value)
+)
 }
 \arguments{
-\item{recipe}{A recipe object. The step will be added to the
-sequence of operations for this recipe.}
+\item{recipe}{A recipe object.}
 
-\item{x}{A data frame, tibble, or epi_df data set.}
+\item{x}{An epi_df. The typical usage is to
+pass the same data as that used for fitting the recipe.}
 
 \item{fill_locf}{Logical. Should we use \code{locf} to fill in missing data?}
 
-\item{n_recent}{Integer or NULL. If filling missing data with \code{locf=TRUE},
+\item{n_recent}{Integer or NULL. If filling missing data with \code{locf = TRUE},
 how far back are we willing to tolerate missing data? Larger values allow
-more filling. The default \code{NULL} will determine this from the maximum
-lags used in the \code{recipe}. For example, suppose n_recent = 3, then if the
-3 most recent observations in some region are all \code{NA}’s, we won’t be able
-to fill anything, and an error message will be thrown.}
+more filling. The default \code{NULL} will determine this from the
+the \code{recipe}. For example, suppose \code{n_recent = 3}, then if the
+3 most recent observations in any \code{geo_value} are all \code{NA}’s, we won’t be
+able to fill anything, and an error message will be thrown. (See details.)}
+
+\item{forecast_date}{By default, this is set to the maximum
+\code{time_value} in \code{x}. But if there is data latency such that recent \code{NA}'s
+should be filled, this may be \emph{after} the last available \code{time_value}.}
 }
 \value{
-A tibble with columns \code{geo_value}, \code{time_value}, any additional
+An object of the same type as \code{x} with columns \code{geo_value}, \code{time_value}, any additional
 keys, as well other variables in the original dataset.
 }
 \description{
 Based on the longest lag period in the recipe,
-\code{get_test_data()} creates an \link[epiprocess:epi_df]{epiprocess::epi_df}
+\code{get_test_data()} creates an \link{epi_df}
 with columns \code{geo_value}, \code{time_value}
 and other variables in the original dataset,
-which will be used to create test data.
+which will be used to create features necessary to produce forecasts.
 }
 \details{
+The minimum required (recent) data to produce a forecast is equal to
+the maximum lag requested (on any predictor) plus the longest horizon
+used if growth rate calculations are requested by the recipe. This is
+calculated internally.
+
 It also optionally fills missing values
 using the last-observation-carried-forward (LOCF) method. If this
 is not possible (say because there would be only \code{NA}'s in some location),

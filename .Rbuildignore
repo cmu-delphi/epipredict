@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^drafts$
+^\.Rprofile$
 ^man-roxygen$
 ^README\.Rmd$
 ^\.github$
@@ -11,5 +12,3 @@
 ^musings$
 ^data-raw$
 ^vignettes/articles$
-^doc$
-^Meta$
