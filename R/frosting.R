@@ -27,7 +27,7 @@
 #'
 #' # Update frosting in a workflow and predict
 #' f2 <- frosting() %>% layer_predict()
-#' wf2 <- wf %>% update_frosting(wf1, f2)
+#' wf2 <- wf1 %>% update_frosting(f2)
 #' p2 <- predict(wf2, latest)
 #' p2
 #'
