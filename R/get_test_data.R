@@ -6,6 +6,11 @@
 #' and other variables in the original dataset,
 #' which will be used to create test data.
 #'
+#' The minimum required (recent) data to produce a forecast is equal to
+#' the maximum lag requested (on any predictor) plus the longest horizon
+#' used if growth rate calculations are requested by the recipe. This is
+#' calculated internally.
+#'
 #' It also optionally fills missing values
 #' using the last-observation-carried-forward (LOCF) method. If this
 #' is not possible (say because there would be only `NA`'s in some location),
@@ -16,12 +21,12 @@
 #'  sequence of operations for this recipe.
 #' @param x A data frame, tibble, or epi_df data set.
 #' @param fill_locf Logical. Should we use `locf` to fill in missing data?
-#' @param n_recent Integer or NULL. If filling missing data with `locf=TRUE`,
+#' @param n_recent Integer or NULL. If filling missing data with `locf = TRUE`,
 #'   how far back are we willing to tolerate missing data? Larger values allow
-#'   more filling. The default `NULL` will determine this from the maximum
-#'   lags used in the `recipe`. For example, suppose n_recent = 3, then if the
+#'   more filling. The default `NULL` will determine this from the
+#'   the `recipe`. For example, suppose `n_recent = 3`, then if the
 #'   3 most recent observations in some region are all `NA`’s, we won’t be able
-#'   to fill anything, and an error message will be thrown.
+#'   to fill anything, and an error message will be thrown. (See details.)
 #' @param forecast_date Date. By default, this is set to the maximum
 #'   `time_value` in `x`. But if there is data latency such that recent `NA`'s
 #'   should be filled, this may be _after_ the last available `time_value`.

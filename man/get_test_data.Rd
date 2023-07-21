@@ -20,12 +20,12 @@ sequence of operations for this recipe.}
 
 \item{fill_locf}{Logical. Should we use \code{locf} to fill in missing data?}
 
-\item{n_recent}{Integer or NULL. If filling missing data with \code{locf=TRUE},
+\item{n_recent}{Integer or NULL. If filling missing data with \code{locf = TRUE},
 how far back are we willing to tolerate missing data? Larger values allow
-more filling. The default \code{NULL} will determine this from the maximum
-lags used in the \code{recipe}. For example, suppose n_recent = 3, then if the
+more filling. The default \code{NULL} will determine this from the
+the \code{recipe}. For example, suppose \code{n_recent = 3}, then if the
 3 most recent observations in some region are all \code{NA}’s, we won’t be able
-to fill anything, and an error message will be thrown.}
+to fill anything, and an error message will be thrown. (See details.)}
 
 \item{forecast_date}{Date. By default, this is set to the maximum
 \code{time_value} in \code{x}. But if there is data latency such that recent \code{NA}'s
@@ -43,6 +43,11 @@ and other variables in the original dataset,
 which will be used to create test data.
 }
 \details{
+The minimum required (recent) data to produce a forecast is equal to
+the maximum lag requested (on any predictor) plus the longest horizon
+used if growth rate calculations are requested by the recipe. This is
+calculated internally.
+
 It also optionally fills missing values
 using the last-observation-carried-forward (LOCF) method. If this
 is not possible (say because there would be only \code{NA}'s in some location),
