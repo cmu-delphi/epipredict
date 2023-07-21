@@ -3,11 +3,14 @@
 \name{add_frosting}
 \alias{add_frosting}
 \alias{remove_frosting}
+\alias{update_frosting}
 \title{Add frosting to a workflow}
 \usage{
 add_frosting(x, frosting, ...)
 
 remove_frosting(x)
+
+update_frosting(x, frosting, ...)
 }
 \arguments{
 \item{x}{A workflow}
@@ -40,8 +43,14 @@ wf1 <- wf \%>\% add_frosting(f)
 p1 <- predict(wf1, latest)
 p1
 
-# Remove frosting from the workflow and predict
-wf2 <- wf1 \%>\% remove_frosting()
+# Update frosting in a workflow and predict
+f2 <- frosting() \%>\% layer_predict()
+wf2 <- wf \%>\% update_frosting(wf1, f2)
 p2 <- predict(wf2, latest)
+p2
+
+# Remove frosting from the workflow and predict
+wf3 <- wf2 \%>\% remove_frosting()
+p2 <- predict(wf3, latest)
 p2
 }

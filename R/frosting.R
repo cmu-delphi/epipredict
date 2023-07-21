@@ -25,9 +25,15 @@
 #' p1 <- predict(wf1, latest)
 #' p1
 #'
-#' # Remove frosting from the workflow and predict
-#' wf2 <- wf1 %>% remove_frosting()
+#' # Update frosting in a workflow and predict
+#' f2 <- frosting() %>% layer_predict()
+#' wf2 <- wf %>% update_frosting(wf1, f2)
 #' p2 <- predict(wf2, latest)
+#' p2
+#'
+#' # Remove frosting from the workflow and predict
+#' wf3 <- wf2 %>% remove_frosting()
+#' p2 <- predict(wf3, latest)
 #' p2
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
@@ -64,7 +70,6 @@ remove_frosting <- function(x) {
   x
 }
 
-
 has_postprocessor_frosting <- function(x) {
   "frosting" %in% names(x$post$actions)
 }
@@ -84,8 +89,13 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
   invisible(x)
 }
 
-
-
+#' @rdname add_frosting
+#' @export
+update_frosting <- function(x, frosting, ...) {
+  rlang:::check_dots_empty()
+  x <- remove_frosting(x)
+  add_frosting(x, frosting)
+}
 
 #' @importFrom rlang caller_env
 add_postprocessor <- function(x, postprocessor, ..., call = caller_env()) {
