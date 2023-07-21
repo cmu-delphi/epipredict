@@ -1,10 +1,10 @@
 #' Get test data for prediction based on longest lag period
 #'
 #' Based on the longest lag period in the recipe,
-#' `get_test_data()` creates an [epiprocess::epi_df]
+#' `get_test_data()` creates an [epi_df]
 #' with columns `geo_value`, `time_value`
 #' and other variables in the original dataset,
-#' which will be used to create test data.
+#' which will be used to create features necessary to produce forecasts.
 #'
 #' The minimum required (recent) data to produce a forecast is equal to
 #' the maximum lag requested (on any predictor) plus the longest horizon
@@ -17,21 +17,21 @@
 #' it will produce an error suggesting alternative options to handle missing
 #' values with more advanced techniques.
 #'
-#' @param recipe A recipe object. The step will be added to the
-#'  sequence of operations for this recipe.
-#' @param x A data frame, tibble, or epi_df data set.
+#' @param recipe A recipe object.
+#' @param x An epi_df. The typical usage is to
+#'   pass the same data as that used for fitting the recipe.
 #' @param fill_locf Logical. Should we use `locf` to fill in missing data?
 #' @param n_recent Integer or NULL. If filling missing data with `locf = TRUE`,
 #'   how far back are we willing to tolerate missing data? Larger values allow
 #'   more filling. The default `NULL` will determine this from the
 #'   the `recipe`. For example, suppose `n_recent = 3`, then if the
-#'   3 most recent observations in some region are all `NA`’s, we won’t be able
-#'   to fill anything, and an error message will be thrown. (See details.)
-#' @param forecast_date Date. By default, this is set to the maximum
+#'   3 most recent observations in any `geo_value` are all `NA`’s, we won’t be
+#'   able to fill anything, and an error message will be thrown. (See details.)
+#' @param forecast_date By default, this is set to the maximum
 #'   `time_value` in `x`. But if there is data latency such that recent `NA`'s
 #'   should be filled, this may be _after_ the last available `time_value`.
 #'
-#' @return A tibble with columns `geo_value`, `time_value`, any additional
+#' @return An object of the same type as `x` with columns `geo_value`, `time_value`, any additional
 #'   keys, as well other variables in the original dataset.
 #' @examples
 #' # create recipe
@@ -50,7 +50,7 @@ get_test_data <- function(
     n_recent = NULL,
     forecast_date = max(x$time_value)
 ) {
-  stopifnot(is.data.frame(x))
+  if (!is_epi_df(x)) cli::cli_abort("`x` must be an `epi_df`.")
   arg_is_lgl(fill_locf)
   arg_is_scalar(fill_locf)
   arg_is_scalar(n_recent, allow_null = TRUE)
