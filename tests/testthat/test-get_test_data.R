@@ -79,6 +79,32 @@ test_that("NA fill behaves as desired", {
 
 })
 
+test_that("forecast date behaves", {
+
+  df <- tibble::tibble(
+    geo_value = rep(c("ca", "ny"), each = 10),
+    time_value = rep(1:10, times = 2),
+    x1 = rnorm(20),
+    x2 = rnorm(20)) %>%
+    epiprocess::as_epi_df()
+
+  r <- epi_recipe(df) %>%
+    step_epi_ahead(x1, ahead = 3) %>%
+    step_epi_lag(x1, x2, lag = c(1, 3))
+
+  expect_error(get_test_data(r, df, TRUE, forecast_date = 9)) # class error
+  expect_error(get_test_data(r, df, TRUE, forecast_date = 9L)) # fd too early
+  expect_error(get_test_data(r, df, forecast_date = 9L)) # fd too early
+
+  ndf <- get_test_data(r, df, TRUE, forecast_date = 12L)
+  expect_equal(max(ndf$time_value), 11L) # max lag was 1
+  expect_equal(tail(ndf$x1, 2), tail(ndf$x1, 4)[1:2]) # should have filled
+
+  ndf <- get_test_data(r, df, FALSE, forecast_date = 12L)
+  expect_equal(max(ndf$time_value), 11L)
+  expect_equal(tail(ndf$x1, 2), as.double(c(NA, NA)))
+})
+
 test_that("Omit end rows according to minimum lag when that’s not lag 0", {
   # Simple toy ex
 
