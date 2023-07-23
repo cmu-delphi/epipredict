@@ -58,6 +58,47 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
+#' Fit an `epi_workflow` object
+#'
+#' @description
+#' This is the `fit()` method for an `epi_workflow` object that
+#' estimates parameters for a given model from a set of data.
+#' Fitting an `epi_workflow` involves two main steps, which are
+#' preprocessing the data and fitting the underlying parsnip model.
+#'
+#' @inheritParams workflows::fit.workflow
+#'
+#' @param object an `epi_workflow` object
+#'
+#' @param x an `epi_df` of predictors and outcomes to use when
+#' fitting the `epi_workflow`
+#'
+#' @return The `epi_workflow` object, updated with a fit parsnip
+#' model in the `object$fit$fit` slot.
+#'
+#' @seealso workflows::fit-workflow
+#'
+#' @name fit-epi_workflow
+#' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#' filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7)
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf
+#'
+#' @export
+fit.epi_workflow <- function(object, x, ...){
+
+  object$fit$meta <- list(mtv = max(x$time_value))
+  #object$fit$as_of <- attributes(x)$metadata$as_of
+
+  NextMethod()
+}
 
 #' Predict from an epi_workflow
 #'
@@ -112,6 +153,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
       c("Can't predict on an untrained epi_workflow.",
         i = "Do you need to call `fit()`?"))
   }
+
   components <- list()
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
@@ -119,6 +161,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
   components$keys <- grab_forged_keys(components$forged,
                                       components$mold, new_data)
   components <- apply_frosting(object, components, new_data, ...)
+
   components$predictions
 }
 

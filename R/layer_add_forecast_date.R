@@ -82,9 +82,9 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 
 #' @export
 slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
-
+  wf <<- workflow
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(new_data$time_value)
+    max_time_value <- max(workflows::extract_preprocessor(wf)$mtv, wf$fit$meta$mtv, max(new_data$time_value))#wf$post$meta$mtv) # workflow$fit$max_train_time #max(new_data$time_value)
     object$forecast_date <- max_time_value
   }
 

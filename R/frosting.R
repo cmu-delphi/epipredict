@@ -229,6 +229,9 @@ apply_frosting.default <- function(workflow, components, ...) {
 apply_frosting.epi_workflow <-
   function(workflow, components, new_data, ...) {
 
+    #%% wf1$post$meta <<- list(mtv = max(new_data$time_value)) #%% change wf1 and possibly <<-
+    # assign("workflow$post$meta", list(mtv = max(new_data$time_value)), envir = .GlobalEnv)
+
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (!has_postprocessor(workflow)) {
@@ -267,6 +270,21 @@ apply_frosting.epi_workflow <-
 
     return(components)
   }
+
+#%% change_workflow = function(x){
+#  assign(deparse(substitute(x)), "changed", env=.GlobalEnv)
+#}
+
+#%% add_meta_post <- function(workflow, new_data){
+#
+#  workflow$post$meta <- list(mtv = max(new_data$time_value))
+#
+#  workflow
+#}
+
+#%% changeMe = function(x){
+#  assign(deparse(substitute(x)), "changed", env=.GlobalEnv)
+#}
 
 #' @export
 print.frosting <- function(x, form_width = 30, ...) {
