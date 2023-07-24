@@ -58,18 +58,6 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
-#' @export
-add_model <- function(x, spec, ..., formula = NULL)
-  UseMethod('add_model')
-
-#' @export
-remove_model <- function(x)
-  UseMethod('remove_model')
-
-#' @export
-update_model <- function(x, spec, ..., formula = NULL)
-  UseMethod('update_model')
-
 #' Add a model to an `epi_workflow`
 #'
 #' @seealso [workflows::add_model()]
@@ -120,11 +108,28 @@ update_model <- function(x, spec, ..., formula = NULL)
 #'
 #' wf <- remove_model(wf)
 #' wf
+#' @import workflows
+#' @export
+add_model <- function(x, spec, ..., formula = NULL)
+  UseMethod('add_model')
+
+#' @rdname add_model
+#' @export
+remove_model <- function(x)
+  UseMethod('remove_model')
+
+#' @rdname add_model
+#' @export
+update_model <- function(x, spec, ..., formula = NULL)
+  UseMethod('update_model')
+
+#' @rdname add_model
+#' @export
 add_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
   workflows::add_model(x, spec, formula = formula)
 }
 
-#' @rdname add_model.epi_workflow
+#' @rdname add_model
 #' @export
 remove_model.epi_workflow <- function(x) {
   workflows:::validate_is_workflow(x)
@@ -141,7 +146,7 @@ remove_model.epi_workflow <- function(x) {
   )
 }
 
-#' @rdname add_model.epi_workflow
+#' @rdname add_model
 #' @export
 update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
   rlang::check_dots_empty()
