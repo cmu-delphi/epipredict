@@ -96,7 +96,7 @@ reconstruct_layer <- function(x) {
     subclass = subclass,
     !!!args,
     .prefix = "",
-    .ns = "epipredict" #%% namespace is epipredict?
+    .ns = "epipredict"
   )
 
   rlang::eval_tidy(call_layer)
