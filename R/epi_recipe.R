@@ -223,7 +223,7 @@ is_epi_recipe <- function(x) {
 
 
 
-#' Add an epi_recipe to a workflow
+#' Add an `epi_recipe` to a workflow
 #'
 #' @seealso [workflows::add_recipe()]
 #' - `add_recipe()` specifies the terms of the model and any preprocessing that
@@ -272,11 +272,49 @@ is_epi_recipe <- function(x) {
 #'   add_epi_recipe(r)
 #'
 #' workflow
+#'
+#' r2 <- r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7)
+
+#' workflow <- update_epi_recipe(workflow, r2)
+#'
+#' workflow <- remove_epi_recipe(workflow)
+#'
+#' workflow
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
   workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
 }
 
+#' @rdname add_epi_recipe
+#' @export
+remove_epi_recipe <- function(x) {
+  workflows:::validate_is_workflow(x)
+
+  if (!workflows:::has_preprocessor_recipe(x)) {
+    rlang::warn("The workflow has no recipe preprocessor to remove.")
+  }
+
+  actions <- x$pre$actions
+  actions[["recipe"]] <- NULL
+
+  new_epi_workflow(
+    pre = workflows:::new_stage_pre(actions = actions),
+    fit = x$fit,
+    post = x$post,
+    trained = FALSE
+  )
+}
+
+#' @rdname add_epi_recipe
+#' @export
+update_epi_recipe <- function(
+    x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
+  rlang::check_dots_empty()
+  x <- remove_epi_recipe(x)
+  add_epi_recipe(x, recipe, blueprint = blueprint)
+}
 
 
 

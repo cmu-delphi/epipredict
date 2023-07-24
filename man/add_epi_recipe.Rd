@@ -2,9 +2,15 @@
 % Please edit documentation in R/epi_recipe.R
 \name{add_epi_recipe}
 \alias{add_epi_recipe}
-\title{Add an epi_recipe to a workflow}
+\alias{remove_epi_recipe}
+\alias{update_epi_recipe}
+\title{Add an \code{epi_recipe} to a workflow}
 \usage{
 add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
+
+remove_epi_recipe(x)
+
+update_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 }
 \arguments{
 \item{x}{A workflow or epi_workflow}
@@ -24,7 +30,7 @@ might be done automatically by the underlying model.}
 \code{x}, updated with a new recipe preprocessor.
 }
 \description{
-Add an epi_recipe to a workflow
+Add an \code{epi_recipe} to a workflow
 }
 \details{
 Has the same behaviour as \code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
@@ -48,6 +54,15 @@ r <- epi_recipe(jhu) \%>\%
 
 workflow <- epi_workflow() \%>\%
   add_epi_recipe(r)
+
+workflow
+
+r2 <- r <- epi_recipe(jhu) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7)
+workflow <- update_epi_recipe(workflow, r2)
+
+workflow <- remove_epi_recipe(workflow)
 
 workflow
 }
