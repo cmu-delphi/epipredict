@@ -32,7 +32,7 @@ layer <- function(subclass, ..., .prefix = "layer_") {
 
 #' Update post-processing `layer`
 #'
-#' This `layer` method for `update()` takes named arguments as `...` who's values
+#' This `layer` method for `update()` takes named arguments as `...` whose values
 #' will replace the elements of the same name in the actual post-processing layer.
 #' Analogous to `update.step()` from the `recipes` package.
 #'

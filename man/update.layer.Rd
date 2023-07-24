@@ -13,7 +13,7 @@
 in the layer, and the values are the new values to update the layer with.}
 }
 \description{
-This \code{layer} method for \code{update()} takes named arguments as \code{...} who's values
+This \code{layer} method for \code{update()} takes named arguments as \code{...} whose values
 will replace the elements of the same name in the actual post-processing layer.
 Analogous to \code{update.step()} from the \code{recipes} package.
 }
