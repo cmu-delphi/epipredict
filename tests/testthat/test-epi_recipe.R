@@ -138,7 +138,7 @@ test_that("add/update/remove epi_recipe works as intended", {
   expect_equal(class(steps[[3]]), c("step_epi_lag", "step"))
   expect_equal(steps[[3]]$lag, c(0, 7, 14))
 
-  r2 <- r <- epi_recipe(jhu) %>%
+  r2 <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 1)) %>%
     step_epi_ahead(death_rate, ahead = 1)
 

@@ -6,14 +6,14 @@
 \alias{update_model.epi_workflow}
 \title{Add a model to an \code{epi_workflow}}
 \usage{
-add_model.epi_workflow(x, spec, ..., formula = NULL)
+\method{add_model}{epi_workflow}(x, spec, ..., formula = NULL)
 
-remove_model.epi_workflow(x)
+\method{remove_model}{epi_workflow}(x)
 
-update_model.epi_workflow(x, spec, ..., formula = NULL)
+\method{update_model}{epi_workflow}(x, spec, ..., formula = NULL)
 }
 \arguments{
-\item{x}{An epi_workflow}
+\item{x}{An \code{epi_workflow}.}
 
 \item{spec}{A parsnip model specification.}
 
@@ -60,7 +60,6 @@ wf
 
 wf <- remove_model(wf)
 wf
-
 }
 \seealso{
 \code{\link[workflows:add_model]{workflows::add_model()}}

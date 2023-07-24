@@ -58,6 +58,17 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
+#' @export
+add_model <- function(x, spec, ..., formula = NULL)
+  UseMethod('add_model')
+
+#' @export
+remove_model <- function(x)
+  UseMethod('remove_model')
+
+#' @export
+update_model <- function(x, spec, ..., formula = NULL)
+  UseMethod('update_model')
 
 #' Add a model to an `epi_workflow`
 #'
@@ -76,7 +87,7 @@ is_epi_workflow <- function(x) {
 #'
 #' @inheritParams workflows::add_model
 #'
-#' @param x An epi_workflow
+#' @param x An `epi_workflow`.
 #'
 #' @param spec A parsnip model specification.
 #'
@@ -109,9 +120,8 @@ is_epi_workflow <- function(x) {
 #'
 #' wf <- remove_model(wf)
 #' wf
-#'
 add_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
-  workflows::add_model(x, spec, ..., formula)
+  workflows::add_model(x, spec, formula = formula)
 }
 
 #' @rdname add_model.epi_workflow

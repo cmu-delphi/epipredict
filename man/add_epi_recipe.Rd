@@ -57,7 +57,7 @@ workflow <- epi_workflow() \%>\%
 
 workflow
 
-r2 <- r <- epi_recipe(jhu) \%>\%
+r2 <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7)
 workflow <- update_epi_recipe(workflow, r2)
