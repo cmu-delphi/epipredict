@@ -267,9 +267,18 @@ apply_frosting.epi_workflow <-
       la <- layers[[l]]
       components <- slather(la, components, workflow, new_data)
     }
+    #%% mtv <- max(new_data$time_value)
+    #%% update_workflow_post(workflow, mtv)
 
     return(components)
   }
+
+#%% #' @export
+# update_workflow_post <- function(x, mtv) {
+#  substitute(x) <- "changed"
+#  #assign(deparse(substitute(x)), "changed", env=.GlobalEnv)
+#  #workflow$post$meta <- list(mtv = max(new_data$time_value))
+# }
 
 #%% change_workflow = function(x){
 #  assign(deparse(substitute(x)), "changed", env=.GlobalEnv)

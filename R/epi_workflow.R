@@ -70,8 +70,10 @@ is_epi_workflow <- function(x) {
 #'
 #' @param object an `epi_workflow` object
 #'
-#' @param x an `epi_df` of predictors and outcomes to use when
+#' @param data an `epi_df` of predictors and outcomes to use when
 #' fitting the `epi_workflow`
+#'
+#' @param control A [workflows::control_workflow()] object
 #'
 #' @return The `epi_workflow` object, updated with a fit parsnip
 #' model in the `object$fit$fit` slot.
@@ -92,10 +94,9 @@ is_epi_workflow <- function(x) {
 #' wf
 #'
 #' @export
-fit.epi_workflow <- function(object, x, ...){
+fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()){
 
-  object$fit$meta <- list(mtv = max(x$time_value))
-  #object$fit$as_of <- attributes(x)$metadata$as_of
+  object$fit$meta <- list(mtv = max(data$time_value), as_of = attributes(data)$metadata$as_of)
 
   NextMethod()
 }
@@ -153,7 +154,6 @@ predict.epi_workflow <- function(object, new_data, ...) {
       c("Can't predict on an untrained epi_workflow.",
         i = "Do you need to call `fit()`?"))
   }
-
   components <- list()
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
@@ -161,7 +161,6 @@ predict.epi_workflow <- function(object, new_data, ...) {
   components$keys <- grab_forged_keys(components$forged,
                                       components$mold, new_data)
   components <- apply_frosting(object, components, new_data, ...)
-
   components$predictions
 }
 

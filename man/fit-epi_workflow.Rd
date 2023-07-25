@@ -5,15 +5,17 @@
 \alias{fit.epi_workflow}
 \title{Fit an \code{epi_workflow} object}
 \usage{
-\method{fit}{epi_workflow}(object, x, ...)
+\method{fit}{epi_workflow}(object, data, ..., control = workflows::control_workflow())
 }
 \arguments{
 \item{object}{an \code{epi_workflow} object}
 
-\item{x}{an \code{epi_df} of predictors and outcomes to use when
+\item{data}{an \code{epi_df} of predictors and outcomes to use when
 fitting the \code{epi_workflow}}
 
 \item{...}{Not used}
+
+\item{control}{A \code{\link[workflows:control_workflow]{workflows::control_workflow()}} object}
 }
 \value{
 The \code{epi_workflow} object, updated with a fit parsnip

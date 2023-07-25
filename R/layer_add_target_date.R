@@ -2,8 +2,9 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param target_date The target date to add as a column to the `epi_df`.
-#' By default, this is the maximum `time_value` from the processed test
-#' data plus `ahead`, where `ahead` has been specified in preprocessing
+#' By default, this is the maximum `time_value` (from the data used in
+#' pre-processing, fitting the model, and postprocessing) plus `ahead`,
+#' where `ahead` has been specified in preprocessing
 #' (most likely in `step_epi_ahead`). The user may override this with a
 #' date of their own (that will usually be in the form "yyyy-mm-dd").
 #' @param id a random id string
@@ -68,7 +69,7 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   the_recipe <- workflows::extract_recipe(workflow)
 
   if (is.null(object$target_date)) {
-    max_time_value <- max(new_data$time_value)
+    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv, workflow$fit$meta$mtv, max(new_data$time_value))
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
 
     if (is.null(ahead)){

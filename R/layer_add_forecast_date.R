@@ -4,17 +4,18 @@
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
 #' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
 #' when the forecast date is left unspecified, it is set to the maximum time
-#' value in the test data after any processing (ex. leads and lags) has been
-#' applied.
+#' value from the data used in pre-processing, fitting the model, and
+#' postprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
 #' @details To use this function, either specify a forecast date or leave the
 #'  forecast date unspecifed here. In the latter case, the forecast date will
-#'  be set as the maximum time value in the processed test data. In any case,
-#'  when the forecast date is less than the most recent update date of the data
-#'  (ie. the `as_of` value), an appropriate warning will be thrown.
+#'  be set as the maximum time value from the data used in pre-processing,
+#'  fitting the model, and postprocessing. In any case, when the forecast date is
+#'  less than the maximum `as_of` value (from the data used pre-processing,
+#'  model fitting, and postprocessing), an appropriate warning will be thrown.
 #'
 #' @export
 #' @examples
@@ -82,14 +83,19 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 
 #' @export
 slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
-  wf <<- workflow
+  #%% wf <<- workflow
+  #%% comp <<- components
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(workflows::extract_preprocessor(wf)$mtv, wf$fit$meta$mtv, max(new_data$time_value))#wf$post$meta$mtv) # workflow$fit$max_train_time #max(new_data$time_value)
+    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv, workflow$fit$meta$mtv, max(new_data$time_value)) #%% wf$post$meta$mtv) # workflow$fit$max_train_time #max(new_data$time_value)
     object$forecast_date <- max_time_value
   }
+  as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
+  as_of_fit <- workflow$fit$meta$as_of
+  as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
+  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post)) #%% as.Date(attributes(components$keys)$metadata$as_of)
 
+  # It would be nice to say that forecast_date is >= to the max of all of them.
   if (object$forecast_date < as_of_date) {
     cli_warn(
       c("The forecast_date is less than the most ",

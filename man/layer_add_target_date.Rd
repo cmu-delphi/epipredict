@@ -14,8 +14,9 @@ layer_add_target_date(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{target_date}{The target date to add as a column to the \code{epi_df}.
-By default, this is the maximum \code{time_value} from the processed test
-data plus \code{ahead}, where \code{ahead} has been specified in preprocessing
+By default, this is the maximum \code{time_value} (from the data used in
+pre-processing, fitting the model, and postprocessing) plus \code{ahead},
+where \code{ahead} has been specified in preprocessing
 (most likely in \code{step_epi_ahead}). The user may override this with a
 date of their own (that will usually be in the form "yyyy-mm-dd").}
 
