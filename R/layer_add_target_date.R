@@ -2,11 +2,10 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param target_date The target date to add as a column to the `epi_df`.
-#' By default, this is the maximum `time_value` (from the data used in
-#' pre-processing, fitting the model, and postprocessing) plus `ahead`,
-#' where `ahead` has been specified in preprocessing
-#' (most likely in `step_epi_ahead`). The user may override this with a
-#' date of their own (that will usually be in the form "yyyy-mm-dd").
+#' By default, this is the forecast date plus `ahead` (from `step_epi_ahead`
+#' in the `epi_recipe`) if there is a `layer_add_forecast_date` in the
+#' `epi_workflow`. If there's no such layer, then the user may specify
+#' their own target date with a date (of the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -28,8 +27,9 @@
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- get_test_data(r, jhu)
 #'
-#' # Use ahead from preprocessing
+#' # Use ahead + forecast date
 #' f <- frosting() %>% layer_predict() %>%
+#'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
 #'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
@@ -37,15 +37,25 @@
 #' p <- predict(wf1, latest)
 #' p
 #'
-#' # Override default behaviour by specifying own target date
-#' f2 <- frosting() %>%
-#'   layer_predict() %>%
-#'   layer_add_target_date(target_date = "2022-01-08") %>%
+#' # Use ahead + max time value from pre, fit, post
+#' # which is the same if include `layer_add_forecast_date()`
+#' f <- frosting() %>% layer_predict() %>%
+#'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
 #' p2 <- predict(wf2, latest)
 #' p2
+#'
+#' # Specify own target date
+#' f3 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_add_target_date(target_date = "2022-01-08") %>%
+#'   layer_naomit(.pred)
+#' wf3 <- wf %>% add_frosting(f3)
+#'
+#' p3 <- predict(wf3, latest)
+#' p3
 layer_add_target_date <-
   function(frosting, target_date = NULL, id = rand_id("add_target_date")) {
     target_date <- arg_to_date(target_date, allow_null = TRUE)
@@ -67,14 +77,26 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
 
   the_recipe <- workflows::extract_recipe(workflow)
+  the_frosting <- extract_frosting(workflow)
 
-  if (is.null(object$target_date)) {
-    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv, workflow$fit$meta$mtv, max(new_data$time_value))
+  if (detect_layer(the_frosting, "layer_add_forecast_date") &&
+      !is.null(extract_argument(the_frosting,
+                       "layer_add_forecast_date", "forecast_date"))) {
+    forecast_date <- extract_argument(the_frosting,
+                                       "layer_add_forecast_date", "forecast_date")
+
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
 
-    if (is.null(ahead)){
-      stop("`ahead` must be specified in preprocessing.")
-    }
+    target_date = forecast_date + ahead
+
+  } else if (is.null(object$target_date) ||
+             detect_layer(the_frosting, "layer_add_forecast_date")) {
+    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv,
+                          workflow$fit$meta$mtv,
+                          max(new_data$time_value))
+
+    ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
+
     target_date = max_time_value + ahead
   } else{
     target_date = as.Date(object$target_date)

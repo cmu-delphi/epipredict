@@ -83,19 +83,19 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 
 #' @export
 slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
-  #%% wf <<- workflow
-  #%% comp <<- components
+
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv, workflow$fit$meta$mtv, max(new_data$time_value)) #%% wf$post$meta$mtv) # workflow$fit$max_train_time #max(new_data$time_value)
+    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv,
+                          workflow$fit$meta$mtv,
+                          max(new_data$time_value))
     object$forecast_date <- max_time_value
   }
   as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
   as_of_fit <- workflow$fit$meta$as_of
   as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post)) #%% as.Date(attributes(components$keys)$metadata$as_of)
+  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post))
 
-  # It would be nice to say that forecast_date is >= to the max of all of them.
   if (object$forecast_date < as_of_date) {
     cli_warn(
       c("The forecast_date is less than the most ",

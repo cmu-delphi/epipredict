@@ -14,11 +14,10 @@ layer_add_target_date(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{target_date}{The target date to add as a column to the \code{epi_df}.
-By default, this is the maximum \code{time_value} (from the data used in
-pre-processing, fitting the model, and postprocessing) plus \code{ahead},
-where \code{ahead} has been specified in preprocessing
-(most likely in \code{step_epi_ahead}). The user may override this with a
-date of their own (that will usually be in the form "yyyy-mm-dd").}
+By default, this is the forecast date plus \code{ahead} (from \code{step_epi_ahead}
+in the \code{epi_recipe}) if there is a \code{layer_add_forecast_date} in the
+\code{epi_workflow}. If there's no such layer, then the user may specify
+their own target date with a date (of the form "yyyy-mm-dd").}
 
 \item{id}{a random id string}
 }
@@ -45,8 +44,9 @@ r <- epi_recipe(jhu) \%>\%
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- get_test_data(r, jhu)
 
-# Use ahead from preprocessing
+# Use ahead + forecast date
 f <- frosting() \%>\% layer_predict() \%>\%
+  layer_add_forecast_date(forecast_date = "2022-05-31") \%>\%
   layer_add_target_date() \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
@@ -54,13 +54,23 @@ wf1 <- wf \%>\% add_frosting(f)
 p <- predict(wf1, latest)
 p
 
-# Override default behaviour by specifying own target date
-f2 <- frosting() \%>\%
-  layer_predict() \%>\%
-  layer_add_target_date(target_date = "2022-01-08") \%>\%
+# Use ahead + max time value from pre, fit, post
+# which is the same if include `layer_add_forecast_date()`
+f <- frosting() \%>\% layer_predict() \%>\%
+  layer_add_target_date() \%>\%
   layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
 
 p2 <- predict(wf2, latest)
 p2
+
+# Specify own target date
+f3 <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_add_target_date(target_date = "2022-01-08") \%>\%
+  layer_naomit(.pred)
+wf3 <- wf \%>\% add_frosting(f3)
+
+p3 <- predict(wf3, latest)
+p3
 }
