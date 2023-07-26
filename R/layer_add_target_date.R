@@ -39,7 +39,7 @@
 #'
 #' # Use ahead + max time value from pre, fit, post
 #' # which is the same if include `layer_add_forecast_date()`
-#' f <- frosting() %>% layer_predict() %>%
+#' f2 <- frosting() %>% layer_predict() %>%
 #'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
