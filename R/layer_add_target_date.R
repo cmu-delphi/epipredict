@@ -1,11 +1,11 @@
 #' Postprocessing step to add the target date
 #'
 #' @param frosting a `frosting` postprocessor
-#' @param target_date The target date to add as a column to the `epi_df`.
-#' By default, this is the forecast date plus `ahead` (from `step_epi_ahead`
-#' in the `epi_recipe`) if there is a `layer_add_forecast_date` in the
-#' `epi_workflow`. If there's no such layer, then the user may specify
-#' their own target date with a date (of the form "yyyy-mm-dd").
+#' @param target_date The target date to add as a column to the
+#' `epi_df`. By default, this is the forecast date plus `ahead`
+#' (from `step_epi_ahead` in the `epi_recipe`). If there's no
+#' forecast date layer, then the user can specify their own
+#' target date (of the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor

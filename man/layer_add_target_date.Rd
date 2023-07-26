@@ -13,11 +13,11 @@ layer_add_target_date(
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
-\item{target_date}{The target date to add as a column to the \code{epi_df}.
-By default, this is the forecast date plus \code{ahead} (from \code{step_epi_ahead}
-in the \code{epi_recipe}) if there is a \code{layer_add_forecast_date} in the
-\code{epi_workflow}. If there's no such layer, then the user may specify
-their own target date with a date (of the form "yyyy-mm-dd").}
+\item{target_date}{The target date to add as a column to the
+\code{epi_df}. By default, this is the forecast date plus \code{ahead}
+(from \code{step_epi_ahead} in the \code{epi_recipe}). If there's no
+forecast date layer, then the user can specify their own
+target date (of the form "yyyy-mm-dd").}
 
 \item{id}{a random id string}
 }
