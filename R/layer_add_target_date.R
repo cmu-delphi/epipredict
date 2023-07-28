@@ -2,10 +2,13 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param target_date The target date to add as a column to the
-#' `epi_df`. By default, this is the forecast date plus `ahead`
-#' (from `step_epi_ahead` in the `epi_recipe`). If there's no
-#' forecast date layer, then the user can specify their own
-#' target date (of the form "yyyy-mm-dd").
+#' `epi_df`. If there's a forecast date specified in a layer, then
+#' it is the forecast date plus `ahead` (from `step_epi_ahead` in
+#' the `epi_recipe`). Otherwise, it is the maximum `time_value`
+#' (from the data used in pre-processing, fitting the model, and
+#' postprocessing) plus `ahead`, where `ahead` has been specified in
+#'  preprocessing. The user may override these by specifying a
+#' target date of their own (of the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -79,27 +82,27 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   the_recipe <- workflows::extract_recipe(workflow)
   the_frosting <- extract_frosting(workflow)
 
-  if (detect_layer(the_frosting, "layer_add_forecast_date") &&
-      !is.null(extract_argument(the_frosting,
-                       "layer_add_forecast_date", "forecast_date"))) {
-    forecast_date <- extract_argument(the_frosting,
-                                       "layer_add_forecast_date", "forecast_date")
-
-    ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
-
-    target_date = forecast_date + ahead
-
-  } else if (is.null(object$target_date) ||
-             detect_layer(the_frosting, "layer_add_forecast_date")) {
-    max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv,
-                          workflow$fit$meta$mtv,
-                          max(new_data$time_value))
-
-    ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
-
-    target_date = max_time_value + ahead
-  } else{
+  if (!is.null(object$target_date)) {
     target_date = as.Date(object$target_date)
+  } else { # null target date case
+    if (detect_layer(the_frosting, "layer_add_forecast_date") &&
+        !is.null(extract_argument(the_frosting,
+                                  "layer_add_forecast_date", "forecast_date"))) {
+      forecast_date <- extract_argument(the_frosting,
+                                        "layer_add_forecast_date", "forecast_date")
+
+      ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
+
+      target_date = forecast_date + ahead
+    } else {
+      max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv,
+                            workflow$fit$meta$mtv,
+                            max(new_data$time_value))
+
+      ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
+
+      target_date = max_time_value + ahead
+    }
   }
 
   components$predictions <- dplyr::bind_cols(components$predictions,
