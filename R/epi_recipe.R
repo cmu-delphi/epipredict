@@ -131,7 +131,7 @@ epi_recipe.epi_df <-
       term_info = var_info,
       steps = NULL,
       template = x[1,],
-      mtv = max(x$time_value),
+      max_time_value = max(x$time_value),
       levels = NULL,
       retained = NA
     )
@@ -375,7 +375,7 @@ prep.epi_recipe <- function(
   } else {
     x$template <- training[0, ]
   }
-  x$mtv <- max(training$time_value)
+  x$max_time_value <- max(training$time_value)
   x$tr_info <- tr_data
   x$levels <- lvls
   x$orig_lvls <- orig_lvls

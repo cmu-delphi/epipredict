@@ -95,8 +95,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
 
       target_date = forecast_date + ahead
     } else {
-      max_time_value <- max(workflows::extract_preprocessor(workflow)$mtv,
-                            workflow$fit$meta$mtv,
+      max_time_value <- max(workflows::extract_preprocessor(workflow)$max_time_value,
+                            workflow$fit$meta$max_time_value,
                             max(new_data$time_value))
 
       ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
