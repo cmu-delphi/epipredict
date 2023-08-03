@@ -27,6 +27,22 @@
 #'
 #' out <- arx_forecaster(jhu, "death_rate",
 #'   c("case_rate", "death_rate"))
+#' # gives the same predictions as
+#' er <- epi_recipe(jhu) %>%
+#'   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_residual_quantiles() %>%
+#'   layer_add_forecast_date() %>%
+#'   layer_add_target_date() %>%
+#'   layer_threshold(starts_with(".pred"))
+#' test_data <- get_test_data(er, jhu)
+#' pred <- epi_workflow(er, linear_reg()) %>%
+#'   fit(jhu) %>%
+#'   add_frosting(f) %>%
+#'   predict(test_data)
 #'
 #' out <- arx_forecaster(jhu, "death_rate",
 #'   c("case_rate", "death_rate"), trainer = quantile_reg(),
