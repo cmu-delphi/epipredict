@@ -203,6 +203,7 @@ bake.step_population_scaling <- function(object,
 
   pop_col = rlang::sym(object$df_pop_col)
   suffix = ifelse(object$create_new, object$suffix, "")
+  col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
   dplyr::left_join(new_data,
                    object$df,
@@ -211,8 +212,7 @@ bake.step_population_scaling <- function(object,
         ~.x * object$rate_rescaling /!!pop_col ,
         .names = "{.col}{suffix}")) %>%
     # removed so the models do not use the population column
-   dplyr::select(-!!pop_col)
-
+    dplyr::select(-any_of(col_to_remove))
 }
 
 #' @export
