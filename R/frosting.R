@@ -20,7 +20,9 @@
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
 #' # Add frosting to a workflow and predict
-#' f <- frosting() %>% layer_predict() %>% layer_naomit(.pred)
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #' p1 <- predict(wf1, latest)
 #' p1
@@ -78,7 +80,8 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
   has_postprocessor <- has_postprocessor_frosting(x)
   if (!has_postprocessor) {
     message <- c("The workflow must have a frosting postprocessor.",
-                 i = "Provide one with `add_frosting()`.")
+      i = "Provide one with `add_frosting()`."
+    )
     rlang::abort(message, call = call)
   }
   invisible(x)
@@ -139,8 +142,8 @@ new_frosting <- function() {
 #' @examples
 #'
 #' # Toy example to show that frosting can be created and added for postprocessing
-#'  f <- frosting()
-#'  wf <- epi_workflow() %>% add_frosting(f)
+#' f <- frosting()
+#' wf <- epi_workflow() %>% add_frosting(f)
 #'
 #' # A more realistic example
 #' jhu <- case_death_rate_subset %>%
@@ -164,8 +167,10 @@ new_frosting <- function() {
 #' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
-    rlang::abort(c("Currently, no arguments to `frosting()` are allowed",
-                 "to be non-null."))
+    rlang::abort(c(
+      "Currently, no arguments to `frosting()` are allowed",
+      "to be non-null."
+    ))
   }
   out <- new_frosting()
 }
@@ -185,14 +190,18 @@ extract_frosting <- function(x, ...) {
 #' @export
 extract_frosting.default <- function(x, ...) {
   abort(c("Frosting is only available for epi_workflows currently.",
-          i = "Can you use `epi_workflow()` instead of `workflow()`?"))
+    i = "Can you use `epi_workflow()` instead of `workflow()`?"
+  ))
   invisible(x)
 }
 
 #' @export
 extract_frosting.epi_workflow <- function(x, ...) {
-  if (has_postprocessor_frosting(x)) return(x$post$actions$frosting$frosting)
-  else cli_stop("The epi_workflow does not have a postprocessor.")
+  if (has_postprocessor_frosting(x)) {
+    return(x$post$actions$frosting$frosting)
+  } else {
+    cli_stop("The epi_workflow does not have a postprocessor.")
+  }
 }
 
 #' Apply postprocessing to a fitted workflow
@@ -215,7 +224,8 @@ apply_frosting <- function(workflow, ...) {
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
     abort(c("Postprocessing is only available for epi_workflows currently.",
-            i = "Can you use `epi_workflow()` instead of `workflow()`?"))
+      i = "Can you use `epi_workflow()` instead of `workflow()`?"
+    ))
   }
   return(components)
 }
@@ -228,24 +238,29 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @export
 apply_frosting.epi_workflow <-
   function(workflow, components, new_data, ...) {
-
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (!has_postprocessor(workflow)) {
       components$predictions <- predict(
-        the_fit, components$forged$predictors, ...)
+        the_fit, components$forged$predictors, ...
+      )
       components$predictions <- dplyr::bind_cols(
-        components$keys, components$predictions)
+        components$keys, components$predictions
+      )
       return(components)
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      rlang::warn(c("Only postprocessors of class frosting are allowed.",
-                    "Returning unpostprocessed predictions."))
+      rlang::warn(c(
+        "Only postprocessors of class frosting are allowed.",
+        "Returning unpostprocessed predictions."
+      ))
       components$predictions <- predict(
-        the_fit, components$forged$predictors, ...)
+        the_fit, components$forged$predictors, ...
+      )
       components$predictions <- dplyr::bind_cols(
-        components$keys, components$predictions)
+        components$keys, components$predictions
+      )
       return(components)
     }
 
@@ -255,9 +270,12 @@ apply_frosting.epi_workflow <-
     if (rlang::is_null(layers)) {
       layers <- extract_layers(frosting() %>% layer_predict())
     } else if (!detect_layer(workflow, "layer_predict")) {
-      layers <- c(list(
-        layer_predict_new(NULL, list(), list(), rand_id("predict_default"))),
-        layers)
+      layers <- c(
+        list(
+          layer_predict_new(NULL, list(), list(), rand_id("predict_default"))
+        ),
+        layers
+      )
     }
 
     for (l in seq_along(layers)) {
@@ -283,14 +301,15 @@ print.frosting <- function(x, form_width = 30, ...) {
 
 # Currently only used in the workflow printing
 print_frosting <- function(x, ...) {
-
   layers <- x$layers
   n_layers <- length(layers)
   layer <- ifelse(n_layers == 1L, "Layer", "Layers")
   n_layers_msg <- glue::glue("{n_layers} Frosting {layer}")
   cat_line(n_layers_msg)
 
-  if (n_layers == 0L) return(invisible(x))
+  if (n_layers == 0L) {
+    return(invisible(x))
+  }
 
   cat_line("")
 
@@ -316,7 +335,9 @@ print_frosting <- function(x, ...) {
 }
 
 print_postprocessor <- function(x) {
-  if (!has_postprocessor_frosting(x)) return(invisible(x))
+  if (!has_postprocessor_frosting(x)) {
+    return(invisible(x))
+  }
 
   header <- cli::rule("Postprocessor")
   cat_line(header)

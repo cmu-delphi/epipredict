@@ -5,4 +5,3 @@ all_epi_keys <- function() {
 base_epi_keys <- function() {
   union(has_role("time_value"), has_role("geo_value"))
 }
-

@@ -75,14 +75,14 @@ To create and train a simple auto-regressive forecaster to predict the death rat
 
 ```{r make-forecasts, warning=FALSE}
 two_week_ahead <- arx_forecaster(
-  jhu, 
-  outcome = "death_rate", 
+  jhu,
+  outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
-    lags = list(c(0,1,2,3,7,14), c(0,7,14)),
+    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
     ahead = 14
   )
-) 
+)
 ```
 
 In this case, we have used a number of different lags for the case rate, while only using 3 weekly lags for the death rate (as predictors). The result is both a fitted model object which could be used any time in the future to create different forecasts, as well as a set of predicted values (and prediction intervals) for each location 14 days after the last available time value in the data.
@@ -111,12 +111,12 @@ feel very familiar to anyone working in `R`+`{tidyverse}`.
 **Simple linear autoregressive model with scaling (modular)**
 
 ```{r ideal-framework, eval=FALSE}
-my_fcaster = new_epi_predictor() %>%
+my_fcaster <- new_epi_predictor() %>%
   add_preprocessor(scaler, var = cases, by = pop) %>%
   add_preprocessor(lagger, var = dv_cli, lags = c(0, 7, 14)) %>%
   add_trainer(lm) %>%
   add_predictor(lm.predict) %>%
-  add_postprocessor(scaler, by = 1/pop)
+  add_postprocessor(scaler, by = 1 / pop)
 ```
 
 Then you could run this on an `epi_df` with one line.

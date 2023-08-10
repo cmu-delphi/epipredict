@@ -10,11 +10,13 @@ new_quantiles <- function(q = double(), tau = double()) {
     q <- q[o]
     tau <- tau[o]
   }
-  if (is.unsorted(q, na.rm = TRUE))
+  if (is.unsorted(q, na.rm = TRUE)) {
     rlang::abort("`q[order(tau)]` produces unsorted quantiles.")
+  }
 
   new_rcrd(list(q = q, tau = tau),
-           class = c("dist_quantiles", "dist_default"))
+    class = c("dist_quantiles", "dist_default")
+  )
 }
 
 #' @export
@@ -42,7 +44,7 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #'
 #' @import vctrs
 #' @examples
-#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 #' quantile(dstn, p = c(.1, .25, .5, .9))
 #' median(dstn)
 #'
@@ -74,13 +76,15 @@ dist_quantiles <- function(x, tau) {
 #' dstn <- dist_normal(c(10, 2), c(5, 10))
 #' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 #'
-#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 #' # because this distribution is already quantiles, any extra quantiles are
 #' # appended
 #' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 #'
-#' dstn <- c(dist_normal(c(10, 2), c(5, 10)),
-#'   dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8))))
+#' dstn <- c(
+#'   dist_normal(c(10, 2), c(5, 10)),
+#'   dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
+#' )
 #' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 extrapolate_quantiles <- function(x, p, ...) {
   UseMethod("extrapolate_quantiles")
@@ -120,8 +124,8 @@ is_dist_quantiles <- function(x) {
 #' @export
 #'
 #' @examples
-#' edf <- case_death_rate_subset[1:3,]
-#' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5/6, 2:4/5, 3:10/11))
+#' edf <- case_death_rate_subset[1:3, ]
+#' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
 #'
 #' edf_nested <- edf %>% dplyr::mutate(q = nested_quantiles(q))
 #' edf_nested %>% tidyr::unnest(q)
@@ -177,7 +181,9 @@ pivot_quantiles <- function(.data, ...) {
     nms <- cols[!checks]
     cli::cli_abort(
       c("Quantiles must be the same length and have the same set of taus.",
-        i = "Check failed for variables(s) {.var {nms}}."))
+        i = "Check failed for variables(s) {.var {nms}}."
+      )
+    )
   }
   if (length(cols) > 1L) {
     for (col in cols) {
@@ -219,15 +225,14 @@ quantile.dist_quantiles <- function(x, probs, ...,
                                     left_tail = c("normal", "exponential"),
                                     right_tail = c("normal", "exponential")) {
   arg_is_probabilities(probs)
-  middle = match.arg(middle)
-  left_tail = match.arg(left_tail)
-  right_tail = match.arg(right_tail)
+  middle <- match.arg(middle)
+  left_tail <- match.arg(left_tail)
+  right_tail <- match.arg(right_tail)
   quantile_extrapolate(x, probs, middle, left_tail, right_tail)
 }
 
 
 quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
-
   tau <- field(x, "tau")
   qvals <- field(x, "q")
   r <- range(tau, na.rm = TRUE)
@@ -235,10 +240,14 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
 
   # short circuit if we aren't actually extrapolating
   # matches to ~15 decimals
-  if (all(tau_out %in% tau)) return(qvals[match(tau_out, tau)])
+  if (all(tau_out %in% tau)) {
+    return(qvals[match(tau_out, tau)])
+  }
   if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
-    rlang::warn(c("Quantile extrapolation is not possible with fewer than",
-                  "3 quantiles or when the probs don't span [.25, .75]"))
+    rlang::warn(c(
+      "Quantile extrapolation is not possible with fewer than",
+      "3 quantiles or when the probs don't span [.25, .75]"
+    ))
     return(qvals_out)
   }
 
@@ -248,11 +257,15 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
 
   if (middle == "cubic") {
     method <- "cubic"
-    result <- tryCatch({
-      Q <- stats::splinefun(tau, qvals, method = "hyman")
-      qvals_out[indm] <- Q(tau_out[indm])
-      quartiles <- Q(c(.25, .5, .75))},
-      error = function(e) { return(NA) }
+    result <- tryCatch(
+      {
+        Q <- stats::splinefun(tau, qvals, method = "hyman")
+        qvals_out[indm] <- Q(tau_out[indm])
+        quartiles <- Q(c(.25, .5, .75))
+      },
+      error = function(e) {
+        return(NA)
+      }
     )
   }
   if (middle == "linear" || any(is.na(result))) {
@@ -262,19 +275,21 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
 
 
   if (any(indm)) {
-    qvals_out[indm] <- switch(
-      method,
+    qvals_out[indm] <- switch(method,
       linear = stats::approx(tau, qvals, tau_out[indm])$y,
       cubic = Q(tau_out[indm])
-    )}
+    )
+  }
   if (any(indl)) {
     qvals_out[indl] <- tail_extrapolate(
       tau_out[indl], quartiles, "left", left_tail
-    )}
+    )
+  }
   if (any(indr)) {
-      qvals_out[indr] <- tail_extrapolate(
-        tau_out[indr], quartiles, "right", right_tail
-      )}
+    qvals_out[indr] <- tail_extrapolate(
+      tau_out[indr], quartiles, "right", right_tail
+    )
+  }
   qvals_out
 }
 
@@ -287,17 +302,21 @@ tail_extrapolate <- function(tau_out, quartiles, tail, type) {
     p <- c(.75, .5)
     par <- quartiles[3:2]
   }
-  if (type == "normal") return(norm_tail_q(p, par, tau_out))
-  if (type == "exponential") return(exp_tail_q(p, par, tau_out))
+  if (type == "normal") {
+    return(norm_tail_q(p, par, tau_out))
+  }
+  if (type == "exponential") {
+    return(exp_tail_q(p, par, tau_out))
+  }
 }
 
 
 exp_q_par <- function(q) {
   # tau should always be c(.75, .5) or c(.25, .5)
   iqr <- 2 * abs(diff(q))
-  s <- iqr / (2*log(2))
+  s <- iqr / (2 * log(2))
   m <- q[2]
-  return(list(m=m, s=s))
+  return(list(m = m, s = s))
 }
 
 exp_tail_q <- function(p, q, target) {
@@ -315,7 +334,7 @@ norm_q_par <- function(q) {
   iqr <- 2 * abs(diff(q))
   s <- iqr / 1.34897950039 # abs(diff(qnorm(c(.75, .25))))
   m <- q[2]
-  return(list(m=m, s=s))
+  return(list(m = m, s = s))
 }
 
 norm_tail_q <- function(p, q, target) {
@@ -335,8 +354,10 @@ Math.dist_quantiles <- function(x, ...) {
 #' @method Ops dist_quantiles
 #' @export
 Ops.dist_quantiles <- function(e1, e2) {
-  is_quantiles <- c(inherits(e1, "dist_quantiles"),
-                    inherits(e2, "dist_quantiles"))
+  is_quantiles <- c(
+    inherits(e1, "dist_quantiles"),
+    inherits(e2, "dist_quantiles")
+  )
   is_dist <- c(inherits(e1, "dist_default"), inherits(e2, "dist_default"))
   tau1 <- tau2 <- NULL
   if (is_quantiles[1]) {
@@ -353,8 +374,11 @@ Ops.dist_quantiles <- function(e1, e2) {
       "You can't perform arithmetic between two distributions like this."
     )
   } else {
-    if (is_quantiles[1]) q2 <- e2
-    else q1 <- e1
+    if (is_quantiles[1]) {
+      q2 <- e2
+    } else {
+      q1 <- e1
+    }
   }
   q <- vctrs::vec_arith(.Generic, q1, q2)
   new_quantiles(q = q, tau = tau)

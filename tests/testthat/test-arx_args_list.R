@@ -8,7 +8,7 @@ test_that("arx_args checks inputs", {
   expect_error(arx_args_list(n_training = -1))
   expect_error(arx_args_list(n_training = 1.5))
   expect_error(arx_args_list(lags = c(-1, 0)))
-  expect_error(arx_args_list(lags = list(c(1:5,6.5), 2:8)))
+  expect_error(arx_args_list(lags = list(c(1:5, 6.5), 2:8)))
 
   expect_error(arx_args_list(symmetrize = 4))
   expect_error(arx_args_list(nonneg = 4))
@@ -53,27 +53,36 @@ test_that("arx forecaster disambiguates quantiles", {
 })
 
 test_that("arx_lags_validator handles named & unnamed lists as expected", {
-
   # Fully named list of lags in order of predictors
   pred_vec <- c("death_rate", "case_rate")
   lags_init_fn <- list(death_rate = c(0, 7, 14), case_rate = c(0, 1, 2, 3, 7, 14))
 
-  expect_equal(arx_lags_validator(pred_vec, lags_init_fn),
-               lags_init_fn)
+  expect_equal(
+    arx_lags_validator(pred_vec, lags_init_fn),
+    lags_init_fn
+  )
 
   # Fully named list of lags not in order of predictors
   lags_finit_fn_switch <- list(case_rate = c(0, 1, 2, 3, 7, 14), death_rate = c(0, 7, 14))
 
-  expect_equal(arx_lags_validator(pred_vec, lags_finit_fn_switch),
-               list(death_rate = c(0, 7, 14), case_rate = c(0, 1, 2, 3, 7, 14)))
+  expect_equal(
+    arx_lags_validator(pred_vec, lags_finit_fn_switch),
+    list(death_rate = c(0, 7, 14), case_rate = c(0, 1, 2, 3, 7, 14))
+  )
 
   # Fully named list of lags not in order of predictors (longer ex.)
-  pred_vec2 <-  c("death_rate", "other_var", "case_rate")
-  lags_finit_fn_switch2 <- list(case_rate = c(0, 1, 2, 3, 7, 14), death_rate = c(0, 7, 14),
-                               other_var = c(0, 1))
-  expect_equal(arx_lags_validator(pred_vec2, lags_finit_fn_switch2),
-               list(death_rate = c(0, 7, 14),
-                    other_var = c(0, 1), case_rate = c(0, 1, 2, 3, 7, 14)))
+  pred_vec2 <- c("death_rate", "other_var", "case_rate")
+  lags_finit_fn_switch2 <- list(
+    case_rate = c(0, 1, 2, 3, 7, 14), death_rate = c(0, 7, 14),
+    other_var = c(0, 1)
+  )
+  expect_equal(
+    arx_lags_validator(pred_vec2, lags_finit_fn_switch2),
+    list(
+      death_rate = c(0, 7, 14),
+      other_var = c(0, 1), case_rate = c(0, 1, 2, 3, 7, 14)
+    )
+  )
 
   # More lags than predictors - Error
   expect_error(arx_lags_validator(pred_vec, lags_finit_fn_switch2))
@@ -98,6 +107,4 @@ test_that("arx_lags_validator handles named & unnamed lists as expected", {
   lags_init_other_name <- list(death_rate = c(0, 7, 14), test_var = c(0, 1, 2, 3, 7, 14))
 
   expect_error(arx_lags_validator(pred_vec, lags_init_other_name))
-
 })
-

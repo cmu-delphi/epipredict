@@ -1,4 +1,3 @@
-
 #' Quantile regression
 #'
 #' @description
@@ -23,9 +22,9 @@
 #' rq_spec <- quantile_reg(tau = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
-quantile_reg <- function(mode = "regression",  engine = "rq", tau = 0.5) {
+quantile_reg <- function(mode = "regression", engine = "rq", tau = 0.5) {
   # Check for correct mode
-  if (mode  != "regression") {
+  if (mode != "regression") {
     rlang::abort("`mode` should be 'regression'")
   }
 
@@ -78,7 +77,8 @@ make_quantile_reg <- function() {
       defaults = list(
         method = "br",
         na.action = rlang::expr(stats::na.omit),
-        model = FALSE)
+        model = FALSE
+      )
     )
   )
 
@@ -100,15 +100,15 @@ make_quantile_reg <- function() {
 
 
     # can't make a method because object is second
-    out <- switch(
-      type,
+    out <- switch(type,
       rq = dist_quantiles(unname(as.list(x)), object$tau), # one quantile
       rqs = {
         x <- lapply(unname(split(x, seq(nrow(x)))), function(q) sort(q))
         dist_quantiles(x, list(object$tau))
       },
       rlang::abort(c("Prediction not implemented for this `rq` type.",
-                     i = "See `?quantreg::rq`."))
+        i = "See `?quantreg::rq`."
+      ))
     )
     return(data.frame(.pred = out))
   }
@@ -127,4 +127,3 @@ make_quantile_reg <- function() {
     )
   )
 }
-
