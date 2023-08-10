@@ -160,7 +160,7 @@ slather.layer_population_scaling <-
         ~ .x * !!pop_col / object$rate_rescaling,
         .names = "{.col}{suffix}"
       )) %>%
-      dplyr::select(-any_of(col_to_remove))
+      dplyr::select(-dplyr::any_of(col_to_remove))
     components
   }
 

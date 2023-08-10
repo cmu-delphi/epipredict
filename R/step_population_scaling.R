@@ -212,7 +212,7 @@ bake.step_population_scaling <- function(object,
         ~.x * object$rate_rescaling /!!pop_col ,
         .names = "{.col}{suffix}")) %>%
     # removed so the models do not use the population column
-    dplyr::select(-any_of(col_to_remove))
+    dplyr::select(-dplyr::any_of(col_to_remove))
 }
 
 #' @export
