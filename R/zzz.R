@@ -6,10 +6,6 @@
 
 .onLoad <- function(libname, pkgname) {
   make_flatline_reg()
-  if (!exists("quantile_reg")) {
-    make_quantile_reg()
-  }
-  if (!exists("smooth_quantile_reg")) {
-    make_smooth_quantile_reg()
-  }
+  make_quantile_reg()
+  make_smooth_quantile_reg()
 }
