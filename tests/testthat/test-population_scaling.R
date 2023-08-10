@@ -376,7 +376,7 @@ test_that("Extra Columns are ignored", {
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
-  expect_equal(ncol(bake(prep(recip, x), x)), 8)
+  expect_equal(ncol(bake(prep(recip, x), x)), 9)
   # done testing step_*
 
   frost <- frosting() %>%
