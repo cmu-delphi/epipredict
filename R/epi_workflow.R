@@ -108,7 +108,6 @@ is_epi_workflow <- function(x) {
 #'
 #' wf <- remove_model(wf)
 #' wf
-#' @import workflows
 #' @export
 add_model <- function(x, spec, ..., formula = NULL)
   UseMethod('add_model')
