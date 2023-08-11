@@ -147,6 +147,7 @@ slather.layer_population_scaling <-
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)
     suffix = ifelse(object$create_new, object$suffix, "")
+    col_to_remove <- setdiff(colnames(object$df), colnames(components$predictions))
 
     components$predictions <- dplyr::left_join(
       components$predictions,
@@ -156,9 +157,10 @@ slather.layer_population_scaling <-
     ) %>%
       dplyr::mutate(dplyr::across(
         dplyr::all_of(col_names),
-        ~.x * !!pop_col / object$rate_rescaling ,
-        .names = "{.col}{suffix}")) %>%
-     dplyr::select(-!!pop_col)
+        ~ .x * !!pop_col / object$rate_rescaling,
+        .names = "{.col}{suffix}"
+      )) %>%
+      dplyr::select(-dplyr::any_of(col_to_remove))
     components
   }
 

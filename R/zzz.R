@@ -9,4 +9,3 @@
   make_quantile_reg()
   make_smooth_quantile_reg()
 }
-
