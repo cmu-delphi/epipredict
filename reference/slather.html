@@ -67,7 +67,7 @@ for this function</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">slather</span><span class="op">(</span><span class="va">object</span>, <span class="va">components</span>, <span class="va">the_fit</span>, <span class="va">the_recipe</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">slather</span><span class="op">(</span><span class="va">object</span>, <span class="va">components</span>, <span class="va">workflow</span>, <span class="va">new_data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -90,12 +90,13 @@ here for ease.</p></li>
 </ul></dd>
 
 
-<dt>the_fit</dt>
-<dd><p>the fitted model object as returned by calling <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">parsnip::fit()</a></code></p></dd>
+<dt>workflow</dt>
+<dd><p>an object of class workflow</p></dd>
 
 
-<dt>the_recipe</dt>
-<dd><p>the <code>epi_recipe</code> preprocessor</p></dd>
+<dt>new_data</dt>
+<dd><p>a data frame containing the new predictors to preprocess
+and predict on</p></dd>
 
 
 <dt>...</dt>
