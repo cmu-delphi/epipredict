@@ -129,7 +129,7 @@ layer_population_scaling_new <-
 
 #' @export
 slather.layer_population_scaling <-
-  function(object, components, the_fit, the_recipe, ...) {
+  function(object, components, workflow, new_data, ...) {
     stopifnot("Only one population column allowed for scaling" =
                 length(object$df_pop_col) == 1)
 

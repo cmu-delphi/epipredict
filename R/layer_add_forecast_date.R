@@ -4,17 +4,18 @@
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
 #' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
 #' when the forecast date is left unspecified, it is set to the maximum time
-#' value in the test data after any processing (ex. leads and lags) has been
-#' applied.
+#' value from the data used in pre-processing, fitting the model, and
+#' postprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
 #' @details To use this function, either specify a forecast date or leave the
 #'  forecast date unspecifed here. In the latter case, the forecast date will
-#'  be set as the maximum time value in the processed test data. In any case,
-#'  when the forecast date is less than the most recent update date of the data
-#'  (ie. the `as_of` value), an appropriate warning will be thrown.
+#'  be set as the maximum time value from the data used in pre-processing,
+#'  fitting the model, and postprocessing. In any case, when the forecast date is
+#'  less than the maximum `as_of` value (from the data used pre-processing,
+#'  model fitting, and postprocessing), an appropriate warning will be thrown.
 #'
 #' @export
 #' @examples
@@ -27,6 +28,13 @@
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
 #'   dplyr::filter(time_value >= max(time_value) - 14)
+#'
+#'  # Don't specify `forecast_date` (by default, this should be last date in latest)
+#' f <- frosting() %>% layer_predict() %>%
+#'    layer_naomit(.pred)
+#' wf0 <- wf %>% add_frosting(f)
+#' p0 <- predict(wf0, latest)
+#' p0
 #'
 #' # Specify a `forecast_date` that is greater than or equal to `as_of` date
 #' f <- frosting() %>% layer_predict() %>%
@@ -74,14 +82,19 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 }
 
 #' @export
-slather.layer_add_forecast_date <- function(object, components, the_fit, the_recipe, ...) {
+slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
 
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(components$keys$time_value)
+    max_time_value <- max(workflows::extract_preprocessor(workflow)$max_time_value,
+                          workflow$fit$meta$max_time_value,
+                          max(new_data$time_value))
     object$forecast_date <- max_time_value
   }
+  as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
+  as_of_fit <- workflow$fit$meta$as_of
+  as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
+  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post))
 
   if (object$forecast_date < as_of_date) {
     cli_warn(

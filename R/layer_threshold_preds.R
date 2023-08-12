@@ -99,7 +99,7 @@ snap.dist_quantiles <- function(x, lower, upper, ...) {
 
 #' @export
 slather.layer_threshold <-
-  function(object, components, the_fit, the_recipe, ...) {
+  function(object, components, workflow, new_data, ...) {
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)

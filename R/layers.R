@@ -123,13 +123,14 @@ detect_layer.workflow <- function(x, name, ...) {
 #'     `keys`).
 #'   * `keys` - we put the keys (`time_value`, `geo_value`, and any others)
 #'     here for ease.
-#' @param the_fit the fitted model object as returned by calling `parsnip::fit()`
-#' @param the_recipe the `epi_recipe` preprocessor
+#' @param workflow an object of class workflow
+#' @param new_data a data frame containing the new predictors to preprocess
+#'   and predict on
 #'
 #' @param ... additional arguments used by methods. Currently unused.
 #'
 #' @return The `components` list. In the same format after applying any updates.
 #' @export
-slather <- function(object, components, the_fit, the_recipe, ...) {
+slather <- function(object, components, workflow, new_data, ...) {
   UseMethod("slather")
 }
