@@ -105,9 +105,34 @@ arx_fcast_epi_workflow <- function(
   if (!(is.null(trainer) || is_regression(trainer)))
     cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
   lags <- arx_lags_validator(predictors, args_list$lags)
+  scaled <- args_list$scaled
+  scaled_frosting <- args_list$scaled_frosting
 
   # --- preprocessor
   r <- epi_recipe(epi_data)
+  if (scaled) {
+    # defaults
+    scaling_by <- args_list$scaling_by
+    scaling_variables <- args_list$scaling_variables
+    scaling_df_pop_col <- args_list$scaling_df_pop_col
+    scaling_rate <- args_list$scaling_rate
+    scaling_df <- args_list$scaling_df
+    if (is.null(scaling_by)) scaling_by <- c("geo_value" = "abbr")
+    if (is.null(scaling_variables)) scaling_variables <- union(predictors, outcome)
+
+    # change names to the scaled versions
+    predictors <- map_chr(predictors, function(x) ifelse((x %in% scaling_variables), sprintf("%s_scaled", x), x))
+    outcome <- map_chr(outcome, function(x) ifelse((x %in% scaling_variables), sprintf("%s_scaled", x), x))
+
+    r <- r %>% step_population_scaling(
+      !!!scaling_variables,
+      df = scaling_df,
+      df_pop_col = scaling_df_pop_col,
+      by = scaling_by,
+      rate_rescaling = scaling_rate,
+      columns = args_list$scaling_columns,
+    )
+  }
   for (l in seq_along(lags)) {
     p <- predictors[l]
     r <- step_epi_lag(r, !!p, lag = lags[[l]])
@@ -122,6 +147,16 @@ arx_fcast_epi_workflow <- function(
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
+  if (scaled_frosting) {
+    f <- f %>% layer_population_scaling(
+      .pred,
+      df = args_list$scaling_df,
+      df_pop_col = scaling_df_pop_col,
+      by = scaling_by,
+      rate_rescaling = scaling_rate,
+      create_new = FALSE,
+    )
+  }
   if (inherits(trainer, "quantile_reg")) {
     # add all levels to the forecaster and update postprocessor
     tau <- sort(compare_quantile_args(
@@ -203,36 +238,54 @@ arx_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf) {
-
+    nafill_buffer = Inf,
+    scaled = FALSE,
+    scaled_frosting = NA,
+    scaling_df = state_census,
+    scaling_variables = NULL,
+    scaling_df_pop_col = "pop",
+    scaling_by = NULL,
+    scaling_rate = 1,
+    scaling_columns = NULL) {
   # error checking if lags is a list
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
-
-  arg_is_scalar(ahead, n_training, symmetrize, nonneg)
+  if (is.na(scaled_frosting)) scaled_frosting <- scaled # default to undoing the transformation
+  arg_is_scalar(ahead, n_training, symmetrize, nonneg, scaling_rate)
+  arg_is_chr(scaling_df_pop_col)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
+  arg_is_chr(scaling_by, allow_null = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags)
-  arg_is_lgl(symmetrize, nonneg)
+  arg_is_lgl(symmetrize, nonneg, scaled, scaled_frosting)
   arg_is_probabilities(levels, allow_null = TRUE)
-  arg_is_pos(n_training)
+  arg_is_pos(n_training, scaling_rate)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   max_lags <- max(lags)
   structure(
-    enlist(lags = .lags,
-           ahead,
-           n_training,
-           levels,
-           forecast_date,
-           target_date,
-           symmetrize,
-           nonneg,
-           max_lags,
-           quantile_by_key,
-           nafill_buffer),
+    enlist(
+      lags = .lags,
+      ahead,
+      n_training,
+      levels,
+      forecast_date,
+      target_date,
+      symmetrize,
+      nonneg,
+      max_lags,
+      quantile_by_key,
+      nafill_buffer,
+      scaled,
+      scaled_frosting,
+      scaling_df,
+      scaling_variables,
+      scaling_df_pop_col,
+      scaling_by,
+      scaling_rate
+    ),
     class = c("arx_fcast", "alist")
   )
 }
