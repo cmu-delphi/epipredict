@@ -253,7 +253,9 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @importFrom rlang abort
 #' @export
 apply_frosting.epi_workflow <-
-  function(workflow, components, the_fit, the_recipe, ...) {
+  function(workflow, components, new_data, ...) {
+
+    the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (!has_postprocessor(workflow)) {
       components$predictions <- predict(
@@ -278,7 +280,7 @@ apply_frosting.epi_workflow <-
     # Check if there's a predict layer, add it if not.
     if (rlang::is_null(layers)) {
       layers <- extract_layers(frosting() %>% layer_predict())
-    } else if (! detect_layer(workflow, "layer_predict")) {
+    } else if (!detect_layer(workflow, "layer_predict")) {
       layers <- c(list(
         layer_predict_new(NULL, list(), list(), rand_id("predict_default"))),
         layers)
@@ -286,7 +288,7 @@ apply_frosting.epi_workflow <-
 
     for (l in seq_along(layers)) {
       la <- layers[[l]]
-      components <- slather(la, components, the_fit, the_recipe)
+      components <- slather(la, components, workflow, new_data)
     }
 
     return(components)

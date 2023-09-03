@@ -350,4 +350,50 @@ test_that("Rate rescaling behaves as expected", {
                unique(predict(wf, latest)$.pred_scaled)))
 })
 
+test_that("Extra Columns are ignored", {
+  x <- tibble(
+    geo_value = rep("place", 50),
+    time_value = as.Date("2021-01-01") + 0:49,
+    case_rate = rep(0.0005, 50),
+    cases = rep(5000, 50)
+  ) %>%
+    as_epi_df()
 
+  reverse_pop_data <- data.frame(
+    states = c("place"),
+    value = c(1 / 1000),
+    extra_col = c("full name")
+  )
+  recip <- epi_recipe(x) %>%
+    step_population_scaling(
+      df = reverse_pop_data,
+      df_pop_col = "value",
+      rate_rescaling = 100, # cases per 100
+      by = c("geo_value" = "states"),
+      case_rate, suffix = "_scaled"
+    ) %>%
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
+    step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+  expect_equal(ncol(bake(prep(recip, x), x)), 9)
+  # done testing step_*
+
+  frost <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred,
+      df = reverse_pop_data,
+      rate_rescaling = 100, # revert back to case rate per 100
+      by = c("geo_value" = "states"),
+      df_pop_col = "value"
+    )
+
+  wf <- epi_workflow(recip, parsnip::linear_reg()) %>%
+    fit(x) %>%
+    add_frosting(frost)
+  latest <- get_test_data(recipe = recip, x = x)
+  # suppress warning: prediction from a rank-deficient fit may be misleading
+  suppressWarnings(expect_equal(ncol(predict(wf, latest)), 4))
+})

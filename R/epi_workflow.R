@@ -58,6 +58,7 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
+
 #' Add a model to an `epi_workflow`
 #'
 #' @seealso [workflows::add_model()]
@@ -152,6 +153,7 @@ update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
   x <- remove_model(x)
   workflows::add_model(x, spec, formula = formula)
 }
+
 
 #' Fit an `epi_workflow` object
 #'
@@ -250,14 +252,12 @@ predict.epi_workflow <- function(object, new_data, ...) {
         i = "Do you need to call `fit()`?"))
   }
   components <- list()
-  the_fit <- workflows::extract_fit_parsnip(object)
-  the_recipe <- workflows::extract_recipe(object)
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
                                       blueprint = components$mold$blueprint)
   components$keys <- grab_forged_keys(components$forged,
                                       components$mold, new_data)
-  components <- apply_frosting(object, components, the_fit, the_recipe, ...)
+  components <- apply_frosting(object, components, new_data, ...)
   components$predictions
 }
 

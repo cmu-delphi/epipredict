@@ -11,7 +11,7 @@ apply_frosting(workflow, ...)
 
 \method{apply_frosting}{default}(workflow, components, ...)
 
-\method{apply_frosting}{epi_workflow}(workflow, components, the_fit, the_recipe, ...)
+\method{apply_frosting}{epi_workflow}(workflow, components, new_data, ...)
 }
 \arguments{
 \item{workflow}{An object of class workflow}
@@ -32,9 +32,8 @@ have three components \code{predictors}, \code{outcomes} (if these were in the
 here for ease.
 }}
 
-\item{the_fit}{the fitted model object as returned by calling \code{parsnip::fit()}}
-
-\item{the_recipe}{the \code{epi_recipe} preprocessor}
+\item{new_data}{a data frame containing the new predictors to preprocess
+and predict on}
 }
 \description{
 This function is intended for internal use. It implements postprocessing

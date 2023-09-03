@@ -45,6 +45,7 @@ reference:
     - epi_workflow
     - add_epi_recipe
     - predict.epi_workflow
+    - fit.epi_workflow
     - augment.epi_workflow
   - title: Epi recipe preprocessing steps
     contents:
