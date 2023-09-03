@@ -153,6 +153,48 @@ update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
   workflows::add_model(x, spec, formula = formula)
 }
 
+#' Fit an `epi_workflow` object
+#'
+#' @description
+#' This is the `fit()` method for an `epi_workflow` object that
+#' estimates parameters for a given model from a set of data.
+#' Fitting an `epi_workflow` involves two main steps, which are
+#' preprocessing the data and fitting the underlying parsnip model.
+#'
+#' @inheritParams workflows::fit.workflow
+#'
+#' @param object an `epi_workflow` object
+#'
+#' @param data an `epi_df` of predictors and outcomes to use when
+#' fitting the `epi_workflow`
+#'
+#' @param control A [workflows::control_workflow()] object
+#'
+#' @return The `epi_workflow` object, updated with a fit parsnip
+#' model in the `object$fit$fit` slot.
+#'
+#' @seealso workflows::fit-workflow
+#'
+#' @name fit-epi_workflow
+#' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#' filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7)
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf
+#'
+#' @export
+fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()){
+
+  object$fit$meta <- list(max_time_value = max(data$time_value), as_of = attributes(data)$metadata$as_of)
+
+  NextMethod()
+}
 
 #' Predict from an epi_workflow
 #'
