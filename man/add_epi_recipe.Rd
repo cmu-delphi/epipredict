@@ -10,7 +10,13 @@ add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 
 remove_epi_recipe(x)
 
-update_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
+update_epi_recipe(
+  x,
+  recipe = NULL,
+  step_num = NULL,
+  ...,
+  blueprint = default_epi_recipe_blueprint()
+)
 }
 \arguments{
 \item{x}{A workflow or epi_workflow}
@@ -65,6 +71,17 @@ workflow <- update_epi_recipe(workflow, r2)
 workflow <- remove_epi_recipe(workflow)
 
 workflow
+
+# Additional feature in `update_epi_recipe` is to change a step
+# in the recipe from the workflow
+workflow <- epi_workflow() \%>\%
+  add_epi_recipe(r)
+
+# Update second step, `step_epi_ahead()`, to have an
+# ahead value of 14 days
+workflow = workflow \%>\% update_epi_recipe(step_num = 2, ahead = 14)
+workflows::extract_preprocessor(workflow)
+
 }
 \seealso{
 \code{\link[workflows:add_recipe]{workflows::add_recipe()}}

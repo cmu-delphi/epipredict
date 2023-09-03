@@ -35,6 +35,17 @@
 #' wf3 <- wf2 %>% remove_frosting()
 #' p2 <- predict(wf3, latest)
 #' p2
+#'
+#' # Additional feature in `update_frosting` is to change a layer
+#' # in the frosting from the workflow
+#' f3 <- frosting() %>% layer_predict() %>% layer_threshold(.pred)
+#'
+#' wf3 = wf %>% add_frosting(f3)
+#'
+#' # Update `layer_threshold` to have an upper bound of 1
+#' wf3 = wf3 %>% update_frosting(layer_num = 2, upper = 1)
+#' extract_frosting(wf3)
+#'
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   action <- workflows:::new_action_post(frosting = frosting)
@@ -91,8 +102,13 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
 
 #' @rdname add_frosting
 #' @export
-update_frosting <- function(x, frosting, ...) {
-  rlang:::check_dots_empty()
+update_frosting <- function(x, frosting = NULL, layer_num = NULL, ...) {
+
+  if(is_null(frosting) && !is_null(layer_num)){
+    frosting = extract_frosting(x)
+    frosting$layers[[layer_num]] = update(frosting$layers[[layer_num]], ...)
+  }
+
   x <- remove_frosting(x)
   add_frosting(x, frosting)
 }

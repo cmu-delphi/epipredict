@@ -282,6 +282,17 @@ is_epi_recipe <- function(x) {
 #' workflow <- remove_epi_recipe(workflow)
 #'
 #' workflow
+#'
+#' # Additional feature in `update_epi_recipe` is to change a step
+#' # in the recipe from the workflow
+#' workflow <- epi_workflow() %>%
+#'   add_epi_recipe(r)
+#'
+#' # Update second step, `step_epi_ahead()`, to have an
+#' # ahead value of 14 days
+#' workflow = workflow %>% update_epi_recipe(step_num = 2, ahead = 14)
+#' workflows::extract_preprocessor(workflow)
+#'
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
   workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
@@ -310,12 +321,16 @@ remove_epi_recipe <- function(x) {
 #' @rdname add_epi_recipe
 #' @export
 update_epi_recipe <- function(
-    x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
-  rlang::check_dots_empty()
+    x, recipe = NULL, step_num = NULL, ..., blueprint = default_epi_recipe_blueprint()) {
+
+  if(is_null(recipe) && !is_null(step_num)){
+    recipe = workflows::extract_preprocessor(x)
+    recipe$steps[[step_num]] = update(recipe$steps[[step_num]], ...)
+  }
+
   x <- remove_epi_recipe(x)
   add_epi_recipe(x, recipe, blueprint = blueprint)
 }
-
 
 
 # unfortunately, almost everything the same as in prep.recipe except string/fctr handling

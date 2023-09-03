@@ -10,7 +10,7 @@ add_frosting(x, frosting, ...)
 
 remove_frosting(x)
 
-update_frosting(x, frosting, ...)
+update_frosting(x, frosting = NULL, layer_num = NULL, ...)
 }
 \arguments{
 \item{x}{A workflow}
@@ -53,4 +53,15 @@ p2
 wf3 <- wf2 \%>\% remove_frosting()
 p2 <- predict(wf3, latest)
 p2
+
+# Additional feature in `update_frosting` is to change a layer
+# in the frosting from the workflow
+f3 <- frosting() \%>\% layer_predict() \%>\% layer_threshold(.pred)
+
+wf3 = wf \%>\% add_frosting(f3)
+
+# Update `layer_threshold` to have an upper bound of 1
+wf3 = wf3 \%>\% update_frosting(layer_num = 2, upper = 1)
+extract_frosting(wf3)
+
 }

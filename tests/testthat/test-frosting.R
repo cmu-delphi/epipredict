@@ -19,15 +19,20 @@ test_that("frosting can be created/added/updated/removed", {
   expect_error(frosting(layers = 1:5))
   wf <- epi_workflow() %>% add_frosting(f)
   expect_true(has_postprocessor_frosting(wf))
-  wf1 <- update_frosting(wf, frosting() %>% layer_predict())
+  wf1 <- update_frosting(wf, frosting() %>% layer_predict() %>% layer_threshold(.pred))
   expect_true(has_postprocessor_frosting(wf1))
-  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 1)
+  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 2)
+  wf1 <- update_frosting(wf1, layer_num = 2, upper = 1)
+  expect_true(has_postprocessor_frosting(wf1))
+  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 2)
+  expect_equal(wf1$post$actions$frosting$frosting$layers[[2]]$upper, 1)
   wf1 <- wf1 %>% remove_frosting()
   expect_false(has_postprocessor_frosting(wf1))
   expect_false(has_postprocessor(wf1))
   expect_equal(length(wf1$post$actions$frosting$frosting$layers), 0)
   expect_null(wf1$post$actions$frosting$frosting$layers[[1]])
 })
+
 
 
 test_that("prediction works without any postprocessor", {
