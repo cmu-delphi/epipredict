@@ -1,11 +1,20 @@
 #' Add frosting to a workflow
 #'
 #' @param x A workflow
-#' @param frosting A frosting layer created using `frosting()`
-#' @param ... Not used.
+#' @param frosting A frosting layer created using `frosting()`.
+#' Optional for `update_epi_recipe()` only.
+#' @param layer_num the number of the layer to update in an `epi_workflow`.
+#' Intended for use in `update_frosting()` only.
+#' @param ... Can only be used in `update_frosting()` to input a parameter
+#' update.
 #'
 #' @return `x`, updated with a new or removed frosting postprocessor
 #' @export
+#'
+#' @details The `update_frosting` function can either update the entire frosting
+#' or a layer in an existing frosting in an `epi_workflow`. In the latter case,
+#' the parameter name the new value it is equal to must be input into `...`.
+#' See the examples below for brief illustrations of both types of updates.
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%

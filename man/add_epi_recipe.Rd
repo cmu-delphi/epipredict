@@ -21,9 +21,11 @@ update_epi_recipe(
 \arguments{
 \item{x}{A workflow or epi_workflow}
 
-\item{recipe}{A recipe created using \code{\link[recipes:recipe]{recipes::recipe()}}}
+\item{recipe}{A recipe created using \code{\link[recipes:recipe]{recipes::recipe()}}.
+Optional for \code{update_epi_recipe()} only.}
 
-\item{...}{Not used.}
+\item{...}{Can only be used in \code{update_epi_recipe()} to input a parameter
+update.}
 
 \item{blueprint}{A hardhat blueprint used for fine tuning the preprocessing.
 
@@ -31,6 +33,9 @@ update_epi_recipe(
 
 Note that preprocessing done here is separate from preprocessing that
 might be done automatically by the underlying model.}
+
+\item{step_num}{the number of the step to update.
+Can only be used in \code{update_epi_recipe()} only.}
 }
 \value{
 \code{x}, updated with a new recipe preprocessor.
@@ -39,8 +44,14 @@ might be done automatically by the underlying model.}
 Add an \code{epi_recipe} to a workflow
 }
 \details{
-Has the same behaviour as \code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
+\code{add_epi_recipe} has the same behaviour as
+\code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
 default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
+
+The \code{update_epi_recipe} function can either update the entire recipe or a
+step in an existing recipe in an \code{epi_workflow}. In the latter case, the
+parameter name that the new value it is equal to must be input into \code{...}.
+See the examples below for brief illustrations of both types of updates.
 }
 \examples{
 library(epiprocess)
@@ -89,5 +100,7 @@ workflows::extract_preprocessor(workflow)
 \item \code{add_recipe()} specifies the terms of the model and any preprocessing that
 is required through the usage of a recipe.
 \item \code{remove_recipe()} removes the recipe as well as any downstream objects
+\item \code{update_recipe()} first removes the recipe, then replaces the previous
+recipe with the new one.
 }
 }

@@ -15,15 +15,26 @@ update_frosting(x, frosting = NULL, layer_num = NULL, ...)
 \arguments{
 \item{x}{A workflow}
 
-\item{frosting}{A frosting layer created using \code{frosting()}}
+\item{frosting}{A frosting layer created using \code{frosting()}.
+Optional for \code{update_epi_recipe()} only.}
 
-\item{...}{Not used.}
+\item{...}{Can only be used in \code{update_frosting()} to input a parameter
+update.}
+
+\item{layer_num}{the number of the layer to update in an \code{epi_workflow}.
+Intended for use in \code{update_frosting()} only.}
 }
 \value{
 \code{x}, updated with a new or removed frosting postprocessor
 }
 \description{
 Add frosting to a workflow
+}
+\details{
+The \code{update_frosting} function can either update the entire frosting
+or a layer in an existing frosting in an \code{epi_workflow}. In the latter case,
+the parameter name the new value it is equal to must be input into \code{...}.
+See the examples below for brief illustrations of both types of updates.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%

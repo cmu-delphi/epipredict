@@ -232,15 +232,29 @@ is_epi_recipe <- function(x) {
 #'
 #' - `remove_recipe()` removes the recipe as well as any downstream objects
 #'
+#' - `update_recipe()` first removes the recipe, then replaces the previous
+#' recipe with the new one.
+#'
 #' @details
-#' Has the same behaviour as [workflows::add_recipe()] but sets a different
+#' `add_epi_recipe` has the same behaviour as
+#' [workflows::add_recipe()] but sets a different
 #' default blueprint to automatically handle [epiprocess::epi_df] data.
+#'
+#' The `update_epi_recipe` function can either update the entire recipe or a
+#' step in an existing recipe in an `epi_workflow`. In the latter case, the
+#' parameter name that the new value it is equal to must be input into `...`.
+#' See the examples below for brief illustrations of both types of updates.
 #'
 #' @param x A workflow or epi_workflow
 #'
-#' @param recipe A recipe created using [recipes::recipe()]
+#' @param recipe A recipe created using [recipes::recipe()].
+#' Optional for `update_epi_recipe()` only.
 #'
-#' @param ... Not used.
+#' @param step_num the number of the step to update.
+#' Can only be used in `update_epi_recipe()` only.
+#'
+#' @param ... Can only be used in `update_epi_recipe()` to input a parameter
+#' update.
 #'
 #' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
 #'
