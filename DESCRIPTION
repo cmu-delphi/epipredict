@@ -61,7 +61,6 @@ Suggests:
 VignetteBuilder: 
     knitr
 Remotes:
-    cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
     dajmcdon/smoothqr
 Config/testthat/edition: 3
