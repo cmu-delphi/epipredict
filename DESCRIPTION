@@ -48,7 +48,7 @@ Imports:
 Suggests: 
     covidcast,
     data.table,
-    epidatr,
+    epidatr (<= 0.6.0)
     ggplot2,
     knitr,
     lubridate,
@@ -61,6 +61,7 @@ Suggests:
 VignetteBuilder: 
     knitr
 Remotes:
+    cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
     dajmcdon/smoothqr
 Config/testthat/edition: 3
