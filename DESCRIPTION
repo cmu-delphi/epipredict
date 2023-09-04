@@ -48,7 +48,7 @@ Imports:
 Suggests: 
     covidcast,
     data.table,
-    epidatr (<= 0.6.0)
+    epidatr (== 0.6.0)
     ggplot2,
     knitr,
     lubridate,
