@@ -64,23 +64,21 @@ for using the `epipredict` package with other existing tidymodels packages.
 
 ```{r poisson-reg-data}
 x <- covidcast(
-  data_source = "jhu-csse",
+  source = "jhu-csse",
   signals = "confirmed_incidence_num",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
   geo_values = "ca,fl,tx,ny,nj") %>%
-  fetch() %>%
   select(geo_value, time_value, cases = value)
 
 y <- covidcast(
-  data_source = "jhu-csse",
+  source = "jhu-csse",
   signals = "deaths_incidence_num",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
   geo_values = "ca,fl,tx,ny,nj") %>%
-  fetch() %>%
   select(geo_value, time_value, deaths = value)
 
 counts_subset <- full_join(x, y, by = c("geo_value", "time_value")) %>%
@@ -245,23 +243,21 @@ State-wise population data from the 2019 U.S. Census is included in this package
 and will be used in `layer_population_scaling()`. 
 ```{r}
 behav_ind_mask <- covidcast(
-  data_source = "fb-survey",
+  source = "fb-survey",
   signals = "smoothed_wwearing_mask_7d",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
   geo_values = "ca,fl,tx,ny,nj")  %>%
-  fetch() %>%
   select(geo_value, time_value, masking = value)
 
 behav_ind_distancing <- covidcast(
-  data_source = "fb-survey",
+  source = "fb-survey",
   signals = "smoothed_wothers_distanced_public",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
   geo_values = "ca,fl,tx,ny,nj")  %>%
-  fetch() %>%
   select(geo_value, time_value, distancing = value) 
 
 pop_dat <- state_census %>% select(abbr, pop)
