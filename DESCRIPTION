@@ -46,6 +46,7 @@ Imports:
     vctrs,
     workflows (>= 1.0.0)
 Suggests: 
+    covidcast,
     data.table,
     epidatr,
     ggplot2,
@@ -61,7 +62,6 @@ VignetteBuilder:
     knitr
 Remotes:
     cmu-delphi/epidatr,
-    cmu-delphi/covidcast,
     cmu-delphi/epiprocess,
     dajmcdon/smoothqr
 Config/testthat/edition: 3
