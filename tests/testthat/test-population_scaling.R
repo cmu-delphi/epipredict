@@ -239,8 +239,8 @@ test_that("expect error if `by` selector does not match", {
                             suffix = "_scaled") %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -290,7 +290,7 @@ test_that("expect error if `by` selector does not match", {
 
 
 test_that("Rate rescaling behaves as expected", {
-  x <- tibble(geo_value = rep("place",50),
+  x <- tibble::tibble(geo_value = rep("place",50),
               time_value = as.Date("2021-01-01") + 0:49,
               case_rate = rep(0.0005, 50),
               cases = rep(5000, 50)) %>%
@@ -315,7 +315,7 @@ test_that("Rate rescaling behaves as expected", {
                              by =  c("geo_value" = "states"),
                              df_pop_col = "value")
 
-  x <- tibble(geo_value = rep("place",50),
+  x <- tibble::tibble(geo_value = rep("place",50),
               time_value = as.Date("2021-01-01") + 0:49,
               case_rate = rep(0.0005, 50)) %>%
     as_epi_df()
@@ -323,8 +323,8 @@ test_that("Rate rescaling behaves as expected", {
   r <- epi_recipe(x) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -347,7 +347,7 @@ test_that("Rate rescaling behaves as expected", {
 })
 
 test_that("Extra Columns are ignored", {
-  x <- tibble(
+  x <- tibble::tibble(
     geo_value = rep("place", 50),
     time_value = as.Date("2021-01-01") + 0:49,
     case_rate = rep(0.0005, 50),
@@ -370,8 +370,8 @@ test_that("Extra Columns are ignored", {
     ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
   expect_equal(ncol(bake(prep(recip, x), x)), 9)
   # done testing step_*
 
