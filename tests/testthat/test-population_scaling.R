@@ -107,7 +107,6 @@ test_that("Postprocessing workflow works and values correct", {
                                 geo_value %in% c("ca", "ny")) %>%
                   dplyr::select(geo_value, time_value, cases))
 
-
   expect_silent(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
