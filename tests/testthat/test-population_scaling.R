@@ -192,7 +192,7 @@ test_that("test joining by default columns", {
     recipes::step_naomit(recipes::all_predictors()) %>%
     recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
-  prep <- prep(r, jhu)
+  expect_message(prep <- prep(r, jhu))
 
   expect_message(b <- bake(prep, jhu))
 
@@ -204,10 +204,10 @@ test_that("test joining by default columns", {
                              by =  NULL,
                              df_pop_col = "values")
 
-  wf <- epi_workflow(r,
+  expect_message(wf <- epi_workflow(r,
                      parsnip::linear_reg()) %>%
     fit(jhu) %>%
-    add_frosting(f)
+    add_frosting(f))
 
   latest <- get_test_data(recipe = r,
                           x = case_death_rate_subset %>%
