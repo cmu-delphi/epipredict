@@ -1,7 +1,3 @@
-library(recipes)
-library(parsnip)
-library(workflows)
-
 ## Preprocessing
 test_that("Column names can be passed with and without the tidy way", {
   pop_data = data.frame(states = c("ak","al","ar","as","az","ca"),
@@ -33,7 +29,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
                                    "42101","42103","42105", "42111"),
                         value = 1000:1009)
 
-  newdata = tibble(geo_value = c(rep("a",5),  rep("b", 5)),
+  newdata = tibble::tibble(geo_value = c(rep("a",5),  rep("b", 5)),
                    county = c("06059","06061","06067",
                               "12111","12113","12117",
                               "42101","42103","42105", "42111"),
@@ -65,7 +61,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
                             suffix = "_rate", # unused
                             create_new = FALSE)
 
-  prep <- prep(r, newdata)
+  prep <- recipes::prep(r, newdata)
 
   expect_message(b <- bake(prep, newdata))
   expect_equal(ncol(b), 5L)
@@ -89,8 +85,8 @@ test_that("Postprocessing workflow works and values correct", {
                             suffix = "_scaled") %>%
     step_epi_lag(cases_scaled, lag = c(0, 7, 14)) %>%
     step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -149,8 +145,8 @@ test_that("Postprocessing to get cases from case rate", {
                             case_rate, suffix = "_scaled") %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -194,8 +190,8 @@ test_that("test joining by default columns", {
                             suffix = "_scaled") %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   prep <- prep(r, jhu)
 
@@ -267,8 +263,8 @@ test_that("expect error if `by` selector does not match", {
                             suffix = "_scaled") %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
