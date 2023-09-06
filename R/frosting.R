@@ -269,15 +269,36 @@ apply_frosting.epi_workflow <-
   }
 
 #' @export
-print.frosting <- function(x, form_width = 30, ...) {
-  cli::cli_div(
-    theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
-  )
-  cli::cli_h1("Frosting")
+# Currently only used in the workflow printing
+print_frosting <- function(x, ...) {
 
-  if (!is.null(x$layers)) cli::cli_h3("Layers")
-  for (layer in x$layers) print(layer, form_width = form_width)
-  cli::cli_end()
+  layers <- x$layers
+  n_layers <- length(layers)
+  layer <- ifelse(n_layers == 1L, "Layer", "Layers")
+  n_layers_msg <- glue::glue("{n_layers} Frosting {layer}")
+  cat_line(n_layers_msg)
+
+  if (n_layers == 0L) return(invisible(x))
+
+  cat_line("")
+
+  layer_names <- map_chr(layers, pull_layer_name)
+
+  if (n_layers <= 10L) {
+    cli:::cli_ol(layer_names)
+    return(invisible(x))
+  }
+
+  extra_layers <- n_layers - 10L
+  layer_names <- layer_names[1:10]
+
+  layer <- ifelse(extra_layers == 1L, "layer", "layers")
+
+  extra_dots <- "..."
+  extra_msg <- glue::glue("and {extra_layers} more {layer}.")
+
+  cli::cli_ol(layer_names)
+  cli::cli_bullets(c(extra_dots, extra_msg))
   invisible(x)
 }
 

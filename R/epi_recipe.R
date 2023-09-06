@@ -397,3 +397,75 @@ kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
   x
 }
+
+print_preprocessor_recipe <- function (x) {
+
+  recipe <- workflows::extract_preprocessor(x)
+  steps <- recipe$steps
+  n_steps <- length(steps)
+  if (n_steps == 1L) {
+    step <- "Step"
+  }
+  else {
+    step <- "Steps"
+  }
+  n_steps_msg <- glue::glue("{n_steps} Recipe {step}")
+  cat_line(n_steps_msg)
+
+  if (n_steps == 0L) return(invisible(x))
+
+  cat_line("")
+
+  step_names <- map_chr(steps, workflows:::pull_step_name)
+
+  if (n_steps <= 10L) {
+    cli:::cli_ol(step_names)
+    return(invisible(x))
+  }
+
+  extra_steps <- n_steps - 10L
+  step_names <- step_names[1:10]
+
+  if (extra_steps == 1L) {
+    step <- "step"
+  }
+  else {
+    step <- "steps"
+  }
+
+  extra_dots <- "..."
+  extra_msg <- glue::glue("and {extra_steps} more {step}.")
+
+  cli::cli_ol(step_names)
+  cli::cli_bullets(c(extra_dots, extra_msg))
+  invisible(x)
+}
+
+print_preprocessor <- function(x) {
+
+  has_preprocessor_formula <- workflows:::has_preprocessor_formula(x)
+  has_preprocessor_recipe <- workflows:::has_preprocessor_recipe(x)
+  has_preprocessor_variables <- workflows:::has_preprocessor_variables(x)
+
+  no_preprocessor <- !has_preprocessor_formula && !has_preprocessor_recipe &&
+    !has_preprocessor_variables
+
+  if (no_preprocessor) {
+    return(invisible(x))
+  }
+
+  cat_line("")
+  header <- cli::rule("Preprocessor")
+  cat_line(header)
+
+  if (has_preprocessor_formula) {
+    workflows:::print_preprocessor_formula(x)
+  }
+  if (has_preprocessor_recipe) {
+      print_preprocessor_recipe(x)
+  }
+  if (has_preprocessor_variables) {
+    workflows:::print_preprocessor_variables(x)
+  }
+  invisible(x)
+}
