@@ -398,6 +398,8 @@ kill_levels <- function(x, keys) {
   x
 }
 
+#' @export
+# Currently only used in the workflow printing
 print_preprocessor_recipe <- function (x) {
 
   recipe <- workflows::extract_preprocessor(x)

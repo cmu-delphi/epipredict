@@ -302,40 +302,6 @@ print_frosting <- function(x, ...) {
   invisible(x)
 }
 
-# Currently only used in the workflow printing
-print_frosting <- function(x, ...) {
-
-  layers <- x$layers
-  n_layers <- length(layers)
-  layer <- ifelse(n_layers == 1L, "Layer", "Layers")
-  n_layers_msg <- glue::glue("{n_layers} Frosting {layer}")
-  cat_line(n_layers_msg)
-
-  if (n_layers == 0L) return(invisible(x))
-
-  cat_line("")
-
-  layer_names <- map_chr(layers, pull_layer_name)
-
-  if (n_layers <= 10L) {
-    cli::cat_bullet(layer_names)
-    return(invisible(x))
-  }
-
-  extra_layers <- n_layers - 10L
-  layer_names <- layer_names[1:10]
-
-  layer <- ifelse(extra_layers == 1L, "layer", "layers")
-
-  extra_dots <- "..."
-  extra_msg <- glue::glue("and {extra_layers} more {layer}.")
-
-  layer_names <- c(layer_names, extra_dots, extra_msg)
-
-  cli::cat_bullet(layer_names)
-  invisible(x)
-}
-
 print_postprocessor <- function(x) {
   if (!has_postprocessor_frosting(x)) return(invisible(x))
 
