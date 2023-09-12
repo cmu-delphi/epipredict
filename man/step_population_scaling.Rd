@@ -7,7 +7,7 @@
 step_population_scaling(
   recipe,
   ...,
-  role = "predictor",
+  role = "raw",
   trained = FALSE,
   df,
   by = NULL,
