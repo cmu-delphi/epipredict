@@ -28,9 +28,12 @@
 #' tib <- tibble::tibble(
 #'   x = 1:10,
 #'   y = 1:10,
-#'   time_value = rep(seq(as.Date("2020-01-01"), by = 1,
-#'                      length.out = 5), times = 2),
-#'   geo_value = rep(c("ca", "hi"), each = 5)) %>%
+#'   time_value = rep(seq(as.Date("2020-01-01"),
+#'     by = 1,
+#'     length.out = 5
+#'   ), times = 2),
+#'   geo_value = rep(c("ca", "hi"), each = 5)
+#' ) %>%
 #'   as_epi_df()
 #'
 #' epi_recipe(y ~ x, data = tib) %>%
@@ -50,7 +53,6 @@ step_training_window <-
            n_recent = 50,
            epi_keys = NULL,
            id = rand_id("training_window")) {
-
     arg_is_lgl_scalar(trained)
     arg_is_scalar(n_recent, id)
     arg_is_pos(n_recent)
@@ -85,7 +87,6 @@ step_training_window_new <-
 
 #' @export
 prep.step_training_window <- function(x, training, info = NULL, ...) {
-
   ekt <- kill_time_value(epi_keys(training))
   ek <- x$epi_keys %||% ekt %||% character(0L)
 
@@ -103,7 +104,6 @@ prep.step_training_window <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_training_window <- function(object, new_data, ...) {
-
   hardhat::validate_column_names(new_data, object$epi_keys)
 
   if (object$n_recent < Inf) {
@@ -121,9 +121,11 @@ bake.step_training_window <- function(object, new_data, ...) {
 print.step_training_window <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "# of recent observations per key limited to:"
-    n_recent = x$n_recent
-    tr_obj = format_selectors(rlang::enquos(n_recent), width)
-    recipes::print_step(tr_obj, rlang::enquos(n_recent),
-                        x$trained, title, width)
+    n_recent <- x$n_recent
+    tr_obj <- format_selectors(rlang::enquos(n_recent), width)
+    recipes::print_step(
+      tr_obj, rlang::enquos(n_recent),
+      x$trained, title, width
+    )
     invisible(x)
   }

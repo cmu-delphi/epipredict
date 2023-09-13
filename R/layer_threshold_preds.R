@@ -108,7 +108,8 @@ slather.layer_threshold <-
         dplyr::across(
           dplyr::all_of(col_names),
           ~ snap(.x, object$lower, object$upper)
-        ))
+        )
+      )
     components
   }
 
@@ -116,12 +117,12 @@ slather.layer_threshold <-
 #' @export
 print.layer_threshold <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Thresholding predictions"
   lwr <- ifelse(is.infinite(x$lower), "(", "[")
   upr <- ifelse(is.infinite(x$upper), ")", "]")
   rng <- paste0(lwr, round(x$lower, 3), ", ", round(x$upper, 3), upr)
-  print_layer(x$terms, title = title, width = width, conjunction = "to",
-              extra_text = rng)
+  print_layer(x$terms,
+    title = title, width = width, conjunction = "to",
+    extra_text = rng
+  )
 }
-

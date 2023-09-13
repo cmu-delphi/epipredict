@@ -20,5 +20,4 @@ test_that("epi_recipe blueprint keeps the class, mold works", {
   bp <- hardhat:::update_blueprint(bp, recipe = r)
   run_mm <- run_mold(bp, data = jhu)
   expect_false(is.factor(run_mm$extras$roles$geo_value$geo_value))
-
 })

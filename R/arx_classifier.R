@@ -47,9 +47,9 @@ arx_classifier <- function(
     predictors,
     trainer = parsnip::logistic_reg(),
     args_list = arx_class_args_list()) {
-
-  if (!is_classification(trainer))
+  if (!is_classification(trainer)) {
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
+  }
 
   wf <- arx_class_epi_workflow(
     epi_data, outcome, predictors, trainer, args_list
@@ -65,13 +65,15 @@ arx_classifier <- function(
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 
-  structure(list(
-    predictions = preds,
-    epi_workflow = wf,
-    metadata = list(
-      training = attr(epi_data, "metadata"),
-      forecast_created = Sys.time()
-    )),
+  structure(
+    list(
+      predictions = preds,
+      epi_workflow = wf,
+      metadata = list(
+        training = attr(epi_data, "metadata"),
+        forecast_created = Sys.time()
+      )
+    ),
     class = c("arx_class", "canned_epipred")
   )
 }
@@ -117,12 +119,13 @@ arx_class_epi_workflow <- function(
     predictors,
     trainer = NULL,
     args_list = arx_class_args_list()) {
-
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, c("arx_class", "alist")))
+  if (!inherits(args_list, c("arx_class", "alist"))) {
     rlang::abort("args_list was not created using `arx_class_args_list().")
-  if (!(is.null(trainer) || is_classification(trainer)))
+  }
+  if (!(is.null(trainer) || is_classification(trainer))) {
     rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
+  }
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -172,8 +175,10 @@ arx_class_epi_workflow <- function(
   o2 <- rlang::sym(paste0("ahead_", args_list$ahead, "_", o))
   r <- r %>%
     step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome") %>%
-    step_mutate(outcome_class = cut(!!o2, breaks = args_list$breaks),
-                role = "outcome") %>%
+    step_mutate(
+      outcome_class = cut(!!o2, breaks = args_list$breaks),
+      role = "outcome"
+    ) %>%
     step_epi_naomit() %>%
     step_training_window(n_recent = args_list$n_training)
 
@@ -245,9 +250,7 @@ arx_class_args_list <- function(
     method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
     log_scale = FALSE,
     additional_gr_args = list(),
-    nafill_buffer = Inf
-) {
-
+    nafill_buffer = Inf) {
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
   method <- match.arg(method)
@@ -266,7 +269,8 @@ arx_class_args_list <- function(
     cli::cli_abort(
       c("`additional_gr_args` must be a {.cls list}.",
         "!" = "This is a {.cls {class(additional_gr_args)}}.",
-        i = "See `?epiprocess::growth_rate` for available arguments.")
+        i = "See `?epiprocess::growth_rate` for available arguments."
+      )
     )
   }
 
@@ -277,19 +281,20 @@ arx_class_args_list <- function(
 
   max_lags <- max(lags)
   structure(
-    enlist(lags = .lags,
-           ahead,
-           n_training,
-           breaks,
-           forecast_date,
-           target_date,
-           outcome_transform,
-           max_lags,
-           horizon,
-           method,
-           log_scale,
-           additional_gr_args,
-           nafill_buffer
+    enlist(
+      lags = .lags,
+      ahead,
+      n_training,
+      breaks,
+      forecast_date,
+      target_date,
+      outcome_transform,
+      max_lags,
+      horizon,
+      method,
+      log_scale,
+      additional_gr_args,
+      nafill_buffer
     ),
     class = c("arx_class", "alist")
   )
@@ -300,4 +305,3 @@ print.arx_class <- function(x, ...) {
   name <- "ARX Classifier"
   NextMethod(name = name, ...)
 }
-

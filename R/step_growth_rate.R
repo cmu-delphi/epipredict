@@ -38,27 +38,28 @@
 #'   step_growth_rate(case_rate, death_rate)
 #' r
 #'
-#' r %>% recipes::prep() %>% recipes::bake(case_death_rate_subset)
+#' r %>%
+#'   recipes::prep() %>%
+#'   recipes::bake(case_death_rate_subset)
 step_growth_rate <-
   function(
-    recipe,
-    ...,
-    role = "predictor",
-    trained = FALSE,
-    horizon = 7,
-    method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
-    log_scale = FALSE,
-    replace_Inf = NA,
-    prefix = "gr_",
-    columns = NULL,
-    skip = FALSE,
-    id = rand_id("growth_rate"),
-    additional_gr_args_list = list()
-  ) {
-
-    if (!is_epi_recipe(recipe))
+      recipe,
+      ...,
+      role = "predictor",
+      trained = FALSE,
+      horizon = 7,
+      method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
+      log_scale = FALSE,
+      replace_Inf = NA,
+      prefix = "gr_",
+      columns = NULL,
+      skip = FALSE,
+      id = rand_id("growth_rate"),
+      additional_gr_args_list = list()) {
+    if (!is_epi_recipe(recipe)) {
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
-    method = match.arg(method)
+    }
+    method <- match.arg(method)
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
     if (!is.null(replace_Inf)) {
@@ -73,30 +74,35 @@ step_growth_rate <-
     if (!is.list(additional_gr_args_list)) {
       rlang::abort(
         c("`additional_gr_args_list` must be a list.",
-          i = "See `?epiprocess::growth_rate` for available options."))
+          i = "See `?epiprocess::growth_rate` for available options."
+        )
+      )
     }
 
     if (!is.null(columns)) {
       rlang::abort(c("The `columns` argument must be `NULL.",
-                     i = "Use `tidyselect` methods to choose columns to use."))
+        i = "Use `tidyselect` methods to choose columns to use."
+      ))
     }
 
-    add_step(recipe,
-             step_growth_rate_new(
-               terms = dplyr::enquos(...),
-               role = role,
-               trained = trained,
-               horizon = horizon,
-               method = method,
-               log_scale = log_scale,
-               replace_Inf = replace_Inf,
-               prefix = prefix,
-               keys = epi_keys(recipe),
-               columns = columns,
-               skip = skip,
-               id = id,
-               additional_gr_args_list = additional_gr_args_list
-             ))
+    add_step(
+      recipe,
+      step_growth_rate_new(
+        terms = dplyr::enquos(...),
+        role = role,
+        trained = trained,
+        horizon = horizon,
+        method = method,
+        log_scale = log_scale,
+        replace_Inf = replace_Inf,
+        prefix = prefix,
+        keys = epi_keys(recipe),
+        columns = columns,
+        skip = skip,
+        id = id,
+        additional_gr_args_list = additional_gr_args_list
+      )
+    )
   }
 
 
@@ -167,10 +173,13 @@ bake.step_growth_rate <- function(object, new_data, ...) {
   if (any(intersection)) {
     rlang::abort(
       c(paste0("Name collision occured in `", class(object)[1], "`."),
-        i = paste("The following variable names already exists: ",
-             paste0(new_data_names[intersection], collapse = ", "),
-             ".")
-      ))
+        i = paste(
+          "The following variable names already exists: ",
+          paste0(new_data_names[intersection], collapse = ", "),
+          "."
+        )
+      )
+    )
   }
 
   ok <- object$keys
@@ -181,12 +190,14 @@ bake.step_growth_rate <- function(object, new_data, ...) {
       dplyr::across(
         dplyr::all_of(object$columns),
         ~ epiprocess::growth_rate(
-          time_value, .x, method = object$method,
+          time_value, .x,
+          method = object$method,
           h = object$horizon, log_scale = object$log_scale,
           !!!object$additional_gr_args_list
         ),
         .names = "{object$prefix}{object$horizon}_{object$method}_{.col}"
-      )) %>%
+      )
+    ) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(time_value = time_value + object$horizon) # shift x0 right
 
@@ -212,7 +223,8 @@ print.step_growth_rate <- function(x, width = max(20, options()$width - 30), ...
   print_epi_step(
     x$columns, x$terms, x$trained,
     title = "Calculating growth_rate for ",
-    conjunction = "by", extra_text = x$method)
+    conjunction = "by", extra_text = x$method
+  )
   invisible(x)
 }
 

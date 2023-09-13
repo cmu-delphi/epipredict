@@ -8,7 +8,7 @@ test_that("arx_class_args checks inputs", {
   expect_error(arx_class_args_list(n_training = -1))
   expect_error(arx_class_args_list(n_training = 1.5))
   expect_error(arx_class_args_list(lags = c(-1, 0)))
-  expect_error(arx_class_args_list(lags = list(c(1:5,6.5), 2:8)))
+  expect_error(arx_class_args_list(lags = list(c(1:5, 6.5), 2:8)))
 
 
   expect_error(arx_class_args_list(target_date = "2022-01-01"))
@@ -17,4 +17,3 @@ test_that("arx_class_args checks inputs", {
     as.Date("2022-01-01")
   )
 })
-

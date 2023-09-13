@@ -40,7 +40,6 @@ slather.layer_unnest <-
 #' @export
 print.layer_unnest <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Unnesting prediction list-cols"
   print_layer(x$terms, title = title, width = width)
 }

@@ -45,8 +45,8 @@ grab_forged_keys <- function(forged, mold, new_data) {
   if (!(setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
     cli::cli_warn(c(
       "Not all epi keys that were present in the training data are available",
-      "in `new_data`. Predictions will have only the available keys.")
-    )
+      "in `new_data`. Predictions will have only the available keys."
+    ))
   }
   if (epiprocess::is_epi_df(new_data)) {
     extras <- epiprocess::as_epi_df(extras)
@@ -60,11 +60,14 @@ grab_forged_keys <- function(forged, mold, new_data) {
 }
 
 get_parsnip_mode <- function(trainer) {
-  if (inherits(trainer, "model_spec")) return(trainer$mode)
+  if (inherits(trainer, "model_spec")) {
+    return(trainer$mode)
+  }
   cc <- class(trainer)
   cli::cli_abort(
     c("`trainer` must be a `parsnip` model.",
-      i = "This trainer has class(s) {cc}.")
+      i = "This trainer has class(s) {cc}."
+    )
   )
 }
 

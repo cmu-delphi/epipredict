@@ -48,14 +48,14 @@ get_test_data <- function(
     x,
     fill_locf = FALSE,
     n_recent = NULL,
-    forecast_date = max(x$time_value)
-) {
+    forecast_date = max(x$time_value)) {
   if (!is_epi_df(x)) cli::cli_abort("`x` must be an `epi_df`.")
   arg_is_lgl(fill_locf)
   arg_is_scalar(fill_locf)
   arg_is_scalar(n_recent, allow_null = TRUE)
-  if (!is.null(n_recent) && is.finite(n_recent))
+  if (!is.null(n_recent) && is.finite(n_recent)) {
     arg_is_pos_int(n_recent, allow_null = TRUE)
+  }
   if (!is.null(n_recent)) n_recent <- abs(n_recent) # in case they passed -Inf
 
   check <- hardhat::check_column_names(x, colnames(recipe$template))
@@ -66,12 +66,14 @@ get_test_data <- function(
     ))
   }
 
-  if (class(forecast_date) != class(x$time_value))
+  if (class(forecast_date) != class(x$time_value)) {
     cli::cli_abort("`forecast_date` must be the same class as `x$time_value`.")
+  }
 
 
-  if (forecast_date < max(x$time_value))
+  if (forecast_date < max(x$time_value)) {
     cli::cli_abort("`forecast_date` must be no earlier than `max(x$time_value)`")
+  }
 
   min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% Inf)), Inf)
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
@@ -87,7 +89,8 @@ get_test_data <- function(
     cli::cli_abort(c(
       "You supplied insufficient recent data for this recipe. ",
       "!" = "You need at least {min_required} days of data,",
-      "!" = "but `x` contains only {avail_recent}."))
+      "!" = "but `x` contains only {avail_recent}."
+    ))
   }
 
   x <- arrange(x, time_value)
@@ -104,8 +107,9 @@ get_test_data <- function(
     epiprocess::group_by(dplyr::across(dplyr::all_of(groups)))
 
   # If all(lags > 0), then we get rid of recent data
-  if (min_lags > 0 && min_lags < Inf)
+  if (min_lags > 0 && min_lags < Inf) {
     x <- dplyr::filter(x, forecast_date - time_value >= min_lags)
+  }
 
   # Now, fill forward missing data if requested
   if (fill_locf) {
@@ -126,14 +130,15 @@ get_test_data <- function(
       unlist()
     if (any(cannot_be_used)) {
       bad_vars <- names(cannot_be_used)[cannot_be_used]
-      if (recipes::is_trained(recipe))
-      cli::cli_abort(c(
-        "The variables {.var {bad_vars}} have too many recent missing",
-        `!` = "values to be filled automatically. ",
-        i = "You should either choose `n_recent` larger than its current ",
-        i = "value {n_recent}, or perform NA imputation manually, perhaps with ",
-        i = "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}."
-      ))
+      if (recipes::is_trained(recipe)) {
+        cli::cli_abort(c(
+          "The variables {.var {bad_vars}} have too many recent missing",
+          `!` = "values to be filled automatically. ",
+          i = "You should either choose `n_recent` larger than its current ",
+          i = "value {n_recent}, or perform NA imputation manually, perhaps with ",
+          i = "{.code recipes::step_impute_*()} or with {.code tidyr::fill()}."
+        ))
+      }
     }
     x <- tidyr::fill(x, !time_value)
   }
@@ -159,6 +164,8 @@ pad_to_end <- function(x, groups, end_date) {
 }
 
 Seq <- function(from, to, by) {
-  if (from > to) return(NULL)
+  if (from > to) {
+    return(NULL)
+  }
   seq(from = from, to = to, by = by)
 }
