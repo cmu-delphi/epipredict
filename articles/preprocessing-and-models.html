@@ -136,7 +136,8 @@ packages.</p>
 <span>  time_type <span class="op">=</span> <span class="st">"day"</span>,</span>
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
-<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span></span>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, cases <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/pub_covidcast.html" class="external-link">pub_covidcast</a></span><span class="op">(</span></span>
@@ -145,7 +146,8 @@ packages.</p>
 <span>  time_type <span class="op">=</span> <span class="st">"day"</span>,</span>
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
-<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span></span>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, deaths <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">counts_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -159,12 +161,12 @@ differential intercept coefficients, we can allow for an intercept shift
 between states.</p>
 The model takes the form
 <span class="math display">\[\begin{aligned}
-\log\left( \mu_{t+7} \right) &amp;= \beta_0 + \delta_1
-s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots +  \nonumber \\ &amp;\quad\beta_1
+\log\left( \mu*{t+7} \right) &amp;= \beta_0 + \delta_1
+s*{\text{state}_1} +
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ &amp;\quad\beta_1
 \text{deaths}_{t} +
-\beta_2 \text{deaths}_{t-7}  + \beta_3 \text{cases}_{t} +
-\beta_4 \text{cases}_{t-7},
+\beta*2 \text{deaths}*{t-7} + \beta*3 \text{cases}*{t} +
+\beta*4 \text{cases}*{t-7},
 \end{aligned}\]</span>
 <p>where <span class="math inline">\(\mu_{t+7} =
 \mathbb{E}(y_{t+7})\)</span>, and <span class="math inline">\(y_{t+7}\)</span> is assumed to follow a Poisson
@@ -234,7 +236,7 @@ like to reuse this variable as <code>predictor</code>s.</p>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_dummy.html" class="external-link">step_dummy</a></span><span class="op">(</span><span class="va">geo_value_factor</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="co">## Occasionally, data reporting errors / corrections result in negative</span></span>
 <span>  <span class="co">## cases / deaths</span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span>cases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">cases</span>, <span class="fl">0</span><span class="op">)</span>, deaths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">deaths</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span>  </span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span>cases <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">cases</span>, <span class="fl">0</span><span class="op">)</span>, deaths <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">pmax</a></span><span class="op">(</span><span class="va">deaths</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">cases</span>, <span class="va">deaths</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">deaths</span>, ahead <span class="op">=</span> <span class="fl">7</span>, role <span class="op">=</span> <span class="st">"outcome"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_naomit.html">step_epi_naomit</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -252,7 +254,7 @@ dataset.</p>
 <pre><code><span><span class="co">#&gt; An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2023-09-13 15:55:52.676251</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-09-13 19:41:47.859522</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   geo_value time_value .pred</span></span>
@@ -287,12 +289,12 @@ Poisson regression can also be used to model rate data, such as case
 rates or death rates, by incorporating offset terms in the model.</p>
 To model death rates, the Poisson regression would be expressed as:
 <span class="math display">\[\begin{aligned}
-\log\left( \mu_{t+7} \right) &amp;= \log(\text{population}) +
-\beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots +  \nonumber \\ &amp;\quad\beta_1
+\log\left( \mu*{t+7} \right) &amp;= \log(\text{population}) +
+\beta_0 + \delta_1 s*{\text{state}_1} +
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ &amp;\quad\beta_1
 \text{deaths}_{t} +
-\beta_2 \text{deaths}_{t-7}  + \beta_3 \text{cases}_{t} +
-\beta_4 \text{cases}_{t-7}\end{aligned}\]</span>
+\beta*2 \text{deaths}*{t-7} + \beta*3 \text{cases}*{t} +
+\beta*4 \text{cases}*{t-7}\end{aligned}\]</span>
 <p>where <span class="math inline">\(\log(\text{population})\)</span> is
 the log of the state population that was used to scale the count data on
 the left-hand side of the equation. This offset is simply a predictor
@@ -347,7 +349,8 @@ this package and will be used in
 <span>  time_type <span class="op">=</span> <span class="st">"day"</span>,</span>
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
-<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span>  <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span></span>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, masking <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">behav_ind_distancing</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/pub_covidcast.html" class="external-link">pub_covidcast</a></span><span class="op">(</span></span>
@@ -356,13 +359,14 @@ this package and will be used in
 <span>  time_type <span class="op">=</span> <span class="st">"day"</span>,</span>
 <span>  geo_type <span class="op">=</span> <span class="st">"state"</span>,</span>
 <span>  time_values <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">20210604</span>, <span class="fl">20211231</span><span class="op">)</span>,</span>
-<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span><span class="op">)</span>  <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, distancing <span class="op">=</span> <span class="va">value</span><span class="op">)</span> </span>
+<span>  geo_values <span class="op">=</span> <span class="st">"ca,fl,tx,ny,nj"</span></span>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, distancing <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">pop_dat</span> <span class="op">&lt;-</span> <span class="va">state_census</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">abbr</span>, <span class="va">pop</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">behav_ind</span> <span class="op">&lt;-</span> <span class="va">behav_ind_mask</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">behav_ind_distancing</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">behav_ind_distancing</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Rather than using raw mask-wearing / social-distancing metrics, for
 the sake of illustration, we’ll convert both into categorical
 predictors.</p>
@@ -372,9 +376,9 @@ built-in dataset <code>case_death_rate_subset</code>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>  <span class="va">case_death_rate_subset</span>,</span>
-<span>  <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-06-04"</span>, </span>
+<span>  <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-06-04"</span>,</span>
 <span>  <span class="va">time_value</span> <span class="op">&lt;=</span> <span class="st">"2021-12-31"</span>,</span>
-<span>  <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>,<span class="st">"fl"</span>,<span class="st">"tx"</span>,<span class="st">"ny"</span>,<span class="st">"nj"</span><span class="op">)</span></span>
+<span>  <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span>, <span class="st">"tx"</span>, <span class="st">"ny"</span>, <span class="st">"nj"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Preprocessing steps will again rely on functions from the
 <code>epipredict</code> package as well as the <code>recipes</code>
@@ -388,13 +392,15 @@ meaningful interpretation of the intercept.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>geo_value_factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">geo_value</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">behav_ind</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>            </span>
+<span></span>
 <span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">add_role</a></span><span class="op">(</span><span class="va">geo_value_factor</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_dummy.html" class="external-link">step_dummy</a></span><span class="op">(</span><span class="va">geo_value_factor</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="va">death_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span>masking <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/cut_interval.html" class="external-link">cut_number</a></span><span class="op">(</span><span class="va">masking</span>, <span class="fl">5</span><span class="op">)</span>, </span>
-<span>              distancing <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/cut_interval.html" class="external-link">cut_number</a></span><span class="op">(</span><span class="va">distancing</span>, <span class="fl">5</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span></span>
+<span>    masking <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/cut_interval.html" class="external-link">cut_number</a></span><span class="op">(</span><span class="va">masking</span>, <span class="fl">5</span><span class="op">)</span>,</span>
+<span>    distancing <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/cut_interval.html" class="external-link">cut_number</a></span><span class="op">(</span><span class="va">distancing</span>, <span class="fl">5</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">death_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span>, role <span class="op">=</span> <span class="st">"outcome"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_center.html" class="external-link">step_center</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">contains</a></span><span class="op">(</span><span class="st">"lag"</span><span class="op">)</span>, role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_naomit.html">step_epi_naomit</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
@@ -404,23 +410,23 @@ data:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">jhu</span><span class="op">)</span>, <span class="va">jhu</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; Rows: 6</span></span>
 <span><span class="co">#&gt; Columns: 17</span></span>
-<span><span class="co">#&gt; $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-12-31, 2021-06-28, 2021-09-26, 2021-07-28, 2…</span></span>
-<span><span class="co">#&gt; $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "nj", "ny", "nj", "ny", "ny", "tx"</span></span>
-<span><span class="co">#&gt; $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 247.646233, 1.702899, 22.469869, 9.039031, 1.72801…</span></span>
-<span><span class="co">#&gt; $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.3039729, 0.0428495, 0.2219485, 0.0310290, 0.0465…</span></span>
-<span><span class="co">#&gt; $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(69.7,85]", "[42.7,52.8]", "(60.2,63.9]", "[42.7,…</span></span>
-<span><span class="co">#&gt; $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "[13.9,18.4]", "(21.1,27]", "(19.8,21.1]", "[13.9,…</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-09-13, 2021-12-28, 2021-08-31, 2021-11-01, 2…</span></span>
+<span><span class="co">#&gt; $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "nj", "tx", "nj", "fl", "ny", "fl"</span></span>
+<span><span class="co">#&gt; $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 23.500804, 46.898846, 22.804400, 7.987081, 32.2316…</span></span>
+<span><span class="co">#&gt; $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.2042569, 0.1970560, 0.1720905, 0.4844439, 0.1743…</span></span>
+<span><span class="co">#&gt; $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(63.9,69.7]", "(52.8,60.2]", "(60.2,63.9]", "(52.…</span></span>
+<span><span class="co">#&gt; $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(18.4,19.8]", "[13.9,18.4]", "(21.1,27]", "[13.9,…</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 0, 1</span></span>
 <span><span class="co">#&gt; $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 1, 0, 0, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 1, 1, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 1</span></span>
-<span><span class="co">#&gt; $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 220.704570, -25.238764, -4.471793, -17.902632, -25…</span></span>
-<span><span class="co">#&gt; $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 100.995542, -25.130162, -1.655621, -21.478350, -24…</span></span>
-<span><span class="co">#&gt; $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 30.51243, -24.51993, -2.78788, -23.28246, -23.9717…</span></span>
-<span><span class="co">#&gt; $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0220993, -0.2390241, -0.0599251, -0.2508446, -0.…</span></span>
-<span><span class="co">#&gt; $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.003633904, -0.240501704, -0.069575104, -0.25527…</span></span>
-<span><span class="co">#&gt; $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.0695751, -0.2198157, -0.1049582, -0.2545386, -0…</span></span>
-<span><span class="co">#&gt; $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> NA, 0.0243799, 0.2315984, 0.0391556, 0.0295514, 0.…</span></span></code></pre>
+<span><span class="co">#&gt; $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 1, 0</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.440859, 19.957184, -4.137262, -18.954582, 5.290…</span></span>
+<span><span class="co">#&gt; $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.4585504, -1.0874262, -4.8626156, -17.3684717, 0…</span></span>
+<span><span class="co">#&gt; $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -4.573118, -12.763847, -7.083708, -14.579468, -5.7…</span></span>
+<span><span class="co">#&gt; $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.0776167, -0.0848176, -0.1097831, 0.2025703, -0.…</span></span>
+<span><span class="co">#&gt; $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1403412, -0.0634090, -0.1853743, 0.2380656, -0.…</span></span>
+<span><span class="co">#&gt; $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1065665, -0.0731402, -0.1918076, 0.6876716, -0.…</span></span>
+<span><span class="co">#&gt; $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.1978236, NA, 0.1543989, 0.4916745, 0.1795247, 0.…</span></span></code></pre>
 <p>Before directly predicting the results, we need to add postprocessing
 layers to obtain the death counts instead of death rates. Note that the
 rates used so far are “per 100K people” rather than “per person”. We’ll
@@ -430,16 +436,17 @@ rather than ordinary least squares to create median predictions and a
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/layer_add_target_date.html">layer_add_target_date</a></span><span class="op">(</span><span class="st">"2022-01-07"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="../reference/layer_add_target_date.html">layer_add_target_date</a></span><span class="op">(</span><span class="st">"2022-01-07"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_threshold.html">layer_threshold</a></span><span class="op">(</span><span class="va">.pred</span>, lower <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_quantile_distn.html">layer_quantile_distn</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_naomit.html">layer_naomit</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_population_scaling.html">layer_population_scaling</a></span><span class="op">(</span></span>
-<span>    <span class="va">.pred</span>, <span class="va">.pred_distn</span>, </span>
-<span>    df <span class="op">=</span> <span class="va">pop_dat</span>, </span>
+<span>    <span class="va">.pred</span>, <span class="va">.pred_distn</span>,</span>
+<span>    df <span class="op">=</span> <span class="va">pop_dat</span>,</span>
 <span>    rate_rescaling <span class="op">=</span> <span class="fl">1e5</span>,</span>
-<span>    by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span> <span class="op">=</span> <span class="st">"abbr"</span><span class="op">)</span>, </span>
-<span>    df_pop_col <span class="op">=</span> <span class="st">"pop"</span><span class="op">)</span></span>
+<span>    by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span> <span class="op">=</span> <span class="st">"abbr"</span><span class="op">)</span>,</span>
+<span>    df_pop_col <span class="op">=</span> <span class="st">"pop"</span></span>
+<span>  <span class="op">)</span></span>
 <span></span>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span>tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">.5</span>, <span class="fl">.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -537,27 +544,29 @@ decrease in newly reported cases over the past 7 days (a 20% decrease is
 the inverse of a 25% increase). Otherwise, we will consider the trend to
 be <code>flat</code>.</p>
 <p>The expression of the multinomial regression we will use is as
-follows: <span class="math display">\[
+follows:</p>
+<p><span class="math display">\[
 \pi_{j}(x) = \text{Pr}(Z_{\ell,t} = j|x) = \frac{e^{g_j(x)}}{1 +
 \sum_{k=0}^2 g_j(x) }
-\]</span> where <span class="math inline">\(j\)</span> is either down,
-flat, or up</p>
+\]</span></p>
+<p>where <span class="math inline">\(j\)</span> is either down, flat, or
+up</p>
 <span class="math display">\[\begin{aligned}
-g_{\text{down}}(x) &amp;= 0.\\
-g_{\text{flat}}(x)&amp;=
-\text{ln}\left(\frac{Pr(Z_{\ell,t}=\text{flat}|x)}{Pr(Z_{\ell,t}=\text{down}|x)}\right)
+g*{\text{down}}(x) &amp;= 0.\\
+g*{\text{flat}}(x)&amp;=
+\text{ln}\left(\frac{Pr(Z*{\ell,t}=\text{flat}|x)}{Pr(Z*{\ell,t}=\text{down}|x)}\right)
 =
-\beta_{10} + \beta_{11}t + \delta_{10} s_{\text{state_1}} +
-\delta_{11} s_{\text{state_2}} + \cdots \nonumber \\
-&amp;\quad + \beta_{12} Y^{\Delta}_{\ell, t} +
+\beta*{10} + \beta*{11}t + \delta*{10} s*{\text{state*1}} +
+\delta*{11} s*{\text{state_2}} + \cdots \nonumber \\
+&amp;\quad + \beta*{12} Y^{\Delta}_{\ell, t} +
 \beta_{13} Y^{\Delta}_{\ell, t-7} \\
 g_{\text{flat}}(x) &amp;=
-\text{ln}\left(\frac{Pr(Z_{\ell,t}=\text{up}|x)}{Pr(Z_{\ell,t}=\text{down}|x)}\right)
+\text{ln}\left(\frac{Pr(Z*{\ell,t}=\text{up}|x)}{Pr(Z*{\ell,t}=\text{down}|x)}\right)
 =
-\beta_{20} + \beta_{21}t + \delta_{20} s_{\text{state_1}} +
-\delta_{21} s_{\text{state}_2} + \cdots \nonumber \\
-&amp;\quad + \beta_{22} Y^{\Delta}_{\ell, t} +
-\beta_{23} Y^{\Delta}_{\ell, t-7}
+\beta*{20} + \beta*{21}t + \delta*{20} s*{\text{state*1}} +
+\delta*{21} s*{\text{state}\_2} + \cdots \nonumber \\
+&amp;\quad + \beta*{22} Y^{\Delta}_{\ell, t} +
+\beta_{23} Y^{\Delta}\_{\ell, t-7}
 \end{aligned}\]</span>
 <p>Preprocessing steps are similar to the previous models with an
 additional step of categorizing the response variables. Again, we will
@@ -565,9 +574,11 @@ use a subset of death rate and case rate data from our built-in dataset
 <code>case_death_rate_subset</code>.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-06-04"</span>, </span>
-<span>                <span class="va">time_value</span> <span class="op">&lt;=</span> <span class="st">"2021-12-31"</span>,</span>
-<span>  <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>,<span class="st">"fl"</span>,<span class="st">"tx"</span>,<span class="st">"ny"</span>,<span class="st">"nj"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span>    <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-06-04"</span>,</span>
+<span>    <span class="va">time_value</span> <span class="op">&lt;=</span> <span class="st">"2021-12-31"</span>,</span>
+<span>    <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span>, <span class="st">"tx"</span>, <span class="st">"ny"</span>, <span class="st">"nj"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>geo_value_factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">geo_value</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -579,21 +590,29 @@ use a subset of death rate and case rate data from our built-in dataset
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span></span>
 <span>    pct_diff_ahead <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>      <span class="va">lag_7_case_rate</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">~</span> <span class="fl">0</span>,</span>
-<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="va">ahead_7_case_rate</span> <span class="op">-</span> <span class="va">lag_0_case_rate</span><span class="op">)</span> <span class="op">/</span> <span class="va">lag_0_case_rate</span><span class="op">)</span>,</span>
+<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="va">ahead_7_case_rate</span> <span class="op">-</span> <span class="va">lag_0_case_rate</span><span class="op">)</span> <span class="op">/</span> <span class="va">lag_0_case_rate</span></span>
+<span>    <span class="op">)</span>,</span>
 <span>    pct_diff_wk1 <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">lag_7_case_rate</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">~</span> <span class="fl">0</span>, </span>
-<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="va">lag_0_case_rate</span> <span class="op">-</span> <span class="va">lag_7_case_rate</span><span class="op">)</span> <span class="op">/</span> <span class="va">lag_7_case_rate</span><span class="op">)</span>,</span>
+<span>      <span class="va">lag_7_case_rate</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">~</span> <span class="fl">0</span>,</span>
+<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="va">lag_0_case_rate</span> <span class="op">-</span> <span class="va">lag_7_case_rate</span><span class="op">)</span> <span class="op">/</span> <span class="va">lag_7_case_rate</span></span>
+<span>    <span class="op">)</span>,</span>
 <span>    pct_diff_wk2 <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>      <span class="va">lag_14_case_rate</span> <span class="op">==</span> <span class="fl">0</span> <span class="op">~</span> <span class="fl">0</span>,</span>
-<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="va">lag_7_case_rate</span> <span class="op">-</span> <span class="va">lag_14_case_rate</span><span class="op">)</span> <span class="op">/</span> <span class="va">lag_14_case_rate</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="op">(</span><span class="va">lag_7_case_rate</span> <span class="op">-</span> <span class="va">lag_14_case_rate</span><span class="op">)</span> <span class="op">/</span> <span class="va">lag_14_case_rate</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span></span>
 <span>    response <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
 <span>      <span class="va">pct_diff_ahead</span> <span class="op">&lt;</span> <span class="op">-</span><span class="fl">0.20</span> <span class="op">~</span> <span class="st">"down"</span>,</span>
 <span>      <span class="va">pct_diff_ahead</span> <span class="op">&gt;</span> <span class="fl">0.25</span> <span class="op">~</span> <span class="st">"up"</span>,</span>
-<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"flat"</span><span class="op">)</span>, </span>
-<span>    role <span class="op">=</span> <span class="st">"outcome"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_rm.html" class="external-link">step_rm</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="va">case_rate</span>, <span class="va">lag_0_case_rate</span>,  <span class="va">lag_7_case_rate</span>, </span>
-<span>          <span class="va">lag_14_case_rate</span>, <span class="va">ahead_7_case_rate</span>, <span class="va">pct_diff_ahead</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>      <span class="cn">TRUE</span> <span class="op">~</span> <span class="st">"flat"</span></span>
+<span>    <span class="op">)</span>,</span>
+<span>    role <span class="op">=</span> <span class="st">"outcome"</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_rm.html" class="external-link">step_rm</a></span><span class="op">(</span></span>
+<span>    <span class="va">death_rate</span>, <span class="va">case_rate</span>, <span class="va">lag_0_case_rate</span>, <span class="va">lag_7_case_rate</span>,</span>
+<span>    <span class="va">lag_14_case_rate</span>, <span class="va">ahead_7_case_rate</span>, <span class="va">pct_diff_ahead</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_naomit.html">step_epi_naomit</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>We will fit the multinomial regression and examine the
 predictions:</p>
@@ -679,8 +698,8 @@ correct lags and leads for future predictions.</p>
 <p>Let’s start with a simple dataset and preprocessing:</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
-<span>  <span class="va">case_death_rate_subset</span>, </span>
-<span>  <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-12-01"</span>, </span>
+<span>  <span class="va">case_death_rate_subset</span>,</span>
+<span>  <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-12-01"</span>,</span>
 <span>  <span class="va">time_value</span> <span class="op">&lt;=</span> <span class="st">"2021-12-31"</span>,</span>
 <span>  <span class="va">geo_value</span> <span class="op">==</span> <span class="st">"ca"</span></span>
 <span><span class="op">)</span></span>
@@ -726,13 +745,15 @@ of the latest available date in our dataset.</p>
 <span><span class="co">#&gt; <span style="color: #949494;">#   lag_7_death_rate &lt;dbl&gt;, lag_14_death_rate &lt;dbl&gt;, ahead_7_death_rate &lt;dbl&gt;</span></span></span></code></pre>
 <div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">ex</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span>lag0case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">0</span><span class="op">)</span>,</span>
-<span>              lag7case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">7</span><span class="op">)</span>,</span>
-<span>              lag14case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">14</span><span class="op">)</span>,</span>
-<span>              lag0death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">0</span><span class="op">)</span>,</span>
-<span>              lag7death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">7</span><span class="op">)</span>,</span>
-<span>              lag14death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">14</span><span class="op">)</span>,</span>
-<span>              ahead7death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lead</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">7</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate</a></span><span class="op">(</span></span>
+<span>    lag0case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>    lag7case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">7</span><span class="op">)</span>,</span>
+<span>    lag14case_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">case_rate</span>, <span class="fl">14</span><span class="op">)</span>,</span>
+<span>    lag0death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">0</span><span class="op">)</span>,</span>
+<span>    lag7death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">7</span><span class="op">)</span>,</span>
+<span>    lag14death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lag</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">14</span><span class="op">)</span>,</span>
+<span>    ahead7death_rate <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/lead-lag.html" class="external-link">lead</a></span><span class="op">(</span><span class="va">death_rate</span>, <span class="fl">7</span><span class="op">)</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_naomit.html">step_epi_naomit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; Warning in max.default(structure(numeric(0), class = "Date"), na.rm = FALSE):</span></span>
@@ -761,9 +782,9 @@ that doesn’t use <code>step_epi_ahead</code> and
 <code>step_epi_lag</code>, has omitted dates compared to the one that
 used the <code>epipredict</code> functions.</p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dates_used_in_training1</span> <span class="op">&lt;-</span> <span class="va">b1</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">ahead_7_death_rate</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<code class="sourceCode R"><span><span class="va">dates_used_in_training1</span> <span class="op">&lt;-</span> <span class="va">b1</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">ahead_7_death_rate</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">time_value</span><span class="op">)</span></span>
 <span><span class="va">dates_used_in_training1</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;  [1] "2021-12-15" "2021-12-16" "2021-12-17" "2021-12-18" "2021-12-19"</span></span>
@@ -771,9 +792,9 @@ used the <code>epipredict</code> functions.</p>
 <span><span class="co">#&gt; [11] "2021-12-25" "2021-12-26" "2021-12-27" "2021-12-28" "2021-12-29"</span></span>
 <span><span class="co">#&gt; [16] "2021-12-30" "2021-12-31"</span></span></code></pre>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dates_used_in_training2</span> <span class="op">&lt;-</span> <span class="va">b2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">ahead7death_rate</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> </span>
+<code class="sourceCode R"><span><span class="va">dates_used_in_training2</span> <span class="op">&lt;-</span> <span class="va">b2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="op">-</span><span class="va">ahead7death_rate</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">time_value</span><span class="op">)</span></span>
 <span><span class="va">dates_used_in_training2</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt;  [1] "2021-12-15" "2021-12-16" "2021-12-17" "2021-12-18" "2021-12-19"</span></span>
