@@ -2,7 +2,7 @@
 title: "Get started with epipredict"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{epipredict}
+  %\VignetteIndexEntry{Get started with epipredict}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

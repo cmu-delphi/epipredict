@@ -105,7 +105,7 @@
 step_population_scaling <-
   function(recipe,
           ...,
-          role = "predictor",
+          role = "raw",
           trained = FALSE,
           df,
           by = NULL,
@@ -195,7 +195,10 @@ bake.step_population_scaling <- function(object,
                "must be present in data and match"))}
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
-    message("`suffix` not used to generate new column in `step_population_scaling`")
+    cli::cli_warn(c(
+      "Custom `suffix` {.val {object$suffix}} was ignored in `step_population_scaling`.",
+      i = "Perhaps `create_new` should be {.val {TRUE}}?"
+    ))
   }
 
   object$df <- object$df %>%
