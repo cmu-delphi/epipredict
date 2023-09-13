@@ -42,7 +42,7 @@ print_epi_step <- function(
   )
   more_dots <- ifelse(first_line == length(elements), "", ", ...")
   cli::cli_bullets(
-    c(`*` = "\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}\\\n    {comma_seperator} \\\n    {.emph {case_weights_text}}\n    "))
+    c("\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}\\\n    {comma_seperator} \\\n    {.emph {case_weights_text}}\n    "))
   cli::cli_end(theme_div_id)
   invisible(NULL)
 }

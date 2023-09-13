@@ -399,8 +399,63 @@ kill_levels <- function(x, keys) {
 }
 
 #' @export
+print.epi_recipe <- function(x, form_width = 30, ...) {
+  cli::cli_div(theme = list(.pkg = list("vec-trunc" = Inf, "vec-last" = ", ")))
+
+  cli::cli_h1("Recipe")
+  cli::cli_h3("Inputs")
+
+  tab <- table(x$var_info$role, useNA = "ifany")
+  tab <- stats::setNames(tab, names(tab))
+  names(tab)[is.na(names(tab))] <- "undeclared role"
+
+  roles <- c("outcome", "predictor", "case_weights", "undeclared role")
+
+  tab <- c(
+    tab[names(tab) == roles[1]],
+    tab[names(tab) == roles[2]],
+    tab[names(tab) == roles[3]],
+    sort(tab[!names(tab) %in% roles], TRUE),
+    tab[names(tab) == roles[4]]
+  )
+
+  cli::cli_text("Number of variables by role")
+
+  spaces_needed <- max(nchar(names(tab))) - nchar(names(tab)) +
+    max(nchar(tab)) - nchar(tab)
+
+  cli::cli_verbatim(
+    glue::glue("{names(tab)}: {strrep('\ua0', spaces_needed)}{tab}")
+  )
+
+  if ("tr_info" %in% names(x)) {
+    cli::cli_h3("Training information")
+    nmiss <- x$tr_info$nrows - x$tr_info$ncomplete
+    nrows <- x$tr_info$nrows
+
+    cli::cli_text(
+      "Training data contained {nrows} data points and {cli::no(nmiss)} \\
+       incomplete row{?s}."
+    )
+  }
+
+  if (!is.null(x$steps)) {
+    cli::cli_h3("Operations")
+  }
+
+  i = 1
+  for (step in x$steps) {
+    cat(paste0(i, ". "))
+    print(step, form_width = form_width)
+    i = i + 1
+  }
+  cli::cli_end()
+
+  invisible(x)
+}
+
 # Currently only used in the workflow printing
-print_preprocessor_recipe <- function (x) {
+print_preprocessor_recipe <- function(x, ...) {
 
   recipe <- workflows::extract_preprocessor(x)
   steps <- recipe$steps
@@ -421,7 +476,7 @@ print_preprocessor_recipe <- function (x) {
   step_names <- map_chr(steps, workflows:::pull_step_name)
 
   if (n_steps <= 10L) {
-    cli:::cli_ol(step_names)
+    cli::cli_ol(step_names)
     return(invisible(x))
   }
 

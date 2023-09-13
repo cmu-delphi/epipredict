@@ -269,6 +269,23 @@ apply_frosting.epi_workflow <-
   }
 
 #' @export
+print.frosting <- function(x, form_width = 30, ...) {
+  cli::cli_div(
+    theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
+  )
+  cli::cli_h1("Frosting")
+
+  if (!is.null(x$layers)) cli::cli_h3("Layers")
+  i = 1
+  for (layer in x$layers){
+    cat(paste0(i, ". "))
+    print(layer, form_width = form_width)
+    i = i + 1
+  }
+  cli::cli_end()
+  invisible(x)
+}
+
 # Currently only used in the workflow printing
 print_frosting <- function(x, ...) {
 
@@ -285,7 +302,7 @@ print_frosting <- function(x, ...) {
   layer_names <- map_chr(layers, pull_layer_name)
 
   if (n_layers <= 10L) {
-    cli:::cli_ol(layer_names)
+    cli::cli_ol(layer_names)
     return(invisible(x))
   }
 
