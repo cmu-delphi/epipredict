@@ -338,9 +338,9 @@ remove_epi_recipe <- function(x) {
 update_epi_recipe <- function(
     x, recipe = NULL, step_num = NULL, ..., blueprint = default_epi_recipe_blueprint()) {
 
-  if(is_null(recipe) && !is_null(step_num)){
-    recipe = workflows::extract_preprocessor(x)
-    recipe$steps[[step_num]] = update(recipe$steps[[step_num]], ...)
+  if (is_null(recipe) && !is_null(step_num)) {
+    recipe <- workflows::extract_preprocessor(x)
+    recipe$steps[[step_num]] <- update(recipe$steps[[step_num]], ...)
   }
 
   x <- remove_epi_recipe(x)
