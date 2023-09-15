@@ -113,9 +113,9 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
 #' @export
 update_frosting <- function(x, frosting = NULL, layer_num = NULL, ...) {
 
-  if(is_null(frosting) && !is_null(layer_num)){
-    frosting = extract_frosting(x)
-    frosting$layers[[layer_num]] = update(frosting$layers[[layer_num]], ...)
+  if (is_null(frosting) && !is_null(layer_num)) {
+    frosting <- extract_frosting(x)
+    frosting$layers[[layer_num]] <- update(frosting$layers[[layer_num]], ...)
   }
 
   x <- remove_frosting(x)
