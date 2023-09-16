@@ -69,13 +69,15 @@
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   dplyr::select(geo_value, time_value, cases)
 #'
-#' pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
+#' pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
 #' r <- epi_recipe(jhu) %>%
-#'   step_population_scaling(df = pop_data,
-#'                           df_pop_col = "value",
-#'                           by = c("geo_value" = "states"),
-#'                           cases, suffix = "_scaled") %>%
+#'   step_population_scaling(
+#'     df = pop_data,
+#'     df_pop_col = "value",
+#'     by = c("geo_value" = "states"),
+#'     cases, suffix = "_scaled"
+#'   ) %>%
 #'   step_epi_lag(cases_scaled, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
 #'   step_epi_naomit()
@@ -84,9 +86,11 @@
 #'   layer_predict() %>%
 #'   layer_threshold(.pred) %>%
 #'   layer_naomit(.pred) %>%
-#'   layer_population_scaling(.pred, df = pop_data,
-#'                            by =  c("geo_value" = "states"),
-#'                            df_pop_col = "value")
+#'   layer_population_scaling(.pred,
+#'     df = pop_data,
+#'     by = c("geo_value" = "states"),
+#'     df_pop_col = "value"
+#'   )
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
 #'   fit(jhu) %>%
@@ -95,8 +99,10 @@
 #' latest <- get_test_data(
 #'   recipe = r,
 #'   epiprocess::jhu_csse_daily_subset %>%
-#'     dplyr::filter(time_value > "2021-11-01",
-#'       geo_value %in% c("ca", "ny")) %>%
+#'     dplyr::filter(
+#'       time_value > "2021-11-01",
+#'       geo_value %in% c("ca", "ny")
+#'     ) %>%
 #'     dplyr::select(geo_value, time_value, cases)
 #' )
 #'
@@ -104,43 +110,44 @@
 #' predict(wf, latest)
 step_population_scaling <-
   function(recipe,
-          ...,
-          role = "predictor",
-          trained = FALSE,
-          df,
-          by = NULL,
-          df_pop_col,
-          rate_rescaling = 1,
-          create_new = TRUE,
-          suffix = "_scaled",
-          columns = NULL,
-          skip = FALSE,
-          id = rand_id("population_scaling")){
-  arg_is_scalar(role, trained, df_pop_col, rate_rescaling, create_new, suffix, id)
-  arg_is_lgl(create_new, skip)
-  arg_is_chr(df_pop_col, suffix, id)
-  arg_is_chr(by, columns, allow_null = TRUE)
-  if (rate_rescaling <= 0)
-    cli_stop("`rate_rescaling` should be a positive number")
+           ...,
+           role = "raw",
+           trained = FALSE,
+           df,
+           by = NULL,
+           df_pop_col,
+           rate_rescaling = 1,
+           create_new = TRUE,
+           suffix = "_scaled",
+           columns = NULL,
+           skip = FALSE,
+           id = rand_id("population_scaling")) {
+    arg_is_scalar(role, trained, df_pop_col, rate_rescaling, create_new, suffix, id)
+    arg_is_lgl(create_new, skip)
+    arg_is_chr(df_pop_col, suffix, id)
+    arg_is_chr(by, columns, allow_null = TRUE)
+    if (rate_rescaling <= 0) {
+      cli_stop("`rate_rescaling` should be a positive number")
+    }
 
-  add_step(
-    recipe,
-    step_population_scaling_new(
-      terms = dplyr::enquos(...),
-      role = role,
-      trained = trained,
-      df = df,
-      by = by,
-      df_pop_col = df_pop_col,
-      rate_rescaling = rate_rescaling,
-      create_new = create_new,
-      suffix = suffix,
-      columns = columns,
-      skip = skip,
-      id = id
+    add_step(
+      recipe,
+      step_population_scaling_new(
+        terms = dplyr::enquos(...),
+        role = role,
+        trained = trained,
+        df = df,
+        by = by,
+        df_pop_col = df_pop_col,
+        rate_rescaling = rate_rescaling,
+        create_new = create_new,
+        suffix = suffix,
+        columns = columns,
+        skip = skip,
+        id = id
+      )
     )
-  )
-}
+  }
 
 step_population_scaling_new <-
   function(role, trained, df, by, df_pop_col, rate_rescaling, terms, create_new,
@@ -182,35 +189,45 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_population_scaling <- function(object,
-                                 new_data,
-                                 ...) {
-
-  stopifnot("Only one population column allowed for scaling" =
-              length(object$df_pop_col) == 1)
+                                         new_data,
+                                         ...) {
+  stopifnot(
+    "Only one population column allowed for scaling" =
+      length(object$df_pop_col) == 1
+  )
 
   try_join <- try(dplyr::left_join(new_data, object$df, by = object$by),
-                silent = TRUE)
+    silent = TRUE
+  )
   if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
-    cli_stop(c("columns in `by` selectors of `step_population_scaling` ",
-               "must be present in data and match"))}
+    cli_stop(c(
+      "columns in `by` selectors of `step_population_scaling` ",
+      "must be present in data and match"
+    ))
+  }
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
-    message("`suffix` not used to generate new column in `step_population_scaling`")
+    cli::cli_warn(c(
+      "Custom `suffix` {.val {object$suffix}} was ignored in `step_population_scaling`.",
+      i = "Perhaps `create_new` should be {.val {TRUE}}?"
+    ))
   }
 
   object$df <- object$df %>%
     dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
 
-  pop_col = rlang::sym(object$df_pop_col)
-  suffix = ifelse(object$create_new, object$suffix, "")
+  pop_col <- rlang::sym(object$df_pop_col)
+  suffix <- ifelse(object$create_new, object$suffix, "")
   col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
   dplyr::left_join(new_data,
-                   object$df,
-                   by = object$by, suffix = c("", ".df")) %>%
+    object$df,
+    by = object$by, suffix = c("", ".df")
+  ) %>%
     dplyr::mutate(dplyr::across(dplyr::all_of(object$columns),
-        ~.x * object$rate_rescaling /!!pop_col ,
-        .names = "{.col}{suffix}")) %>%
+      ~ .x * object$rate_rescaling / !!pop_col,
+      .names = "{.col}{suffix}"
+    )) %>%
     # removed so the models do not use the population column
     dplyr::select(-dplyr::any_of(col_to_remove))
 }
@@ -218,9 +235,7 @@ bake.step_population_scaling <- function(object,
 #' @export
 print.step_population_scaling <-
   function(x, width = max(20, options()$width - 35), ...) {
-  title <- "Population scaling"
-  print_epi_step(x$terms, x$terms, x$trained, title, extra_text = "to rates")
-  invisible(x)
-}
-
-
+    title <- "Population scaling"
+    print_epi_step(x$terms, x$terms, x$trained, title, extra_text = "to rates")
+    invisible(x)
+  }

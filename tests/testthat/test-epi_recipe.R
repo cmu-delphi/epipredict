@@ -1,5 +1,3 @@
-
-
 test_that("epi_recipe produces default recipe", {
   # these all call recipes::recipe(), but the template will always have 1 row
   tib <- tibble(
@@ -7,25 +5,23 @@ test_that("epi_recipe produces default recipe", {
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5)
   )
   rec <- recipes::recipe(tib)
-  rec$template <- rec$template[1,]
+  rec$template <- rec$template[1, ]
   expect_identical(rec, epi_recipe(tib))
   expect_equal(nrow(rec$template), 1L)
 
-  rec <- recipes::recipe(y~x, tib)
-  rec$template <- rec$template[1,]
+  rec <- recipes::recipe(y ~ x, tib)
+  rec$template <- rec$template[1, ]
   expect_identical(rec, epi_recipe(y ~ x, tib))
   expect_equal(nrow(rec$template), 1L)
 
   m <- as.matrix(tib)
   rec <- recipes::recipe(m)
-  rec$template <- rec$template[1,]
+  rec$template <- rec$template[1, ]
   expect_identical(rec, epi_recipe(m))
   expect_equal(nrow(rec$template), 1L)
-
 })
 
 test_that("epi_recipe formula works", {
-
   tib <- tibble(
     x = 1:5, y = 1:5,
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
@@ -35,7 +31,7 @@ test_that("epi_recipe formula works", {
   # simple case
   r <- epi_recipe(y ~ x, tib)
   ref_var_info <- tibble::tribble(
-    ~ variable, ~ type, ~ role, ~ source,
+    ~variable, ~type, ~role, ~source,
     "x", c("integer", "numeric"), "predictor", "original",
     "y", c("integer", "numeric"), "outcome", "original",
     "time_value", "date", "time_value", "original",
@@ -50,7 +46,8 @@ test_that("epi_recipe formula works", {
     tibble::add_row(
       variable = "geo_value", type = list(c("string", "unordered", "nominal")),
       role = "predictor",
-      source = "original", .after = 1)
+      source = "original", .after = 1
+    )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 
@@ -67,14 +64,13 @@ test_that("epi_recipe formula works", {
     tibble::add_row(
       variable = "z", type = list(c("string", "unordered", "nominal")),
       role = "key",
-      source = "original")
+      source = "original"
+    )
 
   expect_identical(r$var_info, ref_var_info)
-
 })
 
 test_that("epi_recipe epi_df works", {
-
   tib <- tibble(
     x = 1:5, y = 1:5,
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
@@ -83,7 +79,7 @@ test_that("epi_recipe epi_df works", {
 
   r <- epi_recipe(tib)
   ref_var_info <- tibble::tribble(
-    ~ variable, ~ type, ~ role, ~ source,
+    ~variable, ~type, ~role, ~source,
     "time_value", "date", "time_value", "original",
     "geo_value", c("string", "unordered", "nominal"), "geo_value", "original",
     "x", c("integer", "numeric"), "raw", "original",
@@ -94,7 +90,7 @@ test_that("epi_recipe epi_df works", {
 
   r <- epi_recipe(tib, formula = y ~ x)
   ref_var_info <- tibble::tribble(
-    ~ variable, ~ type, ~ role, ~ source,
+    ~variable, ~type, ~role, ~source,
     "x", c("integer", "numeric"), "predictor", "original",
     "y", c("integer", "numeric"), "outcome", "original",
     "time_value", "date", "time_value", "original",
@@ -116,6 +112,7 @@ test_that("epi_recipe epi_df works", {
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 })
+
 
 test_that("add/update/adjust/remove epi_recipe works as intended", {
 

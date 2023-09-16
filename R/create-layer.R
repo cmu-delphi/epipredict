@@ -1,4 +1,3 @@
-
 #' Create a new layer
 #'
 #' This function creates the skeleton for a new `frosting` layer. When called
@@ -13,9 +12,9 @@
 #' @examples
 #' \dontrun{
 #'
-#'   # Note: running this will write `layer_strawberry.R` to
-#'   # the `R/` directory of your current project
-#'   create_layer("strawberry")
+#' # Note: running this will write `layer_strawberry.R` to
+#' # the `R/` directory of your current project
+#' create_layer("strawberry")
 #' }
 #'
 create_layer <- function(name = NULL, open = rlang::is_interactive()) {
@@ -25,7 +24,8 @@ create_layer <- function(name = NULL, open = rlang::is_interactive()) {
     if (substr(nn, 1, 1) == "_") nn <- substring(nn, 2)
     cli::cli_abort(
       c('`name` should not begin with "layer" or "layer_".',
-        i = 'Did you mean to use `create_layer("{ nn }")`?')
+        i = 'Did you mean to use `create_layer("{ nn }")`?'
+      )
     )
   }
   layer_name <- name
@@ -35,7 +35,8 @@ create_layer <- function(name = NULL, open = rlang::is_interactive()) {
   path <- fs::path("R", name)
   if (!fs::file_exists(path)) {
     usethis::use_template(
-      "layer.R", save_as = path,
+      "layer.R",
+      save_as = path,
       data = list(name = layer_name), open = FALSE,
       package = "epipredict"
     )

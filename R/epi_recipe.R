@@ -17,8 +17,9 @@ epi_recipe <- function(x, ...) {
 #' @export
 epi_recipe.default <- function(x, ...) {
   ## if not a formula or an epi_df, we just pass to recipes::recipe
-  if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x))
-    x <- x[1,,drop=FALSE]
+  if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x)) {
+    x <- x[1, , drop = FALSE]
+  }
   recipes::recipe(x, ...)
 }
 
@@ -98,8 +99,9 @@ epi_recipe.epi_df <-
     if (!is.null(roles)) {
       if (length(roles) != length(vars)) {
         rlang::abort(c(
-            "The number of roles should be the same as the number of ",
-            "variables."))
+          "The number of roles should be the same as the number of ",
+          "variables."
+        ))
       }
       var_info$role <- roles
     } else {
@@ -122,7 +124,8 @@ epi_recipe.epi_df <-
         role,
         levels = union(
           c("predictor", "outcome", "time_value", "geo_value", "key"),
-          unique(role)) # anything else
+          unique(role)
+        ) # anything else
       ))
 
     ## Return final object of class `recipe`
@@ -130,7 +133,7 @@ epi_recipe.epi_df <-
       var_info = var_info,
       term_info = var_info,
       steps = NULL,
-      template = x[1,],
+      template = x[1, ],
       max_time_value = max(x$time_value),
       levels = NULL,
       retained = NA
@@ -145,7 +148,7 @@ epi_recipe.epi_df <-
 #' @export
 epi_recipe.formula <- function(formula, data, ...) {
   # we ensure that there's only 1 row in the template
-  data <- data[1,]
+  data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
     return(recipes::recipe(formula, data, ...))
@@ -171,7 +174,7 @@ epi_recipe.formula <- function(formula, data, ...) {
 
 # slightly modified version of `form2args()` in {recipes}
 epi_form2args <- function(formula, data, ...) {
-  if (! rlang::is_formula(formula)) formula <- as.formula(formula)
+  if (!rlang::is_formula(formula)) formula <- as.formula(formula)
 
   ## check for in-line formulas
   recipes:::inline_check(formula)
@@ -409,9 +412,11 @@ prep.epi_recipe <- function(
   }
   skippers <- map_lgl(x$steps, recipes:::is_skipable)
   if (any(skippers) & !retain) {
-    rlang::warn(c("Since some operations have `skip = TRUE`, using ",
-                  "`retain = TRUE` will allow those steps results to ",
-                  "be accessible."))
+    rlang::warn(c(
+      "Since some operations have `skip = TRUE`, using ",
+      "`retain = TRUE` will allow those steps results to ",
+      "be accessible."
+    ))
   }
   if (fresh) x$term_info <- x$var_info
 
@@ -423,7 +428,8 @@ prep.epi_recipe <- function(
       arg <- paste0("'", arg, "'", collapse = ", ")
       msg <- paste0(
         "You cannot `prep()` a tuneable recipe. Argument(s) with `tune()`: ",
-        arg, ". Do you want to use a tuning function such as `tune_grid()`?")
+        arg, ". Do you want to use a tuning function such as `tune_grid()`?"
+      )
       rlang::abort(msg)
     }
     note <- paste("oper", i, gsub("_", " ", class(x$steps[[i]])[1]))
@@ -433,8 +439,10 @@ prep.epi_recipe <- function(
       }
       before_nms <- names(training)
       before_template <- training[1, ]
-      x$steps[[i]] <- prep(x$steps[[i]], training = training,
-                           info = x$term_info)
+      x$steps[[i]] <- prep(x$steps[[i]],
+        training = training,
+        info = x$term_info
+      )
       training <- bake(x$steps[[i]], new_data = training)
       if (!tibble::is_tibble(training)) {
         abort("bake() methods should always return tibbles")
@@ -443,7 +451,8 @@ prep.epi_recipe <- function(
         # tidymodels killed our class
         # for now, we only allow step_epi_* to alter the metadata
         training <- dplyr::dplyr_reconstruct(
-          epiprocess::as_epi_df(training), before_template)
+          epiprocess::as_epi_df(training), before_template
+        )
       }
       training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
@@ -458,7 +467,8 @@ prep.epi_recipe <- function(
       recipes:::changelog(log_changes, before_nms, names(training), x$steps[[i]])
       running_info <- rbind(
         running_info,
-        dplyr::mutate(x$term_info, number = i, skip = x$steps[[i]]$skip))
+        dplyr::mutate(x$term_info, number = i, skip = x$steps[[i]]$skip)
+      )
     } else {
       if (verbose) cat(note, "[pre-trained]\n")
     }
@@ -473,9 +483,11 @@ prep.epi_recipe <- function(
   }
   if (retain) {
     if (verbose) {
-      cat("The retained training set is ~",
-          format(utils::object.size(training), units = "Mb", digits = 2),
-          " in memory.\n\n")
+      cat(
+        "The retained training set is ~",
+        format(utils::object.size(training), units = "Mb", digits = 2),
+        " in memory.\n\n"
+      )
     }
     x$template <- training
   } else {
@@ -495,7 +507,8 @@ prep.epi_recipe <- function(
       source = dplyr::first(source),
       number = dplyr::first(number),
       skip = dplyr::first(skip),
-      .groups = "keep")
+      .groups = "keep"
+    )
   x
 }
 

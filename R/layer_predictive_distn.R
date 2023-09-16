@@ -65,14 +65,15 @@ layer_predictive_distn <- function(frosting,
 }
 
 layer_predictive_distn_new <- function(dist_type, truncate, name, id) {
-  layer("predictive_distn", dist_type = dist_type, truncate = truncate,
-        name = name, id = id)
+  layer("predictive_distn",
+    dist_type = dist_type, truncate = truncate,
+    name = name, id = id
+  )
 }
 
 #' @export
 slather.layer_predictive_distn <-
   function(object, components, workflow, new_data, ...) {
-
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
     m <- components$predictions$.pred
@@ -82,9 +83,8 @@ slather.layer_predictive_distn <-
     papprox <- ncol(components$mold$predictors) + 1
     if (is.null(df)) df <- n - papprox
     mse <- sum(r^2, na.rm = TRUE) / df
-    s <- sqrt(mse * (1 + papprox / df )) # E[x (X'X)^1 x] if E[X'X] ~= (n-p) I
-    dstn <- switch(
-      object$dist_type,
+    s <- sqrt(mse * (1 + papprox / df)) # E[x (X'X)^1 x] if E[X'X] ~= (n-p) I
+    dstn <- switch(object$dist_type,
       gaussian = distributional::dist_normal(m, s),
       student_t = distributional::dist_student_t(df, m, s)
     )
@@ -101,11 +101,11 @@ slather.layer_predictive_distn <-
 #' @export
 print.layer_predictive_distn <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Creating approximate predictive intervals"
   td <- "<calculated>"
   td <- rlang::enquos(td)
-  print_layer(td, title = title, width = width, conjunction = "type",
-              extra_text = x$dist_type)
+  print_layer(td,
+    title = title, width = width, conjunction = "type",
+    extra_text = x$dist_type
+  )
 }
-

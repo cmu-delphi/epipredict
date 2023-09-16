@@ -66,17 +66,20 @@ layer_residual_quantiles <- function(frosting, ...,
 }
 
 layer_residual_quantiles_new <- function(probs, symmetrize, by_key, name, id) {
-  layer("residual_quantiles", probs = probs, symmetrize = symmetrize,
-        by_key = by_key, name = name, id = id)
+  layer("residual_quantiles",
+    probs = probs, symmetrize = symmetrize,
+    by_key = by_key, name = name, id = id
+  )
 }
 
 #' @export
 slather.layer_residual_quantiles <-
   function(object, components, workflow, new_data, ...) {
-
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
-    if (is.null(object$probs)) return(components)
+    if (is.null(object$probs)) {
+      return(components)
+    }
 
     s <- ifelse(object$symmetrize, -1, NA)
     r <- grab_residuals(the_fit, components)
@@ -127,8 +130,9 @@ slather.layer_residual_quantiles <-
   }
 
 grab_residuals <- function(the_fit, components) {
-  if (the_fit$spec$mode != "regression")
+  if (the_fit$spec$mode != "regression") {
     rlang::abort("For meaningful residuals, the predictor should be a regression model.")
+  }
   r_generic <- attr(utils::methods(class = class(the_fit$fit)[1]), "info")$generic
   if ("residuals" %in% r_generic) { # Try to use the available method.
     cl <- class(the_fit$fit)[1]
@@ -169,12 +173,12 @@ grab_residuals <- function(the_fit, components) {
 #' @export
 print.layer_residual_quantiles <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Resampling residuals for predictive quantiles"
   td <- "<calculated>"
   td <- rlang::enquos(td)
   ext <- x$probs
-  print_layer(td, title = title, width = width, conjunction = "levels",
-              extra_text = ext)
+  print_layer(td,
+    title = title, width = width, conjunction = "levels",
+    extra_text = ext
+  )
 }
-

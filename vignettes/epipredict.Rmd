@@ -2,7 +2,7 @@
 title: "Get started with epipredict"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{epipredict}
+  %\VignetteIndexEntry{Get started with epipredict}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -12,8 +12,8 @@ knitr::opts_chunk$set(
   echo = TRUE,
   collapse = FALSE,
   comment = "#>",
-  out.width = "100%")
-options(rmarkdown.html_vignette.check_title = FALSE)
+  out.width = "100%"
+)
 ```
 
 ```{r setup, message=FALSE}
@@ -104,7 +104,7 @@ We'll estimate the model jointly across all locations using only the most recent
 ```{r demo-workflow}
 jhu <- jhu %>% filter(time_value >= max(time_value) - 30)
 out <- arx_forecaster(
-  jhu, 
+  jhu,
   outcome = "death_rate",
   predictors = c("case_rate", "death_rate")
 )
@@ -116,11 +116,11 @@ The `out` object has two components:
   
   1. The predictions which is just another `epi_df`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was putatively made) and the `target_date` (the date for which the forecast is being made).
   ```{r}
-  out$predictions
+out$predictions
   ```
   2. A list object of class `epi_workflow`. This object encapsulates all the instructions necessary to create the prediction. More details on this below.
   ```{r}
-  out$epi_workflow
+out$epi_workflow
   ```
 
 Note that the `time_value` in the predictions is not necessarily meaningful, 
@@ -138,13 +138,14 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 ```{r differential-lags}
 out2week <- arx_forecaster(
-  jhu, 
-  outcome = "death_rate", 
+  jhu,
+  outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
-    ahead = 14)
+    ahead = 14
   )
+)
 ```
 
 Here, we've used different lags on the `case_rate` and are now predicting 2 weeks ahead. This example also illustrates a major difficulty with the "iterative" versions of AR models. This model doesn't produce forecasts for `case_rate`, and so, would not have data to "plug in" for the necessary lags.[^1]
@@ -156,8 +157,9 @@ Another property of the basic model is the predictive interval. We describe this
 ```{r differential-levels}
 out_q <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(
-    levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99))
+    levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99)
   )
+)
 ```
 
 The column `.pred_dstn` in the `predictions` object is actually a "distribution" here parameterized by its quantiles. For this default forecaster, these are created using the quantiles of the residuals of the predictive model (possibly symmetrized). Here, we used 23 quantiles, but one can grab a particular quantile,
@@ -169,7 +171,7 @@ head(quantile(out_q$predictions$.pred_distn, p = .4))
 or extract the entire distribution into a "long" `epi_df` with `tau` being the probability and `q` being the value associated to that quantile.
 
 ```{r q2}
-out_q$predictions %>% 
+out_q$predictions %>%
   # first create a "nested" list-column
   mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
   unnest(.pred_distn) # then unnest it
@@ -179,7 +181,7 @@ Additional simple adjustments to the basic forecaster can be made using the func
 
 ```{r, eval = FALSE}
 arx_args_list(
-  lags = c(0L, 7L, 14L), ahead = 7L, n_training = Inf, 
+  lags = c(0L, 7L, 14L), ahead = 7L, n_training = Inf,
   forecast_date = NULL, target_date = NULL, levels = c(0.05, 0.95),
   symmetrize = TRUE, nonneg = TRUE, quantile_by_key = character(0L),
   nafill_buffer = Inf
@@ -193,22 +195,28 @@ The `trainer` argument determines the type of model we want.
 This takes a [`{parsnip}`](https://parsnip.tidymodels.org) model. The default is linear regression, but we could instead use a random forest with the `{ranger}` package:
 
 ```{r ranger, warning = FALSE}
-out_rf <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
-  rand_forest(mode = "regression"))
+out_rf <- arx_forecaster(
+  jhu, "death_rate", c("case_rate", "death_rate"),
+  rand_forest(mode = "regression")
+)
 ```
 
 Or boosted regression trees with `{xgboost}`:
 
 ```{r xgboost, warning = FALSE}
-out_gb <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
-  boost_tree(mode = "regression", trees = 20))
+out_gb <- arx_forecaster(
+  jhu, "death_rate", c("case_rate", "death_rate"),
+  boost_tree(mode = "regression", trees = 20)
+)
 ```
 
 Or quantile regression, using our custom forecasting engine `quantile_reg()`:
 
 ```{r quantreg, warning = FALSE}
-out_gb <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
-  quantile_reg())
+out_gb <- arx_forecaster(
+  jhu, "death_rate", c("case_rate", "death_rate"),
+  quantile_reg()
+)
 ```
 
 FWIW, this last case (using quantile regression), is not far from what the Delphi production forecast team used for its Covid forecasts over the past few years.
@@ -284,15 +292,19 @@ do "linear regression". Above we switched from `lm()` to `xgboost()` without
 any issue despite the fact that these functions couldn't be more different.
 
 ```{r, eval = FALSE}
-lm(formula, data, subset, weights, na.action, method = "qr", 
-    model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE, 
-    contrasts = NULL, offset, ...)
+lm(formula, data, subset, weights, na.action,
+  method = "qr",
+  model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE,
+  contrasts = NULL, offset, ...
+)
 
-xgboost(data = NULL, label = NULL, missing = NA, weight = NULL, 
-    params = list(), nrounds, verbose = 1, print_every_n = 1L, 
-    early_stopping_rounds = NULL, maximize = NULL, save_period = NULL, 
-    save_name = "xgboost.model", xgb_model = NULL, callbacks = list(), 
-    ...) 
+xgboost(
+  data = NULL, label = NULL, missing = NA, weight = NULL,
+  params = list(), nrounds, verbose = 1, print_every_n = 1L,
+  early_stopping_rounds = NULL, maximize = NULL, save_period = NULL,
+  save_name = "xgboost.model", xgb_model = NULL, callbacks = list(),
+  ...
+)
 ```
 
 `{epipredict}` provides a few engines/modules (the flatline forecaster and 
@@ -328,8 +340,9 @@ intervals at 0. The code to do this (inside the forecaster) is
 f <- frosting() %>%
   layer_predict() %>%
   layer_residual_quantiles(
-    probs = c(.01, .025, seq(.05, .95, by = .05), .975, .99), 
-    symmetrize = TRUE) %>%
+    probs = c(.01, .025, seq(.05, .95, by = .05), .975, .99),
+    symmetrize = TRUE
+  ) %>%
   layer_add_forecast_date() %>%
   layer_add_target_date() %>%
   layer_threshold(starts_with(".pred"))
@@ -339,7 +352,9 @@ At predict time, we add this object onto the `epi_workflow` and call `predict()`
 
 ```{r, warning=FALSE}
 test_data <- get_test_data(er, jhu)
-ewf %>% add_frosting(f) %>% predict(test_data)
+ewf %>%
+  add_frosting(f) %>%
+  predict(test_data)
 ```
 
 The above `get_test_data()` function examines the recipe and ensures that enough
@@ -366,7 +381,7 @@ r <- epi_recipe(jhu) %>%
   add_role(all_of(epi_keys(jhu)), new_role = "predictor")
 
 # bit of a weird hack to get the latest values per key
-latest <- get_test_data(epi_recipe(jhu), jhu) 
+latest <- get_test_data(epi_recipe(jhu), jhu)
 
 f <- frosting() %>%
   layer_predict() %>%

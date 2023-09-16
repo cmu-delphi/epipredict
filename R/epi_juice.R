@@ -21,7 +21,8 @@ epi_juice <- function(object, ...) {
   # Get user requested columns
   new_data <- object$template
   out_names <- recipes_eval_select(terms, new_data, object$term_info,
-                                   check_case_weights = FALSE)
+    check_case_weights = FALSE
+  )
   new_data <- new_data[, out_names]
 
   # Since most models require factors, do the conversion from character

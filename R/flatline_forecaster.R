@@ -31,7 +31,6 @@ flatline_forecaster <- function(
     epi_data,
     outcome,
     args_list = flatline_args_list()) {
-
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("flat_fcast", "alist"))) {
     cli_stop("args_list was not created using `flatline_args_list().")
@@ -61,7 +60,8 @@ flatline_forecaster <- function(
     layer_residual_quantiles(
       probs = args_list$levels,
       symmetrize = args_list$symmetrize,
-      by_key = args_list$quantile_by_key) %>%
+      by_key = args_list$quantile_by_key
+    ) %>%
     layer_add_forecast_date(forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
@@ -74,13 +74,15 @@ flatline_forecaster <- function(
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 
-  structure(list(
-    predictions = preds,
-    epi_workflow = wf,
-    metadata = list(
-      training = attr(epi_data, "metadata"),
-      forecast_created = Sys.time()
-    )),
+  structure(
+    list(
+      predictions = preds,
+      epi_workflow = wf,
+      metadata = list(
+        training = attr(epi_data, "metadata"),
+        forecast_created = Sys.time()
+      )
+    ),
     class = c("flat_fcast", "canned_epipred")
   )
 }
@@ -109,9 +111,7 @@ flatline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf
-) {
-
+    nafill_buffer = Inf) {
   arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
@@ -124,15 +124,17 @@ flatline_args_list <- function(
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   structure(
-    enlist(ahead,
-           n_training,
-           forecast_date,
-           target_date,
-           levels,
-           symmetrize,
-           nonneg,
-           quantile_by_key,
-           nafill_buffer),
+    enlist(
+      ahead,
+      n_training,
+      forecast_date,
+      target_date,
+      levels,
+      symmetrize,
+      nonneg,
+      quantile_by_key,
+      nafill_buffer
+    ),
     class = c("flat_fcast", "alist")
   )
 }

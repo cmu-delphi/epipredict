@@ -25,20 +25,24 @@
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
-#' out <- arx_forecaster(jhu, "death_rate",
-#'   c("case_rate", "death_rate"))
+#' out <- arx_forecaster(
+#'   jhu, "death_rate",
+#'   c("case_rate", "death_rate")
+#' )
 #'
 #' out <- arx_forecaster(jhu, "death_rate",
-#'   c("case_rate", "death_rate"), trainer = quantile_reg(),
-#'   args_list = arx_args_list(levels = 1:9 / 10))
+#'   c("case_rate", "death_rate"),
+#'   trainer = quantile_reg(),
+#'   args_list = arx_args_list(levels = 1:9 / 10)
+#' )
 arx_forecaster <- function(epi_data,
                            outcome,
                            predictors,
                            trainer = parsnip::linear_reg(),
                            args_list = arx_args_list()) {
-
-  if (!is_regression(trainer))
+  if (!is_regression(trainer)) {
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
+  }
 
   wf <- arx_fcast_epi_workflow(
     epi_data, outcome, predictors, trainer, args_list
@@ -54,13 +58,15 @@ arx_forecaster <- function(epi_data,
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 
-  structure(list(
-    predictions = preds,
-    epi_workflow = wf,
-    metadata = list(
-      training = attr(epi_data, "metadata"),
-      forecast_created = Sys.time()
-    )),
+  structure(
+    list(
+      predictions = preds,
+      epi_workflow = wf,
+      metadata = list(
+        training = attr(epi_data, "metadata"),
+        forecast_created = Sys.time()
+      )
+    ),
     class = c("arx_fcast", "canned_epipred")
   )
 }
@@ -85,25 +91,30 @@ arx_forecaster <- function(epi_data,
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
-#' arx_fcast_epi_workflow(jhu, "death_rate",
-#'   c("case_rate", "death_rate"))
+#' arx_fcast_epi_workflow(
+#'   jhu, "death_rate",
+#'   c("case_rate", "death_rate")
+#' )
 #'
 #' arx_fcast_epi_workflow(jhu, "death_rate",
-#'   c("case_rate", "death_rate"), trainer = quantile_reg(),
-#'   args_list = arx_args_list(levels = 1:9 / 10))
+#'   c("case_rate", "death_rate"),
+#'   trainer = quantile_reg(),
+#'   args_list = arx_args_list(levels = 1:9 / 10)
+#' )
 arx_fcast_epi_workflow <- function(
     epi_data,
     outcome,
     predictors,
     trainer = NULL,
     args_list = arx_args_list()) {
-
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
-  if (!inherits(args_list, c("arx_fcast", "alist")))
+  if (!inherits(args_list, c("arx_fcast", "alist"))) {
     cli::cli_abort("args_list was not created using `arx_args_list().")
-  if (!(is.null(trainer) || is_regression(trainer)))
+  }
+  if (!(is.null(trainer) || is_regression(trainer))) {
     cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
+  }
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -126,15 +137,17 @@ arx_fcast_epi_workflow <- function(
     # add all levels to the forecaster and update postprocessor
     tau <- sort(compare_quantile_args(
       args_list$levels,
-      rlang::eval_tidy(trainer$args$tau))
-    )
+      rlang::eval_tidy(trainer$args$tau)
+    ))
     args_list$levels <- tau
     trainer$args$tau <- rlang::enquo(tau)
     f <- layer_quantile_distn(f, levels = tau) %>% layer_point_from_distn()
   } else {
     f <- layer_residual_quantiles(
-      f, probs = args_list$levels, symmetrize = args_list$symmetrize,
-      by_key = args_list$quantile_by_key)
+      f,
+      probs = args_list$levels, symmetrize = args_list$symmetrize,
+      by_key = args_list$quantile_by_key
+    )
   }
   f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
@@ -204,7 +217,6 @@ arx_args_list <- function(
     nonneg = TRUE,
     quantile_by_key = character(0L),
     nafill_buffer = Inf) {
-
   # error checking if lags is a list
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
@@ -222,17 +234,19 @@ arx_args_list <- function(
 
   max_lags <- max(lags)
   structure(
-    enlist(lags = .lags,
-           ahead,
-           n_training,
-           levels,
-           forecast_date,
-           target_date,
-           symmetrize,
-           nonneg,
-           max_lags,
-           quantile_by_key,
-           nafill_buffer),
+    enlist(
+      lags = .lags,
+      ahead,
+      n_training,
+      levels,
+      forecast_date,
+      target_date,
+      symmetrize,
+      nonneg,
+      max_lags,
+      quantile_by_key,
+      nafill_buffer
+    ),
     class = c("arx_fcast", "alist")
   )
 }
@@ -248,16 +262,22 @@ compare_quantile_args <- function(alist, tlist) {
   default_alist <- eval(formals(arx_args_list)$levels)
   default_tlist <- eval(formals(quantile_reg)$tau)
   if (setequal(alist, default_alist)) {
-    if (setequal(tlist, default_tlist)) return(sort(unique(union(alist, tlist))))
-    else return(sort(unique(tlist)))
+    if (setequal(tlist, default_tlist)) {
+      return(sort(unique(union(alist, tlist))))
+    } else {
+      return(sort(unique(tlist)))
+    }
   } else {
-    if (setequal(tlist, default_tlist)) return(sort(unique(alist)))
-    else {
-      if (setequal(alist, tlist)) return(sort(unique(alist)))
+    if (setequal(tlist, default_tlist)) {
+      return(sort(unique(alist)))
+    } else {
+      if (setequal(alist, tlist)) {
+        return(sort(unique(alist)))
+      }
       rlang::abort(c(
         "You have specified different, non-default, quantiles in the trainier and `arx_args` options.",
-        i = "Please only specify quantiles in one location.")
-      )
+        i = "Please only specify quantiles in one location."
+      ))
     }
   }
 }

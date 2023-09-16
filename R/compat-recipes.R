@@ -1,12 +1,15 @@
 # These are copied from `recipes` where they are unexported
 
-fun_calls <- function (f) {
-  if (is.function(f)) fun_calls(body(f))
-  else if (rlang::is_quosure(f)) fun_calls(rlang::quo_get_expr(f))
-  else if (is.call(f)) {
+fun_calls <- function(f) {
+  if (is.function(f)) {
+    fun_calls(body(f))
+  } else if (rlang::is_quosure(f)) {
+    fun_calls(rlang::quo_get_expr(f))
+  } else if (is.call(f)) {
     fname <- as.character(f[[1]])
-    if (identical(fname, ".Internal"))
+    if (identical(fname, ".Internal")) {
       return(fname)
+    }
     unique(c(fname, unlist(lapply(f[-1], fun_calls), use.names = FALSE)))
   }
 }
