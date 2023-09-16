@@ -18,6 +18,8 @@ adjust_epi_recipe(x, step_num, ..., blueprint = default_epi_recipe_blueprint())
 \item{step_num}{the number of the step to adjust}
 
 \item{...}{Used to input a parameter adjustment}
+
+\item{blueprint}{A hardhat blueprint used for fine tuning the preprocessing.}
 }
 \value{
 \code{x}, updated with the adjustment to the specified \code{epi_recipe} step.

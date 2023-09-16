@@ -38,8 +38,10 @@ This is an internal function that is used to create a \code{\link[parsnip:linear
 model. It has somewhat odd behaviour (see below).
 }
 \examples{
-tib <- data.frame(y = runif(100),
-  expand.grid(k = letters[1:4], j = letters[5:9], time_value = 1:5)) \%>\%
+tib <- data.frame(
+  y = runif(100),
+  expand.grid(k = letters[1:4], j = letters[5:9], time_value = 1:5)
+) \%>\%
   dplyr::group_by(k, j) \%>\%
   dplyr::mutate(y2 = dplyr::lead(y, 2)) # predict 2 steps ahead
 flat <- flatline(y2 ~ j + k + y, tib) # predictions for 20 locations

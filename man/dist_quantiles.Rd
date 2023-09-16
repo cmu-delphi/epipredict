@@ -15,7 +15,7 @@ dist_quantiles(x, tau)
 A distribution parameterized by a set of quantiles
 }
 \examples{
-dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 quantile(dstn, p = c(.1, .25, .5, .9))
 median(dstn)
 

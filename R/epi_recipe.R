@@ -340,6 +340,8 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = NULL) {
 #'
 #' @param ... Used to input a parameter adjustment
 #'
+#' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
+#'
 #' @return
 #' `x`, updated with the adjustment to the specified `epi_recipe` step.
 #'
