@@ -10,7 +10,6 @@ latest <- jhu %>%
   dplyr::filter(time_value >= max(time_value) - 14)
 
 test_that("Use ahead + max time value from pre, fit, post", {
-
   f <- frosting() %>%
     layer_predict() %>%
     layer_add_target_date() %>%
@@ -38,11 +37,9 @@ test_that("Use ahead + max time value from pre, fit, post", {
   expect_equal(nrow(p2), 3L)
   expect_equal(p2$target_date, rep(as.Date("2022-01-07"), times = 3))
   expect_named(p2, c("geo_value", "time_value", ".pred", "forecast_date", "target_date"))
-
 })
 
 test_that("Use ahead + specified forecast date", {
-
   f <- frosting() %>%
     layer_predict() %>%
     layer_add_forecast_date(forecast_date = "2022-05-31") %>%
@@ -56,11 +53,9 @@ test_that("Use ahead + specified forecast date", {
   expect_equal(nrow(p), 3L)
   expect_equal(p$target_date, rep(as.Date("2022-06-07"), times = 3))
   expect_named(p, c("geo_value", "time_value", ".pred", "forecast_date", "target_date"))
-
 })
 
 test_that("Specify own target date", {
-
   # No forecast date layer
   f <- frosting() %>%
     layer_predict() %>%

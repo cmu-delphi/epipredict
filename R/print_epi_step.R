@@ -3,17 +3,19 @@ print_epi_step <- function(
     width = max(20, options()$width - 30), case_weights = NULL,
     conjunction = NULL, extra_text = NULL) {
   theme_div_id <- cli::cli_div(
-         theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
-       )
+    theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
+  )
   title <- trimws(title)
   trained_text <- dplyr::if_else(trained, "Trained", "")
   case_weights_text <- dplyr::case_when(
     is.null(case_weights) ~ "",
     isTRUE(case_weights) ~ "weighted",
-    isFALSE(case_weights) ~ "ignored weights")
+    isFALSE(case_weights) ~ "ignored weights"
+  )
   vline_seperator <- dplyr::if_else(trained_text == "", "", "|")
   comma_seperator <- dplyr::if_else(
-    trained_text != "" && case_weights_text != "", true = ",", false = "")
+    trained_text != "" && case_weights_text != "", true = ",", false = ""
+  )
   extra_text <- recipes::format_ch_vec(extra_text)
   width_title <- nchar(paste0(
     "* ", title, ":", " ", conjunction, " ", extra_text, " ", vline_seperator,
@@ -42,7 +44,8 @@ print_epi_step <- function(
   )
   more_dots <- ifelse(first_line == length(elements), "", ", ...")
   cli::cli_bullets(
-    c(`*` = "\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}\\\n    {comma_seperator} \\\n    {.emph {case_weights_text}}\n    "))
+    c(`*` = "\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}\\\n    {comma_seperator} \\\n    {.emph {case_weights_text}}\n    ")
+  )
   cli::cli_end(theme_div_id)
   invisible(NULL)
 }

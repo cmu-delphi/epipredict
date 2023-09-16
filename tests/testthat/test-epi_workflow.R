@@ -1,4 +1,3 @@
-
 test_that("postprocesser was evaluated", {
   r <- epi_recipe(case_death_rate_subset)
   s <- parsnip::linear_reg()
@@ -30,7 +29,7 @@ test_that("outcome of the two methods are the same", {
   ef <- epi_workflow(r, s, f)
   ef2 <- epi_workflow(r, s) %>% add_frosting(f)
 
-  expect_equal(ef,ef2)
+  expect_equal(ef, ef2)
 })
 
 test_that("model can be added/updated/removed from epi_workflow", {

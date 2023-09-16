@@ -45,8 +45,8 @@ validate_meta_match <- function(x, template, meta, warn_or_abort = "warn") {
   )
   if (new_meta != old_meta) {
     switch(warn_or_abort,
-           warn = cli::cli_warn(msg),
-           abort = cli::cli_abort(msg)
+      warn = cli::cli_warn(msg),
+      abort = cli::cli_abort(msg)
     )
   }
 }

@@ -6,7 +6,7 @@ test_that("quantile pivotting behaves", {
 
   d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:5, 1:4 / 5))
   # different quantiles
-  tib <- tib[1:2,]
+  tib <- tib[1:2, ]
   tib$d1 <- d1
   expect_error(pivot_quantiles(tib, d1))
 

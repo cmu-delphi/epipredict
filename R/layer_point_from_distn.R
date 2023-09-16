@@ -69,20 +69,22 @@ layer_point_from_distn <- function(frosting,
 
 layer_point_from_distn_new <- function(type, name, id) {
   layer("point_from_distn",
-        type = type,
-        name = name,
-        id = id)
+    type = type,
+    name = name,
+    id = id
+  )
 }
 
 #' @export
 slather.layer_point_from_distn <-
   function(object, components, workflow, new_data, ...) {
-
     dstn <- components$predictions$.pred
     if (!inherits(dstn, "distribution")) {
       rlang::warn(
         c("`layer_point_from_distn` requires distributional predictions.",
-          i = "These are of class {class(dstn)}. Ignoring this layer."))
+          i = "These are of class {class(dstn)}. Ignoring this layer."
+        )
+      )
       return(components)
     }
 
@@ -100,7 +102,6 @@ slather.layer_point_from_distn <-
 #' @export
 print.layer_point_from_distn <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Extracting point predictions"
   if (is.null(x$name)) {
     cnj <- NULL
@@ -111,4 +112,3 @@ print.layer_point_from_distn <- function(
   }
   print_layer(title = title, width = width, conjunction = cnj, extra_text = ext)
 }
-
