@@ -111,15 +111,32 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
 
 #' @rdname add_frosting
 #' @export
-update_frosting <- function(x, frosting = NULL, layer_num = NULL, ...) {
-
-  if (is_null(frosting) && !is_null(layer_num)) {
-    frosting <- extract_frosting(x)
-    frosting$layers[[layer_num]] <- update(frosting$layers[[layer_num]], ...)
-  }
-
+update_frosting <- function(x, frosting, ...) {
   x <- remove_frosting(x)
   add_frosting(x, frosting)
+}
+
+#' @export
+adjust_frosting <- function(x, layer_num, ...) {
+  UseMethod("adjust_frosting")
+}
+
+#' @export
+adjust_frosting.epi_workflow <- function(
+    x, layer_num, ...) {
+
+  frosting <- extract_frosting(x)
+  frosting$layers[[layer_num]] <- update(frosting$layers[[layer_num]], ...)
+
+  update_frosting(x, frosting)
+}
+
+#' @export
+adjust_frosting.frosting <- function(
+    x, layer_num, ...) {
+
+  x$layers[[layer_num]] <- update(x$layers[[layer_num]], ...)
+  x
 }
 
 #' @importFrom rlang caller_env

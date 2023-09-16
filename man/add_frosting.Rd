@@ -10,7 +10,7 @@ add_frosting(x, frosting, ...)
 
 remove_frosting(x)
 
-update_frosting(x, frosting = NULL, layer_num = NULL, ...)
+update_frosting(x, frosting, ...)
 }
 \arguments{
 \item{x}{A workflow}

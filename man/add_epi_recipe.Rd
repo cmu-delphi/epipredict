@@ -10,13 +10,7 @@ add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 
 remove_epi_recipe(x)
 
-update_epi_recipe(
-  x,
-  recipe = NULL,
-  step_num = NULL,
-  ...,
-  blueprint = default_epi_recipe_blueprint()
-)
+update_epi_recipe(x, recipe, ..., blueprint = NULL)
 }
 \arguments{
 \item{x}{A workflow or epi_workflow}
