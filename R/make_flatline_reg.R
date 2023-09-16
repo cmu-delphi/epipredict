@@ -11,7 +11,8 @@ make_flatline_reg <- function() {
       protect = c("formula", "data"),
       func = c(pkg = "epipredict", fun = "flatline"),
       defaults = list()
-    ))
+    )
+  )
 
   parsnip::set_encoding(
     model = "linear_reg",
@@ -35,5 +36,4 @@ make_flatline_reg <- function() {
       args = list(object = quote(object$fit), newdata = quote(new_data))
     )
   )
-
 }

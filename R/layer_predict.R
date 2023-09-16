@@ -20,9 +20,9 @@
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
-#'  step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-#'  step_epi_ahead(death_rate, ahead = 7) %>%
-#'  step_epi_naomit()
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
@@ -63,26 +63,24 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 
 #' @export
 slather.layer_predict <- function(object, components, workflow, new_data, ...) {
-
   the_fit <- workflows::extract_fit_parsnip(workflow)
 
   components$predictions <- predict(
     the_fit,
     components$forged$predictors,
-    type = object$type, opts = object$opts)
+    type = object$type, opts = object$opts
+  )
   components$predictions <- dplyr::bind_cols(
-    components$keys, components$predictions)
+    components$keys, components$predictions
+  )
   components
 }
 
 #' @export
 print.layer_predict <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Creating predictions"
   td <- "<calculated>"
   td <- rlang::enquos(td)
   print_layer(td, title = title, width = width)
 }
-
-

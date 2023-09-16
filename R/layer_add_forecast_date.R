@@ -29,15 +29,17 @@
 #' latest <- jhu %>%
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
-#'  # Don't specify `forecast_date` (by default, this should be last date in latest)
-#' f <- frosting() %>% layer_predict() %>%
-#'    layer_naomit(.pred)
+#' # Don't specify `forecast_date` (by default, this should be last date in latest)
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_naomit(.pred)
 #' wf0 <- wf %>% add_frosting(f)
 #' p0 <- predict(wf0, latest)
 #' p0
 #'
 #' # Specify a `forecast_date` that is greater than or equal to `as_of` date
-#' f <- frosting() %>% layer_predict() %>%
+#' f <- frosting() %>%
+#'   layer_predict() %>%
 #'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
@@ -56,7 +58,7 @@
 #' p2
 #'
 #' # Do not specify a forecast_date
-#'  f3 <- frosting() %>%
+#' f3 <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_add_forecast_date() %>%
 #'   layer_naomit(.pred)
@@ -83,11 +85,12 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 
 #' @export
 slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
-
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(workflows::extract_preprocessor(workflow)$max_time_value,
-                          workflow$fit$meta$max_time_value,
-                          max(new_data$time_value))
+    max_time_value <- max(
+      workflows::extract_preprocessor(workflow)$max_time_value,
+      workflow$fit$meta$max_time_value,
+      max(new_data$time_value)
+    )
     object$forecast_date <- max_time_value
   }
   as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
@@ -100,7 +103,8 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
     cli_warn(
       c("The forecast_date is less than the most ",
         "recent update date of the data: ",
-        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}.")
+        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}."
+      )
     )
   }
   components$predictions <- dplyr::bind_cols(
@@ -113,11 +117,10 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
 #' @export
 print.layer_add_forecast_date <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Adding forecast date"
   fd <- ifelse(is.null(x$forecast_date), "<calculated>",
-               as.character(x$forecast_date))
+    as.character(x$forecast_date)
+  )
   fd <- rlang::enquos(fd)
   print_layer(fd, title = title, width = width)
 }
-

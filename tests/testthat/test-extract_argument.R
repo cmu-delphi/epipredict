@@ -8,18 +8,21 @@ test_that("layer argument extractor works", {
   expect_error(extract_argument(f$layers[[1]], "layer_predict", "bubble"))
   expect_identical(
     extract_argument(f$layers[[2]], "layer_residual_quantiles", "probs"),
-    c(0.0275, 0.9750))
+    c(0.0275, 0.9750)
+  )
 
   expect_error(extract_argument(f, "layer_thresh", "probs"))
   expect_identical(
     extract_argument(f, "layer_residual_quantiles", "probs"),
-    c(0.0275, 0.9750))
+    c(0.0275, 0.9750)
+  )
 
   wf <- epi_workflow(postprocessor = f)
   expect_error(extract_argument(epi_workflow(), "layer_residual_quantiles", "probs"))
   expect_identical(
     extract_argument(wf, "layer_residual_quantiles", "probs"),
-    c(0.0275, 0.9750))
+    c(0.0275, 0.9750)
+  )
 
   expect_error(extract_argument(wf, "layer_predict", c("type", "opts")))
 })
@@ -46,16 +49,13 @@ test_that("recipe argument extractor works", {
   expect_error(extract_argument(r, "step_lightly", "probs"))
   expect_identical(
     extract_argument(r, "step_epi_lag", "lag"),
-    list(c(0,7,14), c(0,7,14))
+    list(c(0, 7, 14), c(0, 7, 14))
   )
 
   wf <- epi_workflow(preprocessor = r)
   expect_error(extract_argument(epi_workflow(), "step_epi_lag", "lag"))
   expect_identical(
     extract_argument(wf, "step_epi_lag", "lag"),
-    list(c(0,7,14), c(0,7,14))
+    list(c(0, 7, 14), c(0, 7, 14))
   )
 })
-
-
-

@@ -5,7 +5,8 @@ print_layer <- function(
   width_title <- nchar(paste0("* ", title, ":", " "))
   extra_text <- recipes::format_ch_vec(extra_text)
   width_title <- nchar(paste0(
-    "* ", title, ":", " ", conjunction, " ", extra_text))
+    "* ", title, ":", " ", conjunction, " ", extra_text
+  ))
   width_diff <- cli::console_width() * 1 - width_title
   elements <- lapply(layer_obj, function(x) {
     rlang::expr_deparse(rlang::quo_get_expr(x), width = Inf)
@@ -25,5 +26,6 @@ print_layer <- function(
   more_dots <- ifelse(first_line == length(elements), "", ", ...")
   cli::cli_bullets(
     c("\n    {title}: \\\n    {.pkg {elements[seq_len(first_line)]}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}}"))
+
   invisible(NULL)
 }

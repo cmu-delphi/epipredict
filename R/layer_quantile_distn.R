@@ -63,21 +63,24 @@ layer_quantile_distn <- function(frosting,
 
 layer_quantile_distn_new <- function(levels, truncate, name, id) {
   layer("quantile_distn",
-        levels = levels,
-        truncate = truncate,
-        name = name,
-        id = id)
+    levels = levels,
+    truncate = truncate,
+    name = name,
+    id = id
+  )
 }
 
 #' @export
 slather.layer_quantile_distn <-
   function(object, components, workflow, new_data, ...) {
-
     dstn <- components$predictions$.pred
     if (!inherits(dstn, "distribution")) {
       rlang::abort(
-        c("`layer_quantile_distn` requires distributional predictions.",
-          "These are of class {class(dstn)}."))
+        c(
+          "`layer_quantile_distn` requires distributional predictions.",
+          "These are of class {class(dstn)}."
+        )
+      )
     }
     dstn <- dist_quantiles(quantile(dstn, object$levels), object["levels"])
 
@@ -94,14 +97,12 @@ slather.layer_quantile_distn <-
 #' @export
 print.layer_quantile_distn <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Creating predictive quantiles"
   td <- "<calculated>"
   td <- rlang::enquos(td)
   ext <- x$levels
-  print_layer(td, title = title, width = width, conjunction = "levels",
-              extra_text = ext)
+  print_layer(td,
+    title = title, width = width, conjunction = "levels",
+    extra_text = ext
+  )
 }
-
-
-

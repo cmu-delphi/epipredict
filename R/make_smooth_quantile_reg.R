@@ -1,4 +1,3 @@
-
 #' Smooth quantile regression
 #'
 #' @description
@@ -27,9 +26,10 @@
 #' tib <- data.frame(
 #'   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
 #'   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),
-#'   x1 = rnorm(100), x2 = rnorm(100))
+#'   x1 = rnorm(100), x2 = rnorm(100)
+#' )
 #' qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 1:6)
-#' ff <- qr_spec %>% fit(cbind(y1, y2 , y3 , y4 , y5 , y6) ~ ., data = tib)
+#' ff <- qr_spec %>% fit(cbind(y1, y2, y3, y4, y5, y6) ~ ., data = tib)
 #' p <- predict(ff, new_data = tib)
 #'
 #' x <- -99:99 / 100 * 2 * pi
@@ -38,21 +38,23 @@
 #' XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
 #' XY <- tibble::as_tibble(XY)
 #' qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 20:1)
-#' tt <- qr_spec %>% fit_xy(x = XY[,21:41], y = XY[,1:20])
+#' tt <- qr_spec %>% fit_xy(x = XY[, 21:41], y = XY[, 1:20])
 #'
 #' library(tidyr)
 #' library(dplyr)
 #' pl <- predict(
-#'         object = tt,
-#'         new_data = XY[max(which(complete.cases(XY[,21:41]))), 21:41]
-#'       )
+#'   object = tt,
+#'   new_data = XY[max(which(complete.cases(XY[, 21:41]))), 21:41]
+#' )
 #' pl <- pl %>%
-#'         unnest(.pred) %>%
-#'         mutate(distn = nested_quantiles(distn)) %>%
-#'         unnest(distn) %>%
-#'         mutate(x = x[length(x) - 20] + ahead / 100 * 2 * pi,
-#'                ahead = NULL) %>%
-#'         pivot_wider(names_from = tau, values_from = q)
+#'   unnest(.pred) %>%
+#'   mutate(distn = nested_quantiles(distn)) %>%
+#'   unnest(distn) %>%
+#'   mutate(
+#'     x = x[length(x) - 20] + ahead / 100 * 2 * pi,
+#'     ahead = NULL
+#'   ) %>%
+#'   pivot_wider(names_from = tau, values_from = q)
 #' plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 #' curve(sin(x), add = TRUE)
 #' abline(v = fd, lty = 2)
@@ -76,7 +78,6 @@ smooth_quantile_reg <- function(
     outcome_locations = NULL,
     tau = 0.5,
     degree = 3L) {
-
   # Check for correct mode
   if (mode != "regression") rlang::abort("`mode` must be 'regression'")
   if (engine != "smoothqr") rlang::abort("`engine` must be 'smoothqr'")
@@ -90,8 +91,10 @@ smooth_quantile_reg <- function(
     tau <- sort(tau)
   }
 
-  args <- list(tau = rlang::enquo(tau), degree = rlang::enquo(degree),
-               outcome_locations = rlang::enquo(outcome_locations))
+  args <- list(
+    tau = rlang::enquo(tau), degree = rlang::enquo(degree),
+    outcome_locations = rlang::enquo(outcome_locations)
+  )
 
   # Save some empty slots for future parts of the specification
   parsnip::new_model_spec(
@@ -169,8 +172,8 @@ make_smooth_quantile_reg <- function() {
     object <- parsnip::extract_fit_engine(object)
     list_of_pred_distns <- lapply(x, function(p) {
       x <- lapply(unname(split(
-        p, seq(nrow(p)))), function(q) unname(sort(q, na.last = TRUE)
-        ))
+        p, seq(nrow(p))
+      )), function(q) unname(sort(q, na.last = TRUE)))
       dist_quantiles(x, list(object$tau))
     })
     n_preds <- length(list_of_pred_distns[[1]])
@@ -178,7 +181,8 @@ make_smooth_quantile_reg <- function() {
     tib <- tibble::tibble(
       ids = rep(seq(n_preds), times = nout),
       ahead = rep(object$aheads, each = n_preds),
-      distn = do.call(c, unname(list_of_pred_distns))) %>%
+      distn = do.call(c, unname(list_of_pred_distns))
+    ) %>%
       tidyr::nest(.pred = c(ahead, distn))
 
     return(tib[".pred"])
@@ -197,4 +201,3 @@ make_smooth_quantile_reg <- function() {
     )
   )
 }
-

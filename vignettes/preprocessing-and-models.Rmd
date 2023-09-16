@@ -12,32 +12,33 @@ knitr::opts_chunk$set(
   echo = TRUE,
   collapse = FALSE,
   comment = "#>",
-  out.width = "100%")
+  out.width = "100%"
+)
 ```
 
-## Introduction 
+## Introduction
 
-The `epipredict` package utilizes the `tidymodels` framework, namely 
-[`{recipes}`](https://recipes.tidymodels.org/) for 
-[dplyr](https://dplyr.tidyverse.org/)-like pipeable sequences 
-of feature engineering and [`{parsnip}`](https://parsnip.tidymodels.org/) for a 
-unified interface to a range of models. 
+The `epipredict` package utilizes the `tidymodels` framework, namely
+[`{recipes}`](https://recipes.tidymodels.org/) for
+[dplyr](https://dplyr.tidyverse.org/)-like pipeable sequences
+of feature engineering and [`{parsnip}`](https://parsnip.tidymodels.org/) for a
+unified interface to a range of models.
 
-`epipredict` has additional customized feature engineering and preprocessing 
-steps, such as `step_epi_lag()`, `step_population_scaling()`, 
-`step_epi_naomit()`. They can be used along with 
-steps from the `{recipes}` package for more feature engineering. 
+`epipredict` has additional customized feature engineering and preprocessing
+steps, such as `step_epi_lag()`, `step_population_scaling()`,
+`step_epi_naomit()`. They can be used along with
+steps from the `{recipes}` package for more feature engineering.
 
 In this vignette, we will illustrate some examples of how to use `epipredict`
 with `recipes` and `parsnip` for different purposes of epidemiological forecasting.
-We will focus on basic autoregressive models, in which COVID cases and 
-deaths in the near future are predicted using a linear combination of cases and 
+We will focus on basic autoregressive models, in which COVID cases and
+deaths in the near future are predicted using a linear combination of cases and
 deaths in the near past.
 
-The remaining vignette will be split into three sections. The first section, we 
+The remaining vignette will be split into three sections. The first section, we
 will use a Poisson regression to predict death counts. In the second section,
 we will use a linear regression to predict death rates. Last but not least, we
-will create a classification model for hotspot predictions. 
+will create a classification model for hotspot predictions.
 
 ```{r, warning=FALSE, message=FALSE}
 library(tidyr)
@@ -49,103 +50,103 @@ library(workflows)
 library(poissonreg)
 ```
 
-## Poisson Regression 
+## Poisson Regression
 
 During COVID-19, the US Center for Disease Control and Prevention (CDC) collected
 models
 and forecasts to characterize the state of an outbreak and its course. They use
-it to inform public health decision makers on potential consequences of 
+it to inform public health decision makers on potential consequences of
 deploying control measures.
 
 One of the outcomes that the CDC forecasts is [death counts from COVID-19](https://www.cdc.gov/coronavirus/2019-ncov/science/forecasting/forecasting-us.html).
-Although there are many state-of-the-art models, we choose to use Poisson 
+Although there are many state-of-the-art models, we choose to use Poisson
 regression, the textbook example for modeling count data, as an illustration
-for using the `epipredict` package with other existing tidymodels packages. 
+for using the `epipredict` package with other existing tidymodels packages.
 
 ```{r poisson-reg-data}
-x <- covidcast(
-  data_source = "jhu-csse",
+x <- pub_covidcast(
+  source = "jhu-csse",
   signals = "confirmed_incidence_num",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj") %>%
-  fetch() %>%
+  geo_values = "ca,fl,tx,ny,nj"
+) %>%
   select(geo_value, time_value, cases = value)
 
-y <- covidcast(
-  data_source = "jhu-csse",
+y <- pub_covidcast(
+  source = "jhu-csse",
   signals = "deaths_incidence_num",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj") %>%
-  fetch() %>%
+  geo_values = "ca,fl,tx,ny,nj"
+) %>%
   select(geo_value, time_value, deaths = value)
 
 counts_subset <- full_join(x, y, by = c("geo_value", "time_value")) %>%
   as_epi_df()
 ```
 
-The `counts_subset` dataset comes from the `epidatr` package, and 
-contains the number of confirmed cases and deaths from June 4, 2021 to 
-Dec 31, 2021 in some U.S. states. 
+The `counts_subset` dataset comes from the `epidatr` package, and
+contains the number of confirmed cases and deaths from June 4, 2021 to
+Dec 31, 2021 in some U.S. states.
 
 We wish to predict the 7-day ahead death counts with lagged cases and deaths.
-Furthermore, we will let each state be a dummy variable. Using differential 
+Furthermore, we will let each state be a dummy variable. Using differential
 intercept coefficients, we can allow for an intercept shift between states.
 
 The model takes the form
 \begin{aligned}
-\log\left( \mu_{t+7} \right) &= \beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots +  \nonumber \\ &\quad\beta_1 \text{deaths}_{t} + 
-\beta_2 \text{deaths}_{t-7}  + \beta_3 \text{cases}_{t} + 
-\beta_4 \text{cases}_{t-7},
+\log\left( \mu*{t+7} \right) &= \beta_0 + \delta_1 s*{\text{state}_1} +
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ &\quad\beta_1 \text{deaths}_{t} +
+\beta*2 \text{deaths}*{t-7} + \beta*3 \text{cases}*{t} +
+\beta*4 \text{cases}*{t-7},
 \end{aligned}
-where $\mu_{t+7} = \mathbb{E}(y_{t+7})$, and $y_{t+7}$ is assumed to follow a 
-Poisson distribution with mean $\mu_{t+7}$; $s_{\text{state}}$ are dummy 
-variables for each state and take values of either 0 or 1. 
+where $\mu_{t+7} = \mathbb{E}(y_{t+7})$, and $y_{t+7}$ is assumed to follow a
+Poisson distribution with mean $\mu_{t+7}$; $s_{\text{state}}$ are dummy
+variables for each state and take values of either 0 or 1.
 
 Preprocessing steps will be performed to prepare the
-data for model fitting. But before diving into them, it will be helpful to understand what `roles` are in the `recipes` framework. 
+data for model fitting. But before diving into them, it will be helpful to understand what `roles` are in the `recipes` framework.
 
 ---
 
 #### Aside on `recipes`
 
-`recipes` can assign one or more roles to each column in the data. The roles 
-are not restricted to a predefined set; they can be anything. 
-For most conventional situations, they are typically “predictor” and/or 
-"outcome". Additional roles enable targeted `step_*()` operations on specific 
+`recipes` can assign one or more roles to each column in the data. The roles
+are not restricted to a predefined set; they can be anything.
+For most conventional situations, they are typically “predictor” and/or
+"outcome". Additional roles enable targeted `step_*()` operations on specific
 variables or groups of variables.
 
 In our case, the role `predictor` is given to explanatory variables on the
-right-hand side of the model (in the equation above). 
-The role `outcome` is the response variable 
-that we wish to predict. `geo_value` and `time_value` are predefined roles 
-that are unique to the `epipredict` package. Since we work with `epi_df` 
+right-hand side of the model (in the equation above).
+The role `outcome` is the response variable
+that we wish to predict. `geo_value` and `time_value` are predefined roles
+that are unique to the `epipredict` package. Since we work with `epi_df`
 objects, all datasets should have `geo_value` and `time_value` passed through
 automatically with these two roles assigned to the appropriate columns in the data.
- 
-The `recipes` package also allows [manual alterations of roles](https://recipes.tidymodels.org/reference/roles.html) 
-in bulk. There are a few handy functions that can be used together to help us 
-manipulate variable roles easily. 
 
-> `update_role()` alters an existing role in the recipe or assigns an initial role 
+The `recipes` package also allows [manual alterations of roles](https://recipes.tidymodels.org/reference/roles.html)
+in bulk. There are a few handy functions that can be used together to help us
+manipulate variable roles easily.
+
+> `update_role()` alters an existing role in the recipe or assigns an initial role
 > to variables that do not yet have a declared role.
-> 
-> `add_role()` adds an additional role to variables that already have a role in 
+>
+> `add_role()` adds an additional role to variables that already have a role in
 > the recipe, without overwriting old roles.
-> 
+>
 > `remove_role()` eliminates a single existing role in the recipe.
 
 #### End aside
 
 ---
 
-Notice in the following preprocessing steps, we used `add_role()` on 
+Notice in the following preprocessing steps, we used `add_role()` on
 `geo_value_factor` since, currently, the default role for it is `raw`, but
-we would like to reuse this variable as `predictor`s. 
+we would like to reuse this variable as `predictor`s.
 
 ```{r}
 counts_subset <- counts_subset %>%
@@ -159,7 +160,7 @@ r <- epi_recipe(counts_subset) %>%
   step_dummy(geo_value_factor) %>%
   ## Occasionally, data reporting errors / corrections result in negative
   ## cases / deaths
-  step_mutate(cases = pmax(cases, 0), deaths = pmax(deaths, 0)) %>%  
+  step_mutate(cases = pmax(cases, 0), deaths = pmax(deaths, 0)) %>%
   step_epi_lag(cases, deaths, lag = c(0, 7)) %>%
   step_epi_ahead(deaths, ahead = 7, role = "outcome") %>%
   step_epi_naomit()
@@ -167,7 +168,7 @@ r <- epi_recipe(counts_subset) %>%
 
 After specifying the preprocessing steps, we will use the `parsnip` package for
 modeling and producing the prediction for death count, 7 days after the
-latest available date in the dataset. 
+latest available date in the dataset.
 
 ```{r}
 latest <- get_test_data(r, counts_subset)
@@ -178,96 +179,96 @@ wf <- epi_workflow(r, parsnip::poisson_reg()) %>%
 predict(wf, latest) %>% filter(!is.na(.pred))
 ```
 
-Note that the `time_value` corresponds to the last available date in the 
-training set, **NOT** to the target date of the forecast 
+Note that the `time_value` corresponds to the last available date in the
+training set, **NOT** to the target date of the forecast
 (`r max(latest$time_value) + 7`).
 
-
 Let's take a look at the fit:
+
 ```{r}
 extract_fit_engine(wf)
 ```
 
-Up to now, we've used the Poisson regression to model count data. Poisson 
+Up to now, we've used the Poisson regression to model count data. Poisson
 regression can also be used to model rate data, such as case rates or death
-rates, by incorporating offset terms in the model. 
+rates, by incorporating offset terms in the model.
 
 To model death rates, the Poisson regression would be expressed as:
 \begin{aligned}
-\log\left( \mu_{t+7} \right) &= \log(\text{population}) + 
-\beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots +  \nonumber \\ &\quad\beta_1 \text{deaths}_{t} + 
-\beta_2 \text{deaths}_{t-7}  + \beta_3 \text{cases}_{t} + 
-\beta_4 \text{cases}_{t-7}\end{aligned}
-where $\log(\text{population})$ is the log of the state population that was 
+\log\left( \mu*{t+7} \right) &= \log(\text{population}) +
+\beta_0 + \delta_1 s*{\text{state}_1} +
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ &\quad\beta_1 \text{deaths}_{t} +
+\beta*2 \text{deaths}*{t-7} + \beta*3 \text{cases}*{t} +
+\beta*4 \text{cases}*{t-7}\end{aligned}
+where $\log(\text{population})$ is the log of the state population that was
 used to scale the count data on the left-hand side of the equation. This offset
 is simply a predictor with coefficient fixed at 1 rather than estimated.
 
-There are several ways to model rate data given count and population data. 
-First, in the `parsnip` framework, we could specify the formula in `fit()`. 
-However, by doing so we lose the ability to use the `recipes` framework to 
-create new variables since variables that do not exist in the 
-original dataset (such as, here, the lags and leads) cannot be called directly in `fit()`. 
+There are several ways to model rate data given count and population data.
+First, in the `parsnip` framework, we could specify the formula in `fit()`.
+However, by doing so we lose the ability to use the `recipes` framework to
+create new variables since variables that do not exist in the
+original dataset (such as, here, the lags and leads) cannot be called directly in `fit()`.
 
-Alternatively, `step_population_scaling()` and `layer_population_scaling()` 
-in the `epipredict` package can perform the population scaling if we provide the 
+Alternatively, `step_population_scaling()` and `layer_population_scaling()`
+in the `epipredict` package can perform the population scaling if we provide the
 population data, which we will illustrate in the next section.
 
+## Linear Regression
 
-## Linear Regression 
-
-For COVID-19, the CDC required submission of case and death count predictions. 
-However, the Delphi Group preferred to train on rate data instead, because it 
-puts different locations on a similar scale (eliminating the need for location-specific intercepts). 
+For COVID-19, the CDC required submission of case and death count predictions.
+However, the Delphi Group preferred to train on rate data instead, because it
+puts different locations on a similar scale (eliminating the need for location-specific intercepts).
 We can use a liner regression to predict the death
-rates and use state population data to scale the rates to counts.[^pois] We will do so 
-using `layer_population_scaling()` from the `epipredict` package. 
+rates and use state population data to scale the rates to counts.[^pois] We will do so
+using `layer_population_scaling()` from the `epipredict` package.
 
 [^pois]: We could continue with the Poisson model, but we'll switch to the Gaussian likelihood just for simplicity.
 
-Additionally, when forecasts are submitted, prediction intervals should be 
+Additionally, when forecasts are submitted, prediction intervals should be
 provided along with the point estimates. This can be obtained via postprocessing
 using
-`layer_residual_quantiles()`. It is worth pointing out, however, that 
-`layer_residual_quantiles()` should be used before population scaling or else 
-the transformation will make the results uninterpretable. 
+`layer_residual_quantiles()`. It is worth pointing out, however, that
+`layer_residual_quantiles()` should be used before population scaling or else
+the transformation will make the results uninterpretable.
 
 We wish, now, to predict the 7-day ahead death counts with lagged case rates and death
 rates, along with some extra behaviourial predictors. Namely, we will use survey data
 from [COVID-19 Trends and Impact Survey](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/fb-survey.html#behavior-indicators).
 
-The survey data provides the estimated percentage of people who wore a mask for 
-most or all of the time while in public in the past 7 days and the estimated 
-percentage of respondents who reported that all or most people they encountered 
-in public in the past 7 days maintained a distance of at least 6 feet. 
+The survey data provides the estimated percentage of people who wore a mask for
+most or all of the time while in public in the past 7 days and the estimated
+percentage of respondents who reported that all or most people they encountered
+in public in the past 7 days maintained a distance of at least 6 feet.
 
 State-wise population data from the 2019 U.S. Census is included in this package
-and will be used in `layer_population_scaling()`. 
+and will be used in `layer_population_scaling()`.
+
 ```{r}
-behav_ind_mask <- covidcast(
-  data_source = "fb-survey",
+behav_ind_mask <- pub_covidcast(
+  source = "fb-survey",
   signals = "smoothed_wwearing_mask_7d",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj")  %>%
-  fetch() %>%
+  geo_values = "ca,fl,tx,ny,nj"
+) %>%
   select(geo_value, time_value, masking = value)
 
-behav_ind_distancing <- covidcast(
-  data_source = "fb-survey",
+behav_ind_distancing <- pub_covidcast(
+  source = "fb-survey",
   signals = "smoothed_wothers_distanced_public",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj")  %>%
-  fetch() %>%
-  select(geo_value, time_value, distancing = value) 
+  geo_values = "ca,fl,tx,ny,nj"
+) %>%
+  select(geo_value, time_value, distancing = value)
 
 pop_dat <- state_census %>% select(abbr, pop)
 
 behav_ind <- behav_ind_mask %>%
-  full_join(behav_ind_distancing, by = c("geo_value", "time_value")) 
+  full_join(behav_ind_distancing, by = c("geo_value", "time_value"))
 ```
 
 Rather than using raw mask-wearing / social-distancing metrics, for the sake
@@ -281,50 +282,53 @@ behav_ind %>%
   geom_density(alpha = 0.5) +
   scale_fill_brewer(palette = "Set1", name = "") +
   theme_bw() +
-  scale_x_continuous(expand = c(0,0)) +
-  scale_y_continuous(expand = expansion(c(0,.05))) +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = expansion(c(0, .05))) +
   facet_wrap(~name, scales = "free") +
   theme(legend.position = "bottom")
 ```
 
-We will take a subset of death rate and case rate data from the built-in dataset 
+We will take a subset of death rate and case rate data from the built-in dataset
 `case_death_rate_subset`.
 
 ```{r}
 jhu <- filter(
   case_death_rate_subset,
-  time_value >= "2021-06-04", 
+  time_value >= "2021-06-04",
   time_value <= "2021-12-31",
-  geo_value %in% c("ca","fl","tx","ny","nj")
+  geo_value %in% c("ca", "fl", "tx", "ny", "nj")
 )
 ```
 
 Preprocessing steps will again rely on functions from the `epipredict` package as well
 as the `recipes` package.
-There are also many functions in the `recipes` package that allow for 
+There are also many functions in the `recipes` package that allow for
 [scalar transformations](https://recipes.tidymodels.org/reference/#step-functions-individual-transformations),
-such as log transformations and data centering. In our case, we will 
-center the numerical predictors to allow for a more meaningful interpretation of the 
-intercept. 
+such as log transformations and data centering. In our case, we will
+center the numerical predictors to allow for a more meaningful interpretation of the
+intercept.
 
 ```{r}
 jhu <- jhu %>%
   mutate(geo_value_factor = as.factor(geo_value)) %>%
   left_join(behav_ind, by = c("geo_value", "time_value")) %>%
   as_epi_df()
-            
+
 r <- epi_recipe(jhu) %>%
   add_role(geo_value_factor, new_role = "predictor") %>%
   step_dummy(geo_value_factor) %>%
   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
-  step_mutate(masking = cut_number(masking, 5), 
-              distancing = cut_number(distancing, 5)) %>%
+  step_mutate(
+    masking = cut_number(masking, 5),
+    distancing = cut_number(distancing, 5)
+  ) %>%
   step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
   step_center(contains("lag"), role = "predictor") %>%
   step_epi_naomit()
 ```
 
 As a sanity check we can examine the structure of the training data:
+
 ```{r, warning = FALSE}
 glimpse(slice_sample(bake(prep(r, jhu), jhu), n = 6))
 ```
@@ -338,16 +342,17 @@ to create median predictions and a 90% prediction interval.
 ```{r, warning=FALSE}
 f <- frosting() %>%
   layer_predict() %>%
-  layer_add_target_date("2022-01-07") %>% 
+  layer_add_target_date("2022-01-07") %>%
   layer_threshold(.pred, lower = 0) %>%
   layer_quantile_distn() %>%
   layer_naomit(.pred) %>%
   layer_population_scaling(
-    .pred, .pred_distn, 
-    df = pop_dat, 
+    .pred, .pred_distn,
+    df = pop_dat,
     rate_rescaling = 1e5,
-    by = c("geo_value" = "abbr"), 
-    df_pop_col = "pop")
+    by = c("geo_value" = "abbr"),
+    df_pop_col = "pop"
+  )
 
 wf <- epi_workflow(r, quantile_reg(tau = c(.05, .5, .95))) %>%
   fit(jhu) %>%
@@ -362,6 +367,7 @@ The columns marked `*_scaled` have been rescaled to the correct units, in this
 case `deaths` rather than deaths per 100K people (these remain in `.pred`).
 
 To look at the prediction intervals:
+
 ```{r}
 p %>%
   select(geo_value, target_date, .pred_scaled, .pred_distn_scaled) %>%
@@ -370,9 +376,9 @@ p %>%
   pivot_wider(names_from = tau, values_from = q)
 ```
 
-
-Last but not least, let's take a look at the regression fit and check the 
+Last but not least, let's take a look at the regression fit and check the
 coefficients:
+
 ```{r, echo =FALSE}
 extract_fit_engine(wf)
 ```
@@ -383,63 +389,66 @@ Sometimes it is preferable to create a predictive model for surges or upswings
 rather than for raw values. In this case,
 the target is to predict if the future will have increased case rates (denoted `up`),
 decreased case rates (`down`), or flat case rates (`flat`) relative to the current
-level. Such models may be 
-referred to as "hotspot prediction models". We will follow the analysis 
+level. Such models may be
+referred to as "hotspot prediction models". We will follow the analysis
 in [McDonald, Bien, Green, Hu, et al.](#references) but extend the application
-to predict three categories instead of two. 
+to predict three categories instead of two.
 
-Hotspot prediction uses a categorical outcome variable defined in terms of the 
-relative change of $Y_{\ell, t+a}$ compared to $Y_{\ell, t}$. 
-Where $Y_{\ell, t}$ denotes the case rates in location $\ell$ at time $t$. 
+Hotspot prediction uses a categorical outcome variable defined in terms of the
+relative change of $Y_{\ell, t+a}$ compared to $Y_{\ell, t}$.
+Where $Y_{\ell, t}$ denotes the case rates in location $\ell$ at time $t$.
 We define the response variables as follows:
 
 $$
  Z_{\ell, t}=
     \begin{cases}
-      \text{up}, & \text{if}\ Y^{\Delta}_{\ell, t} > 0.25 \\ 
+      \text{up}, & \text{if}\ Y^{\Delta}_{\ell, t} > 0.25 \\
       \text{down}, & \text{if}\  Y^{\Delta}_{\ell, t} < -0.20\\
       \text{flat}, & \text{otherwise}
     \end{cases}
 $$
 
-where $Y^{\Delta}_{\ell, t} = (Y_{\ell, t}- Y_{\ell, t-7})\ /\ (Y_{\ell, t-7})$. 
-We say location $\ell$ is a hotspot at time $t$ when $Z_{\ell,t}$ is 
-`up`, meaning the number of newly reported cases over the past 7 days has 
-increased by at least 25% compared to the preceding week. When $Z_{\ell,t}$ 
-is categorized as `down`, it suggests that there has been at least a 20% 
-decrease in newly reported cases over the past 7 days (a 20% decrease is the inverse of a 25% increase). Otherwise, we will 
-consider the trend to be `flat`. 
+where $Y^{\Delta}_{\ell, t} = (Y_{\ell, t}- Y_{\ell, t-7})\ /\ (Y_{\ell, t-7})$.
+We say location $\ell$ is a hotspot at time $t$ when $Z_{\ell,t}$ is
+`up`, meaning the number of newly reported cases over the past 7 days has
+increased by at least 25% compared to the preceding week. When $Z_{\ell,t}$
+is categorized as `down`, it suggests that there has been at least a 20%
+decrease in newly reported cases over the past 7 days (a 20% decrease is the inverse of a 25% increase). Otherwise, we will
+consider the trend to be `flat`.
 
 The expression of the multinomial regression we will use is as follows:
+
 $$
 \pi_{j}(x) = \text{Pr}(Z_{\ell,t} = j|x) = \frac{e^{g_j(x)}}{1 + \sum_{k=0}^2 g_j(x) }
 $$
+
 where $j$ is either down, flat, or up
 
 \begin{aligned}
-g_{\text{down}}(x) &= 0.\\
-g_{\text{flat}}(x)&= \text{ln}\left(\frac{Pr(Z_{\ell,t}=\text{flat}|x)}{Pr(Z_{\ell,t}=\text{down}|x)}\right) = 
-\beta_{10} + \beta_{11}t + \delta_{10} s_{\text{state_1}} +
-\delta_{11} s_{\text{state_2}} + \cdots \nonumber \\
-&\quad + \beta_{12} Y^{\Delta}_{\ell, t} +
+g*{\text{down}}(x) &= 0.\\
+g*{\text{flat}}(x)&= \text{ln}\left(\frac{Pr(Z*{\ell,t}=\text{flat}|x)}{Pr(Z*{\ell,t}=\text{down}|x)}\right) =
+\beta*{10} + \beta*{11}t + \delta*{10} s*{\text{state*1}} +
+\delta*{11} s*{\text{state_2}} + \cdots \nonumber \\
+&\quad + \beta*{12} Y^{\Delta}_{\ell, t} +
 \beta_{13} Y^{\Delta}_{\ell, t-7} \\
-g_{\text{flat}}(x) &= \text{ln}\left(\frac{Pr(Z_{\ell,t}=\text{up}|x)}{Pr(Z_{\ell,t}=\text{down}|x)}\right) = 
-\beta_{20} + \beta_{21}t + \delta_{20} s_{\text{state_1}} +
-\delta_{21} s_{\text{state}_2} + \cdots \nonumber \\
-&\quad + \beta_{22} Y^{\Delta}_{\ell, t} +
-\beta_{23} Y^{\Delta}_{\ell, t-7}
+g_{\text{flat}}(x) &= \text{ln}\left(\frac{Pr(Z*{\ell,t}=\text{up}|x)}{Pr(Z*{\ell,t}=\text{down}|x)}\right) =
+\beta*{20} + \beta*{21}t + \delta*{20} s*{\text{state*1}} +
+\delta*{21} s*{\text{state}\_2} + \cdots \nonumber \\
+&\quad + \beta*{22} Y^{\Delta}_{\ell, t} +
+\beta_{23} Y^{\Delta}\_{\ell, t-7}
 \end{aligned}
 
-
-
-Preprocessing steps are similar to the previous models with an additional step 
-of categorizing the response variables. Again, we will use a subset of death rate and case rate data from our built-in dataset 
+Preprocessing steps are similar to the previous models with an additional step
+of categorizing the response variables. Again, we will use a subset of death rate and case rate data from our built-in dataset
 `case_death_rate_subset`.
+
 ```{r}
 jhu <- case_death_rate_subset %>%
-  dplyr::filter(time_value >= "2021-06-04", 
-                time_value <= "2021-12-31",
-  geo_value %in% c("ca","fl","tx","ny","nj")) %>%
+  dplyr::filter(
+    time_value >= "2021-06-04",
+    time_value <= "2021-12-31",
+    geo_value %in% c("ca", "fl", "tx", "ny", "nj")
+  ) %>%
   mutate(geo_value_factor = as.factor(geo_value)) %>%
   as_epi_df()
 
@@ -451,21 +460,29 @@ r <- epi_recipe(jhu) %>%
   step_mutate(
     pct_diff_ahead = case_when(
       lag_7_case_rate == 0 ~ 0,
-      TRUE ~ (ahead_7_case_rate - lag_0_case_rate) / lag_0_case_rate),
+      TRUE ~ (ahead_7_case_rate - lag_0_case_rate) / lag_0_case_rate
+    ),
     pct_diff_wk1 = case_when(
-      lag_7_case_rate == 0 ~ 0, 
-      TRUE ~ (lag_0_case_rate - lag_7_case_rate) / lag_7_case_rate),
+      lag_7_case_rate == 0 ~ 0,
+      TRUE ~ (lag_0_case_rate - lag_7_case_rate) / lag_7_case_rate
+    ),
     pct_diff_wk2 = case_when(
       lag_14_case_rate == 0 ~ 0,
-      TRUE ~ (lag_7_case_rate - lag_14_case_rate) / lag_14_case_rate)) %>%
+      TRUE ~ (lag_7_case_rate - lag_14_case_rate) / lag_14_case_rate
+    )
+  ) %>%
   step_mutate(
     response = case_when(
       pct_diff_ahead < -0.20 ~ "down",
       pct_diff_ahead > 0.25 ~ "up",
-      TRUE ~ "flat"), 
-    role = "outcome") %>% 
-  step_rm(death_rate, case_rate, lag_0_case_rate,  lag_7_case_rate, 
-          lag_14_case_rate, ahead_7_case_rate, pct_diff_ahead) %>%
+      TRUE ~ "flat"
+    ),
+    role = "outcome"
+  ) %>%
+  step_rm(
+    death_rate, case_rate, lag_0_case_rate, lag_7_case_rate,
+    lag_14_case_rate, ahead_7_case_rate, pct_diff_ahead
+  ) %>%
   step_epi_naomit()
 ```
 
@@ -480,15 +497,17 @@ predict(wf, latest) %>% filter(!is.na(.pred_class))
 ```
 
 We can also look at the estimated coefficients and model summary information:
+
 ```{r}
 extract_fit_engine(wf)
 ```
 
-One could also use a formula in `epi_recipe()` to achieve the same results as 
-above. However, only one of `add_formula()`, `add_recipe()`, or 
-`workflow_variables()` can be specified. For the purpose of demonstrating 
+One could also use a formula in `epi_recipe()` to achieve the same results as
+above. However, only one of `add_formula()`, `add_recipe()`, or
+`workflow_variables()` can be specified. For the purpose of demonstrating
 `add_formula` rather than `add_recipe`, we will `prep` and `bake` our recipe to
 return a `data.frame` that could be used for model fitting.
+
 ```{r}
 b <- bake(prep(r, jhu), jhu)
 
@@ -501,13 +520,14 @@ epi_workflow() %>%
 ## Benefits of Lagging and Leading in `epipredict`
 
 The `step_epi_ahead` and `step_epi_lag` functions in the `epipredict` package
-is handy for creating correct lags and leads for future predictions. 
+is handy for creating correct lags and leads for future predictions.
 
 Let's start with a simple dataset and preprocessing:
+
 ```{r}
 ex <- filter(
-  case_death_rate_subset, 
-  time_value >= "2021-12-01", 
+  case_death_rate_subset,
+  time_value >= "2021-12-01",
   time_value <= "2021-12-31",
   geo_value == "ca"
 )
@@ -515,10 +535,11 @@ ex <- filter(
 dim(ex)
 ```
 
-We want to predict death rates on `r max(ex$time_value) + 7`, which is 7 days ahead of the 
-latest available date in our dataset. 
+We want to predict death rates on `r max(ex$time_value) + 7`, which is 7 days ahead of the
+latest available date in our dataset.
 
 We will compare two methods of trying to create lags and leads:
+
 ```{r}
 p1 <- epi_recipe(ex) %>%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -532,13 +553,15 @@ b1
 
 
 p2 <- epi_recipe(ex) %>%
-  step_mutate(lag0case_rate = lag(case_rate, 0),
-              lag7case_rate = lag(case_rate, 7),
-              lag14case_rate = lag(case_rate, 14),
-              lag0death_rate = lag(death_rate, 0),
-              lag7death_rate = lag(death_rate, 7),
-              lag14death_rate = lag(death_rate, 14),
-              ahead7death_rate = lead(death_rate, 7)) %>%
+  step_mutate(
+    lag0case_rate = lag(case_rate, 0),
+    lag7case_rate = lag(case_rate, 7),
+    lag14case_rate = lag(case_rate, 14),
+    lag0death_rate = lag(death_rate, 0),
+    lag7death_rate = lag(death_rate, 7),
+    lag14death_rate = lag(death_rate, 14),
+    ahead7death_rate = lead(death_rate, 7)
+  ) %>%
   step_epi_naomit() %>%
   prep()
 
@@ -546,37 +569,37 @@ b2 <- bake(p2, ex)
 b2
 ```
 
-Notice the difference in number of rows `b1` and `b2` returns. This is because 
+Notice the difference in number of rows `b1` and `b2` returns. This is because
 the second version, the one that doesn't use `step_epi_ahead` and `step_epi_lag`,
 has omitted dates compared to the one that used the `epipredict` functions.
+
 ```{r}
-dates_used_in_training1 <- b1 %>% 
-  select(-ahead_7_death_rate) %>% 
-  na.omit() %>% 
+dates_used_in_training1 <- b1 %>%
+  select(-ahead_7_death_rate) %>%
+  na.omit() %>%
   pull(time_value)
 dates_used_in_training1
 
-dates_used_in_training2 <- b2 %>% 
-  select(-ahead7death_rate) %>% 
-  na.omit() %>% 
+dates_used_in_training2 <- b2 %>%
+  select(-ahead7death_rate) %>%
+  na.omit() %>%
   pull(time_value)
 dates_used_in_training2
 ```
 
-The model that is trained based on the `{recipes}` functions will predict 7 days ahead from 
+The model that is trained based on the `{recipes}` functions will predict 7 days ahead from
 `r max(dates_used_in_training2)`
 instead of 7 days ahead from `r max(dates_used_in_training1)`.
 
 ## References
 
-McDonald, Bien, Green, Hu, et al. "Can auxiliary indicators improve COVID-19 
-forecasting and hotspot prediction?." Proceedings of the National Academy of 
-Sciences 118.51 (2021): e2111453118. [doi:10.1073/pnas.2111453118](
-https://doi.org/10.1073/pnas.2111453118)
+McDonald, Bien, Green, Hu, et al. "Can auxiliary indicators improve COVID-19
+forecasting and hotspot prediction?." Proceedings of the National Academy of
+Sciences 118.51 (2021): e2111453118. [doi:10.1073/pnas.2111453118](https://doi.org/10.1073/pnas.2111453118)
 
 ## Attribution
 
 This object contains a modified part of the [COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) as [republished in the COVIDcast Epidata API.](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html)
 
-This data set is licensed under the terms of the [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) by the Johns Hopkins University 
+This data set is licensed under the terms of the [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) by the Johns Hopkins University
 on behalf of its Center for Systems Science in Engineering. Copyright Johns Hopkins University 2020.

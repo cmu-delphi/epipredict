@@ -31,7 +31,8 @@
 #' latest <- get_test_data(r, jhu)
 #'
 #' # Use ahead + forecast date
-#' f <- frosting() %>% layer_predict() %>%
+#' f <- frosting() %>%
+#'   layer_predict() %>%
 #'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
 #'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
@@ -42,7 +43,8 @@
 #'
 #' # Use ahead + max time value from pre, fit, post
 #' # which is the same if include `layer_add_forecast_date()`
-#' f2 <- frosting() %>% layer_predict() %>%
+#' f2 <- frosting() %>%
+#'   layer_predict() %>%
 #'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
@@ -73,51 +75,56 @@ layer_add_target_date <-
   }
 
 layer_add_target_date_new <- function(id = id, target_date = target_date) {
-  layer("add_target_date",  target_date = target_date, id = id)
+  layer("add_target_date", target_date = target_date, id = id)
 }
 
 #' @export
 slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
-
   the_recipe <- workflows::extract_recipe(workflow)
   the_frosting <- extract_frosting(workflow)
 
   if (!is.null(object$target_date)) {
-    target_date = as.Date(object$target_date)
+    target_date <- as.Date(object$target_date)
   } else { # null target date case
     if (detect_layer(the_frosting, "layer_add_forecast_date") &&
-        !is.null(extract_argument(the_frosting,
-                                  "layer_add_forecast_date", "forecast_date"))) {
-      forecast_date <- extract_argument(the_frosting,
-                                        "layer_add_forecast_date", "forecast_date")
+      !is.null(extract_argument(
+        the_frosting,
+        "layer_add_forecast_date", "forecast_date"
+      ))) {
+      forecast_date <- extract_argument(
+        the_frosting,
+        "layer_add_forecast_date", "forecast_date"
+      )
 
       ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
 
-      target_date = forecast_date + ahead
+      target_date <- forecast_date + ahead
     } else {
-      max_time_value <- max(workflows::extract_preprocessor(workflow)$max_time_value,
-                            workflow$fit$meta$max_time_value,
-                            max(new_data$time_value))
+      max_time_value <- max(
+        workflows::extract_preprocessor(workflow)$max_time_value,
+        workflow$fit$meta$max_time_value,
+        max(new_data$time_value)
+      )
 
       ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
 
-      target_date = max_time_value + ahead
+      target_date <- max_time_value + ahead
     }
   }
 
   components$predictions <- dplyr::bind_cols(components$predictions,
-                                             target_date = target_date)
+    target_date = target_date
+  )
   components
 }
 
 #' @export
 print.layer_add_target_date <- function(
     x, width = max(20, options()$width - 30), ...) {
-
   title <- "Adding target date"
   td <- ifelse(is.null(x$target_date), "<calculated>",
-               as.character(x$target_date))
+    as.character(x$target_date)
+  )
   td <- rlang::enquos(td)
   print_layer(td, title = title, width = width)
 }
-

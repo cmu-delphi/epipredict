@@ -1,4 +1,3 @@
-
 #' Recipe blueprint that accounts for `epi_df` panel data
 #'
 #' Used for simplicity. See [hardhat::new_recipe_blueprint()] or
@@ -15,17 +14,17 @@ new_epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
            composition = "tibble",
            ptypes = NULL, recipe = NULL, ..., subclass = character()) {
-  hardhat::new_recipe_blueprint(
-    intercept = intercept,
-    allow_novel_levels = allow_novel_levels,
-    fresh = fresh,
-    composition = composition,
-    ptypes = ptypes,
-    recipe = recipe,
-    ...,
-    subclass = c(subclass, "epi_recipe_blueprint")
-  )
-}
+    hardhat::new_recipe_blueprint(
+      intercept = intercept,
+      allow_novel_levels = allow_novel_levels,
+      fresh = fresh,
+      composition = composition,
+      ptypes = ptypes,
+      recipe = recipe,
+      ...,
+      subclass = c(subclass, "epi_recipe_blueprint")
+    )
+  }
 
 
 #' @rdname new_epi_recipe_blueprint
@@ -34,10 +33,12 @@ epi_recipe_blueprint <-
   function(intercept = FALSE, allow_novel_levels = FALSE,
            fresh = TRUE,
            composition = "tibble") {
-    new_epi_recipe_blueprint(intercept = intercept,
-                             allow_novel_levels = allow_novel_levels,
-                             fresh = fresh,
-                             composition = composition)
+    new_epi_recipe_blueprint(
+      intercept = intercept,
+      allow_novel_levels = allow_novel_levels,
+      fresh = fresh,
+      composition = composition
+    )
   }
 
 #' @rdname new_epi_recipe_blueprint
@@ -61,18 +62,18 @@ new_default_epi_recipe_blueprint <-
            fresh = TRUE,
            composition = "tibble", ptypes = NULL, recipe = NULL,
            extra_role_ptypes = NULL, ..., subclass = character()) {
-  new_epi_recipe_blueprint(
-    intercept = intercept,
-    allow_novel_levels = allow_novel_levels,
-    fresh = fresh,
-    composition = composition,
-    ptypes = ptypes,
-    recipe = recipe,
-    extra_role_ptypes = extra_role_ptypes,
-    ...,
-    subclass = c(subclass, "default_epi_recipe_blueprint", "default_recipe_blueprint")
-  )
-}
+    new_epi_recipe_blueprint(
+      intercept = intercept,
+      allow_novel_levels = allow_novel_levels,
+      fresh = fresh,
+      composition = composition,
+      ptypes = ptypes,
+      recipe = recipe,
+      extra_role_ptypes = extra_role_ptypes,
+      ...,
+      subclass = c(subclass, "default_epi_recipe_blueprint", "default_recipe_blueprint")
+    )
+  }
 
 #' @importFrom hardhat run_mold
 #' @export

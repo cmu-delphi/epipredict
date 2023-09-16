@@ -19,22 +19,23 @@
 #'   step_lag_difference(case_rate, death_rate, horizon = c(7, 14))
 #' r
 #'
-#' r %>% recipes::prep() %>% recipes::bake(case_death_rate_subset)
+#' r %>%
+#'   recipes::prep() %>%
+#'   recipes::bake(case_death_rate_subset)
 step_lag_difference <-
   function(
-    recipe,
-    ...,
-    role = "predictor",
-    trained = FALSE,
-    horizon = 7,
-    prefix = "lag_diff_",
-    columns = NULL,
-    skip = FALSE,
-    id = rand_id("lag_diff")
-  ) {
-
-    if (!is_epi_recipe(recipe))
+      recipe,
+      ...,
+      role = "predictor",
+      trained = FALSE,
+      horizon = 7,
+      prefix = "lag_diff_",
+      columns = NULL,
+      skip = FALSE,
+      id = rand_id("lag_diff")) {
+    if (!is_epi_recipe(recipe)) {
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+    }
     arg_is_pos_int(horizon)
     arg_is_chr(role)
     arg_is_chr_scalar(prefix, id)
@@ -43,22 +44,25 @@ step_lag_difference <-
     if (!is.null(columns)) {
       rlang::abort(
         c("The `columns` argument must be `NULL.",
-          i = "Use `tidyselect` methods to choose columns to use.")
+          i = "Use `tidyselect` methods to choose columns to use."
+        )
       )
     }
 
-    add_step(recipe,
-             step_lag_difference_new(
-               terms = dplyr::enquos(...),
-               role = role,
-               trained = trained,
-               horizon = horizon,
-               prefix = prefix,
-               keys = epi_keys(recipe),
-               columns = columns,
-               skip = skip,
-               id = id
-             ))
+    add_step(
+      recipe,
+      step_lag_difference_new(
+        terms = dplyr::enquos(...),
+        role = role,
+        trained = trained,
+        horizon = horizon,
+        prefix = prefix,
+        keys = epi_keys(recipe),
+        columns = columns,
+        skip = skip,
+        id = id
+      )
+    )
   }
 
 
@@ -110,7 +114,7 @@ epi_shift_single_diff <- function(x, col, horizon, newname, key_cols) {
     dplyr::mutate(time_value = time_value + horizon) %>%
     dplyr::rename(!!newname := {{ col }})
   x <- dplyr::left_join(x, y, by = key_cols)
-  x[ ,newname] <- x[ ,col] - x[ ,newname]
+  x[, newname] <- x[, col] - x[, newname]
   x %>% dplyr::select(tidyselect::all_of(c(key_cols, newname)))
 }
 
@@ -126,10 +130,13 @@ bake.step_lag_difference <- function(object, new_data, ...) {
   if (any(intersection)) {
     rlang::abort(
       c(paste0("Name collision occured in `", class(object)[1], "`."),
-        i = paste("The following variable names already exists: ",
-             paste0(new_data_names[intersection], collapse = ", "),
-             ".")
-      ))
+        i = paste(
+          "The following variable names already exists: ",
+          paste0(new_data_names[intersection], collapse = ", "),
+          "."
+        )
+      )
+    )
   }
 
   ok <- object$keys
@@ -149,8 +156,9 @@ bake.step_lag_difference <- function(object, new_data, ...) {
 #' @export
 print.step_lag_difference <- function(x, width = max(20, options()$width - 30), ...) {
   print_epi_step(x$columns, x$terms, x$trained,
-                 title = "Calculating lag_difference for",
-                 conjunction = "by",
-                 extra_text = x$horizon)
+    title = "Calculating lag_difference for",
+    conjunction = "by",
+    extra_text = x$horizon
+  )
   invisible(x)
 }

@@ -84,7 +84,7 @@ is_epi_workflow <- function(x) {
 #' @export
 #' @examples
 #' jhu <- case_death_rate_subset %>%
-#' filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -94,8 +94,7 @@ is_epi_workflow <- function(x) {
 #' wf
 #'
 #' @export
-fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()){
-
+fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
   object$fit$meta <- list(max_time_value = max(data$time_value), as_of = attributes(data)$metadata$as_of)
 
   NextMethod()
@@ -152,14 +151,19 @@ predict.epi_workflow <- function(object, new_data, ...) {
   if (!workflows::is_trained_workflow(object)) {
     rlang::abort(
       c("Can't predict on an untrained epi_workflow.",
-        i = "Do you need to call `fit()`?"))
+        i = "Do you need to call `fit()`?"
+      )
+    )
   }
   components <- list()
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
-                                      blueprint = components$mold$blueprint)
-  components$keys <- grab_forged_keys(components$forged,
-                                      components$mold, new_data)
+    blueprint = components$mold$blueprint
+  )
+  components$keys <- grab_forged_keys(
+    components$forged,
+    components$mold, new_data
+  )
   components <- apply_frosting(object, components, new_data, ...)
   components$predictions
 }
@@ -174,18 +178,27 @@ predict.epi_workflow <- function(object, new_data, ...) {
 #'
 #' @return new_data with additional columns containing the predicted values
 #' @export
-augment.epi_workflow <- function (x, new_data, ...) {
+augment.epi_workflow <- function(x, new_data, ...) {
   predictions <- predict(x, new_data, ...)
-  if (epiprocess::is_epi_df(predictions)) join_by <- epi_keys(predictions)
-  else rlang::abort(
-    c("Cannot determine how to join new_data with the predictions.",
-      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."))
+  if (epiprocess::is_epi_df(predictions)) {
+    join_by <- epi_keys(predictions)
+  } else {
+    rlang::abort(
+      c(
+        "Cannot determine how to join new_data with the predictions.",
+        "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
+      )
+    )
+  }
   complete_overlap <- intersect(names(new_data), join_by)
   if (length(complete_overlap) < length(join_by)) {
     rlang::warn(
-      glue::glue("Your original training data had keys {join_by}, but",
-                 "`new_data` only has {complete_overlap}. The output",
-                 "may be strange."))
+      glue::glue(
+        "Your original training data had keys {join_by}, but",
+        "`new_data` only has {complete_overlap}. The output",
+        "may be strange."
+      )
+    )
   }
   dplyr::full_join(predictions, new_data, by = join_by)
 }
@@ -195,9 +208,9 @@ new_epi_workflow <- function(
     fit = workflows:::new_stage_fit(),
     post = workflows:::new_stage_post(),
     trained = FALSE) {
-
   out <- workflows:::new_workflow(
-    pre = pre, fit = fit, post = post, trained = trained)
+    pre = pre, fit = fit, post = post, trained = trained
+  )
   class(out) <- c("epi_workflow", class(out))
 }
 
@@ -254,4 +267,3 @@ print_header <- function(x) {
 
   invisible(x)
 }
-

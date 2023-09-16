@@ -11,7 +11,6 @@ latest <- jhu %>%
 
 
 test_that("predict layer works alone", {
-
   f <- frosting() %>% layer_predict()
   wf1 <- wf %>% add_frosting(f)
 
@@ -23,7 +22,6 @@ test_that("predict layer works alone", {
 })
 
 test_that("prediction with interval works", {
-
   f <- frosting() %>% layer_predict(type = "pred_int")
   wf2 <- wf %>% add_frosting(f)
 
