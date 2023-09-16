@@ -316,7 +316,6 @@ remove_epi_recipe <- function(x) {
 #' @rdname add_epi_recipe
 #' @export
 update_epi_recipe <- function(x, recipe, ..., blueprint = NULL) {
-  #rlang::check_dots_empty()
   x <- remove_epi_recipe(x)
   add_epi_recipe(x, recipe, blueprint = blueprint)
 }
