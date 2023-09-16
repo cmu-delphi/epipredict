@@ -15,26 +15,15 @@ update_frosting(x, frosting, ...)
 \arguments{
 \item{x}{A workflow}
 
-\item{frosting}{A frosting layer created using \code{frosting()}.
-Optional for \code{update_epi_recipe()} only.}
+\item{frosting}{A frosting object created using \code{frosting()}.}
 
-\item{...}{Can only be used in \code{update_frosting()} to input a parameter
-update.}
-
-\item{layer_num}{the number of the layer to update in an \code{epi_workflow}.
-Intended for use in \code{update_frosting()} only.}
+\item{...}{Not used.}
 }
 \value{
-\code{x}, updated with a new or removed frosting postprocessor
+\code{x}, updated with a new frosting postprocessor
 }
 \description{
 Add frosting to a workflow
-}
-\details{
-The \code{update_frosting} function can either update the entire frosting
-or a layer in an existing frosting in an \code{epi_workflow}. In the latter case,
-the parameter name the new value it is equal to must be input into \code{...}.
-See the examples below for brief illustrations of both types of updates.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -62,17 +51,7 @@ p2
 
 # Remove frosting from the workflow and predict
 wf3 <- wf2 \%>\% remove_frosting()
-p2 <- predict(wf3, latest)
-p2
-
-# Additional feature in `update_frosting` is to change a layer
-# in the frosting from the workflow
-f3 <- frosting() \%>\% layer_predict() \%>\% layer_threshold(.pred)
-
-wf3 = wf \%>\% add_frosting(f3)
-
-# Update `layer_threshold` to have an upper bound of 1
-wf3 = wf3 \%>\% update_frosting(layer_num = 2, upper = 1)
-extract_frosting(wf3)
+p3 <- predict(wf3, latest)
+p3
 
 }

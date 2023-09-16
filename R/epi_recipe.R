@@ -240,21 +240,11 @@ is_epi_recipe <- function(x) {
 #' [workflows::add_recipe()] but sets a different
 #' default blueprint to automatically handle [epiprocess::epi_df] data.
 #'
-#' The `update_epi_recipe` function can either update the entire recipe or a
-#' step in an existing recipe in an `epi_workflow`. In the latter case, the
-#' parameter name that the new value it is equal to must be input into `...`.
-#' See the examples below for brief illustrations of both types of updates.
-#'
-#' @param x A workflow or epi_workflow
+#' @param x A `workflow` `or `epi_workflow`
 #'
 #' @param recipe A recipe created using [recipes::recipe()].
-#' Optional for `update_epi_recipe()` only.
 #'
-#' @param step_num the number of the step to update.
-#' Can only be used in `update_epi_recipe()` only.
-#'
-#' @param ... Can only be used in `update_epi_recipe()` to input a parameter
-#' update.
+#' @param ... Not used
 #'
 #' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
 #'
@@ -298,16 +288,6 @@ is_epi_recipe <- function(x) {
 #'
 #' workflow
 #'
-#' # Additional feature in `update_epi_recipe` is to change a step
-#' # in the recipe from the workflow
-#' workflow <- epi_workflow() %>%
-#'   add_epi_recipe(r)
-#'
-#' # Update second step, `step_epi_ahead()`, to have an
-#' # ahead value of 14 days
-#' workflow = workflow %>% update_epi_recipe(step_num = 2, ahead = 14)
-#' workflows::extract_preprocessor(workflow)
-#'
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
   workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
@@ -341,11 +321,54 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = NULL) {
   add_epi_recipe(x, recipe, blueprint = blueprint)
 }
 
+#' Adjust a step in an `epi_workflow` or `epi_recipe`
+#'
+#' Make a parameter adjustment to a step in either an
+#' `epi_workflow` or `epi_recipe` object.
+#'
+#'
+#' @details This function can either adjust a step in a `epi_recipe` object
+#' or a step from a `epi_recipe` object in an `epi_workflow`. In any case, the
+#' argument name and update value must be inputted as `...`.
+#' See the examples below for brief illustrations of both types of updates.
+#'
+#' @param x A `epi_workflow` or `epi_recipe` object
+#'
+#' @param step_num the number of the step to adjust
+#'
+#' @param ... Used to input a parameter adjustment
+#'
+#' @return
+#' `x`, updated with the adjustment to the specified `epi_recipe` step.
+#'
 #' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- jhu %>%
+#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'
+#' # Adjust `step_epi_ahead` to have an ahead value of 14
+#' # in the `epi_workflow`
+#' wf2 = wf %>% adjust_epi_recipe(step_num = 2, ahead = 14)
+#' workflows::extract_preprocessor(wf2)
+#'
+#' # Adjust `step_epi_ahead` to have an ahead value of 14
+#' # in the `epi_recipe`
+#' r2 = r %>% adjust_epi_recipe(step_num = 2, ahead = 14)
+#' r2
+#'
 adjust_epi_recipe <- function(x, step_num, ..., blueprint = default_epi_recipe_blueprint()) {
   UseMethod("adjust_epi_recipe")
 }
 
+#' @rdname adjust_epi_recipe
 #' @export
 adjust_epi_recipe.epi_workflow <- function(
     x, step_num, ..., blueprint = default_epi_recipe_blueprint()) {
@@ -356,6 +379,7 @@ adjust_epi_recipe.epi_workflow <- function(
   update_epi_recipe(x, recipe, blueprint = blueprint)
 }
 
+#' @rdname adjust_epi_recipe
 #' @export
 adjust_epi_recipe.epi_recipe <- function(
     x, step_num, ..., blueprint = default_epi_recipe_blueprint()) {
@@ -363,7 +387,6 @@ adjust_epi_recipe.epi_recipe <- function(
   x$steps[[step_num]] <- update(x$steps[[step_num]], ...)
   x
 }
-
 
 # unfortunately, almost everything the same as in prep.recipe except string/fctr handling
 #' @export

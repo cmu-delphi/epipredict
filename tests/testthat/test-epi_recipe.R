@@ -117,7 +117,7 @@ test_that("epi_recipe epi_df works", {
   expect_equal(nrow(r$template), 1L)
 })
 
-test_that("add/update/remove epi_recipe works as intended", {
+test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   jhu <- case_death_rate_subset
 
@@ -151,7 +151,7 @@ test_that("add/update/remove epi_recipe works as intended", {
   expect_equal(class(steps[[2]]), c("step_epi_ahead", "step"))
   expect_equal(steps[[2]]$ahead, c(1))
 
-  wf <- update_epi_recipe(wf, step_num = 2, ahead = 7)
+  wf <- adjust_epi_recipe(wf, step_num = 2, ahead = 7)
   steps <- extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))

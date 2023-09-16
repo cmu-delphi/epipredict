@@ -1,20 +1,11 @@
 #' Add frosting to a workflow
 #'
 #' @param x A workflow
-#' @param frosting A frosting layer created using `frosting()`.
-#' Optional for `update_epi_recipe()` only.
-#' @param layer_num the number of the layer to update in an `epi_workflow`.
-#' Intended for use in `update_frosting()` only.
-#' @param ... Can only be used in `update_frosting()` to input a parameter
-#' update.
+#' @param frosting A frosting object created using `frosting()`.
+#' @param ... Not used.
 #'
-#' @return `x`, updated with a new or removed frosting postprocessor
+#' @return `x`, updated with a new frosting postprocessor
 #' @export
-#'
-#' @details The `update_frosting` function can either update the entire frosting
-#' or a layer in an existing frosting in an `epi_workflow`. In the latter case,
-#' the parameter name the new value it is equal to must be input into `...`.
-#' See the examples below for brief illustrations of both types of updates.
 #'
 #' @examples
 #' jhu <- case_death_rate_subset %>%
@@ -42,18 +33,8 @@
 #'
 #' # Remove frosting from the workflow and predict
 #' wf3 <- wf2 %>% remove_frosting()
-#' p2 <- predict(wf3, latest)
-#' p2
-#'
-#' # Additional feature in `update_frosting` is to change a layer
-#' # in the frosting from the workflow
-#' f3 <- frosting() %>% layer_predict() %>% layer_threshold(.pred)
-#'
-#' wf3 = wf %>% add_frosting(f3)
-#'
-#' # Update `layer_threshold` to have an upper bound of 1
-#' wf3 = wf3 %>% update_frosting(layer_num = 2, upper = 1)
-#' extract_frosting(wf3)
+#' p3 <- predict(wf3, latest)
+#' p3
 #'
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
@@ -116,11 +97,58 @@ update_frosting <- function(x, frosting, ...) {
   add_frosting(x, frosting)
 }
 
+
+#' Adjust a layer in an `epi_workflow` or `frosting`
+#'
+#' Make a parameter adjustment to a layer in either an
+#' `epi_workflow` or `frosting` object.
+#'
+#'
+#' @details This function can either adjust a layer in a `frosting` object
+#' or a layer from a `frosting` object in an `epi_workflow`. In any case, the
+#' argument name and update value must be inputted as `...`.
+#' See the examples below for brief illustrations of both types of updates.
+#'
+#' @param x An `epi_workflow` or `frosting` object
+#'
+#' @param layer_num the number of the layer to adjust
+#'
+#' @param ... Used to input a parameter adjustment
+#'
+#' @return
+#' `x`, updated with the adjustment to the specified `frosting` layer.
+#'
 #' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#'
+#' # in the frosting from the workflow
+#' f1 <- frosting() %>% layer_predict() %>% layer_threshold(.pred)
+#'
+#' wf2 = wf %>% add_frosting(f1)
+#'
+#' # Adjust `layer_threshold` to have an upper bound of 1
+#' # in the `epi_workflow`
+#' wf2 = wf2 %>% adjust_frosting(layer_num = 2, upper = 1)
+#' extract_frosting(wf2)
+#'
+#' # Adjust `layer_threshold` to have an upper bound of 1
+#' # in the `frosting` object
+#' f2 = f1 %>% adjust_frosting(layer_num = 2, upper = 5)
+#' extract_frosting(wf2)
+#'
 adjust_frosting <- function(x, layer_num, ...) {
   UseMethod("adjust_frosting")
 }
 
+#' @rdname adjust_frosting
 #' @export
 adjust_frosting.epi_workflow <- function(
     x, layer_num, ...) {
@@ -131,6 +159,7 @@ adjust_frosting.epi_workflow <- function(
   update_frosting(x, frosting)
 }
 
+#' @rdname adjust_frosting
 #' @export
 adjust_frosting.frosting <- function(
     x, layer_num, ...) {
