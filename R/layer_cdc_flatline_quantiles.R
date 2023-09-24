@@ -149,7 +149,7 @@ propogate_samples <- function(
     for (iter in 2:max_ahead) {
       samp <- shuffle(samp)
       raw <- raw + samp
-      if (symmetrize) symmetric <- raw - (median(raw) + p)
+      if (symmetrize) symmetric <- raw - (median(raw) - p)
       else symmetric <- raw
       if (nonneg) symmetric <- pmax(0, symmetric)
       res[[iter]] <- symmetric
@@ -157,7 +157,7 @@ propogate_samples <- function(
   }
   res <- res[aheads]
   list(tibble::tibble(
-    aheads = aheads,
+    ahead = aheads,
     .pred_distn = map_vec(
       res, ~ dist_quantiles(quantile(.x, quantiles), tau = quantiles)
     )
