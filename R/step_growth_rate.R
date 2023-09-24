@@ -42,20 +42,19 @@
 #'   recipes::prep() %>%
 #'   recipes::bake(case_death_rate_subset)
 step_growth_rate <-
-  function(
-      recipe,
-      ...,
-      role = "predictor",
-      trained = FALSE,
-      horizon = 7,
-      method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
-      log_scale = FALSE,
-      replace_Inf = NA,
-      prefix = "gr_",
-      columns = NULL,
-      skip = FALSE,
-      id = rand_id("growth_rate"),
-      additional_gr_args_list = list()) {
+  function(recipe,
+           ...,
+           role = "predictor",
+           trained = FALSE,
+           horizon = 7,
+           method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
+           log_scale = FALSE,
+           replace_Inf = NA,
+           prefix = "gr_",
+           columns = NULL,
+           skip = FALSE,
+           id = rand_id("growth_rate"),
+           additional_gr_args_list = list()) {
     if (!is_epi_recipe(recipe)) {
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
     }

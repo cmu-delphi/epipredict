@@ -83,14 +83,15 @@
 #'   geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
 #'   geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
 #'   geom_line(aes(y = .pred), color = "orange") +
-#'   geom_line(data = case_death_rate_subset %>% filter(geo_value %in% four_states),
-#'     aes(x = time_value, y = death_rate)) +
+#'   geom_line(
+#'     data = case_death_rate_subset %>% filter(geo_value %in% four_states),
+#'     aes(x = time_value, y = death_rate)
+#'   ) +
 #'   scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
 #'   labs(x = "Date", y = "Death rate") +
 #'   facet_wrap(~geo_value, scales = "free_y") +
 #'   theme_bw() +
 #'   geom_vline(xintercept = forecast_date)
-#'
 #'
 layer_cdc_flatline_quantiles <- function(
     frosting,
@@ -102,7 +103,6 @@ layer_cdc_flatline_quantiles <- function(
     symmetrize = FALSE,
     nonneg = TRUE,
     id = rand_id("cdc_baseline_bands")) {
-
   rlang::check_dots_empty()
 
   arg_is_int(aheads)
@@ -134,8 +134,7 @@ layer_cdc_flatline_quantiles_new <- function(
     by_key,
     symmetrize,
     nonneg,
-    id
-) {
+    id) {
   layer(
     "cdc_flatline_quantiles",
     aheads = aheads,
@@ -154,8 +153,10 @@ slather.layer_cdc_flatline_quantiles <-
     the_fit <- workflows::extract_fit_parsnip(workflow)
     if (!inherits(the_fit, "_flatline")) {
       cli::cli_warn(
-        c("Predictions for this workflow were not produced by the {.cls flatline}",
-        "{.pkg parsnip} engine. Results may be unexpected. See {.fn epipredict::flatline}.")
+        c(
+          "Predictions for this workflow were not produced by the {.cls flatline}",
+          "{.pkg parsnip} engine. Results may be unexpected. See {.fn epipredict::flatline}."
+        )
       )
     }
     p <- components$predictions
@@ -240,8 +241,11 @@ propogate_samples <- function(
     for (iter in 2:max_ahead) {
       samp <- shuffle(samp)
       raw <- raw + samp
-      if (symmetrize) symmetric <- raw - (median(raw) - p)
-      else symmetric <- raw
+      if (symmetrize) {
+        symmetric <- raw - (median(raw) - p)
+      } else {
+        symmetric <- raw
+      }
       if (nonneg) symmetric <- pmax(0, symmetric)
       res[[iter]] <- symmetric
     }
