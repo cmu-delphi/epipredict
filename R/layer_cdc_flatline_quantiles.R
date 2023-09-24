@@ -3,7 +3,7 @@ layer_cdc_flatline_quantiles <- function(
     ...,
     aheads = 1:4,
     quantiles = c(.01, .025, 1:19 / 20, .975, .99),
-    nsims = 1e5,
+    nsims = 1e3,
     by_key = "geo_value",
     symmetrize = FALSE,
     nonneg = TRUE,
@@ -73,7 +73,7 @@ slather.layer_cdc_flatline_quantiles <-
       cols_in_preds <- hardhat::check_column_names(p, object$by_key)
       if (!cols_in_preds$ok) {
         cli::cli_warn(c(
-          "Predicted values are missing key columns: {.var cols_in_preds$missing_names}.",
+          "Predicted values are missing key columns: {.val {cols_in_preds$missing_names}}.",
           "Ignoring these."
         ))
       }
@@ -81,7 +81,7 @@ slather.layer_cdc_flatline_quantiles <-
         cols_in_resids <- hardhat::check_column_names(r, object$by_key)
         if (!cols_in_resids$ok) {
           cli::cli_warn(c(
-            "Existing residuals are missing key columns: {.var cols_in_resids$missing_names}.",
+            "Existing residuals are missing key columns: {.val {cols_in_resids$missing_names}}.",
             "Ignoring these."
           ))
         }
@@ -98,7 +98,7 @@ slather.layer_cdc_flatline_quantiles <-
         cols_in_resids <- hardhat::check_column_names(key_cols, object$by_key)
         if (!cols_in_resids$ok) {
           cli::cli_warn(c(
-            "Requested residuals are missing key columns: {.var cols_in_resids$missing_names}.",
+            "Requested residuals are missing key columns: {.val {cols_in_resids$missing_names}}.",
             "Ignoring these."
           ))
         }
@@ -138,9 +138,6 @@ propogate_samples <- function(
   max_ahead <- max(aheads)
   samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1), na.rm = TRUE)
   res <- list()
-
-  # p should be all the same
-  p <- max(p, na.rm = TRUE)
 
   raw <- samp + p
   if (nonneg) raw <- pmax(0, raw)
