@@ -20,9 +20,9 @@ fill in the name of the layer, and open the file.
 \examples{
 \dontrun{
 
-  # Note: running this will write `layer_strawberry.R` to
-  # the `R/` directory of your current project
-  create_layer("strawberry")
+# Note: running this will write `layer_strawberry.R` to
+# the `R/` directory of your current project
+create_layer("strawberry")
 }
 
 }
