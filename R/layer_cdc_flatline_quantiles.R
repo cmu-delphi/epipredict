@@ -75,7 +75,7 @@
 #'   pivot_quantiles(.pred_distn) %>%
 #'   mutate(target_date = forecast_date + ahead)
 #'
-#' library(ggplot2)
+#' if (require("ggplot2")) {
 #' four_states <- c("ca", "pa", "wa", "ny")
 #' preds %>%
 #'   filter(geo_value %in% four_states) %>%
@@ -92,7 +92,7 @@
 #'   facet_wrap(~geo_value, scales = "free_y") +
 #'   theme_bw() +
 #'   geom_vline(xintercept = forecast_date)
-#'
+#' }
 layer_cdc_flatline_quantiles <- function(
     frosting,
     ...,
