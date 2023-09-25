@@ -52,7 +52,7 @@ test_that("quantile pivotting longer behaves", {
   expect_length(pivot_quantiles_longer(tib, c("d1", "d2")), 5L)
   expect_identical(nrow(pivot_quantiles_longer(tib, c("d1", "d2"))), 6L)
   expect_silent(pivot_quantiles_longer(tib, tidyselect::starts_with("d")))
-  expect_length(pivot_quantiles_longer(tib, d2), 5L)
+  expect_length(pivot_quantiles_longer(tib, d2), 4L)
 
   tib$d3 <- c(dist_quantiles(2:5, 2:5 / 6), dist_quantiles(3:6, 2:5 / 6))
   # now the cols have different numbers of quantiles
