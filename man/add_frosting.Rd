@@ -35,7 +35,9 @@ latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
 # Add frosting to a workflow and predict
-f <- frosting() \%>\% layer_predict() \%>\% layer_naomit(.pred)
+f <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 p1 <- predict(wf1, latest)
 p1
