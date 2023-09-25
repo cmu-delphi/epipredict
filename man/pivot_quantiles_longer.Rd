@@ -21,7 +21,7 @@ reasonable. But if, for example, \code{var1[1]} has 5 quantiles while \code{var2
 has 7, then the only option would be to recycle everything, creating a
 \emph{very} long result. By default, this would throw an error. But if this is
 really the goal, then the error can be bypassed by setting this argument
-to \code{TRUE}.}
+to \code{TRUE}. The first selected column will vary fastest.}
 }
 \value{
 An object of the same class as \code{.data}.
