@@ -24,8 +24,8 @@ The arguments are currently placeholders and must be NULL
 \examples{
 
 # Toy example to show that frosting can be created and added for postprocessing
- f <- frosting()
- wf <- epi_workflow() \%>\% add_frosting(f)
+f <- frosting()
+wf <- epi_workflow() \%>\% add_frosting(f)
 
 # A more realistic example
 jhu <- case_death_rate_subset \%>\%
