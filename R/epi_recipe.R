@@ -415,7 +415,7 @@ kill_levels <- function(x, keys) {
 print.epi_recipe <- function(x, form_width = 30, ...) {
   cli::cli_div(theme = list(.pkg = list("vec-trunc" = Inf, "vec-last" = ", ")))
 
-  cli::cli_h1("Recipe")
+  cli::cli_h1("Epi Recipe")
   cli::cli_h3("Inputs")
 
   tab <- table(x$var_info$role, useNA = "ifany")

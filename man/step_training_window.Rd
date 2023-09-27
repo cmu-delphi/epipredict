@@ -50,9 +50,12 @@ after any filtering step.
 tib <- tibble::tibble(
   x = 1:10,
   y = 1:10,
-  time_value = rep(seq(as.Date("2020-01-01"), by = 1,
-                     length.out = 5), times = 2),
-  geo_value = rep(c("ca", "hi"), each = 5)) \%>\%
+  time_value = rep(seq(as.Date("2020-01-01"),
+    by = 1,
+    length.out = 5
+  ), times = 2),
+  geo_value = rep(c("ca", "hi"), each = 5)
+) \%>\%
   as_epi_df()
 
 epi_recipe(y ~ x, data = tib) \%>\%
