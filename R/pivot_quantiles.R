@@ -142,6 +142,9 @@ pivot_quantiles_wider <- function(.data, ...) {
   .data
 }
 
+pivot_quantiles <- function(.data, ...) {
+  lifecycle::deprecate_stop("0.0.6", "pivot_quantiles()", "pivot_quantiles_wider()")
+}
 
 validate_pivot_quantiles <- function(.data, ...) {
   expr <- rlang::expr(c(...))
