@@ -175,7 +175,7 @@ make_smooth_quantile_reg <- function() {
       x <- lapply(unname(split(
         p, seq(nrow(p))
       )), function(q) unname(sort(q, na.last = TRUE)))
-      dist_quantiles(x, list(object$quantile_values))
+      dist_quantiles(x, list(object$tau))
     })
     n_preds <- length(list_of_pred_distns[[1]])
     nout <- length(list_of_pred_distns)

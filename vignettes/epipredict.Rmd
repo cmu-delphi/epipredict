@@ -214,7 +214,7 @@ out_gb <- arx_forecaster(
 Or quantile regression, using our custom forecasting engine `quantile_reg()`:
 
 ```{r quantreg, warning = FALSE}
-out_gb <- arx_forecaster(
+out_qr <- arx_forecaster(
   jhu, "death_rate", c("case_rate", "death_rate"),
   quantile_reg()
 )

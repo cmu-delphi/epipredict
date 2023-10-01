@@ -9,7 +9,7 @@ flatline_args_list(
   n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
-  levels = c(0.05, 0.95),
+  quantile_values = c(0.05, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
@@ -30,6 +30,10 @@ The default \code{NULL} will attempt to determine this automatically.}
 
 \item{target_date}{Date. The date for which the forecast is intended.
 The default \code{NULL} will attempt to determine this automatically.}
+
+\item{quantile_values}{Vector or \code{NULL}. A vector of probabilities to produce
+prediction intervals. These are created by computing the quantiles of
+training residuals. A \code{NULL} value will result in point forecasts only.}
 
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
 symmetric prediction intervals. This argument only applies when

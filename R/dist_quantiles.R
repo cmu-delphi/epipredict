@@ -53,7 +53,6 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #' nested_quantiles(dstn[1])[[1]]
 #'
 #' dist_quantiles(1:4, 1:4 / 5)
-#' dist_quantiles(1:4, c(1, 3, 2, 4) / 5)
 #' @importFrom vctrs as_list_of vec_recycle_common new_vctr
 dist_quantiles <- function(values, quantile_values) {
   if (!is.list(values)) values <- list(values)

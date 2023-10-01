@@ -107,7 +107,7 @@ flatline_args_list <- function(
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
-    levels = c(0.05, 0.95),
+    quantile_values = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),

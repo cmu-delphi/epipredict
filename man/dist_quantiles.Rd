@@ -24,5 +24,4 @@ distributional::parameters(dstn[1])
 nested_quantiles(dstn[1])[[1]]
 
 dist_quantiles(1:4, 1:4 / 5)
-dist_quantiles(1:4, c(1, 3, 2, 4) / 5)
 }
