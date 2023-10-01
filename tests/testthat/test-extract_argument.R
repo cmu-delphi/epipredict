@@ -7,7 +7,7 @@ test_that("layer argument extractor works", {
   expect_error(extract_argument(f$layers[[1]], "uhoh", "bubble"))
   expect_error(extract_argument(f$layers[[1]], "layer_predict", "bubble"))
   expect_identical(
-    extract_argument(f$layers[[2]], "layer_residual_quantiles", "probs"),
+    extract_argument(f$layers[[2]], "layer_residual_quantiles", "quantile_values"),
     c(0.0275, 0.9750)
   )
 

@@ -1,12 +1,13 @@
+#' @importFrom vctrs field vec_cast new_rcrd
 new_quantiles <- function(values = double(), quantile_values = double()) {
   arg_is_probabilities(quantile_values)
 
   vec_cast(values, double())
   vec_cast(quantile_values, double())
   stopifnot(length(values) == length(quantile_values))
-  stopifnot(!vec_duplicate_any(quantile_values))
+  stopifnot(!vctrs::vec_duplicate_any(quantile_values))
   if (is.unsorted(quantile_values)) {
-    o <- vec_order(quantile_values)
+    o <- vctrs::vec_order(quantile_values)
     values <- values[o]
     quantile_values <- quantile_values[o]
   }
@@ -20,6 +21,8 @@ new_quantiles <- function(values = double(), quantile_values = double()) {
 }
 
 
+
+#' @importFrom vctrs vec_ptype_abbr vec_ptype_full
 #' @export
 vec_ptype_abbr.dist_quantiles <- function(x, ...) "dist_qntls"
 #' @export
@@ -51,6 +54,7 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #'
 #' dist_quantiles(1:4, 1:4 / 5)
 #' dist_quantiles(1:4, c(1, 3, 2, 4) / 5)
+#' @importFrom vctrs as_list_of vec_recycle_common new_vctr
 dist_quantiles <- function(values, quantile_values) {
   if (!is.list(values)) values <- list(values)
   if (!is.list(quantile_values)) quantile_values <- list(quantile_values)
@@ -114,10 +118,11 @@ extrapolate_quantiles <- function(x, probs, ...) {
 }
 
 #' @export
+#' @importFrom vctrs vec_data
 extrapolate_quantiles.distribution <- function(x, probs, ...) {
   arg_is_probabilities(probs)
   dstn <- lapply(vec_data(x), extrapolate_quantiles, p = probs, ...)
-  distributional:::wrap_dist(dstn)
+  new_vctr(dstn, vars = NULL, class = "distribution")
 }
 
 #' @export
@@ -157,7 +162,8 @@ nested_quantiles <- function(x) {
   map(
     x,
     ~ distributional::parameters(.x) %>%
-      tidyr::unnest(tidyselect::everything())
+      tidyr::unnest(tidyselect::everything()) %>%
+      mutate(values = unname(values))
   )
 }
 
@@ -418,7 +424,7 @@ Ops.dist_quantiles <- function(e1, e2) {
 #' @method is.na distribution
 #' @export
 is.na.distribution <- function(x) {
-  sapply(vctrs::vec_data(x), is.na)
+  sapply(vec_data(x), is.na)
 }
 
 #' @method is.na dist_quantiles
