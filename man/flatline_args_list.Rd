@@ -13,7 +13,8 @@ flatline_args_list(
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
-  nafill_buffer = Inf
+  nafill_buffer = Inf,
+  ...
 )
 }
 \arguments{
@@ -29,10 +30,6 @@ The default \code{NULL} will attempt to determine this automatically.}
 
 \item{target_date}{Date. The date for which the forecast is intended.
 The default \code{NULL} will attempt to determine this automatically.}
-
-\item{levels}{Vector or \code{NULL}. A vector of probabilities to produce
-prediction intervals. These are created by computing the quantiles of
-training residuals. A \code{NULL} value will result in point forecasts only.}
 
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
 symmetric prediction intervals. This argument only applies when
@@ -58,6 +55,8 @@ we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
 create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
 will be treated as \emph{additional} allowed recent data rather than the
 total amount of recent data to examine.}
+
+\item{...}{Space to handle future expansions (unused).}
 }
 \value{
 A list containing updated parameter choices with class \code{flatline_alist}.
@@ -68,5 +67,5 @@ Constructs a list of arguments for \code{\link[=flatline_forecaster]{flatline_fo
 \examples{
 flatline_args_list()
 flatline_args_list(symmetrize = FALSE)
-flatline_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
+flatline_args_list(quantile_values = c(.1, .3, .7, .9), n_training = 120)
 }

@@ -7,7 +7,7 @@
 layer_residual_quantiles(
   frosting,
   ...,
-  probs = c(0.05, 0.95),
+  quantile_values = c(0.05, 0.95),
   symmetrize = TRUE,
   by_key = character(0L),
   name = ".pred_distn",
@@ -19,7 +19,7 @@ layer_residual_quantiles(
 
 \item{...}{Unused, include for consistency with other layers.}
 
-\item{probs}{numeric vector of probabilities with values in (0,1)
+\item{quantile_values}{numeric vector of probabilities with values in (0,1)
 referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
@@ -53,7 +53,7 @@ latest <- get_test_data(recipe = r, x = jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
+  layer_residual_quantiles(quantile_values = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
@@ -61,7 +61,7 @@ p <- predict(wf1, latest)
 
 f2 <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantiles(probs = c(0.3, 0.7), by_key = "geo_value") \%>\%
+  layer_residual_quantiles(quantile_values = c(0.3, 0.7), by_key = "geo_value") \%>\%
   layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
 

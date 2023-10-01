@@ -41,12 +41,16 @@ use \code{\link[=quantile_reg]{quantile_reg()}}) but can be omitted.
 jhu <- case_death_rate_subset \%>\%
   dplyr::filter(time_value >= as.Date("2021-12-01"))
 
-arx_fcast_epi_workflow(jhu, "death_rate",
-  c("case_rate", "death_rate"))
+arx_fcast_epi_workflow(
+  jhu, "death_rate",
+  c("case_rate", "death_rate")
+)
 
 arx_fcast_epi_workflow(jhu, "death_rate",
-  c("case_rate", "death_rate"), trainer = quantile_reg(),
-  args_list = arx_args_list(levels = 1:9 / 10))
+  c("case_rate", "death_rate"),
+  trainer = quantile_reg(),
+  args_list = arx_args_list(quantile_values = 1:9 / 10)
+)
 }
 \seealso{
 \code{\link[=arx_forecaster]{arx_forecaster()}}

@@ -4,12 +4,12 @@
 \alias{extrapolate_quantiles}
 \title{Summarize a distribution with a set of quantiles}
 \usage{
-extrapolate_quantiles(x, p, ...)
+extrapolate_quantiles(x, probs, ...)
 }
 \arguments{
 \item{x}{a \code{distribution} vector}
 
-\item{p}{a vector of probabilities at which to calculate quantiles}
+\item{probs}{a vector of probabilities at which to calculate quantiles}
 
 \item{...}{additional arguments passed on to the \code{quantile} method}
 }
@@ -22,14 +22,16 @@ Summarize a distribution with a set of quantiles
 \examples{
 library(distributional)
 dstn <- dist_normal(c(10, 2), c(5, 10))
-extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
 
-dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 # because this distribution is already quantiles, any extra quantiles are
 # appended
-extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
 
-dstn <- c(dist_normal(c(10, 2), c(5, 10)),
-  dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8))))
-extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+dstn <- c(
+  dist_normal(c(10, 2), c(5, 10)),
+  dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
+)
+extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
 }

@@ -4,21 +4,25 @@
 \alias{dist_quantiles}
 \title{A distribution parameterized by a set of quantiles}
 \usage{
-dist_quantiles(x, tau)
+dist_quantiles(values, quantile_values)
 }
 \arguments{
-\item{x}{A vector of values}
+\item{values}{A vector of values}
 
-\item{tau}{A vector of probabilities corresponding to \code{x}}
+\item{quantile_values}{A vector of probabilities corresponding to \code{values}}
 }
 \description{
 A distribution parameterized by a set of quantiles
 }
 \examples{
-dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 quantile(dstn, p = c(.1, .25, .5, .9))
 median(dstn)
 
 # it's a bit annoying to inspect the data
-vctrs::vec_data(vctrs::vec_data(dstn[1])[[1]])
+distributional::parameters(dstn[1])
+nested_quantiles(dstn[1])[[1]]
+
+dist_quantiles(1:4, 1:4 / 5)
+dist_quantiles(1:4, c(1, 3, 2, 4) / 5)
 }
