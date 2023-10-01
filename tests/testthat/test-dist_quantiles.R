@@ -20,7 +20,7 @@ test_that("tail functions give reasonable output", {
 })
 
 test_that("single dist_quantiles works, quantiles are accessible", {
-  z <- new_quantiles(q = 1:5, tau = c(.2, .4, .5, .6, .8))
+  z <- new_quantiles(values = 1:5, quantile_values = c(.2, .4, .5, .6, .8))
   expect_s3_class(z, "dist_quantiles")
   expect_equal(median(z), 3)
   expect_equal(quantile(z, c(.2, .4, .5, .6, .8)), 1:5)
@@ -30,7 +30,7 @@ test_that("single dist_quantiles works, quantiles are accessible", {
   expect_equal(quantile(z, c(.3, .7), middle = "cubic"), Q(c(.3, .7)))
   expect_identical(
     extrapolate_quantiles(z, c(.3, .7), middle = "linear"),
-    new_quantiles(q = c(1, 1.5, 2, 3, 4, 4.5, 5), tau = 2:8 / 10)
+    new_quantiles(values = c(1, 1.5, 2, 3, 4, 4.5, 5), quantile_values = 2:8 / 10)
   )
 })
 

@@ -1,23 +1,24 @@
-new_quantiles <- function(q = double(), tau = double()) {
-  arg_is_probabilities(tau)
+new_quantiles <- function(values = double(), quantile_values = double()) {
+  arg_is_probabilities(quantile_values)
 
-  vec_cast(q, double())
-  vec_cast(tau, double())
-  stopifnot(length(q) == length(tau))
-  stopifnot(!vec_duplicate_any(tau))
-  if (is.unsorted(tau)) {
-    o <- vec_order(tau)
-    q <- q[o]
-    tau <- tau[o]
+  vec_cast(values, double())
+  vec_cast(quantile_values, double())
+  stopifnot(length(values) == length(quantile_values))
+  stopifnot(!vec_duplicate_any(quantile_values))
+  if (is.unsorted(quantile_values)) {
+    o <- vec_order(quantile_values)
+    values <- values[o]
+    quantile_values <- quantile_values[o]
   }
-  if (is.unsorted(q, na.rm = TRUE)) {
-    rlang::abort("`q[order(tau)]` produces unsorted quantiles.")
+  if (is.unsorted(values, na.rm = TRUE)) {
+    cli::cli_abort("`values[order(quantile_values)]` produces unsorted quantiles.")
   }
 
-  new_rcrd(list(q = q, tau = tau),
-    class = c("dist_quantiles", "dist_default")
+  new_rcrd(list(values = values, quantile_values = quantile_values),
+           class = c("dist_quantiles", "dist_default")
   )
 }
+
 
 #' @export
 vec_ptype_abbr.dist_quantiles <- function(x, ...) "dist_qntls"
@@ -26,46 +27,68 @@ vec_ptype_full.dist_quantiles <- function(x, ...) "dist_quantiles"
 
 #' @export
 format.dist_quantiles <- function(x, digits = 2, ...) {
-  q <- field(x, "q")
-  tau <- field(x, "tau")
-  rng <- range(tau, na.rm = TRUE)
-  paste0("[", round(rng[1], digits), ", ", round(rng[2], digits), "]<q-rng>")
+  q <- field(x, "values")
+  m <- suppressWarnings(median(x))
+  paste0("quantiles(", round(m, digits), ")[", vctrs::vec_size(q), "]")
 }
-
-
 
 
 #' A distribution parameterized by a set of quantiles
 #'
-#' @param x A vector of values
-#' @param tau A vector of probabilities corresponding to `x`
+#' @param values A vector of values
+#' @param quantile_values A vector of probabilities corresponding to `values`
 #'
 #' @export
 #'
-#' @import vctrs
 #' @examples
 #' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 #' quantile(dstn, p = c(.1, .25, .5, .9))
 #' median(dstn)
 #'
 #' # it's a bit annoying to inspect the data
-#' vctrs::vec_data(vctrs::vec_data(dstn[1])[[1]])
-dist_quantiles <- function(x, tau) {
-  if (!is.list(x)) x <- list(x)
-  if (!is.list(tau)) tau <- list(tau)
+#' distributional::parameters(dstn[1])
+#' nested_quantiles(dstn[1])[[1]]
+#'
+#' dist_quantiles(1:4, 1:4 / 5)
+#' dist_quantiles(1:4, c(1, 3, 2, 4) / 5)
+dist_quantiles <- function(values, quantile_values) {
+  if (!is.list(values)) values <- list(values)
+  if (!is.list(quantile_values)) quantile_values <- list(quantile_values)
 
-  x <- as_list_of(x, .ptype = double())
-  tau <- as_list_of(tau, .ptype = double())
-  args <- vec_recycle_common(x = x, tau = tau)
-  qntls <- as_list_of(map2(args$x, args$tau, new_quantiles))
+  values <- as_list_of(values, .ptype = double())
+  quantile_values <- as_list_of(quantile_values, .ptype = double())
+  args <- vec_recycle_common(values = values, quantile_values = quantile_values)
+  qntls <- as_list_of(map2(args$values, args$quantile_values, new_quantiles))
   new_vctr(qntls, class = "distribution")
+}
+
+validate_dist_quantiles <- function(values, quantile_values) {
+  map(quantile_values, arg_is_probabilities)
+  common_length <- vctrs::vec_size_common( # aborts internally
+    values = values,
+    quantile_values = quantile_values
+  )
+  length_diff <- vctrs::list_sizes(values) != vctrs::list_sizes(quantile_values)
+  if (any(length_diff)) {
+    cli::cli_abort(c(
+      "`values` and `quantile_values` must have common length.",
+      i = "Mismatches found at position(s): {.val {which(length_diff)}}."
+    ))
+  }
+  tau_duplication <- map_lgl(quantile_values, vctrs::vec_duplicate_any)
+  if (any(tau_duplication)) {
+    cli::cli_abort(c(
+      "`quantile_values` must not be duplicated.",
+      i = "Duplicates found at position(s): {.val {which(tau_duplication)}}."
+    ))
+  }
 }
 
 
 #' Summarize a distribution with a set of quantiles
 #'
 #' @param x a `distribution` vector
-#' @param p a vector of probabilities at which to calculate quantiles
+#' @param probs a vector of probabilities at which to calculate quantiles
 #' @param ... additional arguments passed on to the `quantile` method
 #'
 #' @return a `distribution` vector containing `dist_quantiles`
@@ -74,45 +97,45 @@ dist_quantiles <- function(x, tau) {
 #' @examples
 #' library(distributional)
 #' dstn <- dist_normal(c(10, 2), c(5, 10))
-#' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
 #'
 #' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 #' # because this distribution is already quantiles, any extra quantiles are
 #' # appended
-#' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
 #'
 #' dstn <- c(
 #'   dist_normal(c(10, 2), c(5, 10)),
 #'   dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 #' )
-#' extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
-extrapolate_quantiles <- function(x, p, ...) {
+#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
+extrapolate_quantiles <- function(x, probs, ...) {
   UseMethod("extrapolate_quantiles")
 }
 
 #' @export
-extrapolate_quantiles.distribution <- function(x, p, ...) {
-  arg_is_probabilities(p)
-  dstn <- lapply(vec_data(x), extrapolate_quantiles, p = p, ...)
+extrapolate_quantiles.distribution <- function(x, probs, ...) {
+  arg_is_probabilities(probs)
+  dstn <- lapply(vec_data(x), extrapolate_quantiles, p = probs, ...)
   distributional:::wrap_dist(dstn)
 }
 
 #' @export
-extrapolate_quantiles.dist_default <- function(x, p, ...) {
-  q <- quantile(x, p, ...)
-  new_quantiles(q = q, tau = p)
+extrapolate_quantiles.dist_default <- function(x, probs, ...) {
+  q <- quantile(x, probs, ...)
+  new_quantiles(values = q, quantile_values = probs)
 }
 
 #' @export
-extrapolate_quantiles.dist_quantiles <- function(x, p, ...) {
-  q <- quantile(x, p, ...)
-  tau <- field(x, "tau")
-  qvals <- field(x, "q")
-  new_quantiles(q = c(qvals, q), tau = c(tau, p))
+extrapolate_quantiles.dist_quantiles <- function(x, probs, ...) {
+  q <- quantile(x, probs, ...)
+  tau <- field(x, "quantile_values")
+  qvals <- field(x, "values")
+  new_quantiles(values = c(qvals, q), quantile_values = c(tau, probs))
 }
 
 is_dist_quantiles <- function(x) {
-  is_distribution(x) && all(stats::family(x) == "quantiles")
+  is_distribution(x) & all(stats::family(x) == "quantiles")
 }
 
 
@@ -131,11 +154,11 @@ is_dist_quantiles <- function(x) {
 #' edf_nested %>% tidyr::unnest(q)
 nested_quantiles <- function(x) {
   stopifnot(is_dist_quantiles(x))
-  distributional:::dist_apply(x, .f = function(z) {
-    tibble::as_tibble(vec_data(z)) %>%
-      dplyr::mutate(dplyr::across(tidyselect::everything(), as.double)) %>%
-      list_of()
-  })
+  map(
+    x,
+    ~ distributional::parameters(.x) %>%
+      tidyr::unnest(tidyselect::everything())
+  )
 }
 
 
@@ -190,14 +213,14 @@ pivot_quantiles <- function(.data, ...) {
       .data <- .data %>%
         tidyr::unnest(tidyselect::all_of(col)) %>%
         tidyr::pivot_wider(
-          names_from = "tau", values_from = "q",
+          names_from = "quantile_values", values_from = "values",
           names_prefix = paste0(col, "_")
         )
     }
   } else {
     .data <- .data %>%
       tidyr::unnest(tidyselect::all_of(cols)) %>%
-      tidyr::pivot_wider(names_from = "tau", values_from = "q")
+      tidyr::pivot_wider(names_from = "quantile_values", values_from = "values")
   }
   .data
 }
@@ -207,23 +230,31 @@ pivot_quantiles <- function(.data, ...) {
 
 #' @export
 #' @importFrom stats median qnorm family
-median.dist_quantiles <- function(x, ..., middle = c("cubic", "linear")) {
+median.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "linear")) {
+  tau <- field(x, "quantile_values")
+  qvals <- field(x, "values")
+  if (0.5 %in% tau) return(qvals[match(0.5, tau)])
+  if (min(tau) > 0.5 || max(tau) < 0.5 || length(tau) < 2) return(NA)
+  if (length(tau) < 3 || min(tau) > .25 || max(tau) < .75) {
+   return(stats::approx(tau, qvals, xout = 0.5)$y)
+  }
   quantile(x, 0.5, ..., middle = middle)
 }
 
 # placeholder to avoid errors, but not ideal
 #' @export
-mean.dist_quantiles <- function(x, ..., middle = c("cubic", "linear")) {
+mean.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "linear")) {
   median(x, ..., middle = middle)
 }
 
 #' @export
 #' @importFrom stats quantile
 #' @import distributional
-quantile.dist_quantiles <- function(x, probs, ...,
-                                    middle = c("cubic", "linear"),
-                                    left_tail = c("normal", "exponential"),
-                                    right_tail = c("normal", "exponential")) {
+quantile.dist_quantiles <- function(
+    x, probs, ...,
+    middle = c("cubic", "linear"),
+    left_tail = c("normal", "exponential"),
+    right_tail = c("normal", "exponential")) {
   arg_is_probabilities(probs)
   middle <- match.arg(middle)
   left_tail <- match.arg(left_tail)
@@ -233,8 +264,8 @@ quantile.dist_quantiles <- function(x, probs, ...,
 
 
 quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
-  tau <- field(x, "tau")
-  qvals <- field(x, "q")
+  tau <- field(x, "quantile_values")
+  qvals <- field(x, "values")
   r <- range(tau, na.rm = TRUE)
   qvals_out <- rep(NA, length(tau_out))
 
@@ -244,7 +275,7 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
     return(qvals[match(tau_out, tau)])
   }
   if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
-    rlang::warn(c(
+    cli::cli_warn(c(
       "Quantile extrapolation is not possible with fewer than",
       "3 quantiles or when the probs don't span [.25, .75]"
     ))
@@ -345,10 +376,10 @@ norm_tail_q <- function(p, q, target) {
 #' @method Math dist_quantiles
 #' @export
 Math.dist_quantiles <- function(x, ...) {
-  tau <- field(x, "tau")
-  q <- field(x, "q")
-  q <- vctrs::vec_math(.Generic, q, ...)
-  new_quantiles(q = q, tau = tau)
+  quantile_values <- field(x, "quantile_values")
+  values <- field(x, "values")
+  values <- vctrs::vec_math(.Generic, values, ...)
+  new_quantiles(values = values, quantile_values = quantile_values)
 }
 
 #' @method Ops dist_quantiles
@@ -361,16 +392,16 @@ Ops.dist_quantiles <- function(e1, e2) {
   is_dist <- c(inherits(e1, "dist_default"), inherits(e2, "dist_default"))
   tau1 <- tau2 <- NULL
   if (is_quantiles[1]) {
-    q1 <- field(e1, "q")
-    tau1 <- field(e1, "tau")
+    q1 <- field(e1, "values")
+    tau1 <- field(e1, "quantile_values")
   }
   if (is_quantiles[2]) {
-    q2 <- field(e2, "q")
-    tau2 <- field(e2, "tau")
+    q2 <- field(e2, "values")
+    tau2 <- field(e2, "quantile_values")
   }
   tau <- union(tau1, tau2)
   if (all(is_dist)) {
-    rlang::abort(
+    cli::cli_abort(
       "You can't perform arithmetic between two distributions like this."
     )
   } else {
@@ -381,7 +412,7 @@ Ops.dist_quantiles <- function(e1, e2) {
     }
   }
   q <- vctrs::vec_arith(.Generic, q1, q2)
-  new_quantiles(q = q, tau = tau)
+  new_quantiles(values = q, quantile_values = tau)
 }
 
 #' @method is.na distribution
@@ -393,6 +424,6 @@ is.na.distribution <- function(x) {
 #' @method is.na dist_quantiles
 #' @export
 is.na.dist_quantiles <- function(x) {
-  q <- field(x, "q")
+  q <- field(x, "values")
   all(is.na(q))
 }
