@@ -1,7 +1,7 @@
 test_that("layer argument extractor works", {
   f <- frosting() %>%
     layer_predict() %>%
-    layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
+    layer_residual_quantiles(quantile_values = c(0.0275, 0.975), symmetrize = FALSE) %>%
     layer_naomit(.pred)
 
   expect_error(extract_argument(f$layers[[1]], "uhoh", "bubble"))
@@ -11,16 +11,16 @@ test_that("layer argument extractor works", {
     c(0.0275, 0.9750)
   )
 
-  expect_error(extract_argument(f, "layer_thresh", "probs"))
+  expect_error(extract_argument(f, "layer_thresh", "quantile_values"))
   expect_identical(
-    extract_argument(f, "layer_residual_quantiles", "probs"),
+    extract_argument(f, "layer_residual_quantiles", "quantile_values"),
     c(0.0275, 0.9750)
   )
 
   wf <- epi_workflow(postprocessor = f)
-  expect_error(extract_argument(epi_workflow(), "layer_residual_quantiles", "probs"))
+  expect_error(extract_argument(epi_workflow(), "layer_residual_quantiles", "quantile_values"))
   expect_identical(
-    extract_argument(wf, "layer_residual_quantiles", "probs"),
+    extract_argument(wf, "layer_residual_quantiles", "quantile_values"),
     c(0.0275, 0.9750)
   )
 
@@ -46,7 +46,7 @@ test_that("recipe argument extractor works", {
   expect_identical(extract_argument(r$steps[[2]], "step_epi_ahead", "ahead"), 7)
 
 
-  expect_error(extract_argument(r, "step_lightly", "probs"))
+  expect_error(extract_argument(r, "step_lightly", "quantile_values"))
   expect_identical(
     extract_argument(r, "step_epi_lag", "lag"),
     list(c(0, 7, 14), c(0, 7, 14))

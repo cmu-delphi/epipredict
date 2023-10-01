@@ -14,7 +14,7 @@ test_that("Returns expected number or rows and columns", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
-    layer_residual_quantiles(probs = c(0.0275, 0.8, 0.95), symmetrize = FALSE)
+    layer_residual_quantiles(quantile_values = c(0.0275, 0.8, 0.95), symmetrize = FALSE)
 
   wf1 <- wf %>% add_frosting(f)
 
@@ -28,5 +28,5 @@ test_that("Returns expected number or rows and columns", {
   unnested <- nested %>% tidyr::unnest(.quantiles)
 
   expect_equal(nrow(unnested), 9L)
-  expect_equal(unique(unnested$tau), c(.0275, .8, .95))
+  expect_equal(unique(unnested$quantile_values), c(.0275, .8, .95))
 })

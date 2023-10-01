@@ -9,7 +9,7 @@
 #'   The only possible value for this model is "regression".
 #' @param engine Character string naming the fitting function. Currently, only
 #'   "rq" is supported.
-#' @param tau A scalar or vector of values in (0, 1) to determine which
+#' @param quantile_values A scalar or vector of values in (0, 1) to determine which
 #'   quantiles to estimate (default is 0.5).
 #'
 #' @export
@@ -19,23 +19,23 @@
 #' @importFrom quantreg rq
 #' @examples
 #' tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
-#' rq_spec <- quantile_reg(tau = c(.2, .8)) %>% set_engine("rq")
+#' rq_spec <- quantile_reg(quantile_values = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
-quantile_reg <- function(mode = "regression", engine = "rq", tau = 0.5) {
+quantile_reg <- function(mode = "regression", engine = "rq", quantile_values = 0.5) {
   # Check for correct mode
   if (mode != "regression") {
-    rlang::abort("`mode` should be 'regression'")
+    cli_abort("`mode` must be 'regression'")
   }
 
   # Capture the arguments in quosures
-  if (any(tau > 1)) rlang::abort("All `tau` must be less than 1.")
-  if (any(tau < 0)) rlang::abort("All `tau` must be greater than 0.")
-  if (is.unsorted(tau)) {
-    rlang::warn("Sorting tau to increasing order.")
-    tau <- sort(tau)
+  if (any(quantile_values > 1)) cli_abort("All `quantile_values` must be less than 1.")
+  if (any(quantile_values < 0)) cli_abort("All `quantile_values` must be greater than 0.")
+  if (is.unsorted(quantile_values)) {
+    cli::cli_warn("Sorting `quantile_values` to increasing order.")
+    quantile_values <- sort(quantile_values)
   }
-  args <- list(tau = rlang::enquo(tau))
+  args <- list(quantile_values = rlang::enquo(quantile_values))
 
   # Save some empty slots for future parts of the specification
   parsnip::new_model_spec(
@@ -60,7 +60,7 @@ make_quantile_reg <- function() {
   parsnip::set_model_arg(
     model = "quantile_reg",
     eng = "rq",
-    parsnip = "tau",
+    parsnip = "quantile_values",
     original = "tau",
     func = list(pkg = "quantreg", fun = "rq"),
     has_submodel = FALSE
@@ -101,13 +101,14 @@ make_quantile_reg <- function() {
 
     # can't make a method because object is second
     out <- switch(type,
-      rq = dist_quantiles(unname(as.list(x)), object$tau), # one quantile
+      rq = dist_quantiles(unname(as.list(x)), object$quantile_values), # one quantile
       rqs = {
         x <- lapply(unname(split(x, seq(nrow(x)))), function(q) sort(q))
-        dist_quantiles(x, list(object$tau))
+        dist_quantiles(x, list(object$quantile_values))
       },
-      rlang::abort(c("Prediction not implemented for this `rq` type.",
-        i = "See `?quantreg::rq`."
+      cli_abort(c(
+        "Prediction is not implemented for this `rq` type.",
+        i = "See {.fun quantreg::rq}."
       ))
     )
     return(data.frame(.pred = out))

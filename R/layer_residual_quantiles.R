@@ -2,7 +2,7 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
-#' @param probs numeric vector of probabilities with values in (0,1)
+#' @param quantile_values numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
 #' @param by_key A character vector of keys to group the residuals by before
@@ -28,7 +28,7 @@
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'   layer_residual_quantiles(quantile_values = c(0.0275, 0.975), symmetrize = FALSE) %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
@@ -36,27 +36,28 @@
 #'
 #' f2 <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(probs = c(0.3, 0.7), by_key = "geo_value") %>%
+#'   layer_residual_quantiles(quantile_values = c(0.3, 0.7), by_key = "geo_value") %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
 #' p2 <- predict(wf2, latest)
-layer_residual_quantiles <- function(frosting, ...,
-                                     probs = c(0.05, 0.95),
-                                     symmetrize = TRUE,
-                                     by_key = character(0L),
-                                     name = ".pred_distn",
-                                     id = rand_id("residual_quantiles")) {
+layer_residual_quantiles <- function(
+    frosting, ...,
+    quantile_values = c(0.05, 0.95),
+    symmetrize = TRUE,
+    by_key = character(0L),
+    name = ".pred_distn",
+    id = rand_id("residual_quantiles")) {
   rlang::check_dots_empty()
   arg_is_scalar(symmetrize)
   arg_is_chr_scalar(name, id)
   arg_is_chr(by_key, allow_empty = TRUE)
-  arg_is_probabilities(probs)
+  arg_is_probabilities(quantile_values)
   arg_is_lgl(symmetrize)
   add_layer(
     frosting,
     layer_residual_quantiles_new(
-      probs = probs,
+      quantile_values = quantile_values,
       symmetrize = symmetrize,
       by_key = by_key,
       name = name,
@@ -65,9 +66,10 @@ layer_residual_quantiles <- function(frosting, ...,
   )
 }
 
-layer_residual_quantiles_new <- function(probs, symmetrize, by_key, name, id) {
+layer_residual_quantiles_new <- function(
+    quantile_values, symmetrize, by_key, name, id) {
   layer("residual_quantiles",
-    probs = probs, symmetrize = symmetrize,
+    quantile_values = quantile_values, symmetrize = symmetrize,
     by_key = by_key, name = name, id = id
   )
 }
@@ -77,7 +79,7 @@ slather.layer_residual_quantiles <-
   function(object, components, workflow, new_data, ...) {
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
-    if (is.null(object$probs)) {
+    if (is.null(object$quantile_values)) {
       return(components)
     }
 
@@ -93,19 +95,19 @@ slather.layer_residual_quantiles <-
       common <- intersect(object$by_key, names(key_cols))
       excess <- setdiff(object$by_key, names(key_cols))
       if (length(excess) > 0L) {
-        rlang::warn(
-          "Requested residual grouping key(s) {excess} are unavailable ",
-          "in the original data. Grouping by the remainder: {common}."
-        )
+        cli::cli_warn(c(
+          "Requested residual grouping key(s) {.val {excess}} are unavailable ",
+          "in the original data. Grouping by the remainder: {.val {common}}."
+        ))
       }
       if (length(common) > 0L) {
         r <- r %>% dplyr::select(tidyselect::any_of(c(common, ".resid")))
         common_in_r <- common[common %in% names(r)]
         if (length(common_in_r) != length(common)) {
-          rlang::warn(
+          cli::cli_warn(c(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
-          )
+          ))
         }
         r <- dplyr::bind_cols(key_cols, r) %>%
           dplyr::group_by(!!!rlang::syms(common))
@@ -116,13 +118,13 @@ slather.layer_residual_quantiles <-
       dplyr::summarize(
         q = list(quantile(
           c(.resid, s * .resid),
-          probs = object$probs, na.rm = TRUE
+          probs = object$quantile_values, na.rm = TRUE
         ))
       )
 
     estimate <- components$predictions$.pred
     res <- tibble::tibble(
-      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$probs)
+      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$quantile_values)
     )
     res <- check_pname(res, components$predictions, object)
     components$predictions <- dplyr::mutate(components$predictions, !!!res)
@@ -141,8 +143,8 @@ grab_residuals <- function(the_fit, components) {
       if (".resid" %in% names(r)) { # success
         return(r)
       } else { # failure
-        rlang::warn(c(
-          "The `residuals()` method for objects of class {cl} results in",
+        cli::cli_warn(c(
+          "The `residuals()` method for objects of class {.cls {cl}} results in",
           "a data frame without a column named `.resid`.",
           i = "Residual quantiles will be calculated directly from the",
           i = "difference between predictions and observations.",
@@ -152,8 +154,8 @@ grab_residuals <- function(the_fit, components) {
     } else if (is.vector(drop(r))) { # also success
       return(tibble(.resid = drop(r)))
     } else { # failure
-      rlang::warn(c(
-        "The `residuals()` method for objects of class {cl} results in an",
+      cli::cli_warn(c(
+        "The `residuals()` method for objects of class {.cls {cl}} results in an",
         "object that is neither a data frame with a column named `.resid`,",
         "nor something coercible to a vector.",
         i = "Residual quantiles will be calculated directly from the",
@@ -176,9 +178,9 @@ print.layer_residual_quantiles <- function(
   title <- "Resampling residuals for predictive quantiles"
   td <- "<calculated>"
   td <- rlang::enquos(td)
-  ext <- x$probs
+  ext <- x$quantile_values
   print_layer(td,
-    title = title, width = width, conjunction = "levels",
+    title = title, width = width, conjunction = "quantile_values",
     extra_text = ext
   )
 }

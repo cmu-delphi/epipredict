@@ -91,10 +91,10 @@ snap.dist_default <- function(x, lower, upper, ...) {
 
 #' @export
 snap.dist_quantiles <- function(x, lower, upper, ...) {
-  q <- field(x, "q")
-  tau <- field(x, "tau")
-  q <- snap(q, lower, upper)
-  new_quantiles(q = q, tau = tau)
+  values <- field(x, "values")
+  quantile_values <- field(x, "quantile_values")
+  values <- snap(values, lower, upper)
+  new_quantiles(values = values, quantile_values = quantile_values)
 }
 
 #' @export

@@ -58,7 +58,7 @@ flatline_forecaster <- function(
   f <- frosting() %>%
     layer_predict() %>%
     layer_residual_quantiles(
-      probs = args_list$levels,
+      quantile_values = args_list$quantile_values,
       symmetrize = args_list$symmetrize,
       by_key = args_list$quantile_by_key
     ) %>%
@@ -101,7 +101,7 @@ flatline_forecaster <- function(
 #' @examples
 #' flatline_args_list()
 #' flatline_args_list(symmetrize = FALSE)
-#' flatline_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
+#' flatline_args_list(quantile_values = c(.1, .3, .7, .9), n_training = 120)
 flatline_args_list <- function(
     ahead = 7L,
     n_training = Inf,
@@ -111,14 +111,15 @@ flatline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf) {
+    nafill_buffer = Inf,
+    ...) {
   arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead)
   arg_is_lgl(symmetrize, nonneg)
-  arg_is_probabilities(levels, allow_null = TRUE)
+  arg_is_probabilities(quantile_values, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
@@ -129,7 +130,7 @@ flatline_args_list <- function(
       n_training,
       forecast_date,
       target_date,
-      levels,
+      quantile_values,
       symmetrize,
       nonneg,
       quantile_by_key,
