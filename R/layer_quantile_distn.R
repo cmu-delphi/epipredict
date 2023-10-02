@@ -77,8 +77,8 @@ slather.layer_quantile_distn <-
     dstn <- components$predictions$.pred
     if (!inherits(dstn, "distribution")) {
       cli_abort(c(
-          "`layer_quantile_distn()` requires distributional predictions.",
-          "These are of class {.cls {class(dstn)}}."
+        "`layer_quantile_distn()` requires distributional predictions.",
+        "These are of class {.cls {class(dstn)}}."
       ))
     }
     dstn <- dist_quantiles(

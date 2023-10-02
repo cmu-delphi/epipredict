@@ -116,7 +116,7 @@ slather.layer_residual_quantiles <-
 
     r <- r %>%
       dplyr::summarize(
-        q = list(quantile(
+        dstn = list(quantile(
           c(.resid, s * .resid),
           probs = object$quantile_levels, na.rm = TRUE
         ))
@@ -124,7 +124,7 @@ slather.layer_residual_quantiles <-
 
     estimate <- components$predictions$.pred
     res <- tibble::tibble(
-      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$quantile_levels)
+      .pred_distn = dist_quantiles(map2(estimate, r$dstn, "+"), object$quantile_levels)
     )
     res <- check_pname(res, components$predictions, object)
     components$predictions <- dplyr::mutate(components$predictions, !!!res)

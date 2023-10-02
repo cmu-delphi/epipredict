@@ -10,7 +10,7 @@ arx_args_list(
   n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
-  quantile_level = c(0.05, 0.95),
+  quantile_levels = c(0.05, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
@@ -36,7 +36,7 @@ The default \code{NULL} will attempt to determine this automatically.}
 \item{target_date}{Date. The date for which the forecast is intended.
 The default \code{NULL} will attempt to determine this automatically.}
 
-\item{quantile_level}{Vector or \code{NULL}. A vector of probabilities to produce
+\item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of
 training residuals. A \code{NULL} value will result in point forecasts only.}
 
@@ -76,5 +76,5 @@ Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()
 \examples{
 arx_args_list()
 arx_args_list(symmetrize = FALSE)
-arx_args_list(quantile_level = c(.1, .3, .7, .9), n_training = 120)
+arx_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 }

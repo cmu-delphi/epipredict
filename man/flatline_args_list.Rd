@@ -31,6 +31,10 @@ The default \code{NULL} will attempt to determine this automatically.}
 \item{target_date}{Date. The date for which the forecast is intended.
 The default \code{NULL} will attempt to determine this automatically.}
 
+\item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
+prediction intervals. These are created by computing the quantiles of
+training residuals. A \code{NULL} value will result in point forecasts only.}
+
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
 symmetric prediction intervals. This argument only applies when
 residual quantiles are used. It is not applicable with

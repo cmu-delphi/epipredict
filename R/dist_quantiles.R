@@ -16,7 +16,7 @@ new_quantiles <- function(values = double(), quantile_levels = double()) {
   }
 
   new_rcrd(list(values = values, quantile_levels = quantile_levels),
-           class = c("dist_quantiles", "dist_default")
+    class = c("dist_quantiles", "dist_default")
   )
 }
 
@@ -30,9 +30,8 @@ vec_ptype_full.dist_quantiles <- function(x, ...) "dist_quantiles"
 
 #' @export
 format.dist_quantiles <- function(x, digits = 2, ...) {
-  q <- field(x, "values")
   m <- suppressWarnings(median(x))
-  paste0("quantiles(", round(m, digits), ")[", vctrs::vec_size(q), "]")
+  paste0("quantiles(", round(m, digits), ")[", vctrs::vec_size(x), "]")
 }
 
 
@@ -78,11 +77,11 @@ validate_dist_quantiles <- function(values, quantile_levels) {
       i = "Mismatches found at position(s): {.val {which(length_diff)}}."
     ))
   }
-  tau_duplication <- map_lgl(quantile_levels, vctrs::vec_duplicate_any)
-  if (any(tau_duplication)) {
+  level_duplication <- map_lgl(quantile_levels, vctrs::vec_duplicate_any)
+  if (any(level_duplication)) {
     cli::cli_abort(c(
       "`quantile_levels` must not be duplicated.",
-      i = "Duplicates found at position(s): {.val {which(tau_duplication)}}."
+      i = "Duplicates found at position(s): {.val {which(level_duplication)}}."
     ))
   }
 }
@@ -120,22 +119,25 @@ extrapolate_quantiles <- function(x, probs, ...) {
 #' @importFrom vctrs vec_data
 extrapolate_quantiles.distribution <- function(x, probs, ...) {
   arg_is_probabilities(probs)
-  dstn <- lapply(vec_data(x), extrapolate_quantiles, p = probs, ...)
+  dstn <- lapply(vec_data(x), extrapolate_quantiles, probs = probs, ...)
   new_vctr(dstn, vars = NULL, class = "distribution")
 }
 
 #' @export
 extrapolate_quantiles.dist_default <- function(x, probs, ...) {
-  q <- quantile(x, probs, ...)
-  new_quantiles(values = q, quantile_levels = probs)
+  values <- quantile(x, probs, ...)
+  new_quantiles(values = values, quantile_levels = probs)
 }
 
 #' @export
 extrapolate_quantiles.dist_quantiles <- function(x, probs, ...) {
-  q <- quantile(x, probs, ...)
-  tau <- field(x, "quantile_levels")
-  qvals <- field(x, "values")
-  new_quantiles(values = c(qvals, q), quantile_levels = c(tau, probs))
+  new_values <- quantile(x, probs, ...)
+  quantile_levels <- field(x, "quantile_levels")
+  values <- field(x, "values")
+  new_quantiles(
+    values = c(values, new_values),
+    quantile_levels = c(quantile_levels, probs)
+  )
 }
 
 is_dist_quantiles <- function(x) {
@@ -152,10 +154,10 @@ is_dist_quantiles <- function(x) {
 #'
 #' @examples
 #' edf <- case_death_rate_subset[1:3, ]
-#' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
+#' edf$dstn <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
 #'
-#' edf_nested <- edf %>% dplyr::mutate(q = nested_quantiles(q))
-#' edf_nested %>% tidyr::unnest(q)
+#' edf_nested <- edf %>% dplyr::mutate(dstn = nested_quantiles(dstn))
+#' edf_nested %>% tidyr::unnest(dstn)
 nested_quantiles <- function(x) {
   stopifnot(is_dist_quantiles(x))
   map(
@@ -236,12 +238,16 @@ pivot_quantiles <- function(.data, ...) {
 #' @export
 #' @importFrom stats median qnorm family
 median.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "linear")) {
-  tau <- field(x, "quantile_levels")
-  qvals <- field(x, "values")
-  if (0.5 %in% tau) return(qvals[match(0.5, tau)])
-  if (min(tau) > 0.5 || max(tau) < 0.5 || length(tau) < 2) return(NA)
-  if (length(tau) < 3 || min(tau) > .25 || max(tau) < .75) {
-   return(stats::approx(tau, qvals, xout = 0.5)$y)
+  quantile_levels <- field(x, "quantile_levels")
+  values <- field(x, "values")
+  if (0.5 %in% quantile_levels) {
+    return(values[match(0.5, quantile_levels)])
+  }
+  if (length(quantile_levels) < 2 || min(quantile_levels) > 0.5 || max(quantile_levels) < 0.5) {
+    return(NA)
+  }
+  if (length(quantile_levels) < 3 || min(quantile_levels) > .25 || max(quantile_levels) < .75) {
+    return(stats::approx(quantile_levels, values, xout = 0.5)$y)
   }
   quantile(x, 0.5, ..., middle = middle)
 }
@@ -256,15 +262,15 @@ mean.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "line
 #' @importFrom stats quantile
 #' @import distributional
 quantile.dist_quantiles <- function(
-    x, probs, ...,
+    x, p, ...,
     middle = c("cubic", "linear"),
     left_tail = c("normal", "exponential"),
     right_tail = c("normal", "exponential")) {
-  arg_is_probabilities(probs)
+  arg_is_probabilities(p)
   middle <- match.arg(middle)
   left_tail <- match.arg(left_tail)
   right_tail <- match.arg(right_tail)
-  quantile_extrapolate(x, probs, middle, left_tail, right_tail)
+  quantile_extrapolate(x, p, middle, left_tail, right_tail)
 }
 
 
