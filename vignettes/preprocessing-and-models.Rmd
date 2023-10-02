@@ -354,7 +354,7 @@ f <- frosting() %>%
     df_pop_col = "pop"
   )
 
-wf <- epi_workflow(r, quantile_reg(quantile_values = c(.05, .5, .95))) %>%
+wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.05, .5, .95))) %>%
   fit(jhu) %>%
   add_frosting(f)
 
@@ -373,7 +373,7 @@ p %>%
   select(geo_value, target_date, .pred_scaled, .pred_distn_scaled) %>%
   mutate(.pred_distn_scaled = nested_quantiles(.pred_distn_scaled)) %>%
   unnest(.pred_distn_scaled) %>%
-  pivot_wider(names_from = quantile_values, values_from = values)
+  pivot_wider(names_from = quantile_levels, values_from = values)
 ```
 
 Last but not least, let's take a look at the regression fit and check the

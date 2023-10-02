@@ -2,7 +2,7 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
-#' @param quantile_values numeric vector of probabilities with values in (0,1)
+#' @param quantile_levels numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
 #' @param by_key A character vector of keys to group the residuals by before
@@ -28,7 +28,7 @@
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(quantile_values = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'   layer_residual_quantiles(quantile_levels = c(0.0275, 0.975), symmetrize = FALSE) %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
@@ -36,14 +36,14 @@
 #'
 #' f2 <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(quantile_values = c(0.3, 0.7), by_key = "geo_value") %>%
+#'   layer_residual_quantiles(quantile_levels = c(0.3, 0.7), by_key = "geo_value") %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
 #' p2 <- predict(wf2, latest)
 layer_residual_quantiles <- function(
     frosting, ...,
-    quantile_values = c(0.05, 0.95),
+    quantile_levels = c(0.05, 0.95),
     symmetrize = TRUE,
     by_key = character(0L),
     name = ".pred_distn",
@@ -52,12 +52,12 @@ layer_residual_quantiles <- function(
   arg_is_scalar(symmetrize)
   arg_is_chr_scalar(name, id)
   arg_is_chr(by_key, allow_empty = TRUE)
-  arg_is_probabilities(quantile_values)
+  arg_is_probabilities(quantile_levels)
   arg_is_lgl(symmetrize)
   add_layer(
     frosting,
     layer_residual_quantiles_new(
-      quantile_values = quantile_values,
+      quantile_levels = quantile_levels,
       symmetrize = symmetrize,
       by_key = by_key,
       name = name,
@@ -67,9 +67,9 @@ layer_residual_quantiles <- function(
 }
 
 layer_residual_quantiles_new <- function(
-    quantile_values, symmetrize, by_key, name, id) {
+    quantile_levels, symmetrize, by_key, name, id) {
   layer("residual_quantiles",
-    quantile_values = quantile_values, symmetrize = symmetrize,
+    quantile_levels = quantile_levels, symmetrize = symmetrize,
     by_key = by_key, name = name, id = id
   )
 }
@@ -79,7 +79,7 @@ slather.layer_residual_quantiles <-
   function(object, components, workflow, new_data, ...) {
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
-    if (is.null(object$quantile_values)) {
+    if (is.null(object$quantile_levels)) {
       return(components)
     }
 
@@ -118,13 +118,13 @@ slather.layer_residual_quantiles <-
       dplyr::summarize(
         q = list(quantile(
           c(.resid, s * .resid),
-          probs = object$quantile_values, na.rm = TRUE
+          probs = object$quantile_levels, na.rm = TRUE
         ))
       )
 
     estimate <- components$predictions$.pred
     res <- tibble::tibble(
-      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$quantile_values)
+      .pred_distn = dist_quantiles(map2(estimate, r$q, "+"), object$quantile_levels)
     )
     res <- check_pname(res, components$predictions, object)
     components$predictions <- dplyr::mutate(components$predictions, !!!res)
@@ -178,9 +178,9 @@ print.layer_residual_quantiles <- function(
   title <- "Resampling residuals for predictive quantiles"
   td <- "<calculated>"
   td <- rlang::enquos(td)
-  ext <- x$quantile_values
+  ext <- x$quantile_levels
   print_layer(td,
-    title = title, width = width, conjunction = "quantile_values",
+    title = title, width = width, conjunction = "quantile_levels",
     extra_text = ext
   )
 }

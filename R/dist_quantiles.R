@@ -1,21 +1,21 @@
 #' @importFrom vctrs field vec_cast new_rcrd
-new_quantiles <- function(values = double(), quantile_values = double()) {
-  arg_is_probabilities(quantile_values)
+new_quantiles <- function(values = double(), quantile_levels = double()) {
+  arg_is_probabilities(quantile_levels)
 
   vec_cast(values, double())
-  vec_cast(quantile_values, double())
-  stopifnot(length(values) == length(quantile_values))
-  stopifnot(!vctrs::vec_duplicate_any(quantile_values))
-  if (is.unsorted(quantile_values)) {
-    o <- vctrs::vec_order(quantile_values)
+  vec_cast(quantile_levels, double())
+  stopifnot(length(values) == length(quantile_levels))
+  stopifnot(!vctrs::vec_duplicate_any(quantile_levels))
+  if (is.unsorted(quantile_levels)) {
+    o <- vctrs::vec_order(quantile_levels)
     values <- values[o]
-    quantile_values <- quantile_values[o]
+    quantile_levels <- quantile_levels[o]
   }
   if (is.unsorted(values, na.rm = TRUE)) {
-    cli::cli_abort("`values[order(quantile_values)]` produces unsorted quantiles.")
+    cli::cli_abort("`values[order(quantile_levels)]` produces unsorted quantiles.")
   }
 
-  new_rcrd(list(values = values, quantile_values = quantile_values),
+  new_rcrd(list(values = values, quantile_levels = quantile_levels),
            class = c("dist_quantiles", "dist_default")
   )
 }
@@ -39,7 +39,7 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #' A distribution parameterized by a set of quantiles
 #'
 #' @param values A vector of values
-#' @param quantile_values A vector of probabilities corresponding to `values`
+#' @param quantile_levels A vector of probabilities corresponding to `values`
 #'
 #' @export
 #'
@@ -54,34 +54,34 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #'
 #' dist_quantiles(1:4, 1:4 / 5)
 #' @importFrom vctrs as_list_of vec_recycle_common new_vctr
-dist_quantiles <- function(values, quantile_values) {
+dist_quantiles <- function(values, quantile_levels) {
   if (!is.list(values)) values <- list(values)
-  if (!is.list(quantile_values)) quantile_values <- list(quantile_values)
+  if (!is.list(quantile_levels)) quantile_levels <- list(quantile_levels)
 
   values <- as_list_of(values, .ptype = double())
-  quantile_values <- as_list_of(quantile_values, .ptype = double())
-  args <- vec_recycle_common(values = values, quantile_values = quantile_values)
-  qntls <- as_list_of(map2(args$values, args$quantile_values, new_quantiles))
+  quantile_levels <- as_list_of(quantile_levels, .ptype = double())
+  args <- vec_recycle_common(values = values, quantile_levels = quantile_levels)
+  qntls <- as_list_of(map2(args$values, args$quantile_levels, new_quantiles))
   new_vctr(qntls, class = "distribution")
 }
 
-validate_dist_quantiles <- function(values, quantile_values) {
-  map(quantile_values, arg_is_probabilities)
+validate_dist_quantiles <- function(values, quantile_levels) {
+  map(quantile_levels, arg_is_probabilities)
   common_length <- vctrs::vec_size_common( # aborts internally
     values = values,
-    quantile_values = quantile_values
+    quantile_levels = quantile_levels
   )
-  length_diff <- vctrs::list_sizes(values) != vctrs::list_sizes(quantile_values)
+  length_diff <- vctrs::list_sizes(values) != vctrs::list_sizes(quantile_levels)
   if (any(length_diff)) {
     cli::cli_abort(c(
-      "`values` and `quantile_values` must have common length.",
+      "`values` and `quantile_levels` must have common length.",
       i = "Mismatches found at position(s): {.val {which(length_diff)}}."
     ))
   }
-  tau_duplication <- map_lgl(quantile_values, vctrs::vec_duplicate_any)
+  tau_duplication <- map_lgl(quantile_levels, vctrs::vec_duplicate_any)
   if (any(tau_duplication)) {
     cli::cli_abort(c(
-      "`quantile_values` must not be duplicated.",
+      "`quantile_levels` must not be duplicated.",
       i = "Duplicates found at position(s): {.val {which(tau_duplication)}}."
     ))
   }
@@ -127,15 +127,15 @@ extrapolate_quantiles.distribution <- function(x, probs, ...) {
 #' @export
 extrapolate_quantiles.dist_default <- function(x, probs, ...) {
   q <- quantile(x, probs, ...)
-  new_quantiles(values = q, quantile_values = probs)
+  new_quantiles(values = q, quantile_levels = probs)
 }
 
 #' @export
 extrapolate_quantiles.dist_quantiles <- function(x, probs, ...) {
   q <- quantile(x, probs, ...)
-  tau <- field(x, "quantile_values")
+  tau <- field(x, "quantile_levels")
   qvals <- field(x, "values")
-  new_quantiles(values = c(qvals, q), quantile_values = c(tau, probs))
+  new_quantiles(values = c(qvals, q), quantile_levels = c(tau, probs))
 }
 
 is_dist_quantiles <- function(x) {
@@ -218,14 +218,14 @@ pivot_quantiles <- function(.data, ...) {
       .data <- .data %>%
         tidyr::unnest(tidyselect::all_of(col)) %>%
         tidyr::pivot_wider(
-          names_from = "quantile_values", values_from = "values",
+          names_from = "quantile_levels", values_from = "values",
           names_prefix = paste0(col, "_")
         )
     }
   } else {
     .data <- .data %>%
       tidyr::unnest(tidyselect::all_of(cols)) %>%
-      tidyr::pivot_wider(names_from = "quantile_values", values_from = "values")
+      tidyr::pivot_wider(names_from = "quantile_levels", values_from = "values")
   }
   .data
 }
@@ -236,7 +236,7 @@ pivot_quantiles <- function(.data, ...) {
 #' @export
 #' @importFrom stats median qnorm family
 median.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "linear")) {
-  tau <- field(x, "quantile_values")
+  tau <- field(x, "quantile_levels")
   qvals <- field(x, "values")
   if (0.5 %in% tau) return(qvals[match(0.5, tau)])
   if (min(tau) > 0.5 || max(tau) < 0.5 || length(tau) < 2) return(NA)
@@ -269,7 +269,7 @@ quantile.dist_quantiles <- function(
 
 
 quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
-  tau <- field(x, "quantile_values")
+  tau <- field(x, "quantile_levels")
   qvals <- field(x, "values")
   r <- range(tau, na.rm = TRUE)
   qvals_out <- rep(NA, length(tau_out))
@@ -381,10 +381,10 @@ norm_tail_q <- function(p, q, target) {
 #' @method Math dist_quantiles
 #' @export
 Math.dist_quantiles <- function(x, ...) {
-  quantile_values <- field(x, "quantile_values")
+  quantile_levels <- field(x, "quantile_levels")
   values <- field(x, "values")
   values <- vctrs::vec_math(.Generic, values, ...)
-  new_quantiles(values = values, quantile_values = quantile_values)
+  new_quantiles(values = values, quantile_levels = quantile_levels)
 }
 
 #' @method Ops dist_quantiles
@@ -398,11 +398,11 @@ Ops.dist_quantiles <- function(e1, e2) {
   tau1 <- tau2 <- NULL
   if (is_quantiles[1]) {
     q1 <- field(e1, "values")
-    tau1 <- field(e1, "quantile_values")
+    tau1 <- field(e1, "quantile_levels")
   }
   if (is_quantiles[2]) {
     q2 <- field(e2, "values")
-    tau2 <- field(e2, "quantile_values")
+    tau2 <- field(e2, "quantile_levels")
   }
   tau <- union(tau1, tau2)
   if (all(is_dist)) {
@@ -417,7 +417,7 @@ Ops.dist_quantiles <- function(e1, e2) {
     }
   }
   q <- vctrs::vec_arith(.Generic, q1, q2)
-  new_quantiles(values = q, quantile_values = tau)
+  new_quantiles(values = q, quantile_levels = tau)
 }
 
 #' @method is.na distribution

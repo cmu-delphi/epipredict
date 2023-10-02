@@ -4,12 +4,12 @@
 \alias{dist_quantiles}
 \title{A distribution parameterized by a set of quantiles}
 \usage{
-dist_quantiles(values, quantile_values)
+dist_quantiles(values, quantile_levels)
 }
 \arguments{
 \item{values}{A vector of values}
 
-\item{quantile_values}{A vector of probabilities corresponding to \code{values}}
+\item{quantile_levels}{A vector of probabilities corresponding to \code{values}}
 }
 \description{
 A distribution parameterized by a set of quantiles

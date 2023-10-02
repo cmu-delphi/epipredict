@@ -7,7 +7,7 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
-#' @param quantile_values a vector of probabilities to extract
+#' @param quantile_levels a vector of probabilities to extract
 #' @param truncate Do we truncate the distribution to an interval
 #' @param name character. The name for the output column.
 #' @param id a random id string
@@ -25,7 +25,7 @@
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, quantile_reg(quantile_values = c(.25, .5, .75))) %>%
+#' wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) %>%
 #'   fit(jhu)
 #'
 #' latest <- get_test_data(recipe = r, x = jhu)
@@ -40,13 +40,13 @@
 #' p
 layer_quantile_distn <- function(frosting,
                                  ...,
-                                 quantile_values = c(.25, .75),
+                                 quantile_levels = c(.25, .75),
                                  truncate = c(-Inf, Inf),
                                  name = ".pred_distn",
                                  id = rand_id("quantile_distn")) {
   rlang::check_dots_empty()
   arg_is_chr_scalar(name, id)
-  arg_is_probabilities(quantile_values)
+  arg_is_probabilities(quantile_levels)
   stopifnot(
     length(truncate) == 2L, is.numeric(truncate), truncate[1] < truncate[2]
   )
@@ -54,7 +54,7 @@ layer_quantile_distn <- function(frosting,
   add_layer(
     frosting,
     layer_quantile_distn_new(
-      quantile_values = quantile_values,
+      quantile_levels = quantile_levels,
       truncate = truncate,
       name = name,
       id = id
@@ -62,9 +62,9 @@ layer_quantile_distn <- function(frosting,
   )
 }
 
-layer_quantile_distn_new <- function(quantile_values, truncate, name, id) {
+layer_quantile_distn_new <- function(quantile_levels, truncate, name, id) {
   layer("quantile_distn",
-    quantile_values = quantile_values,
+    quantile_levels = quantile_levels,
     truncate = truncate,
     name = name,
     id = id
@@ -82,8 +82,8 @@ slather.layer_quantile_distn <-
       ))
     }
     dstn <- dist_quantiles(
-      quantile(dstn, object$quantile_values),
-      object$quantile_values
+      quantile(dstn, object$quantile_levels),
+      object$quantile_levels
     )
 
     truncate <- object$truncate
@@ -102,9 +102,9 @@ print.layer_quantile_distn <- function(
   title <- "Creating predictive quantiles"
   td <- "<calculated>"
   td <- rlang::enquos(td)
-  ext <- x$quantile_values
+  ext <- x$quantile_levels
   print_layer(td,
-    title = title, width = width, conjunction = "quantile_values",
+    title = title, width = width, conjunction = "quantile_levels",
     extra_text = ext
   )
 }

@@ -43,7 +43,7 @@ test_that("Specified pred_lower and pred_upper work as intended", {
 test_that("thresholds additional columns", {
   f <- frosting() %>%
     layer_predict() %>%
-    layer_residual_quantiles(quantile_values = c(.1, .9)) %>%
+    layer_residual_quantiles(quantile_levels = c(.1, .9)) %>%
     layer_threshold(.pred, .pred_distn, lower = 0.180, upper = 0.31) %>%
     layer_naomit(.pred)
 
@@ -59,5 +59,5 @@ test_that("thresholds additional columns", {
     dplyr::mutate(.quantiles = nested_quantiles(.pred_distn)) %>%
     tidyr::unnest(.quantiles)
   expect_equal(round(p$values, digits = 3), c(0.180, 0.31, 0.180, .18, 0.310, .31))
-  expect_equal(p$quantile_values, rep(c(.1, .9), times = 3))
+  expect_equal(p$quantile_levels, rep(c(.1, .9), times = 3))
 })

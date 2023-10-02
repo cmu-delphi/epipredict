@@ -7,7 +7,7 @@
 layer_quantile_distn(
   frosting,
   ...,
-  quantile_values = c(0.25, 0.75),
+  quantile_levels = c(0.25, 0.75),
   truncate = c(-Inf, Inf),
   name = ".pred_distn",
   id = rand_id("quantile_distn")
@@ -18,7 +18,7 @@ layer_quantile_distn(
 
 \item{...}{Unused, include for consistency with other layers.}
 
-\item{quantile_values}{a vector of probabilities to extract}
+\item{quantile_levels}{a vector of probabilities to extract}
 
 \item{truncate}{Do we truncate the distribution to an interval}
 
@@ -45,7 +45,7 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()
 
-wf <- epi_workflow(r, quantile_reg(quantile_values = c(.25, .5, .75))) \%>\%
+wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) \%>\%
   fit(jhu)
 
 latest <- get_test_data(recipe = r, x = jhu)

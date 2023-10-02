@@ -92,9 +92,9 @@ snap.dist_default <- function(x, lower, upper, ...) {
 #' @export
 snap.dist_quantiles <- function(x, lower, upper, ...) {
   values <- field(x, "values")
-  quantile_values <- field(x, "quantile_values")
+  quantile_levels <- field(x, "quantile_levels")
   values <- snap(values, lower, upper)
-  new_quantiles(values = values, quantile_values = quantile_values)
+  new_quantiles(values = values, quantile_levels = quantile_levels)
 }
 
 #' @export

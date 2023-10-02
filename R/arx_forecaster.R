@@ -33,7 +33,7 @@
 #' out <- arx_forecaster(jhu, "death_rate",
 #'   c("case_rate", "death_rate"),
 #'   trainer = quantile_reg(),
-#'   args_list = arx_args_list(quantile_values = 1:9 / 10)
+#'   args_list = arx_args_list(quantile_levels = 1:9 / 10)
 #' )
 arx_forecaster <- function(epi_data,
                            outcome,
@@ -99,7 +99,7 @@ arx_forecaster <- function(epi_data,
 #' arx_fcast_epi_workflow(jhu, "death_rate",
 #'   c("case_rate", "death_rate"),
 #'   trainer = quantile_reg(),
-#'   args_list = arx_args_list(quantile_values = 1:9 / 10)
+#'   args_list = arx_args_list(quantile_level = 1:9 / 10)
 #' )
 arx_fcast_epi_workflow <- function(
     epi_data,
@@ -134,19 +134,19 @@ arx_fcast_epi_workflow <- function(
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
   if (inherits(trainer, "quantile_reg")) {
-    # add all quantile_values to the forecaster and update postprocessor
-    quantile_values <- sort(compare_quantile_args(
-      args_list$quantile_values,
-      rlang::eval_tidy(trainer$args$quantile_values)
+    # add all quantile_level to the forecaster and update postprocessor
+    quantile_level <- sort(compare_quantile_args(
+      args_list$quantile_level,
+      rlang::eval_tidy(trainer$args$quantile_level)
     ))
-    args_list$quantile_values <- quantile_values
-    trainer$args$quantile_values <- rlang::enquo(quantile_values)
-    f <- layer_quantile_distn(f, quantile_values = quantile_values) %>%
+    args_list$quantile_level <- quantile_level
+    trainer$args$quantile_level <- rlang::enquo(quantile_level)
+    f <- layer_quantile_distn(f, quantile_level = quantile_level) %>%
       layer_point_from_distn()
   } else {
     f <- layer_residual_quantiles(
       f,
-      quantile_values = args_list$quantile_values,
+      quantile_level = args_list$quantile_level,
       symmetrize = args_list$symmetrize,
       by_key = args_list$quantile_by_key
     )
@@ -175,7 +175,7 @@ arx_fcast_epi_workflow <- function(
 #'   The default `NULL` will attempt to determine this automatically.
 #' @param target_date Date. The date for which the forecast is intended.
 #'   The default `NULL` will attempt to determine this automatically.
-#' @param quantile_values Vector or `NULL`. A vector of probabilities to produce
+#' @param quantile_level Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
 #' @param symmetrize Logical. The default `TRUE` calculates
@@ -208,14 +208,14 @@ arx_fcast_epi_workflow <- function(
 #' @examples
 #' arx_args_list()
 #' arx_args_list(symmetrize = FALSE)
-#' arx_args_list(quantile_values = c(.1, .3, .7, .9), n_training = 120)
+#' arx_args_list(quantile_level = c(.1, .3, .7, .9), n_training = 120)
 arx_args_list <- function(
     lags = c(0L, 7L, 14L),
     ahead = 7L,
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
-    quantile_values = c(0.05, 0.95),
+    quantile_level = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
@@ -231,7 +231,7 @@ arx_args_list <- function(
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags)
   arg_is_lgl(symmetrize, nonneg)
-  arg_is_probabilities(quantile_values, allow_null = TRUE)
+  arg_is_probabilities(quantile_level, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
@@ -242,7 +242,7 @@ arx_args_list <- function(
       lags = .lags,
       ahead,
       n_training,
-      quantile_values,
+      quantile_level,
       forecast_date,
       target_date,
       symmetrize,
@@ -263,8 +263,8 @@ print.arx_fcast <- function(x, ...) {
 }
 
 compare_quantile_args <- function(alist, tlist) {
-  default_alist <- eval(formals(arx_args_list)$quantile_values)
-  default_tlist <- eval(formals(quantile_reg)$quantile_values)
+  default_alist <- eval(formals(arx_args_list)$quantile_level)
+  default_tlist <- eval(formals(quantile_reg)$quantile_level)
   if (setequal(alist, default_alist)) {
     if (setequal(tlist, default_tlist)) {
       return(sort(unique(union(alist, tlist))))
