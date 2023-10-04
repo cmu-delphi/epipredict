@@ -306,3 +306,5 @@ print.arx_class <- function(x, ...) {
   name <- "ARX Classifier"
   NextMethod(name = name, ...)
 }
+
+# this is a trivial change to induce a check
