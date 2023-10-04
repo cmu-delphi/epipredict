@@ -39,12 +39,21 @@ in linear interpolation on the X scale. This is achieved with
 \item{by_key}{A character vector of keys to group the residuals by before
 calculating quantiles. The default, \code{c()} performs no grouping.}
 
-\item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
+\item{symmetrize}{Logical. If \code{TRUE}, does two things: (i) forces the
+"empirical" CDF of residuals to be symmetric by pretending that for every
+actually-observed residual X we also observed another residual -X, and (ii)
+at each ahead, forces the median simulated value to be equal to the point
+prediction by adding or subtracting the same amount to every simulated
+value. Adjustments in (ii) take place before propagating forward and
+simulating the next ahead. This forces any 1-ahead predictive intervals to
+be symmetric about the point prediction, and encourages larger aheads to be
+more symmetric.}
 
 \item{nonneg}{Logical. Force all predictive intervals be non-negative.
-Because non-negativity is forced \emph{before} propagating forward, this
-has slightly different behaviour than would occur if using
-\code{\link[=layer_threshold]{layer_threshold()}}.}
+Because non-negativity is forced \emph{before} propagating forward, this has
+slightly different behaviour than would occur if using \code{\link[=layer_threshold]{layer_threshold()}}.
+Thresholding at each ahead takes place after any shifting from
+\code{symmetrize}.}
 
 \item{id}{a random id string}
 }
