@@ -8,7 +8,7 @@ layer_cdc_flatline_quantiles(
   frosting,
   ...,
   aheads = 1:4,
-  quantiles = c(0.01, 0.025, 1:19/20, 0.975, 0.99),
+  quantile_levels = c(0.01, 0.025, 1:19/20, 0.975, 0.99),
   nsims = 1000,
   by_key = "geo_value",
   symmetrize = FALSE,
@@ -27,10 +27,6 @@ typically observed daily (possibly with missing values), but
 with weekly forecast targets, you would use \code{c(7, 14, 21, 28)}. But with
 weekly data, you would use \code{1:4}.}
 
-\item{quantiles}{Numeric vector of probabilities with values in (0,1)
-referring to the desired predictive intervals. The default is the standard
-set for the COVID Forecast Hub.}
-
 \item{nsims}{Positive integer. The number of draws from the empirical CDF.
 These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting
 in linear interpolation on the X scale. This is achieved with
@@ -47,6 +43,10 @@ has slightly different behaviour than would occur if using
 \code{\link[=layer_threshold_preds]{layer_threshold_preds()}}.}
 
 \item{id}{a random id string}
+
+\item{quantiles}{Numeric vector of probabilities with values in (0,1)
+referring to the desired predictive intervals. The default is the standard
+set for the COVID Forecast Hub.}
 }
 \value{
 an updated \code{frosting} postprocessor. Calling \code{\link[=predict]{predict()}} will result
@@ -105,7 +105,7 @@ preds <- preds \%>\%
   pivot_quantiles(.pred_distn) \%>\%
   mutate(target_date = forecast_date + ahead)
 
-library(ggplot2)
+if (require("ggplot2")) {
 four_states <- c("ca", "pa", "wa", "ny")
 preds \%>\%
   filter(geo_value \%in\% four_states) \%>\%
@@ -122,5 +122,5 @@ preds \%>\%
   facet_wrap(~geo_value, scales = "free_y") +
   theme_bw() +
   geom_vline(xintercept = forecast_date)
-
+}
 }

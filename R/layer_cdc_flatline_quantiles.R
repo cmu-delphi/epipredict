@@ -97,7 +97,7 @@ layer_cdc_flatline_quantiles <- function(
     frosting,
     ...,
     aheads = 1:4,
-    quantiles = c(.01, .025, 1:19 / 20, .975, .99),
+    quantile_levels = c(.01, .025, 1:19 / 20, .975, .99),
     nsims = 1e3,
     by_key = "geo_value",
     symmetrize = FALSE,
@@ -106,7 +106,7 @@ layer_cdc_flatline_quantiles <- function(
   rlang::check_dots_empty()
 
   arg_is_int(aheads)
-  arg_is_probabilities(quantiles)
+  arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos_int(nsims)
   arg_is_scalar(nsims)
   arg_is_chr_scalar(id)
@@ -117,7 +117,7 @@ layer_cdc_flatline_quantiles <- function(
     frosting,
     layer_cdc_flatline_quantiles_new(
       aheads = aheads,
-      quantiles = quantiles,
+      quantile_levels = quantile_levels,
       nsims = nsims,
       by_key = by_key,
       symmetrize = symmetrize,
@@ -129,7 +129,7 @@ layer_cdc_flatline_quantiles <- function(
 
 layer_cdc_flatline_quantiles_new <- function(
     aheads,
-    quantiles,
+    quantile_levels,
     nsims,
     by_key,
     symmetrize,
@@ -138,7 +138,7 @@ layer_cdc_flatline_quantiles_new <- function(
   layer(
     "cdc_flatline_quantiles",
     aheads = aheads,
-    quantiles = quantiles,
+    quantile_levels = quantile_levels,
     nsims = nsims,
     by_key = by_key,
     symmetrize = symmetrize,
@@ -150,6 +150,7 @@ layer_cdc_flatline_quantiles_new <- function(
 #' @export
 slather.layer_cdc_flatline_quantiles <-
   function(object, components, workflow, new_data, ...) {
+    if (is.null(object$quantile_levels)) return(components)
     the_fit <- workflows::extract_fit_parsnip(workflow)
     if (!inherits(the_fit, "_flatline")) {
       cli::cli_warn(
@@ -213,7 +214,7 @@ slather.layer_cdc_flatline_quantiles <-
       dplyr::rowwise() %>%
       dplyr::mutate(
         .pred_distn_all = propogate_samples(
-          .resid, .pred, object$quantiles,
+          .resid, .pred, object$quantile_levels,
           object$aheads, object$nsim, object$symmetrize, object$nonneg
         )
       ) %>%
@@ -229,7 +230,7 @@ slather.layer_cdc_flatline_quantiles <-
   }
 
 propogate_samples <- function(
-    r, p, quantiles, aheads, nsim, symmetrize, nonneg) {
+    r, p, quantile_levels, aheads, nsim, symmetrize, nonneg) {
   max_ahead <- max(aheads)
   samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1), na.rm = TRUE)
   res <- list()
@@ -254,7 +255,7 @@ propogate_samples <- function(
   list(tibble::tibble(
     ahead = aheads,
     .pred_distn = map_vec(
-      res, ~ dist_quantiles(quantile(.x, quantiles), tau = quantiles)
+      res, ~ dist_quantiles(quantile(.x, quantile_levels), quantile_levels)
     )
   ))
 }
