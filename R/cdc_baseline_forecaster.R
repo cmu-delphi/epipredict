@@ -33,7 +33,7 @@
 #'   ungroup() %>%
 #'   filter(weekdays(time_value) == "Saturday")
 #'
-#' cdc <- cdc_baseline_forecaster(deaths, "deaths")
+#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
 #' preds <- pivot_quantiles(cdc$predictions, .pred_distn)
 #'
 #' if (require(ggplot2)) {
@@ -46,7 +46,7 @@
 #'   geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
 #'   geom_line(aes(y = .pred), color = "orange") +
 #'   geom_line(
-#'     data = deaths %>% filter(geo_value %in% four_states),
+#'     data = weekly_deaths %>% filter(geo_value %in% four_states),
 #'     aes(x = time_value, y = deaths)
 #'   ) +
 #'   scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
@@ -150,7 +150,7 @@ cdc_baseline_forecaster <- function(
 #' @param nonneg Logical. Force all predictive intervals be non-negative.
 #'   Because non-negativity is forced _before_ propagating forward, this
 #'   has slightly different behaviour than would occur if using
-#'   [layer_threshold_preds()].
+#'   [layer_threshold()].
 #'
 #' @return A list containing updated parameter choices with class `cdc_flat_fcast`.
 #' @export
@@ -158,7 +158,7 @@ cdc_baseline_forecaster <- function(
 #' @examples
 #' cdc_baseline_args_list()
 #' cdc_baseline_args_list(symmetrize = FALSE)
-#' cdc_baseline_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
+#' cdc_baseline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 cdc_baseline_args_list <- function(
     data_frequency = "1 week",
     aheads = 1:4,

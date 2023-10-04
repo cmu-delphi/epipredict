@@ -21,7 +21,7 @@
 #'
 #' @seealso [fit.model_spec()], [set_engine()]
 #'
-#' @importFrom quantreg rq
+#' @importFrom smoothqr smooth_qr
 #' @examples
 #' tib <- data.frame(
 #'   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),

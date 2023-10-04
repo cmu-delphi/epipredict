@@ -25,7 +25,7 @@
 #'   typically observed daily (possibly with missing values), but
 #'   with weekly forecast targets, you would use `c(7, 14, 21, 28)`. But with
 #'   weekly data, you would use `1:4`.
-#' @param quantiles Numeric vector of probabilities with values in (0,1)
+#' @param quantile_levels Numeric vector of probabilities with values in (0,1)
 #'   referring to the desired predictive intervals. The default is the standard
 #'   set for the COVID Forecast Hub.
 #' @param nsims Positive integer. The number of draws from the empirical CDF.
@@ -35,7 +35,7 @@
 #' @param nonneg Logical. Force all predictive intervals be non-negative.
 #'   Because non-negativity is forced _before_ propagating forward, this
 #'   has slightly different behaviour than would occur if using
-#'   [layer_threshold_preds()].
+#'   [layer_threshold()].
 #'
 #' @return an updated `frosting` postprocessor. Calling [predict()] will result
 #'   in an additional `<list-col>` named `.pred_distn_all` containing 2-column

@@ -53,7 +53,7 @@ residual quantiles are used. It is not applicable with
 \item{nonneg}{Logical. Force all predictive intervals be non-negative.
 Because non-negativity is forced \emph{before} propagating forward, this
 has slightly different behaviour than would occur if using
-\code{\link[=layer_threshold_preds]{layer_threshold_preds()}}.}
+\code{\link[=layer_threshold]{layer_threshold()}}.}
 
 \item{quantile_by_key}{Character vector. Groups residuals by listed keys
 before calculating residual quantiles. See the \code{by_key} argument to
@@ -81,5 +81,5 @@ Constructs a list of arguments for \code{\link[=cdc_baseline_forecaster]{cdc_bas
 \examples{
 cdc_baseline_args_list()
 cdc_baseline_args_list(symmetrize = FALSE)
-cdc_baseline_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
+cdc_baseline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 }

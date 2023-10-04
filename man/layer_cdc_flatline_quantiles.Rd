@@ -27,6 +27,10 @@ typically observed daily (possibly with missing values), but
 with weekly forecast targets, you would use \code{c(7, 14, 21, 28)}. But with
 weekly data, you would use \code{1:4}.}
 
+\item{quantile_levels}{Numeric vector of probabilities with values in (0,1)
+referring to the desired predictive intervals. The default is the standard
+set for the COVID Forecast Hub.}
+
 \item{nsims}{Positive integer. The number of draws from the empirical CDF.
 These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting
 in linear interpolation on the X scale. This is achieved with
@@ -40,13 +44,9 @@ calculating quantiles. The default, \code{c()} performs no grouping.}
 \item{nonneg}{Logical. Force all predictive intervals be non-negative.
 Because non-negativity is forced \emph{before} propagating forward, this
 has slightly different behaviour than would occur if using
-\code{\link[=layer_threshold_preds]{layer_threshold_preds()}}.}
+\code{\link[=layer_threshold]{layer_threshold()}}.}
 
 \item{id}{a random id string}
-
-\item{quantiles}{Numeric vector of probabilities with values in (0,1)
-referring to the desired predictive intervals. The default is the standard
-set for the COVID Forecast Hub.}
 }
 \value{
 an updated \code{frosting} postprocessor. Calling \code{\link[=predict]{predict()}} will result
