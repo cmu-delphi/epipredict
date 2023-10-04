@@ -11,7 +11,7 @@ cdc_baseline_forecaster(
 )
 }
 \arguments{
-\item{epi_data}{An \link[epiprocess:epi_df]{epiprocess::epi_df}}
+\item{epi_data}{An \code{\link[epiprocess:epi_df]{epiprocess::epi_df}}}
 
 \item{outcome}{A scalar character for the column name we wish to predict.}
 
@@ -19,8 +19,8 @@ cdc_baseline_forecaster(
 \code{\link[=cdc_baseline_args_list]{cdc_baseline_args_list()}} constructor function.}
 }
 \value{
-A data frame of point and interval forecasts at for all
-aheads (unique horizons) for each unique combination of \code{key_vars}.
+A data frame of point and interval forecasts for all aheads (unique
+horizons) for each unique combination of \code{key_vars}.
 }
 \description{
 This is a simple forecasting model for

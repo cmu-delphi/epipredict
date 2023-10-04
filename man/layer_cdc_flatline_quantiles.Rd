@@ -23,17 +23,17 @@ layer_cdc_flatline_quantiles(
 
 \item{aheads}{Numeric vector of desired forecast horizons. These should be
 given in the "units of the training data". So, for example, for data
-typically observed daily (possibly with missing values), but
-with weekly forecast targets, you would use \code{c(7, 14, 21, 28)}. But with
-weekly data, you would use \code{1:4}.}
+typically observed daily (possibly with missing values), but with weekly
+forecast targets, you would use \code{c(7, 14, 21, 28)}. But with weekly data,
+you would use \code{1:4}.}
 
 \item{quantile_levels}{Numeric vector of probabilities with values in (0,1)
 referring to the desired predictive intervals. The default is the standard
 set for the COVID Forecast Hub.}
 
 \item{nsims}{Positive integer. The number of draws from the empirical CDF.
-These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting
-in linear interpolation on the X scale. This is achieved with
+These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting in
+linear interpolation on the X scale. This is achieved with
 \code{\link[stats:quantile]{stats::quantile()}} Type 7 (the default for that function).}
 
 \item{by_key}{A character vector of keys to group the residuals by before

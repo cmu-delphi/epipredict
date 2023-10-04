@@ -1,4 +1,4 @@
-test_that("propogate_samples", {
+test_that("propagate_samples", {
   r <- -30:50
   p <- 40
   quantiles <- 1:9 / 10

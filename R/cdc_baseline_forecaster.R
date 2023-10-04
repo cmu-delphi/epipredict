@@ -12,13 +12,13 @@
 #' This forecaster is meant to produce exactly the CDC Baseline used for
 #' [COVID19ForecastHub](https://covid19forecasthub.org)
 #'
-#' @param epi_data An [epiprocess::epi_df]
+#' @param epi_data An [`epiprocess::epi_df`]
 #' @param outcome A scalar character for the column name we wish to predict.
 #' @param args_list A list of additional arguments as created by the
 #'   [cdc_baseline_args_list()] constructor function.
 #'
-#' @return A data frame of point and interval forecasts at for all
-#'   aheads (unique horizons) for each unique combination of `key_vars`.
+#' @return A data frame of point and interval forecasts for all aheads (unique
+#'   horizons) for each unique combination of `key_vars`.
 #' @export
 #'
 #' @examples
