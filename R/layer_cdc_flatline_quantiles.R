@@ -32,7 +32,7 @@
 #'   These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting in
 #'   linear interpolation on the X scale. This is achieved with
 #'   [stats::quantile()] Type 7 (the default for that function).
-#' @param symmetrize Logical. If `TRUE`, does two things: (i) forces the
+#' @param symmetrize Scalar logical. If `TRUE`, does two things: (i) forces the
 #'   "empirical" CDF of residuals to be symmetric by pretending that for every
 #'   actually-observed residual X we also observed another residual -X, and (ii)
 #'   at each ahead, forces the median simulated value to be equal to the point
@@ -41,7 +41,7 @@
 #'   simulating the next ahead. This forces any 1-ahead predictive intervals to
 #'   be symmetric about the point prediction, and encourages larger aheads to be
 #'   more symmetric.
-#' @param nonneg Logical. Force all predictive intervals be non-negative.
+#' @param nonneg Scalar logical. Force all predictive intervals be non-negative.
 #'   Because non-negativity is forced _before_ propagating forward, this has
 #'   slightly different behaviour than would occur if using [layer_threshold()].
 #'   Thresholding at each ahead takes place after any shifting from
@@ -245,7 +245,8 @@ propagate_samples <- function(
   if (symmetrize) {
     r <- c(r, -r)
   }
-  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1), na.rm = TRUE)
+  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1),
+                   na.rm = TRUE, names = FALSE)
   res <- list()
 
   raw <- samp + p
