@@ -87,7 +87,9 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
   step_growth_rate(case_rate, death_rate)
 r
 
-r \%>\% recipes::prep() \%>\% recipes::bake(case_death_rate_subset)
+r \%>\%
+  recipes::prep() \%>\%
+  recipes::bake(case_death_rate_subset)
 }
 \seealso{
 Other row operation steps: 

@@ -23,16 +23,15 @@
 #'   recipes::prep() %>%
 #'   recipes::bake(case_death_rate_subset)
 step_lag_difference <-
-  function(
-      recipe,
-      ...,
-      role = "predictor",
-      trained = FALSE,
-      horizon = 7,
-      prefix = "lag_diff_",
-      columns = NULL,
-      skip = FALSE,
-      id = rand_id("lag_diff")) {
+  function(recipe,
+           ...,
+           role = "predictor",
+           trained = FALSE,
+           horizon = 7,
+           prefix = "lag_diff_",
+           columns = NULL,
+           skip = FALSE,
+           id = rand_id("lag_diff")) {
     if (!is_epi_recipe(recipe)) {
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
     }

@@ -141,8 +141,8 @@ grab_residuals <- function(the_fit, components) {
       if (".resid" %in% names(r)) { # success
         return(r)
       } else { # failure
-        rlang::warn(c(
-          "The `residuals()` method for objects of class {cl} results in",
+        cli::cli_warn(c(
+          "The `residuals()` method for {.cls cl} objects results in",
           "a data frame without a column named `.resid`.",
           i = "Residual quantiles will be calculated directly from the",
           i = "difference between predictions and observations.",
@@ -152,8 +152,8 @@ grab_residuals <- function(the_fit, components) {
     } else if (is.vector(drop(r))) { # also success
       return(tibble(.resid = drop(r)))
     } else { # failure
-      rlang::warn(c(
-        "The `residuals()` method for objects of class {cl} results in an",
+      cli::cli_warn(c(
+        "The `residuals()` method for {.cls cl} objects results in an",
         "object that is neither a data frame with a column named `.resid`,",
         "nor something coercible to a vector.",
         i = "Residual quantiles will be calculated directly from the",

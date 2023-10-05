@@ -48,7 +48,8 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- get_test_data(r, jhu)
 
 # Use ahead + forecast date
-f <- frosting() \%>\% layer_predict() \%>\%
+f <- frosting() \%>\%
+  layer_predict() \%>\%
   layer_add_forecast_date(forecast_date = "2022-05-31") \%>\%
   layer_add_target_date() \%>\%
   layer_naomit(.pred)
@@ -59,7 +60,8 @@ p
 
 # Use ahead + max time value from pre, fit, post
 # which is the same if include `layer_add_forecast_date()`
-f2 <- frosting() \%>\% layer_predict() \%>\%
+f2 <- frosting() \%>\%
+  layer_predict() \%>\%
   layer_add_target_date() \%>\%
   layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
