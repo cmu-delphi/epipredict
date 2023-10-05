@@ -245,7 +245,8 @@ propagate_samples <- function(
   if (symmetrize) {
     r <- c(r, -r)
   }
-  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1), na.rm = TRUE)
+  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1),
+                   na.rm = TRUE, names = FALSE)
   res <- list()
 
   raw <- samp + p
