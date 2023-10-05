@@ -13,7 +13,16 @@ flusight_hub_formatter(object, ..., .fcast_period = c("daily", "weekly"))
 \item{...}{<\code{\link[rlang:dyn-dots]{dynamic-dots}}> Name = value pairs of constant
 columns (or mutations) to perform to the results. See examples.}
 
-\item{.fcast_period}{}
+\item{.fcast_period}{Control whether the \code{horizon} should represent days or
+weeks. Depending on whether the forecaster output has target dates
+from \code{\link[=layer_add_target_date]{layer_add_target_date()}} or not, we may need to compute the horizon
+and/or the \code{target_end_date} from the other available columns in the predictions.
+When both \code{ahead} and \code{target_date} are available, this is ignored. If only
+\code{ahead} or \code{aheads} exists, then the target date may need to be multiplied
+if the \code{ahead} represents weekly forecasts. Alternatively, if only, the
+\code{target_date} is available, then the \code{horizon} will be in days, unless
+this argument is \code{"weekly"}. Note that these can be adjusted later by the
+\code{...} argument.}
 }
 \value{
 A \link[tibble:tibble]{tibble::tibble}. If \code{...} is empty, the result will contain the

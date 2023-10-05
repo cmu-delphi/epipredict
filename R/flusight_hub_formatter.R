@@ -27,7 +27,16 @@ abbr_to_fips <- function(abbr) {
 #'   `canned_epipred` as created by, e.g., [arx_forecaster()]
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Name = value pairs of constant
 #'   columns (or mutations) to perform to the results. See examples.
-#' @param .fcast_period
+#' @param .fcast_period Control whether the `horizon` should represent days or
+#'   weeks. Depending on whether the forecaster output has target dates
+#'   from [layer_add_target_date()] or not, we may need to compute the horizon
+#'   and/or the `target_end_date` from the other available columns in the predictions.
+#'   When both `ahead` and `target_date` are available, this is ignored. If only
+#'   `ahead` or `aheads` exists, then the target date may need to be multiplied
+#'   if the `ahead` represents weekly forecasts. Alternatively, if only, the
+#'   `target_date` is available, then the `horizon` will be in days, unless
+#'   this argument is `"weekly"`. Note that these can be adjusted later by the
+#'   `...` argument.
 #'
 #' @return A [tibble::tibble]. If `...` is empty, the result will contain the
 #'   columns `reference_date`, `horizon`, `target_end_date`, `location`,
