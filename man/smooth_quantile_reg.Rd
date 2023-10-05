@@ -74,7 +74,8 @@ abline(v = fd, lty = 2)
 lines(pl$x, pl$`0.2`, col = "blue")
 lines(pl$x, pl$`0.8`, col = "blue")
 lines(pl$x, pl$`0.5`, col = "red")
-\dontrun{
+
+if (require("ggplot2")) {
 ggplot(data.frame(x = x, y = y), aes(x)) +
   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
   geom_point(aes(y = y), colour = "grey") + # observed data

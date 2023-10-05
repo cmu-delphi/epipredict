@@ -34,6 +34,7 @@ reference:
     contents:
     - contains("flatline")
     - contains("arx")
+    - contains("cdc")
   - title: Parsnip engines
     desc: Prediction methods not available elsewhere
     contents:
@@ -67,7 +68,7 @@ reference:
     - dist_quantiles
     - extrapolate_quantiles
     - nested_quantiles
-    - pivot_quantiles
+    - starts_with("pivot_quantiles")
   - title: Included datasets
     contents:
     - case_death_rate_subset
