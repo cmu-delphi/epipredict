@@ -38,7 +38,7 @@ test_that("quantile pivotting longer behaves", {
   tib$d1 <- d1
   expect_length(pivot_quantiles_longer(tib, d1), 5L)
   expect_identical(nrow(pivot_quantiles_longer(tib, d1)), 7L)
-  expect_identical(pivot_quantiles_longer(tib, d1)$q, as.double(c(1:3, 2:5)))
+  expect_identical(pivot_quantiles_longer(tib, d1)$values, as.double(c(1:3, 2:5)))
 
   d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 2:4 / 4))
   tib$d1 <- d1
@@ -62,7 +62,7 @@ test_that("quantile pivotting longer behaves", {
     6L
   )
   expect_identical(
-    pivot_quantiles_longer(tib, d1, d3, .ignore_length_check = TRUE)$d1_q,
+    pivot_quantiles_longer(tib, d1, d3, .ignore_length_check = TRUE)$d1_values,
     as.double(rep(c(1:3, 2:4), each = 4))
   )
 })
