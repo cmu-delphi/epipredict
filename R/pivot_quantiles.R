@@ -23,8 +23,8 @@ nested_quantiles <- function(x) {
 
 #' Pivot columns containing `dist_quantile` longer
 #'
-#' Selected columns that contains `dist_quantiles` will be "lengthened" with
-#' the "taus" (quantile) serving as 1 column and the values as another. If
+#' Selected columns that contain `dist_quantiles` will be "lengthened" with
+#' the quantile levels serving as 1 column and the values as another. If
 #' multiple columns are selected, these will be prefixed the the column name.
 #'
 #' @param .data A data frame, or a data frame extension such as a tibble or

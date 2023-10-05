@@ -8,6 +8,7 @@
 * fixed quantile bug in `flatline_forecaster()`
 * add functionality to output the unfit workflow from the canned forecasters
 * add `pivot_quantiles_wider()` for easier plotting
+* add complement `pivot_quantiles_longer()`
 
 
 # epipredict 0.0.4
