@@ -21,15 +21,15 @@ reasonable. But if, for example, \code{var1[1]} has 5 quantiles while \code{var2
 has 7, then the only option would be to recycle everything, creating a
 \emph{very} long result. By default, this would throw an error. But if this is
 really the goal, then the error can be bypassed by setting this argument
-to \code{TRUE}. The first selected column will vary fastest.}
+to \code{TRUE}. The quantiles in the first selected column will vary the fastest.}
 }
 \value{
 An object of the same class as \code{.data}.
 }
 \description{
-Selected columns that contains \code{dist_quantiles} will be "lengthened" with
-the "taus" (quantile) serving as 1 column and the values as another. If
-multiple columns are selected, these will be prefixed the the column name.
+Selected columns that contain \code{dist_quantiles} will be "lengthened" with
+the quantile levels serving as 1 column and the values as another. If
+multiple columns are selected, these will be prefixed with the column name.
 }
 \examples{
 d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))

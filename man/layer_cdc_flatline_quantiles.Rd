@@ -102,7 +102,7 @@ preds
 
 preds <- preds \%>\%
   unnest(.pred_distn_all) \%>\%
-  pivot_quantiles(.pred_distn) \%>\%
+  pivot_quantiles_wider(.pred_distn) \%>\%
   mutate(target_date = forecast_date + ahead)
 
 if (require("ggplot2")) {

@@ -34,7 +34,7 @@
 #'   filter(weekdays(time_value) == "Saturday")
 #'
 #' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
-#' preds <- pivot_quantiles(cdc$predictions, .pred_distn)
+#' preds <- pivot_quantiles_wider(cdc$predictions, .pred_distn)
 #'
 #' if (require(ggplot2)) {
 #' forecast_date <- unique(preds$forecast_date)

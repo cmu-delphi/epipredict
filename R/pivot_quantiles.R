@@ -25,7 +25,7 @@ nested_quantiles <- function(x) {
 #'
 #' Selected columns that contain `dist_quantiles` will be "lengthened" with
 #' the quantile levels serving as 1 column and the values as another. If
-#' multiple columns are selected, these will be prefixed the the column name.
+#' multiple columns are selected, these will be prefixed with the column name.
 #'
 #' @param .data A data frame, or a data frame extension such as a tibble or
 #'   epi_df.
@@ -39,7 +39,7 @@ nested_quantiles <- function(x) {
 #'   has 7, then the only option would be to recycle everything, creating a
 #'   _very_ long result. By default, this would throw an error. But if this is
 #'   really the goal, then the error can be bypassed by setting this argument
-#'   to `TRUE`. The first selected column will vary fastest.
+#'   to `TRUE`. The quantiles in the first selected column will vary the fastest.
 #'
 #' @return An object of the same class as `.data`.
 #' @export
