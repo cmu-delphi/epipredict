@@ -78,13 +78,15 @@ jhu <- epiprocess::jhu_csse_daily_subset \%>\%
   dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   dplyr::select(geo_value, time_value, cases)
 
-pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
+pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 
 r <- epi_recipe(jhu) \%>\%
-  step_population_scaling(df = pop_data,
-                          df_pop_col = "value",
-                          by = c("geo_value" = "states"),
-                          cases, suffix = "_scaled") \%>\%
+  step_population_scaling(
+    df = pop_data,
+    df_pop_col = "value",
+    by = c("geo_value" = "states"),
+    cases, suffix = "_scaled"
+  ) \%>\%
   step_epi_lag(cases_scaled, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") \%>\%
   step_epi_naomit()
@@ -93,9 +95,11 @@ f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_threshold(.pred) \%>\%
   layer_naomit(.pred) \%>\%
-  layer_population_scaling(.pred, df = pop_data,
-                           by =  c("geo_value" = "states"),
-                           df_pop_col = "value")
+  layer_population_scaling(.pred,
+    df = pop_data,
+    by = c("geo_value" = "states"),
+    df_pop_col = "value"
+  )
 
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
   fit(jhu) \%>\%
@@ -104,9 +108,12 @@ wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
 latest <- get_test_data(
   recipe = r,
   x = epiprocess::jhu_csse_daily_subset \%>\%
-    dplyr::filter(time_value > "2021-11-01",
-                  geo_value \%in\% c("ca", "ny")) \%>\%
-    dplyr::select(geo_value, time_value, cases))
+    dplyr::filter(
+      time_value > "2021-11-01",
+      geo_value \%in\% c("ca", "ny")
+    ) \%>\%
+    dplyr::select(geo_value, time_value, cases)
+)
 
 predict(wf, latest)
 }

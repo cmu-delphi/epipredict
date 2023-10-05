@@ -94,6 +94,12 @@ flatline_forecaster <- function(
 #' Constructs a list of arguments for [flatline_forecaster()].
 #'
 #' @inheritParams arx_args_list
+#' @param ahead Integer. Unlike [arx_forecaster()], this doesn't have any effect
+#'   on the predicted values. Predictions are always the most recent observation.
+#'   However, this _does_ impact the residuals stored in the object. Residuals
+#'   are calculated based on this number to mimic how badly you would have done.
+#'   So for example, `ahead = 7` will create residuals by comparing values
+#'   7 days apart.
 #'
 #' @return A list containing updated parameter choices with class `flatline_alist`.
 #' @export

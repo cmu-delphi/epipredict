@@ -32,6 +32,11 @@ map_chr <- function(.x, .f, ...) {
   .rlang_purrr_map_mold(.x, .f, character(1), ...)
 }
 
+map_vec <- function(.x, .f, ...) {
+  out <- map(.x, .f, ...)
+  vctrs::list_unchop(out)
+}
+
 map_dfr <- function(.x, .f, ..., .id = NULL) {
   .f <- rlang::as_function(.f, env = rlang::global_env())
   res <- map(.x, .f, ...)

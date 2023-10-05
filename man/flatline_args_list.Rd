@@ -17,8 +17,12 @@ flatline_args_list(
 )
 }
 \arguments{
-\item{ahead}{Integer. Number of time steps ahead (in days) of the forecast
-date for which forecasts should be produced.}
+\item{ahead}{Integer. Unlike \code{\link[=arx_forecaster]{arx_forecaster()}}, this doesn't have any effect
+on the predicted values. Predictions are always the most recent observation.
+However, this \emph{does} impact the residuals stored in the object. Residuals
+are calculated based on this number to mimic how badly you would have done.
+So for example, \code{ahead = 7} will create residuals by comparing values
+7 days apart.}
 
 \item{n_training}{Integer. An upper limit for the number of rows per
 key that are used for training

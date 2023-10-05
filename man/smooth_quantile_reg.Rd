@@ -39,9 +39,10 @@ only supported engine is \code{\link[smoothqr:smooth_qr]{smoothqr::smooth_qr()}}
 tib <- data.frame(
   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),
-  x1 = rnorm(100), x2 = rnorm(100))
+  x1 = rnorm(100), x2 = rnorm(100)
+)
 qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 1:6)
-ff <- qr_spec \%>\% fit(cbind(y1, y2 , y3 , y4 , y5 , y6) ~ ., data = tib)
+ff <- qr_spec \%>\% fit(cbind(y1, y2, y3, y4, y5, y6) ~ ., data = tib)
 p <- predict(ff, new_data = tib)
 
 x <- -99:99 / 100 * 2 * pi
@@ -50,28 +51,31 @@ fd <- x[length(x) - 20]
 XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
 XY <- tibble::as_tibble(XY)
 qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 20:1)
-tt <- qr_spec \%>\% fit_xy(x = XY[,21:41], y = XY[,1:20])
+tt <- qr_spec \%>\% fit_xy(x = XY[, 21:41], y = XY[, 1:20])
 
 library(tidyr)
 library(dplyr)
 pl <- predict(
-        object = tt,
-        new_data = XY[max(which(complete.cases(XY[,21:41]))), 21:41]
-      )
+  object = tt,
+  new_data = XY[max(which(complete.cases(XY[, 21:41]))), 21:41]
+)
 pl <- pl \%>\%
-        unnest(.pred) \%>\%
-        mutate(distn = nested_quantiles(distn)) \%>\%
-        unnest(distn) \%>\%
-        mutate(x = x[length(x) - 20] + ahead / 100 * 2 * pi,
-               ahead = NULL) \%>\%
-        pivot_wider(names_from = tau, values_from = q)
+  unnest(.pred) \%>\%
+  mutate(distn = nested_quantiles(distn)) \%>\%
+  unnest(distn) \%>\%
+  mutate(
+    x = x[length(x) - 20] + ahead / 100 * 2 * pi,
+    ahead = NULL
+  ) \%>\%
+  pivot_wider(names_from = tau, values_from = q)
 plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 curve(sin(x), add = TRUE)
 abline(v = fd, lty = 2)
 lines(pl$x, pl$`0.2`, col = "blue")
 lines(pl$x, pl$`0.8`, col = "blue")
 lines(pl$x, pl$`0.5`, col = "red")
-\dontrun{
+
+if (require("ggplot2")) {
 ggplot(data.frame(x = x, y = y), aes(x)) +
   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
   geom_point(aes(y = y), colour = "grey") + # observed data
