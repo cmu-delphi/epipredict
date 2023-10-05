@@ -14,18 +14,44 @@ abbr_to_fips <- function(abbr) {
 
 #' Format predictions for submission to FluSight forecast Hub
 #'
-#'
+#' This function converts predictions from any of the included forecasters into
+#' a format (nearly) ready for submission to the 2023-24
+#' [FluSight-forecast-hub](https://github.com/cdcepi/FluSight-forecast-hub).
+#' See there for documentation of the required columns. Currently, only
+#' "quantile" forcasts are supported, but the intention is to support both
+#' "quantile" and "pmf". For this reason, adding the `output_type` column should
+#' be done via the `...` argument. See the examples below. The specific required
+#' format for this forecast task is [here](https://github.com/cdcepi/FluSight-forecast-hub/blob/main/model-output/README.md).
 #'
 #' @param object a data.frame of predictions or an object of class
 #'   `canned_epipred` as created by, e.g., [arx_forecaster()]
 #' @param ... <[`dynamic-dots`][rlang::dyn-dots]> Name = value pairs of constant
-#'   columns (or mutations) to perform to the results.
+#'   columns (or mutations) to perform to the results. See examples.
 #' @param .fcast_period
 #'
-#' @return A [tibble::tibble].
+#' @return A [tibble::tibble]. If `...` is empty, the result will contain the
+#'   columns `reference_date`, `horizon`, `target_end_date`, `location`,
+#'   `output_type_id`, and `value`. The `...` can perform mutations on any of
+#'   these.
 #' @export
 #'
 #' @examples
+#' library(dplyr)
+#' weekly_deaths <- case_death_rate_subset %>%
+#'   select(geo_value, time_value, death_rate) %>%
+#'   left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
+#'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
+#'   select(-pop, -death_rate) %>%
+#'   group_by(geo_value) %>%
+#'   epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
+#'   ungroup() %>%
+#'   filter(weekdays(time_value) == "Saturday")
+#'
+#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+#' flusight_hub_formatter(cdc)
+#' flusight_hub_formatter(cdc, target = "wk inc covid deaths")
+#' flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
+#' flusight_hub_formatter(cdc, target = "wk inc covid deaths", output_type = "quantile")
 flusight_hub_formatter <- function(
     object, ...,
     .fcast_period = c("daily", "weekly")) {
@@ -69,7 +95,7 @@ flusight_hub_formatter.data.frame <- function(
       reference_date = forecast_date
     ) %>%
     # convert to fips codes, and add any constant cols passed in ...
-    dplyr::mutate(location = abbr_to_fips(tolower(geo_value)), geo_value = NULL, !!!dots)
+    dplyr::mutate(location = abbr_to_fips(tolower(geo_value)), geo_value = NULL)
 
   # create target_end_date / horizon, depending on what is available
   pp <- ifelse(match.arg(.fcast_period) == "daily", 1L, 7L)
@@ -91,5 +117,6 @@ flusight_hub_formatter.data.frame <- function(
   }
   object %>% dplyr::relocate(
     reference_date, horizon, target_end_date, location, output_type_id, value
-  )
+  ) %>%
+    dplyr::mutate(!!!dots)
 }
