@@ -16,7 +16,8 @@ arx_class_args_list(
   method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
   log_scale = FALSE,
   additional_gr_args = list(),
-  nafill_buffer = Inf
+  nafill_buffer = Inf,
+  ...
 )
 }
 \arguments{
@@ -82,6 +83,8 @@ we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
 create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
 will be treated as \emph{additional} allowed recent data rather than the
 total amount of recent data to examine.}
+
+\item{...}{Space to handle future expansions (unused).}
 }
 \value{
 A list containing updated parameter choices with class \code{arx_clist}.

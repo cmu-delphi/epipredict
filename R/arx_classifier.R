@@ -250,7 +250,8 @@ arx_class_args_list <- function(
     method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
     log_scale = FALSE,
     additional_gr_args = list(),
-    nafill_buffer = Inf) {
+    nafill_buffer = Inf,
+    ...) {
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
   method <- match.arg(method)
@@ -305,3 +306,5 @@ print.arx_class <- function(x, ...) {
   name <- "ARX Classifier"
   NextMethod(name = name, ...)
 }
+
+# this is a trivial change to induce a check

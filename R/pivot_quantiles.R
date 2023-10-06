@@ -16,7 +16,7 @@ nested_quantiles <- function(x) {
   distributional:::dist_apply(x, .f = function(z) {
     tibble::as_tibble(vec_data(z)) %>%
       dplyr::mutate(dplyr::across(tidyselect::everything(), as.double)) %>%
-      list_of()
+      vctrs::list_of()
   })
 }
 
@@ -130,14 +130,14 @@ pivot_quantiles_wider <- function(.data, ...) {
       .data <- .data %>%
         tidyr::unnest(tidyselect::all_of(col)) %>%
         tidyr::pivot_wider(
-          names_from = "tau", values_from = "q",
+          names_from = "quantile_levels", values_from = "values",
           names_prefix = paste0(col, "_")
         )
     }
   } else {
     .data <- .data %>%
       tidyr::unnest(tidyselect::all_of(cols)) %>%
-      tidyr::pivot_wider(names_from = "tau", values_from = "q")
+      tidyr::pivot_wider(names_from = "quantile_levels", values_from = "values")
   }
   .data
 }

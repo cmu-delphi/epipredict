@@ -8,7 +8,7 @@ smooth_quantile_reg(
   mode = "regression",
   engine = "smoothqr",
   outcome_locations = NULL,
-  tau = 0.5,
+  quantile_levels = 0.5,
   degree = 3L
 )
 }
@@ -24,7 +24,7 @@ responses are observed at a different spacing (or appear in a different
 order), that information should be used here. This
 argument will be mapped to the \code{ahead} argument of \code{\link[smoothqr:smooth_qr]{smoothqr::smooth_qr()}}.}
 
-\item{tau}{A scalar or vector of values in (0, 1) to determine which
+\item{quantile_levels}{A scalar or vector of values in (0, 1) to determine which
 quantiles to estimate (default is 0.5).}
 
 \item{degree}{the number of polynomials used for response smoothing. Must
@@ -41,7 +41,7 @@ tib <- data.frame(
   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),
   x1 = rnorm(100), x2 = rnorm(100)
 )
-qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 1:6)
+qr_spec <- smooth_quantile_reg(quantile_levels = c(.2, .5, .8), outcome_locations = 1:6)
 ff <- qr_spec \%>\% fit(cbind(y1, y2, y3, y4, y5, y6) ~ ., data = tib)
 p <- predict(ff, new_data = tib)
 
@@ -50,7 +50,7 @@ y <- sin(x) + rnorm(length(x), sd = .1)
 fd <- x[length(x) - 20]
 XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
 XY <- tibble::as_tibble(XY)
-qr_spec <- smooth_quantile_reg(tau = c(.2, .5, .8), outcome_locations = 20:1)
+qr_spec <- smooth_quantile_reg(quantile_levels = c(.2, .5, .8), outcome_locations = 20:1)
 tt <- qr_spec \%>\% fit_xy(x = XY[, 21:41], y = XY[, 1:20])
 
 library(tidyr)
@@ -67,7 +67,7 @@ pl <- pl \%>\%
     x = x[length(x) - 20] + ahead / 100 * 2 * pi,
     ahead = NULL
   ) \%>\%
-  pivot_wider(names_from = tau, values_from = q)
+  pivot_wider(names_from = quantile_levels, values_from = values)
 plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 curve(sin(x), add = TRUE)
 abline(v = fd, lty = 2)
