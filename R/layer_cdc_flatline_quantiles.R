@@ -22,20 +22,30 @@
 #' @inheritParams layer_residual_quantiles
 #' @param aheads Numeric vector of desired forecast horizons. These should be
 #'   given in the "units of the training data". So, for example, for data
-#'   typically observed daily (possibly with missing values), but
-#'   with weekly forecast targets, you would use `c(7, 14, 21, 28)`. But with
-#'   weekly data, you would use `1:4`.
+#'   typically observed daily (possibly with missing values), but with weekly
+#'   forecast targets, you would use `c(7, 14, 21, 28)`. But with weekly data,
+#'   you would use `1:4`.
 #' @param quantile_levels Numeric vector of probabilities with values in (0,1)
 #'   referring to the desired predictive intervals. The default is the standard
 #'   set for the COVID Forecast Hub.
 #' @param nsims Positive integer. The number of draws from the empirical CDF.
-#'   These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting
-#'   in linear interpolation on the X scale. This is achieved with
+#'   These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting in
+#'   linear interpolation on the X scale. This is achieved with
 #'   [stats::quantile()] Type 7 (the default for that function).
-#' @param nonneg Logical. Force all predictive intervals be non-negative.
-#'   Because non-negativity is forced _before_ propagating forward, this
-#'   has slightly different behaviour than would occur if using
-#'   [layer_threshold()].
+#' @param symmetrize Scalar logical. If `TRUE`, does two things: (i) forces the
+#'   "empirical" CDF of residuals to be symmetric by pretending that for every
+#'   actually-observed residual X we also observed another residual -X, and (ii)
+#'   at each ahead, forces the median simulated value to be equal to the point
+#'   prediction by adding or subtracting the same amount to every simulated
+#'   value. Adjustments in (ii) take place before propagating forward and
+#'   simulating the next ahead. This forces any 1-ahead predictive intervals to
+#'   be symmetric about the point prediction, and encourages larger aheads to be
+#'   more symmetric.
+#' @param nonneg Scalar logical. Force all predictive intervals be non-negative.
+#'   Because non-negativity is forced _before_ propagating forward, this has
+#'   slightly different behaviour than would occur if using [layer_threshold()].
+#'   Thresholding at each ahead takes place after any shifting from
+#'   `symmetrize`.
 #'
 #' @return an updated `frosting` postprocessor. Calling [predict()] will result
 #'   in an additional `<list-col>` named `.pred_distn_all` containing 2-column
@@ -213,7 +223,7 @@ slather.layer_cdc_flatline_quantiles <-
     res <- dplyr::left_join(p, r, by = avail_grps) %>%
       dplyr::rowwise() %>%
       dplyr::mutate(
-        .pred_distn_all = propogate_samples(
+        .pred_distn_all = propagate_samples(
           .resid, .pred, object$quantile_levels,
           object$aheads, object$nsim, object$symmetrize, object$nonneg
         )
@@ -229,10 +239,14 @@ slather.layer_cdc_flatline_quantiles <-
     components
   }
 
-propogate_samples <- function(
+propagate_samples <- function(
     r, p, quantile_levels, aheads, nsim, symmetrize, nonneg) {
   max_ahead <- max(aheads)
-  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1), na.rm = TRUE)
+  if (symmetrize) {
+    r <- c(r, -r)
+  }
+  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1),
+                   na.rm = TRUE, names = FALSE)
   res <- list()
 
   raw <- samp + p

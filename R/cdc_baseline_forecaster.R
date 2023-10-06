@@ -12,13 +12,13 @@
 #' This forecaster is meant to produce exactly the CDC Baseline used for
 #' [COVID19ForecastHub](https://covid19forecasthub.org)
 #'
-#' @param epi_data An [epiprocess::epi_df]
+#' @param epi_data An [`epiprocess::epi_df`]
 #' @param outcome A scalar character for the column name we wish to predict.
 #' @param args_list A list of additional arguments as created by the
 #'   [cdc_baseline_args_list()] constructor function.
 #'
-#' @return A data frame of point and interval forecasts at for all
-#'   aheads (unique horizons) for each unique combination of `key_vars`.
+#' @return A data frame of point and interval forecasts for all aheads (unique
+#'   horizons) for each unique combination of `key_vars`.
 #' @export
 #'
 #' @examples
@@ -26,7 +26,7 @@
 #' weekly_deaths <- case_death_rate_subset %>%
 #'   select(geo_value, time_value, death_rate) %>%
 #'   left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
-#'   mutate(deaths = pmax(death_rate / 1e5 * pop, 0)) %>%
+#'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
 #'   select(-pop, -death_rate) %>%
 #'   group_by(geo_value) %>%
 #'   epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
