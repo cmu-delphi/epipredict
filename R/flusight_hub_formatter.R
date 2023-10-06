@@ -93,14 +93,14 @@ flusight_hub_formatter.data.frame <- function(
     dplyr::mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(
-      .pred_distn = list(add_row(.pred_distn, q = .pred, tau = NA)),
+      .pred_distn = list(add_row(.pred_distn, values = .pred, quantile_levels = NA)),
       .pred = NULL
     ) %>%
     tidyr::unnest(.pred_distn) %>%
     # now we create the correct column names
     dplyr::rename(
-      value = q,
-      output_type_id = tau,
+      value = values,
+      output_type_id = quantile_levels,
       reference_date = forecast_date
     ) %>%
     # convert to fips codes, and add any constant cols passed in ...
