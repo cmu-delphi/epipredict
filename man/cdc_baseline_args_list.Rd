@@ -6,11 +6,11 @@
 \usage{
 cdc_baseline_args_list(
   data_frequency = "1 week",
-  aheads = 1:4,
+  aheads = 1:5,
   n_training = Inf,
   forecast_date = NULL,
   quantile_levels = c(0.01, 0.025, 1:19/20, 0.975, 0.99),
-  nsims = 1000L,
+  nsims = 100000L,
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = "geo_value",

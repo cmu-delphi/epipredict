@@ -57,7 +57,6 @@ abbr_to_location <- function(abbr) {
 #'
 #' @examples
 #' if (require(dplyr)) {
-#'   library(dplyr)
 #'   weekly_deaths <- case_death_rate_subset %>%
 #'     select(geo_value, time_value, death_rate) %>%
 #'     left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
