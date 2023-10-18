@@ -115,21 +115,21 @@ preds <- preds \%>\%
   mutate(target_date = forecast_date + ahead)
 
 if (require("ggplot2")) {
-four_states <- c("ca", "pa", "wa", "ny")
-preds \%>\%
-  filter(geo_value \%in\% four_states) \%>\%
-  ggplot(aes(target_date)) +
-  geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
-  geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
-  geom_line(aes(y = .pred), color = "orange") +
-  geom_line(
-    data = case_death_rate_subset \%>\% filter(geo_value \%in\% four_states),
-    aes(x = time_value, y = death_rate)
-  ) +
-  scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
-  labs(x = "Date", y = "Death rate") +
-  facet_wrap(~geo_value, scales = "free_y") +
-  theme_bw() +
-  geom_vline(xintercept = forecast_date)
+  four_states <- c("ca", "pa", "wa", "ny")
+  preds \%>\%
+    filter(geo_value \%in\% four_states) \%>\%
+    ggplot(aes(target_date)) +
+    geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
+    geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
+    geom_line(aes(y = .pred), color = "orange") +
+    geom_line(
+      data = case_death_rate_subset \%>\% filter(geo_value \%in\% four_states),
+      aes(x = time_value, y = death_rate)
+    ) +
+    scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
+    labs(x = "Date", y = "Death rate") +
+    facet_wrap(~geo_value, scales = "free_y") +
+    theme_bw() +
+    geom_vline(xintercept = forecast_date)
 }
 }
