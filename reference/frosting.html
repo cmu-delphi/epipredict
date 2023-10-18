@@ -92,8 +92,8 @@ to hold steps for postprocessing predictions.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Toy example to show that frosting can be created and added for postprocessing</span></span></span>
-<span class="r-in"><span> <span class="va">f</span> <span class="op">&lt;-</span> <span class="fu">frosting</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-in"><span> <span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu">frosting</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A more realistic example</span></span></span>
 <span class="r-in"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>

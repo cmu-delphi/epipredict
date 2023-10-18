@@ -138,20 +138,20 @@ the type of forecasting model. See <code><a href="arx_class_args_list.html">arx_
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Preprocessor ────────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8 Recipe Steps</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_growth_rate()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_epi_lag()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_epi_lag()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_epi_ahead()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_mutate()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_naomit()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_naomit()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_training_window()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. step_growth_rate()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 2. step_epi_lag()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 3. step_epi_lag()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 4. step_epi_ahead()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 5. step_mutate()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 6. step_naomit()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7. step_naomit()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 8. step_training_window()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Postprocessor ───────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 Frosting Layers</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • layer_predict()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • layer_add_forecast_date()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • layer_add_target_date()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. layer_predict()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 2. layer_add_forecast_date()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 3. layer_add_target_date()</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">arx_class_epi_workflow</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="va">jhu</span>,</span></span>
@@ -171,14 +171,14 @@ the type of forecasting model. See <code><a href="arx_class_args_list.html">arx_
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Preprocessor ────────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8 Recipe Steps</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_growth_rate()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_epi_lag()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_epi_lag()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_epi_ahead()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_mutate()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_naomit()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_naomit()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • step_training_window()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. step_growth_rate()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 2. step_epi_lag()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 3. step_epi_lag()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 4. step_epi_ahead()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 5. step_mutate()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 6. step_naomit()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7. step_naomit()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 8. step_training_window()</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Model ───────────────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Multinomial Regression Model Specification (classification)</span>
@@ -188,9 +188,9 @@ the type of forecasting model. See <code><a href="arx_class_args_list.html">arx_
 <span class="r-out co"><span class="r-pr">#&gt;</span> ── Postprocessor ───────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 Frosting Layers</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • layer_predict()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • layer_add_forecast_date()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> • layer_add_target_date()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. layer_predict()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 2. layer_add_forecast_date()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 3. layer_add_target_date()</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
