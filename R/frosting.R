@@ -294,11 +294,11 @@ print.frosting <- function(x, form_width = 30, ...) {
   cli::cli_h1("Frosting")
 
   if (!is.null(x$layers)) cli::cli_h3("Layers")
-  i = 1
-  for (layer in x$layers){
+  i <- 1
+  for (layer in x$layers) {
     cat(paste0(i, ". "))
     print(layer, form_width = form_width)
-    i = i + 1
+    i <- i + 1
   }
   cli::cli_end()
   invisible(x)

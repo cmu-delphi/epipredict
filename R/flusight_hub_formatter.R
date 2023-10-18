@@ -1,7 +1,9 @@
 abbr_to_fips <- function(abbr) {
   fi <- dplyr::left_join(
     tibble::tibble(abbr = tolower(abbr)),
-    state_census, by = "abbr") %>%
+    state_census,
+    by = "abbr"
+  ) %>%
     dplyr::mutate(fips = as.character(fips), fips = case_when(
       fips == "0" ~ "US",
       nchar(fips) < 2L ~ paste0("0", fips),
@@ -118,14 +120,15 @@ flusight_hub_formatter.data.frame <- function(
   } else if (!is.na(has_ahead)) { # ahead present, not target date
     object <- object %>%
       dplyr::rename(horizon = !!names(object)[has_ahead]) %>%
-      dplyr::mutate(target_end_date =  horizon * pp + reference_date)
+      dplyr::mutate(target_end_date = horizon * pp + reference_date)
   } else { # target_date present, not ahead
     object <- object %>%
       dplyr::rename(target_end_date = target_date) %>%
       dplyr::mutate(horizon = as.integer((target_end_date - reference_date)) / pp)
   }
-  object %>% dplyr::relocate(
-    reference_date, horizon, target_end_date, location, output_type_id, value
-  ) %>%
+  object %>%
+    dplyr::relocate(
+      reference_date, horizon, target_end_date, location, output_type_id, value
+    ) %>%
     dplyr::mutate(!!!dots)
 }

@@ -86,22 +86,22 @@
 #'   mutate(target_date = forecast_date + ahead)
 #'
 #' if (require("ggplot2")) {
-#' four_states <- c("ca", "pa", "wa", "ny")
-#' preds %>%
-#'   filter(geo_value %in% four_states) %>%
-#'   ggplot(aes(target_date)) +
-#'   geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
-#'   geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
-#'   geom_line(aes(y = .pred), color = "orange") +
-#'   geom_line(
-#'     data = case_death_rate_subset %>% filter(geo_value %in% four_states),
-#'     aes(x = time_value, y = death_rate)
-#'   ) +
-#'   scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
-#'   labs(x = "Date", y = "Death rate") +
-#'   facet_wrap(~geo_value, scales = "free_y") +
-#'   theme_bw() +
-#'   geom_vline(xintercept = forecast_date)
+#'   four_states <- c("ca", "pa", "wa", "ny")
+#'   preds %>%
+#'     filter(geo_value %in% four_states) %>%
+#'     ggplot(aes(target_date)) +
+#'     geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
+#'     geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
+#'     geom_line(aes(y = .pred), color = "orange") +
+#'     geom_line(
+#'       data = case_death_rate_subset %>% filter(geo_value %in% four_states),
+#'       aes(x = time_value, y = death_rate)
+#'     ) +
+#'     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
+#'     labs(x = "Date", y = "Death rate") +
+#'     facet_wrap(~geo_value, scales = "free_y") +
+#'     theme_bw() +
+#'     geom_vline(xintercept = forecast_date)
 #' }
 layer_cdc_flatline_quantiles <- function(
     frosting,
@@ -160,7 +160,9 @@ layer_cdc_flatline_quantiles_new <- function(
 #' @export
 slather.layer_cdc_flatline_quantiles <-
   function(object, components, workflow, new_data, ...) {
-    if (is.null(object$quantile_levels)) return(components)
+    if (is.null(object$quantile_levels)) {
+      return(components)
+    }
     the_fit <- workflows::extract_fit_parsnip(workflow)
     if (!inherits(the_fit, "_flatline")) {
       cli::cli_warn(
@@ -245,8 +247,10 @@ propagate_samples <- function(
   if (symmetrize) {
     r <- c(r, -r)
   }
-  samp <- quantile(r, probs = c(0, seq_len(nsim - 1)) / (nsim - 1),
-                   na.rm = TRUE, names = FALSE)
+  samp <- quantile(r,
+    probs = c(0, seq_len(nsim - 1)) / (nsim - 1),
+    na.rm = TRUE, names = FALSE
+  )
   res <- list()
 
   raw <- samp + p

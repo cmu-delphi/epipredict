@@ -63,15 +63,15 @@
 #' lines(pl$x, pl$`0.5`, col = "red")
 #'
 #' if (require("ggplot2")) {
-#' ggplot(data.frame(x = x, y = y), aes(x)) +
-#'   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
-#'   geom_point(aes(y = y), colour = "grey") + # observed data
-#'   geom_function(fun = sin, colour = "black") + # truth
-#'   geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
-#'   geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
-#'   theme_bw() +
-#'   coord_cartesian(xlim = c(0, NA)) +
-#'   ylab("y")
+#'   ggplot(data.frame(x = x, y = y), aes(x)) +
+#'     geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
+#'     geom_point(aes(y = y), colour = "grey") + # observed data
+#'     geom_function(fun = sin, colour = "black") + # truth
+#'     geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
+#'     geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
+#'     theme_bw() +
+#'     coord_cartesian(xlim = c(0, NA)) +
+#'     ylab("y")
 #' }
 smooth_quantile_reg <- function(
     mode = "regression",
