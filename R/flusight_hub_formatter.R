@@ -93,11 +93,6 @@ flusight_hub_formatter.data.frame <- function(
   object <- object %>%
     # combine the predictions and the distribution
     dplyr::mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-    dplyr::rowwise() %>%
-    dplyr::mutate(
-      .pred_distn = list(add_row(.pred_distn, values = .pred, quantile_levels = NA)),
-      .pred = NULL
-    ) %>%
     tidyr::unnest(.pred_distn) %>%
     # now we create the correct column names
     dplyr::rename(
