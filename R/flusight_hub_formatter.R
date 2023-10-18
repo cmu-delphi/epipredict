@@ -1,18 +1,27 @@
-abbr_to_fips <- function(abbr) {
-  fi <- dplyr::left_join(
-    tibble::tibble(abbr = tolower(abbr)),
-    state_census,
-    by = "abbr"
-  ) %>%
-    dplyr::mutate(fips = as.character(fips), fips = case_when(
-      fips == "0" ~ "US",
-      nchar(fips) < 2L ~ paste0("0", fips),
-      TRUE ~ fips
-    )) %>%
-    pull(.data$fips)
-  names(fi) <- NULL
-  fi
+location_to_abbr <- function(location) {
+  dictionary <-
+    state_census %>%
+    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
+    dplyr::transmute(
+      location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
+      abbr
+    )
+  dictionary$abbr[match(location, dictionary$location)]
 }
+
+abbr_to_location <- function(abbr) {
+  dictionary <-
+    state_census %>%
+    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
+    dplyr::transmute(
+      location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
+      abbr
+    )
+  dictionary$location[match(abbr, dictionary$abbr)]
+}
+
+
+
 
 #' Format predictions for submission to FluSight forecast Hub
 #'
@@ -47,22 +56,24 @@ abbr_to_fips <- function(abbr) {
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' weekly_deaths <- case_death_rate_subset %>%
-#'   select(geo_value, time_value, death_rate) %>%
-#'   left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
-#'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
-#'   select(-pop, -death_rate) %>%
-#'   group_by(geo_value) %>%
-#'   epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
-#'   ungroup() %>%
-#'   filter(weekdays(time_value) == "Saturday")
+#' if (require(dplyr)) {
+#'   library(dplyr)
+#'   weekly_deaths <- case_death_rate_subset %>%
+#'     select(geo_value, time_value, death_rate) %>%
+#'     left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
+#'     mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
+#'     select(-pop, -death_rate) %>%
+#'     group_by(geo_value) %>%
+#'     epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
+#'     ungroup() %>%
+#'     filter(weekdays(time_value) == "Saturday")
 #'
-#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
-#' flusight_hub_formatter(cdc)
-#' flusight_hub_formatter(cdc, target = "wk inc covid deaths")
-#' flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
-#' flusight_hub_formatter(cdc, target = "wk inc covid deaths", output_type = "quantile")
+#'   cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+#'   flusight_hub_formatter(cdc)
+#'   flusight_hub_formatter(cdc, target = "wk inc covid deaths")
+#'   flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
+#'   flusight_hub_formatter(cdc, target = "wk inc covid deaths", output_type = "quantile")
+#' }
 flusight_hub_formatter <- function(
     object, ...,
     .fcast_period = c("daily", "weekly")) {
@@ -101,7 +112,7 @@ flusight_hub_formatter.data.frame <- function(
       reference_date = forecast_date
     ) %>%
     # convert to fips codes, and add any constant cols passed in ...
-    dplyr::mutate(location = abbr_to_fips(tolower(geo_value)), geo_value = NULL)
+    dplyr::mutate(location = abbr_to_location(tolower(geo_value)), geo_value = NULL)
 
   # create target_end_date / horizon, depending on what is available
   pp <- ifelse(match.arg(.fcast_period) == "daily", 1L, 7L)
