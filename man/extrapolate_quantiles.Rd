@@ -24,12 +24,14 @@ library(distributional)
 dstn <- dist_normal(c(10, 2), c(5, 10))
 extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 
-dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8)))
+dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
 # because this distribution is already quantiles, any extra quantiles are
 # appended
 extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 
-dstn <- c(dist_normal(c(10, 2), c(5, 10)),
-  dist_quantiles(list(1:4, 8:11), list(c(.2,.4,.6,.8))))
+dstn <- c(
+  dist_normal(c(10, 2), c(5, 10)),
+  dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
+)
 extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
 }
