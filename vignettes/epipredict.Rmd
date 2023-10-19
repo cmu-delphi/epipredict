@@ -157,7 +157,7 @@ Another property of the basic model is the predictive interval. We describe this
 ```{r differential-levels}
 out_q <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(
-    levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99)
+    quantile_levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99)
   )
 )
 ```
@@ -168,7 +168,8 @@ The column `.pred_dstn` in the `predictions` object is actually a "distribution"
 head(quantile(out_q$predictions$.pred_distn, p = .4))
 ```
 
-or extract the entire distribution into a "long" `epi_df` with `tau` being the probability and `q` being the value associated to that quantile.
+or extract the entire distribution into a "long" `epi_df` with `quantile_levels`
+being the probability and `values` being the value associated to that quantile.
 
 ```{r q2}
 out_q$predictions %>%
@@ -182,7 +183,7 @@ Additional simple adjustments to the basic forecaster can be made using the func
 ```{r, eval = FALSE}
 arx_args_list(
   lags = c(0L, 7L, 14L), ahead = 7L, n_training = Inf,
-  forecast_date = NULL, target_date = NULL, levels = c(0.05, 0.95),
+  forecast_date = NULL, target_date = NULL, quantile_levels = c(0.05, 0.95),
   symmetrize = TRUE, nonneg = TRUE, quantile_by_key = character(0L),
   nafill_buffer = Inf
 )
@@ -213,7 +214,7 @@ out_gb <- arx_forecaster(
 Or quantile regression, using our custom forecasting engine `quantile_reg()`:
 
 ```{r quantreg, warning = FALSE}
-out_gb <- arx_forecaster(
+out_qr <- arx_forecaster(
   jhu, "death_rate", c("case_rate", "death_rate"),
   quantile_reg()
 )
@@ -340,7 +341,7 @@ intervals at 0. The code to do this (inside the forecaster) is
 f <- frosting() %>%
   layer_predict() %>%
   layer_residual_quantiles(
-    probs = c(.01, .025, seq(.05, .95, by = .05), .975, .99),
+    quantile_levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99),
     symmetrize = TRUE
   ) %>%
   layer_add_forecast_date() %>%

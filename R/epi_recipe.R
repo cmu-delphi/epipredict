@@ -456,11 +456,11 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
     cli::cli_h3("Operations")
   }
 
-  i = 1
+  i <- 1
   for (step in x$steps) {
     cat(paste0(i, ". "))
     print(step, form_width = form_width)
-    i = i + 1
+    i <- i + 1
   }
   cli::cli_end()
 
@@ -469,20 +469,20 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
 
 # Currently only used in the workflow printing
 print_preprocessor_recipe <- function(x, ...) {
-
   recipe <- workflows::extract_preprocessor(x)
   steps <- recipe$steps
   n_steps <- length(steps)
   if (n_steps == 1L) {
     step <- "Step"
-  }
-  else {
+  } else {
     step <- "Steps"
   }
   n_steps_msg <- glue::glue("{n_steps} Recipe {step}")
   cat_line(n_steps_msg)
 
-  if (n_steps == 0L) return(invisible(x))
+  if (n_steps == 0L) {
+    return(invisible(x))
+  }
 
   cat_line("")
 
@@ -498,8 +498,7 @@ print_preprocessor_recipe <- function(x, ...) {
 
   if (extra_steps == 1L) {
     step <- "step"
-  }
-  else {
+  } else {
     step <- "steps"
   }
 
@@ -512,7 +511,6 @@ print_preprocessor_recipe <- function(x, ...) {
 }
 
 print_preprocessor <- function(x) {
-
   has_preprocessor_formula <- workflows:::has_preprocessor_formula(x)
   has_preprocessor_recipe <- workflows:::has_preprocessor_recipe(x)
   has_preprocessor_variables <- workflows:::has_preprocessor_variables(x)
@@ -532,7 +530,7 @@ print_preprocessor <- function(x) {
     workflows:::print_preprocessor_formula(x)
   }
   if (has_preprocessor_recipe) {
-      print_preprocessor_recipe(x)
+    print_preprocessor_recipe(x)
   }
   if (has_preprocessor_variables) {
     workflows:::print_preprocessor_variables(x)

@@ -49,7 +49,7 @@ arx_fcast_epi_workflow(
 arx_fcast_epi_workflow(jhu, "death_rate",
   c("case_rate", "death_rate"),
   trainer = quantile_reg(),
-  args_list = arx_args_list(levels = 1:9 / 10)
+  args_list = arx_args_list(quantile_levels = 1:9 / 10)
 )
 }
 \seealso{

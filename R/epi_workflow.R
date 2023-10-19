@@ -219,7 +219,7 @@ new_epi_workflow <- function(
 print.epi_workflow <- function(x, ...) {
   print_header(x)
   print_preprocessor(x)
-  #workflows:::print_case_weights(x)
+  # workflows:::print_case_weights(x)
   workflows:::print_model(x)
   print_postprocessor(x)
   invisible(x)
