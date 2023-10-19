@@ -169,7 +169,9 @@ cdc_baseline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = "geo_value",
-    nafill_buffer = Inf) {
+    nafill_buffer = Inf,
+    ...) {
+  rlang::check_dots_empty()
   arg_is_scalar(n_training, nsims, data_frequency)
   data_frequency <- parse_period(data_frequency)
   arg_is_pos_int(data_frequency)
