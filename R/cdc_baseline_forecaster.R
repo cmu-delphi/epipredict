@@ -161,11 +161,11 @@ cdc_baseline_forecaster <- function(
 #' cdc_baseline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 cdc_baseline_args_list <- function(
     data_frequency = "1 week",
-    aheads = 1:4,
+    aheads = 1:5,
     n_training = Inf,
     forecast_date = NULL,
     quantile_levels = c(.01, .025, 1:19 / 20, .975, .99),
-    nsims = 1e3L,
+    nsims = 1e5L,
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = "geo_value",
