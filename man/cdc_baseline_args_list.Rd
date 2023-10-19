@@ -14,7 +14,8 @@ cdc_baseline_args_list(
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = "geo_value",
-  nafill_buffer = Inf
+  nafill_buffer = Inf,
+  ...
 )
 }
 \arguments{
@@ -71,6 +72,8 @@ we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
 create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
 will be treated as \emph{additional} allowed recent data rather than the
 total amount of recent data to examine.}
+
+\item{...}{Space to handle future expansions (unused).}
 }
 \value{
 A list containing updated parameter choices with class \code{cdc_flat_fcast}.
