@@ -119,6 +119,7 @@ flatline_args_list <- function(
     quantile_by_key = character(0L),
     nafill_buffer = Inf,
     ...) {
+  rlang::check_dots_empty()
   arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)

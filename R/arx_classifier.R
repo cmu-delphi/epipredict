@@ -252,6 +252,8 @@ arx_class_args_list <- function(
     additional_gr_args = list(),
     nafill_buffer = Inf,
     ...) {
+
+  rlang::check_dots_empty()
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
   method <- match.arg(method)
