@@ -35,6 +35,9 @@ reference:
     - contains("flatline")
     - contains("arx")
     - contains("cdc")
+  - title: Helper functions for Hub submission
+    contents:
+    - flusight_hub_formatter
   - title: Parsnip engines
     desc: Prediction methods not available elsewhere
     contents:
