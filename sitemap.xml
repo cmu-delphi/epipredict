@@ -70,6 +70,12 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/case_death_rate_subset.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/cdc_baseline_args_list.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/cdc_baseline_forecaster.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/check_pname.html</loc>
   </url>
   <url>
@@ -115,6 +121,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/flatline_forecaster.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/flusight_hub_formatter.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/frosting.html</loc>
   </url>
   <url>
@@ -143,6 +152,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_add_target_date.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/layer_cdc_flatline_quantiles.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/layer_naomit.html</loc>
@@ -181,7 +193,10 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/pipe.html</loc>
   </url>
   <url>
-    <loc>https://cmu-delphi.github.io/epipredict/reference/pivot_quantiles.html</loc>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/pivot_quantiles_longer.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/pivot_quantiles_wider.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/predict-epi_workflow.html</loc>

@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -201,7 +201,7 @@ cluttering the output.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/pivot_quantiles.html">pivot_quantiles</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/pivot_quantiles_wider.html">pivot_quantiles_wider</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span></span></code></pre></div>
 <p>Here, <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> does all the heavy lifting. It
 creates leads of the target (respecting time stamps and locations) along
 with lags of the features (here, the response and doctors visits),
@@ -294,7 +294,7 @@ regression with those from using boosted regression trees.</p>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/pivot_quantiles.html">pivot_quantiles</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="../reference/pivot_quantiles_wider.html">pivot_quantiles_wider</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span></span></code></pre></div>
 <p>The figures below shows the results for all of the provinces.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span></span>
@@ -396,7 +396,7 @@ for version-unaware forecasting, <code>x_latest</code> is fed into
 <span><span class="va">fc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">aheads</span>, <span class="op">~</span> <span class="fu">k_week_version_aware</span><span class="op">(</span><span class="va">.x</span>, <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">aheads</span>, <span class="op">~</span> <span class="fu">k_week_version_aware</span><span class="op">(</span><span class="va">.x</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/pivot_quantiles.html">pivot_quantiles</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/pivot_quantiles_wider.html">pivot_quantiles_wider</a></span><span class="op">(</span><span class="va">fc_.pred_distn</span><span class="op">)</span></span></code></pre></div>
 <p>Now we can plot the results on top of the latest case rates. As
 before, we will only display and focus on the results for FL and CA for
 simplicity.</p>
@@ -443,7 +443,7 @@ purpose.</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay, Maggie Liu, Ken Mawer, Chloe You.</p>
+<p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay.</p>
 </div>
 
 <div class="pkgdown-footer-right">

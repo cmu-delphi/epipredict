@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -254,7 +254,7 @@ dataset.</p>
 <pre><code><span><span class="co">#&gt; An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2023-10-18 19:37:57.221853</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-10-20 15:07:29.07034</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   geo_value time_value .pred</span></span>
@@ -410,23 +410,23 @@ data:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">jhu</span><span class="op">)</span>, <span class="va">jhu</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; Rows: 6</span></span>
 <span><span class="co">#&gt; Columns: 17</span></span>
-<span><span class="co">#&gt; $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-10-20, 2021-09-21, 2021-07-22, 2021-09-20, 2…</span></span>
-<span><span class="co">#&gt; $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "tx", "nj", "fl", "ca", "nj", "ca"</span></span>
-<span><span class="co">#&gt; $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 17.12003, 25.61575, 29.87448, 22.13541, 13.81388, …</span></span>
-<span><span class="co">#&gt; $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.6422567, 0.2235568, 0.1518406, 0.3044526, 0.0997…</span></span>
-<span><span class="co">#&gt; $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(52.8,60.2]", "(63.9,69.7]", "[42.7,52.8]", "(69.…</span></span>
-<span><span class="co">#&gt; $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "[13.9,18.4]", "(19.8,21.1]", "[13.9,18.4]", "(27,…</span></span>
+<span><span class="co">#&gt; $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-06-20, 2021-08-31, 2021-08-31, 2021-10-10, 2…</span></span>
+<span><span class="co">#&gt; $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "nj", "tx", "fl", "ca", "nj", "ny"</span></span>
+<span><span class="co">#&gt; $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 2.603874, 57.488782, 96.305747, 14.886245, 20.7087…</span></span>
+<span><span class="co">#&gt; $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0707662, 0.7274043, 1.2088092, 0.2554644, 0.2187…</span></span>
+<span><span class="co">#&gt; $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(52.8,60.2]", "(63.9,69.7]", "(63.9,69.7]", "(69.…</span></span>
+<span><span class="co">#&gt; $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(27,43]", "(18.4,19.8]", "(19.8,21.1]", "(27,43]"…</span></span>
 <span><span class="co">#&gt; $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 1, 0, 0, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 0, 1, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -9.821630, -1.325915, 2.932819, -4.806252, -13.127…</span></span>
-<span><span class="co">#&gt; $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.73235585, -0.73244425, -11.33231325, -0.0279061…</span></span>
-<span><span class="co">#&gt; $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1.931180, -6.311714, -16.632275, 5.145611, -13.576…</span></span>
-<span><span class="co">#&gt; $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.3603831, -0.0583168, -0.1300330, 0.0225790, -0.1…</span></span>
-<span><span class="co">#&gt; $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.479103196, -0.084050004, -0.168814804, 0.0066124…</span></span>
-<span><span class="co">#&gt; $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.6085276965, -0.1274747035, -0.1418647035, 0.0004…</span></span>
-<span><span class="co">#&gt; $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.5610015, 0.2251651, 0.1853639, 0.2768741, 0.2171…</span></span></code></pre>
+<span><span class="co">#&gt; $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 0, 0, 1, 0</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 1</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.337789, 30.547120, 69.364085, -12.055417, -6.2…</span></span>
+<span><span class="co">#&gt; $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.273456, 30.449808, 70.895638, -9.076572, -1.20…</span></span>
+<span><span class="co">#&gt; $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.096541, 26.060568, 86.799466, -7.573904, -2.69…</span></span>
+<span><span class="co">#&gt; $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.2111074, 0.4455307, 0.9269356, -0.0264092, -0.0…</span></span>
+<span><span class="co">#&gt; $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1998492, 0.2392301, 0.7645779, -0.0351182, -0.0…</span></span>
+<span><span class="co">#&gt; $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1660744, 0.0329295, 0.3511244, -0.0260463, -0.0…</span></span>
+<span><span class="co">#&gt; $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.1013243, 0.7755736, 1.5854529, 0.2431266, 0.2283…</span></span></code></pre>
 <p>Before directly predicting the results, we need to add postprocessing
 layers to obtain the death counts instead of death rates. Note that the
 rates used so far are “per 100K people” rather than “per person”. We’ll
@@ -448,7 +448,7 @@ rather than ordinary least squares to create median predictions and a
 <span>    df_pop_col <span class="op">=</span> <span class="st">"pop"</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span>tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">.5</span>, <span class="fl">.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">.5</span>, <span class="fl">.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
 <span></span>
@@ -461,13 +461,13 @@ rather than ordinary least squares to create median predictions and a
 <span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 7</span></span></span>
-<span><span class="co">#&gt;   geo_value time_value               .pred target_date         .pred_distn</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2021-12-31 [0.05, 0.95]&lt;q-rng&gt; 2022-01-07  [0.25, 0.75]&lt;q-rng&gt;</span></span>
+<span><span class="co">#&gt;   geo_value time_value              .pred target_date        .pred_distn</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2021-12-31 quantiles(0.18)[3] 2022-01-07  quantiles(0.18)[2]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2021-12-31 quantiles(0.35)[3] 2022-01-07  quantiles(0.36)[2]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2021-12-31 quantiles(0.65)[3] 2022-01-07  quantiles(0.64)[2]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2021-12-31  quantiles(0.7)[3] 2022-01-07  quantiles(0.69)[2]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2021-12-31  quantiles(0.3)[3] 2022-01-07   quantiles(0.3)[2]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: .pred_scaled &lt;dist&gt;, .pred_distn_scaled &lt;dist&gt;</span></span></span></code></pre>
 <p>The columns marked <code>*_scaled</code> have been rescaled to the
 correct units, in this case <code>deaths</code> rather than deaths per
@@ -478,15 +478,15 @@ correct units, in this case <code>deaths</code> rather than deaths per
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">target_date</span>, <span class="va">.pred_scaled</span>, <span class="va">.pred_distn_scaled</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>.pred_distn_scaled <span class="op">=</span> <span class="fu"><a href="../reference/nested_quantiles.html">nested_quantiles</a></span><span class="op">(</span><span class="va">.pred_distn_scaled</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.pred_distn_scaled</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">tau</span>, values_from <span class="op">=</span> <span class="va">q</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/pivot_wider.html" class="external-link">pivot_wider</a></span><span class="op">(</span>names_from <span class="op">=</span> <span class="va">quantile_levels</span>, values_from <span class="op">=</span> <span class="va">values</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
-<span><span class="co">#&gt;   geo_value target_date        .pred_scaled `0.25` `0.75`</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2022-01-07  [0.05, 0.95]&lt;q-rng&gt;   48.8   94.0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2022-01-07  [0.05, 0.95]&lt;q-rng&gt;   48.4  104. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2022-01-07  [0.05, 0.95]&lt;q-rng&gt;   45.5   68.7</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2022-01-07  [0.05, 0.95]&lt;q-rng&gt;  108.   163. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2022-01-07  [0.05, 0.95]&lt;q-rng&gt;   68.6  107.</span></span></code></pre>
+<span><span class="co">#&gt;   geo_value target_date         .pred_scaled `0.25` `0.75`</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2022-01-07   quantiles(71.61)[3]   48.8   94.0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2022-01-07    quantiles(74.7)[3]   48.4  104. </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2022-01-07    quantiles(57.4)[3]   45.5   68.7</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2022-01-07  quantiles(135.85)[3]  108.   163. </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2022-01-07   quantiles(86.77)[3]   68.6  107.</span></span></code></pre>
 <p>Last but not least, let’s take a look at the regression fit and check
 the coefficients:</p>
 <pre><code><span><span class="co">#&gt; Call:</span></span>
@@ -831,7 +831,7 @@ Copyright Johns Hopkins University 2020.</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay, Maggie Liu, Ken Mawer, Chloe You.</p>
+<p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay.</p>
 </div>
 
 <div class="pkgdown-footer-right">

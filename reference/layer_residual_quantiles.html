@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">layer_residual_quantiles</span><span class="op">(</span></span>
 <span>  <span class="va">frosting</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">".pred_distn"</span>,</span>
@@ -82,7 +82,7 @@
 <dd><p>Unused, include for consistency with other layers.</p></dd>
 
 
-<dt>probs</dt>
+<dt>quantile_levels</dt>
 <dd><p>numeric vector of probabilities with values in (0,1)
 referring to the desired quantile.</p></dd>
 
@@ -128,7 +128,7 @@ residual quantiles added to the prediction</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">layer_residual_quantiles</span><span class="op">(</span>probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.0275</span>, <span class="fl">0.975</span><span class="op">)</span>, symmetrize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">layer_residual_quantiles</span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.0275</span>, <span class="fl">0.975</span><span class="op">)</span>, symmetrize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="layer_naomit.html">layer_naomit</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">wf1</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -136,12 +136,13 @@ residual quantiles added to the prediction</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">layer_residual_quantiles</span><span class="op">(</span>probs <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.7</span><span class="op">)</span>, by_key <span class="op">=</span> <span class="st">"geo_value"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">layer_residual_quantiles</span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.3</span>, <span class="fl">0.7</span><span class="op">)</span>, by_key <span class="op">=</span> <span class="st">"geo_value"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="layer_naomit.html">layer_naomit</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">wf2</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="pipe.html">%&gt;%</a></span> <span class="fu"><a href="add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f2</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf2</span>, <span class="va">latest</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Some grouping keys are not in data.frame returned by the</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> `residuals()` method. Groupings may not be correct.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -149,7 +150,7 @@ residual quantiles added to the prediction</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay, Maggie Liu, Ken Mawer, Chloe You.</p>
+  <p></p><p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay.</p>
 </div>
 
 <div class="pkgdown-footer-right">

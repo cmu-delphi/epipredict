@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,19 +66,24 @@
 <span>  n_training <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nonneg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
-<span>  nafill_buffer <span class="op">=</span> <span class="cn">Inf</span></span>
+<span>  nafill_buffer <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
     <dl><dt>ahead</dt>
-<dd><p>Integer. Number of time steps ahead (in days) of the forecast
-date for which forecasts should be produced.</p></dd>
+<dd><p>Integer. Unlike <code><a href="arx_forecaster.html">arx_forecaster()</a></code>, this doesn't have any effect
+on the predicted values. Predictions are always the most recent observation.
+However, this <em>does</em> impact the residuals stored in the object. Residuals
+are calculated based on this number to mimic how badly you would have done.
+So for example, <code>ahead = 7</code> will create residuals by comparing values
+7 days apart.</p></dd>
 
 
 <dt>n_training</dt>
@@ -97,7 +102,7 @@ The default <code>NULL</code> will attempt to determine this automatically.</p><
 The default <code>NULL</code> will attempt to determine this automatically.</p></dd>
 
 
-<dt>levels</dt>
+<dt>quantile_levels</dt>
 <dd><p>Vector or <code>NULL</code>. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of
 training residuals. A <code>NULL</code> value will result in point forecasts only.</p></dd>
@@ -135,6 +140,10 @@ create a prediction. For this reason, setting <code>nafill_buffer &lt; min(lags)
 will be treated as <em>additional</em> allowed recent data rather than the
 total amount of recent data to examine.</p></dd>
 
+
+<dt>...</dt>
+<dd><p>Space to handle future expansions (unused).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -151,7 +160,7 @@ total amount of recent data to examine.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ levels         : num [1:2] 0.05 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_levels: num [1:2] 0.05 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
@@ -163,19 +172,19 @@ total amount of recent data to examine.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ levels         : num [1:2] 0.05 0.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_levels: num [1:2] 0.05 0.95</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "flat_fcast" "alist"</span>
-<span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, n_training <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, n_training <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num 120</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ levels         : num [1:4] 0.1 0.3 0.7 0.9</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_levels: num [1:4] 0.1 0.3 0.7 0.9</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
@@ -188,7 +197,7 @@ total amount of recent data to examine.</p></dd>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay, Maggie Liu, Ken Mawer, Chloe You.</p>
+  <p></p><p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay.</p>
 </div>
 
 <div class="pkgdown-footer-right">

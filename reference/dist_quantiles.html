@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.6</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -61,17 +61,17 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dist_quantiles</span><span class="op">(</span><span class="va">x</span>, <span class="va">tau</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dist_quantiles</span><span class="op">(</span><span class="va">values</span>, <span class="va">quantile_levels</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>x</dt>
+    <dl><dt>values</dt>
 <dd><p>A vector of values</p></dd>
 
 
-<dt>tau</dt>
-<dd><p>A vector of probabilities corresponding to <code>x</code></p></dd>
+<dt>quantile_levels</dt>
+<dd><p>A vector of probabilities corresponding to <code>values</code></p></dd>
 
 </dl></div>
 
@@ -89,12 +89,21 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.5 9.5</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># it's a bit annoying to inspect the data</span></span></span>
-<span class="r-in"><span><span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/vec_data.html" class="external-link">vec_data</a></span><span class="op">(</span><span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/vec_data.html" class="external-link">vec_data</a></span><span class="op">(</span><span class="va">dstn</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   q tau</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1 0.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 2 0.4</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 3 0.6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 4 0.8</span>
+<span class="r-in"><span><span class="fu">distributional</span><span class="fu">::</span><span class="fu"><a href="https://pkg.mitchelloharawild.com/distributional/reference/parameters.html" class="external-link">parameters</a></span><span class="op">(</span><span class="va">dstn</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       values    quantile_levels</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 1, 2, 3, 4 0.2, 0.4, 0.6, 0.8</span>
+<span class="r-in"><span><span class="fu"><a href="nested_quantiles.html">nested_quantiles</a></span><span class="op">(</span><span class="va">dstn</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span><span class="op">)</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 4 × 2</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   values quantile_levels</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>      1             0.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>      2             0.4</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>      3             0.6</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>      4             0.8</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">dist_quantiles</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;distribution[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] quantiles(2.5)[4]</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
@@ -102,7 +111,7 @@
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p><p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay, Maggie Liu, Ken Mawer, Chloe You.</p>
+  <p></p><p>Developed by Daniel McDonald, Ryan Tibshirani, Logan Brooks, Rachel Lobay.</p>
 </div>
 
 <div class="pkgdown-footer-right">
