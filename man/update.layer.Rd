@@ -19,7 +19,7 @@ Analogous to \code{update.step()} from the \code{recipes} package.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
-dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
@@ -29,7 +29,8 @@ latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
 # Specify a `forecast_date` that is greater than or equal to `as_of` date
-f <- frosting() \%>\% layer_predict() \%>\%
+f <- frosting() \%>\%
+  layer_predict() \%>\%
   layer_add_forecast_date(forecast_date = "2022-05-31") \%>\%
   layer_naomit(.pred)
 

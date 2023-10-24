@@ -45,26 +45,28 @@ r <- epi_recipe(jhu) \%>\%
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 
 # in the frosting from the workflow
-f1 <- frosting() \%>\% layer_predict() \%>\% layer_threshold(.pred)
+f1 <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_threshold(.pred)
 
-wf2 = wf \%>\% add_frosting(f1)
+wf2 <- wf \%>\% add_frosting(f1)
 
 # Adjust `layer_threshold` to have an upper bound of 1
 # in the `epi_workflow`
 # Option 1. Using the layer number:
-wf2 = wf2 \%>\% adjust_frosting(which_layer = 2, upper = 1)
+wf2 <- wf2 \%>\% adjust_frosting(which_layer = 2, upper = 1)
 extract_frosting(wf2)
 # Option 2. Using the layer name:
-wf3 = wf2 \%>\% adjust_frosting(which_layer = "layer_threshold", upper = 1)
+wf3 <- wf2 \%>\% adjust_frosting(which_layer = "layer_threshold", upper = 1)
 extract_frosting(wf3)
 
 # Adjust `layer_threshold` to have an upper bound of 5
 # in the `frosting` object
 # Option 1. Using the layer number:
-f2 = f1 \%>\% adjust_frosting(which_layer = 2, upper = 5)
+f2 <- f1 \%>\% adjust_frosting(which_layer = 2, upper = 5)
 f2
 # Option 2. Using the layer name
-f3 = f1 \%>\% adjust_frosting(which_layer = "layer_threshold", upper = 5)
+f3 <- f1 \%>\% adjust_frosting(which_layer = "layer_threshold", upper = 5)
 f3
 
 }

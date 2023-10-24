@@ -38,6 +38,8 @@ Add an \code{epi_recipe} to a workflow
 default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
 }
 \examples{
+library(recipes)
+
 jhu <- case_death_rate_subset \%>\%
   filter(time_value > "2021-08-01") \%>\%
   dplyr::arrange(geo_value, time_value)
@@ -46,8 +48,8 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  step_naomit(all_outcomes(), skip = TRUE)
+  recipes::step_naomit(recipes::all_predictors()) \%>\%
+  recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
 workflow <- epi_workflow() \%>\%
   add_epi_recipe(r)

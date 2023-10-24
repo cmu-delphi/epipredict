@@ -66,19 +66,19 @@ latest <- jhu \%>\%
 # Adjust `step_epi_ahead` to have an ahead value of 14
 # in the `epi_workflow`
 # Option 1. Using the step number:
-wf2 = wf \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
+wf2 <- wf \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
 workflows::extract_preprocessor(wf2)
 # Option 2. Using the step name:
-wf3 = wf \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
+wf3 <- wf \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
 workflows::extract_preprocessor(wf3)
 
 # Adjust `step_epi_ahead` to have an ahead value of 14
 # in the `epi_recipe`
 # Option 1. Using the step number
-r2 = r \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
+r2 <- r \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
 r2
 # Option 2. Using the step name
-r3 = r \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
+r3 <- r \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
 r3
 
 }

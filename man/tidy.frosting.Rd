@@ -38,7 +38,7 @@ version of the \code{tidy} method for a recipe.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
-dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
