@@ -12,8 +12,7 @@
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-#'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   step_epi_naomit()
+#'   step_epi_ahead(death_rate, ahead = 7)
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
@@ -41,7 +40,7 @@
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   action <- workflows:::new_action_post(frosting = frosting)
-  epi_add_action(x, action, "frosting")
+  epi_add_action(x, action, "frosting", ...)
 }
 
 
@@ -96,6 +95,7 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
 #' @rdname add_frosting
 #' @export
 update_frosting <- function(x, frosting, ...) {
+  rlang::check_dots_empty()
   x <- remove_frosting(x)
   add_frosting(x, frosting)
 }
@@ -108,13 +108,15 @@ update_frosting <- function(x, frosting, ...) {
 #'
 #'
 #' @details This function can either adjust a layer in a `frosting` object
-#' or a layer from a `frosting` object in an `epi_workflow`. In any case, the
-#' argument name and update value must be inputted as `...`.
-#' See the examples below for brief illustrations of both types of updates.
+#' or a layer from a `frosting` object in an `epi_workflow`. The layer to be
+#' adjusted is indicated by either the layer number or name (if a name is used,
+#' it must be unique). In either case, the argument name and update value
+#' must be inputted as `...`. See the examples below for brief
+#' illustrations of the different types of updates.
 #'
 #' @param x An `epi_workflow` or `frosting` object
 #'
-#' @param layer_num the number of the layer to adjust
+#' @param which_layer the number or name of the layer to adjust
 #'
 #' @param ... Used to input a parameter adjustment
 #'
@@ -133,31 +135,39 @@ update_frosting <- function(x, frosting, ...) {
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #'
 #' # in the frosting from the workflow
-#' f1 <- frosting() %>% layer_predict() %>% layer_threshold(.pred)
+#' f1 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_threshold(.pred)
 #'
-#' wf2 = wf %>% add_frosting(f1)
+#' wf2 <- wf %>% add_frosting(f1)
 #'
 #' # Adjust `layer_threshold` to have an upper bound of 1
 #' # in the `epi_workflow`
-#' wf2 = wf2 %>% adjust_frosting(layer_num = 2, upper = 1)
+#' # Option 1. Using the layer number:
+#' wf2 <- wf2 %>% adjust_frosting(which_layer = 2, upper = 1)
 #' extract_frosting(wf2)
+#' # Option 2. Using the layer name:
+#' wf3 <- wf2 %>% adjust_frosting(which_layer = "layer_threshold", upper = 1)
+#' extract_frosting(wf3)
 #'
-#' # Adjust `layer_threshold` to have an upper bound of 1
+#' # Adjust `layer_threshold` to have an upper bound of 5
 #' # in the `frosting` object
-#' f2 = f1 %>% adjust_frosting(layer_num = 2, upper = 5)
-#' extract_frosting(wf2)
+#' # Option 1. Using the layer number:
+#' f2 <- f1 %>% adjust_frosting(which_layer = 2, upper = 5)
+#' f2
+#' # Option 2. Using the layer name
+#' f3 <- f1 %>% adjust_frosting(which_layer = "layer_threshold", upper = 5)
+#' f3
 #'
-adjust_frosting <- function(x, layer_num, ...) {
+adjust_frosting <- function(x, which_layer, ...) {
   UseMethod("adjust_frosting")
 }
 
 #' @rdname adjust_frosting
 #' @export
 adjust_frosting.epi_workflow <- function(
-    x, layer_num, ...) {
-
-  frosting <- extract_frosting(x)
-  frosting$layers[[layer_num]] <- update(frosting$layers[[layer_num]], ...)
+    x, which_layer, ...) {
+  frosting <- adjust_frosting(extract_frosting(x), which_layer, ...)
 
   update_frosting(x, frosting)
 }
@@ -165,11 +175,44 @@ adjust_frosting.epi_workflow <- function(
 #' @rdname adjust_frosting
 #' @export
 adjust_frosting.frosting <- function(
-    x, layer_num, ...) {
+    x, which_layer, ...) {
+  if (!(is.numeric(which_layer) || is.character(which_layer))) {
+    rlang::abort(
+      paste0(
+        "The layer name (`which_layer`) must be a number or a character."
+      )
+    )
+  } else if (is.numeric(which_layer)) {
+    x$layers[[which_layer]] <- update(x$layers[[which_layer]], ...)
+  } else {
+    layer_names <- map_chr(x$layers, ~ attr(.x, "class")[1])
 
-  x$layers[[layer_num]] <- update(x$layers[[layer_num]], ...)
+    if (!(which_layer %in% layer_names)) {
+      rlang::abort(
+        paste0(
+          "The layer name (`which_layer`) is not in the `frosting` layer names: ",
+          paste0(layer_names, collapse = ", "),
+          "."
+        )
+      )
+    }
+    which_layer_idx <- which(layer_names == which_layer)
+    if (length(which_layer_idx) == 1) {
+      x$layers[[which_layer_idx]] <- update(x$layers[[which_layer_idx]], ...)
+    } else {
+      rlang::abort(
+        paste0(
+          "The layer name (`which_layer`) is not unique. Matches layers: ",
+          paste0(which_layer_idx, collapse = ", "),
+          "."
+        )
+      )
+    }
+  }
   x
 }
+
+
 
 #' @importFrom rlang caller_env
 add_postprocessor <- function(x, postprocessor, ..., call = caller_env()) {

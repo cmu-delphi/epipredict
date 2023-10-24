@@ -57,10 +57,6 @@ around \code{\link[recipes:recipe]{recipes::recipe()}} to properly handle the ad
 columns present in an \code{epi_df}
 }
 \examples{
-library(epiprocess)
-library(dplyr)
-library(recipes)
-
 jhu <- case_death_rate_subset \%>\%
   dplyr::filter(time_value > "2021-08-01") \%>\%
   dplyr::arrange(geo_value, time_value)

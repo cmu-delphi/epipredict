@@ -10,16 +10,16 @@ add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 
 remove_epi_recipe(x)
 
-update_epi_recipe(x, recipe, ..., blueprint = NULL)
+update_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 }
 \arguments{
-\item{x}{A \code{workflow} \code{or }epi_workflow`}
+\item{x}{A \code{workflow} or \code{epi_workflow}}
 
-\item{recipe}{A recipe created using \code{\link[recipes:recipe]{recipes::recipe()}}.}
+\item{recipe}{An epi recipe or recipe}
 
 \item{...}{Not used}
 
-\item{blueprint}{A hardhat blueprint used for fine tuning the preprocessing.
+\item{blueprint}{A hardhat blueprint used for fine tuning the preprocessing
 
 \code{\link[=default_epi_recipe_blueprint]{default_epi_recipe_blueprint()}} is used.
 
@@ -38,10 +38,6 @@ Add an \code{epi_recipe} to a workflow
 default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
 }
 \examples{
-library(epiprocess)
-library(dplyr)
-library(recipes)
-
 jhu <- case_death_rate_subset \%>\%
   filter(time_value > "2021-08-01") \%>\%
   dplyr::arrange(geo_value, time_value)
@@ -61,6 +57,7 @@ workflow
 r2 <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7)
+
 workflow <- update_epi_recipe(workflow, r2)
 
 workflow <- remove_epi_recipe(workflow)

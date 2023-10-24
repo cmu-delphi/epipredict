@@ -88,8 +88,10 @@ is_epi_workflow <- function(x) {
 #' @export
 #' @examples
 #' jhu <- case_death_rate_subset %>%
-#' dplyr::filter(time_value > "2021-11-01",
-#' geo_value %in% c("ak", "ca", "ny"))
+#'   dplyr::filter(
+#'     time_value > "2021-11-01",
+#'     geo_value %in% c("ak", "ca", "ny")
+#'   )
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -110,23 +112,26 @@ is_epi_workflow <- function(x) {
 #' wf <- remove_model(wf)
 #' wf
 #' @export
-add_model <- function(x, spec, ..., formula = NULL)
-  UseMethod('add_model')
+add_model <- function(x, spec, ..., formula = NULL) {
+  UseMethod("add_model")
+}
 
 #' @rdname add_model
 #' @export
-remove_model <- function(x)
-  UseMethod('remove_model')
+remove_model <- function(x) {
+  UseMethod("remove_model")
+}
 
 #' @rdname add_model
 #' @export
-update_model <- function(x, spec, ..., formula = NULL)
-  UseMethod('update_model')
+update_model <- function(x, spec, ..., formula = NULL) {
+  UseMethod("update_model")
+}
 
 #' @rdname add_model
 #' @export
 add_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
-  workflows::add_model(x, spec, formula = formula)
+  workflows::add_model(x, spec, ..., formula = formula)
 }
 
 #' @rdname add_model
@@ -151,7 +156,7 @@ remove_model.epi_workflow <- function(x) {
 update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
   rlang::check_dots_empty()
   x <- remove_model(x)
-  workflows::add_model(x, spec, formula = formula)
+  workflows::add_model(x, spec, ..., formula = formula)
 }
 
 

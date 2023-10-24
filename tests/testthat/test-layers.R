@@ -1,6 +1,8 @@
 test_that("A layer can be updated in frosting", {
   # Modify lower in `layer_threshold`
-  f <- frosting() %>% layer_predict() %>% layer_threshold(.pred)
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred)
   fold <- f
   expect_equal(class(f), "frosting")
   expect_equal(length(f$layers), 2)

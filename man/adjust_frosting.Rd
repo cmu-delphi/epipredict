@@ -6,16 +6,16 @@
 \alias{adjust_frosting.frosting}
 \title{Adjust a layer in an \code{epi_workflow} or \code{frosting}}
 \usage{
-adjust_frosting(x, layer_num, ...)
+adjust_frosting(x, which_layer, ...)
 
-\method{adjust_frosting}{epi_workflow}(x, layer_num, ...)
+\method{adjust_frosting}{epi_workflow}(x, which_layer, ...)
 
-\method{adjust_frosting}{frosting}(x, layer_num, ...)
+\method{adjust_frosting}{frosting}(x, which_layer, ...)
 }
 \arguments{
 \item{x}{An \code{epi_workflow} or \code{frosting} object}
 
-\item{layer_num}{the number of the layer to adjust}
+\item{which_layer}{the number or name of the layer to adjust}
 
 \item{...}{Used to input a parameter adjustment}
 }
@@ -28,9 +28,11 @@ Make a parameter adjustment to a layer in either an
 }
 \details{
 This function can either adjust a layer in a \code{frosting} object
-or a layer from a \code{frosting} object in an \code{epi_workflow}. In any case, the
-argument name and update value must be inputted as \code{...}.
-See the examples below for brief illustrations of both types of updates.
+or a layer from a \code{frosting} object in an \code{epi_workflow}. The layer to be
+adjusted is indicated by either the layer number or name (if a name is used,
+it must be unique). In either case, the argument name and update value
+must be inputted as \code{...}. See the examples below for brief
+illustrations of the different types of updates.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -49,12 +51,20 @@ wf2 = wf \%>\% add_frosting(f1)
 
 # Adjust `layer_threshold` to have an upper bound of 1
 # in the `epi_workflow`
-wf2 = wf2 \%>\% adjust_frosting(layer_num = 2, upper = 1)
+# Option 1. Using the layer number:
+wf2 = wf2 \%>\% adjust_frosting(which_layer = 2, upper = 1)
 extract_frosting(wf2)
+# Option 2. Using the layer name:
+wf3 = wf2 \%>\% adjust_frosting(which_layer = "layer_threshold", upper = 1)
+extract_frosting(wf3)
 
-# Adjust `layer_threshold` to have an upper bound of 1
+# Adjust `layer_threshold` to have an upper bound of 5
 # in the `frosting` object
-f2 = f1 \%>\% adjust_frosting(layer_num = 2, upper = 5)
-extract_frosting(wf2)
+# Option 1. Using the layer number:
+f2 = f1 \%>\% adjust_frosting(which_layer = 2, upper = 5)
+f2
+# Option 2. Using the layer name
+f3 = f1 \%>\% adjust_frosting(which_layer = "layer_threshold", upper = 5)
+f3
 
 }

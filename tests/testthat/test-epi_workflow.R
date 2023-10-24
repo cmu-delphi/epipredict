@@ -61,5 +61,4 @@ test_that("model can be added/updated/removed from epi_workflow", {
   wf <- remove_model(wf)
   expect_error(extract_spec_parsnip(wf))
   expect_equal(wf$fit$actions$model$spec, NULL)
-
 })

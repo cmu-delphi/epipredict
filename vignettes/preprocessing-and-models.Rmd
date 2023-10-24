@@ -245,7 +245,6 @@ State-wise population data from the 2019 U.S. Census is included in this package
 and will be used in `layer_population_scaling()`.
 
 ```{r}
-
 behav_ind_mask <- pub_covidcast(
   source = "fb-survey",
   signals = "smoothed_wwearing_mask_7d",

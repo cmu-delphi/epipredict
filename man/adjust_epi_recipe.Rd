@@ -6,16 +6,31 @@
 \alias{adjust_epi_recipe.epi_recipe}
 \title{Adjust a step in an \code{epi_workflow} or \code{epi_recipe}}
 \usage{
-adjust_epi_recipe(x, step_num, ..., blueprint = default_epi_recipe_blueprint())
+adjust_epi_recipe(
+  x,
+  which_step,
+  ...,
+  blueprint = default_epi_recipe_blueprint()
+)
 
-\method{adjust_epi_recipe}{epi_workflow}(x, step_num, ..., blueprint = default_epi_recipe_blueprint())
+\method{adjust_epi_recipe}{epi_workflow}(
+  x,
+  which_step,
+  ...,
+  blueprint = default_epi_recipe_blueprint()
+)
 
-\method{adjust_epi_recipe}{epi_recipe}(x, step_num, ..., blueprint = default_epi_recipe_blueprint())
+\method{adjust_epi_recipe}{epi_recipe}(
+  x,
+  which_step,
+  ...,
+  blueprint = default_epi_recipe_blueprint()
+)
 }
 \arguments{
 \item{x}{A \code{epi_workflow} or \code{epi_recipe} object}
 
-\item{step_num}{the number of the step to adjust}
+\item{which_step}{the number or name of the step to adjust}
 
 \item{...}{Used to input a parameter adjustment}
 
@@ -30,9 +45,11 @@ Make a parameter adjustment to a step in either an
 }
 \details{
 This function can either adjust a step in a \code{epi_recipe} object
-or a step from a \code{epi_recipe} object in an \code{epi_workflow}. In any case, the
-argument name and update value must be inputted as \code{...}.
-See the examples below for brief illustrations of both types of updates.
+or a step from a \code{epi_recipe} object in an \code{epi_workflow}. The step to be
+adjusted is indicated by either the step number or name (if a name is used,
+it must be unique). In either case, the argument name and update value
+must be inputted as \code{...}. See the examples below for brief
+illustrations of the different types of updates.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -48,12 +65,20 @@ latest <- jhu \%>\%
 
 # Adjust `step_epi_ahead` to have an ahead value of 14
 # in the `epi_workflow`
-wf2 = wf \%>\% adjust_epi_recipe(step_num = 2, ahead = 14)
+# Option 1. Using the step number:
+wf2 = wf \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
 workflows::extract_preprocessor(wf2)
+# Option 2. Using the step name:
+wf3 = wf \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
+workflows::extract_preprocessor(wf3)
 
 # Adjust `step_epi_ahead` to have an ahead value of 14
 # in the `epi_recipe`
-r2 = r \%>\% adjust_epi_recipe(step_num = 2, ahead = 14)
+# Option 1. Using the step number
+r2 = r \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
 r2
+# Option 2. Using the step name
+r3 = r \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
+r3
 
 }

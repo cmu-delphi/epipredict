@@ -26,7 +26,6 @@ test_that("Column names can be passed with and without the tidy way", {
 })
 
 test_that("Number of columns and column names returned correctly, Upper and lower cases handled properly ", {
-
   pop_data <- data.frame(
     states = c(rep("a", 5), rep("B", 5)),
     counties = c(
