@@ -1,5 +1,13 @@
 # epipredict (development)
 
+# epipredict 0.0.6
+
+* rename the `dist_quantiles()` to be more descriptive, breaking change)
+* removes previous `pivot_quantiles()` (now `*_wider()`, breaking change)
+* add `pivot_quantiles_wider()` for easier plotting
+* add complement `pivot_quantiles_longer()`
+* add `cdc_baseline_forecaster()` and `flusight_hub_formatter()`
+
 # epipredict 0.0.5
 
 * add `smooth_quantile_reg()`
@@ -7,8 +15,6 @@
 * canned forecasters get a class
 * fixed quantile bug in `flatline_forecaster()`
 * add functionality to output the unfit workflow from the canned forecasters
-* add `pivot_quantiles()` for easier plotting
-
 
 # epipredict 0.0.4
 

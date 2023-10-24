@@ -66,7 +66,7 @@ get_parsnip_mode <- function(trainer) {
   cc <- class(trainer)
   cli::cli_abort(
     c("`trainer` must be a `parsnip` model.",
-      i = "This trainer has class(s) {cc}."
+      i = "This trainer has class(s) {.cls {cc}}."
     )
   )
 }

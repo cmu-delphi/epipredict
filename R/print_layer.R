@@ -25,7 +25,8 @@ print_layer <- function(
   )
   more_dots <- ifelse(first_line == length(elements), "", ", ...")
   cli::cli_bullets(
-    c(`*` = "\n    {title}: \\\n    {.pkg {elements[seq_len(first_line)]}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}}")
+    c("\n    {title}: \\\n    {.pkg {elements[seq_len(first_line)]}}\\\n    {more_dots} \\\n    {conjunction} \\\n    {.pkg {extra_text}}")
   )
+
   invisible(NULL)
 }

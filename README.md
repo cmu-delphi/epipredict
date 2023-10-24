@@ -35,9 +35,10 @@ You can view documentation for the `main` branch at
     You should be able to do a reasonably limited amount of
     customization on them. For the basic forecasters, we currently
     provide:
-    - Baseline flat-line forecaster
+    - Baseline flatline forecaster
     - Autoregressive forecaster
     - Autoregressive classifier
+    - CDC FluSight flatline forecaster
 2.  A framework for creating custom forecasters out of modular
     components. There are four types of components:
     - Preprocessor: do things to the data before model training
@@ -51,26 +52,26 @@ You can view documentation for the `main` branch at
 - Intermediate. Wants to examine changes to the arguments, take
   advantage of built in flexibility.
 - Advanced. Wants to write their own forecasters. Maybe willing to build
-  up from some components that we write.
+  up from some components.
 
 The Advanced user should find their task to be relatively easy. Examples
 of these tasks are illustrated in the [vignettes and
 articles](https://cmu-delphi.github.io/epipredict).
 
+See also the (in progress) [Forecasting
+Book](https://cmu-delphi.github.io/delphi-tooling-book/).
+
 ## Intermediate example
 
 The package comes with some built-in historical data for illustration,
 but up-to-date versions of this could be downloaded with the
-[`{covidcast}`
-package](https://cmu-delphi.github.io/covidcast/covidcastR/index.html)
-and processed using
+[`{epidatr}` package](https://cmu-delphi.github.io/epidatr/) and
+processed using
 [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
 
 ``` r
-library(tidyverse)
 library(epipredict)
-jhu <- case_death_rate_subset
-jhu
+case_death_rate_subset
 ```
 
     #> An `epi_df` object, 20,496 x 4 with metadata:
@@ -99,15 +100,33 @@ cases, we could use the following function.
 
 ``` r
 two_week_ahead <- arx_forecaster(
-  jhu, 
-  outcome = "death_rate", 
+  case_death_rate_subset,
+  outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
-    lags = list(c(0,1,2,3,7,14), c(0,7,14)),
+    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
     ahead = 14
   )
-) 
+)
+two_week_ahead
 ```
+
+    #> 
+    #> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════
+    #> 
+    #> This forecaster was fit on 2023-10-20 08:59:57
+    #> 
+    #> Training data was an `epi_df` with
+    #> • Geography: state,
+    #> • Time type: day,
+    #> • Using data up-to-date as of: 2022-05-31 12:08:25.
+    #> 
+    #> ── Predictions ─────────────────────────────────────────────────────────────────
+    #> 
+    #> A total of 56 predictions are available for
+    #> • 56 unique geographic regions,
+    #> • At forecast dates: 2021-12-31,
+    #> • For target dates: 2022-01-14.
 
 In this case, we have used a number of different lags for the case rate,
 while only using 3 weekly lags for the death rate (as predictors). The
@@ -127,13 +146,19 @@ two_week_ahead$epi_workflow
     #> 
     #> ── Preprocessor ────────────────────────────────────────────────────────────────
     #> 6 Recipe Steps
-    #> 
-    #> • step_epi_lag()
-    #> • step_epi_lag()
-    #> • step_epi_ahead()
-    #> • step_naomit()
-    #> • step_naomit()
-    #> • step_training_window()
+
+    #> 1. step_epi_lag()
+
+    #> 2. step_epi_lag()
+
+    #> 3. step_epi_ahead()
+
+    #> 4. step_naomit()
+
+    #> 5. step_naomit()
+
+    #> 6. step_training_window()
+
     #> 
     #> ── Model ───────────────────────────────────────────────────────────────────────
     #> 
@@ -150,12 +175,16 @@ two_week_ahead$epi_workflow
     #> 
     #> ── Postprocessor ───────────────────────────────────────────────────────────────
     #> 5 Frosting Layers
-    #> 
-    #> • layer_predict()
-    #> • layer_residual_quantiles()
-    #> • layer_add_forecast_date()
-    #> • layer_add_target_date()
-    #> • layer_threshold()
+
+    #> 1. layer_predict()
+
+    #> 2. layer_residual_quantiles()
+
+    #> 3. layer_add_forecast_date()
+
+    #> 4. layer_add_target_date()
+
+    #> 5. layer_threshold()
 
 The fitted model here involved preprocessing the data to appropriately
 generate lagged predictors, estimating a linear model with `stats::lm()`
@@ -167,18 +196,18 @@ two_week_ahead$predictions
 ```
 
     #> # A tibble: 56 × 5
-    #>    geo_value .pred         .pred_distn forecast_date target_date
-    #>    <chr>     <dbl>              <dist> <date>        <date>     
-    #>  1 ak        0.449 [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  2 al        0.574 [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  3 ar        0.673 [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  4 as        0     [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  5 az        0.679 [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  6 ca        0.575 [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  7 co        0.862 [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  8 ct        1.07  [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #>  9 dc        2.12  [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
-    #> 10 de        1.09  [0.05, 0.95]<q-rng> 2021-12-31    2022-01-14 
+    #>    geo_value .pred        .pred_distn forecast_date target_date
+    #>    <chr>     <dbl>             <dist> <date>        <date>     
+    #>  1 ak        0.449 quantiles(0.45)[2] 2021-12-31    2022-01-14 
+    #>  2 al        0.574 quantiles(0.57)[2] 2021-12-31    2022-01-14 
+    #>  3 ar        0.673 quantiles(0.67)[2] 2021-12-31    2022-01-14 
+    #>  4 as        0     quantiles(0.12)[2] 2021-12-31    2022-01-14 
+    #>  5 az        0.679 quantiles(0.68)[2] 2021-12-31    2022-01-14 
+    #>  6 ca        0.575 quantiles(0.57)[2] 2021-12-31    2022-01-14 
+    #>  7 co        0.862 quantiles(0.86)[2] 2021-12-31    2022-01-14 
+    #>  8 ct        1.07  quantiles(1.07)[2] 2021-12-31    2022-01-14 
+    #>  9 dc        2.12  quantiles(2.12)[2] 2021-12-31    2022-01-14 
+    #> 10 de        1.09  quantiles(1.09)[2] 2021-12-31    2022-01-14 
     #> # ℹ 46 more rows
 
 The results above show a distributional forecast produced using data
@@ -186,34 +215,8 @@ through the end of 2021 for the 14th of January 2022. A prediction for
 the death rate per 100K inhabitants is available for every state
 (`geo_value`) along with a 90% predictive interval.
 
-<!--
-&#10;During a quiet period, a user decides they want to first predict whether a surge is about to occur, say using variant information from GISAID. Then for surging locations, they want to train an AR model using past surges in the same location. Everywhere else, they predict a flat line. We should be able to do this in a few lines of code.
-&#10;Delphi's own forecasts have been produced/evaluated in this way for a while now, but the code base is scattered and evolving. We want to consolidate, generalize, and simplify to allow others to benefit as well.
-&#10;The basic framework should allow for something like the following. This would
-feel very familiar to anyone working in `R`+`{tidyverse}`.
-&#10;**Simple linear autoregressive model with scaling (modular)**
-&#10;
-```r
-my_fcaster = new_epi_predictor() %>%
-  add_preprocessor(scaler, var = cases, by = pop) %>%
-  add_preprocessor(lagger, var = dv_cli, lags = c(0, 7, 14)) %>%
-  add_trainer(lm) %>%
-  add_predictor(lm.predict) %>%
-  add_postprocessor(scaler, by = 1/pop)
-```
-&#10;Then you could run this on an `epi_df` with one line.
-&#10;
-```r
-my_fcaster(lead(cases, 7) ~ ., epi_df, key_vars, time_vars)
-```
-&#10;The hypothetical example of first classifying, then fitting different models would also fit into this framework. And this isn't far from our current production models.
-&#10;
-&#10;
-### What this isn't
-&#10;This is not a framework for SIR models. We intend to create some simple versions, but advanced models---those that use variants, hospitalizations, different types of immunity, age stratification, etc.---cannot be compartmentalized in the same way (though see [pypm](https://pypm.github.io/home/)). These types of models also are better at scenario modeling than short term forecasts unless they are quite complicated.
-&#10;-->
-
 [^1]: Other epidemiological signals for non-Covid related illnesses are
-    available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr)
-    which interfaces directly to Delphi’s [Epidata
+    also available with
+    [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which
+    interfaces directly to Delphi’s [Epidata
     API](https://cmu-delphi.github.io/delphi-epidata/)

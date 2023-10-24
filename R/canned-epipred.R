@@ -8,13 +8,13 @@ validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
   arg_is_chr(predictors)
   arg_is_chr_scalar(outcome)
   if (!outcome %in% names(epi_data)) {
-    cli::cli_abort("{outcome} was not found in the training data.")
+    cli::cli_abort("{.var {outcome}} was not found in the training data.")
   }
   check <- hardhat::check_column_names(epi_data, predictors)
   if (!check$ok) {
     cli::cli_abort(c(
       "At least one predictor was not found in the training data.",
-      "!" = "The following required columns are missing: {check$missing_names}."
+      "!" = "The following required columns are missing: {.val {check$missing_names}}."
     ))
   }
   invisible(TRUE)
@@ -41,8 +41,8 @@ arx_lags_validator <- function(predictors, lags) {
         predictors_miss <- setdiff(predictors, names(lags))
         cli::cli_abort(c(
           "If lags is a named list, then all predictors must be present.",
-          i = "The predictors are '{predictors}'.",
-          i = "So lags is missing '{predictors_miss}'."
+          i = "The predictors are {.var {predictors}}.",
+          i = "So lags is missing {.var {predictors_miss}}'."
         ))
       }
     }
