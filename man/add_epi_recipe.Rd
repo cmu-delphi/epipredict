@@ -38,10 +38,8 @@ Add an \code{epi_recipe} to a workflow
 default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
 }
 \examples{
-library(recipes)
-
 jhu <- case_death_rate_subset \%>\%
-  filter(time_value > "2021-08-01") \%>\%
+  dplyr::filter(time_value > "2021-08-01") \%>\%
   dplyr::arrange(geo_value, time_value)
 
 r <- epi_recipe(jhu) \%>\%
