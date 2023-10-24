@@ -418,7 +418,12 @@ print.frosting <- function(x, form_width = 30, ...) {
   cli::cli_h1("Frosting")
 
   if (!is.null(x$layers)) cli::cli_h3("Layers")
-  for (layer in x$layers) print(layer, form_width = form_width)
+  i <- 1
+  for (layer in x$layers) {
+    cat(paste0(i, ". "))
+    print(layer, form_width = form_width)
+    i <- i + 1
+  }
   cli::cli_end()
   invisible(x)
 }
@@ -440,7 +445,7 @@ print_frosting <- function(x, ...) {
   layer_names <- map_chr(layers, pull_layer_name)
 
   if (n_layers <= 10L) {
-    cli::cat_bullet(layer_names)
+    cli::cli_ol(layer_names)
     return(invisible(x))
   }
 
@@ -452,9 +457,8 @@ print_frosting <- function(x, ...) {
   extra_dots <- "..."
   extra_msg <- glue::glue("and {extra_layers} more {layer}.")
 
-  layer_names <- c(layer_names, extra_dots, extra_msg)
-
-  cli::cat_bullet(layer_names)
+  cli::cli_ol(layer_names)
+  cli::cli_bullets(c(extra_dots, extra_msg))
   invisible(x)
 }
 

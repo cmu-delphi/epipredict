@@ -321,7 +321,7 @@ new_epi_workflow <- function(
 #' @export
 print.epi_workflow <- function(x, ...) {
   print_header(x)
-  workflows:::print_preprocessor(x)
+  print_preprocessor(x)
   # workflows:::print_case_weights(x)
   workflows:::print_model(x)
   print_postprocessor(x)

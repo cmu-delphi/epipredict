@@ -58,7 +58,7 @@ flatline_forecaster <- function(
   f <- frosting() %>%
     layer_predict() %>%
     layer_residual_quantiles(
-      probs = args_list$levels,
+      quantile_levels = args_list$quantile_levels,
       symmetrize = args_list$symmetrize,
       by_key = args_list$quantile_by_key
     ) %>%
@@ -94,6 +94,12 @@ flatline_forecaster <- function(
 #' Constructs a list of arguments for [flatline_forecaster()].
 #'
 #' @inheritParams arx_args_list
+#' @param ahead Integer. Unlike [arx_forecaster()], this doesn't have any effect
+#'   on the predicted values. Predictions are always the most recent observation.
+#'   However, this _does_ impact the residuals stored in the object. Residuals
+#'   are calculated based on this number to mimic how badly you would have done.
+#'   So for example, `ahead = 7` will create residuals by comparing values
+#'   7 days apart.
 #'
 #' @return A list containing updated parameter choices with class `flatline_alist`.
 #' @export
@@ -101,24 +107,26 @@ flatline_forecaster <- function(
 #' @examples
 #' flatline_args_list()
 #' flatline_args_list(symmetrize = FALSE)
-#' flatline_args_list(levels = c(.1, .3, .7, .9), n_training = 120)
+#' flatline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 flatline_args_list <- function(
     ahead = 7L,
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
-    levels = c(0.05, 0.95),
+    quantile_levels = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf) {
+    nafill_buffer = Inf,
+    ...) {
+  rlang::check_dots_empty()
   arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead)
   arg_is_lgl(symmetrize, nonneg)
-  arg_is_probabilities(levels, allow_null = TRUE)
+  arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
@@ -129,7 +137,7 @@ flatline_args_list <- function(
       n_training,
       forecast_date,
       target_date,
-      levels,
+      quantile_levels,
       symmetrize,
       nonneg,
       quantile_by_key,

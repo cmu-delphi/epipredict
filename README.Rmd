@@ -40,9 +40,10 @@ You can view documentation for the `main` branch at <https://cmu-delphi.github.i
 **We hope to provide:**
 
 1. A set of basic, easy-to-use forecasters that work out of the box. You should be able to do a reasonably limited amount of customization on them. For the basic forecasters, we currently provide: 
-    * Baseline flat-line forecaster 
+    * Baseline flatline forecaster 
     * Autoregressive forecaster
     * Autoregressive classifier
+    * CDC FluSight flatline forecaster
 2. A framework for creating custom forecasters out of modular components. There are four types of components:
     * Preprocessor: do things to the data before model training
     * Trainer: train a model on data, resulting in a fitted model object
@@ -52,30 +53,39 @@ You can view documentation for the `main` branch at <https://cmu-delphi.github.i
 **Target audiences:**
 
 * Basic. Has data, calls forecaster with default arguments.
-* Intermediate. Wants to examine changes to the arguments, take advantage of built in flexibility.
-* Advanced. Wants to write their own forecasters. Maybe willing to build up from some components that we write. 
+* Intermediate. Wants to examine changes to the arguments, take advantage of 
+built in flexibility.
+* Advanced. Wants to write their own forecasters. Maybe willing to build up 
+from some components. 
 
-The Advanced user should find their task to be relatively easy. Examples of these tasks are illustrated in the [vignettes and articles](https://cmu-delphi.github.io/epipredict).
+The Advanced user should find their task to be relatively easy. Examples of 
+these tasks are illustrated in the [vignettes and articles](https://cmu-delphi.github.io/epipredict).
+
+See also the (in progress) [Forecasting Book](https://cmu-delphi.github.io/delphi-tooling-book/).
 
 ## Intermediate example
 
 The package comes with some built-in historical data for illustration, but
-up-to-date versions of this could be downloaded with the [`{covidcast}` package](https://cmu-delphi.github.io/covidcast/covidcastR/index.html) and processed using [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
+up-to-date versions of this could be downloaded with the 
+[`{epidatr}` package](https://cmu-delphi.github.io/epidatr/) 
+and processed using 
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
 
-[^1]: Other epidemiological signals for non-Covid related illnesses are available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which interfaces directly to Delphi's [Epidata API](https://cmu-delphi.github.io/delphi-epidata/)
+[^1]: Other epidemiological signals for non-Covid related illnesses are also 
+available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which 
+interfaces directly to Delphi's 
+[Epidata API](https://cmu-delphi.github.io/delphi-epidata/)
 
 ```{r epidf, message=FALSE}
-library(tidyverse)
 library(epipredict)
-jhu <- case_death_rate_subset
-jhu
+case_death_rate_subset
 ```
 
 To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.
 
 ```{r make-forecasts, warning=FALSE}
 two_week_ahead <- arx_forecaster(
-  jhu,
+  case_death_rate_subset,
   outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
@@ -83,55 +93,31 @@ two_week_ahead <- arx_forecaster(
     ahead = 14
   )
 )
+two_week_ahead
 ```
 
-In this case, we have used a number of different lags for the case rate, while only using 3 weekly lags for the death rate (as predictors). The result is both a fitted model object which could be used any time in the future to create different forecasts, as well as a set of predicted values (and prediction intervals) for each location 14 days after the last available time value in the data.
+In this case, we have used a number of different lags for the case rate, while 
+only using 3 weekly lags for the death rate (as predictors). The result is both
+a fitted model object which could be used any time in the future to create
+different forecasts, as well as a set of predicted values (and prediction
+intervals) for each location 14 days after the last available time value in the
+data.
 
 ```{r print-model}
 two_week_ahead$epi_workflow
 ```
 
-The fitted model here involved preprocessing the data to appropriately generate lagged predictors, estimating a linear model with `stats::lm()` and then postprocessing the results to be meaningful for epidemiological tasks. We can also examine the predictions.
+The fitted model here involved preprocessing the data to appropriately generate
+lagged predictors, estimating a linear model with `stats::lm()` and then
+postprocessing the results to be meaningful for epidemiological tasks. We can
+also examine the predictions.
 
 ```{r show-preds}
 two_week_ahead$predictions
 ```
 
-The results above show a distributional forecast produced using data through the end of 2021 for the 14th of January 2022. A prediction for the death rate per 100K inhabitants is available for every state (`geo_value`) along with a 90% predictive interval.
+The results above show a distributional forecast produced using data through
+the end of 2021 for the 14th of January 2022. A prediction for the death rate
+per 100K inhabitants is available for every state (`geo_value`) along with a
+90% predictive interval.
 
-<!--
-
-During a quiet period, a user decides they want to first predict whether a surge is about to occur, say using variant information from GISAID. Then for surging locations, they want to train an AR model using past surges in the same location. Everywhere else, they predict a flat line. We should be able to do this in a few lines of code.
-
-Delphi's own forecasts have been produced/evaluated in this way for a while now, but the code base is scattered and evolving. We want to consolidate, generalize, and simplify to allow others to benefit as well.
-
-The basic framework should allow for something like the following. This would
-feel very familiar to anyone working in `R`+`{tidyverse}`.
-
-**Simple linear autoregressive model with scaling (modular)**
-
-```{r ideal-framework, eval=FALSE}
-my_fcaster <- new_epi_predictor() %>%
-  add_preprocessor(scaler, var = cases, by = pop) %>%
-  add_preprocessor(lagger, var = dv_cli, lags = c(0, 7, 14)) %>%
-  add_trainer(lm) %>%
-  add_predictor(lm.predict) %>%
-  add_postprocessor(scaler, by = 1 / pop)
-```
-
-Then you could run this on an `epi_df` with one line.
-
-```{r run-ideal, eval=FALSE}
-my_fcaster(lead(cases, 7) ~ ., epi_df, key_vars, time_vars)
-```
-
-The hypothetical example of first classifying, then fitting different models would also fit into this framework. And this isn't far from our current production models.
-
-
-
-
-### What this isn't
-
-This is not a framework for SIR models. We intend to create some simple versions, but advanced models---those that use variants, hospitalizations, different types of immunity, age stratification, etc.---cannot be compartmentalized in the same way (though see [pypm](https://pypm.github.io/home/)). These types of models also are better at scenario modeling than short term forecasts unless they are quite complicated.
-
--->

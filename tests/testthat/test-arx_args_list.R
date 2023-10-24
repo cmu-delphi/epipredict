@@ -13,9 +13,9 @@ test_that("arx_args checks inputs", {
   expect_error(arx_args_list(symmetrize = 4))
   expect_error(arx_args_list(nonneg = 4))
 
-  expect_error(arx_args_list(levels = -.1))
-  expect_error(arx_args_list(levels = 1.1))
-  expect_type(arx_args_list(levels = NULL), "list")
+  expect_error(arx_args_list(quantile_levels = -.1))
+  expect_error(arx_args_list(quantile_levels = 1.1))
+  expect_type(arx_args_list(quantile_levels = NULL), "list")
 
   expect_error(arx_args_list(target_date = "2022-01-01"))
   expect_identical(
@@ -25,8 +25,8 @@ test_that("arx_args checks inputs", {
 })
 
 test_that("arx forecaster disambiguates quantiles", {
-  alist <- eval(formals(arx_args_list)$levels)
-  tlist <- eval(formals(quantile_reg)$tau)
+  alist <- eval(formals(arx_args_list)$quantile_levels)
+  tlist <- eval(formals(quantile_reg)$quantile_levels)
   expect_identical( # both default
     compare_quantile_args(alist, tlist),
     sort(c(alist, tlist))
@@ -36,7 +36,7 @@ test_that("arx forecaster disambiguates quantiles", {
     compare_quantile_args(alist, tlist),
     sort(unique(alist))
   )
-  alist <- eval(formals(arx_args_list)$levels)
+  alist <- eval(formals(arx_args_list)$quantile_levels)
   tlist <- c(.05, .95, tlist)
   expect_identical( # alist is default, should give tlist
     compare_quantile_args(alist, tlist),

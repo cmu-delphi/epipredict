@@ -13,10 +13,11 @@ enframer <- function(df, x, fill = NA) {
 }
 
 enlist <- function(...) {
-  # in epiprocess
-  x <- list(...)
-  n <- as.character(sys.call())[-1]
-  if (!is.null(n0 <- names(x))) n[n0 != ""] <- n0[n0 != ""]
-  names(x) <- n
-  x
+  # converted to thin wrapper around
+  rlang::dots_list(
+    ...,
+    .homonyms = "error",
+    .named = TRUE,
+    .check_assign = TRUE
+  )
 }
