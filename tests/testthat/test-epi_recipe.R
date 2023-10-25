@@ -112,3 +112,61 @@ test_that("epi_recipe epi_df works", {
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
 })
+
+
+test_that("add/update/adjust/remove epi_recipe works as intended", {
+  jhu <- case_death_rate_subset
+
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_lag(case_rate, lag = c(0, 7, 14))
+
+  wf <- epi_workflow() %>%
+    add_epi_recipe(r)
+
+  steps <- extract_preprocessor(wf)$steps
+  expect_equal(length(steps), 3)
+  expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
+  expect_equal(steps[[1]]$lag, c(0, 7, 14))
+  expect_equal(class(steps[[2]]), c("step_epi_ahead", "step"))
+  expect_equal(steps[[2]]$ahead, c(7))
+  expect_equal(class(steps[[3]]), c("step_epi_lag", "step"))
+  expect_equal(steps[[3]]$lag, c(0, 7, 14))
+
+  r2 <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 1)) %>%
+    step_epi_ahead(death_rate, ahead = 1)
+
+  wf <- update_epi_recipe(wf, r2)
+
+  steps <- extract_preprocessor(wf)$steps
+  expect_equal(length(steps), 2)
+  expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
+  expect_equal(steps[[1]]$lag, c(0, 1))
+  expect_equal(class(steps[[2]]), c("step_epi_ahead", "step"))
+  expect_equal(steps[[2]]$ahead, c(1))
+
+  # adjust_epi_recipe using step number
+  wf <- adjust_epi_recipe(wf, which_step = 2, ahead = 7)
+  steps <- extract_preprocessor(wf)$steps
+  expect_equal(length(steps), 2)
+  expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
+  expect_equal(steps[[1]]$lag, c(0, 1))
+  expect_equal(class(steps[[2]]), c("step_epi_ahead", "step"))
+  expect_equal(steps[[2]]$ahead, c(7))
+
+  # adjust_epi_recipe using step name
+  wf <- adjust_epi_recipe(wf, which_step = "step_epi_ahead", ahead = 8)
+  steps <- extract_preprocessor(wf)$steps
+  expect_equal(length(steps), 2)
+  expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
+  expect_equal(steps[[1]]$lag, c(0, 1))
+  expect_equal(class(steps[[2]]), c("step_epi_ahead", "step"))
+  expect_equal(steps[[2]]$ahead, c(8))
+
+
+  wf <- remove_epi_recipe(wf)
+  expect_error(extract_preprocessor(wf)$steps)
+  expect_equal(wf$pre$actions$recipe$recipe, NULL)
+})

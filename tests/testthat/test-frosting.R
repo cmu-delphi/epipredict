@@ -14,15 +14,29 @@ test_that("frosting validators / constructors work", {
   expect_true(has_postprocessor_frosting(wf))
 })
 
-test_that("frosting can be created/added/removed", {
+test_that("frosting can be created/added/updated/adjusted/removed", {
   f <- frosting()
   expect_error(frosting(layers = 1:5))
   wf <- epi_workflow() %>% add_frosting(f)
   expect_true(has_postprocessor_frosting(wf))
-  wf <- wf %>% remove_frosting()
-  expect_false(has_postprocessor_frosting(wf))
-  expect_false(has_postprocessor(wf))
+  wf1 <- update_frosting(wf, frosting() %>% layer_predict() %>% layer_threshold(.pred))
+  expect_true(has_postprocessor_frosting(wf1))
+  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 2)
+  wf1 <- adjust_frosting(wf1, which_layer = 2, upper = 1) # adjust frosting by layer number
+  expect_true(has_postprocessor_frosting(wf1))
+  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 2)
+  expect_equal(wf1$post$actions$frosting$frosting$layers[[2]]$upper, 1)
+  wf1 <- adjust_frosting(wf1, which_layer = "layer_threshold", upper = 5) # adjust frosting by layer name
+  expect_true(has_postprocessor_frosting(wf1))
+  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 2)
+  expect_equal(wf1$post$actions$frosting$frosting$layers[[2]]$upper, 5)
+  wf1 <- wf1 %>% remove_frosting()
+  expect_false(has_postprocessor_frosting(wf1))
+  expect_false(has_postprocessor(wf1))
+  expect_equal(length(wf1$post$actions$frosting$frosting$layers), 0)
+  expect_null(wf1$post$actions$frosting$frosting$layers[[1]])
 })
+
 
 
 test_that("prediction works without any postprocessor", {

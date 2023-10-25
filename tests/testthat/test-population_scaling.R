@@ -1,7 +1,3 @@
-library(recipes)
-library(parsnip)
-library(workflows)
-
 ## Preprocessing
 test_that("Column names can be passed with and without the tidy way", {
   pop_data <- data.frame(
@@ -106,8 +102,8 @@ test_that("Postprocessing workflow works and values correct", {
     ) %>%
     step_epi_lag(cases_scaled, lag = c(0, 7, 14)) %>%
     step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -133,8 +129,7 @@ test_that("Postprocessing workflow works and values correct", {
       dplyr::select(geo_value, time_value, cases)
   )
 
-
-  expect_silent(p <- predict(wf, latest))
+  suppressWarnings(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
@@ -151,7 +146,7 @@ test_that("Postprocessing workflow works and values correct", {
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
-  expect_silent(p <- predict(wf, latest))
+  suppressWarnings(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
@@ -176,8 +171,8 @@ test_that("Postprocessing to get cases from case rate", {
     ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -204,7 +199,7 @@ test_that("Postprocessing to get cases from case rate", {
   )
 
 
-  expect_silent(p <- predict(wf, latest))
+  suppressWarnings(p <- predict(wf, latest))
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(1 / 20000, 1 / 30000))
@@ -231,8 +226,8 @@ test_that("test joining by default columns", {
     ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   suppressMessages(prep <- prep(r, jhu))
 
@@ -288,8 +283,8 @@ test_that("expect error if `by` selector does not match", {
     ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -316,8 +311,8 @@ test_that("expect error if `by` selector does not match", {
     ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -394,8 +389,8 @@ test_that("Rate rescaling behaves as expected", {
   r <- epi_recipe(x) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -422,7 +417,7 @@ test_that("Rate rescaling behaves as expected", {
 })
 
 test_that("Extra Columns are ignored", {
-  x <- tibble(
+  x <- tibble::tibble(
     geo_value = rep("place", 50),
     time_value = as.Date("2021-01-01") + 0:49,
     case_rate = rep(0.0005, 50),
@@ -445,8 +440,8 @@ test_that("Extra Columns are ignored", {
     ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
-    step_naomit(all_predictors()) %>%
-    step_naomit(all_outcomes(), skip = TRUE)
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
   expect_equal(ncol(bake(prep(recip, x), x)), 9)
   # done testing step_*
 

@@ -3,21 +3,24 @@
 \name{add_frosting}
 \alias{add_frosting}
 \alias{remove_frosting}
+\alias{update_frosting}
 \title{Add frosting to a workflow}
 \usage{
 add_frosting(x, frosting, ...)
 
 remove_frosting(x)
+
+update_frosting(x, frosting, ...)
 }
 \arguments{
 \item{x}{A workflow}
 
-\item{frosting}{A frosting layer created using \code{frosting()}}
+\item{frosting}{A frosting object created using \code{frosting()}.}
 
 \item{...}{Not used.}
 }
 \value{
-\code{x}, updated with a new or removed frosting postprocessor
+\code{x}, updated with a new frosting postprocessor
 }
 \description{
 Add frosting to a workflow
@@ -27,8 +30,7 @@ jhu <- case_death_rate_subset \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
-  step_epi_ahead(death_rate, ahead = 7) \%>\%
-  step_epi_naomit()
+  step_epi_ahead(death_rate, ahead = 7)
 
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- jhu \%>\%
@@ -42,8 +44,15 @@ wf1 <- wf \%>\% add_frosting(f)
 p1 <- predict(wf1, latest)
 p1
 
-# Remove frosting from the workflow and predict
-wf2 <- wf1 \%>\% remove_frosting()
+# Update frosting in a workflow and predict
+f2 <- frosting() \%>\% layer_predict()
+wf2 <- wf1 \%>\% update_frosting(f2)
 p2 <- predict(wf2, latest)
 p2
+
+# Remove frosting from the workflow and predict
+wf3 <- wf2 \%>\% remove_frosting()
+p3 <- predict(wf3, latest)
+p3
+
 }

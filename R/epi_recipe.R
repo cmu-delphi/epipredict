@@ -42,10 +42,6 @@ epi_recipe.default <- function(x, ...) {
 #'
 #' @export
 #' @examples
-#' library(epiprocess)
-#' library(dplyr)
-#' library(recipes)
-#'
 #' jhu <- case_death_rate_subset %>%
 #'   dplyr::filter(time_value > "2021-08-01") %>%
 #'   dplyr::arrange(geo_value, time_value)
@@ -54,9 +50,9 @@ epi_recipe.default <- function(x, ...) {
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
+#'   recipes::step_naomit(recipes::all_predictors()) %>%
 #'   # below, `skip` means we don't do this at predict time
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 #'
 #' r
 epi_recipe.epi_df <-
@@ -227,7 +223,7 @@ is_epi_recipe <- function(x) {
 
 
 
-#' Add an epi_recipe to a workflow
+#' Add an `epi_recipe` to a workflow
 #'
 #' @seealso [workflows::add_recipe()]
 #' - `add_recipe()` specifies the terms of the model and any preprocessing that
@@ -235,17 +231,21 @@ is_epi_recipe <- function(x) {
 #'
 #' - `remove_recipe()` removes the recipe as well as any downstream objects
 #'
+#' - `update_recipe()` first removes the recipe, then replaces the previous
+#' recipe with the new one.
+#'
 #' @details
-#' Has the same behaviour as [workflows::add_recipe()] but sets a different
+#' `add_epi_recipe` has the same behaviour as
+#' [workflows::add_recipe()] but sets a different
 #' default blueprint to automatically handle [epiprocess::epi_df] data.
 #'
-#' @param x A workflow or epi_workflow
+#' @param x A `workflow` or `epi_workflow`
 #'
-#' @param recipe A recipe created using [recipes::recipe()]
+#' @param recipe An epi recipe or recipe
 #'
-#' @param ... Not used.
+#' @param ... Not used
 #'
-#' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
+#' @param blueprint A hardhat blueprint used for fine tuning the preprocessing
 #'
 #'   [default_epi_recipe_blueprint()] is used.
 #'
@@ -257,13 +257,12 @@ is_epi_recipe <- function(x) {
 #'
 #' @export
 #' @examples
-#' library(epiprocess)
 #' library(dplyr)
 #' library(recipes)
 #'
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-08-01") %>%
-#'   dplyr::arrange(geo_value, time_value)
+#'   arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -276,13 +275,152 @@ is_epi_recipe <- function(x) {
 #'   add_epi_recipe(r)
 #'
 #' workflow
+#'
+#' r2 <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7)
+#'
+#' workflow <- update_epi_recipe(workflow, r2)
+#'
+#' workflow <- remove_epi_recipe(workflow)
+#'
+#' workflow
+#'
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
   workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
 }
 
+#' @rdname add_epi_recipe
+#' @export
+remove_epi_recipe <- function(x) {
+  workflows:::validate_is_workflow(x)
 
+  if (!workflows:::has_preprocessor_recipe(x)) {
+    rlang::warn("The workflow has no recipe preprocessor to remove.")
+  }
 
+  actions <- x$pre$actions
+  actions[["recipe"]] <- NULL
+
+  new_epi_workflow(
+    pre = workflows:::new_stage_pre(actions = actions),
+    fit = x$fit,
+    post = x$post,
+    trained = FALSE
+  )
+}
+
+#' @rdname add_epi_recipe
+#' @export
+update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
+  rlang::check_dots_empty()
+  x <- remove_epi_recipe(x)
+  add_epi_recipe(x, recipe, ..., blueprint = blueprint)
+}
+
+#' Adjust a step in an `epi_workflow` or `epi_recipe`
+#'
+#' Make a parameter adjustment to a step in either an
+#' `epi_workflow` or `epi_recipe` object.
+#'
+#'
+#' @details This function can either adjust a step in a `epi_recipe` object
+#' or a step from a `epi_recipe` object in an `epi_workflow`. The step to be
+#' adjusted is indicated by either the step number or name (if a name is used,
+#' it must be unique). In either case, the argument name and update value
+#' must be inputted as `...`. See the examples below for brief
+#' illustrations of the different types of updates.
+#'
+#' @param x A `epi_workflow` or `epi_recipe` object
+#'
+#' @param which_step the number or name of the step to adjust
+#'
+#' @param ... Used to input a parameter adjustment
+#'
+#' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
+#'
+#' @return
+#' `x`, updated with the adjustment to the specified `epi_recipe` step.
+#'
+#' @export
+#' @examples
+#' library(dplyr)
+#' library(workflows)
+#'
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- jhu %>%
+#'   filter(time_value >= max(time_value) - 14)
+#'
+#' # Adjust `step_epi_ahead` to have an ahead value of 14
+#' # in the `epi_workflow`
+#' # Option 1. Using the step number:
+#' wf2 <- wf %>% adjust_epi_recipe(which_step = 2, ahead = 14)
+#' extract_preprocessor(wf2)
+#' # Option 2. Using the step name:
+#' wf3 <- wf %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
+#' extract_preprocessor(wf3)
+#'
+#' # Adjust `step_epi_ahead` to have an ahead value of 14
+#' # in the `epi_recipe`
+#' # Option 1. Using the step number
+#' r2 <- r %>% adjust_epi_recipe(which_step = 2, ahead = 14)
+#' r2
+#' # Option 2. Using the step name
+#' r3 <- r %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
+#' r3
+#'
+adjust_epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+  UseMethod("adjust_epi_recipe")
+}
+
+#' @rdname adjust_epi_recipe
+#' @export
+adjust_epi_recipe.epi_workflow <- function(
+    x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+  recipe <- adjust_epi_recipe(workflows::extract_preprocessor(x), which_step, ...)
+
+  update_epi_recipe(x, recipe, blueprint = blueprint)
+}
+
+#' @rdname adjust_epi_recipe
+#' @export
+adjust_epi_recipe.epi_recipe <- function(
+    x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+  if (!(is.numeric(which_step) || is.character(which_step))) {
+    cli::cli_abort(
+      c("`which_step` must be a number or a character.",
+        i = "`which_step` has class {.cls {class(which_step)[1]}}."
+      )
+    )
+  } else if (is.numeric(which_step)) {
+    x$steps[[which_step]] <- update(x$steps[[which_step]], ...)
+  } else {
+    step_names <- map_chr(x$steps, ~ attr(.x, "class")[1])
+
+    if (!(which_step %in% step_names)) {
+      cli::cli_abort(
+        c("`which_step` is not in the `epi_recipe` step names. ",
+          "i" = "The step names are {step_names}."
+        )
+      )
+    }
+    which_step_idx <- which(step_names == which_step)
+    if (length(which_step_idx) == 1) {
+      x$steps[[which_step_idx]] <- update(x$steps[[which_step_idx]], ...)
+    } else {
+      cli::cli_abort("`which_step` is not unique. Matches steps: {which_step_idx}.")
+    }
+  }
+  x
+}
 
 # unfortunately, almost everything the same as in prep.recipe except string/fctr handling
 #' @export

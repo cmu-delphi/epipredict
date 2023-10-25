@@ -31,3 +31,34 @@ test_that("outcome of the two methods are the same", {
 
   expect_equal(ef, ef2)
 })
+
+test_that("model can be added/updated/removed from epi_workflow", {
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7)
+
+  rf_model <- rand_forest(mode = "regression")
+
+  wf <- epi_workflow(r)
+
+  wf <- wf %>% add_model(rf_model)
+  model_spec <- extract_spec_parsnip(wf)
+  expect_equal(model_spec$engine, "ranger")
+  expect_equal(model_spec$mode, "regression")
+  expect_equal(class(model_spec), c("rand_forest", "model_spec"))
+
+  lm_model <- parsnip::linear_reg()
+
+  wf <- update_model(wf, lm_model)
+  model_spec2 <- extract_spec_parsnip(wf)
+  expect_equal(model_spec2$engine, "lm")
+  expect_equal(model_spec2$mode, "regression")
+  expect_equal(class(model_spec2), c("linear_reg", "model_spec"))
+
+  wf <- remove_model(wf)
+  expect_error(extract_spec_parsnip(wf))
+  expect_equal(wf$fit$actions$model$spec, NULL)
+})

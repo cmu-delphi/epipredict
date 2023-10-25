@@ -1,10 +1,10 @@
 #' Add frosting to a workflow
 #'
 #' @param x A workflow
-#' @param frosting A frosting layer created using `frosting()`
+#' @param frosting A frosting object created using `frosting()`.
 #' @param ... Not used.
 #'
-#' @return `x`, updated with a new or removed frosting postprocessor
+#' @return `x`, updated with a new frosting postprocessor
 #' @export
 #'
 #' @examples
@@ -12,8 +12,7 @@
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-#'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   step_epi_naomit()
+#'   step_epi_ahead(death_rate, ahead = 7)
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
@@ -27,14 +26,21 @@
 #' p1 <- predict(wf1, latest)
 #' p1
 #'
-#' # Remove frosting from the workflow and predict
-#' wf2 <- wf1 %>% remove_frosting()
+#' # Update frosting in a workflow and predict
+#' f2 <- frosting() %>% layer_predict()
+#' wf2 <- wf1 %>% update_frosting(f2)
 #' p2 <- predict(wf2, latest)
 #' p2
+#'
+#' # Remove frosting from the workflow and predict
+#' wf3 <- wf2 %>% remove_frosting()
+#' p3 <- predict(wf3, latest)
+#' p3
+#'
 add_frosting <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   action <- workflows:::new_action_post(frosting = frosting)
-  epi_add_action(x, action, "frosting")
+  epi_add_action(x, action, "frosting", ...)
 }
 
 
@@ -66,7 +72,6 @@ remove_frosting <- function(x) {
   x
 }
 
-
 has_postprocessor_frosting <- function(x) {
   "frosting" %in% names(x$post$actions)
 }
@@ -87,6 +92,117 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
   invisible(x)
 }
 
+#' @rdname add_frosting
+#' @export
+update_frosting <- function(x, frosting, ...) {
+  rlang::check_dots_empty()
+  x <- remove_frosting(x)
+  add_frosting(x, frosting)
+}
+
+
+#' Adjust a layer in an `epi_workflow` or `frosting`
+#'
+#' Make a parameter adjustment to a layer in either an
+#' `epi_workflow` or `frosting` object.
+#'
+#'
+#' @details This function can either adjust a layer in a `frosting` object
+#' or a layer from a `frosting` object in an `epi_workflow`. The layer to be
+#' adjusted is indicated by either the layer number or name (if a name is used,
+#' it must be unique). In either case, the argument name and update value
+#' must be inputted as `...`. See the examples below for brief
+#' illustrations of the different types of updates.
+#'
+#' @param x An `epi_workflow` or `frosting` object
+#'
+#' @param which_layer the number or name of the layer to adjust
+#'
+#' @param ... Used to input a parameter adjustment
+#'
+#' @return
+#' `x`, updated with the adjustment to the specified `frosting` layer.
+#'
+#' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#'
+#' # in the frosting from the workflow
+#' f1 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_threshold(.pred)
+#'
+#' wf2 <- wf %>% add_frosting(f1)
+#'
+#' # Adjust `layer_threshold` to have an upper bound of 1
+#' # in the `epi_workflow`
+#' # Option 1. Using the layer number:
+#' wf2 <- wf2 %>% adjust_frosting(which_layer = 2, upper = 1)
+#' extract_frosting(wf2)
+#' # Option 2. Using the layer name:
+#' wf3 <- wf2 %>% adjust_frosting(which_layer = "layer_threshold", upper = 1)
+#' extract_frosting(wf3)
+#'
+#' # Adjust `layer_threshold` to have an upper bound of 5
+#' # in the `frosting` object
+#' # Option 1. Using the layer number:
+#' f2 <- f1 %>% adjust_frosting(which_layer = 2, upper = 5)
+#' f2
+#' # Option 2. Using the layer name
+#' f3 <- f1 %>% adjust_frosting(which_layer = "layer_threshold", upper = 5)
+#' f3
+#'
+adjust_frosting <- function(x, which_layer, ...) {
+  UseMethod("adjust_frosting")
+}
+
+#' @rdname adjust_frosting
+#' @export
+adjust_frosting.epi_workflow <- function(
+    x, which_layer, ...) {
+  frosting <- adjust_frosting(extract_frosting(x), which_layer, ...)
+
+  update_frosting(x, frosting)
+}
+
+#' @rdname adjust_frosting
+#' @export
+adjust_frosting.frosting <- function(
+    x, which_layer, ...) {
+  if (!(is.numeric(which_layer) || is.character(which_layer))) {
+    cli::cli_abort(
+      c("`which_layer` must be a number or a character.",
+        i = "`which_layer` has class {.cls {class(which_layer)[1]}}."
+      )
+    )
+  } else if (is.numeric(which_layer)) {
+    x$layers[[which_layer]] <- update(x$layers[[which_layer]], ...)
+  } else {
+    layer_names <- map_chr(x$layers, ~ attr(.x, "class")[1])
+
+    if (!(which_layer %in% layer_names)) {
+      cli::cli_abort(
+        c("`which_layer` is not in the `frosting` layer names. ",
+          "i" = "The layer names are {layer_names}."
+        )
+      )
+    }
+    which_layer_idx <- which(layer_names == which_layer)
+    if (length(which_layer_idx) == 1) {
+      x$layers[[which_layer_idx]] <- update(x$layers[[which_layer_idx]], ...)
+    } else {
+      cli::cli_abort("`which_layer` is not unique. Matches layers: {which_layer_idx}.")
+    }
+  }
+  x
+}
 
 
 
