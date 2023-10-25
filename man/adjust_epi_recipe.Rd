@@ -52,6 +52,9 @@ must be inputted as \code{...}. See the examples below for brief
 illustrations of the different types of updates.
 }
 \examples{
+library(dplyr)
+library(workflows)
+
 jhu <- case_death_rate_subset \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%
@@ -61,16 +64,16 @@ r <- epi_recipe(jhu) \%>\%
 
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- jhu \%>\%
-  dplyr::filter(time_value >= max(time_value) - 14)
+  filter(time_value >= max(time_value) - 14)
 
 # Adjust `step_epi_ahead` to have an ahead value of 14
 # in the `epi_workflow`
 # Option 1. Using the step number:
 wf2 <- wf \%>\% adjust_epi_recipe(which_step = 2, ahead = 14)
-workflows::extract_preprocessor(wf2)
+extract_preprocessor(wf2)
 # Option 2. Using the step name:
 wf3 <- wf \%>\% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
-workflows::extract_preprocessor(wf3)
+extract_preprocessor(wf3)
 
 # Adjust `step_epi_ahead` to have an ahead value of 14
 # in the `epi_recipe`

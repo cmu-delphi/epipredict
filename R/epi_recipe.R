@@ -257,16 +257,19 @@ is_epi_recipe <- function(x) {
 #'
 #' @export
 #' @examples
+#' library(dplyr)
+#' library(recipes)
+#'
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-08-01") %>%
-#'   dplyr::arrange(geo_value, time_value)
+#'   filter(time_value > "2021-08-01") %>%
+#'   arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   recipes::step_naomit(recipes::all_predictors()) %>%
-#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#'   step_naomit(all_predictors()) %>%
+#'   step_naomit(all_outcomes(), skip = TRUE)
 #'
 #' workflow <- epi_workflow() %>%
 #'   add_epi_recipe(r)
@@ -342,6 +345,9 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #'
 #' @export
 #' @examples
+#' library(dplyr)
+#' library(workflows)
+#'
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
@@ -351,16 +357,16 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'   filter(time_value >= max(time_value) - 14)
 #'
 #' # Adjust `step_epi_ahead` to have an ahead value of 14
 #' # in the `epi_workflow`
 #' # Option 1. Using the step number:
 #' wf2 <- wf %>% adjust_epi_recipe(which_step = 2, ahead = 14)
-#' workflows::extract_preprocessor(wf2)
+#' extract_preprocessor(wf2)
 #' # Option 2. Using the step name:
 #' wf3 <- wf %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14)
-#' workflows::extract_preprocessor(wf3)
+#' extract_preprocessor(wf3)
 #'
 #' # Adjust `step_epi_ahead` to have an ahead value of 14
 #' # in the `epi_recipe`
@@ -389,9 +395,9 @@ adjust_epi_recipe.epi_workflow <- function(
 adjust_epi_recipe.epi_recipe <- function(
     x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
   if (!(is.numeric(which_step) || is.character(which_step))) {
-    rlang::abort(
-      paste0(
-        "The step name (`which_step`) must be a number or a character."
+    cli::cli_abort(
+      c("`which_step` must be a number or a character.",
+        i = "`which_step` has class {.cls {class(which_step)[1]}}."
       )
     )
   } else if (is.numeric(which_step)) {
@@ -400,11 +406,9 @@ adjust_epi_recipe.epi_recipe <- function(
     step_names <- map_chr(x$steps, ~ attr(.x, "class")[1])
 
     if (!(which_step %in% step_names)) {
-      rlang::abort(
-        paste0(
-          "The step name (`which_step`) is not in the `epi_recipe` step names: ",
-          paste0(step_names, collapse = ", "),
-          "."
+      cli::cli_abort(
+        c("`which_step` is not in the `epi_recipe` step names. ",
+          "i" = "The step names are {step_names}."
         )
       )
     }
@@ -412,13 +416,7 @@ adjust_epi_recipe.epi_recipe <- function(
     if (length(which_step_idx) == 1) {
       x$steps[[which_step_idx]] <- update(x$steps[[which_step_idx]], ...)
     } else {
-      rlang::abort(
-        paste0(
-          "The step name (`which_step`) is not unique. Matches steps: ",
-          paste0(which_step_idx, collapse = ", "),
-          "."
-        )
-      )
+      cli::cli_abort("`which_step` is not unique. Matches steps: {which_step_idx}.")
     }
   }
   x

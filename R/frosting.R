@@ -177,9 +177,9 @@ adjust_frosting.epi_workflow <- function(
 adjust_frosting.frosting <- function(
     x, which_layer, ...) {
   if (!(is.numeric(which_layer) || is.character(which_layer))) {
-    rlang::abort(
-      paste0(
-        "The layer name (`which_layer`) must be a number or a character."
+    cli::cli_abort(
+      c("`which_layer` must be a number or a character.",
+        i = "`which_layer` has class {.cls {class(which_layer)[1]}}."
       )
     )
   } else if (is.numeric(which_layer)) {
@@ -188,11 +188,9 @@ adjust_frosting.frosting <- function(
     layer_names <- map_chr(x$layers, ~ attr(.x, "class")[1])
 
     if (!(which_layer %in% layer_names)) {
-      rlang::abort(
-        paste0(
-          "The layer name (`which_layer`) is not in the `frosting` layer names: ",
-          paste0(layer_names, collapse = ", "),
-          "."
+      cli::cli_abort(
+        c("`which_layer` is not in the `frosting` layer names. ",
+          "i" = "The layer names are {layer_names}."
         )
       )
     }
@@ -200,13 +198,7 @@ adjust_frosting.frosting <- function(
     if (length(which_layer_idx) == 1) {
       x$layers[[which_layer_idx]] <- update(x$layers[[which_layer_idx]], ...)
     } else {
-      rlang::abort(
-        paste0(
-          "The layer name (`which_layer`) is not unique. Matches layers: ",
-          paste0(which_layer_idx, collapse = ", "),
-          "."
-        )
-      )
+      cli::cli_abort("`which_layer` is not unique. Matches layers: {which_layer_idx}.")
     }
   }
   x
