@@ -48,6 +48,8 @@ reference:
     - epi_recipe
     - epi_workflow
     - add_epi_recipe
+    - adjust_epi_recipe
+    - add_model
     - predict.epi_workflow
     - fit.epi_workflow
     - augment.epi_workflow
@@ -62,6 +64,7 @@ reference:
     - frosting
     - ends_with("_frosting")
     - get_test_data
+    - tidy.frosting
   - title: Frosting layers
     contents:
     - contains("layer")

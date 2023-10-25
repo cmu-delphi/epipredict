@@ -103,13 +103,9 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
   res
 }
 
-#' @rdname tidy.layer
 #' @export
 tidy.layer <- function(x, ...) {
-  rlang::abort(
-    paste0(
-      "No `tidy` method for a layer with classes: ",
-      paste0(class(x), collapse = ", ")
-    )
+  cli::cli_abort(
+    "No `tidy()` method exists for a layer with class: {.cls {class(x)}}."
   )
 }

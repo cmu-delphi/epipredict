@@ -187,7 +187,7 @@ adjust_frosting.frosting <- function(
   } else {
     layer_names <- map_chr(x$layers, ~ attr(.x, "class")[1])
     starts_with_layer <- substr(which_layer, 1, 6) == "layer_"
-    if (!starts_with_step) which_layer <- paste0("layer_", which_layer)
+    if (!starts_with_layer) which_layer <- paste0("layer_", which_layer)
 
     if (!(which_layer %in% layer_names)) {
       cli::cli_abort(c(
