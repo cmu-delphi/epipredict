@@ -186,19 +186,23 @@ adjust_frosting.frosting <- function(
     x$layers[[which_layer]] <- update(x$layers[[which_layer]], ...)
   } else {
     layer_names <- map_chr(x$layers, ~ attr(.x, "class")[1])
+    starts_with_layer <- substr(which_layer, 1, 6) == "layer_"
+    if (!starts_with_step) which_layer <- paste0("layer_", which_layer)
 
     if (!(which_layer %in% layer_names)) {
-      cli::cli_abort(
-        c("`which_layer` is not in the `frosting` layer names. ",
-          "i" = "The layer names are {layer_names}."
-        )
-      )
+      cli::cli_abort(c(
+        "`which_layer` does not appear in the available `frosting` layer names. ",
+        i = "The layer names are {.val {layer_names}}."
+      ))
     }
     which_layer_idx <- which(layer_names == which_layer)
     if (length(which_layer_idx) == 1) {
       x$layers[[which_layer_idx]] <- update(x$layers[[which_layer_idx]], ...)
     } else {
-      cli::cli_abort("`which_layer` is not unique. Matches layers: {which_layer_idx}.")
+      cli::cli_abort(c(
+        "`which_layer` is not unique. Matches layers: {.val {which_layer_idx}}.",
+        i = "Please use the layer number instead for precise alterations."
+      ))
     }
   }
   x
@@ -212,7 +216,7 @@ add_postprocessor <- function(x, postprocessor, ..., call = caller_env()) {
   if (is_frosting(postprocessor)) {
     return(add_frosting(x, postprocessor))
   }
-  rlang::abort("`postprocessor` must be a frosting object.", call = call)
+  cli::cli_abort("`postprocessor` must be a frosting object.", call = call)
 }
 
 is_frosting <- function(x) {
@@ -223,8 +227,8 @@ is_frosting <- function(x) {
 validate_frosting <- function(x, ..., arg = "`x`", call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_frosting(x)) {
-    glubort(
-      "{arg} must be a frosting postprocessor, not a {class(x)[[1]]}.",
+    cli::cli_abort(
+      "{arg} must be a frosting postprocessor, not a {.cls {class(x)[[1]]}}.",
       .call = call
     )
   }
@@ -283,10 +287,9 @@ new_frosting <- function() {
 #' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
-    rlang::abort(c(
-      "Currently, no arguments to `frosting()` are allowed",
-      "to be non-null."
-    ))
+    cli::cli_abort(
+      "Currently, no arguments to `frosting()` are allowed to be non-null."
+    )
   }
   out <- new_frosting()
 }
@@ -305,7 +308,8 @@ extract_frosting <- function(x, ...) {
 
 #' @export
 extract_frosting.default <- function(x, ...) {
-  abort(c("Frosting is only available for epi_workflows currently.",
+  cli::cli_abort(c(
+    "Frosting is only available for epi_workflows currently.",
     i = "Can you use `epi_workflow()` instead of `workflow()`?"
   ))
   invisible(x)
@@ -339,7 +343,8 @@ apply_frosting <- function(workflow, ...) {
 #' @export
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
-    abort(c("Postprocessing is only available for epi_workflows currently.",
+    cli::cli_abort(c(
+      "Postprocessing is only available for epi_workflows currently.",
       i = "Can you use `epi_workflow()` instead of `workflow()`?"
     ))
   }
@@ -367,8 +372,8 @@ apply_frosting.epi_workflow <-
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      rlang::warn(c(
-        "Only postprocessors of class frosting are allowed.",
+      cli::cli_warn(c(
+        "Only postprocessors of class {.cls frosting} are allowed.",
         "Returning unpostprocessed predictions."
       ))
       components$predictions <- predict(

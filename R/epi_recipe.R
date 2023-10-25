@@ -404,19 +404,23 @@ adjust_epi_recipe.epi_recipe <- function(
     x$steps[[which_step]] <- update(x$steps[[which_step]], ...)
   } else {
     step_names <- map_chr(x$steps, ~ attr(.x, "class")[1])
+    starts_with_step <- substr(which_step, 1, 5) == "step_"
+    if (!starts_with_step) which_step <- paste0("step_", which_step)
 
     if (!(which_step %in% step_names)) {
-      cli::cli_abort(
-        c("`which_step` is not in the `epi_recipe` step names. ",
-          "i" = "The step names are {step_names}."
-        )
-      )
+      cli::cli_abort(c(
+        "`which_step` does not appear in the available `epi_recipe` step names. ",
+        i = "The step names are {.val {step_names}}."
+      ))
     }
     which_step_idx <- which(step_names == which_step)
     if (length(which_step_idx) == 1) {
       x$steps[[which_step_idx]] <- update(x$steps[[which_step_idx]], ...)
     } else {
-      cli::cli_abort("`which_step` is not unique. Matches steps: {which_step_idx}.")
+      cli::cli_abort(c(
+        "`which_step` is not unique. Matches steps: {.val {which_step_idx}}.",
+        i = "Please use the step number instead for precise alterations."
+      ))
     }
   }
   x
@@ -444,7 +448,7 @@ prep.epi_recipe <- function(
   }
   skippers <- map_lgl(x$steps, recipes:::is_skipable)
   if (any(skippers) & !retain) {
-    rlang::warn(c(
+    cli::cli_warn(c(
       "Since some operations have `skip = TRUE`, using ",
       "`retain = TRUE` will allow those steps results to ",
       "be accessible."
@@ -477,7 +481,7 @@ prep.epi_recipe <- function(
       )
       training <- bake(x$steps[[i]], new_data = training)
       if (!tibble::is_tibble(training)) {
-        abort("bake() methods should always return tibbles")
+        cli::cli_abort("`bake()` methods should always return {.cls tibble}.")
       }
       if (!is_epi_df(training)) {
         # tidymodels killed our class
