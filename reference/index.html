@@ -179,9 +179,19 @@
         <dd>Create an epi_workflow</dd>
       </dl><dl><dt>
           
-          <code><a href="add_epi_recipe.html">add_epi_recipe()</a></code> 
+          <code><a href="add_epi_recipe.html">add_epi_recipe()</a></code> <code><a href="add_epi_recipe.html">remove_epi_recipe()</a></code> <code><a href="add_epi_recipe.html">update_epi_recipe()</a></code> 
         </dt>
-        <dd>Add an epi_recipe to a workflow</dd>
+        <dd>Add an <code>epi_recipe</code> to a workflow</dd>
+      </dl><dl><dt>
+          
+          <code><a href="adjust_epi_recipe.html">adjust_epi_recipe()</a></code> 
+        </dt>
+        <dd>Adjust a step in an <code>epi_workflow</code> or <code>epi_recipe</code></dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_model.html">add_model()</a></code> <code><a href="add_model.html">remove_model()</a></code> <code><a href="add_model.html">update_model()</a></code> 
+        </dt>
+        <dd>Add a model to an <code>epi_workflow</code></dd>
       </dl><dl><dt>
           
           <code><a href="predict-epi_workflow.html">predict(<i>&lt;epi_workflow&gt;</i>)</a></code> 
@@ -266,9 +276,14 @@
         <dd>Create frosting for postprocessing predictions</dd>
       </dl><dl><dt>
           
-          <code><a href="add_frosting.html">add_frosting()</a></code> <code><a href="add_frosting.html">remove_frosting()</a></code> 
+          <code><a href="add_frosting.html">add_frosting()</a></code> <code><a href="add_frosting.html">remove_frosting()</a></code> <code><a href="add_frosting.html">update_frosting()</a></code> 
         </dt>
         <dd>Add frosting to a workflow</dd>
+      </dl><dl><dt>
+          
+          <code><a href="adjust_frosting.html">adjust_frosting()</a></code> 
+        </dt>
+        <dd>Adjust a layer in an <code>epi_workflow</code> or <code>frosting</code></dd>
       </dl><dl><dt>
           
           <code><a href="apply_frosting.html">apply_frosting()</a></code> 
@@ -284,6 +299,11 @@
           <code><a href="get_test_data.html">get_test_data()</a></code> 
         </dt>
         <dd>Get test data for prediction based on longest lag period</dd>
+      </dl><dl><dt>
+          
+          <code><a href="tidy.frosting.html">tidy(<i>&lt;frosting&gt;</i>)</a></code> 
+        </dt>
+        <dd>Tidy the result of a frosting object</dd>
       </dl></div><div class="section level2">
       <h2 id="frosting-layers">Frosting layers<a class="anchor" aria-label="anchor" href="#frosting-layers"></a></h2>
       
@@ -370,6 +390,11 @@
           <code><a href="layer_unnest.html">layer_unnest()</a></code> 
         </dt>
         <dd>Unnest prediction list-cols</dd>
+      </dl><dl><dt>
+          
+          <code><a href="update.layer.html">update(<i>&lt;layer&gt;</i>)</a></code> 
+        </dt>
+        <dd>Update post-processing <code>layer</code></dd>
       </dl><dl><dt>
           
           <code><a href="slather.html">slather()</a></code> 

@@ -40,6 +40,15 @@
     <loc>https://cmu-delphi.github.io/epipredict/reference/add_layer.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/add_model.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/adjust_epi_recipe.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/adjust_frosting.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/apply_frosting.html</loc>
   </url>
   <url>
@@ -233,5 +242,11 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/step_training_window.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/tidy.frosting.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/reference/update.layer.html</loc>
   </url>
 </urlset>
