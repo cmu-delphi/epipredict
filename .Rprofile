@@ -9,3 +9,5 @@ document <- function() {
   if (R.utils::isPackageLoaded("parsnip")) devtools::unload("parsnip")
   devtools::document()
 }
+
+options(lifecycle_verbosity = "warning")
