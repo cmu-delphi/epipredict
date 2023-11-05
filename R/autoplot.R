@@ -1,3 +1,9 @@
+
+#' @importFrom ggplot2 autoplot
+#' @export
+ggplot2::autoplot
+
+
 autoplot.epi_workflow <- function(object, ..., .max_keys = Inf) {
   if (!workflows::is_trained_workflow(object)) {
     cli::cli_abort(c(
@@ -29,6 +35,7 @@ autoplot.epi_workflow <- function(object, ..., .max_keys = Inf) {
   autoplot(edf, ..., .max_keys = .max_keys)
 }
 
+#' @export
 autoplot.epi_df <- function(object, ..., .max_keys = Inf) {
   ek <- epi_keys(object)
   mv <- setdiff(names(object), ek)
@@ -41,7 +48,7 @@ autoplot.epi_df <- function(object, ..., .max_keys = Inf) {
   if (rlang::is_empty(vars)) {
     vars <- tidyselect::eval_select(names(allowed)[1], object)
     cli::cli_warn(
-      "Plot variable was unspecified. Automatically selecting {.var {allowed[1]}}."
+      "Plot variable was unspecified. Automatically selecting {.var {names(allowed)[1]}}."
     )
   } else {
     ok <- names(vars) %in% names(allowed)
