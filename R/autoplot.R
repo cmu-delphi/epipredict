@@ -64,7 +64,9 @@ autoplot.epi_df <- function(object, ..., .max_keys = Inf) {
       vars <- vars[ok]
     }
   }
-  pos <- tidyselect::eval_select(expr(c("time_value", ek, names(vars))), object)
+  pos <- tidyselect::eval_select(
+    rlang::expr(c("time_value", ek, names(vars))), object
+  )
   if (length(vars) > 1) {
     object <- tidyr::pivot_longer(
       object[pos], tidyselect::all_of(names(vars)),
@@ -74,7 +76,7 @@ autoplot.epi_df <- function(object, ..., .max_keys = Inf) {
     object <- dplyr::rename(object[pos], .response := !!names(vars))
   }
 
-  cc <- rlang::expr(interaction(!!!syms(as.list(ek)), sep = "/"))
+  cc <- rlang::expr(interaction(!!!rlang::syms(as.list(ek)), sep = "/"))
   p <- ggplot2::ggplot(
     object,
     ggplot2::aes(x = .data$time_value, y = .data$.response)
