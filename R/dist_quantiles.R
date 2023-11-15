@@ -174,18 +174,14 @@ mean.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "line
 #' @import distributional
 quantile.dist_quantiles <- function(
     x, p, ...,
-    middle = c("cubic", "linear"),
-    left_tail = c("normal", "exponential"),
-    right_tail = c("normal", "exponential")) {
+    middle = c("cubic", "linear")) {
   arg_is_probabilities(p)
   middle <- match.arg(middle)
-  left_tail <- match.arg(left_tail)
-  right_tail <- match.arg(right_tail)
-  quantile_extrapolate(x, p, middle, left_tail, right_tail)
+  quantile_extrapolate(x, p, middle)
 }
 
 
-quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
+quantile_extrapolate <- function(x, tau_out, middle) {
   tau <- field(x, "quantile_levels")
   qvals <- field(x, "values")
   r <- range(tau, na.rm = TRUE)
@@ -196,10 +192,10 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
   if (all(tau_out %in% tau)) {
     return(qvals[match(tau_out, tau)])
   }
-  if (length(qvals) < 3 || r[1] > .25 || r[2] < .75) {
+  if (length(qvals) < 2 || r[1] > .5 || r[2] < .5) {
     cli::cli_warn(c(
       "Quantile extrapolation is not possible with fewer than",
-      "3 quantiles or when the probs don't span [.25, .75]"
+      "2 values or when the probabilties don't span 0.5."
     ))
     return(qvals_out)
   }
@@ -214,86 +210,43 @@ quantile_extrapolate <- function(x, tau_out, middle, left_tail, right_tail) {
       {
         Q <- stats::splinefun(tau, qvals, method = "hyman")
         qvals_out[indm] <- Q(tau_out[indm])
-        quartiles <- Q(c(.25, .5, .75))
       },
       error = function(e) {
         return(NA)
       }
     )
   }
-  if (middle == "linear" || any(is.na(result))) {
-    method <- "linear"
-    quartiles <- stats::approx(tau, qvals, c(.25, .5, .75))$y
-  }
 
+  if (middle == "linear" || any(is.na(result))) method <- "linear"
 
   if (any(indm)) {
     qvals_out[indm] <- switch(method,
       linear = stats::approx(tau, qvals, tau_out[indm])$y,
       cubic = Q(tau_out[indm])
     )
+    tau <- sort(unique(c(tau, tau_out[indm])))
+    qvals <- sort(unique(c(qvals, qvals_out[indm])))
   }
   if (any(indl)) {
-    qvals_out[indl] <- tail_extrapolate(
-      tau_out[indl], quartiles, "left", left_tail
-    )
+    ta <- head(tau, 2)
+    qv <- head(qvals, 2)
+    qvals_out[indl] <- normal_tail(tau_out[indl], ta, qv, "left")
   }
   if (any(indr)) {
-    qvals_out[indr] <- tail_extrapolate(
-      tau_out[indr], quartiles, "right", right_tail
-    )
+    ta <- tail(tau, 2)
+    qv <- tail(qvals, 2)
+    qvals_out[indr] <- normal_tail(tau_out[indr], ta, qv, "right")
   }
   qvals_out
 }
 
-tail_extrapolate <- function(tau_out, quartiles, tail, type) {
-  if (tail == "left") {
-    p <- c(.25, .5)
-    par <- quartiles[1:2]
-  }
-  if (tail == "right") {
-    p <- c(.75, .5)
-    par <- quartiles[3:2]
-  }
-  if (type == "normal") {
-    return(norm_tail_q(p, par, tau_out))
-  }
-  if (type == "exponential") {
-    return(exp_tail_q(p, par, tau_out))
-  }
+normal_tail <- function(tau_out, tau, qvals, lr = c("left", "right")) {
+  lr <- match.arg(lr)
+  s <- abs(diff(qvals)) / abs(diff(qnorm(tau)))
+  m <- qvals[1] - s * qnorm(tau[1])
+  qnorm(tau_out, m, s)
 }
 
-
-exp_q_par <- function(q) {
-  # tau should always be c(.75, .5) or c(.25, .5)
-  iqr <- 2 * abs(diff(q))
-  s <- iqr / (2 * log(2))
-  m <- q[2]
-  return(list(m = m, s = s))
-}
-
-exp_tail_q <- function(p, q, target) {
-  ms <- exp_q_par(q)
-  qlaplace(target, ms$m, ms$s)
-}
-
-qlaplace <- function(p, centre = 0, b = 1) {
-  # lower.tail = TRUE, log.p = FALSE
-  centre - b * sign(p - 0.5) * log(1 - 2 * abs(p - 0.5))
-}
-
-norm_q_par <- function(q) {
-  # tau should always be c(.75, .5) or c(.25, .5)
-  iqr <- 2 * abs(diff(q))
-  s <- iqr / 1.34897950039 # abs(diff(qnorm(c(.75, .25))))
-  m <- q[2]
-  return(list(m = m, s = s))
-}
-
-norm_tail_q <- function(p, q, target) {
-  ms <- norm_q_par(q)
-  stats::qnorm(target, ms$m, ms$s)
-}
 
 #' @method Math dist_quantiles
 #' @export
