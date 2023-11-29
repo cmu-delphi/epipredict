@@ -41,7 +41,7 @@ test_that("Errors when used with a classifier", {
     geo_value = "ak"
   ) %>% as_epi_df()
 
-  r <- epi_recipe(y~x1+x2, data = tib)
+  r <- epi_recipe(y ~ x1 + x2, data = tib)
   wf <- epi_workflow(r, parsnip::logistic_reg()) %>% fit(tib)
   f <- frosting() %>%
     layer_predict() %>%
@@ -49,5 +49,3 @@ test_that("Errors when used with a classifier", {
   wf <- wf %>% add_frosting(f)
   expect_error(predict(wf, tib))
 })
-
-
