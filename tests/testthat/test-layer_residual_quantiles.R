@@ -30,3 +30,24 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(nrow(unnested), 9L)
   expect_equal(unique(unnested$quantile_levels), c(.0275, .8, .95))
 })
+
+
+test_that("Errors when used with a classifier", {
+  tib <- tibble(
+    y = factor(rep(c("a", "b"), length.out = 100)),
+    x1 = rnorm(100),
+    x2 = rnorm(100),
+    time_value = 1:100,
+    geo_value = "ak"
+  ) %>% as_epi_df()
+
+  r <- epi_recipe(y~x1+x2, data = tib)
+  wf <- epi_workflow(r, parsnip::logistic_reg()) %>% fit(tib)
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_residual_quantiles()
+  wf <- wf %>% add_frosting(f)
+  expect_error(predict(wf, tib))
+})
+
+
