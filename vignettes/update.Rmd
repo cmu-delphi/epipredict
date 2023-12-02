@@ -43,7 +43,7 @@ We start with the built-in `case_death_rate_subset` dataset that contains JHU da
 
 ```{r}
 jhu <- case_death_rate_subset %>%
-  dplyr::filter(time_value >= as.Date("2021-11-01"), geo_value %in% c("ak", "ca", "ny", "sc")) 
+  dplyr::filter(time_value >= as.Date("2021-11-01"), geo_value %in% c("ak", "ca", "ny", "sc"))
 
 jhu
 ```
@@ -56,7 +56,6 @@ r <- epi_recipe(jhu) %>%
   step_epi_ahead(death_rate, ahead = 14) %>%
   step_naomit(all_predictors()) %>%
   step_naomit(all_outcomes(), skip = TRUE)
-
 ```
 
 We add this recipe to an `epi_workflow` object by inputting `r` into the `add_epi_recipe` function:
@@ -82,7 +81,7 @@ At this stage, suppose we decide to overhaul our recipe so that we have a differ
 r2 <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 1, 7, 14)) %>%
   step_epi_lag(case_rate, lag = c(0:7, 14)) %>%
-  step_epi_ahead(death_rate, ahead = 7) %>% 
+  step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_naomit()
 
 wf <- update_epi_recipe(wf, r2)
@@ -113,9 +112,8 @@ One thing to notice about this workflow output is that is that the model fit rem
 
 ```{r}
 # fit linear model
-wf <- update_model(wf, parsnip::linear_reg()) %>% fit(jhu) 
+wf <- update_model(wf, parsnip::linear_reg()) %>% fit(jhu)
 wf
-
 ```
 
 Alternatively, we may use the `remove_model` followed by `add_model` combination for the same effect.
@@ -128,12 +126,11 @@ We will now generate and create a `frosting` object for post-processing predicti
 latest <- get_test_data(recipe = r2, x = jhu)
 
 f <- frosting() %>%
-  layer_predict() 
+  layer_predict()
 
 wf1 <- wf %>% add_frosting(f)
 p1 <- predict(wf1, latest)
 p1
-
 ```
 
 Suppose we decide to augment our post-processing to include a threshold to enforce that the predictions are at least 0. As well, let's include the forecast and target dates as separate columns.
@@ -142,16 +139,15 @@ To update the `frosting` while leaving the remainder of the `epi_workflow` the s
 
 ```{r}
 # Update frosting in a workflow and predict
-f2 <- frosting() %>% 
-  layer_predict() %>% 
-  layer_threshold(.pred) %>% 
-  layer_add_forecast_date %>% 
-  layer_add_target_date() 
+f2 <- frosting() %>%
+  layer_predict() %>%
+  layer_threshold(.pred) %>%
+  layer_add_forecast_date() %>%
+  layer_add_target_date()
 
 wf2 <- wf1 %>% update_frosting(f2)
 p2 <- predict(wf2, latest)
 p2
-
 ```
 
 Internally, this works by removing the old frosting followed by adding the new frosting, just like when we update a recipe or model. 
@@ -179,7 +175,7 @@ For instance, suppose that we decide to lead the `death_rate` by 14 days instead
 workflows::extract_preprocessor(wf) # step_epi_ahead is the third step in r2
 tidy(workflows::extract_preprocessor(wf)) # tidy tibble summary of r2
 
-wf <- wf %>% adjust_epi_recipe(which_step = 3, ahead = 14) 
+wf <- wf %>% adjust_epi_recipe(which_step = 3, ahead = 14)
 ```
 
 Alternatively, we may adjust that step by name by specifying the full name of the step, `step_epi_ahead`, in `which_step`:
@@ -191,7 +187,7 @@ wf %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14) # not overwr
 If there are at least two steps in a recipe that share the same name, specifying the name in `which_step` will throw an error as `adjust_epi_recipe` is not intended to be used to modify multiple steps at once. The way, then, to modify a step that has the same name as another is to indicate what number it is in the ordering of the steps. For example, in `r2` there are two steps named `step_epi_lag` - the first step where we lag the death rate, and the second where we lag the case rate. If we want to modify the lags for the `case_rate` variable, we would specify the step number of 2 in `which_step`. 
 
 ```{r}
-wf <- wf %>% adjust_epi_recipe(which_step = 2, lag = c(0, 1, 7, 14, 21)) 
+wf <- wf %>% adjust_epi_recipe(which_step = 2, lag = c(0, 1, 7, 14, 21))
 
 workflows::extract_preprocessor(wf)
 ```
@@ -205,7 +201,7 @@ adjust_epi_recipe(r2, which_step = 2, lag = c(0, 1, 7, 14, 21)) # should be same
 Note that when we adjust the `r2` object directly, we are not adjusting the recipe in the `epi_workflow`. That is, if we modify a step in `r2`, the change will not automatically transfer over to `wf`. We would need to modify the recipe in `wf` directly (`adjust_epi_recipe` on `wf`) or update the recipe in `wf` with a new `epi_recipe` that has undergone the adjustment (using `update_epi_recipe`):
 
 ```{r}
-r2 <- adjust_epi_recipe(r2, which_step = 2, lag = 0:21) 
+r2 <- adjust_epi_recipe(r2, which_step = 2, lag = 0:21)
 
 workflows::extract_preprocessor(wf)
 ```
@@ -223,7 +219,7 @@ f2
 Suppose that we decide to change the upper bound of the prediction threshold to 10 instead of `Inf`. We can adjust this layer in frosting object by setting `which_layer` to the layer number, 3 (which can be found by inspecting `f2` or `tidy(f2)`):
 
 ```{r}
-f2  <- f2 %>% adjust_frosting(which_layer = 2, upper = 10)
+f2 <- f2 %>% adjust_frosting(which_layer = 2, upper = 10)
 
 f2
 ```
