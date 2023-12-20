@@ -133,12 +133,10 @@ slather.layer_residual_quantiles <-
 
 grab_residuals <- function(the_fit, components) {
   if (the_fit$spec$mode != "regression") {
-    rlang::abort("For meaningful residuals, the predictor should be a regression model.")
+    cli::cli_abort("For meaningful residuals, the predictor should be a regression model.")
   }
-  r_generic <- attr(utils::methods(class = class(the_fit$fit)[1]), "info")$generic
-  if ("residuals" %in% r_generic) { # Try to use the available method.
-    cl <- class(the_fit$fit)[1]
-    r <- residuals(the_fit$fit)
+  r <- stats::residuals(the_fit$fit)
+  if (!is.null(r)) { # Got something from the method
     if (inherits(r, "data.frame")) {
       if (".resid" %in% names(r)) { # success
         return(r)

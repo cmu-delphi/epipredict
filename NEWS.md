@@ -1,5 +1,9 @@
 # epipredict (development)
 
+# epipredict 0.0.7
+
+* simplify `layer_residual_quantiles()` to avoid timesuck in `utils::methods()`
+
 # epipredict 0.0.6
 
 * rename the `dist_quantiles()` to be more descriptive, breaking change)
