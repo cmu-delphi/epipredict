@@ -431,6 +431,15 @@ adjust_epi_recipe.epi_recipe <- function(
 prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
+  if (is.null(training)) {
+    cli::cli_warn(c(
+      "!" = "No training data was supplied to {.fn prep}.",
+      "!" = "Unlike a {.cls recipe}, an {.cls epi_recipe} does not ",
+      "!" = "store the full template data in the object.",
+      "!" = "Please supply the training data to the {.fn prep} function,",
+      "!" = "to avoid addtional warning messages."
+    ))
+  }
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
   training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
