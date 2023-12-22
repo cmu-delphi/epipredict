@@ -449,40 +449,23 @@ jhu <- case_death_rate_subset %>%
     time_value <= "2021-12-31",
     geo_value %in% c("ca", "fl", "tx", "ny", "nj")
   ) %>%
-  mutate(geo_value_factor = as.factor(geo_value)) %>%
-  as_epi_df()
+  mutate(geo_value_factor = as.factor(geo_value))
 
 r <- epi_recipe(jhu) %>%
   add_role(time_value, new_role = "predictor") %>%
   step_dummy(geo_value_factor) %>%
-  step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-  step_epi_ahead(case_rate, ahead = 7, role = "predictor") %>%
+  step_growth_rate(case_rate, role = "none", prefix = "gr_") %>%
+  step_epi_lag(starts_with("gr_"), lag = c(0, 7, 14)) %>%
+  step_epi_ahead(starts_with("gr_"), ahead = 7, role = "none") %>%
+  # note recipes::step_cut() has a bug in it, or we could use that here
   step_mutate(
-    pct_diff_ahead = case_when(
-      lag_7_case_rate == 0 ~ 0,
-      TRUE ~ (ahead_7_case_rate - lag_0_case_rate) / lag_0_case_rate
-    ),
-    pct_diff_wk1 = case_when(
-      lag_7_case_rate == 0 ~ 0,
-      TRUE ~ (lag_0_case_rate - lag_7_case_rate) / lag_7_case_rate
-    ),
-    pct_diff_wk2 = case_when(
-      lag_14_case_rate == 0 ~ 0,
-      TRUE ~ (lag_7_case_rate - lag_14_case_rate) / lag_14_case_rate
-    )
-  ) %>%
-  step_mutate(
-    response = case_when(
-      pct_diff_ahead < -0.20 ~ "down",
-      pct_diff_ahead > 0.25 ~ "up",
-      TRUE ~ "flat"
-    ),
+    response = cut(
+      ahead_7_gr_7_rel_change_case_rate, 
+      breaks = c(-Inf, -0.2, 0.25, Inf) / 7, # division gives weekly not daily
+      labels = c("down", "flat", "up")),
     role = "outcome"
   ) %>%
-  step_rm(
-    death_rate, case_rate, lag_0_case_rate, lag_7_case_rate,
-    lag_14_case_rate, ahead_7_case_rate, pct_diff_ahead
-  ) %>%
+  step_rm(has_role("none"), has_role("raw")) %>%
   step_epi_naomit()
 ```
 
@@ -512,7 +495,10 @@ return a `data.frame` that could be used for model fitting.
 b <- bake(prep(r, jhu), jhu)
 
 epi_workflow() %>%
-  add_formula(response ~ geo_value + time_value + pct_diff_wk1 + pct_diff_wk2) %>%
+  add_formula(
+    response ~ geo_value + time_value + lag_0_gr_7_rel_change_case_rate +
+      lag_7_gr_7_rel_change_case_rate + lag_14_gr_7_rel_change_case_rate
+  ) %>%
   add_model(parsnip::multinom_reg()) %>%
   fit(data = b)
 ```
