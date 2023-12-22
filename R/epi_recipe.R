@@ -598,12 +598,12 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
     cli::cli_h3("Operations")
   }
 
-  i <- 1
-  for (step in x$steps) {
-    cat(paste0(i, ". "))
-    print(step, form_width = form_width)
-    i <- i + 1
-  }
+  fmt <- cli::cli_fmt({
+    for (step in x$steps) {
+      print(step, form_width = form_width)
+    }
+  })
+  cli::cli_ol(fmt)
   cli::cli_end()
 
   invisible(x)
