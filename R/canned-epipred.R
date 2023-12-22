@@ -58,39 +58,43 @@ print.alist <- function(x, ...) {
 
 #' @export
 print.canned_epipred <- function(x, name, ...) {
-  cat("\n")
-  bullet <- "\u2022"
-  header <- glue::glue("A basic forecaster of type {name}")
-  header <- cli::rule(header, line = 2)
-  cat_line(header)
-  cat("\n")
-
-  date_created <- glue::glue(
-    "This forecaster was fit on {format(x$metadata$forecast_created)}"
+  d <- cli::cli_div(theme = list(rule = list("line-type" = "double")))
+  cli::cli_rule("A basic forecaster of type {name}")
+  cli::cli_end(d)
+  cli::cli_text("")
+  cli::cli_text(
+    "This forecaster was fit on {.field {format(x$metadata$forecast_created)}}."
   )
-  cat_line(date_created)
-  cat("\n")
+  cli::cli_text("")
+  cli::cli_text("Training data was an {.cls epi_df} with:")
+  cli::cli_ul(c(
+    "Geography: {.field {x$metadata$training$geo_type}},",
+    "Time type: {.field {x$metadata$training$time_type}},",
+    "Using data up-to-date as of: {.field {format(x$metadata$training$as_of)}}."
+  ))
+  cli::cli_text("")
 
-  cat_line("Training data was an `epi_df` with")
-  cat_line(glue::glue("\u2022 Geography: {x$metadata$training$geo_type},"))
-  cat_line(glue::glue("{bullet} Time type: {x$metadata$training$time_type},"))
-  cat_line(glue::glue("{bullet} Using data up-to-date as of: {format(x$metadata$training$as_of)}."))
-
-  cat("\n")
-  header <- cli::rule("Predictions")
-  cat_line(header)
-  cat("\n")
+  cli::cli_rule("Predictions")
+  cli::cli_text("")
 
   n_geos <- dplyr::n_distinct(x$predictions$geo_value)
-  fds <- unique(x$predictions$forecast_date)
-  tds <- unique(x$predictions$target_date)
-
-  cat_line(
-    glue::glue("A total of {nrow(x$predictions)} predictions are available for")
+  fds <- cli::cli_vec(
+    unique(x$predictions$forecast_date),
+    list("vec-trunc" = 5)
   )
-  cat_line(glue::glue("{bullet} {n_geos} unique geographic regions,"))
-  cat_line(glue::glue("{bullet} At forecast dates: {fds},"))
-  cat_line(glue::glue("{bullet} For target dates: {tds}."))
+  tds <- cli::cli_vec(
+    unique(x$predictions$target_date),
+    list("vec-trunc" = 5)
+  )
 
-  cat("\n")
+  cli::cli_text(c(
+    "A total of {.val {nrow(x$predictions)}} prediction{?s}",
+    " {?is/are} available for"
+  ))
+  cli::cli_ul(c(
+    "{.val {n_geos}} unique geographic region{?s},",
+    "At forecast date{?s}: {.val {fds}},",
+    "For target date{?s}: {.val {tds}}."
+  ))
+  cli::cli_text("")
 }
