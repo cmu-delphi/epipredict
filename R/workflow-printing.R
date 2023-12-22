@@ -190,5 +190,3 @@ print_frosting <- function(x, ...) {
   cli::cli_bullets("... and {extra_layers} more layer{?s}.")
   invisible(x)
 }
-
-

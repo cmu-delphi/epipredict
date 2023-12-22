@@ -460,9 +460,10 @@ r <- epi_recipe(jhu) %>%
   # note recipes::step_cut() has a bug in it, or we could use that here
   step_mutate(
     response = cut(
-      ahead_7_gr_7_rel_change_case_rate, 
+      ahead_7_gr_7_rel_change_case_rate,
       breaks = c(-Inf, -0.2, 0.25, Inf) / 7, # division gives weekly not daily
-      labels = c("down", "flat", "up")),
+      labels = c("down", "flat", "up")
+    ),
     role = "outcome"
   ) %>%
   step_rm(has_role("none"), has_role("raw")) %>%

@@ -425,4 +425,3 @@ print.frosting <- function(x, form_width = 30, ...) {
   cli::cli_end()
   invisible(x)
 }
-
