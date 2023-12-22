@@ -614,19 +614,11 @@ print_preprocessor_recipe <- function(x, ...) {
   recipe <- workflows::extract_preprocessor(x)
   steps <- recipe$steps
   n_steps <- length(steps)
-  if (n_steps == 1L) {
-    step <- "Step"
-  } else {
-    step <- "Steps"
-  }
-  n_steps_msg <- glue::glue("{n_steps} Recipe {step}")
-  cat_line(n_steps_msg)
+  cli::cli_text("{n_steps} Recipe step{?s}.")
 
   if (n_steps == 0L) {
     return(invisible(x))
   }
-
-  cat_line("")
 
   step_names <- map_chr(steps, workflows:::pull_step_name)
 
@@ -638,17 +630,8 @@ print_preprocessor_recipe <- function(x, ...) {
   extra_steps <- n_steps - 10L
   step_names <- step_names[1:10]
 
-  if (extra_steps == 1L) {
-    step <- "step"
-  } else {
-    step <- "steps"
-  }
-
-  extra_dots <- "..."
-  extra_msg <- glue::glue("and {extra_steps} more {step}.")
-
   cli::cli_ol(step_names)
-  cli::cli_bullets(c(extra_dots, extra_msg))
+  cli::cli_bullets("... and {extra_steps} more step{?s}.")
   invisible(x)
 }
 
@@ -664,9 +647,8 @@ print_preprocessor <- function(x) {
     return(invisible(x))
   }
 
-  cat_line("")
-  header <- cli::rule("Preprocessor")
-  cat_line(header)
+  cli::cli_rule("Preprocessor")
+  cli::cli_text("")
 
   if (has_preprocessor_formula) {
     workflows:::print_preprocessor_formula(x)

@@ -415,60 +415,14 @@ print.frosting <- function(x, form_width = 30, ...) {
   cli::cli_h1("Frosting")
 
   if (!is.null(x$layers)) cli::cli_h3("Layers")
-  i <- 1
-  for (layer in x$layers) {
-    cat(paste0(i, ". "))
-    print(layer, form_width = form_width)
-    i <- i + 1
-  }
+
+  fmt <- cli::cli_fmt({
+    for (layer in x$layers) {
+      print(layer, form_width = form_width)
+    }
+  })
+  cli::cli_ol(fmt)
   cli::cli_end()
   invisible(x)
 }
 
-# Currently only used in the workflow printing
-print_frosting <- function(x, ...) {
-  layers <- x$layers
-  n_layers <- length(layers)
-  layer <- ifelse(n_layers == 1L, "Layer", "Layers")
-  n_layers_msg <- glue::glue("{n_layers} Frosting {layer}")
-  cat_line(n_layers_msg)
-
-  if (n_layers == 0L) {
-    return(invisible(x))
-  }
-
-  cat_line("")
-
-  layer_names <- map_chr(layers, pull_layer_name)
-
-  if (n_layers <= 10L) {
-    cli::cli_ol(layer_names)
-    return(invisible(x))
-  }
-
-  extra_layers <- n_layers - 10L
-  layer_names <- layer_names[1:10]
-
-  layer <- ifelse(extra_layers == 1L, "layer", "layers")
-
-  extra_dots <- "..."
-  extra_msg <- glue::glue("and {extra_layers} more {layer}.")
-
-  cli::cli_ol(layer_names)
-  cli::cli_bullets(c(extra_dots, extra_msg))
-  invisible(x)
-}
-
-print_postprocessor <- function(x) {
-  if (!has_postprocessor_frosting(x)) {
-    return(invisible(x))
-  }
-
-  header <- cli::rule("Postprocessor")
-  cat_line(header)
-
-  frost <- extract_frosting(x)
-  print_frosting(frost)
-
-  invisible(x)
-}
