@@ -1,6 +1,6 @@
 print_header <- function(x) {
+  cli::cli_text("")
   trained <- ifelse(workflows::is_trained_workflow(x), " [trained]", "")
-
   d <- cli::cli_div(theme = list(rule = list("line-type" = "double")))
   cli::cli_rule("Epi Workflow{trained}")
   cli::cli_end(d)
