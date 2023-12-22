@@ -419,7 +419,7 @@ consider the trend to be `flat`.
 The expression of the multinomial regression we will use is as follows:
 
 $$
-\pi_{j}(x) = \text{Pr}(Z_{\ell,t} = j|x) = \frac{e^{g_j(x)}}{1 + \sum_{k=0}^2 g_j(x) }
+\pi_{j}(x) = \text{Pr}(Z_{\ell,t} = j|x) = \frac{e^{g_j(x)}}{1 + \sum_{k=1}^{2}e^{g_k(x)} }
 $$
 
 where $j$ is either down, flat, or up
