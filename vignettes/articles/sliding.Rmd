@@ -4,7 +4,7 @@ title: "Demonstrations of sliding AR and ARX forecasters"
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = FALSE,
+  collapse = TRUE,
   comment = "#>",
   warning = FALSE,
   message = FALSE,

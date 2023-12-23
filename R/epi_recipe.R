@@ -431,6 +431,15 @@ adjust_epi_recipe.epi_recipe <- function(
 prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
+  if (is.null(training)) {
+    cli::cli_warn(c(
+      "!" = "No training data was supplied to {.fn prep}.",
+      "!" = "Unlike a {.cls recipe}, an {.cls epi_recipe} does not ",
+      "!" = "store the full template data in the object.",
+      "!" = "Please supply the training data to the {.fn prep} function,",
+      "!" = "to avoid addtional warning messages."
+    ))
+  }
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
   training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
@@ -598,12 +607,12 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
     cli::cli_h3("Operations")
   }
 
-  i <- 1
-  for (step in x$steps) {
-    cat(paste0(i, ". "))
-    print(step, form_width = form_width)
-    i <- i + 1
-  }
+  fmt <- cli::cli_fmt({
+    for (step in x$steps) {
+      print(step, form_width = form_width)
+    }
+  })
+  cli::cli_ol(fmt)
   cli::cli_end()
 
   invisible(x)
@@ -614,19 +623,11 @@ print_preprocessor_recipe <- function(x, ...) {
   recipe <- workflows::extract_preprocessor(x)
   steps <- recipe$steps
   n_steps <- length(steps)
-  if (n_steps == 1L) {
-    step <- "Step"
-  } else {
-    step <- "Steps"
-  }
-  n_steps_msg <- glue::glue("{n_steps} Recipe {step}")
-  cat_line(n_steps_msg)
+  cli::cli_text("{n_steps} Recipe step{?s}.")
 
   if (n_steps == 0L) {
     return(invisible(x))
   }
-
-  cat_line("")
 
   step_names <- map_chr(steps, workflows:::pull_step_name)
 
@@ -638,17 +639,8 @@ print_preprocessor_recipe <- function(x, ...) {
   extra_steps <- n_steps - 10L
   step_names <- step_names[1:10]
 
-  if (extra_steps == 1L) {
-    step <- "step"
-  } else {
-    step <- "steps"
-  }
-
-  extra_dots <- "..."
-  extra_msg <- glue::glue("and {extra_steps} more {step}.")
-
   cli::cli_ol(step_names)
-  cli::cli_bullets(c(extra_dots, extra_msg))
+  cli::cli_bullets("... and {extra_steps} more step{?s}.")
   invisible(x)
 }
 
@@ -664,9 +656,8 @@ print_preprocessor <- function(x) {
     return(invisible(x))
   }
 
-  cat_line("")
-  header <- cli::rule("Preprocessor")
-  cat_line(header)
+  cli::cli_rule("Preprocessor")
+  cli::cli_text("")
 
   if (has_preprocessor_formula) {
     workflows:::print_preprocessor_formula(x)
