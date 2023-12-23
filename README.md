@@ -111,22 +111,37 @@ two_week_ahead <- arx_forecaster(
 two_week_ahead
 ```
 
-    #> 
     #> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════
+
     #> 
-    #> This forecaster was fit on 2023-10-20 08:59:57
+
+    #> This forecaster was fit on 2023-12-23 08:50:59.
+
     #> 
-    #> Training data was an `epi_df` with
+
+    #> Training data was an <epi_df> with:
+
     #> • Geography: state,
+
     #> • Time type: day,
+
     #> • Using data up-to-date as of: 2022-05-31 12:08:25.
+
     #> 
+
     #> ── Predictions ─────────────────────────────────────────────────────────────────
+
     #> 
+
     #> A total of 56 predictions are available for
+
     #> • 56 unique geographic regions,
-    #> • At forecast dates: 2021-12-31,
-    #> • For target dates: 2022-01-14.
+
+    #> • At forecast date: 2021-12-31,
+
+    #> • For target date: 2022-01-14.
+
+    #> 
 
 In this case, we have used a number of different lags for the case rate,
 while only using 3 weekly lags for the death rate (as predictors). The
@@ -139,13 +154,23 @@ last available time value in the data.
 two_week_ahead$epi_workflow
 ```
 
-    #> ══ Epi Workflow [trained] ══════════════════════════════════════════════════════
-    #> Preprocessor: Recipe
-    #> Model: linear_reg()
-    #> Postprocessor: Frosting
     #> 
+
+    #> ══ Epi Workflow [trained] ══════════════════════════════════════════════════════
+
+    #> Preprocessor: Recipe
+
+    #> Model: linear_reg()
+
+    #> Postprocessor: Frosting
+
+    #> 
+
     #> ── Preprocessor ────────────────────────────────────────────────────────────────
-    #> 6 Recipe Steps
+
+    #> 
+
+    #> 6 Recipe steps.
 
     #> 1. step_epi_lag()
 
@@ -160,7 +185,9 @@ two_week_ahead$epi_workflow
     #> 6. step_training_window()
 
     #> 
+
     #> ── Model ───────────────────────────────────────────────────────────────────────
+
     #> 
     #> Call:
     #> stats::lm(formula = ..y ~ ., data = data)
@@ -171,10 +198,15 @@ two_week_ahead$epi_workflow
     #>   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  
     #>         0.0011425          0.0012481          0.0003041          0.1351769  
     #>  lag_7_death_rate  lag_14_death_rate  
-    #>         0.1471127          0.1062473  
+    #>         0.1471127          0.1062473
+
     #> 
+
     #> ── Postprocessor ───────────────────────────────────────────────────────────────
-    #> 5 Frosting Layers
+
+    #> 
+
+    #> 5 Frosting layers.
 
     #> 1. layer_predict()
 
@@ -185,6 +217,8 @@ two_week_ahead$epi_workflow
     #> 4. layer_add_target_date()
 
     #> 5. layer_threshold()
+
+    #> 
 
 The fitted model here involved preprocessing the data to appropriately
 generate lagged predictors, estimating a linear model with `stats::lm()`
