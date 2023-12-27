@@ -102,8 +102,7 @@ slather.layer_predictive_distn <-
 print.layer_predictive_distn <- function(
     x, width = max(20, options()$width - 30), ...) {
   title <- "Creating approximate predictive intervals"
-  td <- "<calculated>"
-  td <- rlang::enquos(td)
+  td <- rlang::quos(.calculated.)
   print_layer(td,
     title = title, width = width, conjunction = "type",
     extra_text = x$dist_type

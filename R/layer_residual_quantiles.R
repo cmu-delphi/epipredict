@@ -28,7 +28,7 @@
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(quantile_levels = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'   layer_residual_quantiles(quantile_levels = c(0.025, 0.975), symmetrize = FALSE) %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
@@ -173,12 +173,11 @@ grab_residuals <- function(the_fit, components) {
 #' @export
 print.layer_residual_quantiles <- function(
     x, width = max(20, options()$width - 30), ...) {
-  title <- "Resampling residuals for predictive quantiles"
-  td <- "<calculated>"
-  td <- rlang::enquos(td)
+  title <- "Predictive distn from residuals"
+  td <- rlang::quos(.calculated.)
   ext <- x$quantile_levels
   print_layer(td,
-    title = title, width = width, conjunction = "quantile_levels",
+    title = title, width = width, conjunction = "at",
     extra_text = ext
   )
 }

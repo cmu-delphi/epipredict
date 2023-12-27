@@ -80,7 +80,6 @@ slather.layer_predict <- function(object, components, workflow, new_data, ...) {
 print.layer_predict <- function(
     x, width = max(20, options()$width - 30), ...) {
   title <- "Creating predictions"
-  td <- "<calculated>"
-  td <- rlang::enquos(td)
+  td <- rlang::quos(.calculated.)
   print_layer(td, title = title, width = width)
 }

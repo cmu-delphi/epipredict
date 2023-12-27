@@ -100,8 +100,7 @@ slather.layer_quantile_distn <-
 print.layer_quantile_distn <- function(
     x, width = max(20, options()$width - 30), ...) {
   title <- "Creating predictive quantiles"
-  td <- "<calculated>"
-  td <- rlang::enquos(td)
+  td <- rlang::quos(.calculated.)
   ext <- x$quantile_levels
   print_layer(td,
     title = title, width = width, conjunction = "quantile_levels",

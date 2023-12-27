@@ -120,7 +120,7 @@ bake.step_training_window <- function(object, new_data, ...) {
 #' @export
 print.step_training_window <-
   function(x, width = max(20, options()$width - 30), ...) {
-    title <- "# of recent observations per key limited to:"
+    title <- "# of recent observations per key limited to"
     n_recent <- x$n_recent
     tr_obj <- format_selectors(rlang::enquos(n_recent), width)
     recipes::print_step(

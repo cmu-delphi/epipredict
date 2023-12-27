@@ -122,9 +122,11 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
 print.layer_add_target_date <- function(
     x, width = max(20, options()$width - 30), ...) {
   title <- "Adding target date"
-  td <- ifelse(is.null(x$target_date), "<calculated>",
-    as.character(x$target_date)
-  )
-  td <- rlang::enquos(td)
+  if (is.null(x$forecast_date)) {
+    td <- rlang::quos(.calculated.)
+  } else {
+    td <- as.character(x$target_date)
+    td <- rlang::enquos(fd)
+  }
   print_layer(td, title = title, width = width)
 }

@@ -282,3 +282,16 @@ shuffle <- function(x) {
   stopifnot(is.vector(x))
   sample(x, length(x), replace = FALSE)
 }
+
+#' @export
+print.layer_cdc_flatline_quantiles <- function(
+    x, width = max(20, options()$width - 30), ...) {
+  title <- "Simulating predictive distn"
+  td <- rlang::quos(.calculated.)
+  ext <- x$quantile_levels
+  print_layer(
+    td,
+    title = title, width = width, conjunction = "at",
+    extra_text = ext
+  )
+}

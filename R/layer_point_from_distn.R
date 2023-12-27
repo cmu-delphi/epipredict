@@ -104,8 +104,8 @@ print.layer_point_from_distn <- function(
     x, width = max(20, options()$width - 30), ...) {
   title <- "Extracting point predictions"
   if (is.null(x$name)) {
-    cnj <- NULL
-    ext <- "<overwriting .pred>"
+    cnj <- "overwriting"
+    ext <- ".pred"
   } else {
     cnj <- "adding column"
     ext <- x$name

@@ -58,6 +58,6 @@ slather.layer_naomit <- function(object, components, workflow, new_data, ...) {
 #' @export
 print.layer_naomit <- function(
     x, width = max(20, options()$width - 30), ...) {
-  title <- "Removing na predictions from"
+  title <- "Removing <NA> predictions from"
   print_layer(x$terms, title = title, width = width)
 }
