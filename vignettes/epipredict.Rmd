@@ -83,7 +83,7 @@ As described above:
 * Parts actually DO exist. There's a universe called `{tidymodels}`. It handles 
 preprocessing, training, and prediction, bound together, through a package called
 `{workflows}`. We built `{epipredict}` on top of that setup. In this way, you CAN
-use almost everything they provide.
+use many things they provide.
 
 * However, `{workflows}` doesn't do postprocessing. And nothing in the -verse handles _panel data_.
 
@@ -114,7 +114,7 @@ This call produces a warning, which we'll ignore for now. But essentially, it's 
 
 The `out` object has two components: 
   
-  1. The predictions which is just another `epi_df`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was putatively made) and the `target_date` (the date for which the forecast is being made).
+  1. The predictions which is a `tibble`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was putatively made) and the `target_date` (the date for which the forecast is being made).
   ```{r}
 out$predictions
   ```
@@ -122,9 +122,6 @@ out$predictions
   ```{r}
 out$epi_workflow
   ```
-
-Note that the `time_value` in the predictions is not necessarily meaningful, 
-but it is a required column in an `epi_df`, so it remains here.
 
 By default, the forecaster predicts the outcome (`death_rate`) 1-week ahead, using 3 lags of each predictor (`case_rate` and `death_rate`) at 0 (today), 1 week back and 2 weeks back. The predictors and outcome can be changed directly. The rest of the defaults are encapsulated into a list of arguments. This list is produced by `arx_args_list()`.
 
@@ -168,14 +165,12 @@ The column `.pred_dstn` in the `predictions` object is actually a "distribution"
 head(quantile(out_q$predictions$.pred_distn, p = .4))
 ```
 
-or extract the entire distribution into a "long" `epi_df` with `quantile_levels`
+or extract the entire distribution into a "long" `tibble` with `quantile_levels`
 being the probability and `values` being the value associated to that quantile.
 
 ```{r q2}
 out_q$predictions %>%
-  # first create a "nested" list-column
-  mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-  unnest(.pred_distn) # then unnest it
+  pivot_quantiles_longer(.pred_distn)
 ```
 
 Additional simple adjustments to the basic forecaster can be made using the function:
@@ -258,7 +253,7 @@ the `time_value`, `geo_value`, and any additional keys so that these are availab
 when necessary.
 
 The `epi_recipe` from `out_gb` can be extracted from the result:
-```{r}
+```{r, message=TRUE}
 extract_recipe(out_gb$epi_workflow)
 ```
 
@@ -326,7 +321,7 @@ each postprocessing operation is a "layer" and we "slather" these onto our
 baked cake. To fix ideas, below is the postprocessing `frosting` for 
 `arx_forecaster()`
 
-```{r}
+```{r, message=TRUE}
 extract_frosting(out_q$epi_workflow)
 ```
 
