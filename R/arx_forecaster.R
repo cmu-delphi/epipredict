@@ -222,6 +222,7 @@ arx_args_list <- function(
     nafill_buffer = Inf,
     ...) {
   # error checking if lags is a list
+  rlang::check_dots_empty()
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
 
