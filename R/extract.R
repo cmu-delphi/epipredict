@@ -18,6 +18,7 @@
 #'
 #' extract_argument(f, "layer_residual_quantiles", "symmetrize")
 extract_argument <- function(x, name, arg, ...) {
+  rlang::check_dots_empty()
   UseMethod("extract_argument")
 }
 

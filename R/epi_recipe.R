@@ -57,6 +57,7 @@ epi_recipe.default <- function(x, ...) {
 #' r
 epi_recipe.epi_df <-
   function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
+    rlang::check_dots_empty()
     if (!is.null(formula)) {
       if (!is.null(vars)) {
         rlang::abort(
@@ -288,6 +289,7 @@ is_epi_recipe <- function(x) {
 #'
 add_epi_recipe <- function(
     x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
+  rlang::check_dots_empty()
   workflows::add_recipe(x, recipe, ..., blueprint = blueprint)
 }
 
