@@ -160,6 +160,7 @@ layer_cdc_flatline_quantiles_new <- function(
 #' @export
 slather.layer_cdc_flatline_quantiles <-
   function(object, components, workflow, new_data, ...) {
+  rlang::check_dots_empty()
     if (is.null(object$quantile_levels)) {
       return(components)
     }

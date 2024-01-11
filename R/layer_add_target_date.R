@@ -80,6 +80,7 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 
 #' @export
 slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
+  rlang::check_dots_empty()
   the_recipe <- workflows::extract_recipe(workflow)
   the_frosting <- extract_frosting(workflow)
 
