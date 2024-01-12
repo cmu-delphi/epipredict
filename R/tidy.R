@@ -49,7 +49,6 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
   # add id = NA as default. If both ID & number are non-NA, error.
   # If number is NA and ID is not, select the layer with the corresponding
   # ID. Only a single ID is allowed, as this follows the convention for number
-  rlang::check_dots_empty()
   num_oper <- length(x$layers)
   pattern <- "^layer_"
 

@@ -43,7 +43,6 @@
 layer_predict <-
   function(frosting, type = NULL, opts = list(), ...,
            id = rand_id("predict_default")) {
-    rlang::check_dots_empty()
     arg_is_chr_scalar(id)
     arg_is_chr_scalar(type, allow_null = TRUE)
     add_layer(

@@ -303,7 +303,6 @@ frosting <- function(layers = NULL, requirements = NULL) {
 #' @return a `frosting` object
 #' @export
 extract_frosting <- function(x, ...) {
-  rlang::check_dots_empty()
   UseMethod("extract_frosting")
 }
 

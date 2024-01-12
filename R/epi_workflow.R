@@ -113,7 +113,6 @@ is_epi_workflow <- function(x) {
 #' wf
 #' @export
 add_model <- function(x, spec, ..., formula = NULL) {
-  rlang::check_dots_empty()
   UseMethod("add_model")
 }
 
@@ -126,7 +125,6 @@ remove_model <- function(x) {
 #' @rdname add_model
 #' @export
 update_model <- function(x, spec, ..., formula = NULL) {
-  rlang::check_dots_empty()
   UseMethod("update_model")
 }
 
