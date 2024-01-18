@@ -49,7 +49,10 @@ quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0
 }
 
 make_quantile_reg <- function() {
-  parsnip::set_new_model("quantile_reg")
+  model_env <- get_model_env()
+  if (!("quantile_reg" %in% model_env$models)) {
+    parsnip::set_new_model("quantile_reg")
+  }
   parsnip::set_model_mode("quantile_reg", "regression")
 
 
