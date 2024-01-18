@@ -111,7 +111,10 @@ smooth_quantile_reg <- function(
 
 
 make_smooth_quantile_reg <- function() {
-  parsnip::set_new_model("smooth_quantile_reg")
+  current_env <- get_model_env()
+  if (!any(current_env$models == "smooth_quantile_reg")) {
+    parsnip::set_new_model("smooth_quantile_reg")
+  }
   parsnip::set_model_mode("smooth_quantile_reg", "regression")
   parsnip::set_model_engine("smooth_quantile_reg", "regression", eng = "smoothqr")
   parsnip::set_dependency(
