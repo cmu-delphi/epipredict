@@ -89,19 +89,19 @@ test_that("check_enough_train_data", {
 
   # Check that the train data has enough data, the test data does not, but
   # the check passes anyway (because it should be applied to training data)
-  n_ <- n - 2
+  n_minus <- n - 2
   toy_test_data <- tibble::tibble(
     time_value = rep(
       seq(
         as.Date("2020-01-01"),
         by = 1,
-        length.out = n_
+        length.out = n_minus
       ),
       times = 2
     ),
-    geo_value = rep(c("ca", "hi"), each = n_),
-    x = c(1:n_, c(1:(n_ - 2), NA, NA)),
-    y = 1:(2 * n_)
+    geo_value = rep(c("ca", "hi"), each = n_minus),
+    x = c(1:n_minus, c(1:(n_minus - 2), NA, NA)),
+    y = 1:(2 * n_minus)
   ) %>% epiprocess::as_epi_df()
   expect_no_error(
     epi_recipe(y ~ x, data = toy_epi_df) %>%
@@ -110,20 +110,6 @@ test_that("check_enough_train_data", {
       recipes::bake(new_data = toy_test_data)
   )
   # Same thing, but skip = FALSE
-  n_ <- n - 2
-  toy_test_data <- tibble::tibble(
-    time_value = rep(
-      seq(
-        as.Date("2020-01-01"),
-        by = 1,
-        length.out = n_
-      ),
-      times = 2
-    ),
-    geo_value = rep(c("ca", "hi"), each = n_),
-    x = c(1:n_, c(1:(n_ - 2), NA, NA)),
-    y = 1:(2 * n_)
-  ) %>% epiprocess::as_epi_df()
   expect_no_error(
     epi_recipe(y ~ x, data = toy_epi_df) %>%
       check_enough_train_data(y, n = n - 1, epi_keys = "geo_value", skip = FALSE) %>%
