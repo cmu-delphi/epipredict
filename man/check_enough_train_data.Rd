@@ -24,6 +24,14 @@ sequence of operations for this recipe.}
 \item{...}{One or more selector functions to choose variables
 for this check. See \code{\link[=selections]{selections()}} for more details.}
 
+\item{n}{The minimum number of data points required for training.}
+
+\item{epi_keys}{A character vector of column names on which to group the data
+and check threshold within each group. Useful if your forecaster trains
+per group (for example, per geo_value).}
+
+\item{drop_na}{A logical for whether to count NA values as valid rows.}
+
 \item{role}{Not used by this check since no new variables are
 created.}
 
@@ -41,8 +49,7 @@ the computations for subsequent operations.}
 }
 \description{
 \code{check_enough_train_data} creates a \emph{specification} of a recipe
-operation that will check if variables contain enough data. NA values
-are not counted as data points.
+operation that will check if variables contain enough data.
 }
 \details{
 This check will break the \code{bake} function if any of the checked
@@ -52,41 +59,6 @@ changed to the data.
 \section{tidy() results}{
 When you \code{\link[=tidy.recipe]{tidy()}} this check, a tibble with column
 \code{terms} (the selectors or variables selected) is returned.
-
-TODO: Change these tests for check enough data.
 }
 
-\examples{
-\dontshow{if (rlang::is_installed("modeldata")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
-data(credit_data, package = "modeldata")
-is.na(credit_data) \%>\% colSums()
-
-# If the test passes, `new_data` is returned unaltered
-recipe(credit_data) \%>\%
-  check_missing(Age, Expenses) \%>\%
-  prep() \%>\%
-  bake(credit_data)
-
-# If your training set doesn't pass, prep() will stop with an error
-\dontrun{
-recipe(credit_data) \%>\%
-  check_missing(Income) \%>\%
-  prep()
-}
-
-# If `new_data` contain missing values, the check will stop `bake()`
-
-train_data <- credit_data \%>\% dplyr::filter(Income > 150)
-test_data <- credit_data \%>\% dplyr::filter(Income <= 150 | is.na(Income))
-
-rp <- recipe(train_data) \%>\%
-  check_missing(Income) \%>\%
-  prep()
-
-bake(rp, train_data)
-\dontrun{
-bake(rp, test_data)
-}
-\dontshow{\}) # examplesIf}
-}
 \concept{checks}

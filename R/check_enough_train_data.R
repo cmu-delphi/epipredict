@@ -1,13 +1,17 @@
 #' Check the dataset contains enough data points.
 #'
 #' `check_enough_train_data` creates a *specification* of a recipe
-#'  operation that will check if variables contain enough data. NA values
-#'  are not counted as data points.
+#'  operation that will check if variables contain enough data.
 #'
 #' @param recipe A recipe object. The check will be added to the
 #'  sequence of operations for this recipe.
 #' @param ... One or more selector functions to choose variables
 #'  for this check. See [selections()] for more details.
+#' @param n The minimum number of data points required for training.
+#' @param epi_keys A character vector of column names on which to group the data
+#'   and check threshold within each group. Useful if your forecaster trains
+#'   per group (for example, per geo_value).
+#' @param drop_na A logical for whether to count NA values as valid rows.
 #' @param role Not used by this check since no new variables are
 #'  created.
 #' @param trained A logical for whether the selectors in `...`
@@ -30,38 +34,6 @@
 #'  When you [`tidy()`][tidy.recipe()] this check, a tibble with column
 #'  `terms` (the selectors or variables selected) is returned.
 #'
-#' TODO: Change these tests for check enough data.
-#'
-#' @examplesIf rlang::is_installed("modeldata")
-#' data(credit_data, package = "modeldata")
-#' is.na(credit_data) %>% colSums()
-#'
-#' # If the test passes, `new_data` is returned unaltered
-#' recipe(credit_data) %>%
-#'   check_missing(Age, Expenses) %>%
-#'   prep() %>%
-#'   bake(credit_data)
-#'
-#' # If your training set doesn't pass, prep() will stop with an error
-#' \dontrun{
-#' recipe(credit_data) %>%
-#'   check_missing(Income) %>%
-#'   prep()
-#' }
-#'
-#' # If `new_data` contain missing values, the check will stop `bake()`
-#'
-#' train_data <- credit_data %>% dplyr::filter(Income > 150)
-#' test_data <- credit_data %>% dplyr::filter(Income <= 150 | is.na(Income))
-#'
-#' rp <- recipe(train_data) %>%
-#'   check_missing(Income) %>%
-#'   prep()
-#'
-#' bake(rp, train_data)
-#' \dontrun{
-#' bake(rp, test_data)
-#' }
 check_enough_train_data <-
   function(recipe,
            ...,
