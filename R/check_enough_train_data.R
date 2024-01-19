@@ -67,16 +67,18 @@ check_enough_train_data <-
            ...,
            n,
            epi_keys = NULL,
+           drop_na = TRUE,
            role = NA,
            trained = FALSE,
            columns = NULL,
-           skip = FALSE,
+           skip = TRUE,
            id = rand_id("enough_train_data")) {
     add_check(
       recipe,
       check_enough_train_data_new(
         n = n,
         epi_keys = epi_keys,
+        drop_na = drop_na,
         terms = rlang::enquos(...),
         role = role,
         trained = trained,
@@ -88,12 +90,13 @@ check_enough_train_data <-
   }
 
 check_enough_train_data_new <-
-  function(n, epi_keys, terms, role, trained, columns, skip, id) {
+  function(n, epi_keys, drop_na, terms, role, trained, columns, skip, id) {
     check(
       subclass = "enough_train_data",
       prefix = "check_",
       n = n,
       epi_keys = epi_keys,
+      drop_na = drop_na,
       terms = terms,
       role = role,
       trained = trained,
@@ -107,9 +110,33 @@ check_enough_train_data_new <-
 prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
 
+  cols_not_enough_data <- purrr::map(col_names, function(col) {
+    groups_below_thresh <- training %>%
+      dplyr::select(all_of(c(epi_keys(training), col))) %>%
+      {
+        if (x$drop_na) {
+          tidyr::drop_na(.)
+        } else {
+          .
+        }
+      } %>%
+      dplyr::count(dplyr::across(dplyr::all_of(x$epi_keys))) %>%
+      dplyr::filter(n < x$n)
+    if (nrow(groups_below_thresh) > 0) {
+      col
+    }
+  }) %>% purrr::keep(~ !is.null(.))
+
+  if (length(cols_not_enough_data) > 0) {
+    cli::cli_abort(
+      "The following columns don't have enough data to predict: {cols_not_enough_data}."
+    )
+  }
+
   check_enough_train_data_new(
     n = x$n,
     epi_keys = x$epi_keys,
+    drop_na = x$drop_na,
     terms = x$terms,
     role = x$role,
     trained = TRUE,
@@ -121,25 +148,6 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.check_enough_train_data <- function(object, new_data, ...) {
-  col_names <- object$columns
-  check_new_data(col_names, object, new_data)
-
-  cols_not_enough_data <- purrr::map(col_names, function(col) {
-    groups_below_thresh <- new_data %>%
-      dplyr::select(all_of(c(epi_keys(new_data), col))) %>%
-      tidyr::drop_na() %>%
-      dplyr::count(dplyr::across(dplyr::all_of(object$epi_keys))) %>%
-      dplyr::filter(n < object$n)
-    if (nrow(groups_below_thresh) > 0) {
-      col
-    }
-  }) %>% purrr::keep(~ !is.null(.))
-
-  if (length(cols_not_enough_data) > 0) {
-    cli::cli_abort(
-      "The following columns don't have enough data to predict: {cols_not_enough_data}."
-    )
-  }
   new_data
 }
 
@@ -160,5 +168,7 @@ tidy.check_enough_train_data <- function(x, ...) {
   }
   res$id <- x$id
   res$n <- x$n
+  res$epi_keys <- x$epi_keys
+  res$drop_na <- x$drop_na
   res
 }
