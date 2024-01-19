@@ -1,4 +1,3 @@
-test_that("check_enough_train_data", {
   # Setup toy data
   n <- 10
   toy_epi_df <- tibble::tibble(
@@ -15,6 +14,7 @@ test_that("check_enough_train_data", {
     y = 1:(2 * n)
   ) %>% epiprocess::as_epi_df()
 
+test_that("check_enough_train_data works on pooled data", {
   # Check both columns have enough data, with geo pooling
   expect_no_error(
     epi_recipe(y ~ x, data = toy_epi_df) %>%
@@ -38,6 +38,8 @@ test_that("check_enough_train_data", {
       recipes::prep(toy_epi_df) %>%
       recipes::bake(new_data = NULL)
   )
+})
+test_that("check_enough_train_data works on unpooled data", {
   # Check both columns have enough data, without geo pooling
   expect_no_error(
     epi_recipe(y ~ x, data = toy_epi_df) %>%
@@ -68,7 +70,9 @@ test_that("check_enough_train_data", {
       recipes::prep(toy_epi_df) %>%
       recipes::bake(new_data = NULL)
   )
+  })
 
+test_that("check_enough_train_data outputs the correct values", {
   # Sanity check the output of a passing recipe
   expect_no_error(
     p <- epi_recipe(y ~ x, data = toy_epi_df) %>%
@@ -86,7 +90,9 @@ test_that("check_enough_train_data", {
     rep(seq(as.Date("2020-01-01"), by = 1, length.out = n), times = 2)
   )
   expect_equal(p$geo_value, rep(c("ca", "hi"), each = n))
+})
 
+test_that("check_enough_train_data only checks train data", {
   # Check that the train data has enough data, the test data does not, but
   # the check passes anyway (because it should be applied to training data)
   n_minus <- n - 2
