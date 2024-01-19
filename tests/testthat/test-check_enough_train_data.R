@@ -130,5 +130,4 @@ test_that("check_enough_train_data", {
       recipes::prep(toy_epi_df) %>%
       recipes::bake(new_data = toy_test_data)
   )
-  browser()
 })
