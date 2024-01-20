@@ -92,9 +92,9 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
         .
       }
     } %>%
-    dplyr::group_by(all_of(.env$x$epi_keys)) %>%
+    dplyr::group_by(across(all_of(.env$x$epi_keys))) %>%
     summarise(across(all_of(.env$col_names), ~ n() < .env$x$n), .groups = "drop") %>%
-    summarise(across(all_of(.env$col_names), ~ any())) %>%
+    summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
     unlist() %>%
     names(.)[.]
 
