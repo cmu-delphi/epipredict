@@ -16,6 +16,8 @@
 #'  created.
 #' @param trained A logical for whether the selectors in `...`
 #' have been resolved by [prep()].
+#' @param columns An internal argument that tracks which columns are evaluated
+#'   for this check. Should not be used by the user.
 #' @param id A character string that is unique to this check to identify it.
 #' @param skip A logical. Should the check be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
@@ -82,22 +84,19 @@ check_enough_train_data_new <-
 prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
 
-  cols_not_enough_data <- purrr::map(col_names, function(col) {
-    groups_below_thresh <- training %>%
-      dplyr::select(all_of(c(epi_keys(training), col))) %>%
-      {
-        if (x$drop_na) {
-          tidyr::drop_na(.)
-        } else {
-          .
-        }
-      } %>%
-      dplyr::count(dplyr::across(dplyr::all_of(x$epi_keys))) %>%
-      dplyr::filter(n < x$n)
-    if (nrow(groups_below_thresh) > 0) {
-      col
-    }
-  }) %>% purrr::keep(~ !is.null(.))
+  cols_not_enough_data <- training %>%
+    {
+      if (x$drop_na) {
+        tidyr::drop_na(.)
+      } else {
+        .
+      }
+    } %>%
+    dplyr::group_by(all_of(.env$x$epi_keys)) %>%
+    summarise(across(all_of(.env$col_names), ~ n() < .env$x$n), .groups = "drop") %>%
+    summarise(across(all_of(.env$col_names), ~ any())) %>%
+    unlist() %>%
+    names(.)[.]
 
   if (length(cols_not_enough_data) > 0) {
     cli::cli_abort(

@@ -38,6 +38,9 @@ created.}
 \item{trained}{A logical for whether the selectors in \code{...}
 have been resolved by \code{\link[=prep]{prep()}}.}
 
+\item{columns}{An internal argument that tracks which columns are evaluated
+for this check. Should not be used by the user.}
+
 \item{skip}{A logical. Should the check be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
 when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
