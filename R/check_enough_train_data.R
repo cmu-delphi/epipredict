@@ -39,7 +39,7 @@
 check_enough_train_data <-
   function(recipe,
            ...,
-           n,
+           n = NULL,
            epi_keys = NULL,
            drop_na = TRUE,
            role = NA,
@@ -81,18 +81,23 @@ check_enough_train_data_new <-
   }
 
 #' @export
+#' @importFrom dplyr group_by summarise ungroup across all_of n
+#' @importFrom tidyr drop_na
 prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
+  if (is.null(x$n)) {
+    x$n <- length(col_names) + 5
+  }
 
   cols_not_enough_data <- training %>%
     {
       if (x$drop_na) {
-        tidyr::drop_na(.)
+        drop_na(.)
       } else {
         .
       }
     } %>%
-    dplyr::group_by(across(all_of(.env$x$epi_keys))) %>%
+    group_by(across(all_of(.env$x$epi_keys))) %>%
     summarise(across(all_of(.env$col_names), ~ n() < .env$x$n), .groups = "drop") %>%
     summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
     unlist() %>%
@@ -122,14 +127,13 @@ bake.check_enough_train_data <- function(object, new_data, ...) {
   new_data
 }
 
-print.check_enough_train_data <-
-  function(x, width = max(20, options()$width - 30), ...) {
-    title <- paste0("Check enough data (n = ", x$n, ") for ")
-    print_step(x$columns, x$terms, x$trained, title, width)
-    invisible(x)
-  }
+#' @export
+print.check_enough_train_data <- function(x, width = max(20, options()$width - 30), ...) {
+  title <- paste0("Check enough data (n = ", x$n, ") for ")
+  print_step(x$columns, x$terms, x$trained, title, width)
+  invisible(x)
+}
 
-#' @rdname tidy.recipe
 #' @export
 tidy.check_enough_train_data <- function(x, ...) {
   if (is_trained(x)) {

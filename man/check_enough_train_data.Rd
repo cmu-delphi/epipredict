@@ -7,7 +7,7 @@
 check_enough_train_data(
   recipe,
   ...,
-  n,
+  n = NULL,
   epi_keys = NULL,
   drop_na = TRUE,
   role = NA,
