@@ -67,15 +67,15 @@ create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
 will be treated as \emph{additional} allowed recent data rather than the
 total amount of recent data to examine.}
 
+\item{n_training_min}{Integer. The minimum number of rows per
+epi_key that are required for training. If \code{NULL}, this will be set to
+\verb{number of predictors + 5}.}
+
 \item{epi_keys}{Character vector. A character vector of column names on
 which to group the data and check threshold within each group. Useful if
 training per group (for example, per geo_value).}
 
 \item{...}{Space to handle future expansions (unused).}
-
-\item{min_training_n_threshold}{Integer. The minimum number of rows per
-epi_key that are required for training. If \code{NULL}, this will be set to
-\verb{number of predictors + 5}.}
 }
 \value{
 A list containing updated parameter choices with class \code{arx_flist}.
