@@ -180,7 +180,21 @@ arx_class_epi_workflow <- function(
       role = "outcome"
     ) %>%
     step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training)
+    step_training_window(n_recent = args_list$n_training) %>%
+    {
+      if (!is.null(args_list$check_enough_data_n)) {
+        check_enough_train_data(
+          .,
+          all_predictors(),
+          !!outcome,
+          n = args_list$check_enough_data_n,
+          epi_keys = args_list$check_enough_data_epi_keys,
+          drop_na = FALSE
+        )
+      } else {
+        .
+      }
+    }
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
@@ -228,6 +242,11 @@ arx_class_epi_workflow <- function(
 #' @param additional_gr_args List. Optional arguments controlling growth rate
 #'   calculation. See [epiprocess::growth_rate()] and the related Vignette for
 #'   more details.
+#' @param check_enough_data_n Integer. A lower limit for the number of rows per
+#'   epi_key that are required for training. If `NULL`, this check is ignored.
+#' @param check_enough_data_epi_keys Character vector. A character vector of
+#'   column names on which to group the data and check threshold within each
+#'   group. Useful if training per group (for example, per geo_value).
 #'
 #' @return A list containing updated parameter choices with class `arx_clist`.
 #' @export
@@ -251,6 +270,8 @@ arx_class_args_list <- function(
     log_scale = FALSE,
     additional_gr_args = list(),
     nafill_buffer = Inf,
+    check_enough_data_n = NULL,
+    check_enough_data_epi_keys = NULL,
     ...) {
   rlang::check_dots_empty()
   .lags <- lags
@@ -275,6 +296,8 @@ arx_class_args_list <- function(
       )
     )
   }
+  arg_is_pos(check_enough_data_n, allow_null = TRUE)
+  arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
   breaks <- sort(breaks)
   if (min(breaks) > -Inf) breaks <- c(-Inf, breaks)
@@ -296,7 +319,9 @@ arx_class_args_list <- function(
       method,
       log_scale,
       additional_gr_args,
-      nafill_buffer
+      nafill_buffer,
+      check_enough_data_n,
+      check_enough_data_epi_keys
     ),
     class = c("arx_class", "alist")
   )

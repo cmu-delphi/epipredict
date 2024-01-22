@@ -126,7 +126,21 @@ arx_fcast_epi_workflow <- function(
   r <- r %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
     step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training)
+    step_training_window(n_recent = args_list$n_training) %>%
+    {
+      if (!is.null(args_list$check_enough_data_n)) {
+        check_enough_train_data(
+          .,
+          all_predictors(),
+          !!outcome,
+          n = args_list$check_enough_data_n,
+          epi_keys = args_list$check_enough_data_epi_keys,
+          drop_na = FALSE
+        )
+      } else {
+        .
+      }
+    }
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% forecast_date + args_list$ahead
@@ -199,6 +213,11 @@ arx_fcast_epi_workflow <- function(
 #'   create a prediction. For this reason, setting `nafill_buffer < min(lags)`
 #'   will be treated as _additional_ allowed recent data rather than the
 #'   total amount of recent data to examine.
+#' @param check_enough_data_n Integer. A lower limit for the number of rows per
+#'   epi_key that are required for training. If `NULL`, this check is ignored.
+#' @param check_enough_data_epi_keys Character vector. A character vector of
+#'   column names on which to group the data and check threshold within each
+#'   group. Useful if training per group (for example, per geo_value).
 #' @param ... Space to handle future expansions (unused).
 #'
 #'
@@ -220,6 +239,8 @@ arx_args_list <- function(
     nonneg = TRUE,
     quantile_by_key = character(0L),
     nafill_buffer = Inf,
+    check_enough_data_n = NULL,
+    check_enough_data_epi_keys = NULL,
     ...) {
   # error checking if lags is a list
   rlang::check_dots_empty()
@@ -236,6 +257,8 @@ arx_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
+  arg_is_pos(check_enough_data_n, allow_null = TRUE)
+  arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
   max_lags <- max(lags)
   structure(
@@ -250,7 +273,9 @@ arx_args_list <- function(
       nonneg,
       max_lags,
       quantile_by_key,
-      nafill_buffer
+      nafill_buffer,
+      check_enough_data_n,
+      check_enough_data_epi_keys
     ),
     class = c("arx_fcast", "alist")
   )
