@@ -21,10 +21,12 @@ check_enough_train_data(
 \item{recipe}{A recipe object. The check will be added to the
 sequence of operations for this recipe.}
 
-\item{...}{One or more selector functions to choose variables
-for this check. See \code{\link[=selections]{selections()}} for more details.}
+\item{...}{One or more selector functions to choose variables for this check.
+See \code{\link[=selections]{selections()}} for more details. You will usually want to use
+\code{\link[recipes:has_role]{recipes::all_predictors()}} here.}
 
-\item{n}{The minimum number of data points required for training.}
+\item{n}{The minimum number of data points required for training. If this is
+NULL, the total number of predictors will be used.}
 
 \item{epi_keys}{A character vector of column names on which to group the data
 and check threshold within each group. Useful if your forecaster trains

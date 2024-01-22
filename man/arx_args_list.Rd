@@ -15,8 +15,8 @@ arx_args_list(
   nonneg = TRUE,
   quantile_by_key = character(0L),
   nafill_buffer = Inf,
-  n_training_min = NULL,
-  epi_keys = NULL,
+  check_enough_data_n = NULL,
+  check_enough_data_epi_keys = NULL,
   ...
 )
 }
@@ -67,13 +67,12 @@ create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
 will be treated as \emph{additional} allowed recent data rather than the
 total amount of recent data to examine.}
 
-\item{n_training_min}{Integer. The minimum number of rows per
-epi_key that are required for training. If \code{NULL}, this will be set to
-\verb{number of predictors + 5}.}
+\item{check_enough_data_n}{Integer. A lower limit for the number of rows per
+epi_key that are required for training. If \code{NULL}, this check is ignored.}
 
-\item{epi_keys}{Character vector. A character vector of column names on
-which to group the data and check threshold within each group. Useful if
-training per group (for example, per geo_value).}
+\item{check_enough_data_epi_keys}{Character vector. A character vector of
+column names on which to group the data and check threshold within each
+group. Useful if training per group (for example, per geo_value).}
 
 \item{...}{Space to handle future expansions (unused).}
 }
