@@ -1,6 +1,6 @@
 # epipredict (development)
 
-# epipredict 0.0.7.9000
+# epipredict 0.0.8
 
 -   add `check_enough_train_data` that will error if training data is too small
 -   added `check_enough_train_data` to `arx_forecaster`
