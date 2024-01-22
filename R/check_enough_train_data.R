@@ -5,9 +5,11 @@
 #'
 #' @param recipe A recipe object. The check will be added to the
 #'  sequence of operations for this recipe.
-#' @param ... One or more selector functions to choose variables
-#'  for this check. See [selections()] for more details.
-#' @param n The minimum number of data points required for training.
+#' @param ... One or more selector functions to choose variables for this check.
+#'  See [selections()] for more details. You will usually want to use
+#'  [recipes::all_predictors()] here.
+#' @param n The minimum number of data points required for training. If this is
+#'   NULL, the total number of predictors will be used.
 #' @param epi_keys A character vector of column names on which to group the data
 #'   and check threshold within each group. Useful if your forecaster trains
 #'   per group (for example, per geo_value).
@@ -86,7 +88,7 @@ check_enough_train_data_new <-
 prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
   if (is.null(x$n)) {
-    x$n <- length(col_names) + 5
+    x$n <- length(col_names)
   }
 
   cols_not_enough_data <- training %>%
