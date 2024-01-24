@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.7</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,6 +74,8 @@
 <span>  log_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  additional_gr_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  nafill_buffer <span class="op">=</span> <span class="cn">Inf</span>,</span>
+<span>  check_enough_data_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  check_enough_data_epi_keys <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -167,6 +169,17 @@ will be treated as <em>additional</em> allowed recent data rather than the
 total amount of recent data to examine.</p></dd>
 
 
+<dt>check_enough_data_n</dt>
+<dd><p>Integer. A lower limit for the number of rows per
+epi_key that are required for training. If <code>NULL</code>, this check is ignored.</p></dd>
+
+
+<dt>check_enough_data_epi_keys</dt>
+<dd><p>Character vector. A character vector of
+column names on which to group the data and check threshold within each
+group. Useful if training per group (for example, per geo_value).</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Space to handle future expansions (unused).</p></dd>
 
@@ -181,39 +194,43 @@ total amount of recent data to examine.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">arx_class_args_list</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags              : int [1:3] 0 7 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead             : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training        : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ breaks            : num [1:3] -Inf 0.25 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date     : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date       : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ outcome_transform : chr "growth_rate"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags          : int 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ horizon           : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ method            : chr "rel_change"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ log_scale         : logi FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ additional_gr_args: list()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer     : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags                      : int [1:3] 0 7 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead                     : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training                : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ breaks                    : num [1:3] -Inf 0.25 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date               : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ outcome_transform         : chr "growth_rate"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags                  : int 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ horizon                   : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ method                    : chr "rel_change"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ log_scale                 : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ additional_gr_args        : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer             : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ check_enough_data_n       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ check_enough_data_epi_keys: NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "arx_class" "alist"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># 3-class classsification,</span></span></span>
 <span class="r-in"><span><span class="co"># also needs arx_classifier(trainer = parsnip::multinom_reg())</span></span></span>
 <span class="r-in"><span><span class="fu">arx_class_args_list</span><span class="op">(</span>breaks <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">.2</span>, <span class="fl">.25</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 13</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags              : int [1:3] 0 7 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead             : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training        : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ breaks            : num [1:4] -Inf -0.2 0.25 Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date     : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date       : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ outcome_transform : chr "growth_rate"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags          : int 14</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ horizon           : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ method            : chr "rel_change"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ log_scale         : logi FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ additional_gr_args: list()</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer     : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ lags                      : int [1:3] 0 7 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead                     : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training                : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ breaks                    : num [1:4] -Inf -0.2 0.25 Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date             : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date               : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ outcome_transform         : chr "growth_rate"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ max_lags                  : int 14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ horizon                   : int 7</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ method                    : chr "rel_change"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ log_scale                 : logi FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ additional_gr_args        : list()</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer             : num Inf</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ check_enough_data_n       : NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ check_enough_data_epi_keys: NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "arx_class" "alist"</span>
 </code></pre></div>
     </div>
