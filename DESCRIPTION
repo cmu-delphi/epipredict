@@ -27,6 +27,7 @@ Depends:
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
 Imports:
+    checkmate,
     cli,
     distributional,
     dplyr,
