@@ -48,13 +48,11 @@ add/update/remove an entire `frosting` object in an `epi_workflow` as well as
 `epi_workflow` by its number or name. A summary of the function uses by
 processing step is shown by the following table:
 
-| | Add/update/remove functions | adjust functions |
+|                            | Add/update/remove functions                                | adjust functions    |
 |----------------------------|------------------------------------------------------------|---------------------|
-| Pre-processing | `add_epi_recipe()`, `update_epi_recipe()`,
-`remove_epi_recipe()` | `adjust_epi_recipe()` | | Model specification |
-`add_model()`, `update_model()` `remove_model()` | | | Post-processing |
-`add_frosting()`, `remove_frosting()`, `update_frosting()` | `adjust_frosting()`
-|
+| Pre-processing  | `add_epi_recipe()`, `update_epi_recipe()`, `remove_epi_recipe()` | `adjust_epi_recipe()` |
+| Model specification        | `add_model()`, `update_model()` `remove_model()`                 |                     |
+| Post-processing | `add_frosting()`, `remove_frosting()`, `update_frosting()`       | `adjust_frosting()`   |
 
 Since adding/removing/updating frosting as well as adjusting a layer in a
 `frosting` object proceeds in the same way as performing those tasks on an
