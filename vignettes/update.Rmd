@@ -261,7 +261,7 @@ wf %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14) # not overwr
 ```
 
 If there are at least two steps in a recipe that share the same name, specifying
-the name in `which_step` will throw an error as `adjust_epi_recipe` is not
+the name in `which_step` will throw an error as `adjust_epi_recipe()` is not
 intended to be used to modify multiple steps at once. The way, then, to modify a
 step that has the same name as another is to indicate what number it is in the
 ordering of the steps. For example, in `r2` there are two steps named
