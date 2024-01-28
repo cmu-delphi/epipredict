@@ -21,25 +21,52 @@ library(epipredict)
 library(recipes)
 ```
 
-In this vignette, we will state the main goal of the add/update/remove and adjust functions and describe what part of the processing each function is intended for. We will then demonstrate how to use the sets of add/update/remove functions, followed by the adjust functions, and end with a brief discussion on the tidy methods for recipe and frosting objects. 
+In this vignette, we will state the main goal of the add/update/remove and
+adjust functions and describe what part of the processing each function is
+intended for. We will then demonstrate how to use the sets of add/update/remove
+functions, followed by the adjust functions, and end with a brief discussion on
+the tidy methods for recipe and frosting objects.
 
 ## Main goal of the add/update/remove and adjust functions
 
-The primary goal of the update and adjust functions is to allow the user to modify a `step`, `layer`, `epi_recipe`, `frosting`, or a part of an `epi_workflow` so that they do not have to create a new object each time they wish to make a change to the pre-processing, fitting, or post-processing.
+The primary goal of the update and adjust functions is to allow the user to
+modify a `step`, `layer`, `epi_recipe`, `frosting`, or a part of an
+`epi_workflow` so that they do not have to create a new object each time they
+wish to make a change to the pre-processing, fitting, or post-processing.
 
-In the context of pre-processing, the goal of the update functions is to add/remove/update an `epi_recipe` or a step in it. For this, we have `add_epi_recipe`, `update_epi_recipe`, and `remove_epi_recipe` to add/update/remove an entire `epi_recipe` in an `epi_workflow` as well as `adjust_epi_recipe` to adjust a particular step in an `epi_recipe` or `epi_workflow` by the step number or name. For a model, one may `add_model`, `update_model`, or `remove_model` in an `epi_workflow`. For post-processing, where the goal is to update a frosting object or a layer in it, we have `add_frosting`, `remove_frosting`, and `update_frosting` to add/update/remove an entire `frosting` object in an `epi_workflow` as well as `adjust_frosting` to adjust a particular layer in a `frosting` or `epi_workflow` by its number or name. A summary of the function uses by processing step is shown by the following table:
+In the context of pre-processing, the goal of the update functions is to
+add/remove/update an `epi_recipe` or a step in it. For this, we have
+`add_epi_recipe()`, `update_epi_recipe()`, and `remove_epi_recipe()` to
+add/update/remove an entire `epi_recipe` in an `epi_workflow` as well as
+`adjust_epi_recipe()` to adjust a particular step in an `epi_recipe` or
+`epi_workflow` by the step number or name. For a model, one may `add_model()`,
+`update_model()`, or `remove_model()` in an `epi_workflow`. For post-processing,
+where the goal is to update a frosting object or a layer in it, we have
+`add_frosting()`, `remove_frosting()`, and `update_frosting()` to
+add/update/remove an entire `frosting` object in an `epi_workflow` as well as
+`adjust_frosting()` to adjust a particular layer in a `frosting` or
+`epi_workflow` by its number or name. A summary of the function uses by
+processing step is shown by the following table:
 
-|                            | Add/update/remove functions                                | adjust functions    |
+| | Add/update/remove functions | adjust functions |
 |----------------------------|------------------------------------------------------------|---------------------|
-| Pre-processing  | `add_epi_recipe`, `update_epi_recipe`, `remove_epi_recipe` | `adjust_epi_recipe` |
-| Model specification        | `add_model`, `update_model` `remove_model`                 |                     |
-| Post-processing | `add_frosting`, `remove_frosting`, `update_frosting`       | `adjust_frosting`   |
+| Pre-processing | `add_epi_recipe()`, `update_epi_recipe()`,
+`remove_epi_recipe()` | `adjust_epi_recipe()` | | Model specification |
+`add_model()`, `update_model()` `remove_model()` | | | Post-processing |
+`add_frosting()`, `remove_frosting()`, `update_frosting()` | `adjust_frosting()`
+|
 
-Since adding/removing/updating frosting as well as adjusting a layer in a `frosting` object proceeds in the same way as performing those tasks on an `epi_recipe`, we will focus on implementing those for an `epi_recipe` in this vignette and only briefly go through some examples for a `frosting` object.
+Since adding/removing/updating frosting as well as adjusting a layer in a
+`frosting` object proceeds in the same way as performing those tasks on an
+`epi_recipe`, we will focus on implementing those for an `epi_recipe` in this
+vignette and only briefly go through some examples for a `frosting` object.
 
 ## Add/update/remove an `epi_recipe` in an `epi_workflow`
 
-We start with the built-in `case_death_rate_subset` dataset that contains JHU daily COVID-19 cases and deaths by state and take a subset of it from Nov. 1, 2021 to Dec. 31, 2021 for the four states of Alaska, California, New York, and South Carolina.
+We start with the built-in `case_death_rate_subset` dataset that contains JHU
+daily COVID-19 cases and deaths by state and take a subset of it from Nov. 1,
+2021 to Dec. 31, 2021 for the four states of Alaska, California, New York, and
+South Carolina.
 
 ```{r}
 jhu <- case_death_rate_subset %>%
@@ -48,7 +75,10 @@ jhu <- case_death_rate_subset %>%
 jhu
 ```
 
-Then, we construct a simple `epi_recipe` named `r`, where we lag the death rates by 0, 7, and 14 days, lead the death rate by 14 days, omit NA values in all predictors and then in all outcomes (and set `skip = TRUE` to skip over this processing of the outcome variable when the recipe is baked). 
+Then, we construct a simple `epi_recipe` object named `r`, where we lag the
+death rates by 0, 7, and 14 days, lead the death rate by 14 days, omit NA values
+in all predictors and then in all outcomes (and set `skip = TRUE` to skip over
+this processing of the outcome variable when the recipe is baked).
 
 ```{r}
 r <- epi_recipe(jhu) %>%
@@ -58,7 +88,8 @@ r <- epi_recipe(jhu) %>%
   step_naomit(all_outcomes(), skip = TRUE)
 ```
 
-We add this recipe to an `epi_workflow` object by inputting `r` into the `add_epi_recipe` function:
+We add this recipe to an `epi_workflow` object by inputting `r` into the
+`add_epi_recipe()` function:
 
 ```{r}
 wf <- epi_workflow() %>%
@@ -68,6 +99,7 @@ wf
 ```
 
 We may then go on to add the fitted linear model to our `epi_workflow`:
+
 ```{r}
 # Fit a linear model
 wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
@@ -75,7 +107,11 @@ wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 wf
 ```
 
-At this stage, suppose we decide to overhaul our recipe so that we have a different set of pre-processing steps or we want to make multiple changes to existing steps, but we desire to keep the remainder of the `epi_workflow` the same. We can use the `update_epi_recipe` function to trade our current recipe `r` for another recipe `r2` in `wf` as follows:
+At this stage, suppose we decide to overhaul our recipe so that we have a
+different set of pre-processing steps or we want to make multiple changes to
+existing steps, but we desire to keep the remainder of the `epi_workflow` the
+same. We can use the `update_epi_recipe()` function to trade our current recipe
+`r` for another recipe `r2` in `wf` as follows:
 
 ```{r}
 r2 <- epi_recipe(jhu) %>%
@@ -87,28 +123,49 @@ r2 <- epi_recipe(jhu) %>%
 wf <- update_epi_recipe(wf, r2)
 wf
 ```
-You can see that the output of `wf` depicts the sequence of steps in `r2` instead of `r`, which indicates that the update was successful.
 
-A longer approach to achieve the same end is to use `remove_epi_recipe` to remove the old recipe and then `add_epi_recipe` to add the new one. Under the hood, the `update_epi_recipe` function operates in this way. 
+You can see that the output of `wf` depicts the sequence of steps in `r2`
+instead of `r`, which indicates that the update was successful.
 
-The `add_epi_recipe` and `remove_epi_recipe` functions offload to the `workflows` versions of the functions (`workflows::add_recipe()` and `workflows::remove_recipe()`) as much as possible. The main reason for using the `epipredict` version is so that we ensure that we do not lose the `epi_workflow` class. 
+A longer approach to achieve the same end is to use `remove_epi_recipe()` to
+remove the old recipe and then `add_epi_recipe()` to add the new one. Under the
+hood, the `update_epi_recipe()` function operates in this way.
 
-To see this, let's look at what happens if we remove our current `epi_recipe` using `workflows::remove_recipe` and then inspect the class of `wf`:
+The `add_epi_recipe()` and `remove_epi_recipe()` functions offload to the
+`{workflows}` versions of the functions as much as possible. The main reason for
+using the `{epipredict}` version is so that we ensure that we retain the
+`epi_workflow` class.
+
+To see this, let's look at what happens if we remove our current `epi_recipe`
+using `workflows::remove_recipe()` and then inspect the class of `wf`:
 
 ```{r}
 wf %>% class() # class before
 workflows::remove_recipe(wf) %>% class() # class after removing recipe using workflows function
 ```
 
-We can observe that `wf` is no longer an `epi_workflow` and a `workflow`. It has been demoted to only a `workflow`. While all `epi_workflow`s are `workflow`s, not all `workflow`s are `epi_workflow`s, meaning that there may be compatibility issues and limitations to the tools that may be used from the `epipredict` package on a plain `workflow` object. 
+We can observe that `wf` is no longer an `epi_workflow` and a `workflow`. It has
+been demoted to only a `workflow`. While all `epi_workflow`s are `workflow`s,
+not all `workflow`s are `epi_workflow`s, meaning that there may be compatibility
+issues and limitations to the tools that may be used from the `{epipredict}`
+package on a plain `workflow` object.
 
-Now, while we checked what happens to the above `epi_recipe` if we remove it, note that we did not actually store that change to `wf` (using the assignment operator `<-`). Hence, our `epi_workflow` remains unchanged.
+Now, while we checked what happens to the above `epi_recipe` if we remove it,
+note that we did not actually store that change to `wf`. Hence, our
+`epi_workflow` remains unchanged.
 
 ```{r}
 wf
 ```
 
-One thing to notice about this workflow output is that is that the model fit remains the same as when we had `r` as the recipe. This illustrates an important point - Any operations performed using the old recipe are not updated automatically. So we should be careful to fit the model using the new recipe, `r2`. Similarly, if predictions were made using the old recipe, then they should be re-generated using the version `epi_workflow` that contains the updated recipe. We can use `update_model` to replace the model used in `wf`, and then fit as before:
+One thing to notice about this workflow output is that is that the model fit
+remains the same as when we had `r` as the recipe. This illustrates an important
+point - Any operations performed using the old recipe are not updated
+automatically. So we should be careful to fit the model using the new recipe,
+`r2`. Similarly, if predictions were made using the old recipe, then they should
+be re-generated using the version `epi_workflow` that contains the updated
+recipe. We can use `update_model()` to replace the model used in `wf`, and then
+fit as before:
 
 ```{r}
 # fit linear model
@@ -116,11 +173,14 @@ wf <- update_model(wf, parsnip::linear_reg()) %>% fit(jhu)
 wf
 ```
 
-Alternatively, we may use the `remove_model` followed by `add_model` combination for the same effect.
+Alternatively, we may use the `remove_model()` followed by `add_model()`
+combination for the same effect.
 
 ## Add/update/remove a `frosting` object in an `epi_workflow`
 
-We will now generate and create a `frosting` object for post-processing predictions. In our initial frosting object, `f`, we simply implement predictions on the fitted `epi_workflow`:
+We will now generate and create a `frosting` object for post-processing
+predictions. In our initial frosting object, `f`, we simply implement
+predictions on the fitted `epi_workflow`:
 
 ```{r}
 latest <- get_test_data(recipe = r2, x = jhu)
@@ -133,9 +193,12 @@ p1 <- predict(wf1, latest)
 p1
 ```
 
-Suppose we decide to augment our post-processing to include a threshold to enforce that the predictions are at least 0. As well, let's include the forecast and target dates as separate columns.
+Suppose we decide to augment our post-processing to include a threshold to
+enforce that the predictions are at least 0. As well, let's include the forecast
+and target dates as separate columns.
 
-To update the `frosting` while leaving the remainder of the `epi_workflow` the same, we can use the `update_frosting` function as follows:
+To update the `frosting` while leaving the remainder of the `epi_workflow` the
+same, we can use the `update_frosting()` function as follows:
 
 ```{r}
 # Update frosting in a workflow and predict
@@ -150,26 +213,38 @@ p2 <- predict(wf2, latest)
 p2
 ```
 
-Internally, this works by removing the old frosting followed by adding the new frosting, just like when we update a recipe or model. 
+Internally, this works by removing the old frosting followed by adding the new
+frosting, just like when we update a recipe or model.
 
 ```{r}
 update_frosting
 ```
 
-If we decide that we do not want the `frosting` post-processing at all, we can remove the `frosting` object from the workflow and make predictions as follows: 
+If we decide that we do not want the `frosting` post-processing at all, we can
+remove the `frosting` object from the workflow and make predictions as follows:
 
 ```{r}
 wf3 <- wf2 %>% remove_frosting()
 p3 <- predict(wf3, latest)
 p3
 ```
-You can see that the above results from `p3` are the same as from `p1`, when we simply have a prediction layer in the `frosting` post-processing container.
+
+You can see that the above results from `p3` are the same as from `p1`, when we
+simply have a prediction layer in the `frosting` post-processing container.
 
 ## Adjust a single step of an `epi_recipe`
 
-Suppose that we just want to change a single step in an `epi_recipe` (that is either standalone or a part of an `epi_workflow`). Instead of replacing an entire `epi_recipe`, we can use the `adjust_epi_recipe` function. In this function, the step to be adjusted is indicated either the step number or name in the `which_step` parameter. Then, the parameter name and update value must be inputted as `...`.
+Suppose that we just want to change a single step in an `epi_recipe` (that is
+either standalone or a part of an `epi_workflow`). Instead of replacing an
+entire `epi_recipe`, we can use the `adjust_epi_recipe()` function. In this
+function, the step to be adjusted is indicated either the step number or name in
+the `which_step` parameter. Then, the parameter name and update value must be
+inputted as `...`.
 
-For instance, suppose that we decide to lead the `death_rate` by 14 days instead of 7. We may adjust this step in `wf` recipe by setting `which_step` to the step number in the order of operations, which can be obtained by inspecting `r2` or the tidy summary of it:
+For instance, suppose that we decide to lead the `death_rate` by 14 days instead
+of 7. We may adjust this step in `wf` recipe by setting `which_step` to the step
+number in the order of operations, which can be obtained by inspecting `r2` or
+the tidy summary of it:
 
 ```{r}
 workflows::extract_preprocessor(wf) # step_epi_ahead is the third step in r2
@@ -178,13 +253,21 @@ tidy(workflows::extract_preprocessor(wf)) # tidy tibble summary of r2
 wf <- wf %>% adjust_epi_recipe(which_step = 3, ahead = 14)
 ```
 
-Alternatively, we may adjust that step by name by specifying the full name of the step, `step_epi_ahead`, in `which_step`:
+Alternatively, we may adjust that step by name by specifying the full name of
+the step, `step_epi_ahead`, in `which_step`:
 
 ```{r}
 wf %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14) # not overwrite r2 because same result
 ```
 
-If there are at least two steps in a recipe that share the same name, specifying the name in `which_step` will throw an error as `adjust_epi_recipe` is not intended to be used to modify multiple steps at once. The way, then, to modify a step that has the same name as another is to indicate what number it is in the ordering of the steps. For example, in `r2` there are two steps named `step_epi_lag` - the first step where we lag the death rate, and the second where we lag the case rate. If we want to modify the lags for the `case_rate` variable, we would specify the step number of 2 in `which_step`. 
+If there are at least two steps in a recipe that share the same name, specifying
+the name in `which_step` will throw an error as `adjust_epi_recipe` is not
+intended to be used to modify multiple steps at once. The way, then, to modify a
+step that has the same name as another is to indicate what number it is in the
+ordering of the steps. For example, in `r2` there are two steps named
+`step_epi_lag` - the first step where we lag the death rate, and the second
+where we lag the case rate. If we want to modify the lags for the `case_rate`
+variable, we would specify the step number of 2 in `which_step`.
 
 ```{r}
 wf <- wf %>% adjust_epi_recipe(which_step = 2, lag = c(0, 1, 7, 14, 21))
@@ -192,13 +275,20 @@ wf <- wf %>% adjust_epi_recipe(which_step = 2, lag = c(0, 1, 7, 14, 21))
 workflows::extract_preprocessor(wf)
 ```
 
-We could adjust a recipe directly in the same way as we adjust a recipe in a workflow. The main difference is that we would not input `wf` as the first argument to `adjust_epi_recipe` but rather `r2`.
+We could adjust a recipe directly in the same way as we adjust a recipe in a
+workflow. The main difference is that we would not input `wf` as the first
+argument to `adjust_epi_recipe()` but rather `r2`.
 
 ```{r}
 adjust_epi_recipe(r2, which_step = 2, lag = c(0, 1, 7, 14, 21)) # should be same result as above
 ```
 
-Note that when we adjust the `r2` object directly, we are not adjusting the recipe in the `epi_workflow`. That is, if we modify a step in `r2`, the change will not automatically transfer over to `wf`. We would need to modify the recipe in `wf` directly (`adjust_epi_recipe` on `wf`) or update the recipe in `wf` with a new `epi_recipe` that has undergone the adjustment (using `update_epi_recipe`):
+Note that when we adjust the `r2` object directly, we are not adjusting the
+recipe in the `epi_workflow`. That is, if we modify a step in `r2`, the change
+will not automatically transfer over to `wf`. We would need to modify the recipe
+in `wf` directly (`adjust_epi_recipe()` on `wf`) or update the recipe in `wf`
+with a new `epi_recipe` that has undergone the adjustment (using
+`update_epi_recipe()`):
 
 ```{r}
 r2 <- adjust_epi_recipe(r2, which_step = 2, lag = 0:21)
@@ -208,15 +298,25 @@ workflows::extract_preprocessor(wf)
 
 ## Adjust a single layer of a `frosting`
 
-Adjusting a layer of a `frosting` object proceeds in the same way as adjusting a step in an `epi_recipe` does. So if we want to change a single layer in a `frosting` (that is either in a standalone object or part of an `epi_workflow`), we can use the `adjust_frosting` function wherein the layer to be adjusted is indicated by either its number or name in the `which_layer` parameter. In addition, the argument name and update value must be inputted as `...`.
+Adjusting a layer of a `frosting` object proceeds in the same way as adjusting a
+step in an `epi_recipe` does. So if we want to change a single layer in a
+`frosting` (that is either in a standalone object or part of an `epi_workflow`),
+we can use the `adjust_frosting()` function wherein the layer to be adjusted is
+indicated by either its number or name in the `which_layer` parameter. In
+addition, the argument name and update value must be inputted as `...`.
 
-Let's work with the frosting object directly instead of working on it through the `epi_workflow` in a simple, illustrative example. Recall frosting `f2` which has the following layers:
+Let's work with the frosting object directly instead of working on it through
+the `epi_workflow` in a simple, illustrative example. Recall frosting `f2` which
+has the following layers:
 
 ```{r}
 f2
 ```
 
-Suppose that we decide to change the upper bound of the prediction threshold to 10 instead of `Inf`. We can adjust this layer in frosting object by setting `which_layer` to the layer number, 3 (which can be found by inspecting `f2` or `tidy(f2)`):
+Suppose that we decide to change the upper bound of the prediction threshold to
+10 instead of `Inf`. We can adjust this layer in frosting object by setting
+`which_layer` to the layer number, 3 (which can be found by inspecting `f2` or
+`tidy(f2)`):
 
 ```{r}
 f2 <- f2 %>% adjust_frosting(which_layer = 2, upper = 10)
@@ -224,7 +324,8 @@ f2 <- f2 %>% adjust_frosting(which_layer = 2, upper = 10)
 f2
 ```
 
-Alternatively, we may adjust that layer by specifying its full name, `layer_threshold`, in `which_layer`, to achieve the same result:
+Alternatively, we may adjust that layer by specifying its full name,
+`layer_threshold`, in `which_layer`, to achieve the same result:
 
 ```{r}
 f2 %>% adjust_frosting(which_layer = "layer_threshold", upper = 10) # not overwrite f2 because same result
@@ -232,19 +333,30 @@ f2 %>% adjust_frosting(which_layer = "layer_threshold", upper = 10) # not overwr
 
 ## On the tidy method to inspect an `epi_recipe` or a `frosting` object
 
-The tidy method, when used on an `epi_recipe`, will return a data frame that contains specific overview information about the recipe including the operation number, the operation class (either "step" or "check"), the type of method, a boolean value to indicate whether `prep()` has been used to estimate the operation, a boolean value to indicate whether the step is applied when `bake()` is called, and the id of the operation.
+The tidy method, when used on an `epi_recipe`, will return a data frame that
+contains specific overview information about the recipe including the operation
+number, the operation class (either "step" or "check"), the type of method, a
+boolean value to indicate whether `prep()` has been used to estimate the
+operation, a boolean value to indicate whether the step is applied when `bake()`
+is called, and the id of the operation.
 
 ```{r}
 tidy(r2)
 ```
 
-In contrast, printing the `epi_recipe` object shows the inputs (number and roles of the variables) as well as the ordering and a brief written summary of the operations:
+In contrast, printing the `epi_recipe` object shows the inputs (number and roles
+of the variables) as well as the ordering and a brief written summary of the
+operations:
 
 ```{r}
 r2
 ```
 
-This same general structure persists when we compare the output of a frosting object to that of its tidy tibble. However, we no longer have the output specific to a recipe such as the roles in the recipe output and the trained and skip columns in tidy tibble for it. Thus, the output of a frosting object and the tidy tibble are simplified in comparison to those for an `epi_recipe`. 
+This same general structure persists when we compare the output of a frosting
+object to that of its tidy tibble. However, we no longer have the output
+specific to a recipe such as the roles in the recipe output and the trained and
+skip columns in tidy tibble for it. Thus, the output of a frosting object and
+the tidy tibble are simplified in comparison to those for an `epi_recipe`.
 
 ```{r}
 f
