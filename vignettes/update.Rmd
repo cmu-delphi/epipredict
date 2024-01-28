@@ -287,8 +287,8 @@ Note that when we adjust the `r2` object directly, we are not adjusting the
 recipe in the `epi_workflow`. That is, if we modify a step in `r2`, the change
 will not automatically transfer over to `wf`. We would need to modify the recipe
 in `wf` directly (`adjust_epi_recipe()` on `wf`) or update the recipe in `wf`
-with a new `epi_recipe` that has undergone the adjustment (using
-`update_epi_recipe()`):
+with a new `epi_recipe` that has undergone the adjustment 
+(using `update_epi_recipe()`):
 
 ```{r}
 r2 <- adjust_epi_recipe(r2, which_step = 2, lag = 0:21)
