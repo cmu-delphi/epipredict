@@ -7,7 +7,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 -   add `check_enough_train_data` that will error if training data is too small
 -   added `check_enough_train_data` to `arx_forecaster`
 -   simplify `layer_residual_quantiles()` to avoid timesuck in `utils::methods()`
--   rename the `dist_quantiles()` to be more descriptive, breaking change)
+-   rename the `dist_quantiles()` to be more descriptive, breaking change
 -   removes previous `pivot_quantiles()` (now `*_wider()`, breaking change)
 -   add `pivot_quantiles_wider()` for easier plotting
 -   add complement `pivot_quantiles_longer()`
@@ -31,3 +31,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 -   Publish public for easy navigation
 -   Two simple forecasters as test beds
 -   Working vignette
+-   use `checkmate` for input validation

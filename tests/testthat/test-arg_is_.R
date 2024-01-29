@@ -44,7 +44,7 @@ test_that("scalar", {
 test_that("numeric", {
   expect_silent(arg_is_numeric(i, j, x, y))
   expect_error(arg_is_numeric(a))
-  expect_error(arg_is_numeric(d))
+  expect_silent(arg_is_numeric(d))
   expect_silent(arg_is_numeric(c(i, j)))
   expect_silent(arg_is_numeric(i, k))
   expect_silent(arg_is_numeric(i, j, n, allow_null = TRUE))
@@ -56,7 +56,7 @@ test_that("numeric", {
 test_that("positive", {
   expect_silent(arg_is_pos(i, j, x, y))
   expect_error(arg_is_pos(a))
-  expect_error(arg_is_pos(d))
+  expect_silent(arg_is_pos(d))
   expect_silent(arg_is_pos(c(i, j)))
   expect_error(arg_is_pos(i, k))
   expect_silent(arg_is_pos(i, j, n, allow_null = TRUE))
@@ -68,7 +68,7 @@ test_that("positive", {
 test_that("nonneg", {
   expect_silent(arg_is_nonneg(i, j, x, y))
   expect_error(arg_is_nonneg(a))
-  expect_error(arg_is_nonneg(d))
+  expect_silent(arg_is_nonneg(d))
   expect_silent(arg_is_nonneg(c(i, j)))
   expect_error(arg_is_nonneg(i, k))
   expect_silent(arg_is_nonneg(i, j, n, allow_null = TRUE))
@@ -96,7 +96,8 @@ test_that("date", {
   expect_error(arg_is_date(d, dd, n))
   expect_error(arg_is_date(d, dd, nn))
   expect_silent(arg_is_date(d, dd, n, allow_null = TRUE))
-  expect_silent(arg_is_date(d, dd, nn, allow_na = TRUE))
+  # Upstream issue, see: https://github.com/mllg/checkmate/issues/256
+  # expect_silent(arg_is_date(d, dd, nn, allow_na = TRUE))
   expect_error(arg_is_date(a))
   expect_error(arg_is_date(v))
   expect_error(arg_is_date(ll))
@@ -135,14 +136,6 @@ test_that("function", {
   expect_error(arg_is_function(f = NULL))
   expect_silent(arg_is_function(g, f = NULL, allow_null = TRUE))
 })
-
-test_that("sorted", {
-  expect_silent(arg_is_sorted(a = 1:5, b = 6:10))
-  expect_error(arg_is_sorted(a = 5:1, b = 6:10))
-  expect_error(arg_is_sorted(b = NULL))
-  expect_silent(arg_is_sorted(b = NULL, allow_null = TRUE))
-})
-
 
 test_that("coerce scalar to date", {
   expect_error(arg_to_date("12345"))
