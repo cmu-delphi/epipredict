@@ -474,7 +474,7 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x563ae2db5420&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55c1cbc654e0&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
@@ -536,11 +536,11 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 step      epi_lag   FALSE   FALSE epi_lag_l1VpK  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_OZJog  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 step      epi_ahead FALSE   FALSE epi_ahead_0ZyKB</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 step      naomit    FALSE   FALSE naomit_xNcnd   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_zw72E</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 step      epi_lag   FALSE   FALSE epi_lag_Mlydu  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_SnbTV  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 step      epi_ahead FALSE   FALSE epi_ahead_2k9jR</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 step      naomit    FALSE   FALSE naomit_LUnOp   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_AGKsR</span></span>
 <span></span>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="fl">3</span>, ahead <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></code></pre></div>
 <p>Alternatively, we may adjust that step by name by specifying the full
@@ -727,11 +727,11 @@ boolean value to indicate whether the step is applied when
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 step      epi_lag   FALSE   FALSE epi_lag_l1VpK  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_OZJog  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 step      epi_ahead FALSE   FALSE epi_ahead_0ZyKB</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 step      naomit    FALSE   FALSE naomit_xNcnd   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_zw72E</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 step      epi_lag   FALSE   FALSE epi_lag_Mlydu  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_SnbTV  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 step      epi_ahead FALSE   FALSE epi_ahead_2k9jR</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 step      naomit    FALSE   FALSE naomit_LUnOp   </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_AGKsR</span></span></code></pre></div>
 <p>In contrast, printing the <code>epi_recipe</code> object shows the
 inputs (number and roles of the variables) as well as the ordering and a
 brief written summary of the operations:</p>
@@ -772,7 +772,7 @@ those for an <code>epi_recipe</code>.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">#&gt;   number operation type    id                   </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 layer     predict predict_default_toNEs</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 layer     predict predict_default_6bOU9</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

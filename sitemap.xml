@@ -4,6 +4,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/404.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/DEVELOPMENT.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/LICENSE-text.html</loc>
   </url>
   <url>
@@ -32,6 +35,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/news/index.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/pull_request_template.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/reference/add_epi_recipe.html</loc>
