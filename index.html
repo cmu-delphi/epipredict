@@ -88,10 +88,13 @@
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
-<p>You can install the development version of epipredict from <a href="https://github.com/" class="external-link">GitHub</a> with:</p>
+<p>To install (unless you’re making changes to the package, use the stable version):</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># install.packages("remotes")</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"cmu-delphi/epipredict"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Stable version</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"cmu-delphi/epipredict@main"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Dev version</span></span>
+<span><span class="fu">pak</span><span class="fu">::</span><span class="fu"><a href="https://pak.r-lib.org/reference/pkg_install.html" class="external-link">pkg_install</a></span><span class="op">(</span><span class="st">"cmu-delphi/epipredict@dev"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
@@ -133,7 +136,7 @@
 <div class="section level2">
 <h2 id="intermediate-example">Intermediate example<a class="anchor" aria-label="anchor" href="#intermediate-example"></a>
 </h2>
-<p>The package comes with some built-in historical data for illustration, but up-to-date versions of this could be downloaded with the <a href="https://cmu-delphi.github.io/epidatr/" class="external-link"><code>{epidatr}</code> package</a> and processed using <a href="https://cmu-delphi.github.io/epiprocess/" class="external-link"><code>{epiprocess}</code></a>.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Other epidemiological signals for non-Covid related illnesses are also available with &lt;a href="https://github.com/cmu-delphi/epidatr" class="external-link"&gt;&lt;code&gt;{epidatr}&lt;/code&gt;&lt;/a&gt; which interfaces directly to Delphi’s &lt;a href="https://cmu-delphi.github.io/delphi-epidata/" class="external-link"&gt;Epidata API&lt;/a&gt;&lt;/p&gt;'><sup>1</sup></a></p>
+<p>The package comes with some built-in historical data for illustration, but up-to-date versions of this could be downloaded with the <a href="https://cmu-delphi.github.io/epidatr/" class="external-link"><code>{epidatr}</code> package</a> and processed using <a href="https://cmu-delphi.github.io/epiprocess/" class="external-link"><code>{epiprocess}</code></a>.[1]</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span></span>
 <span><span class="va">case_death_rate_subset</span></span>
@@ -170,7 +173,7 @@
 <span><span class="va">two_week_ahead</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on 2023-12-23 09:12:46.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on 2024-01-29 15:10:01.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an &lt;epi_df&gt; with:</span></span>
 <span><span class="co">#&gt; • Geography: state,</span></span>
@@ -243,10 +246,12 @@
 <span><span class="co">#&gt; 10 de        1.09  quantiles(1.09)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt; # ℹ 46 more rows</span></span></code></pre></div>
 <p>The results above show a distributional forecast produced using data through the end of 2021 for the 14th of January 2022. A prediction for the death rate per 100K inhabitants is available for every state (<code>geo_value</code>) along with a 90% predictive interval.</p>
+<ol style="list-style-type: decimal">
+<li>Other epidemiological signals for non-Covid related illnesses are also available with <a href="https://github.com/cmu-delphi/epidatr" class="external-link"><code>{epidatr}</code></a> which interfaces directly to Delphi’s <a href="https://cmu-delphi.github.io/delphi-epidata/" class="external-link">Epidata API</a>
+</li>
+</ol>
 </div>
 </div>
-
-
   </main><aside class="col-md-3"><div class="links">
 <h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
