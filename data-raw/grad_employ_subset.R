@@ -96,8 +96,8 @@ ncol(gemploy)
 
 grad_employ_subset <- gemploy %>%
   tsibble::as_tsibble(
-    index=time_value,
-    key=c(geo_value, age_group, edu_qual)) %>%
+    index = time_value,
+    key = c(geo_value, age_group, edu_qual)) %>%
   as_epi_df(
     geo_type = "custom", time_type = "year", as_of = "2022-07-19",
     additional_metadata = list(other_keys = c("age_group", "edu_qual")))
