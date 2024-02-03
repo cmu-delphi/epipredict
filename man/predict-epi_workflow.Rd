@@ -14,24 +14,25 @@
 \item{new_data}{A data frame containing the new predictors to preprocess
 and predict on}
 
-\item{...}{Arguments to the underlying model's prediction
-function cannot be passed here (see \code{opts}). There are some
-\code{parsnip} related options that can be passed, depending on the
-value of \code{type}. Possible arguments are:
+\item{...}{Additional \code{parsnip}-related options, depending on the
+value of \code{type}. Arguments to the underlying model's prediction
+function cannot be passed here (use the \code{opts} argument instead).
+Possible arguments are:
 \itemize{
-\item \code{interval}: for \code{type}s of "survival" and "quantile", should
+\item \code{interval}: for \code{type} equal to \code{"survival"} or \code{"quantile"}, should
 interval estimates be added, if available? Options are \code{"none"}
 and \code{"confidence"}.
-\item \code{level}: for \code{type}s of "conf_int", "pred_int", and "survival"
+\item \code{level}: for \code{type} equal to \code{"conf_int"}, \code{"pred_int"}, or \code{"survival"},
 this is the parameter for the tail area of the intervals
 (e.g. confidence level for confidence intervals).
-Default value is 0.95.
-\item \code{std_error}: add the standard error of fit or prediction (on
-the scale of the linear predictors) for \code{type}s of "conf_int"
-and "pred_int". Default value is \code{FALSE}.
-\item \code{quantile}: the quantile(s) for quantile regression
-(not implemented yet)
-\item \code{time}: the time(s) for hazard and survival probability estimates.
+Default value is \code{0.95}.
+\item \code{std_error}: for \code{type} equal to \code{"conf_int"} or \code{"pred_int"}, add
+the standard error of fit or prediction (on the scale of the
+linear predictors). Default value is \code{FALSE}.
+\item \code{quantile}: for \code{type} equal to \code{quantile}, the quantiles of the
+distribution. Default is \code{(1:9)/10}.
+\item \code{eval_time}: for \code{type} equal to \code{"survival"} or \code{"hazard"}, the
+time points at which the survival probability or hazard is estimated.
 }}
 }
 \value{
@@ -55,26 +56,17 @@ possible. Specifically, the output will have \code{time_value} and
 }
 }
 \examples{
-
-library(dplyr)
-library(parsnip)
-library(recipes)
-
 jhu <- case_death_rate_subset
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
-wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
+latest <- jhu \%>\% dplyr::filter(time_value >= max(time_value) - 14)
 
-latest <- jhu \%>\% filter(time_value >= max(time_value) - 14)
-
-preds <- predict(wf, latest) \%>\%
-  filter(!is.na(.pred))
-
+preds <- predict(wf, latest)
 preds
 }

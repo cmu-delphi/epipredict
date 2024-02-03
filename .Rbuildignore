@@ -1,7 +1,10 @@
+^renv$
+^renv\.lock$
 ^epipredict\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
 ^drafts$
+^\.Rprofile$
 ^man-roxygen$
 ^README\.Rmd$
 ^\.github$
@@ -11,3 +14,6 @@
 ^musings$
 ^data-raw$
 ^vignettes/articles$
+^.git-blame-ignore-revs$
+^doc$
+^Meta$

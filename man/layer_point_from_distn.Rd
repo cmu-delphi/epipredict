@@ -42,8 +42,7 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()
 
-wf <- epi_workflow(r, quantile_reg(tau = c(.25, .5, .75))) \%>\%
- parsnip::fit(jhu)
+wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) \%>\% fit(jhu)
 
 latest <- get_test_data(recipe = r, x = jhu)
 

@@ -7,25 +7,30 @@
 arx_args_list(
   lags = c(0L, 7L, 14L),
   ahead = 7L,
-  min_train_window = 20L,
+  n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
-  levels = c(0.05, 0.95),
+  quantile_levels = c(0.05, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
-  quantile_by_key = character(0L)
+  quantile_by_key = character(0L),
+  nafill_buffer = Inf,
+  check_enough_data_n = NULL,
+  check_enough_data_epi_keys = NULL,
+  ...
 )
 }
 \arguments{
 \item{lags}{Vector or List. Positive integers enumerating lags to use
-in autoregressive-type models (in days).}
+in autoregressive-type models (in days). By default, an unnamed list
+of lags will be set to correspond to the order of the predictors.}
 
 \item{ahead}{Integer. Number of time steps ahead (in days) of the forecast
 date for which forecasts should be produced.}
 
-\item{min_train_window}{Integer. The minimal amount of training
-data (in the time unit of the \code{epi_df}) needed to produce a forecast.
-If smaller, the forecaster will return \code{NA} predictions.}
+\item{n_training}{Integer. An upper limit for the number of rows per
+key that are used for training
+(in the time unit of the \code{epi_df}).}
 
 \item{forecast_date}{Date. The date on which the forecast is created.
 The default \code{NULL} will attempt to determine this automatically.}
@@ -33,12 +38,14 @@ The default \code{NULL} will attempt to determine this automatically.}
 \item{target_date}{Date. The date for which the forecast is intended.
 The default \code{NULL} will attempt to determine this automatically.}
 
-\item{levels}{Vector or \code{NULL}. A vector of probabilities to produce
+\item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of
 training residuals. A \code{NULL} value will result in point forecasts only.}
 
 \item{symmetrize}{Logical. The default \code{TRUE} calculates
-symmetric prediction intervals.}
+symmetric prediction intervals. This argument only applies when
+residual quantiles are used. It is not applicable with
+\code{trainer = quantile_reg()}, for example.}
 
 \item{nonneg}{Logical. The default \code{TRUE} enforces nonnegative predictions
 by hard-thresholding at 0.}
@@ -46,10 +53,31 @@ by hard-thresholding at 0.}
 \item{quantile_by_key}{Character vector. Groups residuals by listed keys
 before calculating residual quantiles. See the \code{by_key} argument to
 \code{\link[=layer_residual_quantiles]{layer_residual_quantiles()}} for more information. The default,
-\code{character(0)} performs no grouping.}
+\code{character(0)} performs no grouping. This argument only applies when
+residual quantiles are used. It is not applicable with
+\code{trainer = quantile_reg()}, for example.}
+
+\item{nafill_buffer}{At predict time, recent values of the training data
+are used to create a forecast. However, these can be \code{NA} due to, e.g.,
+data latency issues. By default, any missing values will get filled with
+less recent data. Setting this value to \code{NULL} will result in 1 extra
+recent row (beyond those required for lag creation) to be used. Note that
+we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
+create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
+will be treated as \emph{additional} allowed recent data rather than the
+total amount of recent data to examine.}
+
+\item{check_enough_data_n}{Integer. A lower limit for the number of rows per
+epi_key that are required for training. If \code{NULL}, this check is ignored.}
+
+\item{check_enough_data_epi_keys}{Character vector. A character vector of
+column names on which to group the data and check threshold within each
+group. Useful if training per group (for example, per geo_value).}
+
+\item{...}{Space to handle future expansions (unused).}
 }
 \value{
-A list containing updated parameter choices with class \code{arx_alist}.
+A list containing updated parameter choices with class \code{arx_flist}.
 }
 \description{
 Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()}}.
@@ -57,5 +85,5 @@ Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()
 \examples{
 arx_args_list()
 arx_args_list(symmetrize = FALSE)
-arx_args_list(levels = c(.1, .3, .7, .9), min_train_window = 120)
+arx_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 }

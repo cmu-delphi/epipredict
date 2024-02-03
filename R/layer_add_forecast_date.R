@@ -4,17 +4,18 @@
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
 #' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
 #' when the forecast date is left unspecified, it is set to the maximum time
-#' value in the test data after any processing (ex. leads and lags) has been
-#' applied.
+#' value from the data used in pre-processing, fitting the model, and
+#' postprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
 #' @details To use this function, either specify a forecast date or leave the
 #'  forecast date unspecifed here. In the latter case, the forecast date will
-#'  be set as the maximum time value in the processed test data. In any case,
-#'  when the forecast date is less than the most recent update date of the data
-#'  (ie. the `as_of` value), an appropriate warning will be thrown.
+#'  be set as the maximum time value from the data used in pre-processing,
+#'  fitting the model, and postprocessing. In any case, when the forecast date is
+#'  less than the maximum `as_of` value (from the data used pre-processing,
+#'  model fitting, and postprocessing), an appropriate warning will be thrown.
 #'
 #' @export
 #' @examples
@@ -23,14 +24,22 @@
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   recipes::step_naomit(recipes::all_predictors()) %>%
-#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% parsnip::fit(jhu)
+#'   step_epi_naomit()
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
 #'   dplyr::filter(time_value >= max(time_value) - 14)
 #'
+#' # Don't specify `forecast_date` (by default, this should be last date in latest)
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_naomit(.pred)
+#' wf0 <- wf %>% add_frosting(f)
+#' p0 <- predict(wf0, latest)
+#' p0
+#'
 #' # Specify a `forecast_date` that is greater than or equal to `as_of` date
-#' f <- frosting() %>% layer_predict() %>%
+#' f <- frosting() %>%
+#'   layer_predict() %>%
 #'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
@@ -49,7 +58,7 @@
 #' p2
 #'
 #' # Do not specify a forecast_date
-#'  f3 <- frosting() %>%
+#' f3 <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_add_forecast_date() %>%
 #'   layer_naomit(.pred)
@@ -69,31 +78,33 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-  arg_is_scalar(forecast_date, allow_null = TRUE)
-  if (!is.null(forecast_date)) {
-    forecast_date <- tryCatch(as.Date(forecast_date), error = function(e) NA)
-  }
-  arg_is_date(forecast_date, allow_null = TRUE)
+  forecast_date <- arg_to_date(forecast_date, allow_null = TRUE)
   arg_is_chr_scalar(id)
-
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
 #' @export
-slather.layer_add_forecast_date <- function(object, components, the_fit, the_recipe, ...) {
-
+slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(components$keys$time_value)
+    max_time_value <- max(
+      workflows::extract_preprocessor(workflow)$max_time_value,
+      workflow$fit$meta$max_time_value,
+      max(new_data$time_value)
+    )
     object$forecast_date <- max_time_value
   }
+  as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
+  as_of_fit <- workflow$fit$meta$as_of
+  as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(attributes(components$keys)$metadata$as_of)
+  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post))
 
   if (object$forecast_date < as_of_date) {
     cli_warn(
       c("The forecast_date is less than the most ",
-        "recent update date of the data.",
-        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}.")
+        "recent update date of the data: ",
+        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}."
+      )
     )
   }
   components$predictions <- dplyr::bind_cols(
@@ -101,4 +112,15 @@ slather.layer_add_forecast_date <- function(object, components, the_fit, the_rec
     forecast_date = as.Date(object$forecast_date)
   )
   components
+}
+
+#' @export
+print.layer_add_forecast_date <- function(
+    x, width = max(20, options()$width - 30), ...) {
+  title <- "Adding forecast date"
+  fd <- ifelse(is.null(x$forecast_date), "<calculated>",
+    as.character(x$forecast_date)
+  )
+  fd <- rlang::enquos(fd)
+  print_layer(fd, title = title, width = width)
 }

@@ -1,8 +1,12 @@
-# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
+#
+# Created with usethis + edited to run on PRs to dev, use API key.
 on:
   push:
-    branches: [main, master]
+    branches: [dev, main]
+  pull_request:
+    branches: [dev, main]
   release:
     types: [published]
   workflow_dispatch:
@@ -11,6 +15,8 @@ name: pkgdown
 
 jobs:
   pkgdown:
+    # only build docs on the main repository and not forks
+    if: github.repository_owner == 'cmu-delphi'
     runs-on: ubuntu-latest
     # Only restrict concurrency for non-PR jobs
     concurrency:
@@ -18,7 +24,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -32,12 +38,20 @@ jobs:
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        env:
+          DELPHI_EPIDATA_KEY: ${{ secrets.SECRET_EPIPROCESS_GHACTIONS_DELPHI_EPIDATA_KEY }}
+        run: |
+          if (startsWith("${{ github.event_name }}", "pull_request")) {
+              mode <- ifelse("${{ github.base_ref }}" == "main", "release", "devel")
+          } else {
+              mode <- ifelse("${{ github.ref_name }}" == "main", "release", "devel")
+          }
+          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, override=list(PKGDOWN_DEV_MODE=mode))
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
         if: github.event_name != 'pull_request'
-        uses: JamesIves/github-pages-deploy-action@4.1.4
+        uses: JamesIves/github-pages-deploy-action@v4.4.1
         with:
           clean: false
           branch: gh-pages

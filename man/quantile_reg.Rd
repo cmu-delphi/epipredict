@@ -4,7 +4,7 @@
 \alias{quantile_reg}
 \title{Quantile regression}
 \usage{
-quantile_reg(mode = "regression", engine = "rq", tau = 0.5)
+quantile_reg(mode = "regression", engine = "rq", quantile_levels = 0.5)
 }
 \arguments{
 \item{mode}{A single character string for the type of model.
@@ -13,17 +13,17 @@ The only possible value for this model is "regression".}
 \item{engine}{Character string naming the fitting function. Currently, only
 "rq" is supported.}
 
-\item{tau}{A scalar or vector of values in (0, 1) to determine which
+\item{quantile_levels}{A scalar or vector of values in (0, 1) to determine which
 quantiles to estimate (default is 0.5).}
 }
 \description{
 \code{quantile_reg()} generates a quantile regression model \emph{specification} for
 the \href{https://www.tidymodels.org/}{tidymodels} framework. Currently, the
-only supported engine is \code{\link[quantreg:rq]{quantreg::rq()}}.
+only supported engine is "rq" which uses \code{\link[quantreg:rq]{quantreg::rq()}}.
 }
 \examples{
 tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
-rq_spec <- quantile_reg(tau = c(.2, .8)) \%>\% set_engine("rq")
+rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) \%>\% set_engine("rq")
 ff <- rq_spec \%>\% fit(y ~ ., data = tib)
 predict(ff, new_data = tib)
 }

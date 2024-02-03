@@ -4,7 +4,7 @@
 \alias{slather}
 \title{Spread a layer of frosting on a fitted workflow}
 \usage{
-slather(object, components, the_fit, the_recipe, ...)
+slather(object, components, workflow, new_data, ...)
 }
 \arguments{
 \item{object}{a workflow with \code{frosting} postprocessing steps}
@@ -23,9 +23,10 @@ have three components \code{predictors}, \code{outcomes} (if these were in the
 here for ease.
 }}
 
-\item{the_fit}{the fitted model object as returned by calling \code{parsnip::fit()}}
+\item{workflow}{an object of class workflow}
 
-\item{the_recipe}{the \code{epi_recipe} preprocessor}
+\item{new_data}{a data frame containing the new predictors to preprocess
+and predict on}
 
 \item{...}{additional arguments used by methods. Currently unused.}
 }

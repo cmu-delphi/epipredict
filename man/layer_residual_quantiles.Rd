@@ -7,11 +7,10 @@
 layer_residual_quantiles(
   frosting,
   ...,
-  probs = c(0.05, 0.95),
+  quantile_levels = c(0.05, 0.95),
   symmetrize = TRUE,
   by_key = character(0L),
   name = ".pred_distn",
-  .flag = TRUE,
   id = rand_id("residual_quantiles")
 )
 }
@@ -20,7 +19,7 @@ layer_residual_quantiles(
 
 \item{...}{Unused, include for consistency with other layers.}
 
-\item{probs}{numeric vector of probabilities with values in (0,1)
+\item{quantile_levels}{numeric vector of probabilities with values in (0,1)
 referring to the desired quantile.}
 
 \item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
@@ -29,9 +28,6 @@ referring to the desired quantile.}
 calculating quantiles. The default, \code{c()} performs no grouping.}
 
 \item{name}{character. The name for the output column.}
-
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }
@@ -51,14 +47,13 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()
 
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
- parsnip::fit(jhu)
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 
 latest <- get_test_data(recipe = r, x = jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantiles(probs = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
+  layer_residual_quantiles(quantile_levels = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
@@ -66,7 +61,7 @@ p <- predict(wf1, latest)
 
 f2 <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantiles(probs = c(0.3, 0.7), by_key = "geo_value") \%>\%
+  layer_residual_quantiles(quantile_levels = c(0.3, 0.7), by_key = "geo_value") \%>\%
   layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
 

@@ -12,8 +12,6 @@
 #' @param dist_type Gaussian or Student's t predictive intervals
 #' @param truncate Do we truncate the distribution to an interval
 #' @param name character. The name for the output column.
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor with additional columns of the
@@ -30,8 +28,7 @@
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
-#'  parsnip::fit(jhu)
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #'
 #' latest <- get_test_data(recipe = r, x = jhu)
 #'
@@ -44,18 +41,17 @@
 #' p <- predict(wf1, latest)
 #' p
 layer_predictive_distn <- function(frosting,
-                                      ...,
-                                      dist_type = c("gaussian", "student_t"),
-                                      truncate = c(-Inf, Inf),
-                                      name = ".pred_distn",
-                                      .flag = TRUE, # mandatory
-                                      id = rand_id("predictive_distn")) {
+                                   ...,
+                                   dist_type = c("gaussian", "student_t"),
+                                   truncate = c(-Inf, Inf),
+                                   name = ".pred_distn",
+                                   id = rand_id("predictive_distn")) {
   rlang::check_dots_empty()
   arg_is_chr_scalar(name, id)
   dist_type <- match.arg(dist_type)
-  stopifnot(length(truncate) == 2L,
-            is.numeric(truncate),
-            truncate[1] < truncate[2])
+  stopifnot(
+    length(truncate) == 2L, is.numeric(truncate), truncate[1] < truncate[2]
+  )
 
   add_layer(
     frosting,
@@ -64,19 +60,21 @@ layer_predictive_distn <- function(frosting,
       truncate = truncate,
       name = name,
       id = id
-    ),
-    flag = .flag
+    )
   )
 }
 
 layer_predictive_distn_new <- function(dist_type, truncate, name, id) {
-  layer("predictive_distn", dist_type = dist_type, truncate = truncate,
-        name = name, id = id)
+  layer("predictive_distn",
+    dist_type = dist_type, truncate = truncate,
+    name = name, id = id
+  )
 }
 
 #' @export
 slather.layer_predictive_distn <-
-  function(object, components, the_fit, the_recipe, ...) {
+  function(object, components, workflow, new_data, ...) {
+    the_fit <- workflows::extract_fit_parsnip(workflow)
 
     m <- components$predictions$.pred
     r <- grab_residuals(the_fit, components)
@@ -85,9 +83,8 @@ slather.layer_predictive_distn <-
     papprox <- ncol(components$mold$predictors) + 1
     if (is.null(df)) df <- n - papprox
     mse <- sum(r^2, na.rm = TRUE) / df
-    s <- sqrt(mse * (1 + papprox / df )) # E[x (X'X)^1 x] if E[X'X] ~= (n-p) I
-    dstn <- switch(
-      object$dist_type,
+    s <- sqrt(mse * (1 + papprox / df)) # E[x (X'X)^1 x] if E[X'X] ~= (n-p) I
+    dstn <- switch(object$dist_type,
       gaussian = distributional::dist_normal(m, s),
       student_t = distributional::dist_student_t(df, m, s)
     )
@@ -100,3 +97,15 @@ slather.layer_predictive_distn <-
     components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
     components
   }
+
+#' @export
+print.layer_predictive_distn <- function(
+    x, width = max(20, options()$width - 30), ...) {
+  title <- "Creating approximate predictive intervals"
+  td <- "<calculated>"
+  td <- rlang::enquos(td)
+  print_layer(td,
+    title = title, width = width, conjunction = "type",
+    extra_text = x$dist_type
+  )
+}

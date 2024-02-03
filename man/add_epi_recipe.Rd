@@ -2,18 +2,24 @@
 % Please edit documentation in R/epi_recipe.R
 \name{add_epi_recipe}
 \alias{add_epi_recipe}
-\title{Add an epi_recipe to a workflow}
+\alias{remove_epi_recipe}
+\alias{update_epi_recipe}
+\title{Add an \code{epi_recipe} to a workflow}
 \usage{
 add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
+
+remove_epi_recipe(x)
+
+update_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 }
 \arguments{
-\item{x}{A workflow or epi_workflow}
+\item{x}{A \code{workflow} or \code{epi_workflow}}
 
-\item{recipe}{A recipe created using \code{\link[recipes:recipe]{recipes::recipe()}}}
+\item{recipe}{An epi recipe or recipe}
 
-\item{...}{Not used.}
+\item{...}{Not used}
 
-\item{blueprint}{A hardhat blueprint used for fine tuning the preprocessing.
+\item{blueprint}{A hardhat blueprint used for fine tuning the preprocessing
 
 \code{\link[=default_epi_recipe_blueprint]{default_epi_recipe_blueprint()}} is used.
 
@@ -24,20 +30,20 @@ might be done automatically by the underlying model.}
 \code{x}, updated with a new recipe preprocessor.
 }
 \description{
-Add an epi_recipe to a workflow
+Add an \code{epi_recipe} to a workflow
 }
 \details{
-Has the same behaviour as \code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
+\code{add_epi_recipe} has the same behaviour as
+\code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
 default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
 }
 \examples{
-library(epiprocess)
 library(dplyr)
 library(recipes)
 
 jhu <- case_death_rate_subset \%>\%
   filter(time_value > "2021-08-01") \%>\%
-  dplyr::arrange(geo_value, time_value)
+  arrange(geo_value, time_value)
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
@@ -50,6 +56,17 @@ workflow <- epi_workflow() \%>\%
   add_epi_recipe(r)
 
 workflow
+
+r2 <- epi_recipe(jhu) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7)
+
+workflow <- update_epi_recipe(workflow, r2)
+
+workflow <- remove_epi_recipe(workflow)
+
+workflow
+
 }
 \seealso{
 \code{\link[workflows:add_recipe]{workflows::add_recipe()}}
@@ -57,5 +74,7 @@ workflow
 \item \code{add_recipe()} specifies the terms of the model and any preprocessing that
 is required through the usage of a recipe.
 \item \code{remove_recipe()} removes the recipe as well as any downstream objects
+\item \code{update_recipe()} first removes the recipe, then replaces the previous
+recipe with the new one.
 }
 }

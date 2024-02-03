@@ -2,15 +2,14 @@
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param object a `frosting` layer
-#' @param flag logical to determine if the layer is added. Default `TRUE`.
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
-add_layer <- function(frosting, object, flag = TRUE) {
+add_layer <- function(frosting, object) {
   validate_frosting(frosting)
   validate_layer(object)
 
-  if (flag) frosting$layers[[length(frosting$layers) + 1]] <- object
+  frosting$layers[[length(frosting$layers) + 1]] <- object
 
   frosting
 }
@@ -31,6 +30,77 @@ layer <- function(subclass, ..., .prefix = "layer_") {
   structure(list(...), class = c(paste0(.prefix, subclass), "layer"))
 }
 
+#' Update post-processing `layer`
+#'
+#' This `layer` method for `update()` takes named arguments as `...` whose values
+#' will replace the elements of the same name in the actual post-processing layer.
+#' Analogous to `update.step()` from the `recipes` package.
+#'
+#' @param object A post-processing `layer`.
+#' @param ... Key-value pairs where the keys match up with names of elements
+#' in the layer, and the values are the new values to update the layer with.
+#'
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_naomit()
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- jhu %>%
+#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'
+#' # Specify a `forecast_date` that is greater than or equal to `as_of` date
+#' f <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
+#'   layer_naomit(.pred)
+#'
+#' wf1 <- wf %>% add_frosting(f)
+#'
+#' p1 <- predict(wf1, latest)
+#' p1
+#'
+#' # Update forecast date
+#' f$layers[[2]] <- update(f$layers[[2]], forecast_date = "2021-06-01")
+#'
+#' # Need to still update workflow if only update a layer in frosting
+#' wf2 <- wf %>% add_frosting(f)
+#' wf2$post # Check that wf1 has update
+#' p1 <- predict(wf2, latest)
+#' p1
+#' @export
+update.layer <- function(object, ...) {
+  changes <- list(...)
+
+  # Replace the appropriate values in object with the changes
+  object <- recipes:::update_fields(object, changes)
+
+  # Call layer() to construct a new layer to ensure all new changes are validated
+  reconstruct_layer(object)
+}
+
+reconstruct_layer <- function(x) {
+  # Collect the subclass of the layer to use
+  # when recreating it
+  subclass <- setdiff(class(x), "layer")
+
+  # A layer is just a list of its arguments
+  args <- unclass(x)
+
+  # Construct the call and splice in the args
+  # no prefix is needed because we know the full subclass
+  call_layer <- rlang::call2(
+    .fn = "layer",
+    subclass = subclass,
+    !!!args,
+    .prefix = "",
+    .ns = "epipredict"
+  )
+
+  rlang::eval_tidy(call_layer)
+}
 
 
 #' Extract, validate, or detect layers of frosting
@@ -124,21 +194,14 @@ detect_layer.workflow <- function(x, name, ...) {
 #'     `keys`).
 #'   * `keys` - we put the keys (`time_value`, `geo_value`, and any others)
 #'     here for ease.
-#' @param the_fit the fitted model object as returned by calling `parsnip::fit()`
-#' @param the_recipe the `epi_recipe` preprocessor
+#' @param workflow an object of class workflow
+#' @param new_data a data frame containing the new predictors to preprocess
+#'   and predict on
 #'
 #' @param ... additional arguments used by methods. Currently unused.
 #'
 #' @return The `components` list. In the same format after applying any updates.
 #' @export
-slather <- function(object, components, the_fit, the_recipe, ...) {
+slather <- function(object, components, workflow, new_data, ...) {
   UseMethod("slather")
 }
-
-# Possible types of steps
-# 1. mutate-like (apply a scalar transform to the .preds)
-# 2. Filtering (remove some rows from .preds)
-# 3. Imputation (fill the NA's in .preds, might need the training data)
-# 4. Quantiles (needs the_fit, residuals, .preds)
-# 5. add_target_date (needs the recipe, training data?)
-# requirements = c("predictions", "fit", "predictors", "outcomes", "extras"),

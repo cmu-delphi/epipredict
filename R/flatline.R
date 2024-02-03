@@ -1,4 +1,3 @@
-
 #' (Internal) implementation of the flatline forecaster
 #'
 #' This is an internal function that is used to create a [parsnip::linear_reg()]
@@ -29,8 +28,10 @@
 #' @keywords internal
 #'
 #' @examples
-#' tib <- data.frame(y = runif(100),
-#'   expand.grid(k = letters[1:4], j = letters[5:9], time_value = 1:5)) %>%
+#' tib <- data.frame(
+#'   y = runif(100),
+#'   expand.grid(k = letters[1:4], j = letters[5:9], time_value = 1:5)
+#' ) %>%
 #'   dplyr::group_by(k, j) %>%
 #'   dplyr::mutate(y2 = dplyr::lead(y, 2)) # predict 2 steps ahead
 #' flat <- flatline(y2 ~ j + k + y, tib) # predictions for 20 locations
@@ -41,24 +42,29 @@ flatline <- function(formula, data) {
   n <- length(rhs)
   observed <- rhs[n] # DANGER!!
   ek <- rhs[-n]
-  if (length(response) > 1)
+  if (length(response) > 1) {
     cli_stop("flatline forecaster can accept only 1 observed time series.")
-  keys <- ek[ek != "time_value"]
+  }
+  keys <- kill_time_value(ek)
 
   preds <- data %>%
-    dplyr::mutate(.pred = !!rlang::sym(observed),
-                  .resid = !!rlang::sym(response) - .pred)
+    dplyr::mutate(
+      .pred = !!rlang::sym(observed),
+      .resid = !!rlang::sym(response) - .pred
+    )
   .pred <- preds %>%
     dplyr::filter(!is.na(.pred)) %>%
     dplyr::group_by(!!!rlang::syms(keys)) %>%
     dplyr::arrange(time_value) %>%
     dplyr::slice_tail(n = 1L) %>%
     dplyr::ungroup() %>%
-    dplyr::select(dplyr::all_of(c(keys, ".pred")))
+    dplyr::select(tidyselect::all_of(c(keys, ".pred")))
 
-  structure(list(
-    residuals = dplyr::select(preds, dplyr::all_of(c(keys, ".resid"))),
-    .pred = .pred),
+  structure(
+    list(
+      residuals = dplyr::select(preds, dplyr::all_of(c(keys, ".resid"))),
+      .pred = .pred
+    ),
     class = "flatline"
   )
 }
@@ -73,11 +79,33 @@ predict.flatline <- function(object, newdata, ...) {
   object <- object$.pred
   metadata <- names(object)[names(object) != ".pred"]
   ek <- names(newdata)
-  if (! all(metadata %in% ek)) {
-    cli_stop("`newdata` has different metadata than was used",
-             "to fit the flatline forecaster")
+  if (!all(metadata %in% ek)) {
+    cli_stop(
+      "`newdata` has different metadata than was used",
+      "to fit the flatline forecaster"
+    )
   }
 
   dplyr::left_join(newdata, object, by = metadata) %>%
     dplyr::pull(.pred)
+}
+
+#' @export
+print.flatline <- function(x, ...) {
+  keys <- colnames(x$.pred)
+  keys <- paste(keys[!(keys %in% ".pred")], collapse = ", ")
+  nloc <- nrow(x$.pred)
+  nres <- nrow(x$residuals)
+  pmsg <- glue::glue(
+    "Predictions produced by {keys} resulting in {nloc} total forecasts."
+  )
+  rmsg <- glue::glue(
+    "A total of {nres} residuals are available from the training set."
+  )
+  cat("Flatline forecaster\n")
+  cat("\n")
+  cat(pmsg)
+  cat("\n")
+  cat(rmsg)
+  cat("\n\n")
 }

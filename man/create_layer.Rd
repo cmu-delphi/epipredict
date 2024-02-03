@@ -7,11 +7,8 @@
 create_layer(name = NULL, open = rlang::is_interactive())
 }
 \arguments{
-\item{name}{Either a name without extension, or \code{NULL} to create the
-paired file based on currently open file in the script editor. If
-the \verb{R/} file is open, \code{use_test()} will create/open the corresponding
-test file; if the test file is open, \code{use_r()} will create/open the
-corresponding \verb{R/} file.}
+\item{name}{Either a string giving a file name (without directory) or
+\code{NULL} to take the name from the currently open file in RStudio.}
 
 \item{open}{Whether to open the file for interactive editing.}
 }
@@ -23,9 +20,9 @@ fill in the name of the layer, and open the file.
 \examples{
 \dontrun{
 
-  # Note: running this will write `layer_strawberry.R` to
-  # the `R/` directory of your current project
-  create_layer("strawberry")
+# Note: running this will write `layer_strawberry.R` to
+# the `R/` directory of your current project
+create_layer("strawberry")
 }
 
 }

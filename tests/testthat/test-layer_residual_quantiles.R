@@ -14,7 +14,7 @@ test_that("Returns expected number or rows and columns", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
-    layer_residual_quantiles(probs = c(0.0275, 0.8, 0.95), symmetrize = FALSE)
+    layer_residual_quantiles(quantile_levels = c(0.0275, 0.8, 0.95), symmetrize = FALSE)
 
   wf1 <- wf %>% add_frosting(f)
 
@@ -22,11 +22,30 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_named(p, c("geo_value", "time_value",".pred",".pred_distn"))
+  expect_named(p, c("geo_value", "time_value", ".pred", ".pred_distn"))
 
   nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.pred_distn))
   unnested <- nested %>% tidyr::unnest(.quantiles)
 
   expect_equal(nrow(unnested), 9L)
-  expect_equal(unique(unnested$tau), c(.0275, .8, .95))
+  expect_equal(unique(unnested$quantile_levels), c(.0275, .8, .95))
+})
+
+
+test_that("Errors when used with a classifier", {
+  tib <- tibble(
+    y = factor(rep(c("a", "b"), length.out = 100)),
+    x1 = rnorm(100),
+    x2 = rnorm(100),
+    time_value = 1:100,
+    geo_value = "ak"
+  ) %>% as_epi_df()
+
+  r <- epi_recipe(y ~ x1 + x2, data = tib)
+  wf <- epi_workflow(r, parsnip::logistic_reg()) %>% fit(tib)
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_residual_quantiles()
+  wf <- wf %>% add_frosting(f)
+  expect_error(predict(wf, tib))
 })

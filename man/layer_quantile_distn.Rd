@@ -7,7 +7,7 @@
 layer_quantile_distn(
   frosting,
   ...,
-  levels = c(0.25, 0.75),
+  quantile_levels = c(0.25, 0.75),
   truncate = c(-Inf, Inf),
   name = ".pred_distn",
   id = rand_id("quantile_distn")
@@ -18,7 +18,7 @@ layer_quantile_distn(
 
 \item{...}{Unused, include for consistency with other layers.}
 
-\item{levels}{a vector of probabilities (quantiles) to extract}
+\item{quantile_levels}{a vector of probabilities to extract}
 
 \item{truncate}{Do we truncate the distribution to an interval}
 
@@ -34,7 +34,7 @@ quantiles will be added to the predictions.
 This function calculates quantiles when the prediction was \emph{distributional}.
 Currently, the only distributional engine is \code{quantile_reg()}.
 If this engine is used, then this layer will grab out estimated (or extrapolated)
-quantiles at the requested levels.
+quantiles at the requested quantile values.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -45,8 +45,8 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()
 
-wf <- epi_workflow(r, quantile_reg(tau = c(.25, .5, .75))) \%>\%
- parsnip::fit(jhu)
+wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) \%>\%
+  fit(jhu)
 
 latest <- get_test_data(recipe = r, x = jhu)
 

@@ -17,7 +17,6 @@
 #' @rdname bake
 #' @export
 bake.epi_recipe <- function(object, new_data, ...) {
-
   if (rlang::is_missing(new_data)) {
     rlang::abort("'new_data' must be either an epi_df or NULL. No value is not allowed.")
   }
@@ -83,7 +82,8 @@ bake.epi_recipe <- function(object, new_data, ...) {
 
   # Now reduce to only user selected columns
   out_names <- recipes_eval_select(terms, new_data, info,
-                                   check_case_weights = FALSE)
+    check_case_weights = FALSE
+  )
   new_data <- new_data[, out_names]
 
   # The levels are not null when no nominal data are present or

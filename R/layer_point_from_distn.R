@@ -24,8 +24,7 @@
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, quantile_reg(tau = c(.25, .5, .75))) %>%
-#'  parsnip::fit(jhu)
+#' wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) %>% fit(jhu)
 #'
 #' latest <- get_test_data(recipe = r, x = jhu)
 #'
@@ -64,27 +63,29 @@ layer_point_from_distn <- function(frosting,
       type = type,
       name = name,
       id = id
-    ),
-    flag = TRUE
+    )
   )
 }
 
 layer_point_from_distn_new <- function(type, name, id) {
   layer("point_from_distn",
-        type = type,
-        name = name,
-        id = id)
+    type = type,
+    name = name,
+    id = id
+  )
 }
 
 #' @export
 slather.layer_point_from_distn <-
-  function(object, components, the_fit, the_recipe, ...) {
-
+  function(object, components, workflow, new_data, ...) {
+    rlang::check_dots_empty()
     dstn <- components$predictions$.pred
     if (!inherits(dstn, "distribution")) {
       rlang::warn(
         c("`layer_point_from_distn` requires distributional predictions.",
-          i = "These are of class {class(dstn)}. Ignoring this layer."))
+          i = "These are of class {class(dstn)}. Ignoring this layer."
+        )
+      )
       return(components)
     }
 
@@ -98,3 +99,17 @@ slather.layer_point_from_distn <-
     }
     components
   }
+
+#' @export
+print.layer_point_from_distn <- function(
+    x, width = max(20, options()$width - 30), ...) {
+  title <- "Extracting point predictions"
+  if (is.null(x$name)) {
+    cnj <- NULL
+    ext <- "<overwriting .pred>"
+  } else {
+    cnj <- "adding column"
+    ext <- x$name
+  }
+  print_layer(title = title, width = width, conjunction = cnj, extra_text = ext)
+}

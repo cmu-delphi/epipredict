@@ -5,3 +5,8 @@
 docs
 inst/doc
 .DS_Store
+/doc/
+/Meta/
+.Rprofile
+renv.lock
+renv/

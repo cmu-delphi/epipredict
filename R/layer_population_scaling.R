@@ -41,27 +41,26 @@
 #' @param create_new TRUE to create a new column and keep the original column
 #' in the `epi_df`.
 #' @param suffix a character. The suffix added to the column name if
-#' `create_new = TRUE`. Default to "_original".
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
+#' `create_new = TRUE`. Default to "_scaled".
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' library(epiprocess)
 #' jhu <- epiprocess::jhu_csse_daily_subset %>%
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   dplyr::select(geo_value, time_value, cases)
 #'
-#' pop_data = data.frame(states = c("ca", "ny"), value = c(20000, 30000))
+#' pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
 #' r <- epi_recipe(jhu) %>%
-#'   step_population_scaling(df = pop_data,
-#'                           df_pop_col = "value",
-#'                           by = c("geo_value" = "states"),
-#'                           cases, suffix = "_scaled") %>%
-#'   step_epi_lag(cases_scaled, lag = c(7, 14)) %>%
+#'   step_population_scaling(
+#'     df = pop_data,
+#'     df_pop_col = "value",
+#'     by = c("geo_value" = "states"),
+#'     cases, suffix = "_scaled"
+#'   ) %>%
+#'   step_epi_lag(cases_scaled, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(cases_scaled, ahead = 7, role = "outcome") %>%
 #'   step_epi_naomit()
 #'
@@ -69,40 +68,43 @@
 #'   layer_predict() %>%
 #'   layer_threshold(.pred) %>%
 #'   layer_naomit(.pred) %>%
-#'   layer_population_scaling(.pred, df = pop_data,
-#'                            by =  c("geo_value" = "states"),
-#'                            df_pop_col = "value")
+#'   layer_population_scaling(.pred,
+#'     df = pop_data,
+#'     by = c("geo_value" = "states"),
+#'     df_pop_col = "value"
+#'   )
 #'
-#' wf <- epi_workflow(r,
-#'                    parsnip::linear_reg()) %>%
-#'   parsnip::fit(jhu) %>%
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+#'   fit(jhu) %>%
 #'   add_frosting(f)
 #'
 #' latest <- get_test_data(
 #'   recipe = r,
 #'   x = epiprocess::jhu_csse_daily_subset %>%
-#'     dplyr::filter(time_value > "2021-11-01",
-#'                   geo_value %in% c("ca", "ny")) %>%
-#'     dplyr::select(geo_value, time_value, cases))
+#'     dplyr::filter(
+#'       time_value > "2021-11-01",
+#'       geo_value %in% c("ca", "ny")
+#'     ) %>%
+#'     dplyr::select(geo_value, time_value, cases)
+#' )
 #'
 #' predict(wf, latest)
 layer_population_scaling <- function(frosting,
-                           ...,
-                           df,
-                           by = NULL,
-                           df_pop_col,
-                           rate_rescaling = 1,
-                           create_new = TRUE,
-                           suffix = "_scaled",
-                           .flag = TRUE,
-                           id = rand_id("population_scaling")) {
-
-  arg_is_scalar(df_pop_col, rate_rescaling, create_new, suffix, .flag, id)
-  arg_is_lgl(create_new, .flag)
+                                     ...,
+                                     df,
+                                     by = NULL,
+                                     df_pop_col,
+                                     rate_rescaling = 1,
+                                     create_new = TRUE,
+                                     suffix = "_scaled",
+                                     id = rand_id("population_scaling")) {
+  arg_is_scalar(df_pop_col, rate_rescaling, create_new, suffix, id)
+  arg_is_lgl(create_new)
   arg_is_chr(df_pop_col, suffix, id)
   arg_is_chr(by, allow_null = TRUE)
-  if (rate_rescaling <= 0)
+  if (rate_rescaling <= 0) {
     cli_stop("`rate_rescaling` should be a positive number")
+  }
 
   add_layer(
     frosting,
@@ -115,52 +117,73 @@ layer_population_scaling <- function(frosting,
       create_new = create_new,
       suffix = suffix,
       id = id
-    ),
-    flag = .flag
+    )
   )
 }
 
 layer_population_scaling_new <-
   function(df, by, df_pop_col, rate_rescaling, terms, create_new, suffix, id) {
-  layer("population_scaling",
-        df = df,
-        by = by,
-        df_pop_col = df_pop_col,
-        rate_rescaling = rate_rescaling,
-        terms = terms,
-        create_new = create_new,
-        suffix = suffix,
-        id = id)
-}
+    layer("population_scaling",
+      df = df,
+      by = by,
+      df_pop_col = df_pop_col,
+      rate_rescaling = rate_rescaling,
+      terms = terms,
+      create_new = create_new,
+      suffix = suffix,
+      id = id
+    )
+  }
 
 #' @export
 slather.layer_population_scaling <-
-  function(object, components, the_fit, the_recipe, ...) {
-    stopifnot("Only one population column allowed for scaling" =
-                length(object$df_pop_col) == 1)
+  function(object, components, workflow, new_data, ...) {
+    rlang::check_dots_empty()
+    stopifnot(
+      "Only one population column allowed for scaling" =
+        length(object$df_pop_col) == 1
+    )
 
-    try_join <- try(dplyr::left_join(components$predictions, object$df,
-                              by= object$by),
-             silent = TRUE)
+    try_join <- try(
+      dplyr::left_join(components$predictions, object$df,
+        by = object$by
+      ),
+      silent = TRUE
+    )
     if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
-      cli_stop(c("columns in `by` selectors of `layer_population_scaling` ",
-                 "must be present in data and match"))}
+      cli_stop(c(
+        "columns in `by` selectors of `layer_population_scaling` ",
+        "must be present in data and match"
+      ))
+    }
 
     object$df <- object$df %>%
       dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
-    pop_col = rlang::sym(object$df_pop_col)
+    pop_col <- rlang::sym(object$df_pop_col)
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)
-    suffix = ifelse(object$create_new, object$suffix, "")
+    suffix <- ifelse(object$create_new, object$suffix, "")
+    col_to_remove <- setdiff(colnames(object$df), colnames(components$predictions))
 
-    components$predictions <- dplyr::left_join(components$predictions,
-                                               object$df,
-                                               by= object$by,
-                                               suffix = c("", ".df")) %>%
-      dplyr::mutate(dplyr::across(dplyr::all_of(col_names),
-                                  ~.x * !!pop_col / object$rate_rescaling ,
-                                  .names = "{.col}{suffix}")) %>%
-     dplyr::select(- !!pop_col)
+    components$predictions <- dplyr::left_join(
+      components$predictions,
+      object$df,
+      by = object$by,
+      suffix = c("", ".df")
+    ) %>%
+      dplyr::mutate(dplyr::across(
+        dplyr::all_of(col_names),
+        ~ .x * !!pop_col / object$rate_rescaling,
+        .names = "{.col}{suffix}"
+      )) %>%
+      dplyr::select(-dplyr::any_of(col_to_remove))
     components
+  }
+
+#' @export
+print.layer_population_scaling <- function(
+    x, width = max(20, options()$width - 30), ...) {
+  title <- "Scaling predictions by population"
+  print_layer(x$terms, title = title, width = width)
 }

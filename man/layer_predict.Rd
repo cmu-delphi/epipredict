@@ -9,47 +9,42 @@ layer_predict(
   type = NULL,
   opts = list(),
   ...,
-  .flag = TRUE,
   id = rand_id("predict_default")
 )
 }
 \arguments{
-\item{frosting}{a frosting object
-#' @param .flag a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
+\item{frosting}{a frosting object}
 
 \item{type}{A single character value or \code{NULL}. Possible values
-are "numeric", "class", "prob", "conf_int", "pred_int", "quantile", "time",
-"hazard", "survival", or "raw". When \code{NULL}, \code{predict()} will choose an
-appropriate value based on the model's mode.}
+are \code{"numeric"}, \code{"class"}, \code{"prob"}, \code{"conf_int"}, \code{"pred_int"},
+\code{"quantile"}, \code{"time"}, \code{"hazard"}, \code{"survival"}, or \code{"raw"}. When \code{NULL},
+\code{predict()} will choose an appropriate value based on the model's mode.}
 
 \item{opts}{A list of optional arguments to the underlying
 predict function that will be used when \code{type = "raw"}. The
 list should not include options for the model object or the
 new data being predicted.}
 
-\item{...}{Arguments to the underlying model's prediction
-function cannot be passed here (see \code{opts}). There are some
-\code{parsnip} related options that can be passed, depending on the
-value of \code{type}. Possible arguments are:
+\item{...}{Additional \code{parsnip}-related options, depending on the
+value of \code{type}. Arguments to the underlying model's prediction
+function cannot be passed here (use the \code{opts} argument instead).
+Possible arguments are:
 \itemize{
-\item \code{interval}: for \code{type}s of "survival" and "quantile", should
+\item \code{interval}: for \code{type} equal to \code{"survival"} or \code{"quantile"}, should
 interval estimates be added, if available? Options are \code{"none"}
 and \code{"confidence"}.
-\item \code{level}: for \code{type}s of "conf_int", "pred_int", and "survival"
+\item \code{level}: for \code{type} equal to \code{"conf_int"}, \code{"pred_int"}, or \code{"survival"},
 this is the parameter for the tail area of the intervals
 (e.g. confidence level for confidence intervals).
-Default value is 0.95.
-\item \code{std_error}: add the standard error of fit or prediction (on
-the scale of the linear predictors) for \code{type}s of "conf_int"
-and "pred_int". Default value is \code{FALSE}.
-\item \code{quantile}: the quantile(s) for quantile regression
-(not implemented yet)
-\item \code{time}: the time(s) for hazard and survival probability estimates.
+Default value is \code{0.95}.
+\item \code{std_error}: for \code{type} equal to \code{"conf_int"} or \code{"pred_int"}, add
+the standard error of fit or prediction (on the scale of the
+linear predictors). Default value is \code{FALSE}.
+\item \code{quantile}: for \code{type} equal to \code{quantile}, the quantiles of the
+distribution. Default is \code{(1:9)/10}.
+\item \code{eval_time}: for \code{type} equal to \code{"survival"} or \code{"hazard"}, the
+time points at which the survival probability or hazard is estimated.
 }}
-
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a string identifying the layer}
 }
@@ -63,19 +58,16 @@ postprocessing. This would typically be the first layer in a \code{frosting}
 postprocessor.
 }
 \examples{
-library(dplyr)
-library(recipes)
-
 jhu <- case_death_rate_subset \%>\%
-filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+
 r <- epi_recipe(jhu) \%>\%
- step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
- step_epi_ahead(death_rate, ahead = 7) \%>\%
- step_naomit(all_predictors()) \%>\%
- step_naomit(all_outcomes(), skip = TRUE)
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
-latest <- jhu \%>\%
- filter(time_value >= max(time_value) - 14)
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_epi_naomit()
+
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
+latest <- jhu \%>\% filter(time_value >= max(time_value) - 14)
 
 # Predict layer alone
 f <- frosting() \%>\% layer_predict()

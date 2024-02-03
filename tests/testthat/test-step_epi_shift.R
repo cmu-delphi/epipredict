@@ -4,10 +4,12 @@ library(parsnip)
 library(workflows)
 
 # Random generated dataset
-x <- tibble(geo_value = rep("place",200),
-              time_value = as.Date("2021-01-01") + 0:199,
-              case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5*1:200) + 1,
-              death_rate = atan(0.1 * 1:200) + cos(5*1:200) + 1) %>%
+x <- tibble(
+  geo_value = rep("place", 200),
+  time_value = as.Date("2021-01-01") + 0:199,
+  case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
+  death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
+) %>%
   as_epi_df()
 
 slm_fit <- function(recipe, data = x) {
@@ -54,12 +56,12 @@ test_that("Values for ahead and lag cannot be duplicates", {
 test_that("Check that epi_lag shifts applies the shift", {
   r5 <- epi_recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
-    step_epi_lag(death_rate, lag = c(0,7,14))
+    step_epi_lag(death_rate, lag = c(0, 7, 14))
 
   # Two steps passed here
-  expect_equal(length(r5$steps),2)
+  expect_equal(length(r5$steps), 2)
   fit5 <- slm_fit(r5)
 
   # Should have four predictors, including the intercept
-  expect_equal(length(fit5$fit$fit$fit$coefficients),4)
+  expect_equal(length(fit5$fit$fit$fit$coefficients), 4)
 })

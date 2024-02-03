@@ -16,8 +16,8 @@ layer_add_forecast_date(
 \item{forecast_date}{The forecast date to add as a column to the \code{epi_df}.
 For most cases, this should be specified in the form "yyyy-mm-dd". Note that
 when the forecast date is left unspecified, it is set to the maximum time
-value in the test data after any processing (ex. leads and lags) has been
-applied.}
+value from the data used in pre-processing, fitting the model, and
+postprocessing.}
 
 \item{id}{a random id string}
 }
@@ -30,9 +30,10 @@ Postprocessing step to add the forecast date
 \details{
 To use this function, either specify a forecast date or leave the
 forecast date unspecifed here. In the latter case, the forecast date will
-be set as the maximum time value in the processed test data. In any case,
-when the forecast date is less than the most recent update date of the data
-(ie. the \code{as_of} value), an appropriate warning will be thrown.
+be set as the maximum time value from the data used in pre-processing,
+fitting the model, and postprocessing. In any case, when the forecast date is
+less than the maximum \code{as_of} value (from the data used pre-processing,
+model fitting, and postprocessing), an appropriate warning will be thrown.
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -40,14 +41,22 @@ jhu <- case_death_rate_subset \%>\%
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
-  recipes::step_naomit(recipes::all_predictors()) \%>\%
-  recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% parsnip::fit(jhu)
+  step_epi_naomit()
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- jhu \%>\%
   dplyr::filter(time_value >= max(time_value) - 14)
 
+# Don't specify `forecast_date` (by default, this should be last date in latest)
+f <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_naomit(.pred)
+wf0 <- wf \%>\% add_frosting(f)
+p0 <- predict(wf0, latest)
+p0
+
 # Specify a `forecast_date` that is greater than or equal to `as_of` date
-f <- frosting() \%>\% layer_predict() \%>\%
+f <- frosting() \%>\%
+  layer_predict() \%>\%
   layer_add_forecast_date(forecast_date = "2022-05-31") \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
@@ -66,7 +75,7 @@ p2 <- predict(wf2, latest)
 p2
 
 # Do not specify a forecast_date
- f3 <- frosting() \%>\%
+f3 <- frosting() \%>\%
   layer_predict() \%>\%
   layer_add_forecast_date() \%>\%
   layer_naomit(.pred)

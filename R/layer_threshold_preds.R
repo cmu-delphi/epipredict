@@ -16,29 +16,23 @@
 #' @param upper Upper threshold for the prediction values. That is, any
 #'   predictions that are greater than this upper bound are set to it.
 #'   Default value is `Inf`.
-#' @param .flag a logical to determine if the layer is added. Passed on to
-#'   `add_layer()`. Default `TRUE`.
 #' @param id a random id string
 #'
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' library(dplyr)
-#' library(recipes)
-#'
+
 #' jhu <- case_death_rate_subset %>%
-#'   filter(time_value < "2021-03-08", geo_value %in% c("ak", "ca", "ar"))
+#'   dplyr::filter(time_value < "2021-03-08",
+#'   geo_value %in% c("ak", "ca", "ar"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   step_naomit(all_outcomes(), skip = TRUE)
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
-#'   parsnip::fit(jhu)
+#'   step_epi_naomit()
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #'
-#' latest <- jhu %>%
-#'   filter(time_value >= max(time_value) - 14)
+#' latest <- get_test_data(r, jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
@@ -47,8 +41,10 @@
 #' p <- predict(wf, latest)
 #' p
 layer_threshold <-
-  function(frosting, ..., lower = 0, upper = Inf, .flag = TRUE,
-           id = rand_id("threshold")) {
+  function(frosting, ..., lower = 0, upper = Inf, id = rand_id("threshold")) {
+    arg_is_scalar(lower, upper)
+    arg_is_chr_scalar(id)
+    stopifnot(is.numeric(lower), is.numeric(upper), lower < upper)
     add_layer(
       frosting,
       layer_threshold_new(
@@ -56,8 +52,7 @@ layer_threshold <-
         lower = lower,
         upper = upper,
         id = id
-      ),
-      flag = .flag
+      )
     )
   }
 
@@ -96,15 +91,15 @@ snap.dist_default <- function(x, lower, upper, ...) {
 
 #' @export
 snap.dist_quantiles <- function(x, lower, upper, ...) {
-  q <- field(x, "q")
-  tau <- field(x, "tau")
-  q <- snap(q, lower, upper)
-  new_quantiles(q = q, tau = tau)
+  values <- field(x, "values")
+  quantile_levels <- field(x, "quantile_levels")
+  values <- snap(values, lower, upper)
+  new_quantiles(values = values, quantile_levels = quantile_levels)
 }
 
 #' @export
 slather.layer_threshold <-
-  function(object, components, the_fit, the_recipe, ...) {
+  function(object, components, workflow, new_data, ...) {
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)
@@ -113,6 +108,21 @@ slather.layer_threshold <-
         dplyr::across(
           dplyr::all_of(col_names),
           ~ snap(.x, object$lower, object$upper)
-        ))
+        )
+      )
     components
   }
+
+
+#' @export
+print.layer_threshold <- function(
+    x, width = max(20, options()$width - 30), ...) {
+  title <- "Thresholding predictions"
+  lwr <- ifelse(is.infinite(x$lower), "(", "[")
+  upr <- ifelse(is.infinite(x$upper), ")", "]")
+  rng <- paste0(lwr, round(x$lower, 3), ", ", round(x$upper, 3), upr)
+  print_layer(x$terms,
+    title = title, width = width, conjunction = "to",
+    extra_text = rng
+  )
+}

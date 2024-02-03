@@ -10,7 +10,6 @@ layer_predictive_distn(
   dist_type = c("gaussian", "student_t"),
   truncate = c(-Inf, Inf),
   name = ".pred_distn",
-  .flag = TRUE,
   id = rand_id("predictive_distn")
 )
 }
@@ -24,9 +23,6 @@ layer_predictive_distn(
 \item{truncate}{Do we truncate the distribution to an interval}
 
 \item{name}{character. The name for the output column.}
-
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
 
 \item{id}{a random id string}
 }
@@ -51,8 +47,7 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()
 
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
- parsnip::fit(jhu)
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 
 latest <- get_test_data(recipe = r, x = jhu)
 

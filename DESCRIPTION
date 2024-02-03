@@ -1,14 +1,16 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.3
+Version: 0.0.9
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
     person("Logan", "Brooks", role = "aut"),
     person("Rachel", "Lobay", role = "aut"),
-    person("Maggie", "Liu", role = "aut"),
-    person("Ken", "Mawer", role = "aut"),
-    person("Chloe", "You", role = "aut"),
+    person("Dmitry", "Shemetov", email = "dshemeto@andrew.cmu.edu", role = "ctb"),
+    person("David", "Weber", email = "davidweb@andrew.cmu.edu", role = "ctb"),
+    person("Maggie", "Liu", role = "ctb"),
+    person("Ken", "Mawer", role = "ctb"),
+    person("Chloe", "You", role = "ctb"),
     person("Jacob", "Bien", role = "ctb")
   )
 Description: A forecasting "framework" for creating epidemiological
@@ -20,35 +22,37 @@ License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
-Depends: 
-    epiprocess,
+Depends:
+    epiprocess (>= 0.6.0),
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
-Imports: 
+Imports:
+    checkmate,
     cli,
     distributional,
     dplyr,
     fs,
     generics,
     glue,
-    hardhat (>= 1.2.0),
+    hardhat (>= 1.3.0),
+    lifecycle,
     magrittr,
     methods,
     quantreg,
-    recipes (>= 1.0.0),
+    recipes (>= 1.0.4),
     rlang,
+    smoothqr,
     stats,
-    tensr,
     tibble,
     tidyr,
     tidyselect,
     usethis,
     vctrs,
     workflows (>= 1.0.0)
-Suggests: 
+Suggests:
     covidcast,
     data.table,
-    epidatr,
+    epidatr (>= 1.0.0),
     ggplot2,
     knitr,
     lubridate,
@@ -58,13 +62,14 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     xgboost
-VignetteBuilder: 
+VignetteBuilder:
     knitr
 Remotes:
     cmu-delphi/epidatr,
-    cmu-delphi/epiprocess
+    cmu-delphi/epiprocess,
+    dajmcdon/smoothqr
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.0

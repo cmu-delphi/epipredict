@@ -9,7 +9,6 @@ layer_threshold(
   ...,
   lower = 0,
   upper = Inf,
-  .flag = TRUE,
   id = rand_id("threshold")
 )
 }
@@ -30,9 +29,6 @@ Default value is \code{0}.}
 predictions that are greater than this upper bound are set to it.
 Default value is \code{Inf}.}
 
-\item{.flag}{a logical to determine if the layer is added. Passed on to
-\code{add_layer()}. Default \code{TRUE}.}
-
 \item{id}{a random id string}
 }
 \value{
@@ -44,21 +40,16 @@ smaller than the lower threshold or higher than the upper threshold equal
 to the threshold values.
 }
 \examples{
-library(dplyr)
-library(recipes)
-
 jhu <- case_death_rate_subset \%>\%
-  filter(time_value < "2021-03-08", geo_value \%in\% c("ak", "ca", "ar"))
+  dplyr::filter(time_value < "2021-03-08",
+  geo_value \%in\% c("ak", "ca", "ar"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  step_naomit(all_outcomes(), skip = TRUE)
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
-  parsnip::fit(jhu)
+  step_epi_naomit()
+wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 
-latest <- jhu \%>\%
-  filter(time_value >= max(time_value) - 14)
+latest <- get_test_data(r, jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%

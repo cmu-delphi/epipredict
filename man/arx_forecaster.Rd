@@ -41,10 +41,17 @@ that it estimates a model for a particular target horizon.
 jhu <- case_death_rate_subset \%>\%
   dplyr::filter(time_value >= as.Date("2021-12-01"))
 
-out <- arx_forecaster(jhu, "death_rate",
-  c("case_rate", "death_rate"))
+out <- arx_forecaster(
+  jhu, "death_rate",
+  c("case_rate", "death_rate")
+)
 
 out <- arx_forecaster(jhu, "death_rate",
-  c("case_rate", "death_rate"), trainer = quantile_reg(),
-  args_list = arx_args_list(levels = 1:9 / 10))
+  c("case_rate", "death_rate"),
+  trainer = quantile_reg(),
+  args_list = arx_args_list(quantile_levels = 1:9 / 10)
+)
+}
+\seealso{
+\code{\link[=arx_fcast_epi_workflow]{arx_fcast_epi_workflow()}}, \code{\link[=arx_args_list]{arx_args_list()}}
 }

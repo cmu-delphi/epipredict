@@ -20,20 +20,15 @@
 #' @importFrom generics augment
 #' @export
 #' @examples
-#' library(dplyr)
-#' library(parsnip)
-#' library(recipes)
-#'
 #' jhu <- case_death_rate_subset
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, linear_reg())
+#' wf <- epi_workflow(r, parsnip::linear_reg())
 #'
 #' wf
 epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL) {
@@ -63,6 +58,149 @@ is_epi_workflow <- function(x) {
   inherits(x, "epi_workflow")
 }
 
+
+#' Add a model to an `epi_workflow`
+#'
+#' @seealso [workflows::add_model()]
+#' - `add_model()` adds a parsnip model to the `epi_workflow`.
+#'
+#' - `remove_model()` removes the model specification as well as any fitted
+#'   model object. Any extra formulas are also removed.
+#'
+#' - `update_model()` first removes the model then adds the new
+#' specification to the workflow.
+#'
+#' @details
+#' Has the same behaviour as [workflows::add_model()] but also ensures
+#' that the returned object is an `epi_workflow`.
+#'
+#' @inheritParams workflows::add_model
+#'
+#' @param x An `epi_workflow`.
+#'
+#' @param spec A parsnip model specification.
+#'
+#' @param ... Not used.
+#'
+#' @return
+#' `x`, updated with a new, updated, or removed model.
+#'
+#' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(
+#'     time_value > "2021-11-01",
+#'     geo_value %in% c("ak", "ca", "ny")
+#'   )
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7)
+#'
+#' rf_model <- rand_forest(mode = "regression")
+#'
+#' wf <- epi_workflow(r)
+#'
+#' wf <- wf %>% add_model(rf_model)
+#' wf
+#'
+#' lm_model <- parsnip::linear_reg()
+#'
+#' wf <- update_model(wf, lm_model)
+#' wf
+#'
+#' wf <- remove_model(wf)
+#' wf
+#' @export
+add_model <- function(x, spec, ..., formula = NULL) {
+  UseMethod("add_model")
+}
+
+#' @rdname add_model
+#' @export
+remove_model <- function(x) {
+  UseMethod("remove_model")
+}
+
+#' @rdname add_model
+#' @export
+update_model <- function(x, spec, ..., formula = NULL) {
+  UseMethod("update_model")
+}
+
+#' @rdname add_model
+#' @export
+add_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
+  workflows::add_model(x, spec, ..., formula = formula)
+}
+
+#' @rdname add_model
+#' @export
+remove_model.epi_workflow <- function(x) {
+  workflows:::validate_is_workflow(x)
+
+  if (!workflows:::has_spec(x)) {
+    rlang::warn("The workflow has no model to remove.")
+  }
+
+  new_epi_workflow(
+    pre = x$pre,
+    fit = workflows:::new_stage_fit(),
+    post = x$post,
+    trained = FALSE
+  )
+}
+
+#' @rdname add_model
+#' @export
+update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
+  rlang::check_dots_empty()
+  x <- remove_model(x)
+  workflows::add_model(x, spec, ..., formula = formula)
+}
+
+
+#' Fit an `epi_workflow` object
+#'
+#' @description
+#' This is the `fit()` method for an `epi_workflow` object that
+#' estimates parameters for a given model from a set of data.
+#' Fitting an `epi_workflow` involves two main steps, which are
+#' preprocessing the data and fitting the underlying parsnip model.
+#'
+#' @inheritParams workflows::fit.workflow
+#'
+#' @param object an `epi_workflow` object
+#'
+#' @param data an `epi_df` of predictors and outcomes to use when
+#' fitting the `epi_workflow`
+#'
+#' @param control A [workflows::control_workflow()] object
+#'
+#' @return The `epi_workflow` object, updated with a fit parsnip
+#' model in the `object$fit$fit` slot.
+#'
+#' @seealso workflows::fit-workflow
+#'
+#' @name fit-epi_workflow
+#' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7)
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf
+#'
+#' @export
+fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
+  object$fit$meta <- list(max_time_value = max(data$time_value), as_of = attributes(data)$metadata$as_of)
+
+  NextMethod()
+}
 
 #' Predict from an epi_workflow
 #'
@@ -98,43 +236,37 @@ is_epi_workflow <- function(x) {
 #' @name predict-epi_workflow
 #' @export
 #' @examples
-#'
-#' library(dplyr)
-#' library(parsnip)
-#' library(recipes)
-#'
 #' jhu <- case_death_rate_subset
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' latest <- jhu %>% dplyr::filter(time_value >= max(time_value) - 14)
 #'
-#' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
-#'
-#' preds <- predict(wf, latest) %>%
-#'   filter(!is.na(.pred))
-#'
+#' preds <- predict(wf, latest)
 #' preds
 predict.epi_workflow <- function(object, new_data, ...) {
   if (!workflows::is_trained_workflow(object)) {
     rlang::abort(
       c("Can't predict on an untrained epi_workflow.",
-        i = "Do you need to call `fit()`?"))
+        i = "Do you need to call `fit()`?"
+      )
+    )
   }
   components <- list()
-  the_fit <- workflows::extract_fit_parsnip(object)
-  the_recipe <- workflows::extract_recipe(object)
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
-                                      blueprint = components$mold$blueprint)
-  components$keys <- grab_forged_keys(components$forged,
-                                      components$mold, new_data)
-  components <- apply_frosting(object, components, the_fit, the_recipe, ...)
+    blueprint = components$mold$blueprint
+  )
+  components$keys <- grab_forged_keys(
+    components$forged,
+    components$mold, new_data
+  )
+  components <- apply_frosting(object, components, new_data, ...)
   components$predictions
 }
 
@@ -148,18 +280,27 @@ predict.epi_workflow <- function(object, new_data, ...) {
 #'
 #' @return new_data with additional columns containing the predicted values
 #' @export
-augment.epi_workflow <- function (x, new_data, ...) {
+augment.epi_workflow <- function(x, new_data, ...) {
   predictions <- predict(x, new_data, ...)
-  if (epiprocess::is_epi_df(predictions)) join_by <- epi_keys(predictions)
-  else rlang::abort(
-    c("Cannot determine how to join new_data with the predictions.",
-      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."))
+  if (epiprocess::is_epi_df(predictions)) {
+    join_by <- epi_keys(predictions)
+  } else {
+    rlang::abort(
+      c(
+        "Cannot determine how to join new_data with the predictions.",
+        "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
+      )
+    )
+  }
   complete_overlap <- intersect(names(new_data), join_by)
   if (length(complete_overlap) < length(join_by)) {
     rlang::warn(
-      glue::glue("Your original training data had keys {join_by}, but",
-                 "`new_data` only has {complete_overlap}. The output",
-                 "may be strange."))
+      glue::glue(
+        "Your original training data had keys {join_by}, but",
+        "`new_data` only has {complete_overlap}. The output",
+        "may be strange."
+      )
+    )
   }
   dplyr::full_join(predictions, new_data, by = join_by)
 }
@@ -169,63 +310,20 @@ new_epi_workflow <- function(
     fit = workflows:::new_stage_fit(),
     post = workflows:::new_stage_post(),
     trained = FALSE) {
-
   out <- workflows:::new_workflow(
-    pre = pre, fit = fit, post = post, trained = trained)
+    pre = pre, fit = fit, post = post, trained = trained
+  )
   class(out) <- c("epi_workflow", class(out))
+  out
 }
 
 
 #' @export
 print.epi_workflow <- function(x, ...) {
   print_header(x)
-  workflows:::print_preprocessor(x)
-  #workflows:::print_case_weights(x)
-  workflows:::print_model(x)
+  print_preprocessor(x)
+  # workflows:::print_case_weights(x)
+  print_model(x)
   print_postprocessor(x)
   invisible(x)
 }
-
-print_header <- function(x) {
-  # same as in workflows but with a postprocessor
-  trained <- ifelse(workflows::is_trained_workflow(x), " [trained]", "")
-
-  header <- glue::glue("Epi Workflow{trained}")
-  header <- cli::rule(header, line = 2)
-  cat_line(header)
-
-  preprocessor_msg <- cli::style_italic("Preprocessor:")
-
-  if (workflows:::has_preprocessor_formula(x)) {
-    preprocessor <- "Formula"
-  } else if (workflows:::has_preprocessor_recipe(x)) {
-    preprocessor <- "Recipe"
-  } else if (workflows:::has_preprocessor_variables(x)) {
-    preprocessor <- "Variables"
-  } else {
-    preprocessor <- "None"
-  }
-
-  preprocessor_msg <- glue::glue("{preprocessor_msg} {preprocessor}")
-  cat_line(preprocessor_msg)
-
-  spec_msg <- cli::style_italic("Model:")
-
-  if (workflows:::has_spec(x)) {
-    spec <- class(workflows::extract_spec_parsnip(x))[[1]]
-    spec <- glue::glue("{spec}()")
-  } else {
-    spec <- "None"
-  }
-
-  spec_msg <- glue::glue("{spec_msg} {spec}")
-  cat_line(spec_msg)
-
-  postprocessor_msg <- cli::style_italic("Postprocessor:")
-  postprocessor <- ifelse(has_postprocessor_frosting(x), "Frosting", "None")
-  postprocessor_msg <- glue::glue("{postprocessor_msg} {postprocessor}")
-  cat_line(postprocessor_msg)
-
-  invisible(x)
-}
-
