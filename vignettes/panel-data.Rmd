@@ -9,10 +9,10 @@ vignette: >
 
 ```{r setup, include=F}
 knitr::opts_chunk$set(
+  echo = TRUE,
   collapse = TRUE,
   comment = "#>",
-  warning = FALSE,
-  message = FALSE
+  out.width = "100%"
 )
 ```
 
@@ -24,6 +24,8 @@ library(recipes)
 library(epiprocess)
 library(epipredict)
 library(ggplot2)
+library(lubridate)
+theme_set(theme_bw())
 ```
 
 [Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
@@ -38,16 +40,18 @@ dataset, which contains daily state-wise measures of `case_rate` and
 head(case_death_rate_subset, 3)
 ```
 
-`epipredict` functions work with data in [`epi_df`](
-  https://cmu-delphi.github.io/epiprocess/reference/epi_df.html) 
+`epipredict` functions work with data in 
+[`epi_df`](https://cmu-delphi.github.io/epiprocess/reference/epi_df.html) 
 format. Despite the stated goal and name of the package, other panel datasets 
 are also valid candidates for `epipredict` functionality, as long as they are 
 in `epi_df` format.
 
 ```{r employ-stats, include=F}
 data("grad_employ_subset")
-year_start <- min(grad_employ_subset$time_value)
-year_end <- max(grad_employ_subset$time_value)
+grad_employ_subset <- grad_employ_subset %>%
+  mutate(time_value = ymd(paste0(time_value, "0101")))
+year_start <- year(min(grad_employ_subset$time_value))
+year_end <- year(max(grad_employ_subset$time_value))
 ```
 
 # Example panel data overview
@@ -90,7 +94,8 @@ gemploy <- statcan_grad_employ %>%
   select(c(
     "REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification",
     "Field of study", "Gender", "Age group", "Status of student in Canada",
-    "Characteristics after graduation", "Graduate statistics")) %>%
+    "Characteristics after graduation", "Graduate statistics"
+  )) %>%
   rename(
     "geo_value" = "GEO",
     "time_value" = "REF_DATE",
@@ -102,7 +107,8 @@ gemploy <- statcan_grad_employ %>%
     "age_group" = "Age group",
     "student_status" = "Status of student in Canada",
     "grad_charac" = "Characteristics after graduation",
-    "grad_stat" = "Graduate statistics") %>%
+    "grad_stat" = "Graduate statistics"
+  ) %>%
   # The original `VALUE` column contain the statistic indicated by
   # `Graduate statistics` in the original data. Below we pivot the data
   # wider so that each unique statistic can have its own column.
@@ -115,7 +121,8 @@ gemploy <- statcan_grad_employ %>%
       `Median employment income five years after graduation` = "med_income_5y"
     ),
     # They are originally strings but want ints for conversion to epi_df later
-    time_value = as.integer(time_value)) %>%
+    time_value = as.integer(time_value)
+  ) %>%
   pivot_wider(names_from = grad_stat, values_from = value) %>%
   filter(
     # Drop aggregates for some columns
@@ -135,7 +142,8 @@ gemploy <- statcan_grad_employ %>%
       # Only keep "good" data
       is.na(status) &
       # Drop NA value rows
-      !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
+      !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)
+  ) %>%
   select(-c(status, gender, student_status, grad_charac, fos))
 ```
 
@@ -154,10 +162,12 @@ a list of all the `type_type`s available.
 grad_employ_subset <- gemploy %>%
   tsibble::as_tsibble(
     index = time_value,
-    key = c(geo_value, age_group, edu_qual)) %>%
+    key = c(geo_value, age_group, edu_qual)
+  ) %>%
   as_epi_df(
     geo_type = "custom", time_type = "year",
-    additional_metadata = c(other_keys = list("age_group", "edu_qual")))
+    additional_metadata = c(other_keys = list("age_group", "edu_qual"))
+  )
 ```
 
 ```{r data-dim, include=F}
@@ -169,7 +179,7 @@ Now, we are ready to use `grad_employ_subset` with `epipredict`.
 Our `epi_df` contains `r employ_rowcount` rows and `r employ_colcount` columns.
 Here is a quick summary of the columns in our `epi_df`:
 
-* `time_value` (time value): year in YYYY format 
+* `time_value` (time value): year in `date` format 
 * `geo_value` (geo value): province in Canada
 * `num_graduates` (raw, time series value): number of graduates 
 * `med_income_2y` (raw, time series value): median employment income 2 years 
@@ -208,7 +218,8 @@ employ_small <- employ %>%
   mutate(
     num_graduates_prop = num_graduates / sum(num_graduates),
     med_income_2y_prop = med_income_2y / sum(med_income_2y),
-    med_income_5y_prop = med_income_5y / sum(med_income_5y)) %>%
+    med_income_5y_prop = med_income_5y / sum(med_income_5y)
+  ) %>%
   ungroup()
 head(employ_small)
 ```
@@ -226,7 +237,8 @@ employ_small %>%
   facet_grid(rows = vars(edu_qual), cols = vars(age_group)) +
   xlab("Year") +
   ylab("# of graduates as proportion of sum within group") +
-  ggtitle("Trend in # of Graduates by Age Group and Education in BC and ON")
+  ggtitle("Trend in # of Graduates by Age Group and Education in BC and ON") +
+  theme(legend.position = "bottom")
 ```
 
 We will predict the "standardized" number of graduates (a proportion) in the 
@@ -254,8 +266,8 @@ values are both in years.
 
 ```{r make-recipe, include=T, eval=T}
 r <- epi_recipe(employ_small) %>%
-  step_epi_ahead(num_graduates_prop, ahead = 1) %>% # lag & ahead units in years
-  step_epi_lag(num_graduates_prop, lag = 0:2) %>%
+  step_epi_ahead(num_graduates_prop, ahead = 365) %>% # lag & ahead units in days
+  step_epi_lag(num_graduates_prop, lag = 0:2 * 365) %>%
   step_epi_naomit()
 r
 ```
@@ -265,11 +277,11 @@ and `ahead` columns.
 
 ```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
-bake_and_show_sample <- function(recipe, new_data, n=5) {
-  recipe %>% prep() %>% bake(new_data = new_data) %>% sample_n(n)
+bake_and_show_sample <- function(recipe, data, n = 5) {
+  recipe %>% prep(data) %>% bake(new_data = data) %>% sample_n(n)
 }
 
-bake_and_show_sample(r, employ_small)
+r %>% bake_and_show_sample(employ_small)
 ```
 
 We can see that the `prep` and `bake` steps created new columns according to 
@@ -337,7 +349,8 @@ First, we'll plot the residuals (that is, $y_{t} - \hat{y}_{t}$) against the
 fitted values ($\hat{y}_{t}$).
 
 ```{r lienarreg-resid-plot, include=T, fig.height=8}
-par(mfrow = c(2,2)); plot(extract_fit_engine(wf_linreg))
+par(mfrow = c(2, 2), mar = c(5, 3.5, 1, 1) + .5)
+plot(extract_fit_engine(wf_linreg))
 ```
 
 The fitted values vs. residuals plot shows us that the residuals are mostly 
@@ -381,14 +394,14 @@ $z_i$ is the number of graduates (proportion) at time $i$.
 Again, we construct an `epi_recipe` detailing the preprocessing steps.
 
 ```{r custom-arx, include=T}
-rx <- epi_recipe(employ_small) %>% 
-    step_epi_ahead(med_income_5y_prop, ahead = 1) %>% 
-    # 5-year median income has 3 lags c(0,1,2)
-    step_epi_lag(med_income_5y_prop, lag = c(0,1,2)) %>%
-    # But the two exogenous variables have 2 lags c(0,1)
-    step_epi_lag(med_income_2y_prop, lag = c(0,1)) %>%
-    step_epi_lag(num_graduates_prop, lag = c(0,1)) %>%
-    step_epi_naomit()
+rx <- epi_recipe(employ_small) %>%
+  step_epi_ahead(med_income_5y_prop, ahead = 1) %>%
+  # 5-year median income has 3 lags c(0,1,2)
+  step_epi_lag(med_income_5y_prop, lag = c(0, 1, 2)) %>%
+  # But the two exogenous variables have 2 lags c(0,1)
+  step_epi_lag(med_income_2y_prop, lag = c(0, 1)) %>%
+  step_epi_lag(num_graduates_prop, lag = c(0, 1)) %>%
+  step_epi_naomit()
 
 bake_and_show_sample(rx, employ_small)
 ```
@@ -414,20 +427,25 @@ quantify the uncertainty associated with future predicted values.
 # Only have to include med_income_5y since that is our outcome
 totals <- employ_small %>%
   group_by(geo_value, age_group, edu_qual) %>%
-  summarise(med_income_5y_tot = sum(med_income_5y))
+  summarise(med_income_5y_tot = sum(med_income_5y), .groups = "keep")
 
-# Define post-processing steps 
+# Define post-processing steps
 f <- frosting() %>%
   layer_predict() %>%
-  layer_naomit(.pred) %>% 
-  layer_threshold(.pred, lower = 0) %>% 
+  layer_naomit(.pred) %>%
+  layer_threshold(.pred, lower = 0) %>%
   # 90% prediction interval
-  layer_residual_quantiles(probs = c(0.05, 0.95), symmetrize = F) %>% 
+  layer_residual_quantiles(
+    quantile_levels = c(0.05, 0.95), 
+    symmetrize = FALSE
+  ) %>%
   layer_population_scaling(
-    .pred, .pred_distn, df = totals, df_pop_col = "med_income_5y_tot") 
-  
-wfx_linreg <- epi_workflow(rx, parsnip::linear_reg()) %>% 
-  fit(employ_small) %>% 
+    .pred, .pred_distn,
+    df = totals, df_pop_col = "med_income_5y_tot"
+  )
+
+wfx_linreg <- epi_workflow(rx, parsnip::linear_reg()) %>%
+  fit(employ_small) %>%
   add_frosting(f)
 
 summary(extract_fit_engine(wfx_linreg))
@@ -440,20 +458,19 @@ confidence level. Both lags for the number of graduates were insigificant.
 
 Let's take a look at the predictions along with their 90% prediction intervals.
 
- ```{r}
+```{r}
 latest <- get_test_data(recipe = rx, x = employ_small)
 predsx <- predict(wfx_linreg, latest)
 
 # Display values within prediction intervals
 predsx %>%
-    select(
-      geo_value, time_value, edu_qual, age_group,
-      .pred_scaled, .pred_distn_scaled) %>%
-    dplyr::mutate(.quantiles = nested_quantiles(.pred_distn_scaled)) %>%
-    tidyr::unnest(.quantiles) %>% 
-    pivot_wider(names_from = tau, values_from = q) %>%
-    head()
- ```
+  select(
+    geo_value, time_value, edu_qual, age_group, fos,
+    .pred_scaled, .pred_distn_scaled
+  ) %>%
+  head() %>%
+  pivot_quantiles_wider(.pred_distn_scaled)
+```
 
 # Using canned forecasters
 
@@ -486,11 +503,11 @@ where $y_i$ is the 2-year median income (proportion) at time $i$.
 ```{r flatline, include=T, warning=F}
 out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
   args_list = flatline_args_list(
-    ahead = 1L, forecast_date = as.Date("2015-01-01")))
+    ahead = 365L, forecast_date = as.Date("2015-01-01"),
+  )
+)
 
-# The first argument to augment grabs the epi_workflow object from the 
-# forecaster output.
-augment(out_fl$epi_workflow, employ_small) %>% sample_n(5)
+out_fl
 ```
 
 ## Autoregressive forecaster with exogenous inputs
@@ -507,13 +524,15 @@ same number of lags.
 
 ```{r arx-lr, include=T, warning=F}
 arx_args <- arx_args_list(
-  lags = c(0L, 1L), ahead = 1L, forecast_date = as.Date("2015-01-01"))
+  lags = c(0L, 365L), ahead = 365L, forecast_date = as.Date("2015-01-01")
+)
 
 out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
   c("med_income_5y_prop", "med_income_2y_prop", "num_graduates_prop"),
-  args_list = arx_args)
+  args_list = arx_args
+)
 
-augment(out_arx_lr$epi_workflow, employ_small) %>% sample_n(5)
+out_arx_lr
 ```
 
 Other changes to the direct AR forecaster, like changing the engine, also work 
@@ -524,7 +543,8 @@ out_arx_rf <- arx_forecaster(
   employ_small, "med_income_5y_prop",
   c("med_income_5y_prop", "med_income_2y_prop", "num_graduates_prop"),
   trainer = parsnip::boost_tree(mode = "regression", trees = 20),
-  args_list = arx_args)
+  args_list = arx_args
+)
 
-augment(out_arx_rf$epi_workflow, employ_small) %>% sample_n(5)
+out_arx_rf
 ```
