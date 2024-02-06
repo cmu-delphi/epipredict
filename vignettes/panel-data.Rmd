@@ -24,7 +24,6 @@ library(recipes)
 library(epiprocess)
 library(epipredict)
 library(ggplot2)
-library(lubridate)
 theme_set(theme_bw())
 ```
 
@@ -48,10 +47,9 @@ in `epi_df` format.
 
 ```{r employ-stats, include=F}
 data("grad_employ_subset")
-grad_employ_subset <- grad_employ_subset %>%
-  mutate(time_value = ymd(paste0(time_value, "0101")))
-year_start <- year(min(grad_employ_subset$time_value))
-year_end <- year(max(grad_employ_subset$time_value))
+grad_employ_subset <- grad_employ_subset
+year_start <- min(grad_employ_subset$time_value)
+year_end <- max(grad_employ_subset$time_value)
 ```
 
 # Example panel data overview
@@ -232,12 +230,14 @@ with incomplete dates.
 employ_small %>%
   filter(geo_value %in% c("British Columbia", "Ontario")) %>%
   filter(grepl("degree", edu_qual, fixed = T)) %>%
+  group_by(geo_value, time_value, edu_qual, age_group) %>%
+  summarise(num_graduates_prop = sum(num_graduates_prop), .groups = "drop") %>%
   ggplot(aes(x = time_value, y = num_graduates_prop, color = geo_value)) +
   geom_line() +
+  scale_colour_manual(values = c("Cornflowerblue", "Orange"), name = "") +
   facet_grid(rows = vars(edu_qual), cols = vars(age_group)) +
   xlab("Year") +
-  ylab("# of graduates as proportion of sum within group") +
-  ggtitle("Trend in # of Graduates by Age Group and Education in BC and ON") +
+  ylab("Percentage of gratuates") +
   theme(legend.position = "bottom")
 ```
 
@@ -266,8 +266,8 @@ values are both in years.
 
 ```{r make-recipe, include=T, eval=T}
 r <- epi_recipe(employ_small) %>%
-  step_epi_ahead(num_graduates_prop, ahead = 365) %>% # lag & ahead units in days
-  step_epi_lag(num_graduates_prop, lag = 0:2 * 365) %>%
+  step_epi_ahead(num_graduates_prop, ahead = 1) %>% 
+  step_epi_lag(num_graduates_prop, lag = 0:2) %>%
   step_epi_naomit()
 r
 ```
@@ -502,9 +502,7 @@ where $y_i$ is the 2-year median income (proportion) at time $i$.
 
 ```{r flatline, include=T, warning=F}
 out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
-  args_list = flatline_args_list(
-    ahead = 365L, forecast_date = as.Date("2015-01-01"),
-  )
+  args_list = flatline_args_list(ahead = 1)
 )
 
 out_fl
@@ -523,9 +521,7 @@ with Exogenous Inputs" section of this article, but where all inputs have the
 same number of lags.
 
 ```{r arx-lr, include=T, warning=F}
-arx_args <- arx_args_list(
-  lags = c(0L, 365L), ahead = 365L, forecast_date = as.Date("2015-01-01")
-)
+arx_args <- arx_args_list(lags = c(0L, 1L), ahead = 1L)
 
 out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
   c("med_income_5y_prop", "med_income_2y_prop", "num_graduates_prop"),
