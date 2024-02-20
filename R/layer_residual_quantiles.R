@@ -110,7 +110,7 @@ slather.layer_residual_quantiles <-
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
-          r <- dplyr::bind_cols(key_cols, r %>% tidyselect::select(.resid)) %>%
+          r <- dplyr::bind_cols(key_cols, r %>% dplyr::select(.resid)) %>%
             dplyr::group_by(!!!rlang::syms(common))
         }
       }
