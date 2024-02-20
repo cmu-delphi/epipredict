@@ -16,4 +16,7 @@ test_that("arx_class_args checks inputs", {
     arx_class_args_list(target_date = as.Date("2022-01-01"))$target_date,
     as.Date("2022-01-01")
   )
+
+  expect_error(arx_class_args_list(n_training_min = "de"))
+  expect_error(arx_class_args_list(epi_keys = 1))
 })

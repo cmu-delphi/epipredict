@@ -40,7 +40,7 @@
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14))
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
-#' @importFrom rlang `%@%`
+#' @importFrom rlang %@%
 #' @export
 
 get_test_data <- function(

@@ -14,12 +14,15 @@ our best to address them quickly.
 
 ## Installation
 
-You can install the development version of epipredict from
-[GitHub](https://github.com/) with:
+To install (unless you’re making changes to the package, use the stable
+version):
 
 ``` r
-# install.packages("remotes")
-remotes::install_github("cmu-delphi/epipredict")
+# Stable version
+pak::pkg_install("cmu-delphi/epipredict@main")
+
+# Dev version
+pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
 
 ## Documentation
@@ -35,24 +38,25 @@ You can view documentation for the `main` branch at
     You should be able to do a reasonably limited amount of
     customization on them. For the basic forecasters, we currently
     provide:
-    - Baseline flatline forecaster
-    - Autoregressive forecaster
-    - Autoregressive classifier
-    - CDC FluSight flatline forecaster
+      - Baseline flatline forecaster
+      - Autoregressive forecaster
+      - Autoregressive classifier
+      - CDC FluSight flatline forecaster
 2.  A framework for creating custom forecasters out of modular
     components. There are four types of components:
-    - Preprocessor: do things to the data before model training
-    - Trainer: train a model on data, resulting in a fitted model object
-    - Predictor: make predictions, using a fitted model object
-    - Postprocessor: do things to the predictions before returning
+      - Preprocessor: do things to the data before model training
+      - Trainer: train a model on data, resulting in a fitted model
+        object
+      - Predictor: make predictions, using a fitted model object
+      - Postprocessor: do things to the predictions before returning
 
 **Target audiences:**
 
-- Basic. Has data, calls forecaster with default arguments.
-- Intermediate. Wants to examine changes to the arguments, take
-  advantage of built in flexibility.
-- Advanced. Wants to write their own forecasters. Maybe willing to build
-  up from some components.
+  - Basic. Has data, calls forecaster with default arguments.
+  - Intermediate. Wants to examine changes to the arguments, take
+    advantage of built in flexibility.
+  - Advanced. Wants to write their own forecasters. Maybe willing to
+    build up from some components.
 
 The Advanced user should find their task to be relatively easy. Examples
 of these tasks are illustrated in the [vignettes and
@@ -67,32 +71,31 @@ The package comes with some built-in historical data for illustration,
 but up-to-date versions of this could be downloaded with the
 [`{epidatr}` package](https://cmu-delphi.github.io/epidatr/) and
 processed using
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).\[1\]
 
 ``` r
 library(epipredict)
 case_death_rate_subset
+#> An `epi_df` object, 20,496 x 4 with metadata:
+#> * geo_type  = state
+#> * time_type = day
+#> * as_of     = 2022-05-31 12:08:25.791826
+#> 
+#> # A tibble: 20,496 × 4
+#>    geo_value time_value case_rate death_rate
+#>  * <chr>     <date>         <dbl>      <dbl>
+#>  1 ak        2020-12-31      35.9      0.158
+#>  2 al        2020-12-31      65.1      0.438
+#>  3 ar        2020-12-31      66.0      1.27 
+#>  4 as        2020-12-31       0        0    
+#>  5 az        2020-12-31      76.8      1.10 
+#>  6 ca        2020-12-31      96.0      0.751
+#>  7 co        2020-12-31      35.8      0.649
+#>  8 ct        2020-12-31      52.1      0.819
+#>  9 dc        2020-12-31      31.0      0.601
+#> 10 de        2020-12-31      65.2      0.807
+#> # ℹ 20,486 more rows
 ```
-
-    #> An `epi_df` object, 20,496 x 4 with metadata:
-    #> * geo_type  = state
-    #> * time_type = day
-    #> * as_of     = 2022-05-31 12:08:25.791826
-    #> 
-    #> # A tibble: 20,496 × 4
-    #>    geo_value time_value case_rate death_rate
-    #>  * <chr>     <date>         <dbl>      <dbl>
-    #>  1 ak        2020-12-31      35.9      0.158
-    #>  2 al        2020-12-31      65.1      0.438
-    #>  3 ar        2020-12-31      66.0      1.27 
-    #>  4 as        2020-12-31       0        0    
-    #>  5 az        2020-12-31      76.8      1.10 
-    #>  6 ca        2020-12-31      96.0      0.751
-    #>  7 co        2020-12-31      35.8      0.649
-    #>  8 ct        2020-12-31      52.1      0.819
-    #>  9 dc        2020-12-31      31.0      0.601
-    #> 10 de        2020-12-31      65.2      0.807
-    #> # ℹ 20,486 more rows
 
 To create and train a simple auto-regressive forecaster to predict the
 death rate two weeks into the future using past (lagged) deaths and
@@ -109,24 +112,23 @@ two_week_ahead <- arx_forecaster(
   )
 )
 two_week_ahead
+#> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════
+#> 
+#> This forecaster was fit on 2024-01-29 15:10:01.
+#> 
+#> Training data was an <epi_df> with:
+#> • Geography: state,
+#> • Time type: day,
+#> • Using data up-to-date as of: 2022-05-31 12:08:25.
+#> 
+#> ── Predictions ─────────────────────────────────────────────────────────────
+#> 
+#> A total of 56 predictions are available for
+#> • 56 unique geographic regions,
+#> • At forecast date: 2021-12-31,
+#> • For target date: 2022-01-14.
+#> 
 ```
-
-    #> 
-    #> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════
-    #> 
-    #> This forecaster was fit on 2023-10-20 08:59:57
-    #> 
-    #> Training data was an `epi_df` with
-    #> • Geography: state,
-    #> • Time type: day,
-    #> • Using data up-to-date as of: 2022-05-31 12:08:25.
-    #> 
-    #> ── Predictions ─────────────────────────────────────────────────────────────────
-    #> 
-    #> A total of 56 predictions are available for
-    #> • 56 unique geographic regions,
-    #> • At forecast dates: 2021-12-31,
-    #> • For target dates: 2022-01-14.
 
 In this case, we have used a number of different lags for the case rate,
 while only using 3 weekly lags for the death rate (as predictors). The
@@ -137,54 +139,45 @@ last available time value in the data.
 
 ``` r
 two_week_ahead$epi_workflow
+#> 
+#> ══ Epi Workflow [trained] ══════════════════════════════════════════════════
+#> Preprocessor: Recipe
+#> Model: linear_reg()
+#> Postprocessor: Frosting
+#> 
+#> ── Preprocessor ────────────────────────────────────────────────────────────
+#> 
+#> 6 Recipe steps.
+#> 1. step_epi_lag()
+#> 2. step_epi_lag()
+#> 3. step_epi_ahead()
+#> 4. step_naomit()
+#> 5. step_naomit()
+#> 6. step_training_window()
+#> 
+#> ── Model ───────────────────────────────────────────────────────────────────
+#> 
+#> Call:
+#> stats::lm(formula = ..y ~ ., data = data)
+#> 
+#> Coefficients:
+#>       (Intercept)    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  
+#>        -0.0073358          0.0030365          0.0012467          0.0009536  
+#>   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  
+#>         0.0011425          0.0012481          0.0003041          0.1351769  
+#>  lag_7_death_rate  lag_14_death_rate  
+#>         0.1471127          0.1062473
+#> 
+#> ── Postprocessor ───────────────────────────────────────────────────────────
+#> 
+#> 5 Frosting layers.
+#> 1. layer_predict()
+#> 2. layer_residual_quantiles()
+#> 3. layer_add_forecast_date()
+#> 4. layer_add_target_date()
+#> 5. layer_threshold()
+#> 
 ```
-
-    #> ══ Epi Workflow [trained] ══════════════════════════════════════════════════════
-    #> Preprocessor: Recipe
-    #> Model: linear_reg()
-    #> Postprocessor: Frosting
-    #> 
-    #> ── Preprocessor ────────────────────────────────────────────────────────────────
-    #> 6 Recipe Steps
-
-    #> 1. step_epi_lag()
-
-    #> 2. step_epi_lag()
-
-    #> 3. step_epi_ahead()
-
-    #> 4. step_naomit()
-
-    #> 5. step_naomit()
-
-    #> 6. step_training_window()
-
-    #> 
-    #> ── Model ───────────────────────────────────────────────────────────────────────
-    #> 
-    #> Call:
-    #> stats::lm(formula = ..y ~ ., data = data)
-    #> 
-    #> Coefficients:
-    #>       (Intercept)    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  
-    #>        -0.0073358          0.0030365          0.0012467          0.0009536  
-    #>   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  
-    #>         0.0011425          0.0012481          0.0003041          0.1351769  
-    #>  lag_7_death_rate  lag_14_death_rate  
-    #>         0.1471127          0.1062473  
-    #> 
-    #> ── Postprocessor ───────────────────────────────────────────────────────────────
-    #> 5 Frosting Layers
-
-    #> 1. layer_predict()
-
-    #> 2. layer_residual_quantiles()
-
-    #> 3. layer_add_forecast_date()
-
-    #> 4. layer_add_target_date()
-
-    #> 5. layer_threshold()
 
 The fitted model here involved preprocessing the data to appropriately
 generate lagged predictors, estimating a linear model with `stats::lm()`
@@ -193,29 +186,28 @@ tasks. We can also examine the predictions.
 
 ``` r
 two_week_ahead$predictions
+#> # A tibble: 56 × 5
+#>    geo_value .pred        .pred_distn forecast_date target_date
+#>    <chr>     <dbl>             <dist> <date>        <date>     
+#>  1 ak        0.449 quantiles(0.45)[2] 2021-12-31    2022-01-14 
+#>  2 al        0.574 quantiles(0.57)[2] 2021-12-31    2022-01-14 
+#>  3 ar        0.673 quantiles(0.67)[2] 2021-12-31    2022-01-14 
+#>  4 as        0     quantiles(0.12)[2] 2021-12-31    2022-01-14 
+#>  5 az        0.679 quantiles(0.68)[2] 2021-12-31    2022-01-14 
+#>  6 ca        0.575 quantiles(0.57)[2] 2021-12-31    2022-01-14 
+#>  7 co        0.862 quantiles(0.86)[2] 2021-12-31    2022-01-14 
+#>  8 ct        1.07  quantiles(1.07)[2] 2021-12-31    2022-01-14 
+#>  9 dc        2.12  quantiles(2.12)[2] 2021-12-31    2022-01-14 
+#> 10 de        1.09  quantiles(1.09)[2] 2021-12-31    2022-01-14 
+#> # ℹ 46 more rows
 ```
-
-    #> # A tibble: 56 × 5
-    #>    geo_value .pred        .pred_distn forecast_date target_date
-    #>    <chr>     <dbl>             <dist> <date>        <date>     
-    #>  1 ak        0.449 quantiles(0.45)[2] 2021-12-31    2022-01-14 
-    #>  2 al        0.574 quantiles(0.57)[2] 2021-12-31    2022-01-14 
-    #>  3 ar        0.673 quantiles(0.67)[2] 2021-12-31    2022-01-14 
-    #>  4 as        0     quantiles(0.12)[2] 2021-12-31    2022-01-14 
-    #>  5 az        0.679 quantiles(0.68)[2] 2021-12-31    2022-01-14 
-    #>  6 ca        0.575 quantiles(0.57)[2] 2021-12-31    2022-01-14 
-    #>  7 co        0.862 quantiles(0.86)[2] 2021-12-31    2022-01-14 
-    #>  8 ct        1.07  quantiles(1.07)[2] 2021-12-31    2022-01-14 
-    #>  9 dc        2.12  quantiles(2.12)[2] 2021-12-31    2022-01-14 
-    #> 10 de        1.09  quantiles(1.09)[2] 2021-12-31    2022-01-14 
-    #> # ℹ 46 more rows
 
 The results above show a distributional forecast produced using data
 through the end of 2021 for the 14th of January 2022. A prediction for
 the death rate per 100K inhabitants is available for every state
 (`geo_value`) along with a 90% predictive interval.
 
-[^1]: Other epidemiological signals for non-Covid related illnesses are
+1.  Other epidemiological signals for non-Covid related illnesses are
     also available with
     [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which
     interfaces directly to Delphi’s [Epidata

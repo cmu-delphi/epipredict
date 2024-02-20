@@ -323,50 +323,7 @@ print.epi_workflow <- function(x, ...) {
   print_header(x)
   print_preprocessor(x)
   # workflows:::print_case_weights(x)
-  workflows:::print_model(x)
+  print_model(x)
   print_postprocessor(x)
-  invisible(x)
-}
-
-print_header <- function(x) {
-  # same as in workflows but with a postprocessor
-  trained <- ifelse(workflows::is_trained_workflow(x), " [trained]", "")
-
-  header <- glue::glue("Epi Workflow{trained}")
-  header <- cli::rule(header, line = 2)
-  cat_line(header)
-
-  preprocessor_msg <- cli::style_italic("Preprocessor:")
-
-  if (workflows:::has_preprocessor_formula(x)) {
-    preprocessor <- "Formula"
-  } else if (workflows:::has_preprocessor_recipe(x)) {
-    preprocessor <- "Recipe"
-  } else if (workflows:::has_preprocessor_variables(x)) {
-    preprocessor <- "Variables"
-  } else {
-    preprocessor <- "None"
-  }
-
-  preprocessor_msg <- glue::glue("{preprocessor_msg} {preprocessor}")
-  cat_line(preprocessor_msg)
-
-  spec_msg <- cli::style_italic("Model:")
-
-  if (workflows:::has_spec(x)) {
-    spec <- class(workflows::extract_spec_parsnip(x))[[1]]
-    spec <- glue::glue("{spec}()")
-  } else {
-    spec <- "None"
-  }
-
-  spec_msg <- glue::glue("{spec_msg} {spec}")
-  cat_line(spec_msg)
-
-  postprocessor_msg <- cli::style_italic("Postprocessor:")
-  postprocessor <- ifelse(has_postprocessor_frosting(x), "Frosting", "None")
-  postprocessor_msg <- glue::glue("{postprocessor_msg} {postprocessor}")
-  cat_line(postprocessor_msg)
-
   invisible(x)
 }

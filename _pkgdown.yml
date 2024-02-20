@@ -6,12 +6,10 @@ template:
     font_scale: 1.0
     primary: '#C41230'
     link-color: '#C41230'
-    navbar-bg: '#C41230'
-    navbar-fg: '#f8f8f8'
 
 navbar:
-  bg: '#C41230'
-  fg: '#f8f8f8'
+  bg: primary
+  type: dark
 
 home:
   links:
@@ -58,6 +56,9 @@ reference:
     - starts_with("step_")
     - contains("bake")
     - contains("juice")
+  - title: Epi recipe verification checks
+    contents:
+    - check_enough_train_data
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:

@@ -6,7 +6,7 @@
 #'
 #' @inheritParams usethis::use_test
 #'
-#' @importFrom rlang `%||%`
+#' @importFrom rlang %||%
 #' @export
 #'
 #' @examples

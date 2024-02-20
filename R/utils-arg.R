@@ -2,204 +2,103 @@
 # http://adv-r.had.co.nz/Computing-on-the-language.html#substitute
 # Modeled after / copied from rundel/ghclass
 
-handle_arg_list <- function(..., tests) {
+handle_arg_list <- function(..., .tests) {
   values <- list(...)
   names <- eval(substitute(alist(...)))
   names <- map(names, deparse)
 
-  walk2(names, values, tests)
+  walk2(names, values, .tests)
 }
 
 arg_is_scalar <- function(..., allow_null = FALSE, allow_na = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (length(value) > 1 | (!allow_null & length(value) == 0)) {
-        cli::cli_abort("Argument {.val {name}} must be of length 1.")
-      }
-      if (!is.null(value)) {
-        if (is.na(value) & !allow_na) {
-          cli::cli_abort(
-            "Argument {.val {name}} must not be a missing value ({.val {NA}})."
-          )
-        }
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_scalar(value, null.ok = allow_null, na.ok = allow_na, .var.name = name)
+  })
 }
 
-
 arg_is_lgl <- function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (is.null(value) & !allow_null) {
-        cli::cli_abort("Argument {.val {name}} must be of logical type.")
-      }
-      if (any(is.na(value)) & !allow_na) {
-        cli::cli_abort("Argument {.val {name}} must not contain any missing values ({.val {NA}}).")
-      }
-      if (!is.null(value) & (length(value) == 0 & !allow_empty)) {
-        cli::cli_abort("Argument {.val {name}} must have length >= 1.")
-      }
-      if (!is.null(value) & length(value) != 0 & !is.logical(value)) {
-        cli::cli_abort("Argument {.val {name}} must be of logical type.")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_logical(value, null.ok = allow_null, any.missing = allow_na, min.len = as.integer(!allow_empty), .var.name = name)
+  })
 }
 
 arg_is_lgl_scalar <- function(..., allow_null = FALSE, allow_na = FALSE) {
-  arg_is_lgl(..., allow_null = allow_null, allow_na = allow_na)
-  arg_is_scalar(..., allow_null = allow_null, allow_na = allow_na)
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_logical(value, null.ok = allow_null, any.missing = allow_na, min.len = 1, max.len = 1, .var.name = name)
+  })
 }
 
 arg_is_numeric <- function(..., allow_null = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (!(is.numeric(value) | (is.null(value) & allow_null))) {
-        cli::cli_abort("All {.val {name}} must numeric.")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_numeric(value, null.ok = allow_null, any.missing = FALSE, .var.name = name)
+  })
 }
 
 arg_is_pos <- function(..., allow_null = FALSE) {
-  arg_is_numeric(..., allow_null = allow_null)
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (!(all(value > 0) | (is.null(value) & allow_null))) {
-        cli::cli_abort("All {.val {name}} must be positive number(s).")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_numeric(value, lower = 1, null.ok = allow_null, any.missing = FALSE, .var.name = name)
+  })
 }
 
 arg_is_nonneg <- function(..., allow_null = FALSE) {
-  arg_is_numeric(..., allow_null = allow_null)
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (!(all(value >= 0) | (is.null(value) & allow_null))) {
-        cli::cli_abort("All {.val {name}} must be nonnegative number(s).")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_numeric(value, lower = 0, null.ok = allow_null, any.missing = FALSE, .var.name = name)
+  })
 }
 
 arg_is_int <- function(..., allow_null = FALSE) {
-  arg_is_numeric(..., allow_null = allow_null)
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (!(all(value %% 1 == 0) | (is.null(value) & allow_null))) {
-        cli::cli_abort("All {.val {name}} must be whole positive number(s).")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_integerish(value, null.ok = allow_null, .var.name = name)
+  })
 }
 
 arg_is_pos_int <- function(..., allow_null = FALSE) {
-  arg_is_int(..., allow_null = allow_null)
-  arg_is_pos(..., allow_null = allow_null)
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_integerish(value, null.ok = allow_null, lower = 1, any.missing = FALSE, .var.name = name)
+  })
 }
-
 
 arg_is_nonneg_int <- function(..., allow_null = FALSE) {
-  arg_is_int(..., allow_null = allow_null)
-  arg_is_nonneg(..., allow_null = allow_null)
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_integerish(value, null.ok = allow_null, lower = 0, any.missing = FALSE, .var.name = name)
+  })
 }
 
-arg_is_date <- function(..., allow_null = FALSE, allow_na = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (is.null(value) & !allow_null) {
-        cli::cli_abort("Argument {.val {name}} may not be `NULL`.")
-      }
-      if (any(is.na(value)) & !allow_na) {
-        cli::cli_abort("Argument {.val {name}} must not contain any missing values ({.val {NA}}).")
-      }
-      if (!(is(value, "Date") | is.null(value) | all(is.na(value)))) {
-        cli::cli_abort("Argument {.val {name}} must be a Date. Try `as.Date()`.")
-      }
-    }
-  )
+arg_is_date <- function(..., allow_null = FALSE) {
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_date(value, null.ok = allow_null, .var.name = name)
+  })
 }
 
-arg_is_probabilities <- function(..., allow_null = FALSE) {
-  arg_is_numeric(..., allow_null = allow_null)
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (!((all(value >= 0) && all(value <= 1)) | (is.null(value) & allow_null))) {
-        cli::cli_abort("All {.val {name}} must be in [0,1].")
-      }
-    }
-  )
+arg_is_probabilities <- function(..., allow_null = FALSE, allow_na = FALSE) {
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_numeric(value, lower = 0, upper = 1, null.ok = allow_null, any.missing = allow_na, .var.name = name)
+  })
 }
 
 arg_is_chr <- function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (is.null(value) & !allow_null) {
-        cli::cli_abort("Argument {.val {name}} may not be `NULL`.")
-      }
-      if (any(is.na(value)) & !allow_na) {
-        cli::cli_abort("Argument {.val {name}} must not contain any missing values ({.val {NA}}).")
-      }
-      if (!is.null(value) & (length(value) == 0L & !allow_empty)) {
-        cli::cli_abort("Argument {.val {name}} must have length > 0.")
-      }
-      if (!(is.character(value) | is.null(value) | all(is.na(value)))) {
-        cli::cli_abort("Argument {.val {name}} must be of character type.")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_character(value, null.ok = allow_null, any.missing = allow_na, min.len = as.integer(!allow_empty), .var.name = name)
+  })
 }
 
 arg_is_chr_scalar <- function(..., allow_null = FALSE, allow_na = FALSE) {
-  arg_is_chr(..., allow_null = allow_null, allow_na = allow_na)
-  arg_is_scalar(..., allow_null = allow_null, allow_na = allow_na)
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_character(value, null.ok = allow_null, any.missing = allow_na, min.len = 1, max.len = 1, .var.name = name)
+  })
 }
-
 
 arg_is_function <- function(..., allow_null = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (is.null(value) & !allow_null) {
-        cli::cli_abort("Argument {.val {name}} must be a function.")
-      }
-      if (!is.null(value) & !is.function(value)) {
-        cli::cli_abort("Argument {.val {name}} must be a function.")
-      }
-    }
-  )
+  handle_arg_list(..., .tests = function(name, value) {
+    assert_function(value, null.ok = allow_null, .var.name = name)
+  })
 }
 
-
-
-arg_is_sorted <- function(..., allow_null = FALSE) {
-  handle_arg_list(
-    ...,
-    tests = function(name, value) {
-      if (is.unsorted(value, na.rm = TRUE) | (is.null(value) & !allow_null)) {
-        cli::cli_abort("{.val {name}} must be sorted in increasing order.")
-      }
-    }
-  )
-}
-
-
-arg_to_date <- function(x, allow_null = FALSE, allow_na = FALSE) {
-  arg_is_scalar(x, allow_null = allow_null, allow_na = allow_na)
+arg_to_date <- function(x, allow_null = FALSE) {
+  arg_is_scalar(x, allow_null = allow_null)
   if (!is.null(x)) {
     x <- tryCatch(as.Date(x, origin = "1970-01-01"), error = function(e) NA)
   }
-  arg_is_date(x, allow_null = allow_null, allow_na = allow_na)
+  arg_is_date(x, allow_null = allow_null)
   x
 }

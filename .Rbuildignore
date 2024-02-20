@@ -1,3 +1,5 @@
+^renv$
+^renv\.lock$
 ^epipredict\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
@@ -13,3 +15,5 @@
 ^data-raw$
 ^vignettes/articles$
 ^.git-blame-ignore-revs$
+^doc$
+^Meta$

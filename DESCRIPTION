@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.6
+Version: 0.0.9
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -22,11 +22,12 @@ License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
-Depends: 
+Depends:
     epiprocess (>= 0.6.0),
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
-Imports: 
+Imports:
+    checkmate,
     cli,
     distributional,
     dplyr,
@@ -48,7 +49,7 @@ Imports:
     usethis,
     vctrs,
     workflows (>= 1.0.0)
-Suggests: 
+Suggests:
     covidcast,
     data.table,
     epidatr (>= 1.0.0),
@@ -61,7 +62,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0),
     xgboost
-VignetteBuilder: 
+VignetteBuilder:
     knitr
 Remotes:
     cmu-delphi/epidatr,
@@ -71,4 +72,4 @@ Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1

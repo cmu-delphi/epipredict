@@ -4,9 +4,9 @@
 # Created with usethis + edited to use API key.
 on:
   push:
-    branches: [main, master]
+    branches: [main, dev]
   pull_request:
-    branches: [main, master]
+    branches: [main, dev]
 
 name: R-CMD-check
 
