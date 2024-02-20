@@ -103,14 +103,16 @@ slather.layer_residual_quantiles <-
       if (length(common) > 0L) {
         r <- r %>% dplyr::select(tidyselect::any_of(c(common, ".resid")))
         common_in_r <- common[common %in% names(r)]
-        if (length(common_in_r) != length(common)) {
+        if (length(common_in_r) == length(common)) {
+          r <- dplyr::left_join(key_cols, r, by = common_in_r)
+        } else {
           cli::cli_warn(c(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
+          r <- dplyr::bind_cols(key_cols, r %>% tidyselect::select(.resid)) %>%
+            dplyr::group_by(!!!rlang::syms(common))
         }
-        r <- dplyr::bind_cols(key_cols, r) %>%
-          dplyr::group_by(!!!rlang::syms(common))
       }
     }
 
