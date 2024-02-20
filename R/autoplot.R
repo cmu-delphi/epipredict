@@ -5,7 +5,7 @@ ggplot2::autoplot
 #' @export
 autoplot.epi_workflow <- function(
     object, predictions = NULL,
-    .levels = c(.5, .8, .95),
+    .levels = c(.5, .8, .95), ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "#3A448F",
@@ -46,13 +46,13 @@ autoplot.epi_workflow <- function(
   extra_keys <- setdiff(epi_keys_mold(mold), c("time_value", "geo_value"))
   if (length(extra_keys) == 0L) extra_keys <- NULL
   edf <- as_epi_df(edf,
-    as_of = wf$fit$meta$as_of,
+    as_of = object$fit$meta$as_of,
     additional_metadata = list(other_keys = extra_keys)
   )
   if (is.null(predictions)) {
     return(autoplot(
       edf, new_name_y,
-      .color_by = .colour_by, .facet_by = .facet_by, .base_color = .base_color,
+      .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .max_facets = .max_facets
     ))
   }
