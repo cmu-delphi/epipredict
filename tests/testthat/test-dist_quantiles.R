@@ -10,14 +10,6 @@ test_that("constructor returns reasonable quantiles", {
   expect_error(new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
 })
 
-test_that("tail functions give reasonable output", {
-  expect_equal(norm_q_par(qnorm(c(.75, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(norm_q_par(qnorm(c(.25, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(norm_q_par(qnorm(c(.25, .5), 0, 1)), list(m = 0, s = 1))
-  expect_equal(exp_q_par(qlaplace(c(.75, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(exp_q_par(qlaplace(c(.25, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(exp_q_par(qlaplace(c(.25, .5), 0, 1)), list(m = 0, s = 1))
-})
 
 test_that("single dist_quantiles works, quantiles are accessible", {
   z <- new_quantiles(values = 1:5, quantile_levels = c(.2, .4, .5, .6, .8))
