@@ -72,3 +72,29 @@ test_that("Grouping by keys is supported", {
   expect_equal(pivot1$width, rep(pivot1$width[1], nrow(pivot1)))
   expect_false(all(pivot2$width == pivot2$width[1]))
 })
+
+test_that("Canned forecasters work with / without", {
+  meta <- attr(jhu, "metadata")
+  meta$as_of <- max(jhu$time_value)
+  attr(jhu, "metadata") <- meta
+
+  expect_silent(
+    flatline_forecaster(jhu, "death_rate")
+  )
+  expect_silent(
+    flatline_forecaster(
+      jhu, "death_rate",
+      args_list = flatline_args_list(quantile_by_key = "geo_value")
+    )
+  )
+
+  expect_silent(
+    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"))
+  )
+  expect_silent(
+    flatline_forecaster(
+      jhu, "death_rate",
+      args_list = flatline_args_list(quantile_by_key = "geo_value")
+    )
+  )
+})
