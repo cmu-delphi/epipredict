@@ -209,7 +209,9 @@ quantile_extrapolate <- function(x, tau_out, middle) {
         Q <- stats::splinefun(tau, qvals, method = "hyman")
         quartiles <- Q(c(.25, .5, .75))
       },
-      error = function(e) { return(NA) }
+      error = function(e) {
+        return(NA)
+      }
     )
   }
   if (middle == "linear" || any(is.na(result))) {
@@ -247,7 +249,9 @@ logit <- function(p) {
 # extrapolates linearly on the logistic scale using
 # the two points nearest the tail
 tail_extrapolate <- function(tau_out, qv) {
-  if (nrow(qv) == 1L) return(rep(qv$v[1], length(tau_out)))
+  if (nrow(qv) == 1L) {
+    return(rep(qv$v[1], length(tau_out)))
+  }
   x <- logit(qv$q)
   x0 <- logit(tau_out)
   y <- qv$v
