@@ -2,7 +2,10 @@
 #'
 #' This is an autoregressive forecasting model for
 #' [epiprocess::epi_df] data. It does "direct" forecasting, meaning
-#' that it estimates a model for a particular target horizon.
+#' that it estimates a model for a particular target horizon. The
+#' forecaster trains one model using data over all available
+#' geo_value, and produces forecasts for `target_date = max(epi_df$time_value)
+#' + arx_arg_list()$ahead`.  
 #'
 #'
 #' @param epi_data An `epi_df` object

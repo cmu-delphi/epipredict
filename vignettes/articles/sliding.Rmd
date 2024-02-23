@@ -309,6 +309,11 @@ k_week_version_aware <- function(ahead = 7, version_aware = TRUE) {
         args_list = arx_args_list(ahead = ahead)
       ) %>%
         extract2("predictions"),
+      # Both `before` in `epi_slide` and `n_training` in `arx_forecaster()`
+      # Controls number of traning samples forecaster can see
+      # `before` first controls the number of samples at a particular step 
+      # of `epi_slide`, then `n_training` further restricts max training sample
+      # in that partiuclar step `arx_forecaster()` could use.
       before = 120 - 1,
       ref_time_values = fc_time_values,
       new_col_name = "fc"
