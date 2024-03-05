@@ -54,7 +54,6 @@ Suggests:
     covidcast,
     data.table,
     epidatr (>= 1.0.0),
-    ggplot2,
     knitr,
     lubridate,
     poissonreg,
