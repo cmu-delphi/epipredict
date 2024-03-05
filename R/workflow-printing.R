@@ -105,7 +105,7 @@ print_preprocessor_formula <- function(x) {
   invisible(x)
 }
 
-print_prepocessor_variables <- function(x) {
+print_preprocessor_variables <- function(x) {
   variables <- workflows::extract_preprocessor(x)
   outcomes <- rlang::quo_get_expr(variables$outcomes)
   predictors <- rlang::quo_get_expr(variables$predictors)
