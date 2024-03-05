@@ -2,12 +2,14 @@
 #' @export
 ggplot2::autoplot
 
-#' Automatically plot an `epi_workflow`
+#' Automatically plot an `epi_workflow` or `canned_epipred` object
 #'
 #' For a fit workflow, the training data will be displayed, the response by
 #' default. If `predictions` is not `NULL` then point and interval forecasts
 #' will be shown as well. Unfit workflows will result in an error, (you
 #' can simply call `autoplot()` on the original `epi_df`).
+#'
+#'
 #'
 #'
 #' @inheritParams epiprocess::autoplot.epi_df
@@ -20,12 +22,13 @@ ggplot2::autoplot
 #' @param ... Ignored
 #' @param .base_color If available, prediction bands will be shown with this
 #'   color.
-#' @param .pred_line_color If available, point forecasts will be shown with this
+#' @param .point_pred_color If available, point forecasts will be shown with this
 #'   color.
 #'
-#' @export
+#' @name autoplot-epipred
 #' @examples
-#' jhu <- case_death_rate_subset
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value >= as.Date("2021-11-01"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -45,11 +48,8 @@ ggplot2::autoplot
 #' autoplot(wf)
 #'
 #' latest <- jhu %>% dplyr::filter(time_value >= max(time_value) - 14)
-#' preds <- predict(wf, latest) %>%
-#'   dplyr::select(-time_value) %>%
-#'   dplyr::rename(time_value = target_date)
-#' autoplot(wf, preds, .max_facets = 4) +
-#'   ggplot2::coord_cartesian(xlim = as.Date(c("2021-11-01", NA)))
+#' preds <- predict(wf, latest)
+#' autoplot(wf, preds, .max_facets = 4)
 #'
 #' # ------- Show multiple horizons
 #'
@@ -61,21 +61,33 @@ ggplot2::autoplot
 #'     step_epi_naomit()
 #'   ewf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu)
 #'   td <- get_test_data(r, jhu)
-#'   predict(ewf, new_data = td) %>%
-#'     select(-time_value) %>%
-#'     rename(time_value = target_date)
+#'   predict(ewf, new_data = td)
 #' })
 #'
 #' p <- do.call(rbind, p)
-#' autoplot(wf, p, .max_facets = 4) +
-#'   coord_cartesian(xlim = as.Date(c("2021-11-01", NA)))
+#' autoplot(wf, p, .max_facets = 4)
+#'
+#' # ------- Plotting canned forecaster output
+#'
+#' jhu <- case_death_rate_subset %>% filter(time_value >= as.Date("2021-11-01"))
+#' flat <- flatline_forecaster(jhu, "death_rate")
+#' autoplot(flat, .max_facets = 4)
+#'
+#' arx <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+#'   args_list = arx_args_list(ahead = 14L)
+#' )
+#' autoplot(arx, .max_facets = 6)
+NULL
+
+#' @export
+#' @rdname autoplot-epipred
 autoplot.epi_workflow <- function(
     object, predictions = NULL,
     .levels = c(.5, .8, .95), ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-    .base_color = "#3A448F",
-    .pred_line_color = "orange",
+    .base_color = "dodgerblue4",
+    .point_pred_color = "orange",
     .max_facets = Inf) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
@@ -124,6 +136,12 @@ autoplot.epi_workflow <- function(
     ))
   }
 
+  if ("target_date" %in% names(predictions)) {
+    if ("time_value" %in% names(predictions)) {
+      predictions <- dplyr::select(predictions, -time_value)
+    }
+    predictions <- dplyr::rename(predictions, time_value = target_date)
+  }
   pred_cols_ok <- hardhat::check_column_names(predictions, epi_keys(edf))
   if (!pred_cols_ok$ok) {
     cli::cli_warn(c(
@@ -166,13 +184,13 @@ autoplot.epi_workflow <- function(
       bp <- bp +
         ggplot2::geom_line(
           data = predictions, ggplot2::aes(y = .data$.pred),
-          color = .pred_line_color
+          color = .point_pred_color
         )
     } else {
       bp <- bp +
         ggplot2::geom_point(
           data = predictions, ggplot2::aes(y = .data$.pred),
-          color = .pred_line_color
+          color = .point_pred_color
         )
     }
   }
@@ -182,11 +200,13 @@ autoplot.epi_workflow <- function(
 
 
 #' @export
+#' @rdname autoplot-epipred
 autoplot.canned_epipred <- function(
     object, ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-    .base_color = "#3A448F",
+    .base_color = "dodgerblue4",
+    .point_pred_color = "orange",
     .max_facets = Inf) {
   rlang::check_dots_empty()
   ewf <- object$epi_workflow
@@ -207,7 +227,7 @@ starts_with_impl <- function(x, vars) {
 plot_bands <- function(
     base_plot, predictions,
     levels = c(.5, .8, .95),
-    fill = "#3A448F",
+    fill = "blue4",
     alpha = 0.6,
     linewidth = 0.05) {
   innames <- names(predictions)
