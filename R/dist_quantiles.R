@@ -228,13 +228,13 @@ quantile_extrapolate <- function(x, tau_out, middle) {
     qvals <- sort(unique(c(qvals, qvals_out[indm])))
   }
   if (any(indl)) {
-    ta <- head(tau, 2)
-    qv <- head(qvals, 2)
+    ta <- utils::head(tau, 2)
+    qv <- utils::head(qvals, 2)
     qvals_out[indl] <- normal_tail(tau_out[indl], ta, qv, "left")
   }
   if (any(indr)) {
-    ta <- tail(tau, 2)
-    qv <- tail(qvals, 2)
+    ta <- utils::tail(tau, 2)
+    qv <- utils::tail(qvals, 2)
     qvals_out[indr] <- normal_tail(tau_out[indr], ta, qv, "right")
   }
   qvals_out
