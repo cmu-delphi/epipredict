@@ -2,7 +2,73 @@
 #' @export
 ggplot2::autoplot
 
+#' Automatically plot an `epi_workflow`
+#'
+#' For a fit workflow, the training data will be displayed, the response by
+#' default. If `predictions` is not `NULL` then point and interval forecasts
+#' will be shown as well. Unfit workflows will result in an error, (you
+#' can simply call `autoplot()` on the original `epi_df`).
+#'
+#'
+#' @inheritParams epiprocess::autoplot.epi_df
+#' @param object An `epi_workflow`
+#'
+#' @param predictions A data frame with predictions. If `NULL`, only the
+#'   original data is shown.
+#' @param .levels A numeric vector of levels to plot for any prediction bands.
+#'   More than 3 levels begins to be difficult to see.
+#' @param ... Ignored
+#' @param .base_color If available, prediction bands will be shown with this
+#'   color.
+#' @param .pred_line_color If available, point forecasts will be shown with this
+#'   color.
+#'
 #' @export
+#' @examples
+#' jhu <- case_death_rate_subset
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_naomit()
+#'
+#' f <- frosting() %>%
+#'   layer_residual_quantiles(
+#'     quantile_levels = c(.025, .1, .25, .75, .9, .975)
+#'   ) %>%
+#'   layer_threshold(dplyr::starts_with(".pred")) %>%
+#'   layer_add_target_date()
+#'
+#' wf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu)
+#'
+#' autoplot(wf)
+#'
+#' latest <- jhu %>% dplyr::filter(time_value >= max(time_value) - 14)
+#' preds <- predict(wf, latest) %>%
+#'   dplyr::select(-time_value) %>%
+#'   dplyr::rename(time_value = target_date)
+#' autoplot(wf, preds, .max_facets = 4) +
+#'   ggplot2::coord_cartesian(xlim = as.Date(c("2021-11-01", NA)))
+#'
+#' # ------- Show multiple horizons
+#'
+#' p <- lapply(c(7, 14, 21, 28), \(h) {
+#'   r <- epi_recipe(jhu) %>%
+#'     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'     step_epi_ahead(death_rate, ahead = h) %>%
+#'     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'     step_epi_naomit()
+#'   ewf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu)
+#'   td <- get_test_data(r, jhu)
+#'   predict(ewf, new_data = td) %>%
+#'     select(-time_value) %>%
+#'     rename(time_value = target_date)
+#' })
+#'
+#' p <- do.call(rbind, p)
+#' autoplot(wf, p, .max_facets = 4) +
+#'   coord_cartesian(xlim = as.Date(c("2021-11-01", NA)))
 autoplot.epi_workflow <- function(
     object, predictions = NULL,
     .levels = c(.5, .8, .95), ...,
@@ -11,6 +77,7 @@ autoplot.epi_workflow <- function(
     .base_color = "#3A448F",
     .pred_line_color = "orange",
     .max_facets = Inf) {
+  rlang::check_dots_empty()
   arg_is_probabilities(.levels)
   if (!workflows::is_trained_workflow(object)) {
     cli::cli_abort(c(
@@ -30,12 +97,12 @@ autoplot.epi_workflow <- function(
   edf <- dplyr::bind_cols(mold$extras$roles[mold_roles %in% keys], y)
   if (starts_with_impl("ahead_", names(y))) {
     old_name_y <- unlist(strsplit(names(y), "_"))
-    shift <- -as.numeric(old_name_y[2])
+    shift <- as.numeric(old_name_y[2])
     new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
     edf <- dplyr::rename(edf, !!new_name_y := !!names(y))
   } else if (starts_with_impl("lag_", names(y))) {
     old_name_y <- unlist(strsplit(names(y), "_"))
-    shift <- as.numeric(old_name_y[2])
+    shift <- -as.numeric(old_name_y[2])
     new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
     edf <- dplyr::rename(edf, !!new_name_y := !!names(y))
   }
@@ -98,13 +165,13 @@ autoplot.epi_workflow <- function(
     if (ntarget_dates > 1L) {
       bp <- bp +
         ggplot2::geom_line(
-          data = predictions, aes(y = .data$.pred),
+          data = predictions, ggplot2::aes(y = .data$.pred),
           color = .pred_line_color
         )
     } else {
       bp <- bp +
         ggplot2::geom_point(
-          data = predictions, aes(y = .data$.pred),
+          data = predictions, ggplot2::aes(y = .data$.pred),
           color = .pred_line_color
         )
     }
