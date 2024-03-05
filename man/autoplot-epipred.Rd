@@ -13,7 +13,7 @@
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-  .base_color = "blue4",
+  .base_color = "dodgerblue4",
   .point_pred_color = "orange",
   .max_facets = Inf
 )
@@ -23,7 +23,7 @@
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-  .base_color = "blue4",
+  .base_color = "dodgerblue4",
   .point_pred_color = "orange",
   .max_facets = Inf
 )
