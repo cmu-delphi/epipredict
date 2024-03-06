@@ -157,9 +157,6 @@ median.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "li
   if (length(quantile_levels) < 2 || min(quantile_levels) > 0.5 || max(quantile_levels) < 0.5) {
     return(NA)
   }
-  if (length(quantile_levels) < 3 || min(quantile_levels) > .25 || max(quantile_levels) < .75) {
-    return(stats::approx(quantile_levels, values, xout = 0.5)$y)
-  }
   quantile(x, 0.5, ..., middle = middle)
 }
 
@@ -172,10 +169,9 @@ mean.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "line
 #' @export
 #' @importFrom stats quantile
 #' @import distributional
-quantile.dist_quantiles <- function(
-    x, p, ...,
-    middle = c("cubic", "linear")) {
+quantile.dist_quantiles <- function(x, p, ..., middle = c("cubic", "linear")) {
   arg_is_probabilities(p)
+  p <- sort(p)
   middle <- match.arg(middle)
   quantile_extrapolate(x, p, middle)
 }
@@ -192,10 +188,9 @@ quantile_extrapolate <- function(x, tau_out, middle) {
   if (all(tau_out %in% tau)) {
     return(qvals[match(tau_out, tau)])
   }
-  if (length(qvals) < 2 || r[1] > .5 || r[2] < .5) {
-    cli::cli_warn(c(
-      "Quantile extrapolation is not possible with fewer than",
-      "2 values or when the probabilties don't span 0.5."
+  if (length(qvals) < 2) {
+    cli::cli_abort(c(
+      "Quantile extrapolation is not possible with fewer than 2 quantiles."
     ))
     return(qvals_out)
   }
@@ -209,7 +204,6 @@ quantile_extrapolate <- function(x, tau_out, middle) {
     result <- tryCatch(
       {
         Q <- stats::splinefun(tau, qvals, method = "hyman")
-        qvals_out[indm] <- Q(tau_out[indm])
       },
       error = function(e) {
         return(NA)
@@ -227,24 +221,39 @@ quantile_extrapolate <- function(x, tau_out, middle) {
     tau <- sort(unique(c(tau, tau_out[indm])))
     qvals <- sort(unique(c(qvals, qvals_out[indm])))
   }
+  if (any(indl) || any(indr)) {
+    qv <- data.frame(
+      q = c(tau, tau_out[indm]),
+      v = c(qvals, qvals_out[indm])
+    ) %>%
+      dplyr::distinct(q, .keep_all = TRUE) %>%
+      dplyr::arrange(q)
+  }
   if (any(indl)) {
-    ta <- utils::head(tau, 2)
-    qv <- utils::head(qvals, 2)
-    qvals_out[indl] <- normal_tail(tau_out[indl], ta, qv, "left")
+    qvals_out[indl] <- tail_extrapolate(tau_out[indl], utils::head(qv, 2))
   }
   if (any(indr)) {
-    ta <- utils::tail(tau, 2)
-    qv <- utils::tail(qvals, 2)
-    qvals_out[indr] <- normal_tail(tau_out[indr], ta, qv, "right")
+    qvals_out[indr] <- tail_extrapolate(tau_out[indr], utils::tail(qv, 2))
   }
   qvals_out
 }
 
-normal_tail <- function(tau_out, tau, qvals, lr = c("left", "right")) {
-  lr <- match.arg(lr)
-  s <- abs(diff(qvals)) / abs(diff(qnorm(tau)))
-  m <- qvals[1] - s * qnorm(tau[1])
-  qnorm(tau_out, m, s)
+logit <- function(p) {
+  p <- pmax(pmin(p, 1), 0)
+  log(p) - log(1 - p)
+}
+
+# extrapolates linearly on the logistic scale using
+# the two points nearest the tail
+tail_extrapolate <- function(tau_out, qv) {
+  if (nrow(qv) == 1L) {
+    return(rep(qv$v[1], length(tau_out)))
+  }
+  x <- logit(qv$q)
+  x0 <- logit(tau_out)
+  y <- qv$v
+  m <- diff(y) / diff(x)
+  m * (x0 - x[1]) + y[1]
 }
 
 
