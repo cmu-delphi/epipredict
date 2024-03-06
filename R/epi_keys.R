@@ -24,12 +24,17 @@ epi_keys.data.frame <- function(x, other_keys = character(0L), ...) {
 
 #' @export
 epi_keys.epi_df <- function(x, ...) {
-  c("time_value", "geo_value", attributes(x)$metadata$other_keys)
+  c("time_value", "geo_value", attr(x, "metadata")$other_keys)
 }
 
 #' @export
 epi_keys.recipe <- function(x, ...) {
   x$var_info$variable[x$var_info$role %in% c("time_value", "geo_value", "key")]
+}
+
+#' @export
+epi_keys.epi_workflow <- function(x, ...) {
+  epi_keys_mold(hardhat::extract_mold(x))
 }
 
 # a mold is a list extracted from a fitted workflow, gives info about
@@ -44,4 +49,8 @@ epi_keys_mold <- function(mold) {
 kill_time_value <- function(v) {
   arg_is_chr(v)
   v[v != "time_value"]
+}
+
+epi_keys_only <- function(x, ...) {
+  kill_time_value(epi_keys(x, ...))
 }

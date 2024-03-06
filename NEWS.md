@@ -33,3 +33,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 -   Working vignette
 -   use `checkmate` for input validation
 -   refactor quantile extrapolation (possibly creates different results)
+-   add automatic plotting functionality `autoplot()`

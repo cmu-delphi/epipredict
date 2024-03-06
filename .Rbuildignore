@@ -16,5 +16,6 @@
 ^data-raw$
 ^vignettes/articles$
 ^.git-blame-ignore-revs$
+^DEVELOPMENT\.md$
 ^doc$
 ^Meta$
