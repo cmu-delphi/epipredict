@@ -52,6 +52,34 @@ test_that("quantile extrapolator works", {
   expect_length(parameters(qq[1])$q[[1]], 7L)
 })
 
+test_that("small deviations of quantile requests work", {
+  l <- c(.05, .1, .25, .75, .9, .95)
+  v <- c(0.0890306, 0.1424997, 0.1971793, 0.2850978, 0.3832912, 0.4240479)
+  badl <- l
+  badl[1] <- badl[1] - 1e-14
+  distn <- dist_quantiles(list(v), list(l))
+
+  # was broken before, now works
+  expect_equal(quantile(distn, l), quantile(distn, badl))
+
+  # The tail extrapolation was still poor. It needs to _always_ use
+  # the smallest (largest) values or we could end up unsorted
+  l <- 1:9 / 10
+  v <- 1:9
+  distn <- dist_quantiles(list(v), list(l))
+  expect_equal(quantile(distn, c(.25, .75)), list(c(2.5, 7.5)))
+  expect_equal(quantile(distn, c(.1, .9)), list(c(1, 9)))
+  qv <- data.frame(q = l, v = v)
+  expect_equal(
+    unlist(quantile(distn, c(.01, .05))),
+    tail_extrapolate(c(.01, .05), head(qv, 2))
+  )
+  expect_equal(
+    unlist(quantile(distn, c(.99, .95))),
+    tail_extrapolate(c(.95, .99), tail(qv, 2))
+  )
+})
+
 test_that("unary math works on quantiles", {
   dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
   dstn2 <- dist_quantiles(list(log(1:4), log(8:11)), list(c(.2, .4, .6, .8)))

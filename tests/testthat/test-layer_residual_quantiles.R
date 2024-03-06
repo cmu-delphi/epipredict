@@ -49,3 +49,52 @@ test_that("Errors when used with a classifier", {
   wf <- wf %>% add_frosting(f)
   expect_error(predict(wf, tib))
 })
+
+
+test_that("Grouping by keys is supported", {
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles()
+  wf1 <- wf %>% add_frosting(f)
+  expect_silent(p1 <- predict(wf1, latest))
+  f2 <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(by_key = "geo_value")
+  wf2 <- wf %>% add_frosting(f2)
+  expect_warning(p2 <- predict(wf2, latest))
+
+  pivot1 <- pivot_quantiles_wider(p1, .pred_distn) %>%
+    mutate(width = `0.95` - `0.05`)
+  pivot2 <- pivot_quantiles_wider(p2, .pred_distn) %>%
+    mutate(width = `0.95` - `0.05`)
+  expect_equal(pivot1$width, rep(pivot1$width[1], nrow(pivot1)))
+  expect_false(all(pivot2$width == pivot2$width[1]))
+})
+
+test_that("Canned forecasters work with / without", {
+  meta <- attr(jhu, "metadata")
+  meta$as_of <- max(jhu$time_value)
+  attr(jhu, "metadata") <- meta
+
+  expect_silent(
+    flatline_forecaster(jhu, "death_rate")
+  )
+  expect_silent(
+    flatline_forecaster(
+      jhu, "death_rate",
+      args_list = flatline_args_list(quantile_by_key = "geo_value")
+    )
+  )
+
+  expect_silent(
+    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"))
+  )
+  expect_silent(
+    flatline_forecaster(
+      jhu, "death_rate",
+      args_list = flatline_args_list(quantile_by_key = "geo_value")
+    )
+  )
+})
