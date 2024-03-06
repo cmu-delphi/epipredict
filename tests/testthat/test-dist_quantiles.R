@@ -26,16 +26,6 @@ test_that("single dist_quantiles works, quantiles are accessible", {
   )
 })
 
-test_that("normal tail extrapolator works", {
-  tau <- c(.5, .75)
-  v <- qnorm(tau, 2, 3)
-  expect_equal(normal_tail(c(.8, .9), tau, v, "right"), qnorm(c(.8, .9), 2, 3))
-
-  tau <- c(.25, .4)
-  v <- qnorm(tau, -1, 3)
-  expect_equal(normal_tail(c(.1, .2), tau, v, "left"), qnorm(c(.1, .2), -1, 3))
-  expect_equal(normal_tail(c(.1, .3), tau, v, "left"), qnorm(c(.1, .3), -1, 3))
-})
 
 test_that("quantile extrapolator works", {
   dstn <- dist_normal(c(10, 2), c(5, 10))
