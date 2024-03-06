@@ -150,7 +150,7 @@ autoplot.epi_workflow <- function(
     ))
     return(autoplot(
       edf, !!new_name_y,
-      .color_by = .colour_by, .facet_by = .facet_by, .base_color = .base_color,
+      .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .max_facets = .max_facets
     ))
   }
