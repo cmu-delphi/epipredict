@@ -157,6 +157,9 @@ median.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "li
   if (length(quantile_levels) < 2 || min(quantile_levels) > 0.5 || max(quantile_levels) < 0.5) {
     return(NA)
   }
+  if (length(quantile_levels) < 3 || min(quantile_levels) > .25 || max(quantile_levels) < .75) {
+    return(stats::approx(quantile_levels, values, xout = 0.5)$y)
+  }
   quantile(x, 0.5, ..., middle = middle)
 }
 
@@ -204,22 +207,22 @@ quantile_extrapolate <- function(x, tau_out, middle) {
     result <- tryCatch(
       {
         Q <- stats::splinefun(tau, qvals, method = "hyman")
+        quartiles <- Q(c(.25, .5, .75))
       },
       error = function(e) {
         return(NA)
       }
     )
   }
-
-  if (middle == "linear" || any(is.na(result))) method <- "linear"
-
+  if (middle == "linear" || any(is.na(result))) {
+    method <- "linear"
+    quartiles <- stats::approx(tau, qvals, c(.25, .5, .75))$y
+  }
   if (any(indm)) {
     qvals_out[indm] <- switch(method,
       linear = stats::approx(tau, qvals, tau_out[indm])$y,
       cubic = Q(tau_out[indm])
     )
-    tau <- sort(unique(c(tau, tau_out[indm])))
-    qvals <- sort(unique(c(qvals, qvals_out[indm])))
   }
   if (any(indl) || any(indr)) {
     qv <- data.frame(
@@ -230,10 +233,10 @@ quantile_extrapolate <- function(x, tau_out, middle) {
       dplyr::arrange(q)
   }
   if (any(indl)) {
-    qvals_out[indl] <- tail_extrapolate(tau_out[indl], utils::head(qv, 2))
+    qvals_out[indl] <- tail_extrapolate(tau_out[indl], head(qv, 2))
   }
   if (any(indr)) {
-    qvals_out[indr] <- tail_extrapolate(tau_out[indr], utils::tail(qv, 2))
+    qvals_out[indr] <- tail_extrapolate(tau_out[indr], tail(qv, 2))
   }
   qvals_out
 }
