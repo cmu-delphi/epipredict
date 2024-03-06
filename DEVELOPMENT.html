@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.10</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -81,20 +81,16 @@
 <code class="sourceCode R"><span><span class="fu">pkgdown</span><span class="fu">::</span><span class="fu"><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">build_site</a></span><span class="op">(</span>preview<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>main</code> version is available at <code>file:///&lt;local path&gt;/epidatr/epipredict/index.html</code> and <code>dev</code> at <code>file:///&lt;local path&gt;/epipredict/docs/dev/index.html</code>.</p>
 <p>You can also build the docs manually and launch the site with python. From the terminal, this looks like</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">R</span> <span class="at">-e</span> <span class="st">'devtools::document()'</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> http.server <span class="at">-d</span> docs</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">R</span> <span class="at">-e</span> <span class="st">'devtools::document()'</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> http.server <span class="at">-d</span> docs</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a></h2>
 <p>Please follow the guidelines in the PR template document (reproduced here):</p>
-<ul class="task-list"><li>
-<input type="checkbox" disabled>Make sure this PR is against “dev”, not “main”.</li>
-<li>
-<input type="checkbox" disabled>Request a review from one of the current epipredict main reviewers: dajmcdon.</li>
-<li>
-<input type="checkbox" disabled>Makes sure to bump the version number in <code>DESCRIPTION</code> and <code>NEWS.md</code>. Always increment the patch version number (the third number), unless you are making a release PR from dev to main, in which case increment the minor version number (the second number).</li>
-<li>
-<input type="checkbox" disabled>Describe changes made in NEWS.md, making sure breaking changes (backwards-incompatible changes to the documented interface) are noted. Collect the changes under the next release number (e.g. if you are on 0.7.2, then write your changes under the 0.8 heading).</li>
+<ul class="task-list"><li><label><input type="checkbox">Make sure this PR is against “dev”, not “main”.</label></li>
+<li><label><input type="checkbox">Request a review from one of the current epipredict main reviewers: dajmcdon.</label></li>
+<li><label><input type="checkbox">Makes sure to bump the version number in <code>DESCRIPTION</code> and <code>NEWS.md</code>. Always increment the patch version number (the third number), unless you are making a release PR from dev to main, in which case increment the minor version number (the second number).</label></li>
+<li><label><input type="checkbox">Describe changes made in NEWS.md, making sure breaking changes (backwards-incompatible changes to the documented interface) are noted. Collect the changes under the next release number (e.g. if you are on 0.7.2, then write your changes under the 0.8 heading).</label></li>
 </ul></div>
 <div class="section level2">
 <h2 id="release-process">Release process<a class="anchor" aria-label="anchor" href="#release-process"></a></h2>
