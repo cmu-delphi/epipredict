@@ -3,6 +3,7 @@
 ^epipredict\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^DEVELOPMENT\.md$
 ^drafts$
 ^\.Rprofile$
 ^man-roxygen$
