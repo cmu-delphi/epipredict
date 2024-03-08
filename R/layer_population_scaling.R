@@ -144,6 +144,12 @@ slather.layer_population_scaling <-
         length(object$df_pop_col) == 1
     )
 
+    if (is.null(object$by)) {
+      object$by <- intersect(
+        kill_time_value(epi_keys(components$predictions)),
+        colnames(dplyr::select(object$df, !object$df_pop_col))
+      )
+    }
     try_join <- try(
       dplyr::left_join(components$predictions, object$df,
         by = object$by
