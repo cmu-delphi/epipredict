@@ -144,6 +144,7 @@ slather.layer_population_scaling <-
         length(object$df_pop_col) == 1
     )
 
+    browser()
     if (is.null(object$by)) {
       object$by <- intersect(
         kill_time_value(epi_keys(components$predictions)),
@@ -163,8 +164,8 @@ slather.layer_population_scaling <-
       ))
     }
 
-    object$df <- object$df %>%
-      dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
+    # object$df <- object$df %>%
+    #  dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
     pop_col <- rlang::sym(object$df_pop_col)
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)

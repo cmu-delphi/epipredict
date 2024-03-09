@@ -53,20 +53,20 @@
 step_epi_lag <-
   function(recipe,
            ...,
+           lag,
            role = "predictor",
            trained = FALSE,
-           lag,
            prefix = "lag_",
            default = NA,
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This step can only operate on an `epi_recipe`.")
     }
 
     if (missing(lag)) {
-      rlang::abort(
+      cli::cli_abort(
         c("The `lag` argument must not be empty.",
           i = "Did you perhaps pass an integer in `...` accidentally?"
         )
@@ -75,7 +75,8 @@ step_epi_lag <-
     arg_is_nonneg_int(lag)
     arg_is_chr_scalar(prefix, id)
     if (!is.null(columns)) {
-      rlang::abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c(
+        "The `columns` argument must be `NULL.",
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
     }
@@ -85,7 +86,7 @@ step_epi_lag <-
         terms = dplyr::enquos(...),
         role = role,
         trained = trained,
-        lag = lag,
+        lag = as.integer(lag),
         prefix = prefix,
         default = default,
         keys = epi_keys(recipe),
@@ -104,21 +105,21 @@ step_epi_lag <-
 step_epi_ahead <-
   function(recipe,
            ...,
+           ahead,
            role = "outcome",
            trained = FALSE,
-           ahead,
            prefix = "ahead_",
            default = NA,
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This step can only operate on an `epi_recipe`.")
     }
 
     if (missing(ahead)) {
-      rlang::abort(
-        c("The `ahead` argument must not be empty.",
+      cli::cli_abort(c(
+        "The `ahead` argument must not be empty.",
           i = "Did you perhaps pass an integer in `...` accidentally?"
         )
       )
@@ -136,7 +137,7 @@ step_epi_ahead <-
         terms = dplyr::enquos(...),
         role = role,
         trained = trained,
-        ahead = ahead,
+        ahead = as.integer(ahead),
         prefix = prefix,
         default = default,
         keys = epi_keys(recipe),

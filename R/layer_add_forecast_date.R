@@ -78,8 +78,8 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-  forecast_date <- arg_to_date(forecast_date, allow_null = TRUE)
   arg_is_chr_scalar(id)
+  # can't validate forecast_date until we know the time_type
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
@@ -93,23 +93,24 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
     )
     object$forecast_date <- max_time_value
   }
-  as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
-  as_of_fit <- workflow$fit$meta$as_of
-  as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post))
+  expected_time_type <- attr(
+    workflows::extract_preprocessor(workflow)$template, "metadata"
+  )$time_type
+  if (expected_time_type == "week") expected_time_type = "day"
+  check <- validate_date(object$forecast_date, expected_time_type)
 
-  if (object$forecast_date < as_of_date) {
-    cli_warn(
-      c("The forecast_date is less than the most ",
-        "recent update date of the data: ",
-        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}."
-      )
-    )
+  if (!check$ok) {
+    cli::cli_abort(c(
+      "The `forecast_date` was given as a {.val {check$x}} while the",
+      `!` = "`time_type` of the training data was {.val {check$expected}}.",
+      i = "See {.topic epiprocess::epi_df} for descriptions of these are determined."
+    ))
   }
+
   components$predictions <- dplyr::bind_cols(
     components$predictions,
-    forecast_date = as.Date(object$forecast_date)
+    forecast_date = coerce_time_type(object$forecast_date, expected_time_type)
   )
   components
 }
