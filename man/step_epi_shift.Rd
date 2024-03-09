@@ -8,9 +8,9 @@
 step_epi_lag(
   recipe,
   ...,
+  lag,
   role = "predictor",
   trained = FALSE,
-  lag,
   prefix = "lag_",
   default = NA,
   columns = NULL,
@@ -21,9 +21,9 @@ step_epi_lag(
 step_epi_ahead(
   recipe,
   ...,
+  ahead,
   role = "outcome",
   trained = FALSE,
-  ahead,
   prefix = "ahead_",
   default = NA,
   columns = NULL,
@@ -38,15 +38,15 @@ sequence of operations for this recipe.}
 \item{...}{One or more selector functions to choose variables
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
+\item{lag, ahead}{A vector of integers. Each specified column will
+be the lag or lead for each value in the vector. Lag integers must be
+nonnegative, while ahead integers must be positive.}
+
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
 \item{trained}{A logical to indicate if the quantities for
 preprocessing have been estimated.}
-
-\item{lag, ahead}{A vector of integers. Each specified column will
-be the lag or lead for each value in the vector. Lag integers must be
-nonnegative, while ahead integers must be positive.}
 
 \item{prefix}{A prefix to indicate what type of variable this is}
 
