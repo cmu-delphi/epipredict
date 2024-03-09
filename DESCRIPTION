@@ -46,6 +46,7 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
+    tsibble,
     usethis,
     vctrs,
     workflows (>= 1.0.0)
