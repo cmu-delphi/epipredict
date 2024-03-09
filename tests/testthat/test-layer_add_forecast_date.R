@@ -11,8 +11,9 @@ latest <- jhu %>%
 
 test_that("layer validation works", {
   f <- frosting()
-  expect_error(layer_add_forecast_date(f, "a"))
-  expect_error(layer_add_forecast_date(f, "2022-05-31", id = c("a", "b")))
+
+
+  expect_error(layer_add_forecast_date(f, "2022-05-31", id = 2))
   expect_silent(layer_add_forecast_date(f, "2022-05-31"))
   expect_silent(layer_add_forecast_date(f))
   expect_silent(layer_add_forecast_date(f, as.Date("2022-05-31")))
@@ -41,10 +42,12 @@ test_that("Specify a `forecast_date` that is less than `as_of` date", {
     layer_naomit(.pred)
   wf2 <- wf %>% add_frosting(f2)
 
-  expect_warning(
-    p2 <- predict(wf2, latest),
-    "forecast_date is less than the most recent update date of the data."
-  )
+  # this warning has been removed
+  # expect_warning(
+  #   p2 <- predict(wf2, latest),
+  #   "forecast_date is less than the most recent update date of the data."
+  # )
+  expect_silent(p2 <- predict(wf2, latest))
   expect_equal(ncol(p2), 4L)
   expect_s3_class(p2, "epi_df")
   expect_equal(nrow(p2), 3L)
@@ -59,10 +62,12 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
     layer_naomit(.pred)
   wf3 <- wf %>% add_frosting(f3)
 
-  expect_warning(
-    p3 <- predict(wf3, latest),
-    "forecast_date is less than the most recent update date of the data."
-  )
+  # this warning has been removed
+  # expect_warning(
+  #   p3 <- predict(wf3, latest),
+  #   "forecast_date is less than the most recent update date of the data."
+  # )
+  expect_silent(p3 <- predict(wf3, latest))
   expect_equal(ncol(p3), 4L)
   expect_s3_class(p3, "epi_df")
   expect_equal(nrow(p3), 3L)

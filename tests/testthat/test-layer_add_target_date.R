@@ -31,7 +31,8 @@ test_that("Use ahead + max time value from pre, fit, post", {
     layer_naomit(.pred)
   wf2 <- wf %>% add_frosting(f2)
 
-  expect_warning(p2 <- predict(wf2, latest))
+  # expect_warning(p2 <- predict(wf2, latest)) # this warning has been removed
+  expect_silent(p2 <- predict(wf2, latest))
   expect_equal(ncol(p2), 5L)
   expect_s3_class(p2, "epi_df")
   expect_equal(nrow(p2), 3L)
