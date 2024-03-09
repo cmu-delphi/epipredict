@@ -47,7 +47,6 @@ in `epi_df` format.
 
 ```{r employ-stats, include=F}
 data("grad_employ_subset")
-grad_employ_subset <- grad_employ_subset
 year_start <- min(grad_employ_subset$time_value)
 year_end <- max(grad_employ_subset$time_value)
 ```
@@ -306,8 +305,8 @@ to pass the workflow into `fit()` to get our model coefficients
 $\alpha_i, i=0,...,3$.
 
 ```{r linearreg-wf, include=T}
-wf_linreg <- epi_workflow(r, parsnip::linear_reg()) %>%
-  parsnip::fit(employ_small)
+wf_linreg <- epi_workflow(r, linear_reg()) %>%
+  fit(employ_small)
 summary(extract_fit_engine(wf_linreg))
 ```
 
@@ -427,7 +426,7 @@ quantify the uncertainty associated with future predicted values.
 # Only have to include med_income_5y since that is our outcome
 totals <- employ_small %>%
   group_by(geo_value, age_group, edu_qual) %>%
-  summarise(med_income_5y_tot = sum(med_income_5y), .groups = "keep")
+  summarise(med_income_5y_tot = sum(med_income_5y), .groups = "drop")
 
 # Define post-processing steps
 f <- frosting() %>%
@@ -436,7 +435,7 @@ f <- frosting() %>%
   layer_threshold(.pred, lower = 0) %>%
   # 90% prediction interval
   layer_residual_quantiles(
-    quantile_levels = c(0.05, 0.95), 
+    quantile_levels = c(0.1, 0.9), 
     symmetrize = FALSE
   ) %>%
   layer_population_scaling(
@@ -454,7 +453,7 @@ summary(extract_fit_engine(wfx_linreg))
 Based on the summary output for this model, only the intercept term, 5-year 
 median income from 3 years ago, and the 2-year median income from 1 year ago 
 are significant linear predictors for today's 5-year median income at a 95% 
-confidence level. Both lags for the number of graduates were insigificant.
+confidence level. Both lags for the number of graduates were insignificant.
 
 Let's take a look at the predictions along with their 90% prediction intervals.
 
