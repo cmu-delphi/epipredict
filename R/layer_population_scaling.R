@@ -144,7 +144,6 @@ slather.layer_population_scaling <-
         length(object$df_pop_col) == 1
     )
 
-    browser()
     if (is.null(object$by)) {
       object$by <- intersect(
         kill_time_value(epi_keys(components$predictions)),

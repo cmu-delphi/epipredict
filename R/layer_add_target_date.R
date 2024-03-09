@@ -89,7 +89,6 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   )$time_type
   if (expected_time_type == "week") expected_time_type = "day"
 
-  browser()
   if (!is.null(object$target_date)) {
     check <- validate_date(object$target_date, expected_time_type)
     if (!check$ok) {
@@ -114,7 +113,7 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
         i = "See {.topic epiprocess::epi_df} for descriptions of these are determined."
       ))
     }
-    forecast_date <- coerce_time_type(fd, expected_time_type)
+    forecast_date <- coerce_time_type(possible_fd, expected_time_type)
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
     target_date <- forecast_date + ahead
   } else {
