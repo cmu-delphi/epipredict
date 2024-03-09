@@ -233,10 +233,10 @@ quantile_extrapolate <- function(x, tau_out, middle) {
       dplyr::arrange(q)
   }
   if (any(indl)) {
-    qvals_out[indl] <- tail_extrapolate(tau_out[indl], head(qv, 2))
+    qvals_out[indl] <- tail_extrapolate(tau_out[indl], utils::head(qv, 2))
   }
   if (any(indr)) {
-    qvals_out[indr] <- tail_extrapolate(tau_out[indr], tail(qv, 2))
+    qvals_out[indr] <- tail_extrapolate(tau_out[indr], utils::tail(qv, 2))
   }
   qvals_out
 }
