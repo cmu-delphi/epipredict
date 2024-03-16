@@ -52,7 +52,7 @@ test_that("step_lag_difference works for a single signal", {
 })
 
 
-test_that("step_lag_difference works for a two signals", {
+test_that("step_lag_difference works for a two signal epi_df", {
   df <- data.frame(
     time_value = 1:5,
     geo_value = rep("a", 5),
