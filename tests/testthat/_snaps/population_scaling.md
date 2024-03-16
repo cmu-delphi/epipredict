@@ -1,3 +1,23 @@
+# test joining by default columns
+
+    Code
+      prep <- prep(r, jhu)
+
+---
+
+    Code
+      b <- bake(prep, jhu)
+
+---
+
+    Code
+      wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu) %>% add_frosting(f)
+
+---
+
+    Code
+      p <- predict(wf, latest)
+
 # expect error if `by` selector does not match
 
     Code
