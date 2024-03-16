@@ -34,6 +34,7 @@ test_that("quantile extrapolator works", {
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
   expect_length(parameters(qq[1])$quantile_levels[[1]], 3L)
 
+
   dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
   qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
   expect_s3_class(qq, "distribution")
