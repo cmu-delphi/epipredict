@@ -43,14 +43,16 @@ adjust_latency <- function(object, new_data) {
       time_type <- attributes(new_data)$metadata$time_type
 
       if ((grepl("day", time_type) && (shift_amount >= 10)) ||
-            (grepl("week", time_type) && (shift_amount >= 4))||
-            ((time_type == "yearmonth") && (shift_amount >=2)) ||
-            ((time_type == "yearquarter") && (shift_amount >= 1)) ||
-            ((time_type == "year") && (shift_amount >= 1))) {
+        (grepl("week", time_type) && (shift_amount >= 4)) ||
+        ((time_type == "yearmonth") && (shift_amount >= 2)) ||
+        ((time_type == "yearquarter") && (shift_amount >= 1)) ||
+        ((time_type == "year") && (shift_amount >= 1))) {
         cli::cli_warn(c(
-          "!" = glue::glue("The ahead has been adjusted by {shift_amount}, ",
-                           "which is questionable for it's `time_type` of ",
-                           "{time_type}"),
+          "!" = glue::glue(
+            "The ahead has been adjusted by {shift_amount}, ",
+            "which is questionable for it's `time_type` of ",
+            "{time_type}"
+          ),
           "i" = "input ahead: {ahead}",
           "i" = "shifted ahead: {effective_ahead}",
           "i" = "max_time = {max_time} -> as_of = {as_of}"
