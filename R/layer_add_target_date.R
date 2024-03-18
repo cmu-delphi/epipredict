@@ -87,7 +87,7 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   expected_time_type <- attr(
     workflows::extract_preprocessor(workflow)$template, "metadata"
   )$time_type
-  if (expected_time_type == "week") expected_time_type = "day"
+  if (expected_time_type == "week") expected_time_type <- "day"
 
   if (!is.null(object$target_date)) {
     check <- validate_date(object$target_date, expected_time_type)
@@ -101,10 +101,9 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
     target_date <- coerce_time_type(object$target_date, expected_time_type)
   } else if (
     detect_layer(the_frosting, "layer_add_forecast_date") &&
-    !is.null(possible_fd <- extract_argument(
-      the_frosting, "layer_add_forecast_date", "forecast_date"
-    ))) {
-
+      !is.null(possible_fd <- extract_argument(
+        the_frosting, "layer_add_forecast_date", "forecast_date"
+      ))) {
     check <- validate_date(possible_fd, expected_time_type)
     if (!check$ok) {
       cli::cli_abort(c(
@@ -117,13 +116,13 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
     target_date <- forecast_date + ahead
   } else {
-      max_time_value <- max(
-        workflows::extract_preprocessor(workflow)$max_time_value,
-        workflow$fit$meta$max_time_value,
-        max(new_data$time_value)
-      )
-      ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
-      target_date <- max_time_value + ahead
+    max_time_value <- max(
+      workflows::extract_preprocessor(workflow)$max_time_value,
+      workflow$fit$meta$max_time_value,
+      max(new_data$time_value)
+    )
+    ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
+    target_date <- max_time_value + ahead
   }
 
   components$predictions <- dplyr::bind_cols(components$predictions,

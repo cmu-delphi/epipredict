@@ -97,7 +97,7 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
   expected_time_type <- attr(
     workflows::extract_preprocessor(workflow)$template, "metadata"
   )$time_type
-  if (expected_time_type == "week") expected_time_type = "day"
+  if (expected_time_type == "week") expected_time_type <- "day"
   check <- validate_date(object$forecast_date, expected_time_type)
 
   if (!check$ok) {

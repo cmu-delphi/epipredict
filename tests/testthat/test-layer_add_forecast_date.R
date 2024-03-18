@@ -104,5 +104,4 @@ test_that("forecast date works for daily", {
     adjust_frosting(f, "layer_add_forecast_date", forecast_date = 2022L)
   )
   expect_error(predict(wf1, latest)) # wrong time type of forecast_date
-
 })

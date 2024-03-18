@@ -253,7 +253,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
   if (!workflows::is_trained_workflow(object)) {
     cli::cli_abort(c(
       "Can't predict on an untrained epi_workflow.",
-        i = "Do you need to call `fit()`?"
+      i = "Do you need to call `fit()`?"
     ))
   }
   components <- list()

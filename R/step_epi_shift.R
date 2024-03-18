@@ -120,9 +120,8 @@ step_epi_ahead <-
     if (missing(ahead)) {
       cli::cli_abort(c(
         "The `ahead` argument must not be empty.",
-          i = "Did you perhaps pass an integer in `...` accidentally?"
-        )
-      )
+        i = "Did you perhaps pass an integer in `...` accidentally?"
+      ))
     }
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id)
