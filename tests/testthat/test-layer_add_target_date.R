@@ -86,3 +86,35 @@ test_that("Specify own target date", {
   expect_equal(p2$target_date, rep(as.Date("2022-01-08"), times = 3))
   expect_named(p2, c("geo_value", "time_value", ".pred", "target_date"))
 })
+
+test_that("forecast date works for daily", {
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_add_target_date() %>%
+    layer_naomit(.pred)
+
+  wf1 <- add_frosting(wf, f)
+  p <- predict(wf1, latest)
+  expect_identical(p$target_date[1], as.Date("2021-12-31") + 7L)
+
+  latest_bad <- latest %>%
+    unclass() %>%
+    as.data.frame() %>%
+    mutate(time_value = as.POSIXlt(time_value)$year + 1900L) %>%
+    as_epi_df()
+
+  expect_error(predict(wf1, latest_bad))
+  wf1 <- add_frosting(
+    wf,
+    adjust_frosting(f, "layer_add_target_date", target_date = "2022-01-07")
+  )
+  expect_silent(predict(wf1, latest))
+
+  wf1 <- add_frosting(
+    wf,
+    adjust_frosting(f, "layer_add_target_date", target_date = 2022L)
+  )
+  expect_error(predict(wf1, latest)) # wrong time type of forecast_date
+
+})
+
