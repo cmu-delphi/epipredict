@@ -1,6 +1,8 @@
 guess_time_type <- function(time_value) {
+  # similar to epiprocess:::guess_time_type() but w/o the gap handling
+  arg_is_scalar(time_value)
   if (is.character(time_value)) {
-    if (nchar(time_value[1]) <= "10") {
+    if (nchar(time_value) <= "10") {
       new_time_value <- tryCatch({
         as.Date(time_value)
       }, error = function(e) NULL)
