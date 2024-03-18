@@ -110,7 +110,7 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
       cli::cli_abort(c(
         "The `forecast_date` was given as a {.val {check$x}} while the",
         `!` = "`time_type` of the training data was {.val {check$expected}}.",
-        i = "See {.topic epiprocess::epi_df} for descriptions of these are determined."
+        i = "See {.topic epiprocess::epi_df} for how these are determined."
       ))
     }
     forecast_date <- coerce_time_type(possible_fd, expected_time_type)
