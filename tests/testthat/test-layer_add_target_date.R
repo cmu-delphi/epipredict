@@ -98,7 +98,8 @@ test_that("target date works for daily and yearly", {
   # both target_date and epi_df are dates
   expect_identical(p$target_date[1], as.Date("2021-12-31") + 7L)
 
-  # target_date is a date while the epi_df uses years (ints)
+  # the error happens at predict time because the
+  # time_value train/test types don't match
   latest_bad <- latest %>%
     unclass() %>%
     as.data.frame() %>%

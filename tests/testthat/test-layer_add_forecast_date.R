@@ -87,7 +87,8 @@ test_that("forecast date works for daily", {
   # both forecast_date and epi_df are dates
   expect_identical(p$forecast_date[1], as.Date("2021-12-31"))
 
-  # forecast_date is a date while the epi_df uses years (ints)
+  # the error happens at predict time because the
+  # time_value train/test types don't match
   latest_yearly <- latest %>%
     unclass() %>%
     as.data.frame() %>%
@@ -95,7 +96,7 @@ test_that("forecast date works for daily", {
     as_epi_df()
   expect_error(predict(wf1, latest_yearly))
 
-  # forecast_date is a string
+  # forecast_date is a string, gets correctly converted to date
   wf2 <- add_frosting(
     wf,
     adjust_frosting(f, "layer_add_forecast_date", forecast_date = "2022-01-01")
