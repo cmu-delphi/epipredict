@@ -33,3 +33,5 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 -   Working vignette
 -   use `checkmate` for input validation
 -   refactor quantile extrapolation (possibly creates different results)
+-   force `target_date` + `forecast_date` handling to match the time_type of 
+    the epi_df. allows for annual and weekly data
