@@ -289,8 +289,8 @@ print.arx_fcast <- function(x, ...) {
 }
 
 compare_quantile_args <- function(alist, tlist) {
-  default_alist <- eval(formals(arx_args_list)$quantile_level)
-  default_tlist <- eval(formals(quantile_reg)$quantile_level)
+  default_alist <- eval(formals(arx_args_list)$quantile_levels)
+  default_tlist <- eval(formals(quantile_reg)$quantile_levels)
   if (setequal(alist, default_alist)) {
     if (setequal(tlist, default_tlist)) {
       return(sort(unique(union(alist, tlist))))
