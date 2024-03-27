@@ -11,9 +11,9 @@ latest <- jhu %>%
 
 test_that("layer validation works", {
   f <- frosting()
-
-
-  expect_error(layer_add_forecast_date(f, "2022-05-31", id = 2))
+  expect_error(layer_add_forecast_date(f, c("2022-05-31", "2022-05-31"))) # multiple forecast_dates
+  expect_error(layer_add_forecast_date(f, "2022-05-31", id = 2)) # id is not a character
+  expect_error(layer_add_forecast_date(f, "2022-05-31", id = c("a", "b"))) # multiple ids
   expect_silent(layer_add_forecast_date(f, "2022-05-31"))
   expect_silent(layer_add_forecast_date(f))
   expect_silent(layer_add_forecast_date(f, as.Date("2022-05-31")))
