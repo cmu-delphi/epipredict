@@ -79,6 +79,7 @@ layer_add_forecast_date <-
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
   arg_is_chr_scalar(id)
+  arg_is_scalar(forecast_date, allow_null = TRUE)
   # can't validate forecast_date until we know the time_type
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
