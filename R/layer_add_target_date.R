@@ -63,8 +63,9 @@
 #' p3
 layer_add_target_date <-
   function(frosting, target_date = NULL, id = rand_id("add_target_date")) {
-    # can't validate target_date until we know the time_type
     arg_is_chr_scalar(id)
+    arg_is_scalar(target_date, allow_null = TRUE)
+    # can't validate the type of target_date until we know the time_type
     add_layer(
       frosting,
       layer_add_target_date_new(

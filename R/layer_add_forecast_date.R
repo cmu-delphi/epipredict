@@ -68,6 +68,9 @@
 #' p3
 layer_add_forecast_date <-
   function(frosting, forecast_date = NULL, id = rand_id("add_forecast_date")) {
+    arg_is_chr_scalar(id)
+    arg_is_scalar(forecast_date, allow_null = TRUE)
+    # can't validate the type of forecast_date until we know the time_type
     add_layer(
       frosting,
       layer_add_forecast_date_new(
@@ -78,9 +81,7 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-  arg_is_chr_scalar(id)
-  arg_is_scalar(forecast_date, allow_null = TRUE)
-  # can't validate forecast_date until we know the time_type
+
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
