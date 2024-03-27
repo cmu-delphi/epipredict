@@ -84,24 +84,28 @@ test_that("forecast date works for daily", {
 
   wf1 <- add_frosting(wf, f)
   p <- predict(wf1, latest)
+  # both forecast_date and epi_df are dates
   expect_identical(p$forecast_date[1], as.Date("2021-12-31"))
 
-  latest_bad <- latest %>%
+  # forecast_date is a date while the epi_df uses years (ints)
+  latest_yearly <- latest %>%
     unclass() %>%
     as.data.frame() %>%
     mutate(time_value = as.POSIXlt(time_value)$year + 1900L) %>%
     as_epi_df()
+  expect_error(predict(wf1, latest_yearly))
 
-  expect_error(predict(wf1, latest_bad))
-  wf1 <- add_frosting(
+  # forecast_date is a string
+  wf2 <- add_frosting(
     wf,
     adjust_frosting(f, "layer_add_forecast_date", forecast_date = "2022-01-01")
   )
-  expect_silent(predict(wf1, latest))
+  expect_silent(predict(wf2, latest))
 
-  wf1 <- add_frosting(
+  # forecast_date is a year/int while the epi_df is a date
+  wf3 <- add_frosting(
     wf,
     adjust_frosting(f, "layer_add_forecast_date", forecast_date = 2022L)
   )
-  expect_error(predict(wf1, latest)) # wrong time type of forecast_date
+  expect_error(predict(wf3, latest))
 })

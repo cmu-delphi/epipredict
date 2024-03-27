@@ -87,7 +87,7 @@ test_that("Specify own target date", {
   expect_named(p2, c("geo_value", "time_value", ".pred", "target_date"))
 })
 
-test_that("forecast date works for daily", {
+test_that("forecast date works for daily and yearly", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_add_target_date() %>%
