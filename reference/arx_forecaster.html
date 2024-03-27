@@ -14,7 +14,7 @@ that it estimates a model for a particular target horizon.'><!-- mathjax --><scr
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,14 +125,12 @@ workflow</p>
 <span class="r-in"><span>  <span class="va">jhu</span>, <span class="st">"death_rate"</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The forecast_date is less than the most recent update date of the data: forecast_date = 2021-12-31 while data is from 2022-05-31.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu">arx_forecaster</span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span>,</span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  trainer <span class="op">=</span> <span class="fu"><a href="quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  args_list <span class="op">=</span> <span class="fu"><a href="arx_args_list.html">arx_args_list</a></span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">9</span> <span class="op">/</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>The forecast_date is less than the most recent update date of the data: forecast_date = 2021-12-31 while data is from 2022-05-31.</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

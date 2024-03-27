@@ -22,7 +22,7 @@ argument."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/m
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -83,9 +83,9 @@ argument.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">step_epi_lag</span><span class="op">(</span></span>
 <span>  <span class="va">recipe</span>,</span>
 <span>  <span class="va">...</span>,</span>
+<span>  <span class="va">lag</span>,</span>
 <span>  role <span class="op">=</span> <span class="st">"predictor"</span>,</span>
 <span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">lag</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"lag_"</span>,</span>
 <span>  default <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -96,9 +96,9 @@ argument.</p>
 <span><span class="fu">step_epi_ahead</span><span class="op">(</span></span>
 <span>  <span class="va">recipe</span>,</span>
 <span>  <span class="va">...</span>,</span>
+<span>  <span class="va">ahead</span>,</span>
 <span>  role <span class="op">=</span> <span class="st">"outcome"</span>,</span>
 <span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  <span class="va">ahead</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"ahead_"</span>,</span>
 <span>  default <span class="op">=</span> <span class="cn">NA</span>,</span>
 <span>  columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -119,6 +119,12 @@ sequence of operations for this recipe.</p></dd>
 for this step. See <code><a href="https://recipes.tidymodels.org/reference/selections.html" class="external-link">recipes::selections()</a></code> for more details.</p></dd>
 
 
+<dt>lag, ahead</dt>
+<dd><p>A vector of integers. Each specified column will
+be the lag or lead for each value in the vector. Lag integers must be
+nonnegative, while ahead integers must be positive.</p></dd>
+
+
 <dt>role</dt>
 <dd><p>For model terms created by this step, what analysis role should
 they be assigned? <code>lag</code> is default a predictor while <code>ahead</code> is an outcome.</p></dd>
@@ -127,12 +133,6 @@ they be assigned? <code>lag</code> is default a predictor while <code>ahead</cod
 <dt>trained</dt>
 <dd><p>A logical to indicate if the quantities for
 preprocessing have been estimated.</p></dd>
-
-
-<dt>lag, ahead</dt>
-<dd><p>A vector of integers. Each specified column will
-be the lag or lead for each value in the vector. Lag integers must be
-nonnegative, while ahead integers must be positive.</p></dd>
 
 
 <dt>prefix</dt>

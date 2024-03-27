@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -242,9 +242,7 @@ most recent 30 days.</p>
 <span>  <span class="va">jhu</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: The forecast_date is less than the most recent update date of the</span></span>
-<span><span class="co">#&gt; data: forecast_date = 2021-12-31 while data is from 2022-05-31.</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
 <p>This call produces a warning, which we’ll ignore for now. But
 essentially, it’s telling us that our data comes from May 2022 but we’re
 trying to do a forecast for January 2022. The result is likely not an
