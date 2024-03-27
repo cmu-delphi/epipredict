@@ -87,7 +87,7 @@ test_that("Specify own target date", {
   expect_named(p2, c("geo_value", "time_value", ".pred", "target_date"))
 })
 
-test_that("forecast date works for daily and yearly", {
+test_that("target date works for daily and yearly", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_add_target_date() %>%
@@ -95,21 +95,25 @@ test_that("forecast date works for daily and yearly", {
 
   wf1 <- add_frosting(wf, f)
   p <- predict(wf1, latest)
+  # both target_date and epi_df are dates
   expect_identical(p$target_date[1], as.Date("2021-12-31") + 7L)
 
+  # target_date is a date while the epi_df uses years (ints)
   latest_bad <- latest %>%
     unclass() %>%
     as.data.frame() %>%
     mutate(time_value = as.POSIXlt(time_value)$year + 1900L) %>%
     as_epi_df()
-
   expect_error(predict(wf1, latest_bad))
+
+  # target_date is a string (gets correctly converted to Date)
   wf1 <- add_frosting(
     wf,
     adjust_frosting(f, "layer_add_target_date", target_date = "2022-01-07")
   )
   expect_silent(predict(wf1, latest))
 
+  # target_date is a year/int while the epi_df is a date
   wf1 <- add_frosting(
     wf,
     adjust_frosting(f, "layer_add_target_date", target_date = 2022L)
