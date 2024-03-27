@@ -91,29 +91,20 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   if (expected_time_type == "week") expected_time_type <- "day"
 
   if (!is.null(object$target_date)) {
-    check <- validate_date(object$target_date, expected_time_type)
-    if (!check$ok) {
-      cli::cli_abort(c(
-        "The `target_date` was given as a {.val {check$x}} while the",
-        `!` = "`time_type` of the training data was {.val {check$expected}}.",
-        i = "See {.topic epiprocess::epi_df} for descriptions of these are determined."
-      ))
-    }
-    target_date <- coerce_time_type(object$target_date, expected_time_type)
+    target_date <- object$target_date
+    validate_date(target_date, expected_time_type,
+      call = expr(layer_add_target_date())
+    )
+    target_date <- coerce_time_type(target_date, expected_time_type)
   } else if (
     detect_layer(the_frosting, "layer_add_forecast_date") &&
-      !is.null(possible_fd <- extract_argument(
+      !is.null(forecast_date <- extract_argument(
         the_frosting, "layer_add_forecast_date", "forecast_date"
       ))) {
-    check <- validate_date(possible_fd, expected_time_type)
-    if (!check$ok) {
-      cli::cli_abort(c(
-        "The `forecast_date` was given as a {.val {check$x}} while the",
-        `!` = "`time_type` of the training data was {.val {check$expected}}.",
-        i = "See {.topic epiprocess::epi_df} for how these are determined."
-      ))
-    }
-    forecast_date <- coerce_time_type(possible_fd, expected_time_type)
+    validate_date(forecast_date, expected_time_type,
+      call = expr(layer_add_forecast_date())
+    )
+    forecast_date <- coerce_time_type(forecast_date, expected_time_type)
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
     target_date <- forecast_date + ahead
   } else {
@@ -126,6 +117,7 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
     target_date <- max_time_value + ahead
   }
 
+  object$target_date <- target_date
   components$predictions <- dplyr::bind_cols(components$predictions,
     target_date = target_date
   )

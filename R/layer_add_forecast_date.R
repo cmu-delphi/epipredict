@@ -81,7 +81,6 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
@@ -93,27 +92,25 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
       workflow$fit$meta$max_time_value,
       max(new_data$time_value)
     )
-    object$forecast_date <- max_time_value
+    forecast_date <- max_time_value
+  } else {
+    forecast_date <- object$forecast_date
   }
 
   expected_time_type <- attr(
     workflows::extract_preprocessor(workflow)$template, "metadata"
   )$time_type
   if (expected_time_type == "week") expected_time_type <- "day"
-  check <- validate_date(object$forecast_date, expected_time_type)
-
-  if (!check$ok) {
-    cli::cli_abort(c(
-      "The `forecast_date` was given as a {.val {check$x}} while the",
-      `!` = "`time_type` of the training data was {.val {check$expected}}.",
-      i = "See {.topic epiprocess::epi_df} for how these are determined."
-    ))
-  }
-
+  validate_date(forecast_date, expected_time_type,
+    call = expr(layer_add_forecast_date())
+  )
+  forecast_date <- coerce_time_type(forecast_date, expected_time_type)
+  object$forecast_date <- forecast_date
   components$predictions <- dplyr::bind_cols(
     components$predictions,
-    forecast_date = coerce_time_type(object$forecast_date, expected_time_type)
+    forecast_date = forecast_date
   )
+
   components
 }
 
