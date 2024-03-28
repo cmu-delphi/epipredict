@@ -143,7 +143,7 @@ arx_fcast_epi_workflow <- function(
     }
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()

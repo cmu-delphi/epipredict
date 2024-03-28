@@ -75,7 +75,7 @@ cdc_baseline_forecaster <- function(
     step_training_window(n_recent = args_list$n_training)
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  # target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  # target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
 
   latest <- get_test_data(
