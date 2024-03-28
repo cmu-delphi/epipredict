@@ -60,7 +60,7 @@ test_that("arx_forecaster determines target_date where forecast_date exists", {
 test_that("arx_classifier determines target_date where forecast_date exists", {
   arx <- arx_classifier(
     train, "dr", c("dr"),
-    trainer = parsnip::nearest_neighbor(mode = "classification"),
+    trainer = parsnip::boost_tree(mode = "classification", trees = 5),
     args_list = arx_class_args_list(
       forecast_date = as.Date("2021-12-31"),
       target_date = as.Date("2022-01-01"),
