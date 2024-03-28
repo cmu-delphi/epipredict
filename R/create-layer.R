@@ -7,8 +7,8 @@
 #' @inheritParams usethis::use_test
 #'
 #' @importFrom rlang %||%
-#' @export
-#'
+#' @noRd
+#' @keywords internal
 #' @examples
 #' \dontrun{
 #'
