@@ -5,7 +5,6 @@ train <- jhu_csse_daily_subset |>
 ngeos <- n_distinct(train$geo_value)
 
 test_that("flatline determines target_date where forecast_date exists", {
-
   flat <- flatline_forecaster(
     train, "dr",
     args_list = flatline_args_list(
@@ -33,7 +32,6 @@ test_that("flatline determines target_date where forecast_date exists", {
 })
 
 test_that("arx_forecaster determines target_date where forecast_date exists", {
-
   arx <- arx_forecaster(
     train, "dr", c("dr", "cr"),
     args_list = arx_args_list(
@@ -60,8 +58,6 @@ test_that("arx_forecaster determines target_date where forecast_date exists", {
 })
 
 test_that("arx_classifier determines target_date where forecast_date exists", {
-
-
   arx <- arx_classifier(
     train, "dr", c("dr"),
     trainer = parsnip::nearest_neighbor(mode = "classification"),
