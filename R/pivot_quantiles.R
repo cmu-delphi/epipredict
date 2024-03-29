@@ -143,7 +143,11 @@ pivot_quantiles_wider <- function(.data, ...) {
 }
 
 pivot_quantiles <- function(.data, ...) {
-  deprecate_stop("0.0.6", "pivot_quantiles()", "pivot_quantiles_wider()")
+  msg <- c(
+    "{.fn pivot_quantiles} was deprecated in {.pkg epipredict} 0.0.6",
+    i = "Please use {.fn pivot_quantiles_wider} instead."
+  )
+  deprecate_stop(msg)
 }
 
 validate_pivot_quantiles <- function(.data, ...) {
