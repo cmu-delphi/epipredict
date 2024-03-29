@@ -246,75 +246,12 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
-    dplyr::mutate(
-      newname = glue::glue("{object$prefix}{lag}_{col}"),
-      shift_val = lag,
-      lag = NULL
-    )
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    rlang::abort(
-      paste0(
-        "Name collision occured in `", class(object)[1],
-        "`. The following variable names already exists: ",
-        paste0(new_data_names[intersection], collapse = ", "),
-        "."
-      )
-    )
-  }
-  ok <- object$keys
-  shifted <- reduce(
-    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    dplyr::full_join,
-    by = ok
-  )
-
-  dplyr::full_join(new_data, shifted, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup()
+  add_shifted_columns(new_data, object, object$lag)
 }
-
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
-  ahead <- adjust_latency(object, new_data)
-  grid <- tidyr::expand_grid(col = object$columns, ahead = ahead) %>%
-    dplyr::mutate(
-      newname = glue::glue("{object$prefix}{ahead}_{col}"),
-      shift_val = -ahead,
-      ahead = NULL
-    )
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    rlang::abort(
-      paste0(
-        "Name collision occured in `", class(object)[1],
-        "`. The following variable names already exists: ",
-        paste0(new_data_names[intersection], collapse = ", "),
-        "."
-      )
-    )
-  }
-  ok <- object$keys
-  shifted <- reduce(
-    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    dplyr::full_join,
-    by = ok
-  )
-
-  dplyr::full_join(new_data, shifted, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup()
+  add_shifted_columns(new_data, object, object$ahead)
 }
-
 
 #' @export
 print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
