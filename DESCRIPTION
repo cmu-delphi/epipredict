@@ -31,11 +31,13 @@ Imports:
     cli,
     distributional,
     dplyr,
+    fs,
     generics,
     glue,
     hardhat (>= 1.3.0),
     lifecycle,
     magrittr,
+    methods,
     quantreg,
     recipes (>= 1.0.4),
     rlang,
@@ -45,13 +47,13 @@ Imports:
     tidyr,
     tidyselect,
     tsibble,
+    usethis,
     vctrs,
     workflows (>= 1.0.0)
 Suggests:
     covidcast,
     data.table,
     epidatr (>= 1.0.0),
-    fs,
     ggplot2,
     knitr,
     lubridate,
@@ -60,7 +62,6 @@ Suggests:
     RcppRoll,
     rmarkdown,
     testthat (>= 3.0.0),
-    usethis,
     xgboost
 VignetteBuilder:
     knitr

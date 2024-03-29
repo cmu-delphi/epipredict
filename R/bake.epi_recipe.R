@@ -13,6 +13,7 @@
 #' original columns in `new_data`.
 #' @importFrom rlang is_empty quos
 #' @importFrom tibble is_tibble as_tibble
+#' @importFrom methods is
 #' @rdname bake
 #' @export
 bake.epi_recipe <- function(object, new_data, ...) {
