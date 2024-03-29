@@ -233,67 +233,12 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
-    mutate(
-      newname = glue::glue("{object$prefix}{lag}_{col}"),
-      shift_val = lag,
-      lag = NULL
-    )
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    cli_abort(c(
-      "Name collision occured in {.cls {class(object)[1]}}",
-      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
-    ))
-  }
-  ok <- object$keys
-  shifted <- reduce(
-    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    full_join,
-    by = ok
-  )
-
-  full_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(kill_time_value(ok)))) %>%
-    arrange(time_value) %>%
-    ungroup()
+  add_shifted_columns(new_data, object, object$lag)
 }
-
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
-  ahead <- adjust_latency(object, new_data)
-  grid <- tidyr::expand_grid(col = object$columns, ahead = object$ahead) %>%
-    dplyr::mutate(
-      newname = glue::glue("{object$prefix}{ahead}_{col}"),
-      shift_val = -ahead,
-      ahead = NULL
-    )
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    cli_abort(c(
-      "Name collision occured in {.cls {class(object)[1]}}",
-      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
-    ))
-  }
-  ok <- object$keys
-  shifted <- reduce(
-    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    full_join,
-    by = ok
-  )
-
-  full_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(kill_time_value(ok)))) %>%
-    arrange(time_value) %>%
-    ungroup()
+  add_shifted_columns(new_data, object, object$ahead)
 }
-
 
 #' @export
 print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
