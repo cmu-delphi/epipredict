@@ -177,8 +177,10 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
 
   # infer the correct columns to be working with from the previous
   # transformations
-  shift_cols <- get_shifted_column_tibble(object, new_data, terms_used, as_of,
-                                          sign_shift)
+  shift_cols <- get_shifted_column_tibble(
+    object, new_data, terms_used, as_of,
+    sign_shift
+  )
 
   if ((object$method == "extend_ahead") || (object$method == "extend_lags")) {
     # check that the shift amount isn't too extreme
