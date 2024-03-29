@@ -43,6 +43,10 @@ format for this forecast task is \href{https://github.com/cdcepi/FluSight-foreca
 \examples{
 if (require(dplyr)) {
   weekly_deaths <- case_death_rate_subset \%>\%
+    filter(
+      time_value >= as.Date("2021-09-01"),
+      geo_value \%in\% c("ca", "ny", "dc", "ga", "vt")
+    ) \%>\%
     select(geo_value, time_value, death_rate) \%>\%
     left_join(state_census \%>\% select(pop, abbr), by = c("geo_value" = "abbr")) \%>\%
     mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) \%>\%
