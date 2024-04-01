@@ -19,6 +19,7 @@ epi_shift_single <- function(x, col, shift_val, newname, key_cols) {
 
 #' lags move columns forward to bring the past up to today, while aheads drag
 #' the future back to today
+#' @keywords internal
 get_sign <- function(object) {
   if (object$prefix == "lag_") {
     return(1)
