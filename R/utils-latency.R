@@ -27,7 +27,7 @@ extend_either <- function(new_data, shift_cols, keys) {
     )
 
   return(new_data %>%
-    select(-shift_cols$original_name) %>% # drop the original versions
+    select(-all_of(shift_cols$original_name)) %>% # drop the original versions
     dplyr::full_join(shifted, by = keys) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(keys[-1]))) %>%
     dplyr::arrange(time_value) %>%
@@ -107,7 +107,7 @@ get_asof <- function(object, new_data) {
   # the source data determines the actual time_values
   # these are the non-na time_values;
   time_values <- new_data %>%
-    select(original_columns) %>%
+    select(all_of(original_columns)) %>%
     drop_na() %>%
     pull(time_value)
   if (length(time_values) <= 0) {
@@ -163,7 +163,7 @@ adjust_name <- function(prefix, column, effective_shift) {
 #' @keywords internal
 get_latency <- function(new_data, as_of, column, shift_amount, sign_shift) {
   shift_max_date <- new_data %>%
-    drop_na(column) %>%
+    drop_na(all_of(column)) %>%
     pull(time_value) %>%
     max()
   return(as.integer(sign_shift * (as_of - shift_max_date) + shift_amount))
