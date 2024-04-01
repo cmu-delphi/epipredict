@@ -83,6 +83,7 @@ r \%>\%
 }
 \seealso{
 Other row operation steps: 
+\code{\link{step_adjust_latency}()},
 \code{\link{step_epi_lag}()},
 \code{\link{step_lag_difference}()}
 }

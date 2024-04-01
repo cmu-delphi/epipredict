@@ -95,10 +95,12 @@ r
 }
 \seealso{
 Other row operation steps: 
+\code{\link{step_adjust_latency}()},
 \code{\link{step_growth_rate}()},
 \code{\link{step_lag_difference}()}
 
 Other row operation steps: 
+\code{\link{step_adjust_latency}()},
 \code{\link{step_growth_rate}()},
 \code{\link{step_lag_difference}()}
 }
