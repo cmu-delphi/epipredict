@@ -92,6 +92,7 @@ get_shifted_column_tibble <- function(
 
 
 #' extract the as_of, and make sure there's nothing very off about it
+#' @keywords internal
 get_asof <- function(object, new_data) {
   original_columns <- object$info %>%
     filter(source == "original") %>%
