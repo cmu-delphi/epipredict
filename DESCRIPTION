@@ -41,6 +41,7 @@ Imports:
     rlang (>= 1.0.0),
     smoothqr,
     stats,
+    stringr,
     tibble,
     tidyr,
     tidyselect,
