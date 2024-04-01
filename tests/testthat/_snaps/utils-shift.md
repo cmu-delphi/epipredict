@@ -2,8 +2,7 @@
 
     Code
       adjust_latency(object, x_adjust_ahead)
-    Condition
-      Warning:
+    Warning <rlang_warning>
       ! The ahead has been adjusted by 100, which is questionable for it's `time_type` of day
       i input ahead: 7
       i shifted ahead: 107

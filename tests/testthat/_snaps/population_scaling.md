@@ -2,35 +2,33 @@
 
     Code
       prep <- prep(r, jhu)
+    Message <rlang_message>
+      Joining with `by = join_by(geo_value)`
+      Joining with `by = join_by(geo_value)`
 
 ---
 
     Code
       b <- bake(prep, jhu)
+    Message <rlang_message>
+      Joining with `by = join_by(geo_value)`
+      Joining with `by = join_by(geo_value)`
 
 ---
 
     Code
       wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu) %>% add_frosting(f)
+    Message <rlang_message>
+      Joining with `by = join_by(geo_value)`
+      Joining with `by = join_by(geo_value)`
 
 ---
 
     Code
       p <- predict(wf, latest)
-
-# expect error if `by` selector does not match
-
-    Code
-      wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu) %>% add_frosting(f)
-    Condition
-      Error in `hardhat::validate_column_names()`:
-      ! The following required columns are missing: 'a'.
-
----
-
-    Code
-      forecast(wf)
-    Condition
-      Error in `hardhat::validate_column_names()`:
-      ! The following required columns are missing: 'nothere'.
+    Message <rlang_message>
+      Joining with `by = join_by(geo_value)`
+      Joining with `by = join_by(geo_value)`
+      Joining with `by = join_by(geo_value)`
+      Joining with `by = join_by(geo_value)`
 
