@@ -75,7 +75,7 @@ test_that("get_asof works", {
     "death_rate", "numeric", "raw", "original",
     "not_real", "numeric", "predictor", "derived"
   )
-  expect_equal(set_asof(modified_data, info), as_of)
+  expect_equal(set_forecast_date(modified_data, info), as_of)
 })
 
 test_that("get_latent_column_tibble infers latency and works correctly", {
@@ -156,11 +156,51 @@ test_that("extend_either works", {
       epi_shift_single(old_data, "case_rate", -9, "ahead_9_case_rate", keys),
       by = keys
     ) %>%
+    dplyr::add_row(tibble(
+      geo_value = "place",
+      time_value = as.Date("2021-08-01"), case_rate = NA, death_rate = NA,
+      lag_8_case_rate = NA, lag_11_death_rate = NA, ahead_9_case_rate = NA
+    )) %>%
     arrange(time_value)
   expect_equal(
     extend_either(modified_data, all_shift_cols, keys) %>% arrange(time_value),
     expected_post_shift
   )
+})
+
+
+
+
+
+time_range <- as.Date("2021-01-01") + 0:199
+x_adjust_ahead <- tibble(
+  geo_value = rep("place", 200),
+  time_value = time_range,
+  case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
+  death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
+) %>%
+  as_epi_df(as_of = max(time_range) + 3)
+# confirm the delay is right
+
+test_that("adjust_latency extend_ahead works", {
+  # testing that POSIXct converts correctly (as well as basic types)
+  expect_equal(
+    attributes(x_adjust_ahead)$metadata$as_of - max(x_adjust_ahead$time_value),
+    as.difftime(3, units = "days")
+  )
+  object <- list(latency_adjustment = "extend_ahead", ahead = 7)
+  expect_no_error(adjusted_ahead <- adjust_latency(object, x_adjust_ahead))
+  expect_type(adjusted_ahead, "integer")
+  expect_equal(adjusted_ahead, 3 + 7)
+})
+
+test_that("extend_ahead warns in case of extreme adjustment", {
+  # warns if the ahead is relatively small
+  attributes(x_adjust_ahead)$metadata$as_of <-
+    max(x_adjust_ahead$time_value) + 100
+  object <- list(latency_adjustment = "extend_ahead", ahead = 7)
+  attributes(x_adjust_ahead)$metadata$time_type
+  testthat::expect_warning(adjust_latency(object, x_adjust_ahead), regexp = "The ahead has been adjusted by 100")
 })
 
 # todo case where somehow columns of different roles are selected
