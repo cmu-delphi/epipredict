@@ -20,7 +20,7 @@ extend_either <- function(new_data, shift_cols, keys) {
         key_cols = keys
       )
     }) %>%
-    map(\(x) na.trim(x)) %>% # TODO need to talk about this
+    map(\(x) zoo::na.trim(x)) %>% # TODO need to talk about this
     reduce(
       dplyr::full_join,
       by = keys
