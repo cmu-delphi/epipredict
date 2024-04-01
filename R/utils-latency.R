@@ -20,12 +20,14 @@ extend_either <- function(new_data, shift_cols, keys) {
         key_cols = keys
       )
     }) %>%
+    map(\(x) na.trim(x)) %>% # TODO need to talk about this
     reduce(
       dplyr::full_join,
       by = keys
     )
+
   return(new_data %>%
-    select(-shift_cols$original_name) %>%
+    select(-shift_cols$original_name) %>% # drop the original versions
     dplyr::full_join(shifted, by = keys) %>%
     dplyr::group_by(dplyr::across(dplyr::all_of(keys[-1]))) %>%
     dplyr::arrange(time_value) %>%
@@ -34,7 +36,7 @@ extend_either <- function(new_data, shift_cols, keys) {
 
 #' find the columns added with the lags or aheads, and the amounts they have
 #' been changed
-#' @param object the step and its parameters
+#' @param prefix the prefix indicating if we are adjusting lags or aheads
 #' @param new_data the data transformed so far
 #' @return a tibble with columns `column` (relevant shifted names), `shift` (the
 #'   amount that one is shifted), `latency` (original columns difference between
@@ -42,28 +44,36 @@ extend_either <- function(new_data, shift_cols, keys) {
 #'   `effective_shift` (shifts+latency), and `new_name` (adjusted names with the
 #'   effective_shift)
 #' @keywords internal
+#' @importFrom stringr str_match
+#' @importFrom dplyr rowwise %>%
 get_shifted_column_tibble <- function(
-    object, new_data, terms_used, as_of, sign_shift) {
-  prefix <- object$prefix
+    prefix, new_data, terms_used, as_of, sign_shift, call = caller_env()) {
   relevant_columns <- names(new_data)[grepl(prefix, names(new_data))]
   to_keep <- rep(FALSE, length(relevant_columns))
   for (col_name in terms_used) {
     to_keep <- to_keep | grepl(col_name, relevant_columns)
   }
   relevant_columns <- relevant_columns[to_keep]
+  if (length(relevant_columns) == 0) {
+    cli::cli_abort("There is no column(s) {terms_used}.",
+      current_column_names = names(new_data),
+      class = "epipredict_adjust_latency_nonexistent_column_used",
+      call = call
+    )
+  }
   # TODO ask about a less jank way to do this
-  shift_amounts <- as.integer(str_match(
+  shift_amounts <- as.integer(stringr::str_match(
     relevant_columns,
     "_\\d+_"
   ) %>%
     `[`(, 1) %>%
-    str_match("\\d+") %>%
+    stringr::str_match("\\d+") %>%
     `[`(, 1))
   shift_cols <- dplyr::tibble(
     original_name = relevant_columns,
     shifts = shift_amounts
   )
-  shift_cols %>%
+  shift_cols %<>%
     rowwise() %>%
     # add the latencies to shift_cols
     mutate(latency = get_latency(
@@ -72,8 +82,10 @@ get_shifted_column_tibble <- function(
     ungroup() %>%
     # add the updated names to shift_cols
     mutate(
-      effective_shift = shifts + latency,
-      new_name = adjust_name(prefix, shifts, original_name, latency)
+      effective_shift = shifts + abs(latency)
+    ) %>%
+    mutate(
+      new_name = adjust_name(prefix, original_name, effective_shift)
     )
   return(shift_cols)
 }
@@ -136,9 +148,9 @@ get_asof <- function(object, new_data) {
 #' adjust the shifts by latency for the names in column assumes e.g.
 #' `"lag_6_case_rate"` and returns something like `"lag_10_case_rate"`
 #' @keywords internal
-adjust_name <- function(prefix, shifts, column, latency) {
+adjust_name <- function(prefix, column, effective_shift) {
   pattern <- paste0(prefix, "\\d+", "_")
-  adjusted_shifts <- paste0(prefix, shifts + latency, "_")
+  adjusted_shifts <- paste0(prefix, effective_shift, "_")
   stringi::stri_replace_all_regex(
     column,
     pattern, adjusted_shifts
@@ -154,5 +166,5 @@ get_latency <- function(new_data, as_of, column, shift_amount, sign_shift) {
     drop_na(column) %>%
     pull(time_value) %>%
     max()
-  return(as.integer(as_of - (shift_max_date - sign_shift * shift_amount)))
+  return(as.integer(sign_shift * (as_of - shift_max_date) + shift_amount))
 }
