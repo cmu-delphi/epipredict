@@ -160,9 +160,8 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 #'   date, rather than relative to the last day of data
 #' @param new_data assumes that this already has lag/ahead columns that we need
 #'   to adjust
-#' @importFrom dplyr %>%
-#' @keywords internal
 #' @importFrom dplyr %>% pull
+#' @keywords internal
 bake.step_adjust_latency <- function(object, new_data, ...) {
   sign_shift <- get_sign(object)
   # get the columns used, even if it's all of them
@@ -178,7 +177,7 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
   # infer the correct columns to be working with from the previous
   # transformations
   shift_cols <- get_shifted_column_tibble(
-    object, new_data, terms_used, as_of,
+    object$prefix, new_data, terms_used, as_of,
     sign_shift
   )
 
