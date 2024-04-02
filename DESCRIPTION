@@ -45,7 +45,8 @@ Imports:
     tidyselect,
     tsibble,
     vctrs,
-    workflows (>= 1.0.0)
+    workflows (>= 1.0.0),
+    zoo
 Suggests:
     covidcast,
     data.table,
