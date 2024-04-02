@@ -251,11 +251,10 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' preds
 predict.epi_workflow <- function(object, new_data, ...) {
   if (!workflows::is_trained_workflow(object)) {
-    rlang::abort(
-      c("Can't predict on an untrained epi_workflow.",
-        i = "Do you need to call `fit()`?"
-      )
-    )
+    cli::cli_abort(c(
+      "Can't predict on an untrained epi_workflow.",
+      i = "Do you need to call `fit()`?"
+    ))
   }
   components <- list()
   components$mold <- workflows::extract_mold(object)

@@ -68,6 +68,9 @@
 #' p3
 layer_add_forecast_date <-
   function(frosting, forecast_date = NULL, id = rand_id("add_forecast_date")) {
+    arg_is_chr_scalar(id)
+    arg_is_scalar(forecast_date, allow_null = TRUE)
+    # can't validate the type of forecast_date until we know the time_type
     add_layer(
       frosting,
       layer_add_forecast_date_new(
@@ -78,8 +81,6 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-  forecast_date <- arg_to_date(forecast_date, allow_null = TRUE)
-  arg_is_chr_scalar(id)
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
@@ -91,26 +92,25 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
       workflow$fit$meta$max_time_value,
       max(new_data$time_value)
     )
-    object$forecast_date <- max_time_value
+    forecast_date <- max_time_value
+  } else {
+    forecast_date <- object$forecast_date
   }
-  as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
-  as_of_fit <- workflow$fit$meta$as_of
-  as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post))
-
-  if (object$forecast_date < as_of_date) {
-    cli_warn(
-      c("The forecast_date is less than the most ",
-        "recent update date of the data: ",
-        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}."
-      )
-    )
-  }
+  expected_time_type <- attr(
+    workflows::extract_preprocessor(workflow)$template, "metadata"
+  )$time_type
+  if (expected_time_type == "week") expected_time_type <- "day"
+  validate_date(forecast_date, expected_time_type,
+    call = expr(layer_add_forecast_date())
+  )
+  forecast_date <- coerce_time_type(forecast_date, expected_time_type)
+  object$forecast_date <- forecast_date
   components$predictions <- dplyr::bind_cols(
     components$predictions,
-    forecast_date = as.Date(object$forecast_date)
+    forecast_date = forecast_date
   )
+
   components
 }
 
