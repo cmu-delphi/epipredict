@@ -9,3 +9,4 @@ get_asof(object, new_data)
 \description{
 extract the as_of, and make sure there's nothing very off about it
 }
+\keyword{internal}
