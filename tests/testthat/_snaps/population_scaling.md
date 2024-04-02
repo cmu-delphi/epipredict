@@ -29,6 +29,4 @@
     Message
       Joining with `by = join_by(geo_value)`
       Joining with `by = join_by(geo_value)`
-      Joining with `by = join_by(geo_value)`
-      Joining with `by = join_by(geo_value)`
 
