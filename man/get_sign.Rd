@@ -11,3 +11,4 @@ get_sign(object)
 lags move columns forward to bring the past up to today, while aheads drag
 the future back to today
 }
+\keyword{internal}
