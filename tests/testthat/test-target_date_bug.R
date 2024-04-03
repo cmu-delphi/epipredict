@@ -1,3 +1,6 @@
+# These tests address #290:
+# https://github.com/cmu-delphi/epipredict/issues/290
+
 library(dplyr)
 train <- jhu_csse_daily_subset |>
   filter(time_value >= as.Date("2021-10-01")) |>
@@ -13,7 +16,6 @@ test_that("flatline determines target_date where forecast_date exists", {
       ahead = 1L
     )
   )
-
   # previously, if target_date existed, it could be
   # erroneously incremented by the ahead
   expect_identical(
@@ -24,9 +26,6 @@ test_that("flatline determines target_date where forecast_date exists", {
     flat$predictions$forecast_date,
     rep(as.Date("2021-12-31"), ngeos)
   )
-
-  # potentially resulted in NA predictions
-  # see #290 https://github.com/cmu-delphi/epipredict/issues/290
   expect_true(all(!is.na(flat$predictions$.pred_distn)))
   expect_true(all(!is.na(flat$predictions$.pred)))
 })
@@ -50,9 +49,6 @@ test_that("arx_forecaster determines target_date where forecast_date exists", {
     arx$predictions$forecast_date,
     rep(as.Date("2021-12-31"), ngeos)
   )
-
-  # potentially resulted in NA predictions
-  # see #290 https://github.com/cmu-delphi/epipredict/issues/290
   expect_true(all(!is.na(arx$predictions$.pred_distn)))
   expect_true(all(!is.na(arx$predictions$.pred)))
 })
@@ -67,7 +63,6 @@ test_that("arx_classifier determines target_date where forecast_date exists", {
       ahead = 1L
     )
   )
-
   # previously, if target_date existed, it could be
   # erroneously incremented by the ahead
   expect_identical(
@@ -78,8 +73,5 @@ test_that("arx_classifier determines target_date where forecast_date exists", {
     arx$predictions$forecast_date,
     rep(as.Date("2021-12-31"), ngeos)
   )
-
-  # potentially resulted in NA predictions
-  # see #290 https://github.com/cmu-delphi/epipredict/issues/290
   expect_true(all(!is.na(arx$predictions$.pred_class)))
 })

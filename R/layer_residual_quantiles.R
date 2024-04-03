@@ -123,6 +123,10 @@ slather.layer_residual_quantiles <-
           probs = object$quantile_levels, na.rm = TRUE
         ))
       )
+    # Check for NA
+    if (any(sapply(r$dstn, is.na))) {
+      cli::cli_abort("Quantiles could not be calculated due to missing residuals. Check your n_train and ahead values.")
+    }
 
     estimate <- components$predictions$.pred
     res <- tibble::tibble(
