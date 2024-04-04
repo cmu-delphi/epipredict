@@ -20,10 +20,16 @@ ggplot2::autoplot
 #' @param .levels A numeric vector of levels to plot for any prediction bands.
 #'   More than 3 levels begins to be difficult to see.
 #' @param ... Ignored
+#' @param .color_by A character string indicating how to color the data. See
+#'   `epiprocess::autoplot.epi_df()` for more details.
+#' @param .facet_by A character string indicating how to facet the data. See
+#'  `epiprocess::autoplot.epi_df()` for more details.
 #' @param .base_color If available, prediction bands will be shown with this
 #'   color.
 #' @param .point_pred_color If available, point forecasts will be shown with this
 #'   color.
+#' @param .max_facets The maximum number of facets to show. If the number of
+#'  facets is greater than this value, only the top facets will be shown.
 #'
 #' @name autoplot-epipred
 #' @examples
@@ -91,6 +97,9 @@ autoplot.epi_workflow <- function(
     .max_facets = Inf) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
+  rlang::arg_match(.color_by)
+  rlang::arg_match(.facet_by)
+
   if (!workflows::is_trained_workflow(object)) {
     cli::cli_abort(c(
       "Can't plot an untrained {.cls epi_workflow}.",
@@ -197,8 +206,6 @@ autoplot.epi_workflow <- function(
   bp
 }
 
-
-
 #' @export
 #' @rdname autoplot-epipred
 autoplot.canned_epipred <- function(
@@ -209,6 +216,9 @@ autoplot.canned_epipred <- function(
     .point_pred_color = "orange",
     .max_facets = Inf) {
   rlang::check_dots_empty()
+  rlang::arg_match(.color_by)
+  rlang::arg_match(.facet_by)
+
   ewf <- object$epi_workflow
   predictions <- object$predictions %>%
     dplyr::rename(time_value = target_date)
@@ -282,7 +292,6 @@ plot_bands <- function(
   }
   base_plot
 }
-
 
 find_level <- function(x) {
   unique((x < .5) * (1 - 2 * x) + (x > .5) * (1 - 2 * (1 - x)))
