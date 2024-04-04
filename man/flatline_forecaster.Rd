@@ -4,7 +4,12 @@
 \alias{flatline_forecaster}
 \title{Predict the future with today's value}
 \usage{
-flatline_forecaster(epi_data, outcome, args_list = flatline_args_list())
+flatline_forecaster(
+  epi_data,
+  outcome,
+  args_list = flatline_args_list(),
+  .verbose = TRUE
+)
 }
 \arguments{
 \item{epi_data}{An \link[epiprocess:epi_df]{epiprocess::epi_df}}
@@ -13,6 +18,8 @@ flatline_forecaster(epi_data, outcome, args_list = flatline_args_list())
 
 \item{args_list}{A list of dditional arguments as created by the
 \code{\link[=flatline_args_list]{flatline_args_list()}} constructor function.}
+
+\item{.verbose}{If true, prints the arguments used in the workflow.}
 }
 \value{
 A data frame of point (and optionally interval) forecasts at a single

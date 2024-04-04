@@ -9,7 +9,8 @@ arx_class_epi_workflow(
   outcome,
   predictors,
   trainer = NULL,
-  args_list = arx_class_args_list()
+  args_list = arx_class_args_list(),
+  .verbose = TRUE
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ also be used. May be \code{NULL} (the default).}
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_class_args_list]{arx_class_args_list()}}.}
+
+\item{.verbose}{If true, prints the arguments used in the workflow.}
 }
 \value{
 An unfit \code{epi_workflow}.

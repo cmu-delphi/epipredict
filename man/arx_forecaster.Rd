@@ -9,7 +9,8 @@ arx_forecaster(
   outcome,
   predictors,
   trainer = parsnip::linear_reg(),
-  args_list = arx_args_list()
+  args_list = arx_args_list(),
+  .verbose = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ For now, we enforce \code{mode = "regression"}.}
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
+
+\item{.verbose}{If true, prints the arguments used in the workflow.}
 }
 \value{
 A list with (1) \code{predictions} an \code{epi_df} of predicted values

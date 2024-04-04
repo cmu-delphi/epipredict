@@ -18,6 +18,7 @@
 #'   also be used.
 #' @param args_list A list of customization arguments to determine
 #'   the type of forecasting model. See [arx_class_args_list()].
+#' @param .verbose If true, prints the arguments used in the workflow.
 #'
 #' @return A list with (1) `predictions` an `epi_df` of predicted classes
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
@@ -46,13 +47,14 @@ arx_classifier <- function(
     outcome,
     predictors,
     trainer = parsnip::logistic_reg(),
-    args_list = arx_class_args_list()) {
+    args_list = arx_class_args_list(),
+    .verbose = TRUE) {
   if (!is_classification(trainer)) {
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
   }
 
   wf <- arx_class_epi_workflow(
-    epi_data, outcome, predictors, trainer, args_list
+    epi_data, outcome, predictors, trainer, args_list, .verbose
   )
 
   latest <- get_test_data(
@@ -118,7 +120,8 @@ arx_class_epi_workflow <- function(
     outcome,
     predictors,
     trainer = NULL,
-    args_list = arx_class_args_list()) {
+    args_list = arx_class_args_list(),
+    .verbose = TRUE) {
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_class", "alist"))) {
     rlang::abort("args_list was not created using `arx_class_args_list().")
@@ -127,6 +130,11 @@ arx_class_epi_workflow <- function(
     rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
   }
   lags <- arx_lags_validator(predictors, args_list$lags)
+
+  if (.verbose) {
+    cli::cli_inform("Creating ARX Classifier Workflow with the following arguments:")
+    print(args_list)
+  }
 
   # --- preprocessor
   # ------- predictors

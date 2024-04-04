@@ -79,22 +79,24 @@ test_that("Canned forecasters work with / without", {
   attr(jhu, "metadata") <- meta
 
   expect_silent(
-    flatline_forecaster(jhu, "death_rate")
+    flatline_forecaster(jhu, "death_rate", .verbose = FALSE)
   )
   expect_silent(
     flatline_forecaster(
       jhu, "death_rate",
-      args_list = flatline_args_list(quantile_by_key = "geo_value")
+      args_list = flatline_args_list(quantile_by_key = "geo_value"),
+      .verbose = FALSE
     )
   )
 
   expect_silent(
-    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"))
+    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"), .verbose = FALSE)
   )
   expect_silent(
     flatline_forecaster(
       jhu, "death_rate",
-      args_list = flatline_args_list(quantile_by_key = "geo_value")
+      args_list = flatline_args_list(quantile_by_key = "geo_value"),
+      .verbose = FALSE
     )
   )
 })

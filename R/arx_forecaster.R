@@ -14,6 +14,7 @@
 #'   For now, we enforce `mode = "regression"`.
 #' @param args_list A list of customization arguments to determine
 #'   the type of forecasting model. See [arx_args_list()].
+#' @param .verbose If true, prints the arguments used in the workflow.
 #'
 #' @return A list with (1) `predictions` an `epi_df` of predicted values
 #'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
@@ -39,13 +40,14 @@ arx_forecaster <- function(epi_data,
                            outcome,
                            predictors,
                            trainer = parsnip::linear_reg(),
-                           args_list = arx_args_list()) {
+                           args_list = arx_args_list(),
+                           .verbose = TRUE) {
   if (!is_regression(trainer)) {
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
 
   wf <- arx_fcast_epi_workflow(
-    epi_data, outcome, predictors, trainer, args_list
+    epi_data, outcome, predictors, trainer, args_list, .verbose
   )
 
   latest <- get_test_data(
@@ -106,7 +108,8 @@ arx_fcast_epi_workflow <- function(
     outcome,
     predictors,
     trainer = NULL,
-    args_list = arx_args_list()) {
+    args_list = arx_args_list(),
+    .verbose = TRUE) {
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_fcast", "alist"))) {
@@ -116,6 +119,11 @@ arx_fcast_epi_workflow <- function(
     cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
   }
   lags <- arx_lags_validator(predictors, args_list$lags)
+
+  if (.verbose) {
+    cli::cli_inform("Creating ARX Forecaster Workflow with the following arguments:")
+    print(args_list)
+  }
 
   # --- preprocessor
   r <- epi_recipe(epi_data)

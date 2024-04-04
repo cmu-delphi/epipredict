@@ -7,7 +7,8 @@
 cdc_baseline_forecaster(
   epi_data,
   outcome,
-  args_list = cdc_baseline_args_list()
+  args_list = cdc_baseline_args_list(),
+  .verbose = TRUE
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ cdc_baseline_forecaster(
 
 \item{args_list}{A list of additional arguments as created by the
 \code{\link[=cdc_baseline_args_list]{cdc_baseline_args_list()}} constructor function.}
+
+\item{.verbose}{If true, prints the arguments used in the workflow.}
 }
 \value{
 A data frame of point and interval forecasts for all aheads (unique

@@ -9,7 +9,8 @@ arx_fcast_epi_workflow(
   outcome,
   predictors,
   trainer = NULL,
-  args_list = arx_args_list()
+  args_list = arx_args_list(),
+  .verbose = TRUE
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ For now, we enforce \code{mode = "regression"}. May be \code{NULL} (the default)
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
+
+\item{.verbose}{If true, prints the arguments used in the workflow.}
 }
 \value{
 An unfitted \code{epi_workflow}.

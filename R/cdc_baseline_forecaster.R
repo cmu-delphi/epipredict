@@ -16,6 +16,7 @@
 #' @param outcome A scalar character for the column name we wish to predict.
 #' @param args_list A list of additional arguments as created by the
 #'   [cdc_baseline_args_list()] constructor function.
+#' @param .verbose If true, prints the arguments used in the workflow.
 #'
 #' @return A data frame of point and interval forecasts for all aheads (unique
 #'   horizons) for each unique combination of `key_vars`.
@@ -58,7 +59,8 @@
 cdc_baseline_forecaster <- function(
     epi_data,
     outcome,
-    args_list = cdc_baseline_args_list()) {
+    args_list = cdc_baseline_args_list(),
+    .verbose = TRUE) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("cdc_flat_fcast", "alist"))) {
     cli_stop("args_list was not created using `cdc_baseline_args_list().")
@@ -67,6 +69,10 @@ cdc_baseline_forecaster <- function(
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 
+  if (.verbose) {
+    cli::cli_inform("Creating CDC Baseline Forecaster Workflow with the following arguments:")
+    print(args_list)
+  }
 
   r <- epi_recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$data_frequency, skip = TRUE) %>%

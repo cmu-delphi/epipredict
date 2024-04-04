@@ -4,6 +4,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 # epipredict 0.1
 
+- canned forecaster workflow functions (such as `arx_forecaster()`) now display their parameters by default; this can be turned off with `.verbose = FALSE`
 - `*_args_list()` functions now warn if `forecast_date + ahead != target_date`
 - `layer_residual_quantiles()` will now error if any of the residual quantiles are NA
 - add `check_enough_train_data` that will error if training data is too small
