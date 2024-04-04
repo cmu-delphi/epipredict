@@ -57,7 +57,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1" id="epipredict-01">epipredict 0.1<a class="anchor" aria-label="anchor" href="#epipredict-01"></a></h2>
-<ul><li>add <code>check_enough_train_data</code> that will error if training data is too small</li>
+<ul><li>
+<code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> will now error if any of the residual quantiles are NA</li>
+<li>add <code>check_enough_train_data</code> that will error if training data is too small</li>
 <li>added <code>check_enough_train_data</code> to <code>arx_forecaster</code>
 </li>
 <li>simplify <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> to avoid timesuck in <code><a href="https://rdrr.io/r/utils/methods.html" class="external-link">utils::methods()</a></code>
