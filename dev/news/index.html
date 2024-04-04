@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.11</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.12</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,6 +58,9 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1" id="epipredict-01">epipredict 0.1<a class="anchor" aria-label="anchor" href="#epipredict-01"></a></h2>
 <ul><li>
+<code>*_args_list()</code> functions now warn if <code>forecast_date + ahead != target_date</code>
+</li>
+<li>
 <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> will now error if any of the residual quantiles are NA</li>
 <li>add <code>check_enough_train_data</code> that will error if training data is too small</li>
 <li>added <code>check_enough_train_data</code> to <code>arx_forecaster</code>
