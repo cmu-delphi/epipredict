@@ -19,3 +19,4 @@
 ^DEVELOPMENT\.md$
 ^doc$
 ^Meta$
+^.lintr$

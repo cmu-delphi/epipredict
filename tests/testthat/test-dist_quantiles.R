@@ -29,17 +29,16 @@ test_that("single dist_quantiles works, quantiles are accessible", {
 
 test_that("quantile extrapolator works", {
   dstn <- dist_normal(c(10, 2), c(5, 10))
-  qq <- extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+  qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
-  expect_length(parameters(qq[1])$q[[1]], 3L)
-
+  expect_length(parameters(qq[1])$quantile_levels[[1]], 3L)
 
   dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-  qq <- extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+  qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
-  expect_length(parameters(qq[1])$q[[1]], 7L)
+  expect_length(parameters(qq[1])$quantile_levels[[1]], 7L)
 })
 
 test_that("small deviations of quantile requests work", {
