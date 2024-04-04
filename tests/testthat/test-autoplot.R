@@ -18,7 +18,7 @@ test_that("autoplot snapshots", {
   wf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu)
   p <- autoplot(wf)
   withr::with_file("autoplot.png", {
-    ggsave("autoplot.png", p)
+    ggplot2::ggsave("autoplot.png", p)
     expect_snapshot_file("autoplot.png")
   })
 
@@ -26,7 +26,7 @@ test_that("autoplot snapshots", {
   preds <- predict(wf, latest)
   p <- autoplot(wf, preds, .max_facets = 4)
   withr::with_file("autoplot2.png", {
-    ggsave("autoplot2.png", p)
+    ggplot2::ggsave("autoplot2.png", p)
     expect_snapshot_file("autoplot2.png")
   })
 })
