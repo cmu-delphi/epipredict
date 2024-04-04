@@ -131,14 +131,12 @@ flatline_args_list <- function(
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
-  if (!is.null(forecast_date) && !is.null(target_date) && !is.null(ahead)) {
+  if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
-      cli::cli_warn(
-        "forecast_date + ahead does not equal target_date.",
-        forecast_date = forecast_date,
-        ahead = ahead,
-        target_date = target_date
-      )
+      cli::cli_warn(c(
+        "`forecast_date` + `ahead` must equal `target_date`.",
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+      ))
     }
   }
 
