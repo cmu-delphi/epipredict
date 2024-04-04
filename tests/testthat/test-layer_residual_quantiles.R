@@ -98,3 +98,10 @@ test_that("Canned forecasters work with / without", {
     )
   )
 })
+
+test_that("flatline_forecaster correctly errors when n_training < ahead", {
+  expect_error(
+    flatline_forecaster(jhu, "death_rate", args_list = flatline_args_list(ahead = 10, n_training = 9)),
+    "This may be due to `n_train` < `ahead`"
+  )
+})
