@@ -260,6 +260,17 @@ arx_args_list <- function(
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
+  if (!is.null(forecast_date) && !is.null(target_date) && !is.null(ahead)) {
+    if (forecast_date + ahead != target_date) {
+      cli::cli_warn(
+        "forecast_date + ahead does not equal target_date.",
+        forecast_date = forecast_date,
+        ahead = ahead,
+        target_date = target_date
+      )
+    }
+  }
+
   max_lags <- max(lags)
   structure(
     enlist(
