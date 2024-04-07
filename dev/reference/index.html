@@ -67,9 +67,14 @@
 
       <dl><dt>
           
-          <code><a href="flatline_args_list.html">flatline_args_list()</a></code> 
+          <code><a href="arx_forecaster.html">arx_forecaster()</a></code> 
         </dt>
-        <dd>Flatline forecaster argument constructor</dd>
+        <dd>Direct autoregressive forecaster with covariates</dd>
+      </dl><dl><dt>
+          
+          <code><a href="cdc_baseline_forecaster.html">cdc_baseline_forecaster()</a></code> 
+        </dt>
+        <dd>Predict the future with the most recent value</dd>
       </dl><dl><dt>
           
           <code><a href="flatline_forecaster.html">flatline_forecaster()</a></code> 
@@ -77,10 +82,21 @@
         <dd>Predict the future with today's value</dd>
       </dl><dl><dt>
           
-          <code><a href="layer_cdc_flatline_quantiles.html">layer_cdc_flatline_quantiles()</a></code> 
+          <code><a href="arx_classifier.html">arx_classifier()</a></code> 
         </dt>
-        <dd>CDC Flatline Forecast Quantiles</dd>
-      </dl><dl><dt>
+        <dd>Direct autoregressive classifier with covariates</dd>
+      </dl></div><div class="section level2">
+      <h2 id="forecaster-modifications">Forecaster modifications<a class="anchor" aria-label="anchor" href="#forecaster-modifications"></a></h2>
+      
+      <p class="section-desc"></p><p>Constructors to modify forecaster arguments and utilities to produce <code>epi_workflow</code> objects</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
           <code><a href="arx_args_list.html">arx_args_list()</a></code> 
         </dt>
@@ -92,34 +108,24 @@
         <dd>ARX classifier argument constructor</dd>
       </dl><dl><dt>
           
-          <code><a href="arx_class_epi_workflow.html">arx_class_epi_workflow()</a></code> 
-        </dt>
-        <dd>Create a template <code>arx_classifier</code> workflow</dd>
-      </dl><dl><dt>
-          
-          <code><a href="arx_classifier.html">arx_classifier()</a></code> 
-        </dt>
-        <dd>Direct autoregressive classifier with covariates</dd>
-      </dl><dl><dt>
-          
-          <code><a href="arx_fcast_epi_workflow.html">arx_fcast_epi_workflow()</a></code> 
-        </dt>
-        <dd>Create a template <code>arx_forecaster</code> workflow</dd>
-      </dl><dl><dt>
-          
-          <code><a href="arx_forecaster.html">arx_forecaster()</a></code> 
-        </dt>
-        <dd>Direct autoregressive forecaster with covariates</dd>
-      </dl><dl><dt>
-          
           <code><a href="cdc_baseline_args_list.html">cdc_baseline_args_list()</a></code> 
         </dt>
         <dd>CDC baseline forecaster argument constructor</dd>
       </dl><dl><dt>
           
-          <code><a href="cdc_baseline_forecaster.html">cdc_baseline_forecaster()</a></code> 
+          <code><a href="flatline_args_list.html">flatline_args_list()</a></code> 
         </dt>
-        <dd>Predict the future with the most recent value</dd>
+        <dd>Flatline forecaster argument constructor</dd>
+      </dl><dl><dt>
+          
+          <code><a href="arx_class_epi_workflow.html">arx_class_epi_workflow()</a></code> 
+        </dt>
+        <dd>Create a template <code>arx_classifier</code> workflow</dd>
+      </dl><dl><dt>
+          
+          <code><a href="arx_fcast_epi_workflow.html">arx_fcast_epi_workflow()</a></code> 
+        </dt>
+        <dd>Create a template <code>arx_forecaster</code> workflow</dd>
       </dl></div><div class="section level2">
       <h2 id="helper-functions-for-hub-submission">Helper functions for Hub submission<a class="anchor" aria-label="anchor" href="#helper-functions-for-hub-submission"></a></h2>
       
@@ -412,6 +418,22 @@
           <code><a href="slather.html">slather()</a></code> 
         </dt>
         <dd>Spread a layer of frosting on a fitted workflow</dd>
+      </dl></div><div class="section level2">
+      <h2 id="automatic-forecast-visualization">Automatic forecast visualization<a class="anchor" aria-label="anchor" href="#automatic-forecast-visualization"></a></h2>
+      
+      
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="autoplot-epipred.html">autoplot(<i>&lt;epi_workflow&gt;</i>)</a></code> <code><a href="autoplot-epipred.html">autoplot(<i>&lt;canned_epipred&gt;</i>)</a></code> 
+        </dt>
+        <dd>Automatically plot an <code>epi_workflow</code> or <code>canned_epipred</code> object</dd>
       </dl></div><div class="section level2">
       <h2 id="utilities-for-quantile-distribution-processing">Utilities for quantile distribution processing<a class="anchor" aria-label="anchor" href="#utilities-for-quantile-distribution-processing"></a></h2>
       
