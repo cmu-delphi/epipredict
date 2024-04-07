@@ -8,8 +8,11 @@
 #' @param epi_data An `epi_df` object
 #' @param outcome A character (scalar) specifying the outcome (in the
 #'   `epi_df`).
-#' @param predictors A character vector giving column(s) of predictor
-#'   variables.
+#' @param predictors A character vector giving column(s) of predictor variables.
+#'   This defaults to the `outcome`. However, if manually specified, only those variables
+#'   specifically mentioned will be used. (The `outcome` will not be added.)
+#'   By default, equals the outcome. If manually specified, does not add the
+#'   outcome variable, so make sure to specify it.
 #' @param trainer A `{parsnip}` model describing the type of estimation.
 #'   For now, we enforce `mode = "regression"`.
 #' @param args_list A list of customization arguments to determine
@@ -37,7 +40,7 @@
 #' )
 arx_forecaster <- function(epi_data,
                            outcome,
-                           predictors,
+                           predictors = outcome,
                            trainer = parsnip::linear_reg(),
                            args_list = arx_args_list()) {
   if (!is_regression(trainer)) {
@@ -104,7 +107,7 @@ arx_forecaster <- function(epi_data,
 arx_fcast_epi_workflow <- function(
     epi_data,
     outcome,
-    predictors,
+    predictors = outcome,
     trainer = NULL,
     args_list = arx_args_list()) {
   # --- validation

@@ -4,10 +4,11 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 # epipredict 0.1
 
+- the `predictor` argument in `arx_forecaster()` now defaults to the value of the `outcome` argument
 - `*_args_list()` functions now warn if `forecast_date + ahead != target_date`
 - `layer_residual_quantiles()` will now error if any of the residual quantiles are NA
-- add `check_enough_train_data` that will error if training data is too small
-- added `check_enough_train_data` to `arx_forecaster`
+- add `check_enough_train_data()` that will error if training data is too small
+- added `check_enough_train_data()` to `arx_forecaster()`
 - simplify `layer_residual_quantiles()` to avoid timesuck in `utils::methods()`
 - rename the `dist_quantiles()` to be more descriptive, breaking change
 - removes previous `pivot_quantiles()` (now `*_wider()`, breaking change)

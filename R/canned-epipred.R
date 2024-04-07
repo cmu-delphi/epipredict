@@ -5,8 +5,8 @@ validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
       "!" = "This one is a {.cls {class(epi_data)}}."
     ))
   }
-  arg_is_chr(predictors)
   arg_is_chr_scalar(outcome)
+  arg_is_chr(predictors)
   if (!outcome %in% names(epi_data)) {
     cli::cli_abort("{.var {outcome}} was not found in the training data.")
   }
