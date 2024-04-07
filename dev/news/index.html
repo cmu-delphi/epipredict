@@ -57,13 +57,14 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1" id="epipredict-01">epipredict 0.1<a class="anchor" aria-label="anchor" href="#epipredict-01"></a></h2>
-<ul><li>
+<ul><li>the <code>predictor</code> argument in <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> now defaults to the value of the <code>outcome</code> argument</li>
+<li>
 <code>*_args_list()</code> functions now warn if <code>forecast_date + ahead != target_date</code>
 </li>
 <li>
 <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> will now error if any of the residual quantiles are NA</li>
-<li>add <code>check_enough_train_data</code> that will error if training data is too small</li>
-<li>added <code>check_enough_train_data</code> to <code>arx_forecaster</code>
+<li>add <code><a href="../reference/check_enough_train_data.html">check_enough_train_data()</a></code> that will error if training data is too small</li>
+<li>added <code><a href="../reference/check_enough_train_data.html">check_enough_train_data()</a></code> to <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code>
 </li>
 <li>simplify <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> to avoid timesuck in <code><a href="https://rdrr.io/r/utils/methods.html" class="external-link">utils::methods()</a></code>
 </li>
