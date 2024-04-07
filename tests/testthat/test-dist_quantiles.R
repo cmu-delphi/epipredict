@@ -26,6 +26,7 @@ test_that("single dist_quantiles works, quantiles are accessible", {
   )
 })
 
+
 test_that("quantile extrapolator works", {
   dstn <- dist_normal(c(10, 2), c(5, 10))
   qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))

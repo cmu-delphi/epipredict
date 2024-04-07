@@ -23,7 +23,7 @@ URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends:
-    epiprocess (>= 0.6.0),
+    epiprocess (>= 0.7.5),
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
 Imports:
@@ -32,6 +32,7 @@ Imports:
     distributional,
     dplyr,
     generics,
+    ggplot2,
     glue,
     hardhat (>= 1.3.0),
     magrittr,
@@ -51,7 +52,6 @@ Suggests:
     data.table,
     epidatr (>= 1.0.0),
     fs,
-    ggplot2,
     knitr,
     lubridate,
     poissonreg,

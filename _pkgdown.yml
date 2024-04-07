@@ -47,9 +47,13 @@ reference:
   - title: Simple forecasters
     desc: Complete forecasters that produce reasonable baselines
     contents:
-    - contains("flatline")
-    - contains("arx")
-    - contains("cdc")
+    - contains("forecaster")
+    - contains("classifier")
+  - title: Forecaster modifications
+    desc: Constructors to modify forecaster arguments and utilities to produce `epi_workflow` objects
+    contents:
+    - contains("args_list")
+    - contains("_epi_workflow")
   - title: Helper functions for Hub submission
     contents:
     - flusight_hub_formatter
@@ -87,6 +91,10 @@ reference:
     contents:
     - contains("layer")
     - contains("slather")
+  - title: Automatic forecast visualization
+    contents:
+    - autoplot.epi_workflow
+    - autoplot.canned_epipred
   - title: Utilities for quantile distribution processing
     contents:
     - dist_quantiles
