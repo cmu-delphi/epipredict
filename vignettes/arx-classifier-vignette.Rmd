@@ -24,7 +24,7 @@ library(epipredict)
 
 The `arx_classifier()` function is an autoregressive classification model for `epi_df` data that is used to predict a discrete class for each case under consideration. It is a direct forecaster in that it estimates the classes at a specific horizon or ahead value.
 
-To get a sense of how the `arx_classifier()` works, let's consider a simple example with minimal inputs. For this, we will use the built-in `case_death_rate_subset` that contains confirmed COVID-19 cases and deaths from JHU CSSE for all states over Dec 31, 2020 to Dec 31, 2021. From this, we'll take a subset of data for five states over June 4, 2021 to December 31, 2021. Our objective is to predict whether the case rates are increasing when considering the 0, 7 and 14 day case rates: 
+To get a sense of how the `arx_classifier()` works, let's consider a simple example with minimal inputs. For this, we will use the built-in `case_death_rate_subset` that contains confirmed COVID-19 cases and deaths from JHU CSSE for all states over Dec 31, 2020 to Dec 31, 2021. From this, we'll take a subset of data for five states over June 4, 2021 to December 31, 2021. Our objective is to predict whether the case rates are increasing when considering the 0, 7 and 14 day case rates:
 
 ```{r}
 jhu <- case_death_rate_subset %>%
