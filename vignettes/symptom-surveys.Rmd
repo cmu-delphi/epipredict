@@ -71,89 +71,103 @@ library(tidyverse)
 library(epipredict)
 library(recipes)
 
-case_num = 200
-as_of_date = "2020-05-14"
-geo_values = covidcast_signal("jhu-csse", "confirmed_cumulative_num",
-                              "2020-05-14", "2020-05-14") %>%
-  filter(value >= case_num) %>% pull(geo_value)
+case_num <- 200
+as_of_date <- "2020-05-14"
+geo_values <- covidcast_signal(
+  "jhu-csse", "confirmed_cumulative_num",
+  "2020-05-14", "2020-05-14"
+) %>%
+  filter(value >= case_num) %>%
+  pull(geo_value)
 
 # Fetch county-level Google and Facebook % CLI-in-community signals, and JHU
 # confirmed case incidence proportion
-start_day = "2020-04-11"
-end_day = "2020-09-01"
+start_day <- "2020-04-11"
+end_day <- "2020-09-01"
 
-g = covidcast_signal("google-survey", "smoothed_cli") %>%
+g <- covidcast_signal("google-survey", "smoothed_cli") %>%
   filter(geo_value %in% geo_values) %>%
   select(geo_value, time_value, value)
-f = covidcast_signal("fb-survey", "smoothed_hh_cmnty_cli",
-                     start_day, end_day) %>%
+f <- covidcast_signal(
+  "fb-survey", "smoothed_hh_cmnty_cli",
+  start_day, end_day
+) %>%
   filter(geo_value %in% geo_values) %>%
   select(geo_value, time_value, value)
-c = covidcast_signal("jhu-csse", "confirmed_7dav_incidence_prop",
-                     start_day, end_day) %>%
+c <- covidcast_signal(
+  "jhu-csse", "confirmed_7dav_incidence_prop",
+  start_day, end_day
+) %>%
   filter(geo_value %in% geo_values) %>%
   select(geo_value, time_value, value)
 
 # Rename columns
-colnames(g) = sub("^value", "goog", colnames(g))
-colnames(f) = sub("^value", "fb", colnames(f))
-colnames(c) = sub("^value", "case", colnames(c))
+colnames(g) <- sub("^value", "goog", colnames(g))
+colnames(f) <- sub("^value", "fb", colnames(f))
+colnames(c) <- sub("^value", "case", colnames(c))
 
 # Find "complete" counties, present in all three data signals at all times
-geo_values_complete = intersect(intersect(g$geo_value, f$geo_value),
-                                c$geo_value)
+geo_values_complete <- intersect(
+  intersect(g$geo_value, f$geo_value),
+  c$geo_value
+)
 
 # Make one big matrix by joining these three data frames
-z = full_join(full_join(g, f, by = c("geo_value", "time_value")),
-              c, by = c("geo_value", "time_value")) %>%
+z <- full_join(full_join(g, f, by = c("geo_value", "time_value")),
+  c,
+  by = c("geo_value", "time_value")
+) %>%
   filter(geo_value %in% geo_values_complete) %>%
   as_epi_df()
 
-Logit = function(x, a = 0.01) log((x + a) / (1 - x + a))
-Sigmd = function(y, a = 0.01) (exp(y) * (1 + a) - a) / (1 + exp(y))
+Logit <- function(x, a = 0.01) log((x + a) / (1 - x + a))
+Sigmd <- function(y, a = 0.01) (exp(y) * (1 + a) - a) / (1 + exp(y))
 
 #### Parameters #####
 
 # Transforms to consider, in what follows
-trans = Logit
-inv_trans = Sigmd
+trans <- Logit
+inv_trans <- Sigmd
 
 # Rescale factors for our signals: bring them all down to proportions (between
 # 0 and 1)
-rescale_f = 1e-2 # Originally a percentage
-rescale_g = 1e-2 # Originally a percentage
-rescale_c = 1e-5 # Originally a count per 100,000 people
+rescale_f <- 1e-2 # Originally a percentage
+rescale_g <- 1e-2 # Originally a percentage
+rescale_c <- 1e-5 # Originally a count per 100,000 people
 
-z = z %>% mutate(case = trans(case * rescale_c),
-                 fb = trans(fb * rescale_f),
-                 goog = trans(goog * rescale_g))
+z <- z %>% mutate(
+  case = trans(case * rescale_c),
+  fb = trans(fb * rescale_f),
+  goog = trans(goog * rescale_g)
+)
 
 # lead = 7
-leads = c(7, 14)
-lags = c(0, 7, 14)
-n = 14 # Number of trailing days to use for the training set
+leads <- c(7, 14)
+lags <- c(0, 7, 14)
+n <- 14 # Number of trailing days to use for the training set
 
 # Nine forecast dates
-dates = seq(as.Date("2020-05-06"), as.Date("2020-05-14"), by = "day")
+dates <- seq(as.Date("2020-05-06"), as.Date("2020-05-14"), by = "day")
 
 # List for storage of results
 out_list <- vector(mode = "list", length = length(dates))
-for(k in 1:length(dates)){
+for (k in 1:length(dates)) {
+  date <- dates[k]
 
-  date = dates[k]
-
-  if(date %in% c("2020-05-13", "2020-05-14")) leads = c(7, 14) else leads = 7
+  if (date %in% c("2020-05-13", "2020-05-14")) leads <- c(7, 14) else leads <- 7
 
   # Pre-structuring test data for this date
-  z_te = z %>%
-    rename(target_date = time_value,
-           target_case = case) %>%
+  z_te <- z %>%
+    rename(
+      target_date = time_value,
+      target_case = case
+    ) %>%
     select(geo_value, target_date, target_case)
 
   # Strawman model
-  out_df0 <- map(leads, ~  flatline_forecaster(
-    z %>% 
-      filter(between(time_value, date - .x - max(lags) - n, date)) %>% 
+  out_df0 <- map(leads, ~ flatline_forecaster(
+    z %>%
+      filter(between(time_value, date - .x - max(lags) - n, date)) %>%
       select(time_value, geo_value, case),
     outcome = "case",
     args_list = arx_args_list(
@@ -170,7 +184,7 @@ for(k in 1:length(dates)){
 
 
   # Cases model
-  out_df1 <- map(leads, ~  arx_forecaster(
+  out_df1 <- map(leads, ~ arx_forecaster(
     z %>%
       filter(between(time_value, date - .x - max(lags) - n, date)) %>%
       select(time_value, geo_value, case) %>%
@@ -191,7 +205,7 @@ for(k in 1:length(dates)){
     select(geo_value, forecast_date, err1, lead)
 
   # Cases and Facebook model
-  out_df2 <- map(leads, ~  arx_forecaster(
+  out_df2 <- map(leads, ~ arx_forecaster(
     z %>%
       filter(between(time_value, date - .x - max(lags) - n, date)) %>%
       select(time_value, geo_value, case, fb) %>%
@@ -213,7 +227,7 @@ for(k in 1:length(dates)){
 
 
   # Cases and Google model
-  out_df3 <- map(leads, ~  arx_forecaster(
+  out_df3 <- map(leads, ~ arx_forecaster(
     z %>%
       filter(between(time_value, date - .x - max(lags) - n, date)) %>%
       select(time_value, geo_value, case, goog) %>%
@@ -234,7 +248,7 @@ for(k in 1:length(dates)){
     select(geo_value, forecast_date, err3, lead)
 
   # Cases, Facebook and Google model
-  out_df4 <- map(leads, ~  arx_forecaster(
+  out_df4 <- map(leads, ~ arx_forecaster(
     z %>%
       filter(between(time_value, date - .x - max(lags) - n, date)) %>%
       select(time_value, geo_value, case, fb, goog) %>%
@@ -255,10 +269,10 @@ for(k in 1:length(dates)){
     select(geo_value, forecast_date, err4, lead)
 
   # Left join of the results for all models
-  out_list[[k]] = left_join(left_join(left_join(left_join(out_df0, out_df1), out_df2), out_df3), out_df4)
+  out_list[[k]] <- left_join(left_join(left_join(left_join(out_df0, out_df1), out_df2), out_df3), out_df4)
 }
 # Outside of loop bind rows of list
-out_df = do.call(rbind, out_list)
+out_df <- do.call(rbind, out_list)
 ```
 
 ## Results: All Four Models
@@ -272,37 +286,53 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-model_names = c("Cases", "Cases + Facebook", "Cases + Google",
-                "Cases + Facebook + Google")
+model_names <- c(
+  "Cases", "Cases + Facebook", "Cases + Google",
+  "Cases + Facebook + Google"
+)
 
 # Calculate the scaled errors for each model, that is, the error relative to the strawman's error
-res_all4 = out_df %>% 
-  drop_na() %>%                                       # Restrict to common time
-  mutate(err1 = err1 / err0, err2 = err2 / err0,      # Compute relative error
-         err3 = err3 / err0, err4 = err4 / err0) %>%  # to strawman model
-  mutate(dif12 = err1 - err2, dif13 = err1 - err3,    # Compute differences
-         dif14 = err1 - err4) %>%                     # relative to cases model
+res_all4 <- out_df %>%
+  drop_na() %>% # Restrict to common time
+  mutate(
+    err1 = err1 / err0, err2 = err2 / err0, # Compute relative error
+    err3 = err3 / err0, err4 = err4 / err0
+  ) %>% # to strawman model
+  mutate(
+    dif12 = err1 - err2, dif13 = err1 - err3, # Compute differences
+    dif14 = err1 - err4
+  ) %>% # relative to cases model
   ungroup() %>%
   select(-err0)
 
 # Calculate and print median errors, for all 4 models, and just 7 days ahead
-res_err4 = res_all4 %>%
+res_err4 <- res_all4 %>%
   select(-starts_with("dif")) %>%
-  pivot_longer(names_to = "model", values_to = "err",
-               cols = -c(geo_value, forecast_date, lead)) %>%
-  mutate(lead = factor(lead, labels = paste(leads, "days ahead")),
-         model = factor(model, labels = model_names))
+  pivot_longer(
+    names_to = "model", values_to = "err",
+    cols = -c(geo_value, forecast_date, lead)
+  ) %>%
+  mutate(
+    lead = factor(lead, labels = paste(leads, "days ahead")),
+    model = factor(model, labels = model_names)
+  )
 
-knitr::kable(res_err4 %>%
-               group_by(model, lead) %>%
-               summarize(err = median(err), n = length(unique(forecast_date))) %>%
-               arrange(lead) %>% ungroup() %>%
-               rename("Model" = model, "Median scaled error" = err,
-                      "Target" = lead, "Test days" = n) %>%
-               filter(Target == "7 days ahead"),
-             caption = paste("Test period:", min(res_err4$forecast_date), "to",
-                             max(res_err4$forecast_date)),
-             format = "html", table.attr = "style='width:70%;'")
+knitr::kable(
+  res_err4 %>%
+    group_by(model, lead) %>%
+    summarize(err = median(err), n = length(unique(forecast_date))) %>%
+    arrange(lead) %>% ungroup() %>%
+    rename(
+      "Model" = model, "Median scaled error" = err,
+      "Target" = lead, "Test days" = n
+    ) %>%
+    filter(Target == "7 days ahead"),
+  caption = paste(
+    "Test period:", min(res_err4$forecast_date), "to",
+    max(res_err4$forecast_date)
+  ),
+  format = "html", table.attr = "style='width:70%;'"
+)
 ```
 $$\\[0.01in]$$ 
 Are these differences in median scaled errors significant? Some basic hypothesis testing suggests that some probably are: Below we conduct a sign test for whether the difference in the "Cases" model’s scaled error and each other model’s scaled error is centered at zero. The sign test is run on the 9 test days x 442 counties = 3978 pairs of scaled errors. The p-value from the "Cases" versus "Cases + Google" test is tiny and well below a cutoff of 0.01. In contrast, the p-values from the "Cases" versus "Cases + Facebook" and the "Cases" versus "Cases + Facebook + Google" tests are much bigger and exceed this cutoff, suggesting that the Facebook survey is not adding as much for this situation (meaning the time and ahead considered, etc.)
@@ -310,42 +340,56 @@ Are these differences in median scaled errors significant? Some basic hypothesis
 ```{r}
 # Compute p-values using the sign test against a one-sided alternative, for
 # all models, and just 7 days ahead
-res_dif4 = res_all4 %>%
+res_dif4 <- res_all4 %>%
   select(-starts_with("err")) %>%
-  pivot_longer(names_to = "model", values_to = "dif",
-               cols = -c(geo_value, forecast_date, lead)) %>%
-  mutate(lead = factor(lead, labels = paste(leads, "days ahead")),
-         model = factor(model,
-                        labels = c("Cases vs Cases + Facebook",
-                                   "Cases vs Cases + Google",
-                                   "Cases vs Cases + Facebook + Google")))
+  pivot_longer(
+    names_to = "model", values_to = "dif",
+    cols = -c(geo_value, forecast_date, lead)
+  ) %>%
+  mutate(
+    lead = factor(lead, labels = paste(leads, "days ahead")),
+    model = factor(model,
+      labels = c(
+        "Cases vs Cases + Facebook",
+        "Cases vs Cases + Google",
+        "Cases vs Cases + Facebook + Google"
+      )
+    )
+  )
 
-knitr::kable(res_dif4 %>%
-               group_by(model, lead) %>%
-               summarize(p = binom.test(x = sum(dif > 0, na.rm = TRUE),
-                                        n = n(), alt = "greater")$p.val) %>%
-               ungroup() %>% filter(lead == "7 days ahead") %>%
-               rename("Comparison" = model, "Target" = lead, "P-value" = p),
-             format = "html", table.attr = "style='width:50%;'")
+knitr::kable(
+  res_dif4 %>%
+    group_by(model, lead) %>%
+    summarize(p = binom.test(
+      x = sum(dif > 0, na.rm = TRUE),
+      n = n(), alt = "greater"
+    )$p.val) %>%
+    ungroup() %>% filter(lead == "7 days ahead") %>%
+    rename("Comparison" = model, "Target" = lead, "P-value" = p),
+  format = "html", table.attr = "style='width:50%;'"
+)
 ```
 $$\\[0.01in]$$
 We should take these test results with a grain of salt because the sign test assumes independence of observations, which clearly cannot be true given the spatiotemporal structure of our forecasting problem. To mitigate the dependence across time (which intuitively seems to matter more than that across space), we recomputed these tests in a stratified way, where for each day we run a sign test on the scaled errors between two models over all 442 counties. The results are plotted as histograms below; the "Cases + Google" and (to a lesser extent) the "Cases + Facebook + Google" models appear to deliver some decently small p-values, but this is not very evident with the "Cases + Facebook" model. Taking a larger sample size (of more than nine test days) would be a natural next step to take to see if these results persist. 
 
 ```{r}
 # Red, blue (similar to ggplot defaults), then yellow
-ggplot_colors = c("#FC4E07", "#00AFBB", "#E7B800")
+ggplot_colors <- c("#FC4E07", "#00AFBB", "#E7B800")
 
 ggplot(res_dif4 %>%
-         group_by(model, lead, forecast_date) %>%
-         summarize(p = binom.test(x = sum(dif > 0, na.rm = TRUE),
-                                  n = n(), alt = "greater")$p.val) %>%
-         ungroup() %>% filter(lead == "7 days ahead"), aes(p)) +
+  group_by(model, lead, forecast_date) %>%
+  summarize(p = binom.test(
+    x = sum(dif > 0, na.rm = TRUE),
+    n = n(), alt = "greater"
+  )$p.val) %>%
+  ungroup() %>% filter(lead == "7 days ahead"), aes(p)) +
   geom_histogram(aes(color = model, fill = model), alpha = 0.4) +
   scale_color_manual(values = ggplot_colors) +
   scale_fill_manual(values = ggplot_colors) +
   facet_wrap(vars(lead, model)) +
   labs(x = "P-value", y = "Count") +
-  theme_bw() + theme(legend.position = "none")
+  theme_bw() +
+  theme(legend.position = "none")
 ```
 
 ## Results: First Two Models
@@ -353,21 +397,21 @@ ggplot(res_dif4 %>%
 One way to get a larger sample size with the current data is to compare a subset of the models. Therefore, next we focus on comparing results between the "Cases" and "Cases + Facebook" models only. Restricting to common forecast dates for these two models yields a much longer test period for the 7 and 14-day-ahead forecasts: May 20 through August 27, 2020. We make the code to compare these two models a simple function so that we have the option to use it over different dates or aheads (in particular, this function will be useful for the next section where we explore several ahead values):
 
 ```{r}
-case_fb_mods <- function(forecast_dates, leads){
-  
+case_fb_mods <- function(forecast_dates, leads) {
   # List for storage of results
   out_list <- vector(mode = "list", length = length(forecast_dates))
-  for(k in 1:length(forecast_dates)){
-    
-    date = forecast_dates[k]
-    
-    z_te = z %>%
-      rename(target_date = time_value,
-             target_case = case) %>%
+  for (k in 1:length(forecast_dates)) {
+    date <- forecast_dates[k]
+
+    z_te <- z %>%
+      rename(
+        target_date = time_value,
+        target_case = case
+      ) %>%
       select(geo_value, target_date, target_case)
-    
+
     # Strawman model
-    out_df0 <- map(leads, ~  flatline_forecaster(
+    out_df0 <- map(leads, ~ flatline_forecaster(
       z %>% filter(between(time_value, date - .x - max(lags) - n, date)) %>% select(time_value, geo_value, case),
       outcome = "case",
       args_list = arx_args_list(
@@ -381,9 +425,9 @@ case_fb_mods <- function(forecast_dates, leads){
       list_rbind() %>%
       mutate(err0 = abs(inv_trans(.pred) - inv_trans(target_case))) %>%
       select(geo_value, forecast_date, err0, lead)
-    
+
     # Cases model
-    out_df1 <- map(leads, ~  arx_forecaster(
+    out_df1 <- map(leads, ~ arx_forecaster(
       z %>% filter(between(time_value, date - .x - max(lags) - n, date)) %>% select(time_value, geo_value, case) %>% filter(complete.cases(.)),
       outcome = "case",
       predictors = "case",
@@ -399,9 +443,9 @@ case_fb_mods <- function(forecast_dates, leads){
       list_rbind() %>%
       mutate(err1 = abs(inv_trans(.pred) - inv_trans(target_case))) %>%
       select(geo_value, forecast_date, err1, lead)
-    
+
     # Cases and Facebook model
-    out_df2 <- map(leads, ~  arx_forecaster(
+    out_df2 <- map(leads, ~ arx_forecaster(
       z %>% filter(between(time_value, date - .x - max(lags) - n, date)) %>% select(time_value, geo_value, case, fb) %>% filter(complete.cases(.)),
       outcome = "case",
       predictors = c("case", "fb"),
@@ -417,19 +461,19 @@ case_fb_mods <- function(forecast_dates, leads){
       list_rbind() %>%
       mutate(err2 = abs(inv_trans(.pred) - inv_trans(target_case))) %>%
       select(geo_value, forecast_date, err2, lead)
-    
+
     # Left join of the results for all models
-    out_list[[k]] = left_join(left_join(out_df0, out_df1), out_df2)
+    out_list[[k]] <- left_join(left_join(out_df0, out_df1), out_df2)
   }
   # Outside of loop bind rows and split into two lists by lead
-  out_df = do.call(rbind, out_list)
+  out_df <- do.call(rbind, out_list)
 }
 
 # Choose forecast dates common to the Cases and Cases + Facebook models
-dates = seq(as.Date("2020-05-20"), as.Date("2020-08-27"), by = "day")
+dates <- seq(as.Date("2020-05-20"), as.Date("2020-08-27"), by = "day")
 
 # Two leads to consider
-leads = c(7, 14) 
+leads <- c(7, 14)
 
 res <- case_fb_mods(dates, leads)
 ```
@@ -439,34 +483,44 @@ The median scaled errors over the test period are computed and reported below. N
 ```{r}
 # For just models 1 and 2, then calculate the scaled
 # errors, that is, the error relative to the strawman's error
-res_all2 = res %>%
-  drop_na() %>%                                       # Restrict to common time
-  mutate(err1 = err1 / err0, err2 = err2 / err0) %>%  # Compute relative error
-                                                      # to strawman model
-  mutate(dif12 = err1 - err2) %>%                     # Compute differences
-                                                      # relative to cases model
+res_all2 <- res %>%
+  drop_na() %>% # Restrict to common time
+  mutate(err1 = err1 / err0, err2 = err2 / err0) %>% # Compute relative error
+  # to strawman model
+  mutate(dif12 = err1 - err2) %>% # Compute differences
+  # relative to cases model
   ungroup() %>%
   select(-err0)
 
 # Calculate and print median errors, for just models 1 and 2, and both 7 and 14
 # days ahead
-res_err2 = res_all2 %>%
+res_err2 <- res_all2 %>%
   select(-starts_with("dif")) %>%
-  pivot_longer(names_to = "model", values_to = "err",
-               cols = -c(geo_value, forecast_date, lead)) %>%
-  mutate(lead = factor(lead, labels = paste(leads, "days ahead")),
-         model = factor(model, labels = model_names[1:2]))
+  pivot_longer(
+    names_to = "model", values_to = "err",
+    cols = -c(geo_value, forecast_date, lead)
+  ) %>%
+  mutate(
+    lead = factor(lead, labels = paste(leads, "days ahead")),
+    model = factor(model, labels = model_names[1:2])
+  )
 
-knitr::kable(res_err2 %>%
-               select(-starts_with("dif")) %>%
-               group_by(model, lead) %>%
-               summarize(err = median(err), n = length(unique(forecast_date))) %>%
-               arrange(lead) %>% ungroup() %>%
-               rename("Model" = model, "Median scaled error" = err,
-                      "Target" = lead, "Test days" = n),
-             caption = paste("Test period:", min(res_err2$forecast_date), "to",
-                             max(res_err2$forecast_date)),
-             format = "html", table.attr = "style='width:70%;'")
+knitr::kable(
+  res_err2 %>%
+    select(-starts_with("dif")) %>%
+    group_by(model, lead) %>%
+    summarize(err = median(err), n = length(unique(forecast_date))) %>%
+    arrange(lead) %>% ungroup() %>%
+    rename(
+      "Model" = model, "Median scaled error" = err,
+      "Target" = lead, "Test days" = n
+    ),
+  caption = paste(
+    "Test period:", min(res_err2$forecast_date), "to",
+    max(res_err2$forecast_date)
+  ),
+  format = "html", table.attr = "style='width:70%;'"
+)
 ```
 $$\\[0.01in]$$ 
 
@@ -475,16 +529,19 @@ Thanks to the extended length of the test period, we can also plot the trajector
 ```{r}
 # Plot median errors as a function of time, for models 1 and 2, and both 7 and
 # 14 days ahead
-ggplot(res_err2 %>%
-         group_by(model, lead, forecast_date) %>%
-         summarize(err = median(err)) %>% ungroup(),
-       aes(x = forecast_date, y = err)) +
+ggplot(
+  res_err2 %>%
+    group_by(model, lead, forecast_date) %>%
+    summarize(err = median(err)) %>% ungroup(),
+  aes(x = forecast_date, y = err)
+) +
   geom_line(aes(color = model)) +
   scale_color_manual(values = c("black", ggplot_colors)) +
   geom_hline(yintercept = 1, linetype = 2, color = "gray") +
   facet_wrap(vars(lead)) +
   labs(x = "Date", y = "Median scaled error") +
-  theme_bw() + theme(legend.position = "bottom", legend.title = element_blank())
+  theme_bw() +
+  theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
 The fact that the lines are non-coincident suggests that the results we’re seeing here are likely to be significantly different, though it’s hard to say definitively given the complicated dependence structure present in the data. Below we perform a sign test for whether the difference in scaled errors from the "Cases" and "Cases + Facebook" models is centered at zero. The p-values are essentially zero, given the large sample sizes: 98 test days in total for the 7-day-ahead forecasts and 91 days for the 14-day-ahead forecasts (times 442 counties for each day).
@@ -492,20 +549,28 @@ The fact that the lines are non-coincident suggests that the results we’re see
 ```{r}
 # Compute p-values using the sign test against a one-sided alternative, just
 # for models 1 and 2, and both 7 and 14 days ahead
-res_dif2 = res_all2 %>%
+res_dif2 <- res_all2 %>%
   select(-starts_with("err")) %>%
-  pivot_longer(names_to = "model", values_to = "dif",
-               cols = -c(geo_value, forecast_date, lead)) %>%
-  mutate(lead = factor(lead, labels = paste(leads, "days ahead")),
-         model = factor(model, labels = "Cases > Cases + Facebook"))
+  pivot_longer(
+    names_to = "model", values_to = "dif",
+    cols = -c(geo_value, forecast_date, lead)
+  ) %>%
+  mutate(
+    lead = factor(lead, labels = paste(leads, "days ahead")),
+    model = factor(model, labels = "Cases > Cases + Facebook")
+  )
 
-knitr::kable(res_dif2 %>%
-               group_by(model, lead) %>%
-               summarize(p = binom.test(x = sum(dif > 0, na.rm = TRUE),
-                                        n = n(), alt = "greater")$p.val) %>%
-               ungroup() %>%
-               rename("Comparison" = model, "Target" = lead, "P-value" = p),
-             format = "html", table.attr = "style='width:50%;'")
+knitr::kable(
+  res_dif2 %>%
+    group_by(model, lead) %>%
+    summarize(p = binom.test(
+      x = sum(dif > 0, na.rm = TRUE),
+      n = n(), alt = "greater"
+    )$p.val) %>%
+    ungroup() %>%
+    rename("Comparison" = model, "Target" = lead, "P-value" = p),
+  format = "html", table.attr = "style='width:50%;'"
+)
 ```
 $$\\[0.01in]$$ 
 
@@ -513,16 +578,19 @@ If we stratify and recompute p-values by forecast date, the bulk of p-values are
 
 ```{r}
 ggplot(res_dif2 %>%
-         group_by(model, lead, forecast_date) %>%
-         summarize(p = binom.test(x = sum(dif > 0, na.rm = TRUE),
-                                  n = n(), alt = "greater")$p.val) %>%
-         ungroup(), aes(p)) +
+  group_by(model, lead, forecast_date) %>%
+  summarize(p = binom.test(
+    x = sum(dif > 0, na.rm = TRUE),
+    n = n(), alt = "greater"
+  )$p.val) %>%
+  ungroup(), aes(p)) +
   geom_histogram(aes(color = model, fill = model), alpha = 0.4) +
   scale_color_manual(values = ggplot_colors) +
   scale_fill_manual(values = ggplot_colors) +
   facet_wrap(vars(lead, model)) +
   labs(x = "P-value", y = "Count") +
-  theme_bw() + theme(legend.position = "none")
+  theme_bw() +
+  theme(legend.position = "none")
 ```
 
 This exploration illustrates an important point: The test period should be chosen so that it is large enough in size to see differences (if there are any) between the models under comparison. While we did not observe significant differences between the "Cases" and "Cases + Facebook" models when the test period was small at 9 days, we did observe a significant difference over this extended test period of nearly 100 days.
@@ -535,7 +603,7 @@ To answer questions such as these, we can look at the way that the median scaled
 
 ```{r}
 # Consider a number of leads
-leads = 5:20
+leads <- 5:20
 
 res <- case_fb_mods(dates, leads)
 ```
@@ -543,14 +611,16 @@ res <- case_fb_mods(dates, leads)
 We obtain and plot the median scaled errors for the "Cases" and "Cases + Facebook" models for different number of days ahead for the forecast target. This is done over May 20 through August 27 for the forecast dates that are common to the two models. 
 
 ```{r}
-err_by_lead = res %>%
-  drop_na() %>%                                       # Restrict to common time
-  mutate(err1 = err1 / err0, err2 = err2 / err0) %>%  # Compute relative error
+err_by_lead <- res %>%
+  drop_na() %>% # Restrict to common time
+  mutate(err1 = err1 / err0, err2 = err2 / err0) %>% # Compute relative error
   # to strawman model
   ungroup() %>%
   select(-err0) %>%
-  pivot_longer(names_to = "model", values_to = "err",
-               cols = -c(geo_value, forecast_date, lead)) %>%
+  pivot_longer(
+    names_to = "model", values_to = "err",
+    cols = -c(geo_value, forecast_date, lead)
+  ) %>%
   mutate(model = factor(model, labels = model_names[1:2])) %>%
   group_by(model, lead) %>%
   summarize(err = median(err)) %>%
@@ -560,13 +630,19 @@ ggplot(err_by_lead, aes(x = lead, y = err)) +
   geom_line(aes(color = model)) +
   geom_point(aes(color = model)) +
   scale_color_manual(values = c("black", ggplot_colors)) +
-  geom_hline(yintercept = err_by_lead %>%
-               filter(lead %in% 7, model == "Cases") %>% pull(err),
-             linetype = 2, color = "gray") +
-  labs(title = "Forecasting errors by number of days ahead",
-       subtitle = sprintf("Over all counties with at least %i cumulative cases",
-                          case_num),
-       x = "Number of days ahead", y = "Median scaled error") +
+  geom_hline(
+    yintercept = err_by_lead %>%
+      filter(lead %in% 7, model == "Cases") %>% pull(err),
+    linetype = 2, color = "gray"
+  ) +
+  labs(
+    title = "Forecasting errors by number of days ahead",
+    subtitle = sprintf(
+      "Over all counties with at least %i cumulative cases",
+      case_num
+    ),
+    x = "Number of days ahead", y = "Median scaled error"
+  ) +
   theme_bw() # + theme(legend.position = "bottom", legend.title = element_blank())
 ```
 
@@ -593,5 +669,3 @@ Hopefully these preliminary findings have gotten you excited about the possible 
 ## Attribution
 
 This chapter was adapted from the following [Delphi blog post](https://delphi.cmu.edu/blog/2020/09/21/can-symptoms-surveys-improve-covid-19-forecasts/), with the necessary modifications to enable the use of `epipredict`. Note that the results may be different from those on the blog post (one reason is that we are exploring the use of a different forecaster and another is that we're using the most recent versions of the datasets).
-
-
