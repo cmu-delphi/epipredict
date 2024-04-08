@@ -1,0 +1,303 @@
+---
+title: "Smooth Quantile Regression"
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  cache = TRUE
+)
+```
+
+# Introducing smooth quantile regression
+
+Whereas the standard application of time-series forecasting techniques has been to forecast single horizons, in multi-period forecasting, the goal is to forecast several horizons simultaneously. The standard application of these techniques aims to predict the signal for a single forecast horizon (or "ahead"), most often one-step-ahead. This is useful in epidemiological applications where decisions are often based on the trend of a signal.
+
+The idea underlying smooth quantile regression that the future can be approximated by a smooth curve. So this approach enforces smoothness across the horizons for point estimation by regression or interval prediction by quantile regression. Our focus in this chapter is the latter.
+
+# Built-in function for smooth quantile regression and its parameters
+
+The built-in smooth quantile regression function, `smooth_quantile_reg()` provides a model specification for smooth quantile regression that works under the tidymodels framework. It has the following parameters and default values:
+
+```{r, eval = FALSE}
+smooth_quantile_reg(
+  mode = "regression",
+  engine = "smoothqr",
+  outcome_locations = NULL,
+  quantile_levels = 0.5,
+  degree = 3L
+)
+```
+
+For smooth quantile regression, the type of model or `mode` is regression.
+
+The only `engine` that is currently supported is `smooth_qr()` from the [`smooth_qr` package](https://dajmcdon.github.io/smoothqr/).
+
+The `outcome_locations` indicate the multiple horizon (ie. ahead) values. These should be specified by the user.
+
+The `quantile_levels` parameter is a vector of values that indicates the quantiles to be estimated. The default is the median (0.5 quantile).
+
+The `degree` parameter indicates the number of polynomials used for smoothing of the response. It should be no more than the number of responses. If the degree is precisely equal to the number of aheads, then there is no smoothing. To better understand this parameter and how it works, we should look to its origins and how it is used in the model.  
+
+# Model form 
+
+Smooth quantile regression is linear auto-regressive, with the key feature being a transformation that forces the coefficients to satisfy a constraint. The purpose if this is for each model coefficient to be a smooth function of ahead values, and so each such coefficient is set to be a linear combination of smooth basis functions (such as a spline or a polynomial).
+
+The `degree` parameter controls the number of these polynomials used. It should be no greater than the number of responses. This is a tuning parameter, and so it can be chosen by performing a grid search with cross-validation. Intuitively, $d = 1$ corresponds to the constant model, $d = 2$ gives straight line forecasts, while $d = 3$ gives quadratic forecasts. Since a degree of 3 was found to work well in the tested applications (see Section 9 of Tuzhilina et al, 2022), it is the default value.
+
+# Demonstration of smooth quantile regression
+
+```{r, message = FALSE}
+library(epipredict)
+library(tidyverse)
+```
+
+We will now apply smooth quantile regression on the real data used for COVID-19 forecasting. The built-in dataset we will use is a subset of JHU daily data on state cases and deaths. This sample data ranges from Dec 31, 2020 to Dec 31, 2021.
+
+```{r}
+edf <- case_death_rate_subset 
+```
+
+We will set the forecast date to be November 30, 2021 so that we can produce forecasts for target dates of 1 to 28 days ahead. We construct our test data, `tedf` from the days beyond this.
+
+```{r}
+fd <- as.Date("2021-11-30")
+
+tedf <- edf %>% filter(time_value >= fd)
+```
+
+We will use the most recent 3 months worth of data up to the forecast date for training.
+
+```{r}
+edf <- edf %>% filter(time_value < fd, time_value >= fd - 90L)
+```
+
+And for plotting our focus will be on a subset of two states - California and Utah.
+
+```{r}
+geos <- c("ut", "ca")
+```
+
+Suppose that our goal with this data is to predict COVID-19 death rates at several horizons for each state. On day $t$, we want to predict new deaths $y$ that are $a = 1,\dots, 28$ days ahead at locations $j$ using the death rates from today, 1 week ago, and 2 weeks ago. So for each location, we'll predict the median (0.5 quantile) for each of the target dates by using
+$$
+\hat{y}_{j}(t+a) = \alpha(a) + \sum_{l = 0}^2 \beta_{l}(a)  y_{j}(t - 7l)
+$$
+where $\beta_{l}(a) = \sum_{i=1}^d \theta_{il} h_i(a)$ is the smoothing constraint where ${h_1(a), \dots, h_d(a)}$ are the set of smooth basis functions and $d$ is a hyperparameter that manages the flexibility of $\beta_{l}(a)$. Remember that the goal is to have each $\beta_{l}(a)$ to be a smooth function of the aheads and that is achieved through imposing the smoothing constraint.
+
+Note that this model is intended to be simple and straightforward. Our only modification to this model is to add case rates as another predictive feature (we will leave it to the reader to incorporate additional features beyond this and the historical response values). We can update the basic model incorporate the $k = 2$ predictive features of case and death rates for each location j, $x_j(t) = (x_{j1}(t), x_{j2}(t))$ as follows:
+
+$$
+\hat{y}_{j}(t+a) = \alpha(a) + \sum_{k = 1}^2 \sum_{l = 0}^2 \beta_{kl}(a)  x_{jk}(t - 7l)
+$$
+where $\beta_{kl}(a) = \sum_{i=1}^d \theta_{ikl} h_i(a)$.
+
+Now, we will create our own forecaster from scratch by building up an `epi_workflow` (there is no canned forecaster that is currently available). Building our own forecaster allows for customization and control over the pre-processing and post-processing actions we wish to take. 
+
+The pre-processing steps we take in our `epi_recipe` are simply to lag the predictor (by 0, 7, and 14 days) and lead the response by the multiple aheads specified by the function user. 
+
+The post-processing layers we add to our `frosting` are nearly as simple. We first predict, unnest the prediction list-cols, omit NAs from them, and enforce that they are greater than 0. 
+
+The third component of an to an `epi_workflow`, the model, is smooth quantile regression, which has three main arguments - the quantiles, aheads, and degree.
+
+After creating our `epi_workflow` with these components, we get our test data based on longest lag period and make the predictions. 
+
+We input our forecaster into a function for ease of use. 
+
+```{r}
+smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd){
+rec <- epi_recipe(x) %>%
+  step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+  step_epi_ahead(death_rate, ahead = aheads)
+
+f <- frosting() %>%
+  layer_predict() %>%
+  layer_unnest(.pred) %>%
+  layer_naomit(distn) %>%
+  layer_add_forecast_date() %>%
+  layer_threshold(distn)
+
+ee <- smooth_quantile_reg(
+  quantile_levels = quantiles,
+  outcome_locations = aheads,
+  degree = degree
+)
+
+ewf <- epi_workflow(rec, ee, f)
+
+the_fit <- ewf %>% fit(x)
+
+latest <- get_test_data(rec, x, fill_locf = TRUE)
+
+preds <- predict(the_fit, new_data = latest) %>%
+  mutate(forecast_date = fd, target_date = fd + ahead) %>%
+  select(geo_value, target_date, distn, ahead) %>%
+  pivot_quantiles_wider(distn)
+
+preds
+}
+```
+
+Notice that we allow the function user to specify the aheads, degree, and quantile as they may want to change these parameter values. We also allow for input of the forecast date as we fixed that at the onset of this demonstration.
+
+We now can produce smooth quantile regression predictions for our problem:
+
+```{r, warning = FALSE}
+smooth_preds <- smooth_fc(edf, fd = fd)
+
+head(smooth_preds)
+```
+Most often, we're not going to want to limit ourselves to just predicting the median value as there is uncertainty about the predictions, so let's try to predict several different quantiles in addition to the median:
+
+```{r, warning = FALSE}
+smooth_preds <- smooth_fc(edf, quantiles = c(.1, .25, .5, .75, .9), fd = fd)
+
+head(smooth_preds)
+```
+
+We can see that we have different columns for the different quantile predictions.
+
+Let's visualize these results for the sample of two states. We will create a simple plotting function, under which the median predictions are an orange line and the surrounding quantiles are blue bands around this. For comparison, we will include the actual values over time as a black line.
+
+```{r}
+plot_preds <- function(preds, geos_to_plot = NULL, train_test_dat, fd){
+  
+  if (!is.null(geos_to_plot)) {
+    preds <- preds %>% filter(geo_value %in% geos_to_plot)
+    train_test_dat <- train_test_dat %>% filter(geo_value %in% geos_to_plot)
+  }
+  
+  ggplot(preds) +
+    geom_ribbon(aes(target_date, ymin = `0.1`, ymax = `0.9`),
+                fill = "cornflowerblue", alpha = .8) +
+    geom_ribbon(aes(target_date, ymin = `0.25`, ymax = `0.75`),
+                fill = "#00488E", alpha = .8) +
+    geom_line(data = train_test_dat, aes(time_value, death_rate), size = 1.5) +
+    geom_line(aes(target_date, `0.5`), color = "orange", size = 1.5) +
+    geom_vline(xintercept = fd) +
+    facet_wrap(~geo_value) +
+    theme_bw(16) +
+    scale_x_date(name = "", date_labels = "%b %Y") +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    ylab("Deaths per 100K inhabitants")
+}
+```
+
+Since we would like to plot the actual death rates for these states over time, we bind the training and testing data together and input this into our plotting function as follows:
+
+```{r, warning = FALSE}
+plot_preds(smooth_preds, geos, bind_rows(tedf, edf), fd)
+```
+
+We can see that the predictions are smooth curves for each state, as expected when using smooth quantile regression. In addition while the curvature of the forecasts matches that of the truth, the forecasts do not look remarkably accurate.
+
+## Varying the degrees parameter
+
+We can test the impact of different degrees by using the `map()` function. Let's try out all degrees from 1 to 7:
+
+```{r, warning = FALSE}
+smooth_preds_list <- map(1:7, ~ smooth_fc(edf,
+                                degree = .x,
+                                quantiles = c(.1, .25, .5, .75, .9), 
+                                fd = fd) %>% 
+                mutate(degree = .x)
+
+) %>% list_rbind()
+```
+
+One way to quantify the impact of these on the forecasting is to look at the mean absolute error (MAE) or mean squared error (MSE) over the degrees. We can select the degree that results in the lowest MAE. 
+
+Since the MAE compares the predicted values to the actual values, we will first join the test data to the predicted data for our comparisons:
+```{r, message = FALSE}
+tedf_sub <- tedf %>% 
+  rename(target_date = time_value, actual = death_rate) %>%
+  select(geo_value, target_date, actual)
+
+smooth_preds_df_deg = smooth_preds_list %>% 
+  left_join(tedf_sub) 
+```
+
+And then compute the MAE for each of the degrees:
+```{r, message = FALSE}
+smooth_preds_df_deg = smooth_preds_list %>% 
+  left_join(tedf_sub) %>% 
+  group_by(degree) %>% 
+  mutate(error = abs(`0.5` - actual)) %>%
+  summarise(mean = mean(error)) 
+
+# Arrange the MAE from smallest to largest
+head(smooth_preds_df_deg %>% arrange(mean))
+```
+
+Instead of just looking at the raw numbers, let's create a simple line plot to visualize how the MAE changes over degrees for this data:
+
+```{r}
+ggplot(smooth_preds_df_deg, aes(degree, mean)) + 
+  geom_line() +
+  xlab("Degrees of freedom") +
+  ylab("Mean MAE")
+```
+
+We can see that the degree that results in the lowest MAE is 3. Hence, we could pick this degree for future forecasting work on this data.
+
+## A brief comparison between smoothing and no smoothing
+
+Now, we will briefly compare the results from using smooth quantile regression to those obtained without smoothing. The latter approach amounts to ordinary quantile regression to get predictions for the intended target date. The main drawback is that it ignores the fact that the responses all represent the same signal, just for different ahead values. In contrast, the smooth quantile regression approach utilizes this information about the data structure - the fact that the aheads in are not be independent of each other, but rather they are naturally related over time by a smooth curve.
+
+To get the basic quantile regression results we can utilize the forecaster that we've already built. We can simply set the degree to be the number of ahead values to re-run the code without smoothing. 
+```{r, warning = FALSE}
+baseline_preds <- smooth_fc(edf, degree = 28L, quantiles = c(.1, .25, .5, .75, .9), fd = fd) 
+```
+
+And we can produce the corresponding plot to inspect the predictions obtained under the baseline model:
+
+```{r, warning = FALSE}
+plot_preds(baseline_preds, geos, bind_rows(tedf, edf), fd)
+```
+
+Unlike for smooth quantile regression, the resulting forecasts are not smooth curves, but rather jagged and irregular in shape.
+
+For a more formal comparison between the two approaches, we could compare the test performance in terms of accuracy through calculating either the, MAE or MSE, where the performance measure of choice can be calculated over over all times and locations for each ahead value
+
+```{r, message = FALSE}
+baseline_preds_df = baseline_preds %>% 
+  left_join(tedf_sub) %>% 
+  group_by(ahead) %>% 
+  mutate(error = abs(`0.5` - actual)) %>%
+  summarise(mean = mean(error)) %>% 
+  mutate(type = "baseline")
+
+smooth_preds_df = smooth_preds %>% 
+  left_join(tedf_sub) %>% 
+  group_by(ahead) %>% 
+  mutate(error = abs(`0.5` - actual)) %>%
+  summarise(mean = mean(error)) %>% 
+  mutate(type = "smooth")
+
+preds_df <- bind_rows(baseline_preds_df, smooth_preds_df)
+
+ggplot(preds_df, aes(ahead, mean, color = type)) + 
+  geom_line() +
+  xlab("Ahead") +
+  ylab("Mean MAE")
+```
+
+or over all aheads, times, and locations for a single numerical summary.
+
+```{r}
+mean(baseline_preds_df$mean)
+mean(smooth_preds_df$mean)
+```
+
+The former shows that forecasts for the immediate future and for the distant future are more inaccurate for both models under consideration. This demonstrates the standard conclusion that the farther ahead in time, the more challenging the forecasting. The latter shows that the smooth quantile regression model and baseline models perform very similarly, with the smooth quantile regression model only slightly beating the baseline model in terms of overall MAE.
+
+# What we've learned in a nutshell
+
+Smooth quantile regression is used in multi-period forecasting for predicting several horizons simultaneously with a single smooth curve. It operates under the key assumption that the future of the response can be approximated well by a smooth curve. 
+
+# Attribution
+
+The information presented on smooth quantile regression is from [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723).
