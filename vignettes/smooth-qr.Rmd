@@ -55,7 +55,7 @@ library(epipredict)
 library(tidyverse)
 ```
 
-We will now apply smooth quantile regression on the real data used for COVID-19 forecasting. The built-in dataset we will use is a subset of JHU daily data on state cases and deaths. This sample data ranges from Dec 31, 2020 to Dec 31, 2021.
+We will now apply smooth quantile regression on the real data used for COVID-19 forecasting. The built-in dataset we will use is a subset of JHU daily data on state cases and deaths. This sample data ranges from Dec. 31, 2020 to Dec. 31, 2021.
 
 ```{r}
 edf <- case_death_rate_subset 
