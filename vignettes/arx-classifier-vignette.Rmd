@@ -31,7 +31,7 @@ jhu <- case_death_rate_subset %>%
   dplyr::filter(
     time_value >= "2021-06-04",
     time_value <= "2021-12-31",
-    geo_value %in% c("ca", "fl", "tx", "ny", "nj")
+    geo_value %in% c("ca", "fl", "tx", "ny", "nj") 
   ) 
 
 out <- arx_classifier(jhu, 
