@@ -16,7 +16,8 @@ knitr::opts_chunk$set(
 ## Load required packages
 
 ```{r, message = FALSE, warning = FALSE}
-library(tidyverse)
+library(dplyr)
+library(purrr)
 library(epipredict)
 ```
 
