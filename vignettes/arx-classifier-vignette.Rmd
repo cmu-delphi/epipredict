@@ -31,12 +31,12 @@ jhu <- case_death_rate_subset %>%
   dplyr::filter(
     time_value >= "2021-06-04",
     time_value <= "2021-12-31",
-    geo_value %in% c("ca", "fl", "tx", "ny", "nj") 
-  ) 
+    geo_value %in% c("ca", "fl", "tx", "ny", "nj")
+  )
 
-out <- arx_classifier(jhu, 
-                      outcome = "case_rate", 
-                      predictors = "case_rate" 
+out <- arx_classifier(jhu,
+  outcome = "case_rate",
+  predictors = "case_rate"
 )
 
 out$predictions
@@ -55,12 +55,12 @@ From the parsnip model specification, we can see that the trainer used is logist
 If you use the default trainer of logistic regression for binary classification and you decide against using the default break of 0.25, then you should only input one break so that there are two classification bins to properly dichotomize the outcome. For example, let's set a break of 0.5 instead of relying on the default of 0.25. We can do this by passing 0.5 to the `breaks` argument in `arx_class_args_list()` as follows:
 
 ```{r}
-out_break_0.5 <- arx_classifier(jhu, 
-                      outcome = "case_rate", 
-                      predictors = "case_rate",
-                      args_list = arx_class_args_list(
-                        breaks = 0.5
-                        )
+out_break_0.5 <- arx_classifier(jhu,
+  outcome = "case_rate",
+  predictors = "case_rate",
+  args_list = arx_class_args_list(
+    breaks = 0.5
+  )
 )
 
 out_break_0.5$predictions
@@ -129,15 +129,16 @@ The other optional arguments for controlling the growth rate calculation (that c
 To visualize the prediction classes across the states for the target date, we can plot our results as a heatmap. However, if we were to plot the results for only one target date, like our 7-day ahead predictions, then that would be a pretty sad heatmap (which would look more like a bar chart than a heatmap)... So instead of doing that, let's get predictions for several aheads and plot a heatmap across the target dates. To get the predictions across several ahead values, we will use the map function in the same way that we did in other vignettes:
 
 ```{r}
-multi_log_res <- map(1:14, ~  arx_classifier(
+multi_log_res <- map(1:14, ~ arx_classifier(
   jhu,
   outcome = "case_rate",
   predictors = "case_rate",
   args_list = arx_class_args_list(
-    breaks = 0.25 / 7,  
+    breaks = 0.25 / 7,
     ahead = .x,
     horizon = .x,
-  ))$predictions) %>% list_rbind()
+  )
+)$predictions) %>% list_rbind()
 ```
 
 Notice that the ahead and horizon are what we are are changing when we use `map()`. The reason we must also change `horizon` is because that is passed to the `h` argument of `epiprocess::growth_rate()` and determines the amount of data used to calculate the growth rate. So, for nearly all intents and purposes, it should be the same as `ahead`.
@@ -145,11 +146,10 @@ Notice that the ahead and horizon are what we are are changing when we use `map(
 We can plot a the heatmap of the results over the aheads to see if there's anything novel or interesting:
 
 ```{r}
-ggplot(multi_log_res, aes(target_date, geo_value, fill = .pred_class)) + 
-         geom_tile() + 
+ggplot(multi_log_res, aes(target_date, geo_value, fill = .pred_class)) +
+  geom_tile() +
   ylab("State") +
   xlab("Target date")
-
 ```
 
 While there is a bit of variability near to the beginning, we can clearly see that there are upswings for all states starting from the beginning of January 2022, which we can recall was when there was a massive spike in cases for many states. So our results seem to align well with what actually happened at the beginning of January 2022.
@@ -157,4 +157,3 @@ While there is a bit of variability near to the beginning, we can clearly see th
 ## A brief reflection
 
 The most noticeable benefit of using the `arx_classifier()` function is the simplification and reduction of the manual implementation of the classifier from about 30 down to 3 lines. However, as we noted before, the trade-off for simplicity is control over the precise pre-processing, post-processing, and additional features embedded in the coding of a classifier. So the good thing is that `epipredict` provides both - a built-in `arx_classifer()` or the means to implement your own classifier from scratch by using the `epi_workflow` framework. And which you choose depends on the circumstances. Our advice is to start with using the built-in classifier for ostensibly simple projects and begin to implement your own when the modelling project takes a complicated turn. To get some practice on coding up a classifier by hand, consider to take this opportunity to translate this binary classification model example to an `epi_workflow`, akin to that in [Examples of Preprocessing and Models vignette](https://cmu-delphi.github.io/epipredict/articles/preprocessing-and-models.html). #%% takes a complex turn, increases in complexity
-
