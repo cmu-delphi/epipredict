@@ -67,7 +67,7 @@ However, there are some trade-offs to bear in mind. For instance, since we are u
 
 ```{r, message = FALSE, warning = FALSE}
 library(covidcast)
-library(tidyverse)
+library(dplyr)
 library(purrr)
 library(epipredict)
 library(recipes)
