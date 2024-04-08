@@ -58,7 +58,7 @@ library(tidyverse)
 We will now apply smooth quantile regression on the real data used for COVID-19 forecasting. The built-in dataset we will use is a subset of JHU daily data on state cases and deaths. This sample data ranges from Dec. 31, 2020 to Dec. 31, 2021.
 
 ```{r}
-edf <- case_death_rate_subset 
+edf <- case_death_rate_subset
 ```
 
 We will set the forecast date to be November 30, 2021 so that we can produce forecasts for target dates of 1 to 28 days ahead. We construct our test data, `tedf` from the days beyond this.
@@ -107,37 +107,37 @@ After creating our `epi_workflow` with these components, we get our test data ba
 We input our forecaster into a function for ease of use. 
 
 ```{r}
-smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd){
-rec <- epi_recipe(x) %>%
-  step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-  step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-  step_epi_ahead(death_rate, ahead = aheads)
+smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd) {
+  rec <- epi_recipe(x) %>%
+    step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = aheads)
 
-f <- frosting() %>%
-  layer_predict() %>%
-  layer_unnest(.pred) %>%
-  layer_naomit(distn) %>%
-  layer_add_forecast_date() %>%
-  layer_threshold(distn)
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_unnest(.pred) %>%
+    layer_naomit(distn) %>%
+    layer_add_forecast_date() %>%
+    layer_threshold(distn)
 
-ee <- smooth_quantile_reg(
-  quantile_levels = quantiles,
-  outcome_locations = aheads,
-  degree = degree
-)
+  ee <- smooth_quantile_reg(
+    quantile_levels = quantiles,
+    outcome_locations = aheads,
+    degree = degree
+  )
 
-ewf <- epi_workflow(rec, ee, f)
+  ewf <- epi_workflow(rec, ee, f)
 
-the_fit <- ewf %>% fit(x)
+  the_fit <- ewf %>% fit(x)
 
-latest <- get_test_data(rec, x, fill_locf = TRUE)
+  latest <- get_test_data(rec, x, fill_locf = TRUE)
 
-preds <- predict(the_fit, new_data = latest) %>%
-  mutate(forecast_date = fd, target_date = fd + ahead) %>%
-  select(geo_value, target_date, distn, ahead) %>%
-  pivot_quantiles_wider(distn)
+  preds <- predict(the_fit, new_data = latest) %>%
+    mutate(forecast_date = fd, target_date = fd + ahead) %>%
+    select(geo_value, target_date, distn, ahead) %>%
+    pivot_quantiles_wider(distn)
 
-preds
+  preds
 }
 ```
 
@@ -163,18 +163,19 @@ We can see that we have different columns for the different quantile predictions
 Let's visualize these results for the sample of two states. We will create a simple plotting function, under which the median predictions are an orange line and the surrounding quantiles are blue bands around this. For comparison, we will include the actual values over time as a black line.
 
 ```{r}
-plot_preds <- function(preds, geos_to_plot = NULL, train_test_dat, fd){
-  
+plot_preds <- function(preds, geos_to_plot = NULL, train_test_dat, fd) {
   if (!is.null(geos_to_plot)) {
     preds <- preds %>% filter(geo_value %in% geos_to_plot)
     train_test_dat <- train_test_dat %>% filter(geo_value %in% geos_to_plot)
   }
-  
+
   ggplot(preds) +
     geom_ribbon(aes(target_date, ymin = `0.1`, ymax = `0.9`),
-                fill = "cornflowerblue", alpha = .8) +
+      fill = "cornflowerblue", alpha = .8
+    ) +
     geom_ribbon(aes(target_date, ymin = `0.25`, ymax = `0.75`),
-                fill = "#00488E", alpha = .8) +
+      fill = "#00488E", alpha = .8
+    ) +
     geom_line(data = train_test_dat, aes(time_value, death_rate), size = 1.5) +
     geom_line(aes(target_date, `0.5`), color = "orange", size = 1.5) +
     geom_vline(xintercept = fd) +
@@ -200,33 +201,32 @@ We can test the impact of different degrees by using the `map()` function. Let's
 
 ```{r, warning = FALSE}
 smooth_preds_list <- map(1:7, ~ smooth_fc(edf,
-                                degree = .x,
-                                quantiles = c(.1, .25, .5, .75, .9), 
-                                fd = fd) %>% 
-                mutate(degree = .x)
-
-) %>% list_rbind()
+  degree = .x,
+  quantiles = c(.1, .25, .5, .75, .9),
+  fd = fd
+) %>%
+  mutate(degree = .x)) %>% list_rbind()
 ```
 
 One way to quantify the impact of these on the forecasting is to look at the mean absolute error (MAE) or mean squared error (MSE) over the degrees. We can select the degree that results in the lowest MAE. 
 
 Since the MAE compares the predicted values to the actual values, we will first join the test data to the predicted data for our comparisons:
 ```{r, message = FALSE}
-tedf_sub <- tedf %>% 
+tedf_sub <- tedf %>%
   rename(target_date = time_value, actual = death_rate) %>%
   select(geo_value, target_date, actual)
 
-smooth_preds_df_deg = smooth_preds_list %>% 
-  left_join(tedf_sub) 
+smooth_preds_df_deg <- smooth_preds_list %>%
+  left_join(tedf_sub)
 ```
 
 And then compute the MAE for each of the degrees:
 ```{r, message = FALSE}
-smooth_preds_df_deg = smooth_preds_list %>% 
-  left_join(tedf_sub) %>% 
-  group_by(degree) %>% 
+smooth_preds_df_deg <- smooth_preds_list %>%
+  left_join(tedf_sub) %>%
+  group_by(degree) %>%
   mutate(error = abs(`0.5` - actual)) %>%
-  summarise(mean = mean(error)) 
+  summarise(mean = mean(error))
 
 # Arrange the MAE from smallest to largest
 head(smooth_preds_df_deg %>% arrange(mean))
@@ -235,7 +235,7 @@ head(smooth_preds_df_deg %>% arrange(mean))
 Instead of just looking at the raw numbers, let's create a simple line plot to visualize how the MAE changes over degrees for this data:
 
 ```{r}
-ggplot(smooth_preds_df_deg, aes(degree, mean)) + 
+ggplot(smooth_preds_df_deg, aes(degree, mean)) +
   geom_line() +
   xlab("Degrees of freedom") +
   ylab("Mean MAE")
@@ -249,7 +249,7 @@ Now, we will briefly compare the results from using smooth quantile regression t
 
 To get the basic quantile regression results we can utilize the forecaster that we've already built. We can simply set the degree to be the number of ahead values to re-run the code without smoothing. 
 ```{r, warning = FALSE}
-baseline_preds <- smooth_fc(edf, degree = 28L, quantiles = c(.1, .25, .5, .75, .9), fd = fd) 
+baseline_preds <- smooth_fc(edf, degree = 28L, quantiles = c(.1, .25, .5, .75, .9), fd = fd)
 ```
 
 And we can produce the corresponding plot to inspect the predictions obtained under the baseline model:
@@ -263,23 +263,23 @@ Unlike for smooth quantile regression, the resulting forecasts are not smooth cu
 For a more formal comparison between the two approaches, we could compare the test performance in terms of accuracy through calculating either the, MAE or MSE, where the performance measure of choice can be calculated over over all times and locations for each ahead value
 
 ```{r, message = FALSE}
-baseline_preds_df = baseline_preds %>% 
-  left_join(tedf_sub) %>% 
-  group_by(ahead) %>% 
+baseline_preds_df <- baseline_preds %>%
+  left_join(tedf_sub) %>%
+  group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
-  summarise(mean = mean(error)) %>% 
+  summarise(mean = mean(error)) %>%
   mutate(type = "baseline")
 
-smooth_preds_df = smooth_preds %>% 
-  left_join(tedf_sub) %>% 
-  group_by(ahead) %>% 
+smooth_preds_df <- smooth_preds %>%
+  left_join(tedf_sub) %>%
+  group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
-  summarise(mean = mean(error)) %>% 
+  summarise(mean = mean(error)) %>%
   mutate(type = "smooth")
 
 preds_df <- bind_rows(baseline_preds_df, smooth_preds_df)
 
-ggplot(preds_df, aes(ahead, mean, color = type)) + 
+ggplot(preds_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean MAE")
