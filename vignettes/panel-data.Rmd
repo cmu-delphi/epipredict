@@ -77,9 +77,6 @@ modifications to get a subset of the full dataset:
 * Choose a subset of covariates and aggregate across the remaining ones. The 
 chosen covariates are age group, and educational qualification.
 
-Code to obtain the full data and subset it as we 
-just described is available in `vignettes/panel-data-gemploy.R`.
-
 To use this data with `epipredict`, we need to convert it into `epi_df` format 
 using `epiprocess::as_epi_df()`
 with additional keys. In our case, the additional keys are `age_group`,
@@ -90,9 +87,7 @@ lag and ahead modifications later on are using the correct time units. See the
 a list of all the `time_type`s available.
 
 ```{r convert-to-epidf, eval=F}
-gemploy <- readRDS("gemploy.rds")
-grad_employ_subset <- gemploy %>%
-  as_epi_df(additional_metadata = c(other_keys = list("age_group", "edu_qual")))
+data("grad_employ_subset")
 ```
 
 ```{r data-dim, include=F}
