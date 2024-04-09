@@ -55,7 +55,6 @@ arx_lags_validator <- function(predictors, lags) {
 #' @export
 print.alist <- function(x, ...) {
   nm <- names(x)
-  max_wid <- max(nchar(nm))
   for (i in seq_along(x)) {
     if (is.null(x[[i]])) x[[i]] <- "NULL"
     if (length(x[[i]]) == 0L) x[[i]] <- "_empty_"
