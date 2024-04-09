@@ -61,10 +61,7 @@ versions for the less up-to-date input archive.
 ```{r grab-epi-data}
 theme_set(theme_bw())
 
-y <- readRDS(system.file(
-  "extdata", "all_states_covidcast_signals.rds",
-  package = "epipredict", mustWork = TRUE
-))
+y <- readRDS("all_states_covidcast_signals.rds")
 
 y <- purrr::map(y, ~ select(.x, geo_value, time_value, version = issue, value))
 

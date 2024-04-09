@@ -77,94 +77,22 @@ modifications to get a subset of the full dataset:
 * Choose a subset of covariates and aggregate across the remaining ones. The 
 chosen covariates are age group, and educational qualification.
 
-Below is the query for obtaining the full data and code for subsetting it as we 
-just described:
-
-```{r employ-query, eval=F}
-library(cansim)
-
-# Get statcan data using get_cansim, which returns a tibble
-statcan_grad_employ <- get_cansim("37-10-0115-01")
-
-gemploy <- statcan_grad_employ %>%
-  # Drop some columns and rename the ones we keep
-  select(c(
-    "REF_DATE", "GEO", "VALUE", "STATUS", "Educational qualification",
-    "Field of study", "Gender", "Age group", "Status of student in Canada",
-    "Characteristics after graduation", "Graduate statistics"
-  )) %>%
-  rename(
-    "geo_value" = "GEO",
-    "time_value" = "REF_DATE",
-    "value" = "VALUE",
-    "status" = "STATUS",
-    "edu_qual" = "Educational qualification",
-    "fos" = "Field of study",
-    "gender" = "Gender",
-    "age_group" = "Age group",
-    "student_status" = "Status of student in Canada",
-    "grad_charac" = "Characteristics after graduation",
-    "grad_stat" = "Graduate statistics"
-  ) %>%
-  # The original `VALUE` column contain the statistic indicated by
-  # `Graduate statistics` in the original data. Below we pivot the data
-  # wider so that each unique statistic can have its own column.
-  mutate(
-    # Recode for easier pivoting
-    grad_stat = recode_factor(
-      grad_stat,
-      `Number of graduates` = "num_graduates",
-      `Median employment income two years after graduation` = "med_income_2y",
-      `Median employment income five years after graduation` = "med_income_5y"
-    ),
-    # They are originally strings but want ints for conversion to epi_df later
-    time_value = as.integer(time_value)
-  ) %>%
-  pivot_wider(names_from = grad_stat, values_from = value) %>%
-  filter(
-    # Drop aggregates for some columns
-    geo_value != "Canada" &
-      age_group != "15 to 64 years" &
-      edu_qual != "Total, educational qualification" &
-      # Keep aggregates for keys we don't want to keep
-      fos == "Total, field of study" &
-      gender == "Total, gender" &
-      student_status == "Canadian and international students" &
-      # Since we're looking at 2y and 5y employment income, the only
-      # characteristics remaining are:
-      # - Graduates reporting employment income
-      # - Graduates reporting wages, salaries, and commissions only
-      # For simplicity, keep the first one only
-      grad_charac == "Graduates reporting employment income" &
-      # Only keep "good" data
-      is.na(status) &
-      # Drop NA value rows
-      !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)
-  ) %>%
-  select(-c(status, gender, student_status, grad_charac, fos))
-```
+Code to obtain the full data and subset it as we 
+just described is available in `vignettes/panel-data-gemploy.R`.
 
 To use this data with `epipredict`, we need to convert it into `epi_df` format 
-using [`as_epi_df`](
-  https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html) 
+using `epiprocess::as_epi_df()`
 with additional keys. In our case, the additional keys are `age_group`,
 and `edu_qual`. Note that in the above modifications, we encoded `time_value` 
 as type `integer`. This lets us set `time_type = "year"`, and ensures that
 lag and ahead modifications later on are using the correct time units. See the
-[`epi_df` documentation](
-  https://cmu-delphi.github.io/epiprocess/reference/epi_df.html#time-types) for 
-a list of all the `type_type`s available.
+`epiprocess::epi_df` for 
+a list of all the `time_type`s available.
 
 ```{r convert-to-epidf, eval=F}
+gemploy <- readRDS("gemploy.rds")
 grad_employ_subset <- gemploy %>%
-  tsibble::as_tsibble(
-    index = time_value,
-    key = c(geo_value, age_group, edu_qual)
-  ) %>%
-  as_epi_df(
-    geo_type = "custom", time_type = "year",
-    additional_metadata = c(other_keys = list("age_group", "edu_qual"))
-  )
+  as_epi_df(additional_metadata = c(other_keys = list("age_group", "edu_qual")))
 ```
 
 ```{r data-dim, include=F}
