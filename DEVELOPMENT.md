@@ -30,6 +30,7 @@ pkgdown::build_site(preview=TRUE)
 The `main` version is available at `file:///<local path>/epidatr/epipredict/index.html` and `dev` at `file:///<local path>/epipredict/docs/dev/index.html`.
 
 You can also build the docs manually and launch the site with python. From the terminal, this looks like
+
 ```bash
 R -e 'devtools::document()'
 python -m http.server -d docs
@@ -37,19 +38,7 @@ python -m http.server -d docs
 
 ## Versioning
 
-Please follow the guidelines in the PR template document (reproduced here):
-
--   [ ] Make sure this PR is against "dev", not "main".
--   [ ] Request a review from one of the current epipredict main reviewers:
-        dajmcdon.
--   [ ] Makes sure to bump the version number in `DESCRIPTION` and `NEWS.md`.
-        Always increment the patch version number (the third number), unless you are
-        making a release PR from dev to main, in which case increment the minor
-        version number (the second number).
--   [ ] Describe changes made in NEWS.md, making sure breaking changes
-        (backwards-incompatible changes to the documented interface) are noted.
-        Collect the changes under the next release number (e.g. if you are on
-        0.7.2, then write your changes under the 0.8 heading).
+Please follow the guidelines in the [PR template document](.github/pull_request_template.md).
 
 ## Release process
 

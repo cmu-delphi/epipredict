@@ -34,7 +34,7 @@ test_that("step_growth_rate works for a single signal", {
 
   res <- r %>%
     step_growth_rate(value, horizon = 1) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$gr_1_rel_change_value, c(NA, 1 / 6:9))
 
@@ -46,7 +46,7 @@ test_that("step_growth_rate works for a single signal", {
   r <- epi_recipe(edf)
   res <- r %>%
     step_growth_rate(value, horizon = 1) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$gr_1_rel_change_value, rep(c(NA, 1 / 6:9), each = 2))
 })
@@ -63,7 +63,7 @@ test_that("step_growth_rate works for a two signals", {
 
   res <- r %>%
     step_growth_rate(v1, v2, horizon = 1) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$gr_1_rel_change_v1, c(NA, 1 / 6:9))
   expect_equal(res$gr_1_rel_change_v2, c(NA, 1 / 1:4))
@@ -76,7 +76,7 @@ test_that("step_growth_rate works for a two signals", {
   r <- epi_recipe(edf)
   res <- r %>%
     step_growth_rate(v1, v2, horizon = 1) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$gr_1_rel_change_v1, rep(c(NA, 1 / 6:9), each = 2))
   expect_equal(res$gr_1_rel_change_v2, rep(c(NA, 1 / 1:4), each = 2))

@@ -47,8 +47,7 @@ flatline_forecaster <- function(
     step_training_window(n_recent = args_list$n_training)
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
-
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   latest <- get_test_data(
     epi_recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
@@ -130,6 +129,15 @@ flatline_args_list <- function(
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
+
+  if (!is.null(forecast_date) && !is.null(target_date)) {
+    if (forecast_date + ahead != target_date) {
+      cli::cli_warn(c(
+        "`forecast_date` + `ahead` must equal `target_date`.",
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+      ))
+    }
+  }
 
   structure(
     enlist(

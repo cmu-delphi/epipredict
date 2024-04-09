@@ -143,7 +143,7 @@ arx_fcast_epi_workflow <- function(
     }
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
@@ -260,6 +260,15 @@ arx_args_list <- function(
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
+  if (!is.null(forecast_date) && !is.null(target_date)) {
+    if (forecast_date + ahead != target_date) {
+      cli::cli_warn(c(
+        "`forecast_date` + `ahead` must equal `target_date`.",
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+      ))
+    }
+  }
+
   max_lags <- max(lags)
   structure(
     enlist(
@@ -289,8 +298,8 @@ print.arx_fcast <- function(x, ...) {
 }
 
 compare_quantile_args <- function(alist, tlist) {
-  default_alist <- eval(formals(arx_args_list)$quantile_level)
-  default_tlist <- eval(formals(quantile_reg)$quantile_level)
+  default_alist <- eval(formals(arx_args_list)$quantile_levels)
+  default_tlist <- eval(formals(quantile_reg)$quantile_levels)
   if (setequal(alist, default_alist)) {
     if (setequal(tlist, default_tlist)) {
       return(sort(unique(union(alist, tlist))))

@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.9
+Version: 0.0.12
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -31,13 +31,10 @@ Imports:
     cli,
     distributional,
     dplyr,
-    fs,
     generics,
     glue,
     hardhat (>= 1.3.0),
-    lifecycle,
     magrittr,
-    methods,
     quantreg,
     recipes (>= 1.0.4),
     rlang,
@@ -46,13 +43,14 @@ Imports:
     tibble,
     tidyr,
     tidyselect,
-    usethis,
+    tsibble,
     vctrs,
     workflows (>= 1.0.0)
 Suggests:
     covidcast,
     data.table,
     epidatr (>= 1.0.0),
+    fs,
     ggplot2,
     knitr,
     lubridate,
@@ -61,6 +59,7 @@ Suggests:
     RcppRoll,
     rmarkdown,
     testthat (>= 3.0.0),
+    usethis,
     xgboost
 VignetteBuilder:
     knitr

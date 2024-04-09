@@ -1,15 +1,32 @@
 url: https://cmu-delphi.github.io/epipredict/
+
+# This is to give a default value to the `mode` parameter in the
+# `pkgdown::build_site()` function. This is useful when building the site locally,
+# as it will default to `devel` mode. In practice, this should all be handled
+# dynamically by the CI/CD pipeline.
+development:
+  mode: devel
+  version_label: success
+
 template:
   bootstrap: 5
   bootswatch: cosmo
   bslib:
     font_scale: 1.0
-    primary: '#C41230'
-    link-color: '#C41230'
+    primary: "#C41230"
+    success: "#B4D43C"
+    link-color: "#C41230"
 
 navbar:
   bg: primary
-  type: dark
+  type: light
+
+repo:
+  url:
+    home: https://github.com/cmu-delphi/epipredict/tree/main/
+    source: https://github.com/cmu-delphi/epipredict/blob/main/
+    issue: https://github.com/cmu-delphi/epipredict/issues
+    user: https://github.com/
 
 home:
   links:

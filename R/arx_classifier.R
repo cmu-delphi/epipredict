@@ -197,7 +197,7 @@ arx_class_epi_workflow <- function(
     }
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
@@ -298,6 +298,15 @@ arx_class_args_list <- function(
   }
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
+
+  if (!is.null(forecast_date) && !is.null(target_date)) {
+    if (forecast_date + ahead != target_date) {
+      cli::cli_warn(c(
+        "`forecast_date` + `ahead` must equal `target_date`.",
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+      ))
+    }
+  }
 
   breaks <- sort(breaks)
   if (min(breaks) > -Inf) breaks <- c(-Inf, breaks)

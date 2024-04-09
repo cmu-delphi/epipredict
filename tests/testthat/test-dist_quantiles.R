@@ -10,14 +10,6 @@ test_that("constructor returns reasonable quantiles", {
   expect_error(new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
 })
 
-test_that("tail functions give reasonable output", {
-  expect_equal(norm_q_par(qnorm(c(.75, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(norm_q_par(qnorm(c(.25, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(norm_q_par(qnorm(c(.25, .5), 0, 1)), list(m = 0, s = 1))
-  expect_equal(exp_q_par(qlaplace(c(.75, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(exp_q_par(qlaplace(c(.25, .5), 10, 5)), list(m = 10, s = 5))
-  expect_equal(exp_q_par(qlaplace(c(.25, .5), 0, 1)), list(m = 0, s = 1))
-})
 
 test_that("single dist_quantiles works, quantiles are accessible", {
   z <- new_quantiles(values = 1:5, quantile_levels = c(.2, .4, .5, .6, .8))
@@ -36,17 +28,44 @@ test_that("single dist_quantiles works, quantiles are accessible", {
 
 test_that("quantile extrapolator works", {
   dstn <- dist_normal(c(10, 2), c(5, 10))
-  qq <- extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+  qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
-  expect_length(parameters(qq[1])$q[[1]], 3L)
-
+  expect_length(parameters(qq[1])$quantile_levels[[1]], 3L)
 
   dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-  qq <- extrapolate_quantiles(dstn, p = c(.25, 0.5, .75))
+  qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
-  expect_length(parameters(qq[1])$q[[1]], 7L)
+  expect_length(parameters(qq[1])$quantile_levels[[1]], 7L)
+})
+
+test_that("small deviations of quantile requests work", {
+  l <- c(.05, .1, .25, .75, .9, .95)
+  v <- c(0.0890306, 0.1424997, 0.1971793, 0.2850978, 0.3832912, 0.4240479)
+  badl <- l
+  badl[1] <- badl[1] - 1e-14
+  distn <- dist_quantiles(list(v), list(l))
+
+  # was broken before, now works
+  expect_equal(quantile(distn, l), quantile(distn, badl))
+
+  # The tail extrapolation was still poor. It needs to _always_ use
+  # the smallest (largest) values or we could end up unsorted
+  l <- 1:9 / 10
+  v <- 1:9
+  distn <- dist_quantiles(list(v), list(l))
+  expect_equal(quantile(distn, c(.25, .75)), list(c(2.5, 7.5)))
+  expect_equal(quantile(distn, c(.1, .9)), list(c(1, 9)))
+  qv <- data.frame(q = l, v = v)
+  expect_equal(
+    unlist(quantile(distn, c(.01, .05))),
+    tail_extrapolate(c(.01, .05), head(qv, 2))
+  )
+  expect_equal(
+    unlist(quantile(distn, c(.99, .95))),
+    tail_extrapolate(c(.95, .99), tail(qv, 2))
+  )
 })
 
 test_that("unary math works on quantiles", {
