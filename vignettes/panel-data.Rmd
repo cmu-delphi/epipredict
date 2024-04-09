@@ -184,7 +184,7 @@ values are both in years.
 
 ```{r make-recipe, include=T, eval=T}
 r <- epi_recipe(employ_small) %>%
-  step_epi_ahead(num_graduates_prop, ahead = 1) %>% 
+  step_epi_ahead(num_graduates_prop, ahead = 1) %>%
   step_epi_lag(num_graduates_prop, lag = 0:2) %>%
   step_epi_naomit()
 r
@@ -196,7 +196,10 @@ and `ahead` columns.
 ```{r view-preprocessed, include=T}
 # Display a sample of the preprocessed data
 bake_and_show_sample <- function(recipe, data, n = 5) {
-  recipe %>% prep(data) %>% bake(new_data = data) %>% sample_n(n)
+  recipe %>%
+    prep(data) %>%
+    bake(new_data = data) %>%
+    sample_n(n)
 }
 
 r %>% bake_and_show_sample(employ_small)
@@ -354,7 +357,7 @@ f <- frosting() %>%
   layer_threshold(.pred, lower = 0) %>%
   # 90% prediction interval
   layer_residual_quantiles(
-    quantile_levels = c(0.1, 0.9), 
+    quantile_levels = c(0.1, 0.9),
     symmetrize = FALSE
   ) %>%
   layer_population_scaling(

@@ -48,7 +48,8 @@ gemploy <- statcan_grad_employ %>%
     "Age group",
     "Status of student in Canada",
     "Characteristics after graduation",
-    "Graduate statistics")) %>%
+    "Graduate statistics"
+  )) %>%
   rename(
     "geo_value" = "GEO",
     "time_value" = "REF_DATE",
@@ -60,13 +61,15 @@ gemploy <- statcan_grad_employ %>%
     "age_group" = "Age group",
     "student_status" = "Status of student in Canada",
     "grad_charac" = "Characteristics after graduation",
-    "grad_stat" = "Graduate statistics") %>%
+    "grad_stat" = "Graduate statistics"
+  ) %>%
   mutate(
     grad_stat = recode_factor(
       grad_stat,
       `Number of graduates` = "num_graduates",
       `Median employment income two years after graduation` = "med_income_2y",
-      `Median employment income five years after graduation` = "med_income_5y"),
+      `Median employment income five years after graduation` = "med_income_5y"
+    ),
     time_value = as.integer(time_value)
   ) %>%
   pivot_wider(names_from = grad_stat, values_from = value) %>%
@@ -88,7 +91,8 @@ gemploy <- statcan_grad_employ %>%
       # Only keep "good" data
       is.na(status) &
       # Drop NA value rows
-      !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)) %>%
+      !is.na(num_graduates) & !is.na(med_income_2y) & !is.na(med_income_5y)
+  ) %>%
   select(-c(status, gender, student_status, grad_charac, fos))
 
 nrow(gemploy)
