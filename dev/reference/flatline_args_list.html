@@ -156,41 +156,35 @@ total amount of recent data to examine.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_levels: num [1:2] 0.05 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "flat_fcast" "alist"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span> and <span style="color: #0000BB;">0.95</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">TRUE</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nafill_buffer : <span style="color: #0000BB;">Inf</span></span>
 <span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>symmetrize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_levels: num [1:2] 0.05 0.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "flat_fcast" "alist"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span> and <span style="color: #0000BB;">0.95</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">FALSE</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nafill_buffer : <span style="color: #0000BB;">Inf</span></span>
 <span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, n_training <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> List of 9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ ahead          : int 7</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ n_training     : num 120</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ forecast_date  : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ target_date    : NULL</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_levels: num [1:4] 0.1 0.3 0.7 0.9</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ symmetrize     : logi TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nonneg         : logi TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ quantile_by_key: chr(0) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ nafill_buffer  : num Inf</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  - attr(*, "class")= chr [1:2] "flat_fcast" "alist"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">120</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.1</span>, <span style="color: #0000BB;">0.3</span>, <span style="color: #0000BB;">0.7</span>, and <span style="color: #0000BB;">0.9</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">TRUE</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nafill_buffer : <span style="color: #0000BB;">Inf</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
