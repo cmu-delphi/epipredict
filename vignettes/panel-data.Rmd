@@ -86,10 +86,6 @@ lag and ahead modifications later on are using the correct time units. See the
 `epiprocess::epi_df` for 
 a list of all the `time_type`s available.
 
-```{r convert-to-epidf, eval=F}
-data("grad_employ_subset")
-```
-
 ```{r data-dim, include=F}
 employ_rowcount <- format(nrow(grad_employ_subset), big.mark = ",")
 employ_colcount <- length(names(grad_employ_subset))
@@ -387,7 +383,7 @@ predsx <- predict(wfx_linreg, latest)
 # Display values within prediction intervals
 predsx %>%
   select(
-    geo_value, time_value, edu_qual, age_group, fos,
+    geo_value, time_value, edu_qual, age_group,
     .pred_scaled, .pred_distn_scaled
   ) %>%
   head() %>%
