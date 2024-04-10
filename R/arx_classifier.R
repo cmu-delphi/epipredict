@@ -87,11 +87,11 @@ arx_classifier <- function(
 #' may alter the returned `epi_workflow` object but can be omitted.
 #'
 #' @inheritParams arx_classifier
-#' @param trainer A `{parsnip}` model describing the type of estimation.
-#'  For now, we enforce `mode = "classification"`. Typical values are
+#' @param trainer A `{parsnip}` model describing the type of estimation. For
+#'  now, we enforce `mode = "classification"`. Typical values are
 #'  [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
-#'  trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can
-#'  also be used. May be `NULL` (the default).
+#'  trainers like [parsnip::naive_Bayes()] or [parsnip::rand_forest()] can also
+#'  be used. May be `NULL` if you'd like to decide later.
 #'
 #' @return An unfit `epi_workflow`.
 #' @export
@@ -117,7 +117,7 @@ arx_class_epi_workflow <- function(
     epi_data,
     outcome,
     predictors,
-    trainer = NULL,
+    trainer = parsnip::logistic_reg(),
     args_list = arx_class_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_class", "alist"))) {
