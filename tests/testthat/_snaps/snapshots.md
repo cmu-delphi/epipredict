@@ -94,8 +94,8 @@
         0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
     "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", "list"
     )), forecast_date = structure(c(18992, 18992, 18992, 18992, 18992, 
-    18992), class = "Date"), target_date = structure(c(19000, 19000, 
-    19000, 19000, 19000, 19000), class = "Date")), row.names = c(NA, 
+    18992), class = "Date"), target_date = structure(c(18993, 18993, 
+    18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
 # cdc_baseline_forecaster snapshots

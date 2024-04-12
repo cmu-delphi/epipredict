@@ -51,14 +51,14 @@ including the \code{geo_value}
 \item \code{none} - no coloring aesthetic is applied
 }}
 
-\item{.facet_by}{Similar to \code{.color_by} except that the default is to display
-each numeric variable on a separate facet}
+\item{.facet_by}{Similar to \code{.color_by} except that the default is to
+display the response.}
 
 \item{.base_color}{If available, prediction bands will be shown with this
 color.}
 
-\item{.point_pred_color}{If available, point forecasts will be shown with this
-color.}
+\item{.point_pred_color}{If available, point forecasts will be shown with
+this color.}
 
 \item{.max_facets}{Cut down of the number of facets displayed. Especially
 useful for testing when there are many \code{geo_value}'s or keys.}
