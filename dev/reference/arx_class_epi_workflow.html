@@ -16,7 +16,7 @@ may alter the returned epi_workflow object but can be omitted."><meta name="robo
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.12</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.13</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@ may alter the returned <code>epi_workflow</code> object but can be omitted.</p>
 <span>  <span class="va">epi_data</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
 <span>  <span class="va">predictors</span>,</span>
-<span>  trainer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  trainer <span class="op">=</span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/logistic_reg.html" class="external-link">logistic_reg</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="arx_class_args_list.html">arx_class_args_list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -104,11 +104,11 @@ outcome variable, so make sure to specify it.</p></dd>
 
 
 <dt>trainer</dt>
-<dd><p>A <code>{parsnip}</code> model describing the type of estimation.
-For now, we enforce <code>mode = "classification"</code>. Typical values are
+<dd><p>A <code>{parsnip}</code> model describing the type of estimation. For
+now, we enforce <code>mode = "classification"</code>. Typical values are
 <code><a href="https://parsnip.tidymodels.org/reference/logistic_reg.html" class="external-link">parsnip::logistic_reg()</a></code> or <code><a href="https://parsnip.tidymodels.org/reference/multinom_reg.html" class="external-link">parsnip::multinom_reg()</a></code>. More complicated
-trainers like <code><a href="https://parsnip.tidymodels.org/reference/naive_Bayes.html" class="external-link">parsnip::naive_Bayes()</a></code> or <code><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">parsnip::rand_forest()</a></code> can
-also be used. May be <code>NULL</code> (the default).</p></dd>
+trainers like <code><a href="https://parsnip.tidymodels.org/reference/naive_Bayes.html" class="external-link">parsnip::naive_Bayes()</a></code> or <code><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">parsnip::rand_forest()</a></code> can also
+be used. May be <code>NULL</code> if you'd like to decide later.</p></dd>
 
 
 <dt>args_list</dt>
@@ -137,7 +137,7 @@ the type of forecasting model. See <code><a href="arx_class_args_list.html">arx_
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ══ Epi Workflow ════════════════════════════════════════════════════════════════</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Preprocessor:</span> Recipe</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Model:</span> None</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Model:</span> logistic_reg()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Postprocessor:</span> Frosting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Preprocessor ────────────────────────────────────────────────────────────────</span>
@@ -152,6 +152,11 @@ the type of forecasting model. See <code><a href="arx_class_args_list.html">arx_
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 7. step_naomit()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 8. step_training_window()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Model ───────────────────────────────────────────────────────────────────────</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Logistic Regression Model Specification (classification)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Computational engine: glm </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Postprocessor ───────────────────────────────────────────────────────────────</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>

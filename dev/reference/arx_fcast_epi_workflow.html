@@ -18,7 +18,7 @@ use quantile_reg()) but can be omitted."><meta name="robots" content="noindex"><
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.12</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.13</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,7 @@ use <code><a href="quantile_reg.html">quantile_reg()</a></code>) but can be omit
 <span>  <span class="va">epi_data</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="va">outcome</span>,</span>
-<span>  trainer <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  trainer <span class="op">=</span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="arx_args_list.html">arx_args_list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -103,8 +103,9 @@ outcome variable, so make sure to specify it.</p></dd>
 
 
 <dt>trainer</dt>
-<dd><p>A <code>{parsnip}</code> model describing the type of estimation.
-For now, we enforce <code>mode = "regression"</code>. May be <code>NULL</code> (the default).</p></dd>
+<dd><p>A <code>{parsnip}</code> model describing the type of estimation. For
+now, we enforce <code>mode = "regression"</code>. May be <code>NULL</code> if you'd like to
+decide later.</p></dd>
 
 
 <dt>args_list</dt>
@@ -135,7 +136,7 @@ the type of forecasting model. See <code><a href="arx_args_list.html">arx_args_l
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ══ Epi Workflow ════════════════════════════════════════════════════════════════</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Preprocessor:</span> Recipe</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Model:</span> None</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Model:</span> linear_reg()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Postprocessor:</span> Frosting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Preprocessor ────────────────────────────────────────────────────────────────</span>
@@ -148,6 +149,11 @@ the type of forecasting model. See <code><a href="arx_args_list.html">arx_args_l
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 5. step_naomit()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 6. step_training_window()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Model ───────────────────────────────────────────────────────────────────────</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Linear Regression Model Specification (regression)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Computational engine: lm </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Postprocessor ───────────────────────────────────────────────────────────────</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
