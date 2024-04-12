@@ -197,7 +197,11 @@ update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
 #'
 #' @export
 fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
-  object$fit$meta <- list(max_time_value = max(data$time_value), as_of = attributes(data)$metadata$as_of)
+  object$fit$meta <- list(
+    max_time_value = max(data$time_value),
+    as_of = attributes(data)$metadata$as_of
+  )
+  object$original_data <- data
 
   NextMethod()
 }
@@ -325,4 +329,41 @@ print.epi_workflow <- function(x, ...) {
   print_model(x)
   print_postprocessor(x)
   invisible(x)
+}
+
+
+#' Produce a forecast from an epi workflow
+#'
+#' @param epi_workflow An epi workflow
+#' @param fill_locf Logical. Should we use locf to fill in missing data?
+#' @param n_recent Integer or NULL. If filling missing data with locf = TRUE,
+#' how far back are we willing to tolerate missing data? Larger values allow
+#' more filling. The default NULL will determine this from the the recipe. For
+#' example, suppose n_recent = 3, then if the 3 most recent observations in any
+#' geo_value are all NA’s, we won’t be able to fill anything, and an error
+#' message will be thrown. (See details.)
+#' @param forecast_date By default, this is set to the maximum time_value in x.
+#' But if there is data latency such that recent NA's should be filled, this may
+#' be after the last available time_value.
+#'
+#' @return A forecast tibble.
+#'
+#' @export
+forecast <- function(epi_workflow, fill_locf = FALSE, n_recent = NULL, forecast_date = NULL) {
+  if (!epi_workflow$trained) {
+    cli_abort(c(
+      "You cannot `forecast()` a {.cls workflow} that has not been trained.",
+      i = "Please use `fit()` before forecasting."
+    ))
+  }
+
+  test_data <- get_test_data(
+    hardhat::extract_preprocessor(epi_workflow),
+    epi_workflow$original_data,
+    fill_locf = fill_locf,
+    n_recent = n_recent %||% Inf,
+    forecast_date = forecast_date %||% max(epi_workflow$original_data$time_value)
+  )
+
+  predict(epi_workflow, new_data = test_data)
 }
