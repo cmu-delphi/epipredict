@@ -10,7 +10,7 @@ that it estimates a model for a particular target horizon.'><meta name="robots" 
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
@@ -31,8 +31,8 @@ that it estimates a model for a particular target horizon.'><meta name="robots" 
 <li class="nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
     <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
+    <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
     <a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a>
   </div>
 </li>
@@ -71,7 +71,7 @@ that it estimates a model for a particular target horizon.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">arx_forecaster</span><span class="op">(</span></span>
 <span>  <span class="va">epi_data</span>,</span>
 <span>  <span class="va">outcome</span>,</span>
-<span>  <span class="va">predictors</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="va">outcome</span>,</span>
 <span>  trainer <span class="op">=</span> <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="arx_args_list.html">arx_args_list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -89,8 +89,11 @@ that it estimates a model for a particular target horizon.</p>
 
 
 <dt>predictors</dt>
-<dd><p>A character vector giving column(s) of predictor
-variables.</p></dd>
+<dd><p>A character vector giving column(s) of predictor variables.
+This defaults to the <code>outcome</code>. However, if manually specified, only those variables
+specifically mentioned will be used. (The <code>outcome</code> will not be added.)
+By default, equals the outcome. If manually specified, does not add the
+outcome variable, so make sure to specify it.</p></dd>
 
 
 <dt>trainer</dt>
@@ -142,7 +145,7 @@ workflow</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer></div>

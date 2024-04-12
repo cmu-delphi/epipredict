@@ -23,7 +23,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
@@ -45,8 +45,8 @@
 <li class="active nav-item dropdown">
   <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
   <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
     <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
+    <a class="dropdown-item" href="../articles/sliding.html">Demonstrations of sliding AR and ARX forecasters</a>
     <a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a>
   </div>
 </li>
@@ -260,7 +260,7 @@ dataset.</p>
 <span><span class="co">#&gt; An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2024-04-10 23:46:33.674716</span></span>
+<span><span class="co">#&gt; * as_of     = 2024-04-12 02:54:05.004454</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   geo_value time_value .pred</span></span>
@@ -417,23 +417,23 @@ data:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/slice.html" class="external-link">slice_sample</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">jhu</span><span class="op">)</span>, <span class="va">jhu</span><span class="op">)</span>, n <span class="op">=</span> <span class="fl">6</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Rows: 6</span></span>
 <span><span class="co">#&gt; Columns: 17</span></span>
-<span><span class="co">#&gt; $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-06-20, 2021-10-10, 2021-10-17, 2021-10-10, 2…</span></span>
-<span><span class="co">#&gt; $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ca", "ny", "fl", "tx", "ny", "ny"</span></span>
-<span><span class="co">#&gt; $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 2.619236, 24.467072, 12.362194, 25.410982, 25.3344…</span></span>
-<span><span class="co">#&gt; $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.0522541, 0.1780471, 0.7835240, 0.5225634, 0.2282…</span></span>
-<span><span class="co">#&gt; $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(69.7,85]", "(63.9,69.7]", "(52.8,60.2]", "(60.2,…</span></span>
-<span><span class="co">#&gt; $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(27,43]", "(21.1,27]", "(18.4,19.8]", "(18.4,19.8…</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 1, 0, 0, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 1, 0, 0, 1, 1</span></span>
-<span><span class="co">#&gt; $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 0, 0</span></span>
-<span><span class="co">#&gt; $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.322426, -2.474591, -14.579468, -1.530681, -1.6…</span></span>
-<span><span class="co">#&gt; $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.4751972, -4.0053527, -10.3877462, 5.4183417, -…</span></span>
-<span><span class="co">#&gt; $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -24.5622873, -1.1329577, -2.4243291, 13.1054727, 0…</span></span>
-<span><span class="co">#&gt; $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.2296195, -0.1038265, 0.5016504, 0.2406898, -0.0…</span></span>
-<span><span class="co">#&gt; $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.2789706, -0.0831405, 0.6173385, 0.6133933, -0.0…</span></span>
-<span><span class="co">#&gt; $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1171281, -0.0720587, 0.8480574, 0.7467102, -0.0…</span></span>
-<span><span class="co">#&gt; $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.1092256, 0.1972555, 0.6205089, 0.9954978, 0.1691…</span></span></code></pre></div>
+<span><span class="co">#&gt; $ time_value          <span style="color: #949494; font-style: italic;">&lt;date&gt;</span> 2021-10-16, 2021-11-24, 2021-11-28, 2021-12-03, 2…</span></span>
+<span><span class="co">#&gt; $ geo_value           <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> "ny", "ca", "ca", "nj", "ca", "tx"</span></span>
+<span><span class="co">#&gt; $ case_rate           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 23.910028, 11.695843, 10.649673, 34.521027, 32.502…</span></span>
+<span><span class="co">#&gt; $ death_rate          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.1935616, 0.2514728, 0.1589395, 0.1736988, -0.041…</span></span>
+<span><span class="co">#&gt; $ masking             <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(60.2,63.9]", "(69.7,85]", "(69.7,85]", "(63.9,69…</span></span>
+<span><span class="co">#&gt; $ distancing          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span> "(21.1,27]", "(27,43]", "(27,43]", "[13.9,18.4]", …</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_fl <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_nj <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 1, 0, 0</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_ny <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 1, 0, 0, 0, 0, 0</span></span>
+<span><span class="co">#&gt; $ geo_value_factor_tx <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0, 0, 0, 0, 0, 1</span></span>
+<span><span class="co">#&gt; $ lag_0_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -3.031634, -15.245820, -16.291990, 7.579365, 5.560…</span></span>
+<span><span class="co">#&gt; $ lag_7_case_rate     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.452113, -13.677834, -13.883585, -2.516074, 2.70…</span></span>
+<span><span class="co">#&gt; $ lag_14_case_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -1.970740, -11.431271, -12.990548, -5.872642, -2.0…</span></span>
+<span><span class="co">#&gt; $ lag_0_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.0883120, -0.0304008, -0.1229341, -0.1081748, -0…</span></span>
+<span><span class="co">#&gt; $ lag_7_death_rate    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.1053041, -0.0833807, -0.0587051, -0.1483829, -0…</span></span>
+<span><span class="co">#&gt; $ lag_14_death_rate   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> -0.0580218, -0.0721315, -0.0663255, -0.1355163, -0…</span></span>
+<span><span class="co">#&gt; $ ahead_7_death_rate  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> 0.1950392, 0.1730917, 0.2315146, 0.1753071, 0.1767…</span></span></code></pre></div>
 <p>Before directly predicting the results, we need to add postprocessing
 layers to obtain the death counts instead of death rates. Note that the
 rates used so far are “per 100K people” rather than “per person”. We’ll
@@ -830,7 +830,7 @@ Copyright Johns Hopkins University 2020.</p>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.8.</p>
 </div>
 
     </footer>
