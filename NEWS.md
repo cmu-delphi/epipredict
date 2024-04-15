@@ -31,12 +31,15 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Working vignette
 - use `checkmate` for input validation
 - refactor quantile extrapolation (possibly creates different results)
-- force `target_date` + `forecast_date` handling to match the time_type of
-  the epi_df. allows for annual and weekly data
+- force `target_date` + `forecast_date` handling to match the time_type of the
+  epi_df. allows for annual and weekly data
 - add `check_enough_train_data()` that will error if training data is too small
 - added `check_enough_train_data()` to `arx_forecaster()`
-- `layer_residual_quantiles()` will now error if any of the residual quantiles are NA
+- `layer_residual_quantiles()` will now error if any of the residual quantiles
+  are NA
 - `*_args_list()` functions now warn if `forecast_date + ahead != target_date`
-- the `predictor` argument in `arx_forecaster()` now defaults to the value of the `outcome` argument
+- the `predictor` argument in `arx_forecaster()` now defaults to the value of
+  the `outcome` argument
 - `arx_fcast_epi_workflow()` and `arx_class_epi_workflow()` now default to
   `trainer = parsnip::logistic_reg()` to match their more canned versions.
+- add a `forecast()` method simplify generating forecasts
