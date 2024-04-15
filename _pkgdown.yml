@@ -86,7 +86,7 @@ reference:
       - predict.epi_workflow
       - fit.epi_workflow
       - augment.epi_workflow
-      - forecast
+      - forecast.epi_workflow
   - title: Epi recipe preprocessing steps
     contents:
       - starts_with("step_")

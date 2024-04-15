@@ -5,6 +5,7 @@
 \alias{reexports}
 \alias{autoplot}
 \alias{fit}
+\alias{forecast}
 \alias{prep}
 \alias{bake}
 \title{Objects exported from other packages}
@@ -14,7 +15,7 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{generics}{\code{\link[generics]{fit}}}
+  \item{generics}{\code{\link[generics]{fit}}, \code{\link[generics]{forecast}}}
 
   \item{ggplot2}{\code{\link[ggplot2]{autoplot}}}
 

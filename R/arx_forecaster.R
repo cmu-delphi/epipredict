@@ -38,23 +38,18 @@
 #'   trainer = quantile_reg(),
 #'   args_list = arx_args_list(quantile_levels = 1:9 / 10)
 #' )
-arx_forecaster <- function(epi_data,
-                           outcome,
-                           predictors = outcome,
-                           trainer = parsnip::linear_reg(),
-                           args_list = arx_args_list()) {
+arx_forecaster <- function(
+    epi_data,
+    outcome,
+    predictors = outcome,
+    trainer = parsnip::linear_reg(),
+    args_list = arx_args_list()) {
   if (!is_regression(trainer)) {
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
 
-  wf <- arx_fcast_epi_workflow(
-    epi_data, outcome, predictors, trainer, args_list
-  )
+  wf <- arx_fcast_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- generics::fit(wf, epi_data)
-
-  latest <- get_test_data(
-    hardhat::extract_preprocessor(wf), epi_data,
-  )
 
   preds <- forecast(
     wf,

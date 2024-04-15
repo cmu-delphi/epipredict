@@ -100,7 +100,7 @@ f <- frosting() \%>\%
 eng <- parsnip::linear_reg() \%>\% parsnip::set_engine("flatline")
 
 wf <- epi_workflow(r, eng, f) \%>\% fit(case_death_rate_subset)
-preds <- suppressWarnings(forecast(wf)) \%>\%
+preds <- forecast(wf) \%>\%
   dplyr::select(-time_value) \%>\%
   dplyr::mutate(forecast_date = forecast_date)
 preds

@@ -119,7 +119,7 @@ test_that("Postprocessing workflow works and values correct", {
     fit(jhu) %>%
     add_frosting(f)
 
-  suppressWarnings(p <- forecast(wf))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
@@ -136,7 +136,7 @@ test_that("Postprocessing workflow works and values correct", {
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
-  suppressWarnings(p <- forecast(wf))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
@@ -178,7 +178,7 @@ test_that("Postprocessing to get cases from case rate", {
     fit(jhu) %>%
     add_frosting(f)
 
-  suppressWarnings(p <- forecast(wf))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(1 / 20000, 1 / 30000))

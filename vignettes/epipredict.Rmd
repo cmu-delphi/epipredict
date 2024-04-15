@@ -110,8 +110,6 @@ out <- arx_forecaster(
 )
 ```
 
-This call produces a warning, which we'll ignore for now. But essentially, it's telling us that our data comes from May 2022 but we're trying to do a forecast for January 2022. The result is likely not an accurate measure of real-time forecast performance, because the data have been revised over time.
-
 The `out` object has two components:
 
   1. The predictions which is just another `epi_df`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was putatively made) and the `target_date` (the date for which the forecast is being made).
@@ -122,9 +120,6 @@ out$predictions
   ```{r}
 out$epi_workflow
   ```
-
-Note that the `time_value` in the predictions is not necessarily meaningful,
-but it is a required column in an `epi_df`, so it remains here.
 
 By default, the forecaster predicts the outcome (`death_rate`) 1-week ahead, using 3 lags of each predictor (`case_rate` and `death_rate`) at 0 (today), 1 week back and 2 weeks back. The predictors and outcome can be changed directly. The rest of the defaults are encapsulated into a list of arguments. This list is produced by `arx_args_list()`.
 

@@ -334,7 +334,8 @@ print.epi_workflow <- function(x, ...) {
 
 #' Produce a forecast from an epi workflow
 #'
-#' @param epi_workflow An epi workflow
+#' @param object An epi workflow.
+#' @param ... Not used.
 #' @param fill_locf Logical. Should we use locf to fill in missing data?
 #' @param n_recent Integer or NULL. If filling missing data with locf = TRUE,
 #' how far back are we willing to tolerate missing data? Larger values allow
@@ -349,21 +350,34 @@ print.epi_workflow <- function(x, ...) {
 #' @return A forecast tibble.
 #'
 #' @export
-forecast <- function(epi_workflow, fill_locf = FALSE, n_recent = NULL, forecast_date = NULL) {
-  if (!epi_workflow$trained) {
+forecast.epi_workflow <- function(object, ..., fill_locf = FALSE, n_recent = NULL, forecast_date = NULL) {
+  rlang::check_dots_empty()
+
+  if (!object$trained) {
     cli_abort(c(
       "You cannot `forecast()` a {.cls workflow} that has not been trained.",
       i = "Please use `fit()` before forecasting."
     ))
   }
 
+  frosting_fd <- NULL
+  if (has_postprocessor(object) && detect_layer(object, "layer_add_forecast_date")) {
+    frosting_fd <- extract_argument(object, "layer_add_forecast_date", "forecast_date")
+    if (!is.null(frosting_fd) && class(frosting_fd) != class(object$original_data$time_value)) {
+      cli_abort(c(
+        "Error with layer_add_forecast_date():",
+        i = "The type of `forecast_date` must match the type of the `time_value` column in the data."
+      ))
+    }
+  }
+
   test_data <- get_test_data(
-    hardhat::extract_preprocessor(epi_workflow),
-    epi_workflow$original_data,
+    hardhat::extract_preprocessor(object),
+    object$original_data,
     fill_locf = fill_locf,
     n_recent = n_recent %||% Inf,
-    forecast_date = forecast_date %||% max(epi_workflow$original_data$time_value)
+    forecast_date = forecast_date %||% frosting_fd %||% max(object$original_data$time_value)
   )
 
-  predict(epi_workflow, new_data = test_data)
+  predict(object, new_data = test_data)
 }

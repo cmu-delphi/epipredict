@@ -51,9 +51,7 @@ arx_classifier <- function(
     cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
   }
 
-  wf <- arx_class_epi_workflow(
-    epi_data, outcome, predictors, trainer, args_list
-  )
+  wf <- arx_class_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- generics::fit(wf, epi_data)
 
   preds <- forecast(

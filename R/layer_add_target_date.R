@@ -32,7 +32,7 @@
 #' # Use ahead + forecast date
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
+#'   layer_add_forecast_date(forecast_date = as.Date("2022-05-31")) %>%
 #'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
