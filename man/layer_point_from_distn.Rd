@@ -44,8 +44,6 @@ r <- epi_recipe(jhu) \%>\%
 
 wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) \%>\% fit(jhu)
 
-latest <- get_test_data(recipe = r, x = jhu)
-
 f1 <- frosting() \%>\%
   layer_predict() \%>\%
   layer_quantile_distn() \%>\% # puts the other quantiles in a different col
@@ -53,7 +51,7 @@ f1 <- frosting() \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f1)
 
-p1 <- predict(wf1, latest)
+p1 <- forecast(wf1)
 p1
 
 f2 <- frosting() \%>\%
@@ -62,6 +60,6 @@ f2 <- frosting() \%>\%
   layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
 
-p2 <- predict(wf2, latest)
+p2 <- forecast(wf2)
 p2
 }

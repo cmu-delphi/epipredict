@@ -49,11 +49,6 @@ flatline_forecaster <- function(
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
-  latest <- get_test_data(
-    epi_recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
-    forecast_date
-  )
-
   f <- frosting() %>%
     layer_predict() %>%
     layer_residual_quantiles(
@@ -69,7 +64,12 @@ flatline_forecaster <- function(
 
   wf <- epi_workflow(r, eng, f)
   wf <- generics::fit(wf, epi_data)
-  preds <- suppressWarnings(predict(wf, new_data = latest)) %>%
+  preds <- suppressWarnings(forecast(
+    wf,
+    fill_locf = TRUE,
+    n_recent = args_list$nafill_buffer,
+    forecast_date = forecast_date
+  )) %>%
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 

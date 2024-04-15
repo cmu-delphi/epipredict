@@ -28,7 +28,6 @@
 #'   step_epi_naomit()
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#' latest <- get_test_data(r, jhu)
 #'
 #' # Use ahead + forecast date
 #' f <- frosting() %>%
@@ -38,7 +37,7 @@
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 #'
 #' # Use ahead + max time value from pre, fit, post
@@ -49,7 +48,7 @@
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
-#' p2 <- predict(wf2, latest)
+#' p2 <- forecast(wf2)
 #' p2
 #'
 #' # Specify own target date
@@ -59,7 +58,7 @@
 #'   layer_naomit(.pred)
 #' wf3 <- wf %>% add_frosting(f3)
 #'
-#' p3 <- predict(wf3, latest)
+#' p3 <- forecast(wf3)
 #' p3
 layer_add_target_date <-
   function(frosting, target_date = NULL, id = rand_id("add_target_date")) {

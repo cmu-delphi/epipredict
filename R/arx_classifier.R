@@ -54,14 +54,14 @@ arx_classifier <- function(
   wf <- arx_class_epi_workflow(
     epi_data, outcome, predictors, trainer, args_list
   )
-
-  latest <- get_test_data(
-    hardhat::extract_preprocessor(wf), epi_data, TRUE, args_list$nafill_buffer,
-    args_list$forecast_date %||% max(epi_data$time_value)
-  )
-
   wf <- generics::fit(wf, epi_data)
-  preds <- predict(wf, new_data = latest) %>%
+
+  preds <- forecast(
+    wf,
+    fill_locf = TRUE,
+    n_recent = args_list$nafill_buffer,
+    forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
+  ) %>%
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 

@@ -50,14 +50,18 @@ arx_forecaster <- function(epi_data,
   wf <- arx_fcast_epi_workflow(
     epi_data, outcome, predictors, trainer, args_list
   )
+  wf <- generics::fit(wf, epi_data)
 
   latest <- get_test_data(
-    hardhat::extract_preprocessor(wf), epi_data, TRUE, args_list$nafill_buffer,
-    args_list$forecast_date %||% max(epi_data$time_value)
+    hardhat::extract_preprocessor(wf), epi_data,
   )
 
-  wf <- generics::fit(wf, epi_data)
-  preds <- predict(wf, new_data = latest) %>%
+  preds <- forecast(
+    wf,
+    fill_locf = TRUE,
+    n_recent = args_list$nafill_buffer,
+    forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
+  ) %>%
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 

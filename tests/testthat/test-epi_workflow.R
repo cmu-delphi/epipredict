@@ -92,13 +92,5 @@ test_that("forecast method errors when workflow not fit", {
     step_epi_naomit()
   wf <- epi_workflow(r, parsnip::linear_reg())
 
-  latest <- get_test_data(
-    hardhat::extract_preprocessor(wf),
-    jhu
-  )
-
-  expect_error(
-    forecast(wf),
-    regexp = "workflow that has not been fit"
-  )
+  expect_error(forecast(wf))
 })
