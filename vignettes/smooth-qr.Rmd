@@ -247,7 +247,7 @@ We can see that the degree that results in the lowest MAE is 3. Hence, we could 
 
 ## A brief comparison between smoothing and no smoothing
 
-Now, we will briefly compare the results from using smooth quantile regression to those obtained without smoothing. The latter approach amounts to ordinary quantile regression to get predictions for the intended target date. The main drawback is that it ignores the fact that the responses all represent the same signal, just for different ahead values. In contrast, the smooth quantile regression approach utilizes this information about the data structure - the fact that the aheads in are not be independent of each other, but rather they are naturally related over time by a smooth curve.
+Now, we will briefly compare the results from using smooth quantile regression to those obtained without smoothing. The latter approach amounts to ordinary quantile regression to get predictions for the intended target date. The main drawback is that it ignores the fact that the responses all represent the same signal, just for different ahead values. In contrast, the smooth quantile regression approach utilizes this information about the data structure - the fact that the aheads in are not be independent of each other, but that they are naturally related over time by a smooth curve.
 
 To get the basic quantile regression results we can utilize the forecaster that we've already built. We can simply set the degree to be the number of ahead values to re-run the code without smoothing. 
 ```{r, warning = FALSE}
@@ -295,6 +295,46 @@ mean(smooth_preds_df$mean)
 ```
 
 The former shows that forecasts for the immediate future and for the distant future are more inaccurate for both models under consideration. This demonstrates the standard conclusion that the farther ahead in time, the more challenging the forecasting. The latter shows that the smooth quantile regression model and baseline models perform very similarly, with the smooth quantile regression model only slightly beating the baseline model in terms of overall MAE.
+
+One other commonly used metric is the WIS score (cite https://arxiv.org/pdf/2005.12881.pdf), which a scoring rule that is based on the population quantiles. The point is to score the interval, whereas MAE only evaluates the accuracy of the point forecast.
+
+The general formula for the weighted interval is as in [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723):
+
+
+While it is the measure of choice used in the COVID-19 Forecast Hub, one limitation is that it prioritizes sharpness (how wide the interval is) relative to coverage (if the interval contains the truth).
+
+We can manually implement this as a function that is compatible with the latest version of `epipredict` (adapted from the WIS function in https://github.com/dajmcdon/smoothmpf-epipredict).
+
+```{r}
+wis_dist_quantile <- function(actual, q, quantile_levels) {
+  2 * mean(pmax(
+    quantile_levels * (actual - q),
+    (1 - quantile_levels) * (q - actual), na.rm = TRUE
+  ))
+}
+
+# Test row 1 of test df (test = smooth_preds %>% left_join(tedf_sub))
+wis_dist_quantile(test$actual[2], as.numeric(test[2, 4:8]), as.numeric(names(test)[4:8]))
+
+test %>% rowwise() %>% mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`), as.numeric(names(test)[4:5])))
+
+# Compute mean WIS by ahead (over all states)
+test2 = test %>% rowwise() %>% mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`), as.numeric(names(test)[4:5]))) %>% group_by(ahead) %>% summarise(mean = mean(wis))
+
+# Plot over all aheads (do the same as above for the baseline and see which has lower WIS)
+ggplot(test2, aes(ahead, mean)) + #, color = type)) +
+  geom_line() +
+  xlab("Ahead") +
+  ylab("Mean WIS")
+
+```
+
+From our `smooth_preds_df`, we will need to extract the `values` and the `quantile_levels`:
+
+
+For each state at each target date (can be same forecast date), we will apply the `wis_dist_quantile` function to get a WIS score. We may then use these to compute the mean WIS across all states for an ahead (assuming same forecast date for all state and all of the aheads).
+
+
 
 # What we've learned in a nutshell
 
