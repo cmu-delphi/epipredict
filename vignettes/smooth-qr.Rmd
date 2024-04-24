@@ -266,16 +266,15 @@ Unlike for smooth quantile regression, the resulting forecasts are not smooth cu
 For a more formal comparison between the two approaches, we could compare the test performance in terms of accuracy through calculating either the, MAE or MSE, where the performance measure of choice can be calculated over over all times and locations for each ahead value
 
 ```{r, message = FALSE}
-
 baseline_preds_mae_df <- baseline_preds %>%
-  left_join(tedf_sub) %>% 
+  left_join(tedf_sub) %>%
   group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "baseline")
 
 smooth_preds_mae_df <- smooth_preds %>%
-  left_join(tedf_sub) %>% 
+  left_join(tedf_sub) %>%
   group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
@@ -322,7 +321,8 @@ Now, we write a simple function for the first representation of the score that i
 wis_dist_quantile <- function(actual, values, quantile_levels) {
   2 * mean(pmax(
     quantile_levels * (actual - values),
-    (1 - quantile_levels) * (values - actual), na.rm = TRUE
+    (1 - quantile_levels) * (values - actual),
+    na.rm = TRUE
   ))
 }
 ```
@@ -330,19 +330,19 @@ wis_dist_quantile <- function(actual, values, quantile_levels) {
 Next, we apply the `wis_dist_quantile` function to get a WIS score for each state on each target date. We then compute the mean WIS for each ahead value over all of the states. The results for each of the smooth and baseline forecasters are shown in a similar style line plot as we chose for MAE:
 
 ```{r}
-smooth_preds_wis_df = smooth_preds %>%
-  left_join(tedf_sub) %>% 
+smooth_preds_wis_df <- smooth_preds %>%
+  left_join(tedf_sub) %>%
   rowwise() %>%
-  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>% 
-  group_by(ahead) %>% 
+  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>%
+  group_by(ahead) %>%
   summarise(mean = mean(wis)) %>%
   mutate(type = "smooth")
 
-baseline_preds_wis_df = baseline_preds %>%
-  left_join(tedf_sub) %>% 
+baseline_preds_wis_df <- baseline_preds %>%
+  left_join(tedf_sub) %>%
   rowwise() %>%
-  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>% 
-  group_by(ahead) %>% 
+  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>%
+  group_by(ahead) %>%
   summarise(mean = mean(wis)) %>%
   mutate(type = "baseline")
 
