@@ -155,7 +155,8 @@ head(smooth_preds)
 Most often, we're not going to want to limit ourselves to just predicting the median value as there is uncertainty about the predictions, so let's try to predict several different quantiles in addition to the median:
 
 ```{r, warning = FALSE}
-smooth_preds <- smooth_fc(edf, quantiles = c(.1, .25, .5, .75, .9), fd = fd)
+several_quantiles <- c(.1, .25, .5, .75, .9)
+smooth_preds <- smooth_fc(edf, quantiles = several_quantiles, fd = fd)
 
 head(smooth_preds)
 ```
@@ -251,7 +252,7 @@ Now, we will briefly compare the results from using smooth quantile regression t
 
 To get the basic quantile regression results we can utilize the forecaster that we've already built. We can simply set the degree to be the number of ahead values to re-run the code without smoothing. 
 ```{r, warning = FALSE}
-baseline_preds <- smooth_fc(edf, degree = 28L, quantiles = c(.1, .25, .5, .75, .9), fd = fd)
+baseline_preds <- smooth_fc(edf, degree = 28L, quantiles = several_quantiles, fd = fd)
 ```
 
 And we can produce the corresponding plot to inspect the predictions obtained under the baseline model:
@@ -265,23 +266,24 @@ Unlike for smooth quantile regression, the resulting forecasts are not smooth cu
 For a more formal comparison between the two approaches, we could compare the test performance in terms of accuracy through calculating either the, MAE or MSE, where the performance measure of choice can be calculated over over all times and locations for each ahead value
 
 ```{r, message = FALSE}
-baseline_preds_df <- baseline_preds %>%
-  left_join(tedf_sub) %>%
+
+baseline_preds_mae_df <- baseline_preds %>%
+  left_join(tedf_sub) %>% 
   group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "baseline")
 
-smooth_preds_df <- smooth_preds %>%
-  left_join(tedf_sub) %>%
+smooth_preds_mae_df <- smooth_preds %>%
+  left_join(tedf_sub) %>% 
   group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "smooth")
 
-preds_df <- bind_rows(baseline_preds_df, smooth_preds_df)
+preds_mae_df <- bind_rows(baseline_preds_mae_df, smooth_preds_mae_df)
 
-ggplot(preds_df, aes(ahead, mean, color = type)) +
+ggplot(preds_mae_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean MAE")
@@ -290,51 +292,78 @@ ggplot(preds_df, aes(ahead, mean, color = type)) +
 or over all aheads, times, and locations for a single numerical summary.
 
 ```{r}
-mean(baseline_preds_df$mean)
-mean(smooth_preds_df$mean)
+mean(baseline_preds_mae_df$mean)
+mean(smooth_preds_mae_df$mean)
 ```
 
-The former shows that forecasts for the immediate future and for the distant future are more inaccurate for both models under consideration. This demonstrates the standard conclusion that the farther ahead in time, the more challenging the forecasting. The latter shows that the smooth quantile regression model and baseline models perform very similarly, with the smooth quantile regression model only slightly beating the baseline model in terms of overall MAE.
+The former shows that forecasts for the immediate future and for the distant future are more inaccurate for both models under consideration. The latter shows that the smooth quantile regression model and baseline models perform very similarly overall, with the smooth quantile regression model only slightly beating the baseline model in terms of overall average MAE.
 
-One other commonly used metric is the WIS score (cite https://arxiv.org/pdf/2005.12881.pdf), which a scoring rule that is based on the population quantiles. The point is to score the interval, whereas MAE only evaluates the accuracy of the point forecast.
+One other commonly used metric is the WIS score ([ Bracher et al., 2021](https://arxiv.org/pdf/2005.12881.pdf)), which a scoring rule that is based on the population quantiles. The point is to score the interval, whereas MAE only evaluates the accuracy of the point forecast.
 
-The general formula for the weighted interval is as in [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723):
+Suppose we have $F$ be a forecaster composed of predicted quantiles $q_{\tau}$ for the set of quantile levels $\tau$. Then, in terms of the predicted quantiles, the WIS for target variable $Y$ is represented as follows ([McDonald et al., 2021](https://www.pnas.org/doi/full/10.1073/pnas.2111453118)):
 
+$$
+WIS(F, Y) = 2 \sum_{\tau} \phi_{\tau} (Y - q_{\tau})
+$$
+where $\phi_{\tau}(x) = \tau |x|$ for $x \geq 0$ and$\phi_{\tau}(x) = (1 - \tau) |x|$ for $x < 0$.
 
-While it is the measure of choice used in the COVID-19 Forecast Hub, one limitation is that it prioritizes sharpness (how wide the interval is) relative to coverage (if the interval contains the truth).
+This form is general as it can accommodate both symmetric and asymmetric quantile levels. If the quantile levels are symmetric, then we can alternatively express the WIS as a collection of central prediction intervals ($\ell_{\alpha}, u_{\alpha}$) parametrized by the exclusion probability $\alpha$:
 
-We can manually implement this as a function that is compatible with the latest version of `epipredict` (adapted from the WIS function in https://github.com/dajmcdon/smoothmpf-epipredict).
+$$
+WIS(F, Y) =  \sum_{\alpha} \{ (u_{\alpha} - \ell_{\alpha}) + 2 \cdot \text{dist}(Y, [\ell_{\alpha}, u_{\alpha}]) \}
+$$
+where $\text{dist}(a,S)$ is the smallest distance between point $a$ and an element of set $S$.
+
+While we implement the former representation, we mention this form because it shows the that the score can be decomposed into the addition of a sharpness component (first term in the summand) and an under/overprediction component (second term in the summand). This alternative representation is useful because from it, we more easily see the major limitation to the WIS, which is that the score tends to prioritize sharpness (how wide the interval is) relative to coverage (if the interval contains the truth).
+
+Now, we write a simple function for the first representation of the score that is compatible with the latest version of `epipredict` (adapted from the corresponding function in [smoothmpf-epipredict](https://github.com/dajmcdon/smoothmpf-epipredict)). The inputs for it are the actual and predicted values and the quantile levels.
 
 ```{r}
-wis_dist_quantile <- function(actual, q, quantile_levels) {
+wis_dist_quantile <- function(actual, values, quantile_levels) {
   2 * mean(pmax(
-    quantile_levels * (actual - q),
-    (1 - quantile_levels) * (q - actual), na.rm = TRUE
+    quantile_levels * (actual - values),
+    (1 - quantile_levels) * (values - actual), na.rm = TRUE
   ))
 }
+```
 
-# Test row 1 of test df (test = smooth_preds %>% left_join(tedf_sub))
-wis_dist_quantile(test$actual[2], as.numeric(test[2, 4:8]), as.numeric(names(test)[4:8]))
+Next, we apply the `wis_dist_quantile` function to get a WIS score for each state on each target date. We then compute the mean WIS for each ahead value over all of the states. The results for each of the smooth and baseline forecasters are shown in a similar style line plot as we chose for MAE:
 
-test %>% rowwise() %>% mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`), as.numeric(names(test)[4:5])))
+```{r}
+smooth_preds_wis_df = smooth_preds %>%
+  left_join(tedf_sub) %>% 
+  rowwise() %>%
+  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>% 
+  group_by(ahead) %>% 
+  summarise(mean = mean(wis)) %>%
+  mutate(type = "smooth")
 
-# Compute mean WIS by ahead (over all states)
-test2 = test %>% rowwise() %>% mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`), as.numeric(names(test)[4:5]))) %>% group_by(ahead) %>% summarise(mean = mean(wis))
+baseline_preds_wis_df = baseline_preds %>%
+  left_join(tedf_sub) %>% 
+  rowwise() %>%
+  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>% 
+  group_by(ahead) %>% 
+  summarise(mean = mean(wis)) %>%
+  mutate(type = "baseline")
 
-# Plot over all aheads (do the same as above for the baseline and see which has lower WIS)
-ggplot(test2, aes(ahead, mean)) + #, color = type)) +
+preds_wis_df <- bind_rows(smooth_preds_wis_df, baseline_preds_wis_df)
+
+ggplot(preds_wis_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean WIS")
-
 ```
 
-From our `smooth_preds_df`, we will need to extract the `values` and the `quantile_levels`:
+The results are consistent with what we saw for MAE: The forecasts for the near and distant future tend to be inaccurate for both models. The smooth quantile regression model only slightly outperforms the baseline model.
 
+Though averaging the WIS score over location and time tends to be the primary aggregation scheme used in evaluation and model comparisons (see, for example, [McDonald et al., 2021](https://www.pnas.org/doi/full/10.1073/pnas.2111453118)), we can also obtain a single numerical summary by averaging over the aheads, times, and locations:
 
-For each state at each target date (can be same forecast date), we will apply the `wis_dist_quantile` function to get a WIS score. We may then use these to compute the mean WIS across all states for an ahead (assuming same forecast date for all state and all of the aheads).
+```{r}
+mean(baseline_preds_wis_df$mean)
+mean(smooth_preds_wis_df$mean)
+```
 
-
+Overall, both perspectives agree that the smooth quantile regression model tends to perform only slightly better than the baseline model in terms of average WIS, illustrating the difficulty of this forecasting problem.
 
 # What we've learned in a nutshell
 
@@ -342,4 +371,4 @@ Smooth quantile regression is used in multi-period forecasting for predicting se
 
 # Attribution
 
-The information presented on smooth quantile regression is from [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723).
+The information presented on smooth quantile regression is from [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723). 
