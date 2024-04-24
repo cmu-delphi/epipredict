@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r libraries}
+```{r libraries, warning=FALSE, message=FALSE}
 library(dplyr)
 library(tidyr)
 library(parsnip)
@@ -113,23 +113,23 @@ employ <- grad_employ_subset
 sample_n(employ, 6)
 ```
 
-In the following sections, we will go over preprocessing the data in the 
+In the following sections, we will go over pre-processing the data in the 
 `epi_recipe` framework, and fitting a model and making predictions within the 
 `epipredict` framework and using the package's canned forecasters.
 
 # Simple autoregressive with 3 lags to predict number of graduates in a year 
 
-## Preprocessing 
+## Pre-processing 
 
 As a simple example, let's work with the `num_graduates` column for now. We will 
-first pre-process by "standardizing" each numeric column by the total within 
+first pre-process by standardizing each numeric column by the total within 
 each group of keys. We do this since those raw numeric values will vary greatly
 from province to province since there are large differences in population. 
 
 ```{r employ-small, include=T}
 employ_small <- employ %>%
   group_by(geo_value, age_group, edu_qual) %>%
-  # Select groups where there are complete timeseries values
+  # Select groups where there are complete time series values
   filter(n() >= 6) %>%
   mutate(
     num_graduates_prop = num_graduates / sum(num_graduates),
@@ -140,8 +140,9 @@ employ_small <- employ %>%
 head(employ_small)
 ```
 
-Below is a visualization for a sample of the small data. Note that some groups 
-do not have any time series information since we filtered out all timeseries 
+Below is a visualization for a sample of the small data for British Columbia and Ontario. 
+Note that some groups 
+do not have any time series information since we filtered out all time series 
 with incomplete dates.
 
 ```{r employ-small-graph, include=T, eval=T, fig.width=9, fig.height=6}
@@ -159,7 +160,7 @@ employ_small %>%
   theme(legend.position = "bottom")
 ```
 
-We will predict the "standardized" number of graduates (a proportion) in the 
+We will predict the standardized number of graduates (a proportion) in the 
 next year (time $t+1$) using an autoregressive model with three lags (i.e., an 
 AR(3) model). Such a model is represented algebraically like this: 
 
@@ -171,7 +172,7 @@ AR(3) model). Such a model is represented algebraically like this:
 where $x_i$ is the proportion of graduates at time $i$, and the current time is 
 $t$.
 
-In the preprocessing step, we need to create additional columns in `employ` for 
+In the pre-processing step, we need to create additional columns in `employ` for 
 each of $x_{t+1}$, $x_{t}$, $x_{t-1}$, and $x_{t-2}$. We do this via an 
 `epi_recipe`. Note that creating an `epi_recipe` alone doesn't add these 
 outcome and predictor columns; the recipe just stores the instructions for 
@@ -194,7 +195,7 @@ Let's apply this recipe using `prep` and `bake` to generate and view the `lag`
 and `ahead` columns.
 
 ```{r view-preprocessed, include=T}
-# Display a sample of the preprocessed data
+# Display a sample of the pre-processed data
 bake_and_show_sample <- function(recipe, data, n = 5) {
   recipe %>%
     prep(data) %>%
@@ -221,7 +222,7 @@ Since our goal for now is to fit a simple autoregressive model, we can use
 engine `lm`, which fits a linear regression using ordinary least squares. 
 
 We will use `epi_workflow` with the `epi_recipe` we defined in the 
-preprocessing section along with the `parsnip::linear_reg()` model. Note again 
+pre-processing section along with the `parsnip::linear_reg()` model. Note 
 that `epi_workflow` is a container and doesn't actually do the fitting. We have 
 to pass the workflow into `fit()` to get our model coefficients 
 $\alpha_i, i=0,...,3$.
@@ -269,8 +270,8 @@ augment(wf_linreg, latest) %>% sample_n(5)
 First, we'll plot the residuals (that is, $y_{t} - \hat{y}_{t}$) against the 
 fitted values ($\hat{y}_{t}$).
 
-```{r lienarreg-resid-plot, include=T, fig.height=8}
-par(mfrow = c(2, 2), mar = c(5, 3.5, 1, 1) + .5)
+```{r lienarreg-resid-plot, include=T, fig.height = 5, fig.width = 5}
+par(mfrow = c(2,2))
 plot(extract_fit_engine(wf_linreg))
 ```
 
@@ -310,9 +311,9 @@ where $y_i$ is the 5-year median income (proportion) at time $i$,
 $x_i$ is the 2-year median income (proportion) at time $i$, and 
 $z_i$ is the number of graduates (proportion) at time $i$. 
 
-## Preprocessing 
+## Pre-processing 
 
-Again, we construct an `epi_recipe` detailing the preprocessing steps.
+Again, we construct an `epi_recipe` detailing the pre-processing steps.
 
 ```{r custom-arx, include=T}
 rx <- epi_recipe(employ_small) %>%
@@ -327,7 +328,7 @@ rx <- epi_recipe(employ_small) %>%
 bake_and_show_sample(rx, employ_small)
 ```
 
-## Model fitting & postprocessing
+## Model fitting & post-processing
 
 Before fitting our model and making predictions, let's add some post-processing
 steps using a few [`frosting`](
@@ -396,8 +397,8 @@ predsx %>%
 # Using canned forecasters
 
 We've seen what we can do with non-epidemiological panel data using the 
-recipes frame, with `epi_recipe` for preprocessing, `epi_workflow` for model 
-fitting, and `frosting` for postprocessing. 
+recipes frame, with `epi_recipe` for pre-processing, `epi_workflow` for model 
+fitting, and `frosting` for post-processing. 
 
 `epipredict` also comes with canned forecasters that do all of those steps 
 behind the scenes for some simple models. Even though we aren't working with 
