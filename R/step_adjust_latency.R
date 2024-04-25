@@ -25,7 +25,20 @@
 #'   - `"extend_lags"`: per `epi_key` and `predictor`, adjusts the lag so that
 #'   the shortest lag at predict time is at the last observation. E.g. if the
 #'   lags are `c(0,7,14)` for data that is 3 days latent, the actual lags used
-#'   become `c(3,10,17)`
+#'   become `c(3,10,17)`.
+#' @param fixed_latency either a positive integer, or a labeled positive integer
+#'   vector. Cannot be set at the same time as `fixed_asof`.   If non-`NULL`,
+#'   the amount to offset the ahead or lag by. If a single integer, this is used
+#'   for all columns; if a labeled vector, the labels must correspond to the
+#'   base column names.  If `NULL`, the latency is the distance between the
+#'   `epi_df`'s `max_time_value` and either the `fixed_asof` or the `epi_df`'s
+#'   `as_of` field.
+#' @param fixed_asof either a date of the same kind used in the `epi_df`, or
+#'   NULL. Cannot be set at the same time as `fixed_latency`. If a date, it
+#'   gives the date from which the forecast is actually occurring. If `NULL`,
+#'   the `as_of` is determined either from `fixed_latency` or automatically.
+#' @param columns A character string of column names to be adjusted; these
+#'   should be the original columns, and not the derived ones
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
 #' @param prefix a character. The prefix matching the one used in either
@@ -68,6 +81,8 @@ step_adjust_latency <-
              "locf",
              "extend_lags"
            ),
+           fixed_latency = NULL,
+           fixed_asof = NULL,
            default = NA,
            skip = FALSE,
            prefix = NULL,
@@ -85,10 +100,21 @@ step_adjust_latency <-
     method <- rlang::arg_match(method)
     if (method == "extend_ahead") {
       prefix <- "ahead_"
-    } else {
+      if (!any(map_lgl(
+        recipe$steps,
+        \(recipe_step) inherits(recipe_step, "step_epi_ahead")
+      ))) {
+        cli:cli_abort("There is no `step_epi_ahead` defined before this. For the method `extend_ahead` of `step_adjust_latency`, at least one ahead must be previously defined.")
+      }
+    } else if (method == "extend_lags") {
       prefix <- "lag_"
+      if (!any(map_lgl(
+        recipe$steps,
+        \(recipe_step) inherits(recipe_step, "step_epi_lag")
+      ))) {
+        cli:cli_abort("There is no `step_epi_lag` defined before this. For the method `extend_lags` of `step_adjust_latency`, at least one lag must be previously defined.")
+      }
     }
-
     arg_is_chr_scalar(prefix, id, method)
     recipes::add_step(
       recipe,
@@ -96,12 +122,13 @@ step_adjust_latency <-
         terms = dplyr::enquos(...),
         role = role,
         method = method,
-        info = NULL,
         trained = trained,
+        as_of = fixed_asof,
+        latency = fixed_latency,
+        shift_cols = NULL,
         prefix = prefix,
         default = default,
         keys = epi_keys(recipe),
-        columns = columns,
         skip = skip,
         id = id
       )
@@ -109,24 +136,27 @@ step_adjust_latency <-
   }
 
 step_adjust_latency_new <-
-  function(terms, role, trained, prefix, default, keys, method, info,
-           columns, skip, id) {
+  function(terms, role, trained, as_of, latency, shift_cols, prefix, time_type, default,
+           keys, method, skip, id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
       role = role,
       method = method,
-      info = info,
       trained = trained,
+      as_of = as_of,
+      latency = latency,
+      shift_cols = shift_cols,
       prefix = prefix,
       default = default,
       keys = keys,
-      columns = columns,
       skip = skip,
       id = id
     )
   }
 
+# lags introduces max(lags) NA's after the max_time_value.
+# TODO all of the shifting happens before NA removal, which saves all the data I might possibly want; I should probably add a bit that makes sure this operation is happening before NA removal so data doesn't get dropped
 #' @export
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
@@ -136,56 +166,33 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     cli::cli_abort('If `method` is `"extend_lags"` or `"locf"`, then a step ",
 "must have already added a predictor.')
   }
-  # TODO info here is probably not the best way to handle this, hypothetically I
-  # get an info object during baking
-  step_adjust_latency_new(
-    terms = x$terms,
-    role = x$role,
-    trained = TRUE,
-    prefix = x$prefix,
-    default = x$default,
-    keys = x$keys,
-    method = x$method,
-    info = info,
-    columns = recipes::recipes_eval_select(x$terms, training, info),
-    skip = x$skip,
-    id = x$id
-  )
-}
 
-#' various ways of handling differences between the `as_of` date and the maximum
-#' time value
-#' @description
-#' adjust the ahead so that we will be predicting `ahead` days after the `as_of`
-#'   date, rather than relative to the last day of data
-#' @param new_data assumes that this already has lag/ahead columns that we need
-#'   to adjust
-#' @importFrom dplyr %>% pull
-#' @keywords internal
-bake.step_adjust_latency <- function(object, new_data, ...) {
-  sign_shift <- get_sign(object)
+  sign_shift <- get_sign(x)
   # get the columns used, even if it's all of them
-  terms_used <- object$columns
+  terms_used <- x$columns
   if (length(terms_used) == 0) {
-    terms_used <- object$info %>%
+    terms_used <- info %>%
       filter(role == "raw") %>%
       pull(variable)
   }
   # get and check the max_time and as_of are the right kinds of dates
-  as_of <- get_asof(object, new_data)
+  if (is.null(x$as_of)) {
+    as_of <- set_asof(training, info)
+  } else {
+    as_of <- x$as_of
+  }
 
   # infer the correct columns to be working with from the previous
   # transformations
   shift_cols <- get_shifted_column_tibble(
-    object$prefix, new_data, terms_used, as_of,
-    sign_shift
+    x$prefix, training, terms_used,
+    as_of, x$latency, sign_shift, info
   )
 
-  if ((object$method == "extend_ahead") || (object$method == "extend_lags")) {
+  if ((x$method == "extend_ahead") || (x$method == "extend_lags")) {
     # check that the shift amount isn't too extreme
     latency <- max(shift_cols$latency)
-    i_latency <- which.max(shift_cols$latency)
-    time_type <- attributes(new_data)$metadata$time_type
+    time_type <- attributes(training)$metadata$time_type
     if (
       (grepl("day", time_type) && (latency >= 10)) ||
         (grepl("week", time_type) && (latency >= 4)) ||
@@ -204,9 +211,63 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
         "i" = "max_time = {max_time} -> as_of = {as_of}"
       ))
     }
+  }
+
+  step_adjust_latency_new(
+    terms = shift_cols$original_name,
+    role = shift_cols$role[[1]],
+    trained = TRUE,
+    prefix = x$prefix,
+    shift_cols = shift_cols,
+    as_of = as_of,
+    latency = unique(shift_cols$latency),
+    default = x$default,
+    keys = x$keys,
+    method = x$method,
+    skip = x$skip,
+    id = x$id
+  )
+}
+
+#' various ways of handling differences between the `as_of` date and the maximum
+#' time value
+#' @description
+#' adjust the ahead so that we will be predicting `ahead` days after the `as_of`
+#'   date, rather than relative to the last day of data
+#' @param new_data assumes that this already has lag/ahead columns that we need
+#'   to adjust
+#' @importFrom dplyr %>% pull
+#' @keywords internal
+bake.step_adjust_latency <- function(object, new_data, ...) {
+  if ((object$method == "extend_ahead") || (object$method == "extend_lags")) {
     keys <- object$keys
     return(
-      extend_either(new_data, shift_cols, keys)
+      extend_either(new_data, object$shift_cols, keys)
     )
   }
 }
+
+#' @export
+print.step_adjust_latency <-
+  function(x, width = max(20, options$width - 35), ...) {
+    if (length(x$terms) == 0) {
+      terms <- "all previous predictors"
+    } else {
+      terms <- x$terms
+    }
+    if (!is.null(x$as_of)) {
+      conj <- "with forecast date"
+      extra_text <- x$as_of
+    } else if (!is.null(x$shift_cols)) {
+      conj <- "with latencies"
+      extra_text <- x$shift_cols
+    } else {
+      conj <- ""
+      extra_text <- "set at train time"
+    }
+    print_epi_step(terms, NULL, x$trained, x$method,
+      conjunction = conj,
+      extra_text = extra_text
+    )
+    invisible(x)
+  }

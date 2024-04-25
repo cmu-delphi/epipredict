@@ -10,7 +10,9 @@ get_shifted_column_tibble(
   new_data,
   terms_used,
   as_of,
+  latency,
   sign_shift,
+  info,
   call = caller_env()
 )
 }

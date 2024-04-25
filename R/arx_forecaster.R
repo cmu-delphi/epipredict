@@ -1,3 +1,4 @@
+# TODO add latency to default forecaster
 #' Direct autoregressive forecaster with covariates
 #'
 #' This is an autoregressive forecasting model for

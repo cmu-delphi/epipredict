@@ -42,6 +42,7 @@ Imports:
     smoothqr,
     stats,
     stringr,
+    stringi,
     tibble,
     tidyr,
     tidyselect,
