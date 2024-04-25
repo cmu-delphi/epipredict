@@ -1,3 +1,4 @@
+# TODO adapt this to latency
 #' Postprocessing step to add the target date
 #'
 #' @param frosting a `frosting` postprocessor

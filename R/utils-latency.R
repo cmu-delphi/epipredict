@@ -10,7 +10,7 @@
 extend_either <- function(new_data, shift_cols, keys) {
   shifted <-
     shift_cols %>%
-    select(-shifts, -effective_shift) %>%
+    select(-any_of(c("shifts", "effective_shift", "type", "role", "source"))) %>%
     pmap(\(original_name, latency, new_name) {
       epi_shift_single(
         x = new_data,
@@ -20,7 +20,7 @@ extend_either <- function(new_data, shift_cols, keys) {
         key_cols = keys
       )
     }) %>%
-    map(\(x) zoo::na.trim(x)) %>% # TODO need to talk about this
+    map(\(x) zoo::na.trim(x)) %>%
     reduce(
       dplyr::full_join,
       by = keys
@@ -46,8 +46,10 @@ extend_either <- function(new_data, shift_cols, keys) {
 #' @keywords internal
 #' @importFrom stringr str_match
 #' @importFrom dplyr rowwise %>%
+#' @importFrom magrittr %<>%
 get_shifted_column_tibble <- function(
-    prefix, new_data, terms_used, as_of, sign_shift, call = caller_env()) {
+    prefix, new_data, terms_used, as_of, latency,
+    sign_shift, info, call = caller_env()) {
   relevant_columns <- names(new_data)[grepl(prefix, names(new_data))]
   to_keep <- rep(FALSE, length(relevant_columns))
   for (col_name in terms_used) {
@@ -61,40 +63,58 @@ get_shifted_column_tibble <- function(
       call = call
     )
   }
-  # TODO ask about a less jank way to do this
-  shift_amounts <- as.integer(stringr::str_match(
-    relevant_columns,
-    "_\\d+_"
-  ) %>%
-    `[`(, 1) %>%
-    stringr::str_match("\\d+") %>%
-    `[`(, 1))
+  # this pulls text that is any number of digits between two _, e.g. _3557_, and
+  # converts them to an integer
+  shift_amounts <- stringr::str_match(relevant_columns, "_(\\d+)_") %>%
+    `[`(, 2) %>%
+    as.integer()
+
   shift_cols <- dplyr::tibble(
     original_name = relevant_columns,
     shifts = shift_amounts
   )
+  if (is.null(latency)) {
+    shift_cols %<>%
+      rowwise() %>%
+      # add the latencies to shift_cols
+      mutate(latency = get_latency(
+        new_data, as_of, original_name, shifts, sign_shift
+      )) %>%
+      ungroup()
+  } else if (length(latency) > 1) {
+    shift_cols %<>% rowwise() %>%
+      mutate(latency = unname(latency[purrr::map_lgl(
+        names(latency),
+        \(x) grepl(x, original_name)
+      )])) %>%
+      ungroup()
+  } else {
+    shift_cols %<>% mutate(latency = latency)
+  }
+
+  # add the updated names to shift_cols
   shift_cols %<>%
-    rowwise() %>%
-    # add the latencies to shift_cols
-    mutate(latency = get_latency(
-      new_data, as_of, original_name, shifts, sign_shift
-    )) %>%
-    ungroup() %>%
-    # add the updated names to shift_cols
     mutate(
       effective_shift = shifts + abs(latency)
     ) %>%
     mutate(
       new_name = adjust_name(prefix, original_name, effective_shift)
     )
+  info %<>% select(variable, type, role)
+  shift_cols <- left_join(shift_cols, info, by = join_by(original_name == variable))
+  if (length(unique(shift_cols$role)) != 1) {
+    cli::cli_error("not all roles are the same!",
+      shift_cols = shift_cols
+    )
+  }
   return(shift_cols)
 }
 
 
 #' extract the as_of, and make sure there's nothing very off about it
 #' @keywords internal
-get_asof <- function(object, new_data) {
-  original_columns <- object$info %>%
+set_asof <- function(new_data, info) {
+  original_columns <- info %>%
     filter(source == "original") %>%
     pull(variable)
   # make sure that there's enough column names
@@ -117,7 +137,6 @@ get_asof <- function(object, new_data) {
   as_of <- attributes(new_data)$metadata$as_of
   max_time <- max(time_values)
   # make sure the as_of is sane
-  # TODO decide on these checks
   if (!inherits(as_of, class(time_values))) {
     rlang::abort(glue::glue(
       "the data matrix `as_of` value is {as_of}, ",
@@ -149,6 +168,7 @@ get_asof <- function(object, new_data) {
 #' adjust the shifts by latency for the names in column assumes e.g.
 #' `"lag_6_case_rate"` and returns something like `"lag_10_case_rate"`
 #' @keywords internal
+#' @importFrom stringi stri_replace_all_regex
 adjust_name <- function(prefix, column, effective_shift) {
   pattern <- paste0(prefix, "\\d+", "_")
   adjusted_shifts <- paste0(prefix, effective_shift, "_")

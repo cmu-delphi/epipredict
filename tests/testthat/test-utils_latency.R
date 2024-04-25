@@ -34,11 +34,12 @@ modified_data <-
 modified_data %>% tail()
 as_of - (modified_data %>% filter(!is.na(ahead_4_case_rate)) %>% pull(time_value) %>% max())
 all_shift_cols <- tibble::tribble(
-  ~original_name, ~shifts, ~latency, ~effective_shift, ~new_name,
-  "lag_3_case_rate", 3, 5, 8, "lag_8_case_rate",
-  "lag_7_death_rate", 7, 4, 11, "lag_11_death_rate",
-  "ahead_4_case_rate", 4, -5, 9, "ahead_9_case_rate"
+  ~original_name, ~shifts, ~latency, ~effective_shift, ~new_name, ~type, ~role,
+  "lag_3_case_rate", 3, 5, 8, "lag_8_case_rate", "numeric", "predictor",
+  "lag_7_death_rate", 7, 4, 11, "lag_11_death_rate", "numeric", "predictor",
+  "ahead_4_case_rate", 4, -5, 9, "ahead_9_case_rate", "numeric", "outcome"
 )
+
 
 test_that("get_latency works", {
   expect_equal(get_latency(modified_data, as_of, "lag_7_death_rate", 7, 1), 4)
@@ -50,6 +51,8 @@ test_that("get_latency works", {
   # setting the wrong sign doubles the shift and gets the sign wrong
   expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, 1), 5 + 4 * 2)
 })
+
+test_that("get_latency infers max_time to be the minimum `max time` across the columns", {})
 
 test_that("adjust_name works", {
   expect_equal(
@@ -69,50 +72,80 @@ test_that("adjust_name works", {
 })
 
 test_that("get_asof works", {
-  object <- list(info = tribble(
+  info <- tribble(
     ~variable, ~type, ~role, ~source,
     "time_value", "date", "time_value", "original",
     "geo_value", "nominal", "geo_value", "original",
     "case_rate", "numeric", "raw", "original",
     "death_rate", "numeric", "raw", "original",
     "not_real", "numeric", "predictor", "derived"
-  ))
-  expect_equal(get_asof(object, modified_data), as_of)
+  )
+  expect_equal(set_asof(modified_data, info), as_of)
 })
 
-test_that("get_shifted_column_tibble works", {
+test_that("get_shifted_column_tibble infers latency and works correctly", {
+  info <- tibble(variable = c("lag_3_case_rate", "lag_7_death_rate", "ahead_4_case_rate"), type = "numeric", role = c(rep("predictor", 2), "outcome"), source = "derived")
   case_lag <- get_shifted_column_tibble(
-    "lag_", modified_data,
-    "case_rate", as_of, 1
+    "lag_", modified_data, "case_rate",
+    as_of, NULL, 1, info
   )
   expect_equal(case_lag, all_shift_cols[1, ])
 
   death_lag <- get_shifted_column_tibble(
     "lag_", modified_data,
-    "death_rate", as_of, 1
+    "death_rate", as_of, NULL, 1, info
   )
   expect_equal(death_lag, all_shift_cols[2, ])
 
   both_lag <- get_shifted_column_tibble(
-    "lag_", modified_data,
-    c("case_rate", "death_rate"), as_of, 1
+    "lag_", modified_data, c("case_rate", "death_rate"),
+    as_of, NULL, 1, info
   )
   expect_equal(both_lag, all_shift_cols[1:2, ])
+})
+
+test_that("get_shifted_column_tibble assigns given latencies", {
+  # non-null latency
+  info <- tibble(variable = c("lag_3_case_rate", "lag_7_death_rate", "ahead_4_case_rate"), type = "numeric", role = c(rep("predictor", 2), "outcome"), source = "derived")
+  both_lag <- get_shifted_column_tibble(
+    "lag_", modified_data,
+    c("case_rate", "death_rate"), as_of, 50, 1, info
+  )
+  weird_latencies <- tibble::tribble(
+    ~original_name, ~shifts, ~latency, ~effective_shift, ~new_name, ~type, ~role,
+    "lag_3_case_rate", 3, 50, 53, "lag_53_case_rate", "numeric", "predictor",
+    "lag_7_death_rate", 7, 50, 57, "lag_57_death_rate", "numeric", "predictor",
+  )
+  expect_equal(both_lag, weird_latencies)
+
+  # supposing we add the latencies by hand, and they're different, and in a different order
+  weird_latencies <- tibble::tribble(
+    ~original_name, ~shifts, ~latency, ~effective_shift, ~new_name, ~type, ~role,
+    "lag_3_case_rate", 3, 70, 73, "lag_73_case_rate", "numeric", "predictor",
+    "lag_7_death_rate", 7, 30, 37, "lag_37_death_rate", "numeric", "predictor",
+  )
+  both_lag <- get_shifted_column_tibble(
+    "lag_", modified_data,
+    c("case_rate", "death_rate"), as_of, c(death_rate = 30, case_rate = 70), 1, info
+  )
+  expect_equal(both_lag, weird_latencies[1:2, ])
 
   case_ahead <- get_shifted_column_tibble(
     "ahead_", modified_data,
-    "case_rate", as_of, -1
+    "case_rate", as_of, NULL, -1, info
   )
   expect_equal(case_ahead, all_shift_cols[3, ])
 })
+
 test_that("get_shifted_column_tibble objects to non-columns", {
   expect_error(
     get_shifted_column_tibble(
-      "lag_", modified_data, "not_present", as_of, 1
+      "lag_", modified_data, "not_present", as_of, NULL, 1, info
     ),
     class = "epipredict_adjust_latency_nonexistent_column_used"
   )
 })
+
 test_that("extend_either works", {
   keys <- c("geo_value", "time_value")
   # extend_either doesn't differentiate between the directions, it just moves
@@ -137,3 +170,5 @@ test_that("extend_either works", {
     expected_post_shift
   )
 })
+
+# todo case where somehow columns of different roles are selected
