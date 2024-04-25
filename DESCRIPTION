@@ -40,6 +40,7 @@ Imports:
     rlang (>= 1.0.0),
     stats,
     stringr,
+    stringi,
     tibble,
     tidyr,
     tidyselect,

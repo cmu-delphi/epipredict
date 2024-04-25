@@ -10,6 +10,8 @@ step_adjust_latency(
   role = NA,
   trained = FALSE,
   method = c("extend_ahead", "locf", "extend_lags"),
+  fixed_latency = NULL,
+  fixed_asof = NULL,
   default = NA,
   skip = FALSE,
   prefix = NULL,
@@ -40,8 +42,17 @@ sophisticated methods of extrapolation.
 \item \code{"extend_lags"}: per \code{epi_key} and \code{predictor}, adjusts the lag so that
 the shortest lag at predict time is at the last observation. E.g. if the
 lags are \code{c(0,7,14)} for data that is 3 days latent, the actual lags used
-become \code{c(3,10,17)}
 }}
+
+\item{fixed_latency}{either a positive integer, or a labeled positive integer
+vector. Cannot be set at the same time as \code{fixed_asof}.   If non-\code{NULL}, the
+amount to offset the ahead or lag by. If a single integer, this is used for
+all columns; if a labeled vector, the labels must correspond to the base
+column names.  If \code{NULL}, the latency is the distance between the \code{epi_df}'s
+\code{max_time_value} and either the \code{fixed_asof} or the \code{epi_df}'s \code{as_of}
+field.}
+
+\item{fixed_asof}{either a date of the same kind used in the \code{epi_df}, or NULL. Cannot be set at the same time as \code{fixed_latency}. If a date, it gives the date from which the forecast is actually occurring. If \code{NULL}, the \code{as_of} is determined either from \code{fixed_latency} or automatically.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
@@ -56,6 +67,9 @@ the computations for subsequent operations.}
 \item{prefix}{a character. The prefix matching the one used in either
 \code{step_epi_ahead} if \code{method="extend_ahead"} or \code{step_epi_lag}
 if \code{method="extend_lags"} or "locf".}
+
+\item{columns}{A character string of variable names that will
+btency'   become \code{c(3,10,17)}}
 
 \item{id}{A unique identifier for the step}
 }
