@@ -141,7 +141,7 @@ multi_log_res <- map(1:40, ~ arx_classifier(
     breaks = 0.25 / 7, # division by 7 gives weekly not daily
     ahead = .x
   )
-)$predictions) %>% list_rbind() 
+)$predictions) %>% list_rbind()
 ```
 
 We can plot a the heatmap of the results over the aheads to see if there's anything novel or interesting to take away:
