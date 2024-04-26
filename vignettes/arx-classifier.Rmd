@@ -138,7 +138,7 @@ multi_log_res <- map(1:14, ~ arx_classifier(
   outcome = "case_rate",
   predictors = "case_rate",
   args_list = arx_class_args_list(
-    breaks = 0.25 / 7,
+    breaks = 0.25/7,
     ahead = .x
   )
 )$predictions) %>% list_rbind()
@@ -149,9 +149,9 @@ We can plot a the heatmap of the results over the aheads to see if there's anyth
 ```{r}
 ggplot(multi_log_res, aes(target_date, geo_value, fill = .pred_class)) +
   geom_tile() +
-  scale_colour_brewer() +
   ylab("State") +
-  xlab("Target date")
+  xlab("Target date") +
+  scale_fill_brewer(palette = "Set1")
 ```
 
 While there is a bit of variability near to the beginning, we can clearly see that there are upswings for all states starting from the beginning of January 2022, which we can recall was when there was a massive spike in cases for many states. So our results seem to align well with what actually happened at the beginning of January 2022.
