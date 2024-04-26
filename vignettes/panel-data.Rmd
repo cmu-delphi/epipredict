@@ -12,7 +12,8 @@ knitr::opts_chunk$set(
   echo = TRUE,
   collapse = TRUE,
   comment = "#>",
-  out.width = "100%"
+  out.width = "90%",
+  fig.align = "center"
 )
 ```
 
@@ -117,7 +118,7 @@ In the following sections, we will go over pre-processing the data in the
 `epi_recipe` framework, and fitting a model and making predictions within the 
 `epipredict` framework and using the package's canned forecasters.
 
-# Simple autoregressive with 3 lags to predict number of graduates in a year 
+# Autoregressive (AR) model to predict number of graduates in a year 
 
 ## Pre-processing 
 
@@ -165,21 +166,25 @@ next year (time $t+1$) using an autoregressive model with three lags (i.e., an
 AR(3) model). Such a model is represented algebraically like this: 
 
 \[
-  x_{t+1} = 
-  \alpha_0 + \alpha_1 x_{t} + \alpha_2 x_{t-1} + \alpha_3 x_{t-2} + \epsilon_t  
+  y_{t+1,ijk} = 
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk} + \epsilon_{tijk}
 \]
 
-where $x_i$ is the proportion of graduates at time $i$, and the current time is 
-$t$.
+where $y_{tij}$ is the proportion of graduates at time $t$ in location $i$ and
+age group $j$ with education quality $k$.
 
 In the pre-processing step, we need to create additional columns in `employ` for 
-each of $x_{t+1}$, $x_{t}$, $x_{t-1}$, and $x_{t-2}$. We do this via an 
+each of $y_{t+1,ijk}$, $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$. 
+We do this via an 
 `epi_recipe`. Note that creating an `epi_recipe` alone doesn't add these 
 outcome and predictor columns; the recipe just stores the instructions for 
 adding them. 
 
-Our `epi_recipe` should add one `ahead` column representing $x_{t+1}$ and 
-3 `lag` columns representing $x_{t}$, $x_{t-1}$, and $x_{t-2}$. Also note that 
+Our `epi_recipe` should add one `ahead` column representing $y_{t+1,ijk}$ and 
+3 `lag` columns representing $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$
+(it's more accurate to think of the  0th "lag" as the "current" value with 2 lags,
+but that's not quite how the processing works). 
+Also note that 
 since we specified our `time_type` to be `year`, our `lag` and `lead`
 values are both in years. 
 
@@ -209,9 +214,9 @@ r %>% bake_and_show_sample(employ_small)
 We can see that the `prep` and `bake` steps created new columns according to 
 our `epi_recipe`:
 
-- `ahead_1_num_graduates_prop` corresponds to $x_{t+1}$
+- `ahead_1_num_graduates_prop` corresponds to $y_{t+1,ijk}$
 - `lag_0_num_graduates_prop`, `lag_1_num_graduates_prop`, and 
-`lag_2_num_graduates_prop` correspond to $x_{t}$, $x_{t-1}$, and $x_{t-2}$ 
+`lag_2_num_graduates_prop` correspond to $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$ 
 respectively.
 
 ## Model fitting and prediction
@@ -224,8 +229,8 @@ engine `lm`, which fits a linear regression using ordinary least squares.
 We will use `epi_workflow` with the `epi_recipe` we defined in the 
 pre-processing section along with the `parsnip::linear_reg()` model. Note 
 that `epi_workflow` is a container and doesn't actually do the fitting. We have 
-to pass the workflow into `fit()` to get our model coefficients 
-$\alpha_i, i=0,...,3$.
+to pass the workflow into `fit()` to get our estimated model coefficients 
+$\widehat{\alpha}_i,\ i=0,...,3$.
 
 ```{r linearreg-wf, include=T}
 wf_linreg <- epi_workflow(r, linear_reg()) %>%
@@ -234,13 +239,13 @@ summary(extract_fit_engine(wf_linreg))
 ```
 
 This output tells us the coefficients of the fitted model; for instance, 
-the intercept is $\alpha_0 = 0.24804$ and the coefficient for $x_{t}$ is 
-$\alpha_1 = 0.06648$. The summary also tells us that only the intercept and lags
-at 2 years and 3 years ago have coefficients significantly greater than zero.
-
-Extracting the 95% confidence intervals for the coefficients also leads us to
-the same conclusion: all the coefficients except for $\alpha_1$ (lag 0) contain 
-0. 
+the estimated intercept is $\widehat{\alpha}_0 =$ `r round(coef(extract_fit_engine(wf_linreg))[1], 3)` and the coefficient for $y_{tijk}$ is 
+$\widehat\alpha_1 =$ `r round(coef(extract_fit_engine(wf_linreg))[2], 3)`.
+The summary also tells us that all estimated coefficients are significantly 
+different from zero. Extracting the 95% confidence intervals for the 
+coefficients also leads us to
+the same conclusion: all the coefficient estimates are significantly different
+from 0. 
 
 ```{r}
 confint(extract_fit_engine(wf_linreg))
@@ -258,20 +263,20 @@ preds %>% sample_n(5)
 ```
 
 We can do this using the `augment` function too. Note that `predict` and 
-`augment` both still return an `epi_df` with all of the keys that were present 
-in the original dataset.
+`augment` both still return an `epiprocess::epi_df` with all of the keys that 
+were present in the original dataset.
 
-```{r linearreg-augment, include=T, eval=F}
+```{r linearreg-augment}
 augment(wf_linreg, latest) %>% sample_n(5)
 ```
 
 ## Model diagnostics 
 
-First, we'll plot the residuals (that is, $y_{t} - \hat{y}_{t}$) against the 
-fitted values ($\hat{y}_{t}$).
+First, we'll plot the residuals (that is, $y_{tijk} - \widehat{y}_{tijk}$) 
+against the fitted values ($\widehat{y}_{tijk}$).
 
 ```{r lienarreg-resid-plot, include=T, fig.height = 5, fig.width = 5}
-par(mfrow = c(2, 2))
+par(mfrow = c(2, 2), mar = c(5, 3, 1.2, 0))
 plot(extract_fit_engine(wf_linreg))
 ```
 
@@ -286,30 +291,33 @@ The Q-Q plot shows us that the residuals have heavier tails than a Normal
 distribution. So the normality of residuals assumption doesn't hold either.
 
 Finally, the residuals vs. leverage plot shows us that we have a few influential
-points based on the Cooks distance (those outside the red dotted line). 
+points based on the Cook's distance (those outside the red dotted line). 
 
 Since we appear to be violating the linear model assumptions, we might consider 
 transforming our data differently, or considering a non-linear model, or 
 something else.
 
-# Autoregressive model with exogenous inputs
+# AR model with exogenous inputs
 
-Now suppose we want to model the 5-year employment income using 3 lags, while 
+Now suppose we want to model the 1-step-ahead 5-year employment income using 
+current and two previous values, while 
 also incorporating information from the other two time-series in our dataset: 
 the 2-year employment income and the number of graduates in the previous 2 
 years. We would do this using an autoregressive model with exogenous inputs,
 defined as follows:
 
 \[
-  y_{t+1} = 
-  \alpha_0 + \alpha_1 y_{t} + \alpha_2 y_{t-1} + \alpha_3 y_{t-2} +
-  \beta_1 x_{t} + \beta_2 x_{t-1} 
-  \gamma_2 z_{t} + \gamma_2 z_{t-1} 
+\begin{aligned}
+  y_{t+1,ijk} &= 
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk}\\
+  &\quad + \beta_1 x_{tijk} + \beta_2 x_{t-1,ijk}\\
+  &\quad + \gamma_2 z_{tijk} + \gamma_2 z_{t-1,ijk} + \epsilon_{tijk}
+\end{aligned}
 \]
 
-where $y_i$ is the 5-year median income (proportion) at time $i$, 
-$x_i$ is the 2-year median income (proportion) at time $i$, and 
-$z_i$ is the number of graduates (proportion) at time $i$. 
+where $y_{tijk}$ is the 5-year median income (proportion) at time $t$ (in location $i$, age group $j$ with education quality $k$), 
+$x_{tijk}$ is the 2-year median income (proportion) at time $t$, and 
+$z_{tijk}$ is the number of graduates (proportion) at time $t$. 
 
 ## Pre-processing 
 
@@ -318,9 +326,9 @@ Again, we construct an `epi_recipe` detailing the pre-processing steps.
 ```{r custom-arx, include=T}
 rx <- epi_recipe(employ_small) %>%
   step_epi_ahead(med_income_5y_prop, ahead = 1) %>%
-  # 5-year median income has 3 lags c(0,1,2)
-  step_epi_lag(med_income_5y_prop, lag = c(0, 1, 2)) %>%
-  # But the two exogenous variables have 2 lags c(0,1)
+  # 5-year median income has current, and two lags c(0, 1, 2)
+  step_epi_lag(med_income_5y_prop, lag = 0:2) %>%
+  # But the two exogenous variables have current values, and 1 lag c(0, 1)
   step_epi_lag(med_income_2y_prop, lag = c(0, 1)) %>%
   step_epi_lag(num_graduates_prop, lag = c(0, 1)) %>%
   step_epi_naomit()
@@ -335,14 +343,15 @@ steps using a few [`frosting`](
   https://cmu-delphi.github.io/epipredict/reference/frosting.html) layers to do 
 a few things:
 
-1. Convert our predictions back to income values and number of graduates, 
-rather than standardized proportions. We do this via the frosting layer 
-`layer_population_scaling`. 
-2. Threshold our predictions to 0. We are predicting proportions, which can't 
+1. Threshold our predictions to 0. We are predicting proportions, which can't 
 be negative. And the transformed values back to dollars and people can't be 
 negative either.
-3. Generate prediction intervals based on residual quantiles, allowing us to 
+1. Generate prediction intervals based on residual quantiles, allowing us to 
 quantify the uncertainty associated with future predicted values.
+1. Convert our predictions back to income values and number of graduates, 
+rather than standardized proportions. We do this via the frosting layer 
+`layer_population_scaling()`. 
+
 
 ```{r custom-arx-post, include=T}
 # Create dataframe of the sums we used for standardizing
@@ -373,10 +382,8 @@ wfx_linreg <- epi_workflow(rx, parsnip::linear_reg()) %>%
 summary(extract_fit_engine(wfx_linreg))
 ```
 
-Based on the summary output for this model, only the intercept term, 5-year 
-median income from 3 years ago, and the 2-year median income from 1 year ago 
-are significant linear predictors for today's 5-year median income at a 95% 
-confidence level. Both lags for the number of graduates were insignificant.
+Based on the summary output for this model, we can examine confidence intervals
+and perform hypothesis tests as usual.
 
 Let's take a look at the predictions along with their 90% prediction intervals.
 
@@ -384,7 +391,7 @@ Let's take a look at the predictions along with their 90% prediction intervals.
 latest <- get_test_data(recipe = rx, x = employ_small)
 predsx <- predict(wfx_linreg, latest)
 
-# Display values within prediction intervals
+# Display predictions along with prediction intervals
 predsx %>%
   select(
     geo_value, time_value, edu_qual, age_group,
@@ -419,8 +426,8 @@ by the keys in our `epi_df`.
 In this first example, we'll use `flatline_forecaster` to make a simple
 prediction of the 2-year median income for the next year, based on one previous 
 time point. This model is representated algebraically as:
-\[y_{t+1} = \alpha_0 + \alpha_0 y_{t}\]
-where $y_i$ is the 2-year median income (proportion) at time $i$.
+\[y_{t+1,ijk} = y_{tijk} + \epsilon_{tijk}\]
+where $y_{tijk}$ is the 2-year median income (proportion) at time $t$.
 
 ```{r flatline, include=T, warning=F}
 out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
