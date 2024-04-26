@@ -138,7 +138,7 @@ multi_log_res <- map(1:14, ~ arx_classifier(
   outcome = "case_rate",
   predictors = "case_rate",
   args_list = arx_class_args_list(
-    breaks = 0.25/7,
+    breaks = 0.1,
     ahead = .x
   )
 )$predictions) %>% list_rbind()
