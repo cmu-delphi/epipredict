@@ -48,8 +48,8 @@ More than 3 levels begins to be difficult to see.}
 \item{.base_color}{If available, prediction bands will be shown with this
 color.}
 
-\item{.point_pred_color}{If available, point forecasts will be shown with this
-color.}
+\item{.point_pred_color}{If available, point forecasts will be shown with
+this color.}
 
 \item{.max_facets}{The maximum number of facets to show. If the number of
 facets is greater than this value, only the top facets will be shown.}

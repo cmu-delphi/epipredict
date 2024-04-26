@@ -83,8 +83,9 @@ arx_forecaster <- function(epi_data,
 #' use [quantile_reg()]) but can be omitted.
 #'
 #' @inheritParams arx_forecaster
-#' @param trainer A `{parsnip}` model describing the type of estimation.
-#'   For now, we enforce `mode = "regression"`. May be `NULL` (the default).
+#' @param trainer A `{parsnip}` model describing the type of estimation. For
+#'   now, we enforce `mode = "regression"`. May be `NULL` if you'd like to
+#'   decide later.
 #'
 #' @return An unfitted `epi_workflow`.
 #' @export
@@ -108,7 +109,7 @@ arx_fcast_epi_workflow <- function(
     epi_data,
     outcome,
     predictors = outcome,
-    trainer = NULL,
+    trainer = parsnip::linear_reg(),
     args_list = arx_args_list()) {
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)

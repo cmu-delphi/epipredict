@@ -8,7 +8,7 @@ arx_class_epi_workflow(
   epi_data,
   outcome,
   predictors,
-  trainer = NULL,
+  trainer = parsnip::logistic_reg(),
   args_list = arx_class_args_list()
 )
 }
@@ -28,11 +28,11 @@ specifically mentioned will be used. (The \code{outcome} will not be added.)
 By default, equals the outcome. If manually specified, does not add the
 outcome variable, so make sure to specify it.}
 
-\item{trainer}{A \code{{parsnip}} model describing the type of estimation.
-For now, we enforce \code{mode = "classification"}. Typical values are
+\item{trainer}{A \code{{parsnip}} model describing the type of estimation. For
+now, we enforce \code{mode = "classification"}. Typical values are
 \code{\link[parsnip:logistic_reg]{parsnip::logistic_reg()}} or \code{\link[parsnip:multinom_reg]{parsnip::multinom_reg()}}. More complicated
-trainers like \code{\link[parsnip:naive_Bayes]{parsnip::naive_Bayes()}} or \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}} can
-also be used. May be \code{NULL} (the default).}
+trainers like \code{\link[parsnip:naive_Bayes]{parsnip::naive_Bayes()}} or \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}} can also
+be used. May be \code{NULL} if you'd like to decide later.}
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_class_args_list]{arx_class_args_list()}}.}
