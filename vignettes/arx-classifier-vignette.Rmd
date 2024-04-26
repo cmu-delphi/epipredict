@@ -82,7 +82,7 @@ Additional arguments that may be supplied to `arx_class_args_list()` include the
 
 ## Example of using the ARX classifier
 
-Now, to demonstrate the power and utility of this built-in arx classifier, we will adapt the classification example that was written from scratch in the [Examples of Preprocessing and Models vignette](https://cmu-delphi.github.io/epipredict/articles/preprocessing-and-models.html). However, to keep things simple and not merely a direct translation, we will only consider two prediction categories and leave the extension to three as an exercise for the reader.
+Now, to demonstrate the power and utility of this built-in arx classifier, we will adapt the classification example that was written from scratch in `vignette("preprocessing-and-models")`. However, to keep things simple and not merely a direct translation, we will only consider two prediction categories and leave the extension to three as an exercise for the reader.
 
 To motivate this example, a major use of autoregressive classification models is to predict upsurges or downsurges like in hotspot prediction models to anticipate the direction of the outcome (see [McDonald, Bien, Green, Hu, et al. (2021)](https://www.pnas.org/doi/full/10.1073/pnas.2111453118) for more on these). In our case, one simple question that such models can help answer is... Do we expect that the future will have increased case rates or not relative to the present? #%% Ok to say relative to the present? Also, should I be more precise here and say relative change or best to keep it simple?
 
