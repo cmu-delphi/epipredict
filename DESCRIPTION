@@ -55,6 +55,7 @@ Suggests:
     knitr,
     lubridate,
     poissonreg,
+    purrr,
     ranger,
     RcppRoll,
     rmarkdown,
