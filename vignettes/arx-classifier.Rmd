@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
   comment = "#>",
   warning = FALSE,
   message = FALSE,
-out.width = "100%"
+  out.width = "100%"
 )
 ```
 
@@ -139,15 +139,12 @@ multi_log_res <- map(1:14, ~ arx_classifier(
   predictors = "case_rate",
   args_list = arx_class_args_list(
     breaks = 0.25 / 7,
-    ahead = .x,
-    horizon = .x,
+    ahead = .x
   )
 )$predictions) %>% list_rbind()
 ```
 
-Notice that the ahead and horizon are what we are are changing when we use `map()`. The reason we must also change `horizon` is because that is passed to the `h` argument of `epiprocess::growth_rate()` and determines the amount of data used to calculate the growth rate. So, for nearly all intents and purposes, it should be the same as `ahead`.
-
-We can plot a the heatmap of the results over the aheads to see if there's anything novel or interesting:
+We can plot a the heatmap of the results over the aheads to see if there's anything novel or interesting to take away:
 
 ```{r}
 ggplot(multi_log_res, aes(target_date, geo_value, fill = .pred_class)) +
