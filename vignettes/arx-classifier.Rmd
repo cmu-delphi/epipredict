@@ -119,7 +119,7 @@ log_res <- arx_classifier(
   )
 )
 
-workflows::extract_preprocessor(log_res$epi_workflow)
+log_res$epi_workflow
 ```
 
 Comparing the pre-processing steps for this to those in the other vignette, we can see that they are not precisely the same, but they cover the same essentials of transforming `case_rate` to the growth rate scale (`step_growth_rate()`), lagging the predictors (`step_epi_lag()`), leading the response (`step_epi_ahead()`), which are both constructed from the growth rates, and constructing the binary classification response variable (`step_mutate()`). 
@@ -149,6 +149,7 @@ We can plot a the heatmap of the results over the aheads to see if there's anyth
 ```{r}
 ggplot(multi_log_res, aes(target_date, geo_value, fill = .pred_class)) +
   geom_tile() +
+  scale_colour_brewer() +
   ylab("State") +
   xlab("Target date")
 ```
