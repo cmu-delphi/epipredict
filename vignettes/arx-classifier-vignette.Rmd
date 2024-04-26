@@ -1,5 +1,10 @@
 ---
-title: "arx_classifier"
+title: "Auto-regressive classifier"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Auto-regressive classifier}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
