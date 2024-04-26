@@ -473,3 +473,10 @@ out_arx_rf <- arx_forecaster(
 
 out_arx_rf
 ```
+
+# Conclusion
+
+While the purpose of `{epipredict}` is to allow `{tidymodels}` to operate on 
+epidemiology data, it can be easily adapted (both the workflows and the canned
+forecasters) to work for generic panel data modelling.
+
