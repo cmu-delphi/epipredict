@@ -133,12 +133,12 @@ The other optional arguments for controlling the growth rate calculation (that c
 To visualize the prediction classes across the states for the target date, we can plot our results as a heatmap. However, if we were to plot the results for only one target date, like our 7-day ahead predictions, then that would be a pretty sad heatmap (which would look more like a bar chart than a heatmap)... So instead of doing that, let's get predictions for several aheads and plot a heatmap across the target dates. To get the predictions across several ahead values, we will use the map function in the same way that we did in other vignettes:
 
 ```{r}
-multi_log_res <- map(1:14, ~ arx_classifier(
+multi_log_res <- map(1:40, ~ arx_classifier(
   jhu,
   outcome = "case_rate",
   predictors = "case_rate",
   args_list = arx_class_args_list(
-    breaks = 0.1,
+    breaks = 0.25 / 7, # division by 7 gives weekly not daily
     ahead = .x
   )
 )$predictions) %>% list_rbind() 
@@ -154,7 +154,7 @@ ggplot(multi_log_res, aes(target_date, geo_value, fill = .pred_class)) +
   scale_fill_brewer(palette = "Set1")
 ```
 
-While there is a bit of variability near to the beginning, we can clearly see that there are upswings for all states starting from the beginning of January 2022, which we can recall was when there was a massive spike in cases for many states. So our results seem to align well with what actually happened at the beginning of January 2022.
+While there is a bit of variability near to the end, we can clearly see that there are upswings for all states starting from the beginning of January 2022, which we can recall was when there was a massive spike in cases for many states. So our results seem to align well with what actually happened at the beginning of January 2022.
 
 ## A brief reflection
 
