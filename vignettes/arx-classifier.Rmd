@@ -141,7 +141,7 @@ multi_log_res <- map(1:14, ~ arx_classifier(
     breaks = 0.1,
     ahead = .x
   )
-)$predictions) %>% list_rbind()
+)$predictions) %>% list_rbind() 
 ```
 
 We can plot a the heatmap of the results over the aheads to see if there's anything novel or interesting to take away:
