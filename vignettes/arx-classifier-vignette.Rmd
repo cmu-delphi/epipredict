@@ -73,10 +73,7 @@ out_break_0.5 <- arx_classifier(jhu,
 out_break_0.5$predictions
 ```
 Indeed, we can observe that the two `.pred_class` are now (-Inf, 0.5] and (0.5, Inf).
-
-```{r}
-?arx_class_args_list
-```
+See `help(arx_class_args_list)` for other available modifications.
 
 Additional arguments that may be supplied to `arx_class_args_list()` include the expected `lags` and `ahead` arguments for an autoregressive-type model. These have default values of 0, 7, and 14 days for the lags of the predictors and 7 days ahead of the forecast date for predicting the outcome. There is also `n_training` to indicate the upper bound for the number of training rows per key as well as `forecast_date` and `target_date` to specify the date that the forecast is created and intended, respectively. We will not dwell on these arguments here as they are not unique to this classifier or absolutely essential to understanding how it operates. The remaining arguments will be discussed organically, as they are needed to serve our purposes. For information on any remaining arguments that are not discussed here, please see the function documentation for a complete list and their definitions.
 
