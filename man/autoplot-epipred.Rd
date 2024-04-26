@@ -39,6 +39,18 @@ More than 3 levels begins to be difficult to see.}
 
 \item{...}{Ignored}
 
+\item{.color_by}{Which variables should determine the color(s) used to plot
+lines. Options include:
+\itemize{
+\item \code{all_keys} - the default uses the interaction of any key variables
+including the \code{geo_value}
+\item \code{geo_value} - \code{geo_value} only
+\item \code{other_keys} - any available keys that are not \code{geo_value}
+\item \code{.response} - the numeric variables (same as the y-axis)
+\item \code{all} - uses the interaction of all keys and numeric variables
+\item \code{none} - no coloring aesthetic is applied
+}}
+
 \item{.facet_by}{Similar to \code{.color_by} except that the default is to
 display the response.}
 
@@ -47,6 +59,9 @@ color.}
 
 \item{.point_pred_color}{If available, point forecasts will be shown with
 this color.}
+
+\item{.max_facets}{Cut down of the number of facets displayed. Especially
+useful for testing when there are many \code{geo_value}'s or keys.}
 }
 \description{
 For a fit workflow, the training data will be displayed, the response by
