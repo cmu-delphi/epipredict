@@ -8,7 +8,7 @@ arx_fcast_epi_workflow(
   epi_data,
   outcome,
   predictors = outcome,
-  trainer = NULL,
+  trainer = parsnip::linear_reg(),
   args_list = arx_args_list()
 )
 }

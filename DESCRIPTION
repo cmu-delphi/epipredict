@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.0.13
+Version: 0.0.12
 Authors@R: c(
     person("Daniel", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -32,7 +32,6 @@ Imports:
     distributional,
     dplyr,
     generics,
-    ggplot2,
     glue,
     hardhat (>= 1.3.0),
     magrittr,
@@ -52,6 +51,7 @@ Suggests:
     data.table,
     epidatr (>= 1.0.0),
     fs,
+    ggplot2,
     knitr,
     lubridate,
     poissonreg,

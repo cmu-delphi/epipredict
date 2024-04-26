@@ -39,20 +39,14 @@ More than 3 levels begins to be difficult to see.}
 
 \item{...}{Ignored}
 
-\item{.color_by}{A character string indicating how to color the data. See
-\code{epiprocess::autoplot.epi_df()} for more details.}
-
-\item{.facet_by}{A character string indicating how to facet the data. See
-\code{epiprocess::autoplot.epi_df()} for more details.}
+\item{.facet_by}{Similar to \code{.color_by} except that the default is to
+display the response.}
 
 \item{.base_color}{If available, prediction bands will be shown with this
 color.}
 
 \item{.point_pred_color}{If available, point forecasts will be shown with
 this color.}
-
-\item{.max_facets}{The maximum number of facets to show. If the number of
-facets is greater than this value, only the top facets will be shown.}
 }
 \description{
 For a fit workflow, the training data will be displayed, the response by
