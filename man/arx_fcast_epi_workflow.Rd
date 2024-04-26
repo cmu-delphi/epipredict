@@ -24,8 +24,9 @@ specifically mentioned will be used. (The \code{outcome} will not be added.)
 By default, equals the outcome. If manually specified, does not add the
 outcome variable, so make sure to specify it.}
 
-\item{trainer}{A \code{{parsnip}} model describing the type of estimation.
-For now, we enforce \code{mode = "regression"}. May be \code{NULL} (the default).}
+\item{trainer}{A \code{{parsnip}} model describing the type of estimation. For
+now, we enforce \code{mode = "regression"}. May be \code{NULL} if you'd like to
+decide later.}
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}

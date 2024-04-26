@@ -51,9 +51,15 @@ arx_lags_validator <- function(predictors, lags) {
 }
 
 
+
 #' @export
 print.alist <- function(x, ...) {
-  utils::str(x)
+  nm <- names(x)
+  for (i in seq_along(x)) {
+    if (is.null(x[[i]])) x[[i]] <- "NULL"
+    if (length(x[[i]]) == 0L) x[[i]] <- "_empty_"
+    cli::cli_bullets(c("*" = "{nm[[i]]} : {.val {x[[i]]}}"))
+  }
 }
 
 #' @export

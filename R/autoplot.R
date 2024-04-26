@@ -14,22 +14,17 @@ ggplot2::autoplot
 #'
 #' @inheritParams epiprocess::autoplot.epi_df
 #' @param object An `epi_workflow`
-#'
 #' @param predictions A data frame with predictions. If `NULL`, only the
 #'   original data is shown.
 #' @param .levels A numeric vector of levels to plot for any prediction bands.
 #'   More than 3 levels begins to be difficult to see.
 #' @param ... Ignored
-#' @param .color_by A character string indicating how to color the data. See
-#'   `epiprocess::autoplot.epi_df()` for more details.
-#' @param .facet_by A character string indicating how to facet the data. See
-#'  `epiprocess::autoplot.epi_df()` for more details.
+#' @param .facet_by Similar to `.color_by` except that the default is to
+#'   display the response.
 #' @param .base_color If available, prediction bands will be shown with this
 #'   color.
-#' @param .point_pred_color If available, point forecasts will be shown with this
-#'   color.
-#' @param .max_facets The maximum number of facets to show. If the number of
-#'  facets is greater than this value, only the top facets will be shown.
+#' @param .point_pred_color If available, point forecasts will be shown with
+#'   this color.
 #'
 #' @name autoplot-epipred
 #' @examples
