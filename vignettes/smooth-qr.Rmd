@@ -184,8 +184,8 @@ plot_preds <- function(preds, geos_to_plot = NULL, train_test_dat, fd) {
     geom_ribbon(aes(target_date, ymin = `0.25`, ymax = `0.75`),
       fill = "#00488E", alpha = .8
     ) +
-    geom_line(data = train_test_dat, aes(time_value, death_rate), size = 1.5) +
-    geom_line(aes(target_date, `0.5`), color = "orange", size = 1.5) +
+    geom_line(data = train_test_dat, aes(time_value, death_rate)) +
+    geom_line(aes(target_date, `0.5`), color = "orange") +
     geom_vline(xintercept = fd) +
     facet_wrap(~geo_value) +
     theme_bw(16) +
