@@ -39,7 +39,7 @@ smooth_quantile_reg(
 
 For smooth quantile regression, the type of model or `mode` is regression.
 
-The only `engine` that is currently supported is `smooth_qr()` from the [`smooth_qr` package](https://dajmcdon.github.io/smoothqr/).
+The only `engine` that is currently supported is `smooth_qr()` from the [`smoothqr` package](https://dajmcdon.github.io/smoothqr/).
 
 The `outcome_locations` indicate the multiple horizon (ie. ahead) values. These should be specified by the user.
 
