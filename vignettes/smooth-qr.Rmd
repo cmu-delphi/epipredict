@@ -268,7 +268,7 @@ For a more formal comparison between the two approaches, we could compare the te
 
 ```{r, message = FALSE}
 baseline_preds_mae_df <- baseline_preds %>%
-  left_join(tedf_sub) %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date"))
   group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
