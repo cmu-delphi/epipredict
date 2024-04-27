@@ -234,7 +234,7 @@ smooth_preds_df_deg <- smooth_preds_list %>%
   summarise(mean = mean(error))
 
 # Arrange the MAE from smallest to largest
-head(smooth_preds_df_deg %>% arrange(mean))
+smooth_preds_df_deg %>% arrange(mean)
 ```
 
 Instead of just looking at the raw numbers, let's create a simple line plot to visualize how the MAE changes over degrees for this data:
