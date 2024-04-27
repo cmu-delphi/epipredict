@@ -520,7 +520,7 @@ knitr::kable(
     "Test period:", min(res_err2$forecast_date), "to",
     max(res_err2$forecast_date)
   ),
-  format = "html", table.attr = "style='width:70%;'"
+  format = "html", table.attr = "style='width:70%;'", digits = 3
 )
 ```
 $$\\[0.01in]$$ 
