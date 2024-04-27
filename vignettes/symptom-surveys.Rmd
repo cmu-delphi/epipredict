@@ -367,7 +367,8 @@ knitr::kable(
     )$p.val) %>%
     ungroup() %>% filter(lead == "7 days ahead") %>%
     rename("Comparison" = model, "Target" = lead, "P-value" = p),
-  format = "html", table.attr = "style='width:50%;'"
+  format = "html", table.attr = "style='width:50%;'",
+  digiits = 3
 )
 ```
 $$\\[0.01in]$$
