@@ -19,9 +19,9 @@ knitr::opts_chunk$set(
 
 # Introducing smooth quantile regression
 
-Whereas the standard application of time-series forecasting techniques has been to forecast a single horizon, in multi-period forecasting, the goal is to forecast several horizons simultaneously. This is useful in epidemiological applications where decisions are based on the trend of a signal.
+Whereas other time-series forecasting examples in this package have used (direct) models for single horizons, in multi-period forecasting, the goal is to (directly) forecast several horizons simultaneously. This is useful in epidemiological applications where decisions are based on the trend of a signal.
 
-The idea underlying smooth quantile regression is that the future can be approximated by a smooth curve. This novel approach from [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723) enforces smoothness across the horizons and can be applied to point estimation by regression or interval prediction by quantile regression. Our focus in this vignette is the latter.
+The idea underlying smooth quantile regression is that set forecast targets can be approximated by a smooth curve. This novel approach from [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723) enforces smoothness across the horizons and can be applied to point estimation by regression or interval prediction by quantile regression. Our focus in this vignette is the latter.
 
 # Built-in function for smooth quantile regression and its parameters
 
@@ -269,14 +269,14 @@ For a more formal comparison between the two approaches, we could compare the te
 ```{r, message = FALSE}
 baseline_preds_mae_df <- baseline_preds %>%
   left_join(tedf_sub, by = c("geo_value", "target_date"))
-  group_by(ahead) %>%
+group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "baseline")
 
 smooth_preds_mae_df <- smooth_preds %>%
   left_join(tedf_sub, by = c("geo_value", "target_date"))
-  group_by(ahead) %>%
+group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "smooth")
@@ -334,7 +334,7 @@ Next, we apply the `wis_dist_quantile` function to get a WIS score for each stat
 ```{r}
 smooth_preds_wis_df <- smooth_preds %>%
   left_join(tedf_sub, by = c("geo_value", "target_date"))
-  rowwise() %>%
+rowwise() %>%
   mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>%
   group_by(ahead) %>%
   summarise(mean = mean(wis)) %>%
