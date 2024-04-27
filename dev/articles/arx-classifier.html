@@ -216,11 +216,12 @@ list and their definitions.</p>
 <h2 id="example-of-using-the-arx-classifier">Example of using the ARX classifier<a class="anchor" aria-label="anchor" href="#example-of-using-the-arx-classifier"></a>
 </h2>
 <p>Now, to demonstrate the power and utility of this built-in arx
-classifier, we will adapt the classification example that was written
-from scratch in <code><a href="../articles/preprocessing-and-models.html">vignette("preprocessing-and-models")</a></code>.
-However, to keep things simple and not merely a direct translation, we
-will only consider two prediction categories and leave the extension to
-three as an exercise for the reader.</p>
+classifier, we will loosely adapt the classification example that was
+written from scratch in
+<code><a href="../articles/preprocessing-and-models.html">vignette("preprocessing-and-models")</a></code>. However, to keep
+things simple and not merely a direct translation, we will only consider
+two prediction categories and leave the extension to three as an
+exercise for the reader.</p>
 <p>To motivate this example, a major use of autoregressive
 classification models is to predict upswings or downswings like in
 hotspot prediction models to anticipate the direction of the outcome
@@ -245,7 +246,7 @@ Z_{l,t} = \left\{\begin{matrix}
 \text{not up,} &amp; \text{otherwise}
 \end{matrix}\right.
 \end{align}\]</span> where <span class="math inline">\(Y_{l,t}^\Delta =
-(Y_{l, t} - Y_{l, t- 7} / Y_{l, t- 7}\)</span>. If <span class="math inline">\(Y_{l,t}^\Delta\)</span> &gt; 0.25, meaning that
+(Y_{l, t} - Y_{l, t-7} / Y_{l, t-7}\)</span>. If <span class="math inline">\(Y_{l,t}^\Delta\)</span> &gt; 0.25, meaning that
 the number of new cases over the week has increased by over 25%, then
 <span class="math inline">\(Z_{l,t}\)</span> is up. This is the criteria
 for location <span class="math inline">\(l\)</span> to be a hotspot at
@@ -265,9 +266,8 @@ Pr(Z_{l, t} = \text{up}|x)  = \frac{1}{1 + e^{g_{\text{up}}(x)}}
 <p><span class="math display">\[
 g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert
 x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} +
-\beta_{11}t + \delta_{10}s_{state_1} + \delta_{10}s_{state_2} ... +
-\beta_{12}Y_{l,t}^\Delta + \beta_{13}Y_{l,t-7}^\Delta +
-\beta_{14}Y_{l,t-14}^\Delta.
+\beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta +
+\beta_{13}Y_{l,t-14}^\Delta.
 \]</span></p>
 <p>Now then, we will operate on the same subset of the
 <code>case_death_rate_subset</code> that we used in our above example.
