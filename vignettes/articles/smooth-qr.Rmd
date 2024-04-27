@@ -287,7 +287,7 @@ ggplot(preds_mae_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean MAE") +
-  scale_color_manual(values=c('#A69943', '#063970'))
+  scale_color_manual(values = c("#A69943", "#063970"))
 ```
 
 or over all aheads, times, and locations for a single numerical summary.
@@ -354,7 +354,7 @@ ggplot(preds_wis_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean WIS") +
-  scale_color_manual(values=c('#A69943', '#063970'))
+  scale_color_manual(values = c("#A69943", "#063970"))
 ```
 
 The results are consistent with what we saw for MAE: The forecasts for the near and distant future tend to be inaccurate for both models. The smooth quantile regression model only slightly outperforms the baseline model.
