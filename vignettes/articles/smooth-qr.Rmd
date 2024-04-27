@@ -268,15 +268,15 @@ For a more formal comparison between the two approaches, we could compare the te
 
 ```{r, message = FALSE}
 baseline_preds_mae_df <- baseline_preds %>%
-  left_join(tedf_sub, by = c("geo_value", "target_date"))
-group_by(ahead) %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
+  group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "baseline")
 
 smooth_preds_mae_df <- smooth_preds %>%
-  left_join(tedf_sub, by = c("geo_value", "target_date"))
-group_by(ahead) %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
+  group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
   mutate(type = "smooth")
@@ -333,15 +333,15 @@ Next, we apply the `wis_dist_quantile` function to get a WIS score for each stat
 
 ```{r}
 smooth_preds_wis_df <- smooth_preds %>%
-  left_join(tedf_sub, by = c("geo_value", "target_date"))
-rowwise() %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
+  rowwise() %>%
   mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>%
   group_by(ahead) %>%
   summarise(mean = mean(wis)) %>%
   mutate(type = "smooth")
 
 baseline_preds_wis_df <- baseline_preds %>%
-  left_join(tedf_sub) %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
   rowwise() %>%
   mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), several_quantiles)) %>%
   group_by(ahead) %>%
