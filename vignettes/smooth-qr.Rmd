@@ -45,7 +45,7 @@ The `outcome_locations` indicate the multiple horizon (ie. ahead) values. These 
 
 The `quantile_levels` parameter is a vector of values that indicates the quantiles to be estimated. The default is the median (0.5 quantile).
 
-The `degree` parameter indicates the number of polynomials used for smoothing of the response. It should be no more than the number of responses. If the degree is precisely equal to the number of aheads, then there is no smoothing. To better understand this parameter and how it works, we should look to its origins and how it is used in the model.  
+The `degree` parameter indicates the degree of the polynomials used for smoothing of the response. It should be no more than the number of aheads. If the degree is precisely equal to the number of aheads, then there is no smoothing. To better understand this parameter and how it works, we should look to its origins and how it is used in the model.  
 
 # Model form 
 
