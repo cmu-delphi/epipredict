@@ -275,7 +275,7 @@ baseline_preds_mae_df <- baseline_preds %>%
   mutate(type = "baseline")
 
 smooth_preds_mae_df <- smooth_preds %>%
-  left_join(tedf_sub) %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date"))
   group_by(ahead) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error)) %>%
