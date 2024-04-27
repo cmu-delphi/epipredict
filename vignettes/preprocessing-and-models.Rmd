@@ -431,12 +431,12 @@ g_{\text{flat}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{flat}\mid x)}{Pr(Z_{\e
 \beta_{10} + \beta_{11} t + \delta_{10} s_{\text{state_1}} +
 \delta_{11} s_{\text{state_2}} + \cdots \nonumber \\
 &\quad + \beta_{12} Y^{\Delta}_{\ell, t} +
-\beta_{13} Y^{\Delta}_{\ell, t-7} \\
-g_{\text{flat}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{up}\mid x)}{Pr(Z_{\ell,t}=\text{down} \mid x)}\right) =
+\beta_{13} Y^{\Delta}_{\ell, t-7} + \beta_{14} Y^{\Delta}_{\ell, t-14}\\
+g_{\text{up}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{up}\mid x)}{Pr(Z_{\ell,t}=\text{down} \mid x)}\right) =
 \beta_{20} + \beta_{21}t + \delta_{20} s_{\text{state_1}} +
 \delta_{21} s_{\text{state}\_2} + \cdots \nonumber \\
 &\quad + \beta_{22} Y^{\Delta}_{\ell, t} +
-\beta_{23} Y^{\Delta}\_{\ell, t-7}
+\beta_{23} Y^{\Delta}_{\ell, t-7} + \beta_{24} Y^{\Delta}_{\ell, t-14}
 \end{aligned}
 
 Preprocessing steps are similar to the previous models with an additional step
