@@ -10,6 +10,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/dev/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/dev/articles/arx-classifier.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/articles/epipredict.html</loc>
   </url>
   <url>
@@ -32,9 +35,6 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://cmu-delphi.github.io/epipredict/dev/pull_request_template.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.html</loc>
