@@ -19,6 +19,9 @@
     <loc>https://cmu-delphi.github.io/epipredict/dev/articles/index.html</loc>
   </url>
   <url>
+    <loc>https://cmu-delphi.github.io/epipredict/dev/articles/panel-data.html</loc>
+  </url>
+  <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/articles/preprocessing-and-models.html</loc>
   </url>
   <url>
@@ -149,6 +152,9 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/grab_names.html</loc>
+  </url>
+  <url>
+    <loc>https://cmu-delphi.github.io/epipredict/dev/reference/grad_employ_subset.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/index.html</loc>
