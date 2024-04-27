@@ -163,7 +163,7 @@ Most often, we're not going to want to limit ourselves to just predicting the me
 several_quantiles <- c(.1, .25, .5, .75, .9)
 smooth_preds <- smooth_fc(edf, quantiles = several_quantiles, fd = fd)
 
-head(smooth_preds)
+smooth_preds
 ```
 
 We can see that we have different columns for the different quantile predictions.
