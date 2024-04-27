@@ -1,5 +1,10 @@
 ---
-title: "Smooth Quantile Regression"
+title: "Smooth quantile regression"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Smooth quantile regression}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
@@ -8,15 +13,15 @@ knitr::opts_chunk$set(
   comment = "#>",
   warning = FALSE,
   message = FALSE,
-  cache = TRUE
+  out.width = "100%"
 )
 ```
 
 # Introducing smooth quantile regression
 
-Whereas the standard application of time-series forecasting techniques has been to forecast single horizons, in multi-period forecasting, the goal is to forecast several horizons simultaneously. The standard application of these techniques aims to predict the signal for a single forecast horizon (or "ahead"), most often one-step-ahead. This is useful in epidemiological applications where decisions are often based on the trend of a signal.
+Whereas the standard application of time-series forecasting techniques has been to forecast a single horizon, in multi-period forecasting, the goal is to forecast several horizons simultaneously. This is useful in epidemiological applications where decisions are based on the trend of a signal.
 
-The idea underlying smooth quantile regression that the future can be approximated by a smooth curve. So this approach enforces smoothness across the horizons for point estimation by regression or interval prediction by quantile regression. Our focus in this chapter is the latter.
+The idea underlying smooth quantile regression is that the future can be approximated by a smooth curve. This novel approach from [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723) enforces smoothness across the horizons and can be applied to point estimation by regression or interval prediction by quantile regression. Our focus in this vignette is the latter.
 
 # Built-in function for smooth quantile regression and its parameters
 
@@ -200,7 +205,7 @@ We can see that the predictions are smooth curves for each state, as expected wh
 
 ## Varying the degrees parameter
 
-We can test the impact of different degrees by using the `map()` function. Let's try out all degrees from 1 to 7:
+We can test the impact of different degrees by using the `map()` function. Noting that this may take some time to run, let's try out all degrees from 1 to 7:
 
 ```{r, warning = FALSE}
 smooth_preds_list <- map(1:7, ~ smooth_fc(edf,
@@ -218,9 +223,6 @@ Since the MAE compares the predicted values to the actual values, we will first 
 tedf_sub <- tedf %>%
   rename(target_date = time_value, actual = death_rate) %>%
   select(geo_value, target_date, actual)
-
-smooth_preds_df_deg <- smooth_preds_list %>%
-  left_join(tedf_sub)
 ```
 
 And then compute the MAE for each of the degrees:
@@ -285,7 +287,8 @@ preds_mae_df <- bind_rows(baseline_preds_mae_df, smooth_preds_mae_df)
 ggplot(preds_mae_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
-  ylab("Mean MAE")
+  ylab("Mean MAE") +
+  scale_fill_brewer(palette = "Set1")
 ```
 
 or over all aheads, times, and locations for a single numerical summary.
@@ -351,7 +354,8 @@ preds_wis_df <- bind_rows(smooth_preds_wis_df, baseline_preds_wis_df)
 ggplot(preds_wis_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
-  ylab("Mean WIS")
+  ylab("Mean WIS") +
+  scale_fill_brewer(palette = "Set1")
 ```
 
 The results are consistent with what we saw for MAE: The forecasts for the near and distant future tend to be inaccurate for both models. The smooth quantile regression model only slightly outperforms the baseline model.
