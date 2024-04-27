@@ -73,11 +73,17 @@ print.canned_epipred <- function(x, name, ...) {
   )
   cli::cli_text("")
   cli::cli_text("Training data was an {.cls epi_df} with:")
-  cli::cli_ul(c(
-    "Geography: {.field {x$metadata$training$geo_type}},",
-    "Time type: {.field {x$metadata$training$time_type}},",
-    "Using data up-to-date as of: {.field {format(x$metadata$training$as_of)}}."
-  ))
+  fn_meta <- function() {
+    cli::cli_ul()
+    cli::cli_li("Geography: {.field {x$metadata$training$geo_type}},")
+    if (!is.null(x$metadata$training$other_keys)) {
+      cli::cli_li("Other keys: {.field {x$metadata$training$other_keys}},")
+    }
+    cli::cli_li("Time type: {.field {x$metadata$training$time_type}},")
+    cli::cli_li("Using data up-to-date as of: {.field {format(x$metadata$training$as_of)}}.")
+    cli::cli_end()
+  }
+  fn_meta()
   cli::cli_text("")
 
   cli::cli_rule("Predictions")
