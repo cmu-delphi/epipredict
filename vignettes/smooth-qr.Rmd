@@ -301,7 +301,7 @@ mean(smooth_preds_mae_df$mean)
 
 The former shows that forecasts for the immediate future and for the distant future are more inaccurate for both models under consideration. The latter shows that the smooth quantile regression model and baseline models perform very similarly overall, with the smooth quantile regression model only slightly beating the baseline model in terms of overall average MAE.
 
-One other commonly used metric is the WIS score ([ Bracher et al., 2021](https://arxiv.org/pdf/2005.12881.pdf)), which a scoring rule that is based on the population quantiles. The point is to score the interval, whereas MAE only evaluates the accuracy of the point forecast.
+One other commonly used metric is the Weighted Interval Score (WIS, [Bracher et al., 2021](https://arxiv.org/pdf/2005.12881.pdf)), which a scoring rule that is based on the population quantiles. The point is to score the interval, whereas MAE only evaluates the accuracy of the point forecast.
 
 Suppose we have $F$ be a forecaster composed of predicted quantiles $q_{\tau}$ for the set of quantile levels $\tau$. Then, in terms of the predicted quantiles, the WIS for target variable $Y$ is represented as follows ([McDonald et al., 2021](https://www.pnas.org/doi/full/10.1073/pnas.2111453118)):
 
