@@ -189,8 +189,7 @@ plot_preds <- function(preds, geos_to_plot = NULL, train_test_dat, fd) {
     geom_line(aes(target_date, `0.5`), color = "orange") +
     geom_vline(xintercept = fd) +
     facet_wrap(~geo_value) +
-    scale_x_date(name = "", date_labels = "%b %Y") +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    scale_x_date(name = "", date_labels = "%b %Y", date_breaks = "2 months") +
     ylab("Deaths per 100K inhabitants")
 }
 ```
