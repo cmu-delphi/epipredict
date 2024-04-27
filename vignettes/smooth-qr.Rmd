@@ -49,9 +49,9 @@ The `degree` parameter indicates the degree of the polynomials used for smoothin
 
 # Model form 
 
-Smooth quantile regression is linear auto-regressive, with the key feature being a transformation that forces the coefficients to satisfy a constraint. The purpose if this is for each model coefficient to be a smooth function of ahead values, and so each such coefficient is set to be a linear combination of smooth basis functions (such as a spline or a polynomial).
+Smooth quantile regression is linear auto-regressive, with the key feature being a transformation that forces the coefficients to satisfy a smoothing constraint. The purpose of this is for each model coefficient to be a smooth function of ahead values, and so each such coefficient is set to be a linear combination of smooth basis functions (such as a spline or a polynomial).
 
-The `degree` parameter controls the number of these polynomials used. It should be no greater than the number of responses. This is a tuning parameter, and so it can be chosen by performing a grid search with cross-validation. Intuitively, $d = 1$ corresponds to the constant model, $d = 2$ gives straight line forecasts, while $d = 3$ gives quadratic forecasts. Since a degree of 3 was found to work well in the tested applications (see Section 9 of Tuzhilina et al, 2022), it is the default value.
+The `degree` parameter controls the number of these polynomials used. It should be no greater than the number of responses. This is a tuning parameter, and so it can be chosen by performing a grid search with cross-validation. Intuitively, $d = 1$ corresponds to the constant model, $d = 2$ gives straight line forecasts, while $d = 3$ gives quadratic forecasts. Since a degree of 3 was found to work well in the tested applications (see Section 9 of [Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723)), it is the default value.
 
 # Demonstration of smooth quantile regression
 
@@ -227,7 +227,7 @@ tedf_sub <- tedf %>%
 And then compute the MAE for each of the degrees:
 ```{r, message = FALSE}
 smooth_preds_df_deg <- smooth_preds_list %>%
-  left_join(tedf_sub) %>%
+  left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
   group_by(degree) %>%
   mutate(error = abs(`0.5` - actual)) %>%
   summarise(mean = mean(error))
