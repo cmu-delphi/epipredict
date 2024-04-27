@@ -155,7 +155,7 @@ We now can produce smooth quantile regression predictions for our problem:
 ```{r, warning = FALSE}
 smooth_preds <- smooth_fc(edf, fd = fd)
 
-head(smooth_preds)
+smooth_preds
 ```
 Most often, we're not going to want to limit ourselves to just predicting the median value as there is uncertainty about the predictions, so let's try to predict several different quantiles in addition to the median:
 
