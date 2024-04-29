@@ -8,8 +8,9 @@ articles:
   preprocessing-and-models: preprocessing-and-models.html
   sliding: sliding.html
   smooth-qr: smooth-qr.html
+  symptom-surveys: symptom-surveys.html
   update: update.html
-last_built: 2024-04-27T21:50Z
+last_built: 2024-04-29T18:42Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles
