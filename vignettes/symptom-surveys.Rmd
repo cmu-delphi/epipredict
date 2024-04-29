@@ -518,7 +518,7 @@ The median scaled errors over the test period are computed and reported below. N
 res_all2 <- res %>%
   drop_na() %>% # Restrict to common time
   mutate(across(err1:err2, ~ .x / err0)) %>% # compute relative error to strawman
-  mutate(dif12 = err1 - err2) %>% # Compute differences
+  mutate(err12_diff = err1 - err2) %>% # Compute differences
   # relative to cases model
   ungroup() %>%
   select(-err0)
