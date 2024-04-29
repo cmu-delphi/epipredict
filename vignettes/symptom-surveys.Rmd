@@ -1,5 +1,10 @@
 ---
-title: "Can Symptoms Surveys Improve COVID-19 Forecasts?"
+title: "Can symptoms surveys improve COVID-19 forecasts?"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using the update and adjust functions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include = FALSE}
@@ -21,7 +26,9 @@ calculation of a "% CLI-in-community" signal for counties across the US. This is
 
 These surveys were valuable tools for monitoring the pandemic because they reported daily and not subject to reporting delays that plague other sources of data. 
 
-In this chapter, we will look at whether the % CLI-in-community indicators from the Facebook and Google surveys improve the accuracy of short-term forecasts of county-level COVID-19 case rates. The purpose here is to study and demonstrate the value of the Facebook and Google % CLI-in-community signals to add predictive power beyond what we can achieve with simple time series models trained on case rates alone.
+In this vignette, we will look at whether the % CLI-in-community indicators from the Facebook and Google surveys improve the accuracy of short-term forecasts of county-level COVID-19 case rates. The purpose here is to study and demonstrate the value of the Facebook and Google % CLI-in-community signals to add predictive power beyond what we can achieve with simple time series models trained on case rates alone.
+
+Note that this vignette was adapted from the following [Delphi blog post](https://delphi.cmu.edu/blog/2020/09/21/can-symptoms-surveys-improve-covid-19-forecasts/), with the necessary modifications to enable the use of `epipredict`. The results may be different from those on the blog post (one reason is that we are exploring the use of a different forecaster and another is that we're using the most recent versions of the datasets).
 
 Now, we will delve into the forecasting problem set-up and code followed by a discussion of the results.
 
@@ -66,7 +73,7 @@ There are a number of benefits to using `epipredict` over writing the code from 
 However, there are some trade-offs to bear in mind. For instance, since we are using a canned arx forecaster, we are not able to easily modify and add steps such as that for signal transformations to the pre-processing (this is pre-specified as part of using a canned forecaster). If we were to code-up our own forecaster under the `epipredict` framework, we could easily add steps to re-scale and transform the signals to our `epi_recipe`. This would make the code more succinct and self-contained.
 
 ```{r, message = FALSE, warning = FALSE}
-library(covidcast)
+library(epidatr)
 library(dplyr)
 library(purrr)
 library(epipredict)
@@ -74,48 +81,68 @@ library(recipes)
 
 case_num <- 200
 as_of_date <- "2020-05-14"
-geo_values <- covidcast_signal(
-  "jhu-csse", "confirmed_cumulative_num",
-  "2020-05-14", "2020-05-14"
+geo_values <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "confirmed_cumulative_num",
+  geo_type = "county",
+  time_type = "day",
+  geo_values = "*",
+  time_values = epirange(20200514, 20200514)
 ) %>%
   filter(value >= case_num) %>%
-  pull(geo_value)
+  pull(geo_value) %>%
+  unique()
 
 # Fetch county-level Google and Facebook % CLI-in-community signals, and JHU
 # confirmed case incidence proportion
 start_day <- "2020-04-11"
 end_day <- "2020-09-01"
 
-g <- covidcast_signal("google-survey", "smoothed_cli") %>%
-  filter(geo_value %in% geo_values) %>%
-  select(geo_value, time_value, value)
-f <- covidcast_signal(
-  "fb-survey", "smoothed_hh_cmnty_cli",
-  start_day, end_day
+goog_sm_cli <- pub_covidcast(
+  source = "google-survey",
+  signals = "smoothed_cli",
+  geo_type = "county",
+  time_type = "day",
+  geo_values = "*",
+  time_values = epirange(start_day, end_day)
 ) %>%
   filter(geo_value %in% geo_values) %>%
-  select(geo_value, time_value, value)
-c <- covidcast_signal(
-  "jhu-csse", "confirmed_7dav_incidence_prop",
-  start_day, end_day
-) %>%
-  filter(geo_value %in% geo_values) %>%
-  select(geo_value, time_value, value)
+  select(geo_value, time_value, value) %>%
+  rename(goog = value)
 
-# Rename columns
-colnames(g) <- sub("^value", "goog", colnames(g))
-colnames(f) <- sub("^value", "fb", colnames(f))
-colnames(c) <- sub("^value", "case", colnames(c))
+fb_survey <- pub_covidcast(
+  source = "fb-survey",
+  signals = "smoothed_hh_cmnty_cli",
+  geo_type = "county",
+  time_type = "day",
+  geo_values = "*",
+  time_values = epirange(start_day, end_day)
+) %>%
+  filter(geo_value %in% geo_values) %>%
+  select(geo_value, time_value, value) %>%
+  rename(fb = value)
+
+jhu_7dav_incid <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "confirmed_7dav_incidence_prop",
+  geo_type = "county",
+  time_type = "day",
+  geo_values = "*",
+  time_values = epirange(start_day, end_day)
+) %>%
+  filter(geo_value %in% geo_values) %>%
+  select(geo_value, time_value, value) %>%
+  rename(case = value)
 
 # Find "complete" counties, present in all three data signals at all times
 geo_values_complete <- intersect(
-  intersect(g$geo_value, f$geo_value),
-  c$geo_value
+  intersect(goog_sm_cli$geo_value, fb_survey$geo_value),
+  jhu_7dav_incid$geo_value
 )
 
 # Make one big matrix by joining these three data frames
-z <- full_join(full_join(g, f, by = c("geo_value", "time_value")),
-  c,
+z <- full_join(full_join(goog_sm_cli, fb_survey, by = c("geo_value", "time_value")),
+  jhu_7dav_incid,
   by = c("geo_value", "time_value")
 ) %>%
   filter(geo_value %in% geo_values_complete) %>%
@@ -157,7 +184,7 @@ for (k in 1:length(dates)) {
 
   if (date %in% c("2020-05-13", "2020-05-14")) leads <- c(7, 14) else leads <- 7
 
-  # Pre-structuring test data for this date
+  # Pre-structuring test data
   z_te <- z %>%
     rename(
       target_date = time_value,
@@ -295,20 +322,14 @@ model_names <- c(
 # Calculate the scaled errors for each model, that is, the error relative to the strawman's error
 res_all4 <- out_df %>%
   drop_na() %>% # Restrict to common time
-  mutate(
-    err1 = err1 / err0, err2 = err2 / err0, # Compute relative error
-    err3 = err3 / err0, err4 = err4 / err0
-  ) %>% # to strawman model
-  mutate(
-    dif12 = err1 - err2, dif13 = err1 - err3, # Compute differences
-    dif14 = err1 - err4
-  ) %>% # relative to cases model
+  mutate(across(err1:err4, ~ .x / err0)) %>% # compute relative error to strawman
+  mutate(across(err2:err4, list(diff = ~ err1 - .x))) %>% # relative to cases model
   ungroup() %>%
   select(-err0)
 
 # Calculate and print median errors, for all 4 models, and just 7 days ahead
 res_err4 <- res_all4 %>%
-  select(-starts_with("dif")) %>%
+  select(-ends_with("diff")) %>%
   pivot_longer(
     names_to = "model", values_to = "err",
     cols = -c(geo_value, forecast_date, lead)
@@ -342,9 +363,9 @@ Are these differences in median scaled errors significant? Some basic hypothesis
 # Compute p-values using the sign test against a one-sided alternative, for
 # all models, and just 7 days ahead
 res_dif4 <- res_all4 %>%
-  select(-starts_with("err")) %>%
+  select(-ends_with(as.character(1:4))) %>%
   pivot_longer(
-    names_to = "model", values_to = "dif",
+    names_to = "model", values_to = "diff",
     cols = -c(geo_value, forecast_date, lead)
   ) %>%
   mutate(
@@ -362,7 +383,7 @@ knitr::kable(
   res_dif4 %>%
     group_by(model, lead) %>%
     summarize(p = binom.test(
-      x = sum(dif > 0, na.rm = TRUE),
+      x = sum(diff > 0, na.rm = TRUE),
       n = n(), alt = "greater"
     )$p.val) %>%
     ungroup() %>% filter(lead == "7 days ahead") %>%
@@ -381,7 +402,7 @@ ggplot_colors <- c("#FC4E07", "#00AFBB", "#E7B800")
 ggplot(res_dif4 %>%
   group_by(model, lead, forecast_date) %>%
   summarize(p = binom.test(
-    x = sum(dif > 0, na.rm = TRUE),
+    x = sum(diff > 0, na.rm = TRUE),
     n = n(), alt = "greater"
   )$p.val) %>%
   ungroup() %>% filter(lead == "7 days ahead"), aes(p)) +
@@ -405,6 +426,7 @@ case_fb_mods <- function(forecast_dates, leads) {
   for (k in 1:length(forecast_dates)) {
     date <- forecast_dates[k]
 
+    # Pre-structuring test data
     z_te <- z %>%
       rename(
         target_date = time_value,
@@ -414,7 +436,9 @@ case_fb_mods <- function(forecast_dates, leads) {
 
     # Strawman model
     out_df0 <- map(leads, ~ flatline_forecaster(
-      z %>% filter(between(time_value, date - .x - max(lags) - n, date)) %>% select(time_value, geo_value, case),
+      z %>%
+        filter(between(time_value, date - .x - max(lags) - n, date)) %>%
+        select(time_value, geo_value, case),
       outcome = "case",
       args_list = arx_args_list(
         lags = lags,
@@ -430,7 +454,10 @@ case_fb_mods <- function(forecast_dates, leads) {
 
     # Cases model
     out_df1 <- map(leads, ~ arx_forecaster(
-      z %>% filter(between(time_value, date - .x - max(lags) - n, date)) %>% select(time_value, geo_value, case) %>% filter(complete.cases(.)),
+      z %>%
+        filter(between(time_value, date - .x - max(lags) - n, date)) %>%
+        select(time_value, geo_value, case) %>%
+        filter(complete.cases(.)),
       outcome = "case",
       predictors = "case",
       trainer = quantile_reg(),
@@ -448,7 +475,10 @@ case_fb_mods <- function(forecast_dates, leads) {
 
     # Cases and Facebook model
     out_df2 <- map(leads, ~ arx_forecaster(
-      z %>% filter(between(time_value, date - .x - max(lags) - n, date)) %>% select(time_value, geo_value, case, fb) %>% filter(complete.cases(.)),
+      z %>%
+        filter(between(time_value, date - .x - max(lags) - n, date)) %>%
+        select(time_value, geo_value, case, fb) %>%
+        filter(complete.cases(.)),
       outcome = "case",
       predictors = c("case", "fb"),
       trainer = quantile_reg(),
@@ -487,8 +517,7 @@ The median scaled errors over the test period are computed and reported below. N
 # errors, that is, the error relative to the strawman's error
 res_all2 <- res %>%
   drop_na() %>% # Restrict to common time
-  mutate(err1 = err1 / err0, err2 = err2 / err0) %>% # Compute relative error
-  # to strawman model
+  mutate(across(err1:err2, ~ .x / err0)) %>% # compute relative error to strawman
   mutate(dif12 = err1 - err2) %>% # Compute differences
   # relative to cases model
   ungroup() %>%
@@ -497,7 +526,7 @@ res_all2 <- res %>%
 # Calculate and print median errors, for just models 1 and 2, and both 7 and 14
 # days ahead
 res_err2 <- res_all2 %>%
-  select(-starts_with("dif")) %>%
+  select(-ends_with("diff")) %>%
   pivot_longer(
     names_to = "model", values_to = "err",
     cols = -c(geo_value, forecast_date, lead)
@@ -509,7 +538,7 @@ res_err2 <- res_all2 %>%
 
 knitr::kable(
   res_err2 %>%
-    select(-starts_with("dif")) %>%
+    select(-ends_with("diff")) %>%
     group_by(model, lead) %>%
     summarize(err = median(err), n = length(unique(forecast_date))) %>%
     arrange(lead) %>% ungroup() %>%
@@ -552,9 +581,9 @@ The fact that the lines are non-coincident suggests that the results we’re see
 # Compute p-values using the sign test against a one-sided alternative, just
 # for models 1 and 2, and both 7 and 14 days ahead
 res_dif2 <- res_all2 %>%
-  select(-starts_with("err")) %>%
+  select(-ends_with(as.character(1:4))) %>%
   pivot_longer(
-    names_to = "model", values_to = "dif",
+    names_to = "model", values_to = "diff",
     cols = -c(geo_value, forecast_date, lead)
   ) %>%
   mutate(
@@ -566,7 +595,7 @@ knitr::kable(
   res_dif2 %>%
     group_by(model, lead) %>%
     summarize(p = binom.test(
-      x = sum(dif > 0, na.rm = TRUE),
+      x = sum(diff > 0, na.rm = TRUE),
       n = n(), alt = "greater"
     )$p.val) %>%
     ungroup() %>%
@@ -582,7 +611,7 @@ If we stratify and recompute p-values by forecast date, the bulk of p-values are
 ggplot(res_dif2 %>%
   group_by(model, lead, forecast_date) %>%
   summarize(p = binom.test(
-    x = sum(dif > 0, na.rm = TRUE),
+    x = sum(diff > 0, na.rm = TRUE),
     n = n(), alt = "greater"
   )$p.val) %>%
   ungroup(), aes(p)) +
@@ -615,8 +644,7 @@ We obtain and plot the median scaled errors for the "Cases" and "Cases + Faceboo
 ```{r}
 err_by_lead <- res %>%
   drop_na() %>% # Restrict to common time
-  mutate(err1 = err1 / err0, err2 = err2 / err0) %>% # Compute relative error
-  # to strawman model
+  mutate(across(err1:err2, list(rel = ~ .x / err0))) %>%
   ungroup() %>%
   select(-err0) %>%
   pivot_longer(
@@ -654,7 +682,7 @@ But if we look at this from a different angle, by considering the horizontal gap
 
 ## Wrap-Up
 
-In this chapter, we've shown that either of the Facebook or Google % CLI-in-community signals can improve the accuracy of short-term forecasts of county-level COVID-19 case rates. The significance of these improvements is more apparent with the Facebook signal, thanks to the much larger test period. With either signal, the magnitude of the improvement offered seems modest but nontrivial, especially because the forecasting problem is so difficult in the first place.
+In this vignette, we've shown that either of the Facebook or Google % CLI-in-community signals can improve the accuracy of short-term forecasts of county-level COVID-19 case rates. The significance of these improvements is more apparent with the Facebook signal, thanks to the much larger test period. With either signal, the magnitude of the improvement offered seems modest but nontrivial, especially because the forecasting problem is so difficult in the first place.
 
 We reiterate that this was just a demo. Our analysis was fairly simple and lacks a few qualities that we’d expect in a truly comprehensive, realistic forecasting analysis. For reflection, let's discuss three possible areas to improve:
 
@@ -664,10 +692,6 @@ We reiterate that this was just a demo. Our analysis was fairly simple and lacks
 
 3. The way we trained our forecast models does not account for data latency and revisions, which are critical issues. For each (retrospective) forecast date, $t_0$, we constructed forecasts by training on data that we fetched from the API today, "as of" the day of writing this, and not "as of" the forecast date. This matters because nearly all signals are subject to latency and go through multiple revisions.
 
-On the flip side, our example here was not that far away from being realistic. The models we examined are actually not too different from Delphi’s forecasters in production. Also, the way we fit the quantile regression models in the code extends immediately to multiple quantile regression (this just requires changing the parameter `quantile_levels` in the call to `quantile_reg()`). And lastly, it’s fairly easy to change the data acquisition step in the code so that data gets pulled "as of" the forecast date (this requires specifying the parameter `as_of` in the call to `covidcast_signal()` and should change per forecast date).
+On the flip side, our example here was not that far away from being realistic. The models we examined are actually not too different from Delphi’s forecasters in production. Also, the way we fit the quantile regression models in the code extends immediately to multiple quantile regression (this just requires changing the parameter `quantile_levels` in the call to `quantile_reg()`). And lastly, it’s fairly easy to change the data acquisition step in the code so that data gets pulled "as of" the forecast date (this requires specifying the parameter `as_of` in the call to `pub_covidcast()` and should change per forecast date).
 
 Hopefully these preliminary findings have gotten you excited about the possible uses of this symptom survey data. For further practice, try your hand at implementing the suggested improvements or develop your own novel analytic approach to extract insights from this data. 
-
-## Attribution
-
-This chapter was adapted from the following [Delphi blog post](https://delphi.cmu.edu/blog/2020/09/21/can-symptoms-surveys-improve-covid-19-forecasts/), with the necessary modifications to enable the use of `epipredict`. Note that the results may be different from those on the blog post (one reason is that we are exploring the use of a different forecaster and another is that we're using the most recent versions of the datasets).
