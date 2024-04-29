@@ -644,7 +644,7 @@ We obtain and plot the median scaled errors for the "Cases" and "Cases + Faceboo
 ```{r}
 err_by_lead <- res %>%
   drop_na() %>% # Restrict to common time
-  mutate(across(err1:err2, list(rel = ~ .x / err0))) %>%
+  mutate(across(err1:err2, ~ .x / err0)) %>%
   ungroup() %>%
   select(-err0) %>%
   pivot_longer(
