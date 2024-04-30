@@ -84,7 +84,7 @@ reference:
     - epi_workflow
     - add_epi_recipe
     - adjust_epi_recipe
-    - add_model
+    - Add_model
     - predict.epi_workflow
     - fit.epi_workflow
     - augment.epi_workflow
