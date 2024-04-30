@@ -2,6 +2,10 @@
 #' @export
 generics::fit
 
+#' @importFrom generics forecast
+#' @export
+generics::forecast
+
 #' @importFrom recipes prep
 #' @export
 recipes::prep

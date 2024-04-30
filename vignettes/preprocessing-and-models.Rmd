@@ -99,7 +99,7 @@ intercept coefficients, we can allow for an intercept shift between states.
 The model takes the form
 \begin{aligned}
 \log\left( \mu_{t+7} \right) &= \beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ 
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\
 &\quad\beta_1 \text{deaths}_{t} +
 \beta_2 \text{deaths}_{t-7} + \beta_3 \text{cases}_{t} +
 \beta_4 \text{cases}_{t-7},
@@ -198,7 +198,7 @@ To model death rates, the Poisson regression would be expressed as:
 \begin{aligned}
 \log\left( \mu_{t+7} \right) &= \log(\text{population}) +
 \beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ 
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\
 &\quad\beta_1 \text{deaths}_{t} +
 \beta_2 \text{deaths}_{t-7} + \beta_3 \text{cases}_{t} +
 \beta_4 \text{cases}_{t-7}
@@ -361,8 +361,7 @@ wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.05, .5, .95))) %>%
   fit(jhu) %>%
   add_frosting(f)
 
-latest <- get_test_data(recipe = r, x = jhu)
-p <- predict(wf, latest)
+p <- forecast(wf)
 p
 ```
 
@@ -477,8 +476,7 @@ We will fit the multinomial regression and examine the predictions:
 wf <- epi_workflow(r, parsnip::multinom_reg()) %>%
   fit(jhu)
 
-latest <- get_test_data(recipe = r, x = jhu)
-predict(wf, latest) %>% filter(!is.na(.pred_class))
+forecast(wf) %>% filter(!is.na(.pred_class))
 ```
 
 We can also look at the estimated coefficients and model summary information:

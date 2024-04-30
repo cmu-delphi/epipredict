@@ -20,15 +20,13 @@
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #'
-#' latest <- get_test_data(recipe = r, x = jhu)
-#'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_naomit(.pred)
 #'
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 layer_naomit <- function(frosting, ..., id = rand_id("naomit")) {
   arg_is_chr_scalar(id)

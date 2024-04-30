@@ -93,10 +93,6 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
 
 forecast_date <- max(case_death_rate_subset$time_value)
 
-latest <- get_test_data(
-  epi_recipe(case_death_rate_subset), case_death_rate_subset
-)
-
 f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_cdc_flatline_quantiles(aheads = c(7, 14, 21, 28), symmetrize = TRUE)
@@ -104,7 +100,7 @@ f <- frosting() \%>\%
 eng <- parsnip::linear_reg() \%>\% parsnip::set_engine("flatline")
 
 wf <- epi_workflow(r, eng, f) \%>\% fit(case_death_rate_subset)
-preds <- suppressWarnings(predict(wf, new_data = latest)) \%>\%
+preds <- forecast(wf) \%>\%
   dplyr::select(-time_value) \%>\%
   dplyr::mutate(forecast_date = forecast_date)
 preds

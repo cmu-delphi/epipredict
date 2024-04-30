@@ -35,12 +35,12 @@ Serving both populations is the main motivation for our efforts, but at the same
 
 ## Baseline models
 
-We provide a set of basic, easy-to-use forecasters that work out of the box. 
+We provide a set of basic, easy-to-use forecasters that work out of the box.
 You should be able to do a reasonably limited amount of customization on them. Any serious customization happens with the framework discussed below).
 
-For the basic forecasters, we provide: 
-    
-* Baseline flat-line forecaster 
+For the basic forecasters, we provide:
+
+* Baseline flat-line forecaster
 * Autoregressive forecaster
 * Autoregressive classifier
 
@@ -49,12 +49,12 @@ All the forcasters we provide are built on our framework. So we will use these b
 ## Forecasting framework
 
 Our framework for creating custom forecasters views the prediction task as a set of modular components. There are four types of components:
-    
+
 1. Preprocessor: make transformations to the data before model training
 2. Trainer: train a model on data, resulting in a fitted model object
 3. Predictor: make predictions, using a fitted model object and processed test data
 4. Postprocessor: manipulate or transform the predictions before returning
-    
+
 Users familiar with [`{tidymodels}`](https://www.tidymodels.org) and especially the [`{workflows}`](https://workflows.tidymodels.org) package will notice a lot of overlap. This is by design, and is in fact a feature. The truth is that `{epipredict}` is a wrapper around much that is contained in these packages. Therefore, if you want something from this -verse, it should "just work" (we hope).
 
 The reason for the overlap is that `{workflows}` _already implements_ the first three steps. And it does this very well. However, it is missing the postprocessing stage and currently has no plans for such an implementation. And this feature is important. The baseline forecaster we provide _requires_ postprocessing. Anything more complicated needs this as well.
@@ -68,9 +68,9 @@ jhu <- case_death_rate_subset
 jhu
 ```
 
-This data is built into the package and contains the measured variables `case_rate` and `death_rate` for COVID-19 at the daily level for each US state for the year 2021. The "panel" part is because we have repeated measurements across a number of locations. 
+This data is built into the package and contains the measured variables `case_rate` and `death_rate` for COVID-19 at the daily level for each US state for the year 2021. The "panel" part is because we have repeated measurements across a number of locations.
 
-The `epi_df` encodes the time stamp as `time_value` and the `key` as `geo_value`. While these 2 names are required, the values don't need to actually represent such objects. Additional `key`'s are also supported (like age group, ethnicity, taxonomy, etc.). 
+The `epi_df` encodes the time stamp as `time_value` and the `key` as `geo_value`. While these 2 names are required, the values don't need to actually represent such objects. Additional `key`'s are also supported (like age group, ethnicity, taxonomy, etc.).
 
 The `epi_df` also contains some metadata that describes the keys as well as the vintage of the data. It's possible that data collected at different times for the _same set_ of `geo_value`'s and `time_value`'s could actually be different. For more details, see [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/articles/epiprocess.html).
 
@@ -80,7 +80,7 @@ The `epi_df` also contains some metadata that describes the keys as well as the 
 
 As described above:
 
-* Parts actually DO exist. There's a universe called `{tidymodels}`. It handles 
+* Parts actually DO exist. There's a universe called `{tidymodels}`. It handles
 preprocessing, training, and prediction, bound together, through a package called
 `{workflows}`. We built `{epipredict}` on top of that setup. In this way, you CAN
 use almost everything they provide.
@@ -110,10 +110,8 @@ out <- arx_forecaster(
 )
 ```
 
-This call produces a warning, which we'll ignore for now. But essentially, it's telling us that our data comes from May 2022 but we're trying to do a forecast for January 2022. The result is likely not an accurate measure of real-time forecast performance, because the data have been revised over time. 
+The `out` object has two components:
 
-The `out` object has two components: 
-  
   1. The predictions which is just another `epi_df`. It contains the predictions for each location along with additional columns. By default, these are a 90% predictive interval, the `forecast_date` (the date on which the forecast was putatively made) and the `target_date` (the date for which the forecast is being made).
   ```{r}
 out$predictions
@@ -122,9 +120,6 @@ out$predictions
   ```{r}
 out$epi_workflow
   ```
-
-Note that the `time_value` in the predictions is not necessarily meaningful, 
-but it is a required column in an `epi_df`, so it remains here.
 
 By default, the forecaster predicts the outcome (`death_rate`) 1-week ahead, using 3 lags of each predictor (`case_rate` and `death_rate`) at 0 (today), 1 week back and 2 weeks back. The predictors and outcome can be changed directly. The rest of the defaults are encapsulated into a list of arguments. This list is produced by `arx_args_list()`.
 
@@ -192,7 +187,7 @@ arx_args_list(
 ## Changing the engine
 
 So far, our forecasts have been produced using simple linear regression. But this is not the only way to estimate such a model.
-The `trainer` argument determines the type of model we want. 
+The `trainer` argument determines the type of model we want.
 This takes a [`{parsnip}`](https://parsnip.tidymodels.org) model. The default is linear regression, but we could instead use a random forest with the `{ranger}` package:
 
 ```{r ranger, warning = FALSE}
@@ -224,32 +219,32 @@ FWIW, this last case (using quantile regression), is not far from what the Delph
 
 ## Inner workings
 
-Underneath the hood, this forecaster creates (and returns) an `epi_workflow`. 
-Essentially, this is a big S3 object that wraps up the 4 modular steps 
+Underneath the hood, this forecaster creates (and returns) an `epi_workflow`.
+Essentially, this is a big S3 object that wraps up the 4 modular steps
 (preprocessing - postprocessing) described above.
 
 ### Preprocessing
 
-Preprocessing is accomplished through a `recipe` (imagine baking a cake) as 
-provided in the [`{recipes}`](https://recipes.tidymodels.org) package. 
+Preprocessing is accomplished through a `recipe` (imagine baking a cake) as
+provided in the [`{recipes}`](https://recipes.tidymodels.org) package.
 We've made a few modifications (to handle
 panel data) as well as added some additional options. The recipe gives a
 specification of how to handle training data. Think of it like a fancified
-`formula` that you would pass to `lm()`: `y ~ x1 + log(x2)`. In general, 
-there are 2 extensions to the `formula` that `{recipes}` handles: 
+`formula` that you would pass to `lm()`: `y ~ x1 + log(x2)`. In general,
+there are 2 extensions to the `formula` that `{recipes}` handles:
 
-  1. Doing transformations of both training and test data that can always be 
-  applied. These are things like taking the log of a variable, leading or 
+  1. Doing transformations of both training and test data that can always be
+  applied. These are things like taking the log of a variable, leading or
   lagging, filtering out rows, handling dummy variables, etc.
-  2. Using statistics from the training data to eventually process test data. 
+  2. Using statistics from the training data to eventually process test data.
     This is a major benefit of `{recipes}`. It prevents what the tidy team calls
     "data leakage". A simple example is centering a predictor by its mean. We
     need to store the mean of the predictor from the training data and use that
     value on the test data rather than accidentally calculating the mean of
     the test predictor for centering.
-    
+
 A recipe is processed in 2 steps, first it is "prepped". This calculates and
-stores any intermediate statistics necessary for use on the test data. 
+stores any intermediate statistics necessary for use on the test data.
 Then it is "baked"
 resulting in training data ready for passing into a statistical model (like `lm`).
 
@@ -263,8 +258,8 @@ extract_recipe(out_gb$epi_workflow)
 ```
 
 The "Inputs" are the original `epi_df` and the "roles" that these are assigned.
-None of these are predictors or outcomes. Those will be created 
-by the recipe when it is prepped. The "Operations" are the sequence of 
+None of these are predictors or outcomes. Those will be created
+by the recipe when it is prepped. The "Operations" are the sequence of
 instructions to create the cake (baked training data).
 Here we create lagged predictors, lead the outcome, and then remove `NA`s.
 Some models like `lm` internally handle `NA`s, but not everything does, so we
@@ -289,7 +284,7 @@ Users with familiarity with the `{parsnip}` package will have no trouble here.
 Basically, `{parsnip}` unifies the function signature across statistical models.
 For example, `lm()` "likes" to work with formulas, but `glmnet::glmnet()` uses
 `x` and `y` for predictors and response. `{parsnip}` is agnostic. Both of these
-do "linear regression". Above we switched from `lm()` to `xgboost()` without 
+do "linear regression". Above we switched from `lm()` to `xgboost()` without
 any issue despite the fact that these functions couldn't be more different.
 
 ```{r, eval = FALSE}
@@ -308,7 +303,7 @@ xgboost(
 )
 ```
 
-`{epipredict}` provides a few engines/modules (the flatline forecaster and 
+`{epipredict}` provides a few engines/modules (the flatline forecaster and
 quantile regression), but you should be able to use any available models
 listed [here](https://www.tidymodels.org/find/parsnip/).
 
@@ -322,8 +317,8 @@ ewf <- epi_workflow(er, linear_reg()) %>% fit(jhu)
 
 To stretch the metaphor of preparing a cake to its natural limits, we have
 created postprocessing functionality called "frosting". Much like the recipe,
-each postprocessing operation is a "layer" and we "slather" these onto our 
-baked cake. To fix ideas, below is the postprocessing `frosting` for 
+each postprocessing operation is a "layer" and we "slather" these onto our
+baked cake. To fix ideas, below is the postprocessing `frosting` for
 `arx_forecaster()`
 
 ```{r}
@@ -333,7 +328,7 @@ extract_frosting(out_q$epi_workflow)
 Here we have 5 layers of frosting. The first generates the forecasts from the test data.
 The second uses quantiles of the residuals to create distributional
 forecasts. The next two add columns for the date the forecast was made and the
-date for which it is intended to occur. Because we are predicting rates, they 
+date for which it is intended to occur. Because we are predicting rates, they
 should be non-negative, so the last layer thresholds both predicted values and
 intervals at 0. The code to do this (inside the forecaster) is
 
@@ -349,13 +344,12 @@ f <- frosting() %>%
   layer_threshold(starts_with(".pred"))
 ```
 
-At predict time, we add this object onto the `epi_workflow` and call `predict()`
+At predict time, we add this object onto the `epi_workflow` and call `forecast()`
 
 ```{r, warning=FALSE}
-test_data <- get_test_data(er, jhu)
 ewf %>%
   add_frosting(f) %>%
-  predict(test_data)
+  forecast()
 ```
 
 The above `get_test_data()` function examines the recipe and ensures that enough
@@ -369,9 +363,9 @@ that contained the necessary predictors.
 ## Conclusion
 
 Internally, we provide some simple functions to create reasonable forecasts.
-But ideally, a user could create their own forecasters by building up the 
+But ideally, a user could create their own forecasters by building up the
 components we provide. In other vignettes, we try to walk through some of these
-customizations. 
+customizations.
 
 To illustrate everything above, here is (roughly) the code for the `flatline_forecaster()` applied to the `case_rate`.
 
@@ -380,9 +374,6 @@ r <- epi_recipe(jhu) %>%
   step_epi_ahead(case_rate, ahead = 7, skip = TRUE) %>%
   update_role(case_rate, new_role = "predictor") %>%
   add_role(all_of(epi_keys(jhu)), new_role = "predictor")
-
-# bit of a weird hack to get the latest values per key
-latest <- get_test_data(epi_recipe(jhu), jhu)
 
 f <- frosting() %>%
   layer_predict() %>%
@@ -393,11 +384,11 @@ f <- frosting() %>%
 
 eng <- linear_reg() %>% set_engine("flatline")
 wf <- epi_workflow(r, eng, f) %>% fit(jhu)
-preds <- predict(wf, latest)
+preds <- forecast(wf)
 ```
 
-All that really differs from the `arx_forecaster()` is the `recipe`, the 
-test data, and the engine. The `frosting` is identical, as is the fitting 
+All that really differs from the `arx_forecaster()` is the `recipe`, the
+test data, and the engine. The `frosting` is identical, as is the fitting
 and predicting procedure.
 
 ```{r}

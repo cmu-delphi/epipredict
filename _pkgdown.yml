@@ -22,21 +22,20 @@ navbar:
   type: light
 
 articles:
-- title: Get started
-  navbar: ~
-  contents:
-  - epipredict
-  - preprocessing-and-models
-  - arx-classifier
-  - articles/update
+  - title: Get started
+    navbar: ~
+    contents:
+      - epipredict
+      - preprocessing-and-models
+      - arx-classifier
+      - articles/update
 
-- title: Advanced methods
-  contents:
-  - articles/sliding
-  - articles/smooth-qr
-  - articles/symptom-surveys
-  - panel-data
-
+  - title: Advanced methods
+    contents:
+      - articles/sliding
+      - articles/smooth-qr
+      - articles/symptom-surveys
+      - panel-data
 
 repo:
   url:
@@ -47,81 +46,78 @@ repo:
 
 home:
   links:
-  - text: Introduction to Delphi's Tooling Work
-    href: https://cmu-delphi.github.io/delphi-tooling-book/
-  - text: The epiprocess R package
-    href: https://cmu-delphi.github.io/epiprocess/
-  - text: The epidatr R package
-    href: https://github.com/cmu-delphi/epidatr/
-  - text: The epidatasets R package
-    href: https://cmu-delphi.github.io/epidatasets/
-  - text: The covidcast R package
-    href: https://cmu-delphi.github.io/covidcast/covidcastR/
-
+    - text: Introduction to Delphi's Tooling Work
+      href: https://cmu-delphi.github.io/delphi-tooling-book/
+    - text: The epiprocess R package
+      href: https://cmu-delphi.github.io/epiprocess/
+    - text: The epidatr R package
+      href: https://github.com/cmu-delphi/epidatr/
+    - text: The epidatasets R package
+      href: https://cmu-delphi.github.io/epidatasets/
+    - text: The covidcast R package
+      href: https://cmu-delphi.github.io/covidcast/covidcastR/
 
 reference:
   - title: Simple forecasters
     desc: Complete forecasters that produce reasonable baselines
     contents:
-    - contains("forecaster")
-    - contains("classifier")
+      - contains("forecaster")
+      - contains("classifier")
   - title: Forecaster modifications
     desc: Constructors to modify forecaster arguments and utilities to produce `epi_workflow` objects
     contents:
-    - contains("args_list")
-    - contains("_epi_workflow")
+      - contains("args_list")
+      - contains("_epi_workflow")
   - title: Helper functions for Hub submission
     contents:
-    - flusight_hub_formatter
+      - flusight_hub_formatter
   - title: Parsnip engines
     desc: Prediction methods not available elsewhere
     contents:
-    - quantile_reg
-    - smooth_quantile_reg
+      - quantile_reg
+      - smooth_quantile_reg
   - title: Custom panel data forecasting workflows
     contents:
-    - epi_recipe
-    - epi_workflow
-    - add_epi_recipe
-    - adjust_epi_recipe
-    - add_model
-    - predict.epi_workflow
-    - fit.epi_workflow
-    - augment.epi_workflow
+      - epi_recipe
+      - epi_workflow
+      - add_epi_recipe
+      - adjust_epi_recipe
+      - add_model
+      - predict.epi_workflow
+      - fit.epi_workflow
+      - augment.epi_workflow
+      - forecast.epi_workflow
   - title: Epi recipe preprocessing steps
     contents:
-    - starts_with("step_")
-    - contains("bake")
-    - contains("juice")
+      - starts_with("step_")
+      - contains("bake")
+      - contains("juice")
   - title: Epi recipe verification checks
     contents:
-    - check_enough_train_data
+      - check_enough_train_data
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:
-    - frosting
-    - ends_with("_frosting")
-    - get_test_data
-    - tidy.frosting
+      - frosting
+      - ends_with("_frosting")
+      - get_test_data
+      - tidy.frosting
   - title: Frosting layers
     contents:
-    - contains("layer")
-    - contains("slather")
+      - contains("layer")
+      - contains("slather")
   - title: Automatic forecast visualization
     contents:
-    - autoplot.epi_workflow
-    - autoplot.canned_epipred
+      - autoplot.epi_workflow
+      - autoplot.canned_epipred
   - title: Utilities for quantile distribution processing
     contents:
-    - dist_quantiles
-    - extrapolate_quantiles
-    - nested_quantiles
-    - starts_with("pivot_quantiles")
+      - dist_quantiles
+      - extrapolate_quantiles
+      - nested_quantiles
+      - starts_with("pivot_quantiles")
   - title: Included datasets
     contents:
-    - case_death_rate_subset
-    - state_census
-    - grad_employ_subset
-
-
-
+      - case_death_rate_subset
+      - state_census
+      - grad_employ_subset

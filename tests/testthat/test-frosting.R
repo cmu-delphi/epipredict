@@ -72,8 +72,6 @@ test_that("layer_predict is added by default if missing", {
 
   wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 
-  latest <- get_test_data(recipe = r, x = jhu)
-
   f1 <- frosting() %>%
     layer_naomit(.pred) %>%
     layer_residual_quantiles()
@@ -86,5 +84,5 @@ test_that("layer_predict is added by default if missing", {
   wf1 <- wf %>% add_frosting(f1)
   wf2 <- wf %>% add_frosting(f2)
 
-  expect_equal(predict(wf1, latest), predict(wf2, latest))
+  expect_equal(forecast(wf1), forecast(wf2))
 })

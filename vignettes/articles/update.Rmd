@@ -181,13 +181,11 @@ predictions. In our initial frosting object, `f`, we simply implement
 predictions on the fitted `epi_workflow`:
 
 ```{r}
-latest <- get_test_data(recipe = r2, x = jhu)
-
 f <- frosting() %>%
   layer_predict()
 
 wf1 <- wf %>% add_frosting(f)
-p1 <- predict(wf1, latest)
+p1 <- forecast(wf1)
 p1
 ```
 
@@ -207,7 +205,7 @@ f2 <- frosting() %>%
   layer_add_target_date()
 
 wf2 <- wf1 %>% update_frosting(f2)
-p2 <- predict(wf2, latest)
+p2 <- forecast(wf2)
 p2
 ```
 
@@ -223,7 +221,7 @@ remove the `frosting` object from the workflow and make predictions as follows:
 
 ```{r}
 wf3 <- wf2 %>% remove_frosting()
-p3 <- predict(wf3, latest)
+p3 <- forecast(wf3)
 p3
 ```
 
@@ -285,7 +283,7 @@ Note that when we adjust the `r2` object directly, we are not adjusting the
 recipe in the `epi_workflow`. That is, if we modify a step in `r2`, the change
 will not automatically transfer over to `wf`. We would need to modify the recipe
 in `wf` directly (`adjust_epi_recipe()` on `wf`) or update the recipe in `wf`
-with a new `epi_recipe` that has undergone the adjustment 
+with a new `epi_recipe` that has undergone the adjustment
 (using `update_epi_recipe()`):
 
 ```{r}

@@ -62,3 +62,46 @@ test_that("model can be added/updated/removed from epi_workflow", {
   expect_error(extract_spec_parsnip(wf))
   expect_equal(wf$fit$actions$model$spec, NULL)
 })
+
+test_that("forecast method works", {
+  jhu <- case_death_rate_subset %>%
+    filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_naomit()
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+  expect_equal(
+    forecast(wf),
+    predict(wf, new_data = get_test_data(
+      hardhat::extract_preprocessor(wf),
+      jhu
+    ))
+  )
+
+  args <- list(
+    fill_locf = TRUE,
+    n_recent = 360 * 3,
+    forecast_date = as.Date("2024-01-01")
+  )
+  expect_equal(
+    forecast(wf, !!!args),
+    predict(wf, new_data = get_test_data(
+      hardhat::extract_preprocessor(wf),
+      jhu,
+      !!!args
+    ))
+  )
+})
+
+test_that("forecast method errors when workflow not fit", {
+  jhu <- case_death_rate_subset %>%
+    filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_naomit()
+  wf <- epi_workflow(r, parsnip::linear_reg())
+
+  expect_error(forecast(wf))
+})
