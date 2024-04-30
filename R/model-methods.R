@@ -1,4 +1,3 @@
-
 #' Add a model to an `epi_workflow`
 #'
 #' @seealso [workflows::add_model()]
