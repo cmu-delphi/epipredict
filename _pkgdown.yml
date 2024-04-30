@@ -21,6 +21,23 @@ navbar:
   bg: primary
   type: light
 
+articles:
+- title: Get started
+  navbar: ~
+  contents:
+  - epipredict
+  - preprocessing-and-models
+  - arx-classifier
+  - articles/update
+
+- title: Advanced methods
+  contents:
+  - articles/sliding
+  - articles/smooth-qr
+  - articles/symptom-surveys
+  - panel-data
+
+
 repo:
   url:
     home: https://github.com/cmu-delphi/epipredict/tree/main/
@@ -40,7 +57,6 @@ home:
     href: https://cmu-delphi.github.io/epidatasets/
   - text: The covidcast R package
     href: https://cmu-delphi.github.io/covidcast/covidcastR/
-
 
 
 reference:
