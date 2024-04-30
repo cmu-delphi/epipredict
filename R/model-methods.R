@@ -102,27 +102,33 @@ Remove_model.epi_workflow <- function(x) {
 Update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
   rlang::check_dots_empty()
   x <- Remove_model(x)
-  workflows::add_model(x, spec, ..., formula = formula)
+  Add_model(x, spec, ..., formula = formula)
 }
 
 
+#' @rdname Add_model
 #' @export
-Add_model.workflow <- workflows::remove_model
+Add_model.workflow <- workflows::add_model
 
+#' @rdname Add_model
 #' @export
 Remove_model.workflow <- workflows::remove_model
 
+#' @rdname Add_model
 #' @export
 Update_model.workflow <- workflows::update_model
 
 
 # Aliases -----------------------------------------------------------------
 
+#' @rdname Add_model
 #' @export
 add_model <- Add_model
 
+#' @rdname Add_model
 #' @export
 remove_model <- Remove_model
 
+#' @rdname Add_model
 #' @export
 update_model <- Update_model

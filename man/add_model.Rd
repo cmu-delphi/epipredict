@@ -7,6 +7,12 @@
 \alias{Add_model.epi_workflow}
 \alias{Remove_model.epi_workflow}
 \alias{Update_model.epi_workflow}
+\alias{Add_model.workflow}
+\alias{Remove_model.workflow}
+\alias{Update_model.workflow}
+\alias{add_model}
+\alias{remove_model}
+\alias{update_model}
 \title{Add a model to an \code{epi_workflow}}
 \usage{
 Add_model(x, spec, ..., formula = NULL)
@@ -20,6 +26,18 @@ Update_model(x, spec, ..., formula = NULL)
 \method{Remove_model}{epi_workflow}(x)
 
 \method{Update_model}{epi_workflow}(x, spec, ..., formula = NULL)
+
+\method{Add_model}{workflow}(x, spec, ..., formula = NULL)
+
+\method{Remove_model}{workflow}(x)
+
+\method{Update_model}{workflow}(x, spec, ..., formula = NULL)
+
+add_model(x, spec, ..., formula = NULL)
+
+remove_model(x)
+
+update_model(x, spec, ..., formula = NULL)
 }
 \arguments{
 \item{x}{An \code{epi_workflow}.}

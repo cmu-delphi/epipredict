@@ -28,7 +28,7 @@ articles:
   - epipredict
   - preprocessing-and-models
   - arx-classifier
-  - articles/update
+  - update
 
 - title: Advanced methods
   contents:
