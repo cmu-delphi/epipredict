@@ -119,17 +119,7 @@ test_that("Postprocessing workflow works and values correct", {
     fit(jhu) %>%
     add_frosting(f)
 
-  latest <- get_test_data(
-    recipe = r,
-    x = epiprocess::jhu_csse_daily_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, cases)
-  )
-
-  suppressWarnings(p <- predict(wf, latest))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
@@ -146,7 +136,7 @@ test_that("Postprocessing workflow works and values correct", {
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
-  suppressWarnings(p <- predict(wf, latest))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
@@ -188,18 +178,7 @@ test_that("Postprocessing to get cases from case rate", {
     fit(jhu) %>%
     add_frosting(f)
 
-  latest <- get_test_data(
-    recipe = r,
-    x = case_death_rate_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, case_rate)
-  )
-
-
-  suppressWarnings(p <- predict(wf, latest))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(1 / 20000, 1 / 30000))
@@ -249,19 +228,8 @@ test_that("test joining by default columns", {
       add_frosting(f)
   )
 
-  latest <- get_test_data(
-    recipe = r,
-    x = case_death_rate_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, case_rate)
-  )
-
-  suppressMessages(p <- predict(wf, latest))
+  suppressMessages(p <- forecast(wf))
 })
-
 
 
 test_that("expect error if `by` selector does not match", {
@@ -324,22 +292,11 @@ test_that("expect error if `by` selector does not match", {
       df_pop_col = "values"
     )
 
-
-  latest <- get_test_data(
-    recipe = r,
-    x = case_death_rate_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, case_rate)
-  )
-
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
 
-  expect_error(predict(wf, latest))
+  expect_error(forecast(wf))
 })
 
 
@@ -407,12 +364,10 @@ test_that("Rate rescaling behaves as expected", {
     fit(x) %>%
     add_frosting(f)
 
-  latest <- get_test_data(recipe = r, x = x)
-
   # suppress warning: prediction from a rank-deficient fit may be misleading
   suppressWarnings(expect_equal(
-    unique(predict(wf, latest)$.pred) * (1 / 1000) / 100,
-    unique(predict(wf, latest)$.pred_scaled)
+    unique(forecast(wf)$.pred) * (1 / 1000) / 100,
+    unique(forecast(wf)$.pred_scaled)
   ))
 })
 
@@ -459,7 +414,6 @@ test_that("Extra Columns are ignored", {
   wf <- epi_workflow(recip, parsnip::linear_reg()) %>%
     fit(x) %>%
     add_frosting(frost)
-  latest <- get_test_data(recipe = recip, x = x)
   # suppress warning: prediction from a rank-deficient fit may be misleading
-  suppressWarnings(expect_equal(ncol(predict(wf, latest)), 4))
+  suppressWarnings(expect_equal(ncol(forecast(wf)), 4))
 })

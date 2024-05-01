@@ -96,7 +96,11 @@ is_epi_workflow <- function(x) {
 #'
 #' @export
 fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
-  object$fit$meta <- list(max_time_value = max(data$time_value), as_of = attributes(data)$metadata$as_of)
+  object$fit$meta <- list(
+    max_time_value = max(data$time_value),
+    as_of = attributes(data)$metadata$as_of
+  )
+  object$original_data <- data
 
   NextMethod()
 }
@@ -224,4 +228,55 @@ print.epi_workflow <- function(x, ...) {
   print_model(x)
   print_postprocessor(x)
   invisible(x)
+}
+
+
+#' Produce a forecast from an epi workflow
+#'
+#' @param object An epi workflow.
+#' @param ... Not used.
+#' @param fill_locf Logical. Should we use locf to fill in missing data?
+#' @param n_recent Integer or NULL. If filling missing data with locf = TRUE,
+#' how far back are we willing to tolerate missing data? Larger values allow
+#' more filling. The default NULL will determine this from the the recipe. For
+#' example, suppose n_recent = 3, then if the 3 most recent observations in any
+#' geo_value are all NA’s, we won’t be able to fill anything, and an error
+#' message will be thrown. (See details.)
+#' @param forecast_date By default, this is set to the maximum time_value in x.
+#' But if there is data latency such that recent NA's should be filled, this may
+#' be after the last available time_value.
+#'
+#' @return A forecast tibble.
+#'
+#' @export
+forecast.epi_workflow <- function(object, ..., fill_locf = FALSE, n_recent = NULL, forecast_date = NULL) {
+  rlang::check_dots_empty()
+
+  if (!object$trained) {
+    cli_abort(c(
+      "You cannot `forecast()` a {.cls workflow} that has not been trained.",
+      i = "Please use `fit()` before forecasting."
+    ))
+  }
+
+  frosting_fd <- NULL
+  if (has_postprocessor(object) && detect_layer(object, "layer_add_forecast_date")) {
+    frosting_fd <- extract_argument(object, "layer_add_forecast_date", "forecast_date")
+    if (!is.null(frosting_fd) && class(frosting_fd) != class(object$original_data$time_value)) {
+      cli_abort(c(
+        "Error with layer_add_forecast_date():",
+        i = "The type of `forecast_date` must match the type of the `time_value` column in the data."
+      ))
+    }
+  }
+
+  test_data <- get_test_data(
+    hardhat::extract_preprocessor(object),
+    object$original_data,
+    fill_locf = fill_locf,
+    n_recent = n_recent %||% Inf,
+    forecast_date = forecast_date %||% frosting_fd %||% max(object$original_data$time_value)
+  )
+
+  predict(object, new_data = test_data)
 }

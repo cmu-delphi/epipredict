@@ -24,15 +24,13 @@
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #'
-#' latest <- get_test_data(recipe = r, x = jhu)
-#'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_residual_quantiles(quantile_levels = c(0.0275, 0.975), symmetrize = FALSE) %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #'
 #' f2 <- frosting() %>%
 #'   layer_predict() %>%
@@ -40,7 +38,7 @@
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
-#' p2 <- predict(wf2, latest)
+#' p2 <- forecast(wf2)
 layer_residual_quantiles <- function(
     frosting, ...,
     quantile_levels = c(0.05, 0.95),

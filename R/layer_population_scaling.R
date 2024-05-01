@@ -78,17 +78,7 @@
 #'   fit(jhu) %>%
 #'   add_frosting(f)
 #'
-#' latest <- get_test_data(
-#'   recipe = r,
-#'   x = epiprocess::jhu_csse_daily_subset %>%
-#'     dplyr::filter(
-#'       time_value > "2021-11-01",
-#'       geo_value %in% c("ca", "ny")
-#'     ) %>%
-#'     dplyr::select(geo_value, time_value, cases)
-#' )
-#'
-#' predict(wf, latest)
+#' forecast(wf)
 layer_population_scaling <- function(frosting,
                                      ...,
                                      df,

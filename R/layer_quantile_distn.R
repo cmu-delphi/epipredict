@@ -28,15 +28,13 @@
 #' wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) %>%
 #'   fit(jhu)
 #'
-#' latest <- get_test_data(recipe = r, x = jhu)
-#'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_quantile_distn() %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 layer_quantile_distn <- function(frosting,
                                  ...,

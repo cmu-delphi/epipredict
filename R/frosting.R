@@ -275,7 +275,6 @@ new_frosting <- function() {
 #'   step_epi_naomit()
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#' latest <- get_test_data(recipe = r, x = jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
@@ -283,7 +282,7 @@ new_frosting <- function() {
 #'
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {

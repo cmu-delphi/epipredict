@@ -49,12 +49,10 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_naomit()
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 
-latest <- get_test_data(r, jhu)
-
 f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_threshold(.pred, lower = 0.180, upper = 0.310)
 wf <- wf \%>\% add_frosting(f)
-p <- predict(wf, latest)
+p <- forecast(wf)
 p
 }

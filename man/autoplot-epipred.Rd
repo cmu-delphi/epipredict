@@ -103,8 +103,7 @@ p <- lapply(c(7, 14, 21, 28), \(h) {
     step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
     step_epi_naomit()
   ewf <- epi_workflow(r, parsnip::linear_reg(), f) \%>\% fit(jhu)
-  td <- get_test_data(r, jhu)
-  predict(ewf, new_data = td)
+  forecast(ewf)
 })
 
 p <- do.call(rbind, p)
