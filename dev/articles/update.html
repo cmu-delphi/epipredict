@@ -82,7 +82,7 @@
       <img src="" class="logo" alt=""><h1>Using the add/update/remove and adjust functions</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/articles/update.Rmd" class="external-link"><code>vignettes/articles/update.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/update.Rmd" class="external-link"><code>vignettes/update.Rmd</code></a></small>
       <div class="d-none name"><code>update.Rmd</code></div>
     </div>
 
@@ -114,8 +114,12 @@ to add/update/remove an entire <code>epi_recipe</code> in an
 <code>epi_workflow</code> as well as <code><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe()</a></code> to
 adjust a particular step in an <code>epi_recipe</code> or
 <code>epi_workflow</code> by the step number or name. For a model, one
-may <code><a href="../reference/add_model.html">add_model()</a></code>, <code><a href="../reference/add_model.html">update_model()</a></code>, or
-<code><a href="../reference/add_model.html">remove_model()</a></code> in an <code>epi_workflow</code>. For
+may <code><a href="../reference/add_model.html">Add_model()</a></code>, <code><a href="../reference/add_model.html">Update_model()</a></code>, or
+<code><a href="../reference/add_model.html">Remove_model()</a></code> in an <code>epi_workflow</code>.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;We capitalize these names to avoid possible clashes with
+the &lt;a href="https://github.com/tidymodels/workflows" class="external-link"&gt;workflows&lt;/a&gt; versions of these functions. The lower-case
+versions are also available, however, if you load
+&lt;a href="https://github.com/tidymodels/workflows" class="external-link"&gt;workflows&lt;/a&gt; after &lt;a href="https://github.com/cmu-delphi/epipredict/" class="external-link"&gt;epipredict&lt;/a&gt;, these will be
+masked and may not work as expected.&lt;/p&gt;'><sup>1</sup></a> For
 post-processing, where the goal is to update a frosting object or a
 layer in it, we have <code><a href="../reference/add_frosting.html">add_frosting()</a></code>,
 <code><a href="../reference/add_frosting.html">remove_frosting()</a></code>, and <code><a href="../reference/add_frosting.html">update_frosting()</a></code> to
@@ -147,8 +151,8 @@ function uses by processing step is shown by the following table:</p>
 <tr class="even">
 <td>Model specification</td>
 <td>
-<code><a href="../reference/add_model.html">add_model()</a></code>, <code><a href="../reference/add_model.html">update_model()</a></code>
-<code><a href="../reference/add_model.html">remove_model()</a></code>
+<code><a href="../reference/add_model.html">Add_model()</a></code>, <code><a href="../reference/add_model.html">Update_model()</a></code>
+<code><a href="../reference/add_model.html">Remove_model()</a></code>
 </td>
 <td></td>
 </tr>
@@ -368,11 +372,11 @@ old recipe are not updated automatically. So we should be careful to fit
 the model using the new recipe, <code>r2</code>. Similarly, if
 predictions were made using the old recipe, then they should be
 re-generated using the version <code>epi_workflow</code> that contains
-the updated recipe. We can use <code><a href="../reference/add_model.html">update_model()</a></code> to replace
+the updated recipe. We can use <code><a href="../reference/add_model.html">Update_model()</a></code> to replace
 the model used in <code>wf</code>, and then fit as before:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit linear model</span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_model.html">update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
@@ -404,8 +408,8 @@ the model used in <code>wf</code>, and then fit as before:</p>
 <span><span class="co">#&gt;   lag_7_case_rate   lag_14_case_rate  </span></span>
 <span><span class="co">#&gt;          0.011286           0.011721</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
-<p>Alternatively, we may use the <code><a href="../reference/add_model.html">remove_model()</a></code> followed by
-<code><a href="../reference/add_model.html">add_model()</a></code> combination for the same effect.</p>
+<p>Alternatively, we may use the <code><a href="../reference/add_model.html">Remove_model()</a></code> followed by
+<code><a href="../reference/add_model.html">Add_model()</a></code> combination for the same effect.</p>
 </div>
 <div class="section level2">
 <h2 id="addupdateremove-a-frosting-object-in-an-epi_workflow">Add/update/remove a <code>frosting</code> object in an
@@ -473,7 +477,7 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x5608d0e27898&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55753b744eb8&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
@@ -773,6 +777,7 @@ those for an <code>epi_recipe</code>.</p>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 layer     predict predict_default_qZ3vE</span></span></code></pre></div>
 </div>
+
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
 </div>
