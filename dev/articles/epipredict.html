@@ -27,7 +27,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.13</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.14</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -246,11 +246,6 @@ most recent 30 days.</p>
 <span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>This call produces a warning, which we’ll ignore for now. But
-essentially, it’s telling us that our data comes from May 2022 but we’re
-trying to do a forecast for January 2022. The result is likely not an
-accurate measure of real-time forecast performance, because the data
-have been revised over time.</p>
 <p>The <code>out</code> object has two components:</p>
 <ol style="list-style-type: decimal">
 <li>The predictions which is just another <code>epi_df</code>. It
@@ -319,9 +314,6 @@ More details on this below.</li>
 <span><span class="co">#&gt; 4. layer_add_target_date()</span></span>
 <span><span class="co">#&gt; 5. layer_threshold()</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
-<p>Note that the <code>time_value</code> in the predictions is not
-necessarily meaningful, but it is a required column in an
-<code>epi_df</code>, so it remains here.</p>
 <p>By default, the forecaster predicts the outcome
 (<code>death_rate</code>) 1-week ahead, using 3 lags of each predictor
 (<code>case_rate</code> and <code>death_rate</code>) at 0 (today), 1
@@ -554,12 +546,11 @@ to do this (inside the forecaster) is</p>
 <span>  <span class="fu"><a href="../reference/layer_add_target_date.html">layer_add_target_date</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_threshold.html">layer_threshold</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html" class="external-link">starts_with</a></span><span class="op">(</span><span class="st">".pred"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>At predict time, we add this object onto the
-<code>epi_workflow</code> and call <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code></p>
+<code>epi_workflow</code> and call <code><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast()</a></code></p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">test_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="va">er</span>, <span class="va">jhu</span><span class="op">)</span></span>
-<span><span class="va">ewf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">ewf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
@@ -604,9 +595,6 @@ walk through some of these customizations.</p>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">case_rate</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">add_role</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="fu"><a href="../reference/epi_keys.html">epi_keys</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span><span class="op">)</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># bit of a weird hack to get the latest values per key</span></span>
-<span><span class="va">latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span>, <span class="va">jhu</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -616,7 +604,7 @@ walk through some of these customizations.</p>
 <span></span>
 <span><span class="va">eng</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/set_engine.html" class="external-link">set_engine</a></span><span class="op">(</span><span class="st">"flatline"</span><span class="op">)</span></span>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="va">eng</span>, <span class="va">f</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
-<span><span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">latest</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span></code></pre></div>
 <p>All that really differs from the <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> is the
 <code>recipe</code>, the test data, and the engine. The
 <code>frosting</code> is identical, as is the fitting and predicting
