@@ -22,20 +22,20 @@ navbar:
   type: light
 
 articles:
-  - title: Get started
-    navbar: ~
-    contents:
-      - epipredict
-      - preprocessing-and-models
-      - arx-classifier
-      - articles/update
+- title: Get started
+  navbar: ~
+  contents:
+  - epipredict
+  - preprocessing-and-models
+  - arx-classifier
+  - update
 
-  - title: Advanced methods
-    contents:
-      - articles/sliding
-      - articles/smooth-qr
-      - articles/symptom-surveys
-      - panel-data
+- title: Advanced methods
+  contents:
+  - articles/sliding
+  - articles/smooth-qr
+  - articles/symptom-surveys
+  - panel-data
 
 repo:
   url:
@@ -78,15 +78,16 @@ reference:
       - smooth_quantile_reg
   - title: Custom panel data forecasting workflows
     contents:
-      - epi_recipe
-      - epi_workflow
-      - add_epi_recipe
-      - adjust_epi_recipe
-      - add_model
-      - predict.epi_workflow
-      - fit.epi_workflow
-      - augment.epi_workflow
-      - forecast.epi_workflow
+    - epi_recipe
+    - epi_workflow
+    - add_epi_recipe
+    - adjust_epi_recipe
+    - Add_model
+    - predict.epi_workflow
+    - fit.epi_workflow
+    - augment.epi_workflow
+    - forecast.epi_workflow
+
   - title: Epi recipe preprocessing steps
     contents:
       - starts_with("step_")
