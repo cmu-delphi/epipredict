@@ -2,7 +2,7 @@
 % Please edit documentation in R/step_adjust_latency.R
 \name{step_adjust_latency}
 \alias{step_adjust_latency}
-\title{adapt the pipeline to latency in the data}
+\title{Adapt the pipeline to latency in the data}
 \usage{
 step_adjust_latency(
   recipe,
