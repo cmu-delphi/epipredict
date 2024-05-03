@@ -10,9 +10,10 @@ old_data <- tibble(
   as_epi_df(as_of = as_of)
 old_data %>% tail()
 keys <- c("time_value", "geo_value")
-old_data %<>% full_join(epi_shift_single(
-  old_data, "tmp_death_rate", 1, "death_rate", keys
-), by = keys) %>%
+old_data <- shift_cols %>%
+  full_join(epi_shift_single(
+    old_data, "tmp_death_rate", 1, "death_rate", keys
+  ), by = keys) %>%
   select(-tmp_death_rate)
 # old data is created so that death rate has a latency of 4, while case_rate has
 # a latency of 5

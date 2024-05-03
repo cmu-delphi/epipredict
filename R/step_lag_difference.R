@@ -42,7 +42,7 @@ step_lag_difference <-
 
     if (!is.null(columns)) {
       cli::cli_abort(
-        c("The `columns` argument must be `NULL.",
+        c("The `columns` argument must be `NULL`.",
           i = "Use `tidyselect` methods to choose columns to use."
         )
       )

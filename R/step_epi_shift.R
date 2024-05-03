@@ -20,10 +20,6 @@
 #' @param lag,ahead A vector of integers. Each specified column will
 #'  be the lag or lead for each value in the vector. Lag integers must be
 #'  nonnegative, while ahead integers must be positive.
-#' @param latency_adjustment a character. Determines the method by which the forecast handles data that doesn't extend to the day the forecast is made. The options are:
-#'   - `"extend_ahead"`: actually forecasts from the last date. E.g. if there are 3 days of latency for a 4 day ahead forecast, the ahead used in practice is actually 7.
-#'   - `"locf"`: carries forward the last observed value up to the forecast date.
-#'   - `"extend_lags"`: per `epi_key` and `predictor`, adjusts the lag so that the shortest lag at predict time is
 #' @param prefix A prefix to indicate what type of variable this is
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
@@ -64,12 +60,6 @@ step_epi_lag <-
            default = NA,
            columns = NULL,
            skip = FALSE,
-           latency_adjustment = c(
-             "None",
-             "extend_ahead",
-             "locf",
-             "extend_lags"
-           ),
            id = rand_id("epi_lag")) {
     if (!is_epi_recipe(recipe)) {
       cli::cli_abort("This step can only operate on an `epi_recipe`.")
@@ -87,7 +77,7 @@ step_epi_lag <-
     arg_is_chr_scalar(prefix, id, latency_adjustment)
     if (!is.null(columns)) {
       cli::cli_abort(c(
-        "The `columns` argument must be `NULL.",
+        "The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
     }
@@ -145,7 +135,7 @@ step_epi_ahead <-
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id, latency_adjustment)
     if (!is.null(columns)) {
-      cli::cli_abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c("The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lead."
       ))
     }

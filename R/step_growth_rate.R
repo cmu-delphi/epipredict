@@ -79,7 +79,7 @@ step_growth_rate <-
     }
 
     if (!is.null(columns)) {
-      cli::cli_abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c("The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to use."
       ))
     }
