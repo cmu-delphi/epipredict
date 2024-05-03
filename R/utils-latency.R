@@ -74,7 +74,7 @@ get_shifted_column_tibble <- function(
     shifts = shift_amounts
   )
   if (is.null(latency)) {
-    shift_cols %<>%
+    shift_cols <- shift_cols %>%
       rowwise() %>%
       # add the latencies to shift_cols
       mutate(latency = get_latency(
@@ -82,28 +82,29 @@ get_shifted_column_tibble <- function(
       )) %>%
       ungroup()
   } else if (length(latency) > 1) {
-    shift_cols %<>% rowwise() %>%
+    shift_cols <- shift_cols %>%
+      rowwise() %>%
       mutate(latency = unname(latency[purrr::map_lgl(
         names(latency),
         \(x) grepl(x, original_name)
       )])) %>%
       ungroup()
   } else {
-    shift_cols %<>% mutate(latency = latency)
+    shift_cols <- shift_cols %>% mutate(latency = latency)
   }
 
   # add the updated names to shift_cols
-  shift_cols %<>%
+  shift_cols <- shift_cols %>%
     mutate(
       effective_shift = shifts + abs(latency)
     ) %>%
     mutate(
       new_name = adjust_name(prefix, original_name, effective_shift)
     )
-  info %<>% select(variable, type, role)
+  info <- shift_cols %>% select(variable, type, role)
   shift_cols <- left_join(shift_cols, info, by = join_by(original_name == variable))
   if (length(unique(shift_cols$role)) != 1) {
-    cli::cli_error("not all roles are the same!",
+    cli::cli_abort("not all roles are the same!",
       shift_cols = shift_cols
     )
   }

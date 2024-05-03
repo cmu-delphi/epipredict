@@ -28,6 +28,13 @@ See \code{\link[recipes:selections]{recipes::selections()}} for more details. Ty
 to set this manually, as the necessary adjustments will be done for the
 predictors and outcome.}
 
+\item{role}{For model terms created by this step, what analysis role should
+they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.
+It should be correctly inferred and not need setting}
+
+\item{trained}{A logical to indicate if the quantities for preprocessing have
+been estimated.}
+
 \item{method}{a character. Determines the method by which the
 forecast handles latency. All of these assume the forecast date is the
 \code{as_of} of the \code{epi_df}. The options are:

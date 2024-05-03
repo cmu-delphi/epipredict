@@ -58,12 +58,6 @@ step_epi_lag <-
            prefix = "lag_",
            default = NA,
            skip = FALSE,
-           latency_adjustment = c(
-             "None",
-             "extend_ahead",
-             "locf",
-             "extend_lags"
-           ),
            id = rand_id("epi_lag")) {
     if (!is_epi_recipe(recipe)) {
       cli_abort("This step can only operate on an `epi_recipe`.")
@@ -80,7 +74,7 @@ step_epi_lag <-
     arg_is_chr_scalar(prefix, id, latency_adjustment)
     if (!is.null(columns)) {
       cli::cli_abort(c(
-        "The `columns` argument must be `NULL.",
+        "The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
     }
