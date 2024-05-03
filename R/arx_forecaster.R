@@ -317,7 +317,7 @@ compare_quantile_args <- function(alist, tlist) {
       if (setequal(alist, tlist)) {
         return(sort(unique(alist)))
       }
-      rlang::abort(c(
+      cli::cli_abort(c(
         "You have specified different, non-default, quantiles in the trainier and `arx_args` options.",
         i = "Please only specify quantiles in one location."
       ))

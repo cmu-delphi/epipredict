@@ -44,7 +44,7 @@ add_shifted_columns <- function(new_data, object, amount) {
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
   if (any(intersection)) {
-    rlang::abort(
+    cli::cli_abort(
       paste0(
         "Name collision occured in `", class(object)[1],
         "`. The following variable names already exists: ",

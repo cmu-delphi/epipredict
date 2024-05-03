@@ -33,7 +33,7 @@ step_lag_difference <-
            skip = FALSE,
            id = rand_id("lag_diff")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
     }
     arg_is_pos_int(horizon)
     arg_is_chr(role)
@@ -41,7 +41,7 @@ step_lag_difference <-
     arg_is_lgl_scalar(trained, skip)
 
     if (!is.null(columns)) {
-      rlang::abort(
+      cli::cli_abort(
         c("The `columns` argument must be `NULL.",
           i = "Use `tidyselect` methods to choose columns to use."
         )
@@ -127,7 +127,7 @@ bake.step_lag_difference <- function(object, new_data, ...) {
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
   if (any(intersection)) {
-    rlang::abort(
+    cli::cli_abort(
       c(paste0("Name collision occured in `", class(object)[1], "`."),
         i = paste(
           "The following variable names already exists: ",

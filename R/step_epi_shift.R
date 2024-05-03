@@ -145,7 +145,7 @@ step_epi_ahead <-
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id, latency_adjustment)
     if (!is.null(columns)) {
-      rlang::abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c("The `columns` argument must be `NULL.",
         i = "Use `tidyselect` methods to choose columns to lead."
       ))
     }

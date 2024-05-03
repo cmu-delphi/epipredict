@@ -119,10 +119,10 @@ arx_class_epi_workflow <- function(
     args_list = arx_class_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_class", "alist"))) {
-    rlang::abort("args_list was not created using `arx_class_args_list().")
+    cli::cli_abort("args_list was not created using `arx_class_args_list().")
   }
   if (!(is.null(trainer) || is_classification(trainer))) {
-    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
+    cli::cli_abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
   }
   lags <- arx_lags_validator(predictors, args_list$lags)
 

@@ -87,7 +87,7 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
     message <- c("The workflow must have a frosting postprocessor.",
       i = "Provide one with `add_frosting()`."
     )
-    rlang::abort(message, call = call)
+    cli::cli_abort(message, call = call)
   }
   invisible(x)
 }
@@ -354,7 +354,6 @@ apply_frosting.default <- function(workflow, components, ...) {
 
 #' @rdname apply_frosting
 #' @importFrom rlang is_null
-#' @importFrom rlang abort
 #' @export
 apply_frosting.epi_workflow <-
   function(workflow, components, new_data, ...) {

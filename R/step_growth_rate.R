@@ -56,13 +56,13 @@ step_growth_rate <-
            id = rand_id("growth_rate"),
            additional_gr_args_list = list()) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
     }
     method <- match.arg(method)
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
     if (!is.null(replace_Inf)) {
-      if (length(replace_Inf) != 1L) rlang::abort("replace_Inf must be a scalar.")
+      if (length(replace_Inf) != 1L) cli::cli_abort("replace_Inf must be a scalar.")
       if (!is.na(replace_Inf)) arg_is_numeric(replace_Inf)
     }
     arg_is_chr(role)
@@ -71,7 +71,7 @@ step_growth_rate <-
 
 
     if (!is.list(additional_gr_args_list)) {
-      rlang::abort(
+      cli::cli_abort(
         c("`additional_gr_args_list` must be a list.",
           i = "See `?epiprocess::growth_rate` for available options."
         )
@@ -79,7 +79,7 @@ step_growth_rate <-
     }
 
     if (!is.null(columns)) {
-      rlang::abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c("The `columns` argument must be `NULL.",
         i = "Use `tidyselect` methods to choose columns to use."
       ))
     }
@@ -170,7 +170,7 @@ bake.step_growth_rate <- function(object, new_data, ...) {
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% newnames
   if (any(intersection)) {
-    rlang::abort(
+    cli::cli_abort(
       c(paste0("Name collision occured in `", class(object)[1], "`."),
         i = paste(
           "The following variable names already exists: ",

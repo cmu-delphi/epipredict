@@ -132,13 +132,13 @@ set_asof <- function(new_data, info) {
     drop_na() %>%
     pull(time_value)
   if (length(time_values) <= 0) {
-    rlang::abort("the `time_value` column of `new_data` is empty")
+    cli::cli_abort("the `time_value` column of `new_data` is empty")
   }
   as_of <- attributes(new_data)$metadata$as_of
   max_time <- max(time_values)
   # make sure the as_of is sane
   if (!inherits(as_of, class(time_values))) {
-    rlang::abort(glue::glue(
+    cli::cli_abort(glue::glue(
       "the data matrix `as_of` value is {as_of}, ",
       "and not a valid `time_type` with type ",
       "matching `time_value`'s type of ",

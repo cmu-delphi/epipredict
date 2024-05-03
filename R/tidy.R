@@ -53,20 +53,20 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
   pattern <- "^layer_"
 
   if (length(id) != 1L) {
-    rlang::abort("If `id` is provided, it must be a length 1 character vector.")
+    cli::cli_abort("If `id` is provided, it must be a length 1 character vector.")
   }
 
   if (length(number) != 1L) {
-    rlang::abort("If `number` is provided, it must be a length 1 integer vector.")
+    cli::cli_abort("If `number` is provided, it must be a length 1 integer vector.")
   }
 
   if (!is.na(id)) {
     if (!is.na(number)) {
-      rlang::abort("You may specify `number` or `id`, but not both.")
+      cli::cli_abort("You may specify `number` or `id`, but not both.")
     }
     layer_ids <- vapply(x$layers, function(x) x$id, character(1))
     if (!(id %in% layer_ids)) {
-      rlang::abort("Supplied `id` not found in the frosting.")
+      cli::cli_abort("Supplied `id` not found in the frosting.")
     }
     number <- which(id == layer_ids)
   }
@@ -89,7 +89,7 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
     )
   } else {
     if (number > num_oper || length(number) > 1) {
-      rlang::abort(
+      cli::cli_abort(
         paste0(
           "`number` should be a single value between 1 and ",
           num_oper,

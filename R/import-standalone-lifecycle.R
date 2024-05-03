@@ -190,7 +190,7 @@ expect_deprecated <- function(expr, regexp = NULL, ...) {
   rlang::local_options(lifecycle_verbosity = "warning")
 
   if (!is.null(regexp) && rlang::is_na(regexp)) {
-    rlang::abort("`regexp` can't be `NA`.")
+    cli::cli_abort("`regexp` can't be `NA`.")
   }
 
   testthat::expect_warning(
