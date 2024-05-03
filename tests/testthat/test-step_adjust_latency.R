@@ -51,8 +51,10 @@ test_that("epi_adjust_latency correctly extends the lags", {
   expect_equal(nrow(point_pred), 1)
   expect_equal(point_pred$time_value, as.Date(testing_as_of))
 
-  expect_equal(names(fit5$pre$mold$outcomes),
-               glue::glue("ahead_{ahead}_death_rate"))
+  expect_equal(
+    names(fit5$pre$mold$outcomes),
+    glue::glue("ahead_{ahead}_death_rate")
+  )
   latest <- get_test_data(r5, x)
   pred <- predict(fit5, latest)
   actual_solutions <- pred %>% filter(!is.na(.pred))
@@ -68,8 +70,10 @@ test_that("epi_adjust_latency correctly extends the lags", {
     step_epi_lag(case_rate, lag = c(6, 10)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
   fit_hand_adj <- slm_fit(hand_adjusted, data = real_x)
-  expect_equal(fit5$fit$fit$fit$coefficients,
-               fit_hand_adj$fit$fit$fit$coefficients)
+  expect_equal(
+    fit5$fit$fit$fit$coefficients,
+    fit_hand_adj$fit$fit$fit$coefficients
+  )
 })
 
 test_that("epi_adjust_latency correctly extends the ahead", {
@@ -97,8 +101,10 @@ test_that("epi_adjust_latency correctly extends the ahead", {
   # max time is still the forecast date
   expect_equal(point_pred$time_value, as.Date(max_time))
   # target column renamed
-  expect_equal(names(fit5$pre$mold$outcomes),
-               glue::glue("ahead_{ahead + latency}_death_rate"))
+  expect_equal(
+    names(fit5$pre$mold$outcomes),
+    glue::glue("ahead_{ahead + latency}_death_rate")
+  )
   # fit an equivalent forecaster
   equivalent <- epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
@@ -106,8 +112,10 @@ test_that("epi_adjust_latency correctly extends the ahead", {
     step_epi_ahead(death_rate, ahead = ahead + latency)
   equiv_fit <- slm_fit(equivalent, data = real_x)
   # adjusting the ahead should do the same thing as directly adjusting the ahead
-  expect_equal(fit5$fit$fit$fit$coefficients,
-               equiv_fit$fit$fit$fit$coefficients)
+  expect_equal(
+    fit5$fit$fit$fit$coefficients,
+    equiv_fit$fit$fit$fit$coefficients
+  )
 
   # should have four predictors, including the intercept
   expect_equal(length(fit5$fit$fit$fit$coefficients), 6)

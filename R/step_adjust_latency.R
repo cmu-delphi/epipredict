@@ -1,4 +1,4 @@
-#' adapt the pipeline to latency in the data
+#' Adapt the pipeline to latency in the data
 #'
 #' In the standard case, the pipeline assumes that the last observation is also
 #' the day from which the forecast is being made. `step_adjust_latency` uses the
@@ -37,6 +37,11 @@
 #'   NULL. Cannot be set at the same time as `fixed_latency`. If a date, it
 #'   gives the date from which the forecast is actually occurring. If `NULL`,
 #'   the `as_of` is determined either from `fixed_latency` or automatically.
+#' @param role For model terms created by this step, what analysis role should
+#'   they be assigned? `lag` is default a predictor while `ahead` is an outcome.
+#'   It should be correctly inferred and not need setting
+#' @param trained A logical to indicate if the quantities for preprocessing have
+#'   been estimated.
 #' @param columns A character string of column names to be adjusted; these
 #'   should be the original columns, and not the derived ones
 #' @param default Determines what fills empty rows
@@ -92,7 +97,7 @@ step_adjust_latency <-
       cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
     }
     if (!is.null(columns)) {
-      cli::cli_abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c("The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
     }
@@ -102,7 +107,7 @@ step_adjust_latency <-
       prefix <- "ahead_"
       if (!any(map_lgl(
         recipe$steps,
-        \(recipe_step) inherits(recipe_step, "step_epi_ahead")
+        function(recipe_step) inherits(recipe_step, "step_epi_ahead")
       ))) {
         cli:cli_abort("There is no `step_epi_ahead` defined before this. For the method `extend_ahead` of `step_adjust_latency`, at least one ahead must be previously defined.")
       }
@@ -110,7 +115,7 @@ step_adjust_latency <-
       prefix <- "lag_"
       if (!any(map_lgl(
         recipe$steps,
-        \(recipe_step) inherits(recipe_step, "step_epi_lag")
+        function(recipe_step) inherits(recipe_step, "step_epi_lag")
       ))) {
         cli:cli_abort("There is no `step_epi_lag` defined before this. For the method `extend_lags` of `step_adjust_latency`, at least one lag must be previously defined.")
       }
@@ -160,8 +165,8 @@ step_adjust_latency_new <-
 #' @export
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
-    cli::cli_abort(glue::glue(c('If `method` is `"extend_ahead"`, then a step ",
-          "must have already added an outcome .')))
+    cli::cli_abort('If `method` is `"extend_ahead"`, then a step ",
+          "must have already added an outcome .')
   } else if (!("predictor" %in% info$role)) {
     cli::cli_abort('If `method` is `"extend_lags"` or `"locf"`, then a step ",
 "must have already added a predictor.')
@@ -176,11 +181,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
       pull(variable)
   }
   # get and check the max_time and as_of are the right kinds of dates
-  if (is.null(x$as_of)) {
-    as_of <- set_asof(training, info)
-  } else {
-    as_of <- x$as_of
-  }
+  as_of <- x$as_of %||% set_asof(training, info)
 
   # infer the correct columns to be working with from the previous
   # transformations
