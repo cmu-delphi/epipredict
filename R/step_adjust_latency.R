@@ -89,10 +89,10 @@ step_adjust_latency <-
            columns = NULL,
            id = recipes::rand_id("epi_lag")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
     }
     if (!is.null(columns)) {
-      rlang::abort(c("The `columns` argument must be `NULL.",
+      cli::cli_abort(c("The `columns` argument must be `NULL.",
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
     }

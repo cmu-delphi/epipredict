@@ -65,7 +65,7 @@ epi_recipe.epi_df <-
   function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
     if (!is.null(formula)) {
       if (!is.null(vars)) {
-        rlang::abort(
+        cli::cli_abort(
           paste0(
             "This `vars` specification will be ignored ",
             "when a formula is used"
@@ -73,7 +73,7 @@ epi_recipe.epi_df <-
         )
       }
       if (!is.null(roles)) {
-        rlang::abort(
+        cli::cli_abort(
           paste0(
             "This `roles` specification will be ignored ",
             "when a formula is used"
@@ -86,10 +86,10 @@ epi_recipe.epi_df <-
     }
     if (is.null(vars)) vars <- colnames(x)
     if (any(table(vars) > 1)) {
-      rlang::abort("`vars` should have unique members")
+      cli::cli_abort("`vars` should have unique members")
     }
     if (any(!(vars %in% colnames(x)))) {
-      rlang::abort("1 or more elements of `vars` are not in the data")
+      cli::cli_abort("1 or more elements of `vars` are not in the data")
     }
 
     keys <- key_colnames(x) # we know x is an epi_df
@@ -100,7 +100,7 @@ epi_recipe.epi_df <-
     ## Check and add roles when available
     if (!is.null(roles)) {
       if (length(roles) != length(vars)) {
-        rlang::abort(c(
+        cli::cli_abort(c(
           "The number of roles should be the same as the number of ",
           "variables."
         ))
@@ -146,7 +146,6 @@ epi_recipe.epi_df <-
 
 
 #' @rdname epi_recipe
-#' @importFrom rlang abort
 #' @export
 epi_recipe.formula <- function(formula, data, ...) {
   # we ensure that there's only 1 row in the template
@@ -162,7 +161,7 @@ epi_recipe.formula <- function(formula, data, ...) {
 
   f_funcs <- recipes:::fun_calls(formula, data)
   if (any(f_funcs == "-")) {
-    abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
+    cli::cli_abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
   }
 
   # Check for other in-line functions
@@ -479,7 +478,7 @@ prep.epi_recipe <- function(
         "You cannot `prep()` a tuneable recipe. Argument(s) with `tune()`: ",
         arg, ". Do you want to use a tuning function such as `tune_grid()`?"
       )
-      rlang::abort(msg)
+      cli::cli_abort(msg)
     }
     note <- paste("oper", i, gsub("_", " ", class(x$steps[[i]])[1]))
     if (!x$steps[[i]]$trained | fresh) {
