@@ -12,7 +12,7 @@ adjust_latency <- function(object, new_data) {
   } else if (method == "extend_ahead") {
     as_of <- attributes(new_data)$metadata$as_of
     if (FALSE && (typeof(as_of) != typeof(new_data$time_value))) {
-      rlang::abort(glue::glue(
+      cli::cli_abort(glue::glue(
         "the data matrix `as_of` value is {as_of}, ",
         "and not a valid `time_type` with type ",
         "matching `time_value`'s type of ",
@@ -60,10 +60,10 @@ adjust_latency <- function(object, new_data) {
       }
       return(effective_ahead)
     } else {
-      rlang::abort("the `time_value` column of `new_data` is empty")
+      cli::cli_abort("the `time_value` column of `new_data` is empty")
     }
   } else {
-    rlang::abort(glue::glue(
+    cli::cli_abort(glue::glue(
       "Latency adjustment method {method} has not yet ",
       "been implemented for `step_epi_ahead`."
     ))
