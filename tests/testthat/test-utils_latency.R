@@ -8,9 +8,8 @@ old_data <- tibble(
   tmp_death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
 ) %>%
   as_epi_df(as_of = as_of)
-old_data %>% tail()
 keys <- c("time_value", "geo_value")
-old_data <- shift_cols %>%
+old_data <- old_data %>%
   full_join(epi_shift_single(
     old_data, "tmp_death_rate", 1, "death_rate", keys
   ), by = keys) %>%

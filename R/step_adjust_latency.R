@@ -194,6 +194,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     # check that the shift amount isn't too extreme
     latency <- max(shift_cols$latency)
     time_type <- attributes(training)$metadata$time_type
+    i_latency <- which.max(shift_cols$latency)
     if (
       (grepl("day", time_type) && (latency >= 10)) ||
         (grepl("week", time_type) && (latency >= 4)) ||
@@ -207,8 +208,8 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
           "which is questionable for it's `time_type` of ",
           "{time_type}"
         ),
-        "i" = "input ahead: {shift_cols$shifts[[i_latency]]}",
-        "i" = "shifted ahead: {shift_cols$effective_shift[[i_latency]]}",
+        "i" = "input shift: {shift_cols$shifts[[i_latency]]}",
+        "i" = "latency adjusted shift: {shift_cols$effective_shift[[i_latency]]}",
         "i" = "max_time = {max_time} -> as_of = {as_of}"
       ))
     }

@@ -13,7 +13,6 @@ step_epi_lag(
   prefix = "lag_",
   default = NA,
   skip = FALSE,
-  latency_adjustment = c("None", "extend_ahead", "locf", "extend_lags"),
   id = rand_id("epi_lag")
 )
 
@@ -24,7 +23,6 @@ step_epi_ahead(
   role = "outcome",
   prefix = "ahead_",
   default = NA,
-  latency_adjustment = c("None", "extend_ahead", "locf", "extend_lags"),
   columns = NULL,
   skip = FALSE,
   id = rand_id("epi_ahead")
@@ -55,13 +53,6 @@ when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
 conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
-
-\item{latency_adjustment}{a character. Determines the method by which the forecast handles data that doesn't extend to the day the forecast is made. The options are:
-\itemize{
-\item \code{"extend_ahead"}: actually forecasts from the last date. E.g. if there are 3 days of latency for a 4 day ahead forecast, the ahead used in practice is actually 7.
-\item \code{"locf"}: carries forward the last observed value up to the forecast date.
-\item \code{"extend_lags"}: per \code{epi_key} and \code{predictor}, adjusts the lag so that the shortest lag at predict time is
-}}
 
 \item{id}{A unique identifier for the step}
 }

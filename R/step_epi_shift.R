@@ -69,9 +69,8 @@ step_epi_lag <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    latency_adjustment <- rlang::arg_match(latency_adjustment)
     arg_is_nonneg_int(lag)
-    arg_is_chr_scalar(prefix, id, latency_adjustment)
+    arg_is_chr_scalar(prefix, id)
     if (!is.null(columns)) {
       cli::cli_abort(c(
         "The `columns` argument must be `NULL`.",
@@ -88,7 +87,7 @@ step_epi_lag <-
         prefix = prefix,
         default = default,
         keys = key_colnames(recipe),
-        columns = NULL,
+        columns = columns,
         latency_adjustment = latency_adjustment,
         skip = skip,
         id = id
@@ -108,12 +107,6 @@ step_epi_ahead <-
            role = "outcome",
            prefix = "ahead_",
            default = NA,
-           latency_adjustment = c(
-             "None",
-             "extend_ahead",
-             "locf",
-             "extend_lags"
-           ),
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
@@ -127,7 +120,6 @@ step_epi_ahead <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    latency_adjustment <- rlang::arg_match(latency_adjustment)
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id, latency_adjustment)
     recipes::add_step(
@@ -161,7 +153,6 @@ step_epi_lag_new <-
       prefix = prefix,
       default = default,
       keys = keys,
-      latency_adjustment = latency_adjustment,
       columns = columns,
       skip = skip,
       id = id
@@ -169,7 +160,7 @@ step_epi_lag_new <-
   }
 
 step_epi_ahead_new <-
-  function(terms, role, trained, ahead, prefix, default, keys, latency_adjustment,
+  function(terms, role, trained, ahead, prefix, default, keys,
            columns, skip, id) {
     recipes::step(
       subclass = "epi_ahead",
@@ -179,7 +170,6 @@ step_epi_ahead_new <-
       ahead = ahead,
       prefix = prefix,
       default = default,
-      latency_adjustment = latency_adjustment,
       keys = keys,
       columns = columns,
       skip = skip,
