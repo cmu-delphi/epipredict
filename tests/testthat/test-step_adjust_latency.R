@@ -34,10 +34,11 @@ test_that("epi_adjust_latency correctly extends the lags", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5)))
+  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1022"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit5 <- slm_fit(r5, data = real_x)
+
   expect_equal(
     names(fit5$pre$mold$predictors),
     c(

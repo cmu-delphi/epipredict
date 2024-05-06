@@ -101,7 +101,7 @@ get_shifted_column_tibble <- function(
     mutate(
       new_name = adjust_name(prefix, original_name, effective_shift)
     )
-  info <- shift_cols %>% select(variable, type, role)
+  info <- info %>% select(variable, type, role)
   shift_cols <- left_join(shift_cols, info, by = join_by(original_name == variable))
   if (length(unique(shift_cols$role)) != 1) {
     cli::cli_abort("not all roles are the same!",
@@ -138,7 +138,7 @@ set_asof <- function(new_data, info) {
   as_of <- attributes(new_data)$metadata$as_of
   max_time <- max(time_values)
   # make sure the as_of is sane
-  if (!inherits(as_of, class(time_values))) {
+  if (!inherits(as_of, class(time_values)) & !inherits(as_of, "POSIXt")) {
     cli::cli_abort(glue::glue(
       "the data matrix `as_of` value is {as_of}, ",
       "and not a valid `time_type` with type ",
