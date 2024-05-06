@@ -72,9 +72,8 @@ step_epi_lag <-
         )
       )
     }
-    latency_adjustment <- rlang::arg_match(latency_adjustment)
     arg_is_nonneg_int(lag)
-    arg_is_chr_scalar(prefix, id, latency_adjustment)
+    arg_is_chr_scalar(prefix, id)
     if (!is.null(columns)) {
       cli::cli_abort(c(
         "The `columns` argument must be `NULL`.",
@@ -91,7 +90,6 @@ step_epi_lag <-
         prefix = prefix,
         default = default,
         keys = epi_keys(recipe),
-        latency_adjustment = latency_adjustment,
         columns = columns,
         skip = skip,
         id = id
@@ -112,12 +110,6 @@ step_epi_ahead <-
            trained = FALSE,
            prefix = "ahead_",
            default = NA,
-           latency_adjustment = c(
-             "None",
-             "extend_ahead",
-             "locf",
-             "extend_lags"
-           ),
            columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
@@ -131,9 +123,8 @@ step_epi_ahead <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    latency_adjustment <- rlang::arg_match(latency_adjustment)
     arg_is_nonneg_int(ahead)
-    arg_is_chr_scalar(prefix, id, latency_adjustment)
+    arg_is_chr_scalar(prefix, id)
     if (!is.null(columns)) {
       cli::cli_abort(c("The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lead."
@@ -149,7 +140,6 @@ step_epi_ahead <-
         prefix = prefix,
         default = default,
         keys = epi_keys(recipe),
-        latency_adjustment = latency_adjustment,
         columns = columns,
         skip = skip,
         id = id
@@ -160,7 +150,7 @@ step_epi_ahead <-
 
 step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
-           latency_adjustment, columns, skip, id) {
+           columns, skip, id) {
     step(
       subclass = "epi_lag",
       terms = terms,
@@ -170,7 +160,6 @@ step_epi_lag_new <-
       prefix = prefix,
       default = default,
       keys = keys,
-      latency_adjustment = latency_adjustment,
       columns = columns,
       skip = skip,
       id = id
@@ -178,7 +167,7 @@ step_epi_lag_new <-
   }
 
 step_epi_ahead_new <-
-  function(terms, role, trained, ahead, prefix, default, keys, latency_adjustment,
+  function(terms, role, trained, ahead, prefix, default, keys,
            columns, skip, id) {
     step(
       subclass = "epi_ahead",
@@ -188,7 +177,6 @@ step_epi_ahead_new <-
       ahead = ahead,
       prefix = prefix,
       default = default,
-      latency_adjustment = latency_adjustment,
       keys = keys,
       columns = columns,
       skip = skip,
@@ -208,7 +196,6 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    latency_adjustment = x$latency_adjustment,
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
@@ -225,7 +212,6 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    latency_adjustment = x$latency_adjustment,
     columns = recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
