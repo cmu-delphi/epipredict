@@ -90,9 +90,9 @@ step_adjust_latency <-
            fixed_asof = NULL,
            default = NA,
            skip = FALSE,
-           prefix = NULL,
            columns = NULL,
            id = recipes::rand_id("epi_lag")) {
+    arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
       cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
     }
@@ -103,24 +103,28 @@ step_adjust_latency <-
     }
 
     method <- rlang::arg_match(method)
-    if (method == "extend_ahead") {
-      prefix <- "ahead_"
-      if (!any(map_lgl(
-        recipe$steps,
-        function(recipe_step) inherits(recipe_step, "step_epi_ahead")
-      ))) {
-        cli:cli_abort("There is no `step_epi_ahead` defined before this. For the method `extend_ahead` of `step_adjust_latency`, at least one ahead must be previously defined.")
-      }
-    } else if (method == "extend_lags") {
-      prefix <- "lag_"
-      if (!any(map_lgl(
-        recipe$steps,
-        function(recipe_step) inherits(recipe_step, "step_epi_lag")
-      ))) {
-        cli:cli_abort("There is no `step_epi_lag` defined before this. For the method `extend_lags` of `step_adjust_latency`, at least one lag must be previously defined.")
-      }
+    terms_used <- recipes_eval_select(enquos(...), recipe$template, recipe$term_info)
+    if (length(terms_used) == 0) {
+      terms_used <- recipe$term_info %>%
+        filter(role == "raw") %>%
+        pull(variable)
     }
-    arg_is_chr_scalar(prefix, id, method)
+    if (method == "extend_ahead") {
+      rel_step_type <- "step_epi_ahead"
+      shift_name <- "ahead"
+    } else if (method == "extend_lags") {
+      rel_step_type <- "step_epi_lag"
+      shift_name <- "lag"
+    }
+    relevant_shifts <- construct_shift_tibble(terms_used, recipe, rel_step_type, shift_name)
+
+    if (!any(map_lgl(
+      recipe$steps,
+      function(recipe_step) inherits(recipe_step, rel_step_type)
+    ))) {
+      cli:cli_abort("there is no `{rel_step_type}` defined before this. for the method `extend_{shift_name}` of `step_adjust_latency`, at least one {shift_name} must be previously defined.")
+    }
+
     recipes::add_step(
       recipe,
       step_adjust_latency_new(
@@ -130,8 +134,7 @@ step_adjust_latency <-
         trained = trained,
         as_of = fixed_asof,
         latency = fixed_latency,
-        shift_cols = NULL,
-        prefix = prefix,
+        shift_cols = relevant_shifts,
         default = default,
         keys = epi_keys(recipe),
         skip = skip,
@@ -141,7 +144,7 @@ step_adjust_latency <-
   }
 
 step_adjust_latency_new <-
-  function(terms, role, trained, as_of, latency, shift_cols, prefix, time_type, default,
+  function(terms, role, trained, as_of, latency, shift_cols, time_type, default,
            keys, method, skip, id) {
     step(
       subclass = "adjust_latency",
@@ -152,7 +155,6 @@ step_adjust_latency_new <-
       as_of = as_of,
       latency = latency,
       shift_cols = shift_cols,
-      prefix = prefix,
       default = default,
       keys = keys,
       skip = skip,
@@ -163,6 +165,7 @@ step_adjust_latency_new <-
 # lags introduces max(lags) NA's after the max_time_value.
 # TODO all of the shifting happens before NA removal, which saves all the data I might possibly want; I should probably add a bit that makes sure this operation is happening before NA removal so data doesn't get dropped
 #' @export
+#' @importFrom glue glue
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
     cli::cli_abort('If `method` is `"extend_ahead"`, then a step ",
@@ -172,7 +175,6 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 "must have already added a predictor.')
   }
 
-  sign_shift <- get_sign(x)
   # get the columns used, even if it's all of them
   terms_used <- x$columns
   if (length(terms_used) == 0) {
@@ -185,16 +187,18 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 
   # infer the correct columns to be working with from the previous
   # transformations
-  shift_cols <- get_shifted_column_tibble(
-    x$prefix, training, terms_used,
-    as_of, x$latency, sign_shift, info
+  x$prefix <- x$shift_cols$prefix[[1]]
+  sign_shift <- get_sign(x)
+  latency_cols <- get_latent_column_tibble(
+    x$shift_cols, training, as_of,
+    x$latency, sign_shift, info
   )
 
   if ((x$method == "extend_ahead") || (x$method == "extend_lags")) {
     # check that the shift amount isn't too extreme
-    latency <- max(shift_cols$latency)
+    latency <- max(latency_cols$latency)
     time_type <- attributes(training)$metadata$time_type
-    i_latency <- which.max(shift_cols$latency)
+    i_latency <- which.max(latency_cols$latency)
     if (
       (grepl("day", time_type) && (latency >= 10)) ||
         (grepl("week", time_type) && (latency >= 4)) ||
@@ -203,26 +207,25 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
         ((time_type == "year") && (latency >= 1))
     ) {
       cli::cli_warn(c(
-        "!" = glue::glue(
+        "!" = glue(
           "The shift has been adjusted by {latency}, ",
           "which is questionable for it's `time_type` of ",
           "{time_type}"
         ),
-        "i" = "input shift: {shift_cols$shifts[[i_latency]]}",
-        "i" = "latency adjusted shift: {shift_cols$effective_shift[[i_latency]]}",
+        "i" = "input shift: {latency_cols$shift[[i_latency]]}",
+        "i" = "latency adjusted shift: {latency_cols$effective_shift[[i_latency]]}",
         "i" = "max_time = {max_time} -> as_of = {as_of}"
       ))
     }
   }
 
   step_adjust_latency_new(
-    terms = shift_cols$original_name,
-    role = shift_cols$role[[1]],
+    terms = latency_cols$original_name,
+    role = latency_cols$role[[1]],
     trained = TRUE,
-    prefix = x$prefix,
-    shift_cols = shift_cols,
+    shift_cols = latency_cols,
     as_of = as_of,
-    latency = unique(shift_cols$latency),
+    latency = unique(latency_cols$latency),
     default = x$default,
     keys = x$keys,
     method = x$method,
