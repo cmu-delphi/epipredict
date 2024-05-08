@@ -135,11 +135,7 @@ step_adjust_latency <-
       recipe$steps,
       function(recipe_step) inherits(recipe_step, rel_step_type)
     ))) {
-      cli::cli_abort(paste(
-        "There is no `{rel_step_type}` defined before this.",
-        " For the method `extend_{shift_name}` of `step_adjust_latency`,",
-        " at least one {shift_name} must be previously defined."
-      ))
+      cli:cli_abort("there is no `{rel_step_type}` defined before this. for the method `extend_{shift_name}` of `step_adjust_latency`, at least one {shift_name} must be previously defined.")
     }
 
     recipes::add_step(
@@ -181,6 +177,7 @@ step_adjust_latency_new <-
 
 # lags introduces max(lags) NA's after the max_time_value.
 #' @export
+#' @importFrom glue glue
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   # get the columns used, even if it's all of them
   terms_used <- x$columns
