@@ -66,8 +66,11 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 
 #' find the columns added with the lags or aheads, and the amounts they have
 #' been changed
-#' @param prefix the prefix indicating if we are adjusting lags or aheads
+#' @param shift_cols a list of columns to operate on, as created by `construct_shift_tibble`
 #' @param new_data the data transformed so far
+#' @param as_of
+#' @param latency `NULL`, int, or vector, as described in `step_eip_latency`
+#' @param sign_shift -1 if ahead, 1 if lag
 #' @return a tibble with columns `column` (relevant shifted names), `shift` (the
 #'   amount that one is shifted), `latency` (original columns difference between
 #'   max_time_value and as_of (on a per-initial column basis)),
