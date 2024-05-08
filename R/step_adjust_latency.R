@@ -46,9 +46,6 @@
 #'   should be the original columns, and not the derived ones
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
-#' @param prefix a character. The prefix matching the one used in either
-#'   `step_epi_ahead` if `method="extend_ahead"` or `step_epi_lag`
-#'   if `method="extend_lags"` or "locf".
 #' @param skip A logical. Should the step be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
 #'  when [prep()] is run, some operations may not be able to be
