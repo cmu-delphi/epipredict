@@ -38,6 +38,8 @@ Imports:
     magrittr,
     recipes (>= 1.0.4),
     rlang (>= 1.0.0),
+    purrr,
+    smoothqr,
     stats,
     tibble,
     tidyr,
