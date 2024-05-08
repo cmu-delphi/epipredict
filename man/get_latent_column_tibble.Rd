@@ -16,9 +16,13 @@ get_latent_column_tibble(
 )
 }
 \arguments{
+\item{shift_cols}{a list of columns to operate on, as created by \code{construct_shift_tibble}}
+
 \item{new_data}{the data transformed so far}
 
-\item{prefix}{the prefix indicating if we are adjusting lags or aheads}
+\item{latency}{\code{NULL}, int, or vector, as described in \code{step_eip_latency}}
+
+\item{sign_shift}{-1 if ahead, 1 if lag}
 }
 \value{
 a tibble with columns \code{column} (relevant shifted names), \code{shift} (the
