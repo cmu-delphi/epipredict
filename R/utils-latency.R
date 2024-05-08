@@ -76,11 +76,10 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' @keywords internal
 #' @importFrom dplyr rowwise %>%
 #' @importFrom purrr map_lgl
-#' @importFrom glue glue
 get_latent_column_tibble <- function(
     shift_cols, new_data, as_of, latency,
     sign_shift, info, call = caller_env()) {
-  shift_cols <- shift_cols %>% mutate(original_name = glue("{prefix}{shift}_{terms}"))
+  shift_cols <- shift_cols %>% mutate(original_name = glue::glue("{prefix}{shift}_{terms}"))
   if (is.null(latency)) {
     shift_cols <- shift_cols %>%
       rowwise() %>%
@@ -105,7 +104,7 @@ get_latent_column_tibble <- function(
       effective_shift = shift + abs(latency)
     ) %>%
     mutate(
-      new_name = glue("{prefix}{effective_shift}_{terms}")
+      new_name = glue::glue("{prefix}{effective_shift}_{terms}")
     )
   info <- info %>% select(variable, type, role)
   shift_cols <- left_join(shift_cols, info, by = join_by(original_name == variable))

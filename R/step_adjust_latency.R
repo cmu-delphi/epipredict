@@ -165,7 +165,6 @@ step_adjust_latency_new <-
 # lags introduces max(lags) NA's after the max_time_value.
 # TODO all of the shifting happens before NA removal, which saves all the data I might possibly want; I should probably add a bit that makes sure this operation is happening before NA removal so data doesn't get dropped
 #' @export
-#' @importFrom glue glue
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
     cli::cli_abort('If `method` is `"extend_ahead"`, then a step ",
@@ -207,7 +206,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
         ((time_type == "year") && (latency >= 1))
     ) {
       cli::cli_warn(c(
-        "!" = glue(
+        "!" = glue::glue(
           "The shift has been adjusted by {latency}, ",
           "which is questionable for it's `time_type` of ",
           "{time_type}"
