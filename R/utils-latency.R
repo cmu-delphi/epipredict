@@ -10,8 +10,8 @@
 extend_either <- function(new_data, shift_cols, keys) {
   shifted <-
     shift_cols %>%
-    select(-any_of(c("shifts", "effective_shift", "type", "role", "source"))) %>%
-    pmap(\(original_name, latency, new_name) {
+    select(original_name, latency, new_name) %>%
+    pmap(function(original_name, latency, new_name) {
       epi_shift_single(
         x = new_data,
         col = original_name,
@@ -20,7 +20,7 @@ extend_either <- function(new_data, shift_cols, keys) {
         key_cols = keys
       )
     }) %>%
-    map(\(x) zoo::na.trim(x)) %>%
+    map(function(x) zoo::na.trim(x)) %>%
     reduce(
       dplyr::full_join,
       by = keys
@@ -34,6 +34,36 @@ extend_either <- function(new_data, shift_cols, keys) {
     dplyr::ungroup())
 }
 
+#' create a table of the columns to modify, their shifts, and their prefixes
+#' @keywords internal
+#' @importFrom dplyr tibble
+#' @importFrom tidyr unnest
+construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name) {
+  # for the right step types (either "step_epi_lag" or "step_epi_shift"), grab
+  # the useful parameters, including the evaluated column names
+  extract_named_rates <- function(recipe_step) {
+    if (inherits(recipe_step, rel_step_type)) {
+      recipe_columns <- recipes_eval_select(recipe_step$terms, recipe$template, recipe$term_info)
+      if (any(recipe_columns %in% terms_used)) {
+        return(list(term = recipe_columns, shift = recipe_step[shift_name], prefix = recipe_step$prefix))
+      }
+    }
+    return(NULL)
+  }
+  rel_list <- recipe$steps %>%
+    purrr::map(extract_named_rates) %>%
+    unlist(recursive = FALSE) %>%
+    split(c("term", "shift", "prefix"))
+  relevant_shifts <- tibble(
+    terms = lapply(rel_list$term, unname),
+    shift = lapply(rel_list$shift, unname),
+    prefix = unname(unlist(rel_list$prefix))
+  ) %>%
+    unnest(c(terms, shift)) %>%
+    unnest(shift)
+  return(relevant_shifts)
+}
+
 #' find the columns added with the lags or aheads, and the amounts they have
 #' been changed
 #' @param prefix the prefix indicating if we are adjusting lags or aheads
@@ -41,53 +71,29 @@ extend_either <- function(new_data, shift_cols, keys) {
 #' @return a tibble with columns `column` (relevant shifted names), `shift` (the
 #'   amount that one is shifted), `latency` (original columns difference between
 #'   max_time_value and as_of (on a per-initial column basis)),
-#'   `effective_shift` (shifts+latency), and `new_name` (adjusted names with the
+#'   `effective_shift` (shift+latency), and `new_name` (adjusted names with the
 #'   effective_shift)
 #' @keywords internal
-#' @importFrom stringr str_match
 #' @importFrom dplyr rowwise %>%
-#' @importFrom magrittr %<>%
-get_shifted_column_tibble <- function(
-    prefix, new_data, terms_used, as_of, latency,
+#' @importFrom purrr map_lgl
+#' @importFrom glue glue
+get_latent_column_tibble <- function(
+    shift_cols, new_data, as_of, latency,
     sign_shift, info, call = caller_env()) {
-  relevant_columns <- names(new_data)[grepl(prefix, names(new_data))]
-  to_keep <- rep(FALSE, length(relevant_columns))
-  for (col_name in terms_used) {
-    to_keep <- to_keep | grepl(col_name, relevant_columns)
-  }
-  relevant_columns <- relevant_columns[to_keep]
-  if (length(relevant_columns) == 0) {
-    cli::cli_abort("There is no column(s) {terms_used}.",
-      current_column_names = names(new_data),
-      class = "epipredict_adjust_latency_nonexistent_column_used",
-      call = call
-    )
-  }
-  # this pulls text that is any number of digits between two _, e.g. _3557_, and
-  # converts them to an integer
-  shift_amounts <- stringr::str_match(relevant_columns, "_(\\d+)_") %>%
-    `[`(, 2) %>%
-    as.integer()
-
-  shift_cols <- dplyr::tibble(
-    original_name = relevant_columns,
-    shifts = shift_amounts
-  )
+  shift_cols <- shift_cols %>% mutate(original_name = glue("{prefix}{shift}_{terms}"))
   if (is.null(latency)) {
     shift_cols <- shift_cols %>%
       rowwise() %>%
       # add the latencies to shift_cols
       mutate(latency = get_latency(
-        new_data, as_of, original_name, shifts, sign_shift
+        new_data, as_of, original_name, shift, sign_shift
       )) %>%
       ungroup()
   } else if (length(latency) > 1) {
+    # if latency has a length, we assign based on comparing the name in the list with the `terms` column
     shift_cols <- shift_cols %>%
       rowwise() %>%
-      mutate(latency = unname(latency[purrr::map_lgl(
-        names(latency),
-        \(x) grepl(x, original_name)
-      )])) %>%
+      mutate(latency = unname(latency[names(latency) == terms])) %>%
       ungroup()
   } else {
     shift_cols <- shift_cols %>% mutate(latency = latency)
@@ -96,10 +102,10 @@ get_shifted_column_tibble <- function(
   # add the updated names to shift_cols
   shift_cols <- shift_cols %>%
     mutate(
-      effective_shift = shifts + abs(latency)
+      effective_shift = shift + abs(latency)
     ) %>%
     mutate(
-      new_name = adjust_name(prefix, original_name, effective_shift)
+      new_name = glue("{prefix}{effective_shift}_{terms}")
     )
   info <- info %>% select(variable, type, role)
   shift_cols <- left_join(shift_cols, info, by = join_by(original_name == variable))
@@ -164,19 +170,6 @@ set_asof <- function(new_data, info) {
     as_of <- as.Date(as_of)
   }
   return(as_of)
-}
-
-#' adjust the shifts by latency for the names in column assumes e.g.
-#' `"lag_6_case_rate"` and returns something like `"lag_10_case_rate"`
-#' @keywords internal
-#' @importFrom stringi stri_replace_all_regex
-adjust_name <- function(prefix, column, effective_shift) {
-  pattern <- paste0(prefix, "\\d+", "_")
-  adjusted_shifts <- paste0(prefix, effective_shift, "_")
-  stringi::stri_replace_all_regex(
-    column,
-    pattern, adjusted_shifts
-  )
 }
 
 #' the latency is also the amount the shift is off by

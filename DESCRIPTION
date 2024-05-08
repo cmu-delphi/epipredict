@@ -39,8 +39,6 @@ Imports:
     recipes (>= 1.0.4),
     rlang (>= 1.0.0),
     stats,
-    stringr,
-    stringi,
     tibble,
     tidyr,
     tidyselect,
