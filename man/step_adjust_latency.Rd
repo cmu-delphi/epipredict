@@ -14,7 +14,6 @@ step_adjust_latency(
   fixed_asof = NULL,
   default = NA,
   skip = FALSE,
-  prefix = NULL,
   columns = NULL,
   id = recipes::rand_id("epi_lag")
 )
@@ -75,14 +74,14 @@ conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
 
-\item{prefix}{a character. The prefix matching the one used in either
-\code{step_epi_ahead} if \code{method="extend_ahead"} or \code{step_epi_lag}
-if \code{method="extend_lags"} or "locf".}
-
 \item{columns}{A character string of column names to be adjusted; these
 should be the original columns, and not the derived ones}
 
 \item{id}{A unique identifier for the step}
+
+\item{prefix}{a character. The prefix matching the one used in either
+\code{step_epi_ahead} if \code{method="extend_ahead"} or \code{step_epi_lag}
+if \code{method="extend_lags"} or "locf".}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
