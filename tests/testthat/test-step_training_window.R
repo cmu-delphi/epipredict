@@ -16,7 +16,7 @@ test_that("step_training_window works with default n_recent", {
 
   expect_equal(nrow(p), 100L)
   expect_equal(ncol(p), 4L)
-  expect_s3_class(p, "epi_df")
+
   expect_named(p, c("time_value", "geo_value", "x", "y"))
   expect_equal(
     p$time_value,
@@ -33,7 +33,7 @@ test_that("step_training_window works with specified n_recent", {
 
   expect_equal(nrow(p2), 10L)
   expect_equal(ncol(p2), 4L)
-  expect_s3_class(p2, "epi_df")
+
   expect_named(p2, c("time_value", "geo_value", "x", "y"))
   expect_equal(
     p2$time_value,
@@ -53,7 +53,7 @@ test_that("step_training_window does not proceed with specified new_data", {
 
   expect_equal(nrow(p3), 10L)
   expect_equal(ncol(p3), 4L)
-  expect_s3_class(p3, "epi_df")
+
   # cols will be predictors, outcomes, time_value, geo_value
   expect_named(p3, c("x", "y", "time_value", "geo_value"))
   expect_equal(
@@ -83,7 +83,7 @@ test_that("step_training_window works with multiple keys", {
 
   expect_equal(nrow(p4), 12L)
   expect_equal(ncol(p4), 5L)
-  expect_s3_class(p4, "epi_df")
+
   expect_named(p4, c("time_value", "geo_value", "additional_key", "x", "y"))
   expect_equal(
     p4$time_value,

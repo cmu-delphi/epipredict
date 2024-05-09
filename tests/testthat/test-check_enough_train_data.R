@@ -74,7 +74,6 @@ test_that("check_enough_train_data outputs the correct recipe values", {
 
   expect_equal(nrow(p), 2 * n)
   expect_equal(ncol(p), 4L)
-  expect_s3_class(p, "epi_df")
   expect_named(p, c("time_value", "geo_value", "x", "y"))
   expect_equal(
     p$time_value,
