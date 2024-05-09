@@ -144,11 +144,12 @@ pull_layer_name <- function(x) {
 
 #' @export
 #' @rdname layer-processors
-validate_layer <- function(x, ..., arg = "`x`", call = caller_env()) {
+validate_layer <- function(x, ..., arg = rlang::caller_arg(x),
+                           call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_layer(x)) {
-    glubort(
-      "{arg} must be a frosting layer, not a {class(x)[[1]]}.",
+    cli::cli_abort(
+      "{arg} must be a frosting layer, not a {.cls {class(x)[[1]]}}.",
       .call = call
     )
   }

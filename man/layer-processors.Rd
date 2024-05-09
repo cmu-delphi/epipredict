@@ -20,7 +20,7 @@ extract_layers(x, ...)
 
 is_layer(x)
 
-validate_layer(x, ..., arg = "`x`", call = caller_env())
+validate_layer(x, ..., arg = rlang::caller_arg(x), call = caller_env())
 
 detect_layer(x, name, ...)
 
