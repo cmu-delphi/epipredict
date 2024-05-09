@@ -38,7 +38,7 @@ Imports:
     magrittr,
     quantreg,
     recipes (>= 1.0.4),
-    rlang,
+    rlang (>= 1.0.0),
     smoothqr,
     stats,
     tibble,
