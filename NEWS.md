@@ -43,6 +43,6 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - `arx_fcast_epi_workflow()` and `arx_class_epi_workflow()` now default to
   `trainer = parsnip::logistic_reg()` to match their more canned versions.
 - add a `forecast()` method simplify generating forecasts
-- remove unnecessary `bake.epi_recipe()` and `epi_juice()`. 
+- refactor `bake.epi_recipe()` and remove `epi_juice()`. 
 - Revise `compat-purrr` to use the r-lang `standalone-*` version (via 
   `{usethis}`)
