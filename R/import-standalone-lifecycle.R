@@ -1,3 +1,7 @@
+# Standalone file: do not edit by hand
+# Source: <https://github.com/r-lib/rlang/blob/main/R/standalone-lifecycle.R>
+# ----------------------------------------------------------------------
+#
 # ---
 # repo: r-lib/rlang
 # file: standalone-lifecycle.R
@@ -94,7 +98,8 @@ deprecate_soft <- function(msg,
   id <- paste(id, collapse = "\n")
   verbosity <- .rlang_lifecycle_verbosity()
 
-  invisible(switch(verbosity,
+  invisible(switch(
+    verbosity,
     quiet = NULL,
     warning = ,
     default =
@@ -121,7 +126,8 @@ deprecate_warn <- function(msg,
   id <- paste(id, collapse = "\n")
   verbosity <- .rlang_lifecycle_verbosity()
 
-  invisible(switch(verbosity,
+  invisible(switch(
+    verbosity,
     quiet = NULL,
     warning = ,
     default = {

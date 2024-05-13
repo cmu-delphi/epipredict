@@ -92,7 +92,6 @@ reference:
     contents:
       - starts_with("step_")
       - contains("bake")
-      - contains("juice")
   - title: Epi recipe verification checks
     contents:
       - check_enough_train_data
