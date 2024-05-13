@@ -557,6 +557,28 @@ prep.epi_recipe <- function(
   x
 }
 
+#' @export
+bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
+  meta <- NULL
+  if (composition == "epi_df") {
+    if (is_epi_df(new_data)) {
+      meta <- attr(new_data, "metadata")
+    } else if (is_epi_df(object$template)) {
+      meta <- attr(object$template, "metadata")
+    }
+    composition <- "tibble"
+  }
+  new_data <- NextMethod("bake")
+  if (!is.null(meta)) {
+    new_data <- as_epi_df(
+      new_data, meta$geo_type, meta$time_type, meta$as_of,
+      meta$additional_metadata %||% list()
+    )
+  }
+  new_data
+}
+
+
 kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
   x
