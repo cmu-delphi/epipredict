@@ -135,7 +135,11 @@ step_adjust_latency <-
       recipe$steps,
       function(recipe_step) inherits(recipe_step, rel_step_type)
     ))) {
-      cli:cli_abort("there is no `{rel_step_type}` defined before this. for the method `extend_{shift_name}` of `step_adjust_latency`, at least one {shift_name} must be previously defined.")
+      cli::cli_abort(glue::glue(
+        "There is no `{rel_step_type}` defined before this.",
+        " For the method `extend_{shift_name}` of `step_adjust_latency`,",
+        " at least one {shift_name} must be previously defined."
+      ))
     }
 
     recipes::add_step(
