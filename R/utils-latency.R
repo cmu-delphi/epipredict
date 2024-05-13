@@ -68,7 +68,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' been changed
 #' @param shift_cols a list of columns to operate on, as created by `construct_shift_tibble`
 #' @param new_data the data transformed so far
-#' @param as_of
+#' @param as_of the forecast date
 #' @param latency `NULL`, int, or vector, as described in `step_eip_latency`
 #' @param sign_shift -1 if ahead, 1 if lag
 #' @return a tibble with columns `column` (relevant shifted names), `shift` (the
@@ -78,7 +78,6 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #'   effective_shift)
 #' @keywords internal
 #' @importFrom dplyr rowwise %>%
-#' @importFrom purrr map_lgl
 get_latent_column_tibble <- function(
     shift_cols, new_data, as_of, latency,
     sign_shift, info, call = caller_env()) {

@@ -56,13 +56,13 @@ step_growth_rate <-
            id = rand_id("growth_rate"),
            additional_gr_args_list = list()) {
     if (!is_epi_recipe(recipe)) {
-      cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
     method <- match.arg(method)
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
     if (!is.null(replace_Inf)) {
-      if (length(replace_Inf) != 1L) cli::cli_abort("replace_Inf must be a scalar.")
+      if (length(replace_Inf) != 1L) cli::cli_abort("`replace_Inf` must be a scalar.")
       if (!is.na(replace_Inf)) arg_is_numeric(replace_Inf)
     }
     arg_is_chr(role)

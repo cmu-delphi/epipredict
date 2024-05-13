@@ -91,7 +91,7 @@ step_adjust_latency <-
            id = recipes::rand_id("epi_lag")) {
     arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
-      cli::cli_abort("This recipe step can only operate on an `epi_recipe`.")
+      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
     if (!is.null(columns)) {
       cli::cli_abort(c("The `columns` argument must be `NULL`.",
@@ -119,7 +119,11 @@ step_adjust_latency <-
       recipe$steps,
       function(recipe_step) inherits(recipe_step, rel_step_type)
     ))) {
-      cli:cli_abort("there is no `{rel_step_type}` defined before this. for the method `extend_{shift_name}` of `step_adjust_latency`, at least one {shift_name} must be previously defined.")
+      cli::cli_abort(glue::glue(
+        "There is no `{rel_step_type}` defined before this.",
+        " For the method `extend_{shift_name}` of `step_adjust_latency`,",
+        " at least one {shift_name} must be previously defined."
+      ))
     }
 
     recipes::add_step(
@@ -164,11 +168,15 @@ step_adjust_latency_new <-
 #' @export
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
-    cli::cli_abort('If `method` is `"extend_ahead"`, then a step ",
-          "must have already added an outcome .')
+    cli::cli_abort(glue::glue(
+      "If `method` is `\"extend_ahead\"`, then a step ",
+      "must have already added an outcome."
+    ))
   } else if (!("predictor" %in% info$role)) {
-    cli::cli_abort('If `method` is `"extend_lags"` or `"locf"`, then a step ",
-"must have already added a predictor.')
+    cli::cli_abort(glue::glue(
+      "If `method` is `\"extend_lags\"` or `\"locf\"`, then a step ",
+      "must have already added a predictor."
+    ))
   }
 
   # get the columns used, even if it's all of them

@@ -189,8 +189,8 @@ augment.epi_workflow <- function(x, new_data, ...) {
   } else {
     cli::cli_abort(
       c(
-        "Cannot determine how to join new_data with the predictions.",
-        "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
+        "Cannot determine how to join `new_data` with the `predictions`.",
+        "Try converting `new_data` to an {.cls epi_df} with `as_epi_df(new_data)`."
       )
     )
   }
