@@ -184,10 +184,12 @@ augment.epi_workflow <- function(x, new_data, ...) {
   if (is_epi_df(predictions)) {
     join_by <- key_colnames(predictions)
   } else {
-    cli_abort(c(
-      "Cannot determine how to join new_data with the predictions.",
-      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
-    ))
+    cli::cli_abort(
+      c(
+        "Cannot determine how to join `new_data` with the `predictions`.",
+        "Try converting `new_data` to an {.cls epi_df} with `as_epi_df(new_data)`."
+      )
+    )
   }
   complete_overlap <- intersect(names(new_data), join_by)
   if (length(complete_overlap) < length(join_by)) {
