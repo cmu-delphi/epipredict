@@ -20,6 +20,8 @@ get_latent_column_tibble(
 
 \item{new_data}{the data transformed so far}
 
+\item{as_of}{the forecast date}
+
 \item{latency}{\code{NULL}, int, or vector, as described in \code{step_eip_latency}}
 
 \item{sign_shift}{-1 if ahead, 1 if lag}
