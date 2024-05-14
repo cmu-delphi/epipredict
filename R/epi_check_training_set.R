@@ -16,7 +16,7 @@ epi_check_training_set <- function(x, rec) {
   if (!is.null(old_ok)) {
     if (all(old_ok %in% colnames(x))) { # case 1
       if (!all(old_ok %in% new_ok)) {
-        cli::cli_warn(c(
+        cli::cli_warn(paste(
           "The recipe specifies additional keys. Because these are available,",
           "they are being added to the metadata of the training data."
         ))

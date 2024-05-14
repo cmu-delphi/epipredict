@@ -93,7 +93,7 @@ slather.layer_residual_quantiles <-
       common <- intersect(object$by_key, names(key_cols))
       excess <- setdiff(object$by_key, names(key_cols))
       if (length(excess) > 0L) {
-        cli::cli_warn(c(
+        cli::cli_warn(paste(
           "Requested residual grouping key(s) {.val {excess}} are unavailable ",
           "in the original data. Grouping by the remainder: {.val {common}}."
         ))
@@ -104,7 +104,7 @@ slather.layer_residual_quantiles <-
         if (length(common_in_r) == length(common)) {
           r <- dplyr::left_join(key_cols, r, by = common_in_r)
         } else {
-          cli::cli_warn(c(
+          cli::cli_warn(paste(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
@@ -159,7 +159,7 @@ grab_residuals <- function(the_fit, components) {
     } else if (is.vector(drop(r))) { # also success
       return(tibble(.resid = drop(r)))
     } else { # failure
-      cli::cli_warn(c(
+      cli::cli_warn(paste(
         "The `residuals()` method for objects of class {.cls {cl}} results in an",
         "object that is neither a data frame with a column named `.resid`,",
         "nor something coercible to a vector.",

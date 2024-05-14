@@ -177,7 +177,7 @@ slather.layer_cdc_flatline_quantiles <-
     if (length(object$by_key) > 0L) {
       cols_in_preds <- hardhat::check_column_names(p, object$by_key)
       if (!cols_in_preds$ok) {
-        cli::cli_warn(c(
+        cli::cli_warn(paste(
           "Predicted values are missing key columns: {.val {cols_in_preds$missing_names}}.",
           "Ignoring these."
         ))
@@ -185,7 +185,7 @@ slather.layer_cdc_flatline_quantiles <-
       if (inherits(the_fit, "_flatline")) {
         cols_in_resids <- hardhat::check_column_names(r, object$by_key)
         if (!cols_in_resids$ok) {
-          cli::cli_warn(c(
+          cli::cli_warn(paste(
             "Existing residuals are missing key columns: {.val {cols_in_resids$missing_names}}.",
             "Ignoring these."
           ))
@@ -202,7 +202,7 @@ slather.layer_cdc_flatline_quantiles <-
         )
         cols_in_resids <- hardhat::check_column_names(key_cols, object$by_key)
         if (!cols_in_resids$ok) {
-          cli::cli_warn(c(
+          cli::cli_warn(paste(
             "Requested residuals are missing key columns: {.val {cols_in_resids$missing_names}}.",
             "Ignoring these."
           ))

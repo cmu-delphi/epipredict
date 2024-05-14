@@ -1,5 +1,6 @@
 #' offset each relevant column by it's appropriate latency
 #' works for either adjusting aheads or lags
+#' note that this may introduce new NA values when one column is shifted farther than another
 #' @param shift_cols a tibble which must have the columns `column`, the name of
 #'   the column to adjust, `latency` the latency of the original column relative
 #'   to the `as_of` date, `new_name`, the names in `column` adjusted by the
@@ -20,7 +21,6 @@ extend_either <- function(new_data, shift_cols, keys) {
         key_cols = keys
       )
     }) %>%
-    map(function(x) zoo::na.trim(x)) %>%
     reduce(
       dplyr::full_join,
       by = keys
@@ -146,7 +146,7 @@ set_asof <- function(new_data, info) {
   max_time <- max(time_values)
   # make sure the as_of is sane
   if (!inherits(as_of, class(time_values)) & !inherits(as_of, "POSIXt")) {
-    cli::cli_abort(glue::glue(
+    cli::cli_abort(paste(
       "the data matrix `as_of` value is {as_of}, ",
       "and not a valid `time_type` with type ",
       "matching `time_value`'s type of ",
@@ -154,13 +154,13 @@ set_asof <- function(new_data, info) {
     ))
   }
   if (is.null(as_of) || is.na(as_of)) {
-    cli::cli_warn(glue::glue(
+    cli::cli_warn(paste(
       "epi_data's `as_of` was {as_of}, setting to ",
       "the latest time value, {max_time}."
     ))
     as_of <- max_time
   } else if (as_of < max_time) {
-    cli::cli_abort(glue::glue(
+    cli::cli_abort(paste(
       "`as_of` ({(as_of)}) is before the most ",
       "recent data ({max_time}). Remove before ",
       "predicting."
