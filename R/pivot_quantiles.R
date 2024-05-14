@@ -71,7 +71,7 @@ pivot_quantiles_longer <- function(.data, ..., .ignore_length_check = FALSE) {
           .data <- .data %>% tidyr::unnest(all_of(col), names_sep = "_")
         }
       } else {
-        cli::cli_abort(c(
+        cli::cli_abort(paste(
           "Some selected columns contain different numbers of quantiles.",
           "The result would be a {.emph very} long {.cls tibble}.",
           "To do this anyway, rerun with `.ignore_length_check = TRUE`."

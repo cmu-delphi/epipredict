@@ -119,7 +119,7 @@ step_adjust_latency <-
       recipe$steps,
       function(recipe_step) inherits(recipe_step, rel_step_type)
     ))) {
-      cli::cli_abort(glue::glue(
+      cli::cli_abort(paste(
         "There is no `{rel_step_type}` defined before this.",
         " For the method `extend_{shift_name}` of `step_adjust_latency`,",
         " at least one {shift_name} must be previously defined."
@@ -168,13 +168,13 @@ step_adjust_latency_new <-
 #' @export
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
-    cli::cli_abort(glue::glue(
-      "If `method` is `\"extend_ahead\"`, then a step ",
+    cli::cli_abort(paste(
+      "If `method` is {.val extend_ahead}, then a step ",
       "must have already added an outcome."
     ))
   } else if (!("predictor" %in% info$role)) {
-    cli::cli_abort(glue::glue(
-      "If `method` is `\"extend_lags\"` or `\"locf\"`, then a step ",
+    cli::cli_abort(paste(
+      "If `method` is {.val extend_lags} or {.val locf}, then a step ",
       "must have already added a predictor."
     ))
   }
@@ -210,8 +210,8 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
         ((time_type == "yearquarter") && (latency >= 1)) ||
         ((time_type == "year") && (latency >= 1))
     ) {
-      cli::cli_warn(c(
-        "!" = glue::glue(
+      cli::cli_warn(paste(
+        "!" = paste(
           "The shift has been adjusted by {latency}, ",
           "which is questionable for it's `time_type` of ",
           "{time_type}"

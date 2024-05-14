@@ -374,7 +374,7 @@ apply_frosting.epi_workflow <-
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      cli_warn(c(
+      cli::cli_warn(paste(
         "Only postprocessors of class {.cls frosting} are allowed.",
         "Returning unpostprocessed predictions."
       ))

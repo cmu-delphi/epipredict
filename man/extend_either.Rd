@@ -3,7 +3,8 @@
 \name{extend_either}
 \alias{extend_either}
 \title{offset each relevant column by it's appropriate latency
-works for either adjusting aheads or lags}
+works for either adjusting aheads or lags
+note that this may introduce new NA values when one column is shifted farther than another}
 \usage{
 extend_either(new_data, shift_cols, keys)
 }
@@ -20,5 +21,6 @@ latencies \code{latency}}
 \description{
 offset each relevant column by it's appropriate latency
 works for either adjusting aheads or lags
+note that this may introduce new NA values when one column is shifted farther than another
 }
 \keyword{internal}
