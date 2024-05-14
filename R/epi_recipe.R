@@ -96,7 +96,7 @@ epi_recipe.epi_df <-
     ## Check and add roles when available
     if (!is.null(roles)) {
       if (length(roles) != length(vars)) {
-        cli::cli_abort(c(
+        cli::cli_abort(paste(
           "The number of roles should be the same as the number of ",
           "variables."
         ))
@@ -456,7 +456,7 @@ prep.epi_recipe <- function(
   }
   skippers <- map_lgl(x$steps, recipes:::is_skipable)
   if (any(skippers) & !retain) {
-    cli::cli_warn(c(
+    cli::cli_warn(paste(
       "Since some operations have `skip = TRUE`, using ",
       "`retain = TRUE` will allow those steps results to ",
       "be accessible."
