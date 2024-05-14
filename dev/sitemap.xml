@@ -91,9 +91,6 @@
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/autoplot-epipred.html</loc>
   </url>
   <url>
-    <loc>https://cmu-delphi.github.io/epipredict/dev/reference/bake.html</loc>
-  </url>
-  <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/case_death_rate_subset.html</loc>
   </url>
   <url>
@@ -110,9 +107,6 @@
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/dist_quantiles.html</loc>
-  </url>
-  <url>
-    <loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_juice.html</loc>
   </url>
   <url>
     <loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_keys.html</loc>
