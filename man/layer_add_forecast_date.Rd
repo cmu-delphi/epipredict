@@ -14,10 +14,11 @@ layer_add_forecast_date(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{forecast_date}{The forecast date to add as a column to the \code{epi_df}.
-For most cases, this should be specified in the form "yyyy-mm-dd". Note that
-when the forecast date is left unspecified, it is set to the maximum time
-value from the data used in pre-processing, fitting the model, and
-postprocessing.}
+For most cases, this should be specified in the form "yyyy-mm-dd". Note
+that when the forecast date is left unspecified, it is set to one of two
+values.  If there is a \code{step_adjust_latency} step present, it uses the
+\code{as_of}  the maximum time value from the data used in pre-processing,
+fitting the model, and postprocessing.}
 
 \item{id}{a random id string}
 }
