@@ -4,7 +4,7 @@
 \alias{get_latency}
 \title{the latency is also the amount the shift is off by}
 \usage{
-get_latency(new_data, as_of, column, shift_amount, sign_shift)
+get_latency(new_data, forecast_date, column, shift_amount, sign_shift)
 }
 \arguments{
 \item{sign_shift}{integer. 1 if lag and -1 if ahead. These represent how you

@@ -13,12 +13,12 @@
 #'   to set this manually, as the necessary adjustments will be done for the
 #'   predictors and outcome.
 #' @param method a character. Determines the method by which the
-#'   forecast handles latency. All of these assume the forecast date is the
-#'   `as_of` of the `epi_df`. The options are:
+#'   forecast handles latency. The options are:
 #'   - `"extend_ahead"`: Lengthen the ahead so that forecasting from the last
-#'   observation results in a forecast `ahead` after the `as_of` date. E.g. if
-#'   there are 3 days of latency between the last observation and the `as_of`
-#'   date for a 4 day ahead forecast, the ahead used in practice is actually 7.
+#'   observation results in a forecast `ahead` after the `forecast_date` date.
+#'   E.g. if there are 3 days of latency between the last observation and the
+#'   `forecast_date` date for a 4 day ahead forecast, the ahead used in practice
+#'   is actually 7.
 #'   - `"locf"`: carries forward the last observed value(s) up to the forecast
 #'   date. See the Vignette TODO for equivalents using other steps and more
 #'   sophisticated methods of extrapolation.
@@ -27,16 +27,18 @@
 #'   lags are `c(0,7,14)` for data that is 3 days latent, the actual lags used
 #'   become `c(3,10,17)`.
 #' @param fixed_latency either a positive integer, or a labeled positive integer
-#'   vector. Cannot be set at the same time as `fixed_asof`.   If non-`NULL`,
-#'   the amount to offset the ahead or lag by. If a single integer, this is used
-#'   for all columns; if a labeled vector, the labels must correspond to the
-#'   base column names.  If `NULL`, the latency is the distance between the
-#'   `epi_df`'s `max_time_value` and either the `fixed_asof` or the `epi_df`'s
-#'   `as_of` field.
-#' @param fixed_asof either a date of the same kind used in the `epi_df`, or
-#'   NULL. Cannot be set at the same time as `fixed_latency`. If a date, it
-#'   gives the date from which the forecast is actually occurring. If `NULL`,
-#'   the `as_of` is determined either from `fixed_latency` or automatically.
+#'   vector. Cannot be set at the same time as `fixed_asof`. If non-`NULL`, the
+#'   amount to offset the ahead or lag by. If a single integer, this is used for
+#'   all columns; if a labeled vector, the labels must correspond to the base
+#'   column names (before lags/aheads).  If `NULL`, the latency is the distance
+#'   between the `epi_df`'s `max_time_value` and either the
+#'   `fixed_forecast_date` or the `epi_df`'s `as_of` field (the default for
+#'   `forecast_date`).
+#' @param fixed_forecast_date either a date of the same kind used in the
+#'   `epi_df`, or `NULL`. Exclusive with `fixed_latency`. If a date, it gives
+#'   the date from which the forecast is actually occurring. If `NULL`, the
+#'   `forecast_date` is determined either via the `fixed_latency`, or is set to
+#'   the `epi_df`'s `as_of` value if `fixed_latency` is also `NULL`.
 #' @param role For model terms created by this step, what analysis role should
 #'   they be assigned? `lag` is default a predictor while `ahead` is an outcome.
 #'   It should be correctly inferred and not need setting
@@ -68,11 +70,23 @@
 #' @rdname step_adjust_latency
 #' @export
 #' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#' # setting the `as_of` to something realistic
+#' attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+#'
 #' r <- epi_recipe(case_death_rate_subset) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   #   step_adjust_latency(method = "extend_ahead") %>%
+#'   step_adjust_latency(method = "extend_ahead") %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r
+#'
+#' jhu_fit <- epi_workflow() %>%
+#'   add_epi_recipe(r) %>%
+#'   add_model(linear_reg()) %>%
+#'   fit(data = jhu)
+#' jhu_fit
+#'
 #' @importFrom recipes detect_step
 step_adjust_latency <-
   function(recipe,
@@ -85,7 +99,7 @@ step_adjust_latency <-
              "extend_lags"
            ),
            fixed_latency = NULL,
-           fixed_asof = NULL,
+           fixed_forecast_date = NULL,
            default = NA,
            skip = FALSE,
            columns = NULL,
@@ -149,7 +163,7 @@ step_adjust_latency <-
         role = role,
         method = method,
         trained = trained,
-        as_of = fixed_asof,
+        forecast_date = fixed_forecast_date,
         latency = fixed_latency,
         shift_cols = relevant_shifts,
         default = default,
@@ -161,7 +175,7 @@ step_adjust_latency <-
   }
 
 step_adjust_latency_new <-
-  function(terms, role, trained, as_of, latency, shift_cols, time_type, default,
+  function(terms, role, trained, forecast_date, latency, shift_cols, time_type, default,
            keys, method, skip, id) {
     step(
       subclass = "adjust_latency",
@@ -169,7 +183,7 @@ step_adjust_latency_new <-
       role = role,
       method = method,
       trained = trained,
-      as_of = as_of,
+      forecast_date = forecast_date,
       latency = latency,
       shift_cols = shift_cols,
       default = default,
@@ -190,15 +204,15 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
       filter(role == "raw") %>%
       pull(variable)
   }
-  # get and check the max_time and as_of are the right kinds of dates
-  as_of <- x$as_of %||% set_asof(training, info)
+  # get and check the max_time and forecast_date are the right kinds of dates
+  forecast_date <- x$forecast_date %||% set_forecast_date(training, info)
 
   # infer the correct columns to be working with from the previous
   # transformations
   x$prefix <- x$shift_cols$prefix[[1]]
   sign_shift <- get_sign(x)
   latency_cols <- get_latent_column_tibble(
-    x$shift_cols, training, as_of,
+    x$shift_cols, training, forecast_date,
     x$latency, sign_shift, info
   )
 
@@ -222,7 +236,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
         ),
         "i" = "input shift: {latency_cols$shift[[i_latency]]}",
         "i" = "latency adjusted shift: {latency_cols$effective_shift[[i_latency]]}",
-        "i" = "max_time = {max_time} -> as_of = {as_of}"
+        "i" = "`max_time` = {max_time} -> `forecast_date` = {forecast_date}"
       ))
     }
   }
@@ -232,7 +246,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     role = latency_cols$role[[1]],
     trained = TRUE,
     shift_cols = latency_cols,
-    as_of = as_of,
+    forecast_date = forecast_date,
     latency = unique(latency_cols$latency),
     default = x$default,
     keys = x$keys,
@@ -268,9 +282,9 @@ print.step_adjust_latency <-
     } else {
       terms <- x$terms
     }
-    if (!is.null(x$as_of)) {
+    if (!is.null(x$forecast_date)) {
       conj <- "with forecast date"
-      extra_text <- x$as_of
+      extra_text <- x$forecast_date
     } else if (!is.null(x$shift_cols)) {
       conj <- "with latencies"
       extra_text <- x$shift_cols
