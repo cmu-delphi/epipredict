@@ -13,14 +13,14 @@ layer_add_target_date(
 \arguments{
 \item{frosting}{a \code{frosting} postprocessor}
 
-\item{target_date}{The target date to add as a column to the
-\code{epi_df}. If there's a forecast date specified in a layer, then
-it is the forecast date plus \code{ahead} (from \code{step_epi_ahead} in
-the \code{epi_recipe}). Otherwise, it is the maximum \code{time_value}
-(from the data used in pre-processing, fitting the model, and
-postprocessing) plus \code{ahead}, where \code{ahead} has been specified in
-preprocessing. The user may override these by specifying a
-target date of their own (of the form "yyyy-mm-dd").}
+\item{target_date}{The target date to add as a column to the \code{epi_df}. If
+there's a forecast date specified upstream (either in a
+\code{step_adjust_latency} or in a \code{layer_forecast_date}), then it is the
+forecast date plus \code{ahead} (from \code{step_epi_ahead} in the \code{epi_recipe}).
+Otherwise, it is the maximum \code{time_value} (from the data used in
+pre-processing, fitting the model, and postprocessing) plus \code{ahead}, where
+\code{ahead} has been specified in preprocessing. The user may override these by
+specifying a target date of their own (of the form "yyyy-mm-dd").}
 
 \item{id}{a random id string}
 }
@@ -33,8 +33,14 @@ Postprocessing step to add the target date
 \details{
 By default, this function assumes that a value for \code{ahead}
 has been specified in a preprocessing step (most likely in
-\code{step_epi_ahead}). Then, \code{ahead} is added to the maximum \code{time_value}
-in the test data to get the target date.
+\code{step_epi_ahead}). Then, \code{ahead} is added to the \code{forecast_date}
+in the test data to get the target date. \code{forecast_date} can be set in 3 ways:
+\enumerate{
+\item \code{step_adjust_latency}, which typically uses the training \code{epi_df}'s \code{as_of}
+\item \code{layer_add_forecast_date}, which inherits from 1 if not manually specifed
+\item if none of those are the case, it is simply the maximum \code{time_value} over
+every dataset used (prep, training, and prediction).
+}
 }
 \examples{
 jhu <- case_death_rate_subset \%>\%
@@ -57,8 +63,14 @@ wf1 <- wf \%>\% add_frosting(f)
 p <- forecast(wf1)
 p
 
-# Use ahead + max time value from pre, fit, post
-# which is the same if include `layer_add_forecast_date()`
+# Use ahead + forecast_date from adjust_latency
+# setting the `as_of` to something realistic
+attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+r <- epi_recipe(jhu) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_adjust_latency(method = "extend_ahead") \%>\%
+  step_epi_naomit()
 f2 <- frosting() \%>\%
   layer_predict() \%>\%
   layer_add_target_date() \%>\%
@@ -68,13 +80,24 @@ wf2 <- wf \%>\% add_frosting(f2)
 p2 <- forecast(wf2)
 p2
 
-# Specify own target date
+# Use ahead + max time value from pre, fit, post
+# which is the same if include `layer_add_forecast_date()`
 f3 <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_add_target_date(target_date = "2022-01-08") \%>\%
+  layer_add_target_date() \%>\%
   layer_naomit(.pred)
 wf3 <- wf \%>\% add_frosting(f3)
 
-p3 <- forecast(wf3)
-p3
+p3 <- forecast(wf2)
+p2
+
+# Specify own target date
+f4 <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_add_target_date(target_date = "2022-01-08") \%>\%
+  layer_naomit(.pred)
+wf4 <- wf \%>\% add_frosting(f4)
+
+p4 <- forecast(wf4)
+p4
 }

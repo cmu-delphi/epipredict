@@ -11,7 +11,7 @@ step_adjust_latency(
   trained = FALSE,
   method = c("extend_ahead", "locf", "extend_lags"),
   fixed_latency = NULL,
-  fixed_asof = NULL,
+  fixed_forecast_date = NULL,
   default = NA,
   skip = FALSE,
   columns = NULL,
@@ -35,13 +35,13 @@ It should be correctly inferred and not need setting}
 been estimated.}
 
 \item{method}{a character. Determines the method by which the
-forecast handles latency. All of these assume the forecast date is the
-\code{as_of} of the \code{epi_df}. The options are:
+forecast handles latency. The options are:
 \itemize{
 \item \code{"extend_ahead"}: Lengthen the ahead so that forecasting from the last
-observation results in a forecast \code{ahead} after the \code{as_of} date. E.g. if
-there are 3 days of latency between the last observation and the \code{as_of}
-date for a 4 day ahead forecast, the ahead used in practice is actually 7.
+observation results in a forecast \code{ahead} after the \code{forecast_date} date.
+E.g. if there are 3 days of latency between the last observation and the
+\code{forecast_date} date for a 4 day ahead forecast, the ahead used in practice
+is actually 7.
 \item \code{"locf"}: carries forward the last observed value(s) up to the forecast
 date. See the Vignette TODO for equivalents using other steps and more
 sophisticated methods of extrapolation.
@@ -52,17 +52,19 @@ become \code{c(3,10,17)}.
 }}
 
 \item{fixed_latency}{either a positive integer, or a labeled positive integer
-vector. Cannot be set at the same time as \code{fixed_asof}.   If non-\code{NULL},
-the amount to offset the ahead or lag by. If a single integer, this is used
-for all columns; if a labeled vector, the labels must correspond to the
-base column names.  If \code{NULL}, the latency is the distance between the
-\code{epi_df}'s \code{max_time_value} and either the \code{fixed_asof} or the \code{epi_df}'s
-\code{as_of} field.}
+vector. Cannot be set at the same time as \code{fixed_asof}. If non-\code{NULL}, the
+amount to offset the ahead or lag by. If a single integer, this is used for
+all columns; if a labeled vector, the labels must correspond to the base
+column names (before lags/aheads).  If \code{NULL}, the latency is the distance
+between the \code{epi_df}'s \code{max_time_value} and either the
+\code{fixed_forecast_date} or the \code{epi_df}'s \code{as_of} field (the default for
+\code{forecast_date}).}
 
-\item{fixed_asof}{either a date of the same kind used in the \code{epi_df}, or
-NULL. Cannot be set at the same time as \code{fixed_latency}. If a date, it
-gives the date from which the forecast is actually occurring. If \code{NULL},
-the \code{as_of} is determined either from \code{fixed_latency} or automatically.}
+\item{fixed_forecast_date}{either a date of the same kind used in the
+\code{epi_df}, or \code{NULL}. Exclusive with \code{fixed_latency}. If a date, it gives
+the date from which the forecast is actually occurring. If \code{NULL}, the
+\code{forecast_date} is determined either via the \code{fixed_latency}, or is set to
+the \code{epi_df}'s \code{as_of} value if \code{fixed_latency} is also \code{NULL}.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
@@ -105,11 +107,23 @@ are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
 \code{step_epi_lag}, they are set to \code{"lag_"} and \verb{"epi_lag}, respectively.
 }
 \examples{
+jhu <- case_death_rate_subset \%>\%
+  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+# setting the `as_of` to something realistic
+attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+
 r <- epi_recipe(case_death_rate_subset) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
-  #   step_adjust_latency(method = "extend_ahead") \%>\%
+  step_adjust_latency(method = "extend_ahead") \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 r
+
+jhu_fit <- epi_workflow() \%>\%
+  add_epi_recipe(r) \%>\%
+  add_model(linear_reg()) \%>\%
+  fit(data = jhu)
+jhu_fit
+
 }
 \seealso{
 Other row operation steps: 

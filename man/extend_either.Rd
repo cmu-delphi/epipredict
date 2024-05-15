@@ -13,7 +13,7 @@ extend_either(new_data, shift_cols, keys)
 
 \item{shift_cols}{a tibble which must have the columns \code{column}, the name of
 the column to adjust, \code{latency} the latency of the original column relative
-to the \code{as_of} date, \code{new_name}, the names in \code{column} adjusted by the
+to the \code{forecast_date}, \code{new_name}, the names in \code{column} adjusted by the
 latencies \code{latency}}
 
 \item{keys}{the variables which are used as keys}
