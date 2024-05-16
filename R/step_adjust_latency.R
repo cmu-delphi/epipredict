@@ -73,6 +73,7 @@
 #'   #   step_adjust_latency(method = "extend_ahead") %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r
+#' @importFrom recipes detect_step
 step_adjust_latency <-
   function(recipe,
            ...,
@@ -97,6 +98,21 @@ step_adjust_latency <-
       cli::cli_abort(c("The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
+    }
+    if ((method == "extend_ahead") && (!detect_step(recipe, "epi_ahead"))) {
+      cli::cli_abort(
+        "If `method` is {.val extend_ahead}, then a step
+        must have already added an outcome."
+      )
+    } else if ((method == "extend_lags") && (!detect_step(recipe, "epi_lag"))) {
+      cli::cli_abort(
+        "If `method` is {.val extend_lags} or {.val locf}, then a step
+        must have already added a predictor."
+      )
+    }
+    if (detect_step(recipe, "naomit")) {
+      cli::cli_abort("adjust_latency needs to occur before any `NA` removal,
+                      as columns may be moved around")
     }
 
     method <- rlang::arg_match(method)
@@ -164,20 +180,8 @@ step_adjust_latency_new <-
   }
 
 # lags introduces max(lags) NA's after the max_time_value.
-# TODO all of the shifting happens before NA removal, which saves all the data I might possibly want; I should probably add a bit that makes sure this operation is happening before NA removal so data doesn't get dropped
 #' @export
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
-  if ((x$method == "extend_ahead") && (!("outcome" %in% info$role))) {
-    cli::cli_abort(paste(
-      "If `method` is {.val extend_ahead}, then a step ",
-      "must have already added an outcome."
-    ))
-  } else if (!("predictor" %in% info$role)) {
-    cli::cli_abort(paste(
-      "If `method` is {.val extend_lags} or {.val locf}, then a step ",
-      "must have already added a predictor."
-    ))
-  }
 
   # get the columns used, even if it's all of them
   terms_used <- x$columns
