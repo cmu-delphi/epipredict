@@ -182,7 +182,6 @@ step_adjust_latency_new <-
 # lags introduces max(lags) NA's after the max_time_value.
 #' @export
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
-
   # get the columns used, even if it's all of them
   terms_used <- x$columns
   if (length(terms_used) == 0) {
