@@ -1031,6 +1031,34 @@
     18993, 18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
+---
+
+    structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
+    ), .pred = c(0.303244704017743, 0.531332853311082, 0.588827944685979, 
+    0.988690249216229, 0.794801997001639, 0.306895457225321), .pred_distn = structure(list(
+        structure(list(values = c("5%" = 0.136509784083987, "95%" = 0.469979623951498
+        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c("5%" = 0.364597933377326, "95%" = 0.698067773244837
+            ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c("5%" = 0.422093024752224, "95%" = 0.755562864619735
+            ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c("5%" = 0.821955329282474, "95%" = 1.15542516914998
+            ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c("5%" = 0.628067077067883, "95%" = 0.961536916935394
+            ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c("5%" = 0.140160537291566, "95%" = 0.473630377159077
+            ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", 
+    "vctrs_vctr", "list")), forecast_date = structure(c(18997, 18997, 
+    18997, 18997, 18997, 18997), class = "Date"), target_date = structure(c(18998, 
+    18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
+    -6L), class = c("tbl_df", "tbl", "data.frame"))
+
 # arx_classifier snapshots
 
     structure(list(geo_value = c("ak", "al", "ar", "az", "ca", "co", 
