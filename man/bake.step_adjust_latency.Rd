@@ -15,4 +15,3 @@ to adjust}
 adjust the ahead so that we will be predicting \code{ahead} days after the \code{as_of}
 date, rather than relative to the last day of data
 }
-\keyword{internal}

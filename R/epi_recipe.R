@@ -585,7 +585,6 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
   new_data
 }
 
-
 kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)
   x
