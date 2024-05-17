@@ -80,10 +80,6 @@ the computations for subsequent operations.}
 should be the original columns, and not the derived ones}
 
 \item{id}{A unique identifier for the step}
-
-\item{prefix}{a character. The prefix matching the one used in either
-\code{step_epi_ahead} if \code{method="extend_ahead"} or \code{step_epi_lag}
-if \code{method="extend_lags"} or "locf".}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
