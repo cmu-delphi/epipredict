@@ -141,18 +141,20 @@ test_that("epi_adjust_latency insist there's steps before it", {
   )
   expect_error(
     r5 <- epi_recipe(x) %>%
-    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+      step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
       step_adjust_latency(method = "extend_ahead"),
     regexp = "extend_ahead"
   )
 })
 
 test_that("epi_adjust_latency warns against removing NA's beforehand", {
-  expect_error(r5 <- epi_recipe(x) %>%
-                 step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
-                 step_epi_lag(case_rate, lag = c(1, 5)) %>%
-                 step_epi_naomit() %>%
-                 step_adjust_latency(method = "extend_lags"),
-    regexp = "adjust_latency needs to occur before any `NA` removal")
+  expect_error(
+    r5 <- epi_recipe(x) %>%
+      step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+      step_epi_lag(case_rate, lag = c(1, 5)) %>%
+      step_epi_naomit() %>%
+      step_adjust_latency(method = "extend_lags"),
+    regexp = "adjust_latency needs to occur before any `NA` removal"
+  )
 })
 # todo check that epi_adjust_latency errors for nonsense `as_of`'s
