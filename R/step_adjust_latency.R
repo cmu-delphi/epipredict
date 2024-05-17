@@ -264,7 +264,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 #' @param new_data assumes that this already has lag/ahead columns that we need
 #'   to adjust
 #' @importFrom dplyr %>% pull
-#' @keywords internal
+#' @export
 bake.step_adjust_latency <- function(object, new_data, ...) {
   if ((object$method == "extend_ahead") || (object$method == "extend_lags")) {
     keys <- object$keys
