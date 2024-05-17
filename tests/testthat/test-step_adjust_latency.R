@@ -6,7 +6,7 @@ x <- tibble(
   case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
   death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
 ) %>%
-  as_epi_df()
+  as_epi_df(as_of = as.POSIXct("2024-05-17"))
 max_time <- max(x$time_value)
 class(attributes(x)$metadata$as_of)
 as_of <- attributes(x)$metadata$as_of
@@ -34,7 +34,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1031"), class = "simpleError")
+  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit5 <- slm_fit(r5, data = real_x)
