@@ -182,7 +182,7 @@ get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shif
     drop_na(all_of(column)) %>%
     pull(time_value) %>%
     max()
-  return(as.integer(sign_shift * (forecast_date - shift_max_date) + shift_amount))
+  return(as.integer(sign_shift * (as.Date(forecast_date) - shift_max_date) + shift_amount))
 }
 
 
