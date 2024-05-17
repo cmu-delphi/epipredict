@@ -57,7 +57,7 @@ arx_classifier <- function(
 
   preds <- forecast(
     wf,
-    fill_locf = TRUE,
+    fill_locf = is.null(args_list$adjust_latency),
     n_recent = args_list$nafill_buffer,
     forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
   ) %>%
