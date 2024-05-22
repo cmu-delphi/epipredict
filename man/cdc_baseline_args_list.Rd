@@ -34,8 +34,10 @@ set of prediction horizons for \code{\link[=layer_cdc_flatline_quantiles]{layer_
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date on which the forecast is created.
-The default \code{NULL} will attempt to determine this automatically.}
+\item{forecast_date}{Date. The date on which the forecast is created.  The
+default \code{NULL} will attempt to determine this automatically either as the
+max time value if there is no latency adjustment, or as the \code{as_of} of
+\code{epi_data} if \code{adjust_latency} is non-\code{NULL}.}
 
 \item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of
