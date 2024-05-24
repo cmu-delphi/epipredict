@@ -26,6 +26,16 @@
 #'   the shortest lag at predict time is at the last observation. E.g. if the
 #'   lags are `c(0,7,14)` for data that is 3 days latent, the actual lags used
 #'   become `c(3,10,17)`.
+#' @param epi_keys_checked a character vector. A list of keys to group by before
+#'   finding the `max_time_value`; only used if both `fixed_latency` and
+#'   `fixed_forecast_date` are `NULL`.  The default value of this is
+#'   `c("geo_value")`, but it can be any collection of `epi_keys`.  Different
+#'   locations may have different latencies; to produce a forecast at every
+#'   location, we need to use the largest latency across every location; this
+#'   means taking `max_time_value` to be the minimum of the `max_time_value`s
+#'   for each `geo_value` (or whichever collection of keys are specified).  If
+#'   `NULL` or an empty character vector, it will take the maximum across all
+#'   values, irrespective of any keys.
 #' @param fixed_latency either a positive integer, or a labeled positive integer
 #'   vector. Cannot be set at the same time as `fixed_asof`. If non-`NULL`, the
 #'   amount to offset the ahead or lag by. If a single integer, this is used for
@@ -98,6 +108,7 @@ step_adjust_latency <-
              "locf",
              "extend_lags"
            ),
+           epi_keys_checked = c("geo_value"),
            fixed_latency = NULL,
            fixed_forecast_date = NULL,
            default = NA,
@@ -162,6 +173,7 @@ step_adjust_latency <-
         terms = dplyr::enquos(...),
         role = role,
         method = method,
+        epi_keys_checked = epi_keys_checked,
         trained = trained,
         forecast_date = fixed_forecast_date,
         latency = fixed_latency,
@@ -176,12 +188,13 @@ step_adjust_latency <-
 
 step_adjust_latency_new <-
   function(terms, role, trained, forecast_date, latency, shift_cols, time_type, default,
-           keys, method, skip, id) {
+           keys, method, epi_keys_checked, skip, id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
       role = role,
       method = method,
+      epi_keys_checked = epi_keys_checked,
       trained = trained,
       forecast_date = forecast_date,
       latency = latency,
@@ -205,7 +218,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
       pull(variable)
   }
   # get and check the max_time and forecast_date are the right kinds of dates
-  forecast_date <- x$forecast_date %||% set_forecast_date(training, info)
+  forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked)
 
   # infer the correct columns to be working with from the previous
   # transformations
@@ -213,7 +226,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   sign_shift <- get_sign(x)
   latency_cols <- get_latent_column_tibble(
     x$shift_cols, training, forecast_date,
-    x$latency, sign_shift, info
+    x$latency, sign_shift, info, x$epi_keys_checked
   )
 
   if ((x$method == "extend_ahead") || (x$method == "extend_lags")) {
@@ -251,6 +264,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     default = x$default,
     keys = x$keys,
     method = x$method,
+    epi_keys_checked = x$epi_keys_checked,
     skip = x$skip,
     id = x$id
   )
