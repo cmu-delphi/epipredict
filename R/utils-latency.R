@@ -7,8 +7,9 @@
 #'   latencies `latency`
 #' @param new_data just what is says
 #' @param keys the variables which are used as keys
+#' @param epi_keys_checked the keys used to group_by to find max_time_values
 #' @keywords internal
-extend_either <- function(new_data, shift_cols, keys) {
+extend_either <- function(new_data, shift_cols, keys, epi_keys_checked) {
   shifted <-
     shift_cols %>%
     select(original_name, latency, new_name) %>%
@@ -80,14 +81,14 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' @importFrom dplyr rowwise %>%
 get_latent_column_tibble <- function(
     shift_cols, new_data, forecast_date, latency,
-    sign_shift, info, call = caller_env()) {
+    sign_shift, info, epi_keys_checked, call = caller_env()) {
   shift_cols <- shift_cols %>% mutate(original_name = glue::glue("{prefix}{shift}_{terms}"))
   if (is.null(latency)) {
     shift_cols <- shift_cols %>%
       rowwise() %>%
       # add the latencies to shift_cols
       mutate(latency = get_latency(
-        new_data, forecast_date, original_name, shift, sign_shift
+        new_data, forecast_date, original_name, shift, sign_shift, epi_keys_checked
       )) %>%
       ungroup()
   } else if (length(latency) > 1) {
@@ -121,7 +122,7 @@ get_latent_column_tibble <- function(
 
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
 #' @keywords internal
-set_forecast_date <- function(new_data, info) {
+set_forecast_date <- function(new_data, info, epi_keys_checked) {
   original_columns <- info %>%
     filter(source == "original") %>%
     pull(variable)
@@ -135,22 +136,29 @@ set_forecast_date <- function(new_data, info) {
   }
   # the source data determines the actual time_values
   # these are the non-na time_values;
-  time_values <- new_data %>%
+  # get the minimum value across the checked epi_keys' maximum time values
+  max_time <- new_data %>%
     select(all_of(original_columns)) %>%
     drop_na() %>%
-    pull(time_value)
-  if (length(time_values) <= 0) {
-    cli::cli_abort("the `time_value` column of `new_data` is empty")
-  }
+    {
+      # null and "" don't work in `group_by`
+      if (!is.null(epi_keys_checked) && epi_keys_checked != "") {
+        group_by(., get(epi_keys_checked))
+      } else {
+        .
+      }
+    } %>%
+    summarize(time_value = max(time_value)) %>%
+    pull(time_value) %>%
+    min()
   forecast_date <- attributes(new_data)$metadata$as_of
-  max_time <- max(time_values)
   # make sure the as_of is sane
-  if (!inherits(forecast_date, class(time_values)) & !inherits(forecast_date, "POSIXt")) {
+  if (!inherits(forecast_date, class(max_time)) & !inherits(forecast_date, "POSIXt")) {
     cli::cli_abort(paste(
       "the data matrix `forecast_date` value is {forecast_date}, ",
       "and not a valid `time_type` with type ",
       "matching `time_value`'s type of ",
-      "{typeof(new_data$time_value)}."
+      "{class(max_time)}."
     ))
   }
   if (is.null(forecast_date) || is.na(forecast_date)) {
@@ -167,7 +175,7 @@ set_forecast_date <- function(new_data, info) {
     ))
   }
   # TODO cover the rest of the possible types for as_of and max_time...
-  if (class(time_values) == "Date") {
+  if (class(max_time) == "Date") {
     forecast_date <- as.Date(forecast_date)
   }
   return(forecast_date)
@@ -177,11 +185,20 @@ set_forecast_date <- function(new_data, info) {
 #' @param sign_shift integer. 1 if lag and -1 if ahead. These represent how you
 #'   need to shift the data to bring the 3 day lagged value to today.
 #' @keywords internal
-get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shift) {
+get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shift, epi_keys_checked) {
   shift_max_date <- new_data %>%
     drop_na(all_of(column)) %>%
+    {
+      # null and "" don't work in `group_by`
+      if (!is.null(epi_keys_checked) && epi_keys_checked != "") {
+        group_by(., get(epi_keys_checked))
+      } else {
+        .
+      }
+    } %>%
+    summarize(time_value = max(time_value)) %>%
     pull(time_value) %>%
-    max()
+    min()
   return(as.integer(sign_shift * (as.Date(forecast_date) - shift_max_date) + shift_amount))
 }
 
