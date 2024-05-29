@@ -222,3 +222,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
     fit_hand_adj$fit$fit$fit$coefficients
   )
 })
+
+test_that("`step_adjust_latency` only allows one instance of itself", {})
+
+test_that("setting fixed_* works for `step_adjust_latency`", {})
