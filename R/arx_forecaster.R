@@ -139,31 +139,28 @@ arx_fcast_epi_workflow <- function(
   if (!is.null(method)) {
     if (method == "extend_ahead") {
       r <- r %>% step_adjust_latency(all_outcomes(),
-                          fixed_forecast_date = forecast_date,
-                          method = method
-                          )
+        fixed_forecast_date = forecast_date,
+        method = method
+      )
     } else if (method == "extend_lags") {
       r <- r %>% step_adjust_latency(all_predictors(),
-                          fixed_forecast_date = forecast_date,
-                          method = method
-                          )
+        fixed_forecast_date = forecast_date,
+        method = method
+      )
     }
-    r <- r %>% step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training) %>%
-    {
-      if (!is.null(args_list$check_enough_data_n)) {
-        check_enough_train_data(
-          .,
-          all_predictors(),
-          !!outcome,
-          n = args_list$check_enough_data_n,
-          epi_keys = args_list$check_enough_data_epi_keys,
-          drop_na = FALSE
-        )
-      } else {
-        .
-      }
-    }
+  }
+  r <- r %>%
+    step_epi_naomit() %>%
+    step_training_window(n_recent = args_list$n_training)
+  if (!is.null(args_list$check_enough_data_n)) {
+    r <- r %>% check_enough_train_data(
+      all_predictors(),
+      !!outcome,
+      n = args_list$check_enough_data_n,
+      epi_keys = args_list$check_enough_data_epi_keys,
+      drop_na = FALSE
+    )
+  }
 
 
   # --- postprocessor
@@ -176,11 +173,10 @@ arx_fcast_epi_workflow <- function(
     ))
     args_list$quantile_levels <- quantile_levels
     trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
-    f <- layer_quantile_distn(f, quantile_levels = quantile_levels) %>%
+    f <- f %>% layer_quantile_distn(quantile_levels = quantile_levels) %>%
       layer_point_from_distn()
   } else {
-    f <- layer_residual_quantiles(
-      f,
+    f <- f %>% layer_residual_quantiles(
       quantile_levels = args_list$quantile_levels,
       symmetrize = args_list$symmetrize,
       by_key = args_list$quantile_by_key
