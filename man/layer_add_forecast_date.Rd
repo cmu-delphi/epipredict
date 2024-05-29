@@ -17,8 +17,9 @@ layer_add_forecast_date(
 For most cases, this should be specified in the form "yyyy-mm-dd". Note
 that when the forecast date is left unspecified, it is set to one of two
 values.  If there is a \code{step_adjust_latency} step present, it uses the
-\code{as_of}  the maximum time value from the data used in pre-processing,
-fitting the model, and postprocessing.}
+\code{forecast_date} as set in that function. Otherwise, it uses the maximum
+\code{time_value} across the data used for pre-processing, fitting the model,
+and postprocessing.}
 
 \item{id}{a random id string}
 }

@@ -1,4 +1,3 @@
-# TODO adapt this to latency
 #' Postprocessing step to add the forecast date
 #'
 #' @param frosting a `frosting` postprocessor
@@ -6,8 +5,9 @@
 #'   For most cases, this should be specified in the form "yyyy-mm-dd". Note
 #'   that when the forecast date is left unspecified, it is set to one of two
 #'   values.  If there is a `step_adjust_latency` step present, it uses the
-#'   `as_of`  the maximum time value from the data used in pre-processing,
-#'   fitting the model, and postprocessing.
+#'   `forecast_date` as set in that function. Otherwise, it uses the maximum
+#'   `time_value` across the data used for pre-processing, fitting the model,
+#'   and postprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor

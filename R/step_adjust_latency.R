@@ -27,8 +27,7 @@
 #'   lags are `c(0,7,14)` for data that is 3 days latent, the actual lags used
 #'   become `c(3,10,17)`.
 #' @param epi_keys_checked a character vector. A list of keys to group by before
-#'   finding the `max_time_value`; only used if both `fixed_latency` and
-#'   `fixed_forecast_date` are `NULL`.  The default value of this is
+#'   finding the `max_time_value`.  The default value of this is
 #'   `c("geo_value")`, but it can be any collection of `epi_keys`.  Different
 #'   locations may have different latencies; to produce a forecast at every
 #'   location, we need to use the largest latency across every location; this
@@ -37,12 +36,12 @@
 #'   `NULL` or an empty character vector, it will take the maximum across all
 #'   values, irrespective of any keys.
 #' @param fixed_latency either a positive integer, or a labeled positive integer
-#'   vector. Cannot be set at the same time as `fixed_asof`. If non-`NULL`, the
-#'   amount to offset the ahead or lag by. If a single integer, this is used for
-#'   all columns; if a labeled vector, the labels must correspond to the base
-#'   column names (before lags/aheads).  If `NULL`, the latency is the distance
-#'   between the `epi_df`'s `max_time_value` and either the
-#'   `fixed_forecast_date` or the `epi_df`'s `as_of` field (the default for
+#'   vector. Cannot be set at the same time as `fixed_forecast_date`. If
+#'   non-`NULL`, the amount to offset the ahead or lag by. If a single integer,
+#'   this is used for all columns; if a labeled vector, the labels must
+#'   correspond to the base column names (before lags/aheads).  If `NULL`, the
+#'   latency is the distance between the `epi_df`'s `max_time_value` and either
+#'   the `fixed_forecast_date` or the `epi_df`'s `as_of` field (the default for
 #'   `forecast_date`).
 #' @param fixed_forecast_date either a date of the same kind used in the
 #'   `epi_df`, or `NULL`. Exclusive with `fixed_latency`. If a date, it gives
@@ -138,6 +137,10 @@ step_adjust_latency <-
     if (detect_step(recipe, "naomit")) {
       cli::cli_abort("adjust_latency needs to occur before any `NA` removal,
                       as columns may be moved around")
+    }
+    if (!is.null(fixed_latency) && !is.null(fixed_forecast_date)) {
+      cli::cli_abort("Only one of `fixed_latency` and `fixed_forecast_date`
+ can be non-`NULL` at a time!")
     }
 
     method <- rlang::arg_match(method)

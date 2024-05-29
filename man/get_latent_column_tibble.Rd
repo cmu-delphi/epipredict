@@ -12,6 +12,7 @@ get_latent_column_tibble(
   latency,
   sign_shift,
   info,
+  epi_keys_checked,
   call = caller_env()
 )
 }
