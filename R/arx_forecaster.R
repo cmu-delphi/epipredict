@@ -1,4 +1,3 @@
-# TODO add latency to default forecaster
 #' Direct autoregressive forecaster with covariates
 #'
 #' This is an autoregressive forecasting model for
@@ -136,41 +135,36 @@ arx_fcast_epi_workflow <- function(
     r <- step_epi_lag(r, !!p, lag = lags[[l]])
   }
   r <- r %>%
-    step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
+    step_epi_ahead(!!outcome, ahead = args_list$ahead)
+  method <- args_list$adjust_latency
+  if (!is.null(method)) {
+    if (method == "extend_ahead") {
+      r <- r %>% step_adjust_latency(all_outcomes(),
+                          fixed_forecast_date = forecast_date,
+                          method = method
+                          )
+    } else if (method == "extend_lags") {
+      r <- r %>% step_adjust_latency(all_predictors(),
+                          fixed_forecast_date = forecast_date,
+                          method = method
+                          )
+    }
+    r <- r %>% step_epi_naomit() %>%
+    step_training_window(n_recent = args_list$n_training) %>%
     {
-      method <- args_list$adjust_latency
-      if (!is.null(method)) {
-        if (method == "extend_ahead") {
-          step_adjust_latency(.,
-            all_outcomes(),
-            fixed_forecast_date = forecast_date,
-            method = method
-          )
-        } else if (method == "extend_lags") {
-          step_adjust_latency(.,
-            all_predictors(),
-            fixed_forecast_date = forecast_date,
-            method = method
-          )
-        }
+      if (!is.null(args_list$check_enough_data_n)) {
+        check_enough_train_data(
+          .,
+          all_predictors(),
+          !!outcome,
+          n = args_list$check_enough_data_n,
+          epi_keys = args_list$check_enough_data_epi_keys,
+          drop_na = FALSE
+        )
       } else {
         .
       }
-    } %>%
-    step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training)
-
-  if (!is.null(args_list$check_enough_data_n)) {
-    r <- check_enough_train_data(
-      r,
-      all_predictors(),
-      !!outcome,
-      n = args_list$check_enough_data_n,
-      epi_keys = args_list$check_enough_data_epi_keys,
-      drop_na = FALSE
-    )
-  }
-
+    }
 
 
   # --- postprocessor

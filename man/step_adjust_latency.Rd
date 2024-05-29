@@ -10,6 +10,7 @@ step_adjust_latency(
   role = NA,
   trained = FALSE,
   method = c("extend_ahead", "locf", "extend_lags"),
+  epi_keys_checked = c("geo_value"),
   fixed_latency = NULL,
   fixed_forecast_date = NULL,
   default = NA,
@@ -51,13 +52,23 @@ lags are \code{c(0,7,14)} for data that is 3 days latent, the actual lags used
 become \code{c(3,10,17)}.
 }}
 
+\item{epi_keys_checked}{a character vector. A list of keys to group by before
+finding the \code{max_time_value}.  The default value of this is
+\code{c("geo_value")}, but it can be any collection of \code{epi_keys}.  Different
+locations may have different latencies; to produce a forecast at every
+location, we need to use the largest latency across every location; this
+means taking \code{max_time_value} to be the minimum of the \code{max_time_value}s
+for each \code{geo_value} (or whichever collection of keys are specified).  If
+\code{NULL} or an empty character vector, it will take the maximum across all
+values, irrespective of any keys.}
+
 \item{fixed_latency}{either a positive integer, or a labeled positive integer
-vector. Cannot be set at the same time as \code{fixed_asof}. If non-\code{NULL}, the
-amount to offset the ahead or lag by. If a single integer, this is used for
-all columns; if a labeled vector, the labels must correspond to the base
-column names (before lags/aheads).  If \code{NULL}, the latency is the distance
-between the \code{epi_df}'s \code{max_time_value} and either the
-\code{fixed_forecast_date} or the \code{epi_df}'s \code{as_of} field (the default for
+vector. Cannot be set at the same time as \code{fixed_forecast_date}. If
+non-\code{NULL}, the amount to offset the ahead or lag by. If a single integer,
+this is used for all columns; if a labeled vector, the labels must
+correspond to the base column names (before lags/aheads).  If \code{NULL}, the
+latency is the distance between the \code{epi_df}'s \code{max_time_value} and either
+the \code{fixed_forecast_date} or the \code{epi_df}'s \code{as_of} field (the default for
 \code{forecast_date}).}
 
 \item{fixed_forecast_date}{either a date of the same kind used in the

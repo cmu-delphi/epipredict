@@ -7,9 +7,8 @@
 #'   latencies `latency`
 #' @param new_data just what is says
 #' @param keys the variables which are used as keys
-#' @param epi_keys_checked the keys used to group_by to find max_time_values
 #' @keywords internal
-extend_either <- function(new_data, shift_cols, keys, epi_keys_checked) {
+extend_either <- function(new_data, shift_cols, keys) {
   shifted <-
     shift_cols %>%
     select(original_name, latency, new_name) %>%
@@ -187,15 +186,12 @@ set_forecast_date <- function(new_data, info, epi_keys_checked) {
 #' @keywords internal
 get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shift, epi_keys_checked) {
   shift_max_date <- new_data %>%
-    drop_na(all_of(column)) %>%
-    {
-      # null and "" don't work in `group_by`
-      if (!is.null(epi_keys_checked) && epi_keys_checked != "") {
-        group_by(., get(epi_keys_checked))
-      } else {
-        .
-      }
-    } %>%
+    drop_na(all_of(column))
+  # null and "" don't work in `group_by`
+  if (!is.null(epi_keys_checked) && epi_keys_checked != "") {
+    shift_max_date <- shift_max_date %>% group_by(get(epi_keys_checked))
+  }
+  shift_max_date <- shift_max_date %>%
     summarize(time_value = max(time_value)) %>%
     pull(time_value) %>%
     min()
@@ -216,7 +212,7 @@ get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new
     handpicked_as_of <- map(
       this_recipe$steps,
       function(x) {
-        if (inherits(this_recipe$steps[[3]], "step_adjust_latency")) x$as_of
+        if (inherits(x, "step_adjust_latency")) x$as_of
       }
     ) %>% Filter(Negate(is.null), .)
     if (length(handpicked_as_of) > 0) {
