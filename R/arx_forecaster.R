@@ -173,7 +173,8 @@ arx_fcast_epi_workflow <- function(
     ))
     args_list$quantile_levels <- quantile_levels
     trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
-    f <- f %>% layer_quantile_distn(quantile_levels = quantile_levels) %>%
+    f <- f %>%
+      layer_quantile_distn(quantile_levels = quantile_levels) %>%
       layer_point_from_distn()
   } else {
     f <- f %>% layer_residual_quantiles(
