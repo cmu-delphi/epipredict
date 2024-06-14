@@ -340,7 +340,9 @@ we've already built. We can simply set the degree to be the number of ahead
 values to re-run the code without smoothing. 
 ```{r, warning = FALSE}
 baseline_preds <- smooth_fc(
-  edf, degree = 28L, quantiles = several_quantiles, fd = fd)
+  edf,
+  degree = 28L, quantiles = several_quantiles, fd = fd
+)
 ```
 
 And we can produce the corresponding plot to inspect the predictions obtained
@@ -457,9 +459,10 @@ forecasters are shown in a similar style line plot as we chose for MAE:
 smooth_preds_wis_df <- smooth_preds %>%
   left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
   rowwise() %>%
-  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`),
-                                 several_quantiles)
-  ) %>%
+  mutate(wis = wis_dist_quantile(
+    actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`),
+    several_quantiles
+  )) %>%
   group_by(ahead) %>%
   summarise(mean = mean(wis)) %>%
   mutate(type = "smooth")
@@ -467,9 +470,10 @@ smooth_preds_wis_df <- smooth_preds %>%
 baseline_preds_wis_df <- baseline_preds %>%
   left_join(tedf_sub, by = c("geo_value", "target_date")) %>%
   rowwise() %>%
-  mutate(wis = wis_dist_quantile(actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`), 
-                                 several_quantiles)
-  ) %>%
+  mutate(wis = wis_dist_quantile(
+    actual, c(`0.1`, `0.25`, `0.5`, `0.75`, `0.9`),
+    several_quantiles
+  )) %>%
   group_by(ahead) %>%
   summarise(mean = mean(wis)) %>%
   mutate(type = "baseline")
