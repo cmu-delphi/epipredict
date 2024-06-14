@@ -9,12 +9,6 @@
 #' useful in realtime and pseudo-prospective forecasting for data where there is
 #' some delay between the day recorded and when that data is available.
 #'
-#' @param recipe A recipe object. The step will be added to the
-#'  sequence of operations for this recipe.
-#' @param ... One or more selector functions to choose variables for this step.
-#'   See [recipes::selections()] for more details. Typically you will not need
-#'   to set this manually, as the necessary adjustments will be done for the
-#'   predictors and outcome.
 #' @param method a character. Determines the method by which the
 #'   forecast handles latency. The options are:
 #'   - `"extend_ahead"`: Lengthen the ahead so that forecasting from the last
@@ -52,22 +46,12 @@
 #'   `forecast_date` is determined either via the `fixed_latency`, or is set to
 #'   the `epi_df`'s `as_of` value if `fixed_latency` is also `NULL`.
 #' @param role For model terms created by this step, what analysis role should
-#'   they be assigned? `lag` is default a predictor while `ahead` is an outcome.
-#'   It should be correctly inferred and not need setting
-#' @param trained A logical to indicate if the quantities for preprocessing have
-#'   been estimated.
-#' @param columns A character string of column names to be adjusted; these
-#'   should be the original columns, and not the derived ones
+#'   they be assigned? `lag` is a predictor while `ahead` is an outcome.  It
+#'   should be correctly inferred and not need setting
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
-#' @param skip A logical. Should the step be skipped when the
-#'  recipe is baked by [bake()]? While all operations are baked
-#'  when [prep()] is run, some operations may not be able to be
-#'  conducted on new data (e.g. processing the outcome variable(s)).
-#'  Care should be taken when using `skip = TRUE` as it may affect
-#'  the computations for subsequent operations.
-#' @param id A unique identifier for the step
 #' @template step-return
+#' @inheritParams recipes::step_lag
 #'
 #' @details The step assumes that the pipeline has already applied either
 #'   `step_epi_ahead` or `step_epi_lag` depending on the value of `"method"`,
@@ -189,6 +173,7 @@ step_adjust_latency <-
         shift_cols = relevant_shifts,
         default = default,
         keys = epi_keys(recipe),
+        columns = columns,
         skip = skip,
         id = id
       )
@@ -197,7 +182,7 @@ step_adjust_latency <-
 
 step_adjust_latency_new <-
   function(terms, role, trained, forecast_date, latency, shift_cols, time_type, default,
-           keys, method, epi_keys_checked, skip, id) {
+           keys, method, epi_keys_checked, columns, skip, id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
@@ -210,6 +195,7 @@ step_adjust_latency_new <-
       shift_cols = shift_cols,
       default = default,
       keys = keys,
+      columns = columns,
       skip = skip,
       id = id
     )
@@ -220,7 +206,7 @@ step_adjust_latency_new <-
 #' @importFrom glue glue
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   # get the columns used, even if it's all of them
-  terms_used <- x$columns
+  terms_used <- x$terms
   if (length(terms_used) == 0) {
     terms_used <- info %>%
       filter(role == "raw") %>%
@@ -274,6 +260,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     keys = x$keys,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
+    columns = recipes_eval_select(latency_cols$original_name, training, info),
     skip = x$skip,
     id = x$id
   )
@@ -301,14 +288,18 @@ print.step_adjust_latency <-
     if (!is.null(x$forecast_date)) {
       conj <- "with forecast date"
       extra_text <- x$forecast_date
-    } else if (!is.null(x$shift_cols)) {
-      conj <- "with latencies"
-      extra_text <- x$shift_cols
+    } else if (!is.null(x$latency)) {
+      conj <- if (length(x$latency == 1)) {
+        "with latency"
+      } else {
+      "with latencies"
+      }
+      extra_text <- x$latency
     } else {
-      conj <- ""
+      conj <- "with latency"
       extra_text <- "set at train time"
     }
-    print_epi_step(terms, NULL, x$trained, x$method,
+    print_epi_step(terms, terms, x$trained, x$method,
       conjunction = conj,
       extra_text = extra_text
     )

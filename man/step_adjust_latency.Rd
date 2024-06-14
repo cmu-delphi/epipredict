@@ -23,17 +23,15 @@ step_adjust_latency(
 \item{recipe}{A recipe object. The step will be added to the
 sequence of operations for this recipe.}
 
-\item{...}{One or more selector functions to choose variables for this step.
-See \code{\link[recipes:selections]{recipes::selections()}} for more details. Typically you will not need
-to set this manually, as the necessary adjustments will be done for the
-predictors and outcome.}
+\item{...}{One or more selector functions to choose variables
+for this step. See \code{\link[recipes:selections]{selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
-they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.
-It should be correctly inferred and not need setting}
+they be assigned? \code{lag} is a predictor while \code{ahead} is an outcome.  It
+should be correctly inferred and not need setting}
 
-\item{trained}{A logical to indicate if the quantities for preprocessing have
-been estimated.}
+\item{trained}{A logical to indicate if the quantities for
+preprocessing have been estimated.}
 
 \item{method}{a character. Determines the method by which the
 forecast handles latency. The options are:
@@ -81,16 +79,16 @@ the \code{epi_df}'s \code{as_of} value if \code{fixed_latency} is also \code{NUL
 left by leading/lagging (defaults to NA).}
 
 \item{skip}{A logical. Should the step be skipped when the
-recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
-when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
+recipe is baked by \code{\link[recipes:bake]{bake()}}? While all operations are baked
+when \code{\link[recipes:prep]{prep()}} is run, some operations may not be able to be
 conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
 
-\item{columns}{A character string of column names to be adjusted; these
-should be the original columns, and not the derived ones}
+\item{columns}{A character string of the selected variable names. This field
+is a placeholder and will be populated once \code{\link[recipes:prep]{prep()}} is used.}
 
-\item{id}{A unique identifier for the step}
+\item{id}{A character string that is unique to this step to identify it.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
