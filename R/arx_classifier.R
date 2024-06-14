@@ -55,8 +55,11 @@ arx_classifier <- function(
   wf <- arx_class_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- fit(wf, epi_data)
 
-  latency_adjust_fd <- if (is.null(args_list$adjust_latency))
-                         max(epi_data$time_value) else attributes(epi_data)$metadata$as_of
+  latency_adjust_fd <- if (is.null(args_list$adjust_latency)) {
+    max(epi_data$time_value)
+  } else {
+    attributes(epi_data)$metadata$as_of
+  }
   forecast_date <- args_list$forecast_date %||% latency_adjust_fd
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   preds <- forecast(
