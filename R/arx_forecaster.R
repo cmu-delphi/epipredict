@@ -121,8 +121,12 @@ arx_fcast_epi_workflow <- function(
   # forecast_date is first what they set;
   # if they don't and they're not adjusting latency, it defaults to the max time_value
   # if they're adjusting as_of, it defaults to the as_of
-  forecast_date <- args_list$forecast_date %||%
-    if (is.null(args_list$adjust_latency)) max(epi_data$time_value) else attributes(epi_data)$metadata$as_of
+  latency_adjust_fd <- if (is.null(args_list$adjust_latency)) {
+    max(epi_data$time_value)
+  } else {
+    attributes(epi_data)$metadata$as_of
+  }
+  forecast_date <- args_list$forecast_date %||% latency_adjust_fd
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   lags <- arx_lags_validator(predictors, args_list$lags)

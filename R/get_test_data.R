@@ -116,7 +116,7 @@ get_test_data <- function(
     cannot_be_used <- x %>%
       dplyr::filter(forecast_date - time_value <= n_recent) %>%
       dplyr::mutate(fillers = forecast_date - time_value > min_required) %>%
-      dplyr::summarize(
+      dplyr::summarise(
         dplyr::across(
           -tidyselect::any_of(epi_keys(recipe)),
           ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))

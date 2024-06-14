@@ -115,7 +115,7 @@ slather.layer_residual_quantiles <-
     }
 
     r <- r %>%
-      dplyr::summarize(
+      dplyr::summarise(
         dstn = list(quantile(
           c(.resid, s * .resid),
           probs = object$quantile_levels, na.rm = TRUE

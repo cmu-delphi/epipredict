@@ -1,10 +1,13 @@
-#' Adapt the pipeline to latency in the data
+#' Adapt the model to latent data
 #'
-#' In the standard case, the pipeline assumes that the last observation is also
-#' the day from which the forecast is being made. `step_adjust_latency` uses the
-#' `as_of` date of the `epi_df` as the `forecast_date`. This is most useful in
-#' realtime and pseudo-prospective forecasting for data where there is some
-#' delay between the day recorded and when that data is available.
+#' In the standard case, the arx models assume that the last observation is also
+#' the day from which the forecast is being made. But if the data has latency,
+#' then you may wish to adjust the predictors (lags) and/or the outcome (ahead)
+#' to compensate. This allows the model to create bleeding-edge forecasts using
+#' the lags actually observed rather than anticipated. `step_adjust_latency`
+#' uses the `as_of` date of the `epi_df` as the `forecast_date`. This is most
+#' useful in realtime and pseudo-prospective forecasting for data where there is
+#' some delay between the day recorded and when that data is available.
 #'
 #' @param recipe A recipe object. The step will be added to the
 #'  sequence of operations for this recipe.
@@ -67,8 +70,10 @@
 #' @template step-return
 #'
 #' @details The step assumes that the pipeline has already applied either
-#'   `step_epi_ahead` or `step_epi_lag` depending on the value of
-#'   `"method"`, and that `step_epi_naomit` has NOT been run.
+#'   `step_epi_ahead` or `step_epi_lag` depending on the value of `"method"`,
+#'   and that `step_epi_naomit` has NOT been run.  By default, the latency will
+#'   be determined using the arguments below, but can be set explicitly using
+#'   either `fixed_latency` or `fixed_forecast_date`.
 #'
 #' The `prefix` and `id` arguments are unchangeable to ensure that the code runs
 #' properly and to avoid inconsistency with naming. For `step_epi_ahead`, they
@@ -97,6 +102,7 @@
 #' jhu_fit
 #'
 #' @importFrom recipes detect_step
+#' @importFrom rlang enquos
 step_adjust_latency <-
   function(recipe,
            ...,
@@ -113,7 +119,7 @@ step_adjust_latency <-
            default = NA,
            skip = FALSE,
            columns = NULL,
-           id = recipes::rand_id("epi_lag")) {
+           id = recipes::rand_id("adjust_latency")) {
     arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
       cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
@@ -173,7 +179,7 @@ step_adjust_latency <-
     recipes::add_step(
       recipe,
       step_adjust_latency_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
         method = method,
         epi_keys_checked = epi_keys_checked,
@@ -273,13 +279,6 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   )
 }
 
-#' various ways of handling differences between the `as_of` date and the maximum
-#' time value
-#' @description
-#' adjust the ahead so that we will be predicting `ahead` days after the `as_of`
-#'   date, rather than relative to the last day of data
-#' @param new_data assumes that this already has lag/ahead columns that we need
-#'   to adjust
 #' @importFrom dplyr %>% pull
 #' @export
 bake.step_adjust_latency <- function(object, new_data, ...) {
