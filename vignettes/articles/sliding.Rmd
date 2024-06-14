@@ -27,12 +27,12 @@ library(purrr)
 A key function from the epiprocess package is `epi_slide()`, which allows the
 user to apply a function or formula-based computation over variables in an
 `epi_df` over a running window of `n` time steps (see the following `epiprocess`
-vignette to go over the basics of the function: ["Slide a computation over
-signal values"](https://cmu-delphi.github.io/epiprocess/articles/slide.html)).
+vignette to go over the basics of the function: 
+["Slide a computation over signal values"](https://cmu-delphi.github.io/epiprocess/articles/slide.html)).
 The equivalent sliding method for an `epi_archive` object can be called by using
 the wrapper function `epix_slide()` (refer to the following vignette for the
-basics of the function: ["Work with archive objects and data
-revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html)). The
+basics of the function: 
+["Work with archive objects and data revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html)). The
 key difference from `epi_slide()` is that it performs version-aware
 computations. That is, the function only uses data that would have been
 available as of time t for that reference time.
@@ -171,7 +171,9 @@ in such forecasting. Including such factors as well as making enhancements such
 as correcting for outliers are some improvements one could make to this simple
 model.[^1]
 
-[^1]: Note that, despite the above caveats, simple models like this tend to out-perform many far more complicated models in the online Covid forecasting due to those models high variance predictions.
+[^1]: Note that, despite the above caveats, simple models like this tend to
+out-perform many far more complicated models in the online Covid forecasting due
+to those models high variance predictions.
 
 ### Example using case data from Canada
 
@@ -327,7 +329,8 @@ fc <- bind_rows(
 ) %>% pivot_quantiles_wider(fc_.pred_distn)
 ```
 
-Now we can plot the results on top of the latest case rates. As before, we will only display and focus on the results for FL and CA for simplicity.
+Now we can plot the results on top of the latest case rates. As before, we will
+only display and focus on the results for FL and CA for simplicity.
 
 ```{r plot-ar-asof, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
 fc_cafl <- fc %>% filter(geo_value %in% c("ca", "fl"))
