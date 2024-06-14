@@ -225,4 +225,24 @@ test_that("epi_adjust_latency correctly extends the lags", {
 
 test_that("`step_adjust_latency` only allows one instance of itself", {})
 
+test_that("`step_adjust_latency` only uses the columns specified in the `...`", {
+  r5 <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead) %>%
+    step_adjust_latency(case_rate, method = "extend_lags")
+
+  fit5 <- slm_fit(r5, data = real_x)
+  expect_equal(names(fit5$fit$fit$fit$coefficients), c("(Intercept)", "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate", "lag_6_case_rate", "lag_10_case_rate"))
+})
+
 test_that("setting fixed_* works for `step_adjust_latency`", {})
+
+test_that("printing step_adjust_latency results in expected output", {
+  r5 <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead) %>%
+    step_adjust_latency(case_rate, method = "extend_lags")
+  expect_snapshot(r5)
+})
