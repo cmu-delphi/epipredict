@@ -292,7 +292,7 @@ print.step_adjust_latency <-
       conj <- if (length(x$latency == 1)) {
         "with latency"
       } else {
-      "with latencies"
+        "with latencies"
       }
       extra_text <- x$latency
     } else {
