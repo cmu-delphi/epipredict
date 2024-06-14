@@ -111,11 +111,11 @@ get_test_data <- function(
   # Now, fill forward missing data if requested
   if (fill_locf) {
     cannot_be_used <- x %>%
-      filter(forecast_date - time_value <= n_recent) %>%
-      mutate(fillers = forecast_date - time_value > min_required) %>%
-      summarize(
-        across(
-          -any_of(key_colnames(recipe)),
+      dplyr::filter(forecast_date - time_value <= n_recent) %>%
+      dplyr::mutate(fillers = forecast_date - time_value > min_required) %>%
+      dplyr::summarise(
+        dplyr::across(
+          -tidyselect::any_of(epi_keys(recipe)),
           ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))
         ),
         .groups = "drop"
