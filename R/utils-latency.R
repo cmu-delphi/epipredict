@@ -77,7 +77,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #'   `effective_shift` (shift+latency), and `new_name` (adjusted names with the
 #'   effective_shift)
 #' @keywords internal
-#' @importFrom dplyr rowwise %>%
+#' @importFrom dplyr rowwise left_join join_by
 get_latent_column_tibble <- function(
     shift_cols, new_data, forecast_date, latency,
     sign_shift, info, epi_keys_checked, call = caller_env()) {
@@ -121,6 +121,7 @@ get_latent_column_tibble <- function(
 
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
 #' @keywords internal
+#' @importFrom dplyr select
 set_forecast_date <- function(new_data, info, epi_keys_checked) {
   original_columns <- info %>%
     filter(source == "original") %>%
@@ -138,16 +139,13 @@ set_forecast_date <- function(new_data, info, epi_keys_checked) {
   # get the minimum value across the checked epi_keys' maximum time values
   max_time <- new_data %>%
     select(all_of(original_columns)) %>%
-    drop_na() %>%
-    {
-      # null and "" don't work in `group_by`
-      if (!is.null(epi_keys_checked) && epi_keys_checked != "") {
-        group_by(., get(epi_keys_checked))
-      } else {
-        .
-      }
-    } %>%
-    summarize(time_value = max(time_value)) %>%
+    drop_na()
+  # null and "" don't work in `group_by`
+  if (!is.null(epi_keys_checked) && (epi_keys_checked != "")) {
+    max_time <- max_time %>% group_by(get(epi_keys_checked))
+  }
+  max_time <- max_time %>%
+    summarise(time_value = max(time_value)) %>%
     pull(time_value) %>%
     min()
   forecast_date <- attributes(new_data)$metadata$as_of
@@ -174,7 +172,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked) {
     ))
   }
   # TODO cover the rest of the possible types for as_of and max_time...
-  if (class(max_time) == "Date") {
+  if (inherits(max_time, "Date")) {
     forecast_date <- as.Date(forecast_date)
   }
   return(forecast_date)
@@ -192,7 +190,7 @@ get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shif
     shift_max_date <- shift_max_date %>% group_by(get(epi_keys_checked))
   }
   shift_max_date <- shift_max_date %>%
-    summarize(time_value = max(time_value)) %>%
+    summarise(time_value = max(time_value)) %>%
     pull(time_value) %>%
     min()
   return(as.integer(sign_shift * (as.Date(forecast_date) - shift_max_date) + shift_amount))
@@ -201,6 +199,13 @@ get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shif
 
 
 #' get the target date while in a layer
+#' @param this_recipe the recipe to check for `step_adjust_latency`
+#' @param workflow_max_time_value the `max_time` value coming out of the fit
+#'   workflow (this will be the maximal time value in a potentially different
+#'   dataset)
+#' @param new_data the data we're currently working with, from which we'll take
+#'   a potentially different max_time_value
+#' @keywords internal
 get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new_data) {
   max_time_value <- max(
     workflow_max_time_value,
@@ -209,14 +214,14 @@ get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new
   )
   if (this_recipe %>% recipes::detect_step("adjust_latency")) {
     # get the as_of in an `adjust_latency` step, regardless of where
-    handpicked_as_of <- map(
+    handpicked_forecast_date <- map(
       this_recipe$steps,
       function(x) {
-        if (inherits(x, "step_adjust_latency")) x$as_of
+        if (inherits(x, "step_adjust_latency")) x$forecast_date
       }
     ) %>% Filter(Negate(is.null), .)
-    if (length(handpicked_as_of) > 0) {
-      max_time_value <- handpicked_as_of[[1]]
+    if (length(handpicked_forecast_date) > 0) {
+      max_time_value <- handpicked_forecast_date[[1]]
     } else {
       # if we haven't chosen one, use either the max_time_value or the as_of
       max_time_value <- max(

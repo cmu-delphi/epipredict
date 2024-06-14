@@ -423,7 +423,7 @@ res_err4 <- res_all4 %>%
 knitr::kable(
   res_err4 %>%
     group_by(model, lead) %>%
-    summarize(err = median(err), n = length(unique(forecast_date))) %>%
+    summarise(err = median(err), n = length(unique(forecast_date))) %>%
     arrange(lead) %>% ungroup() %>%
     rename(
       "Model" = model, "Median scaled error" = err,
@@ -472,7 +472,7 @@ res_dif4 <- res_all4 %>%
 knitr::kable(
   res_dif4 %>%
     group_by(model, lead) %>%
-    summarize(p = binom.test(
+    summarise(p = binom.test(
       x = sum(diff > 0, na.rm = TRUE),
       n = n(), alt = "greater"
     )$p.val) %>%
@@ -501,7 +501,7 @@ ggplot_colors <- c("#FC4E07", "#00AFBB", "#E7B800")
 
 ggplot(res_dif4 %>%
   group_by(model, lead, forecast_date) %>%
-  summarize(p = binom.test(
+  summarise(p = binom.test(
     x = sum(diff > 0, na.rm = TRUE),
     n = n(), alt = "greater"
   )$p.val) %>%
@@ -649,7 +649,7 @@ knitr::kable(
   res_err2 %>%
     select(-ends_with("diff")) %>%
     group_by(model, lead) %>%
-    summarize(err = median(err), n = length(unique(forecast_date))) %>%
+    summarise(err = median(err), n = length(unique(forecast_date))) %>%
     arrange(lead) %>% ungroup() %>%
     rename(
       "Model" = model, "Median scaled error" = err,
@@ -684,7 +684,7 @@ to incorporate during periods of time where forecasting is easier.
 ggplot(
   res_err2 %>%
     group_by(model, lead, forecast_date) %>%
-    summarize(err = median(err)) %>% ungroup(),
+    summarise(err = median(err)) %>% ungroup(),
   aes(x = forecast_date, y = err)
 ) +
   geom_line(aes(color = model)) +
@@ -722,7 +722,7 @@ res_dif2 <- res_all2 %>%
 knitr::kable(
   res_dif2 %>%
     group_by(model, lead) %>%
-    summarize(p = binom.test(
+    summarise(p = binom.test(
       x = sum(diff > 0, na.rm = TRUE),
       n = n(), alt = "greater"
     )$p.val) %>%
@@ -739,7 +739,7 @@ quite small.
 ```{r}
 ggplot(res_dif2 %>%
   group_by(model, lead, forecast_date) %>%
-  summarize(p = binom.test(
+  summarise(p = binom.test(
     x = sum(diff > 0, na.rm = TRUE),
     n = n(), alt = "greater"
   )$p.val) %>%
@@ -802,7 +802,7 @@ err_by_lead <- res %>%
   ) %>%
   mutate(model = factor(model, labels = model_names[1:2])) %>%
   group_by(model, lead) %>%
-  summarize(err = median(err)) %>%
+  summarise(err = median(err)) %>%
   ungroup()
 
 ggplot(err_by_lead, aes(x = lead, y = err)) +
