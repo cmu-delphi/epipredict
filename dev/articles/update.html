@@ -324,8 +324,9 @@ that we ensure that we retain the <code>epi_workflow</code> class.</p>
 and then inspect the class of <code>wf</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class before</span></span>
-<span><span class="co">#&gt; [1] "epi_workflow" "workflow"</span></span>
-<span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/add_recipe.html" class="external-link">remove_recipe</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class after removing recipe using workflows function</span></span>
+<span><span class="co">#&gt; [1] "epi_workflow" "workflow"</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/add_recipe.html" class="external-link">remove_recipe</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class after removing recipe using workflows function</span></span>
 <span><span class="co">#&gt; [1] "workflow"</span></span></code></pre></div>
 <p>We can observe that <code>wf</code> is no longer an
 <code>epi_workflow</code> and a <code>workflow</code>. It has been
@@ -339,7 +340,7 @@ be used from the <a href="https://github.com/cmu-delphi/epipredict/" class="exte
 <code>epi_recipe</code> if we remove it, note that we did not actually
 store that change to <code>wf</code>. Hence, our
 <code>epi_workflow</code> remains unchanged.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
@@ -374,7 +375,7 @@ predictions were made using the old recipe, then they should be
 re-generated using the version <code>epi_workflow</code> that contains
 the updated recipe. We can use <code><a href="../reference/add_model.html">Update_model()</a></code> to replace
 the model used in <code>wf</code>, and then fit as before:</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit linear model</span></span>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span><span class="va">wf</span></span>
@@ -419,7 +420,7 @@ the model used in <code>wf</code>, and then fit as before:</p>
 post-processing predictions. In our initial frosting object,
 <code>f</code>, we simply implement predictions on the fitted
 <code>epi_workflow</code>:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -444,7 +445,7 @@ include the forecast and target dates as separate columns.</p>
 <p>To update the <code>frosting</code> while leaving the remainder of
 the <code>epi_workflow</code> the same, we can use the
 <code><a href="../reference/add_frosting.html">update_frosting()</a></code> function as follows:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Update frosting in a workflow and predict</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -469,7 +470,7 @@ the <code>epi_workflow</code> the same, we can use the
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31 0.352  2021-12-31    2022-01-07</span></span></code></pre></div>
 <p>Internally, this works by removing the old frosting followed by
 adding the new frosting, just like when we update a recipe or model.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">update_frosting</span></span>
 <span><span class="co">#&gt; function (x, frosting, ...) </span></span>
 <span><span class="co">#&gt; {</span></span>
@@ -477,12 +478,12 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55676c635450&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55ff35081240&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
 from the workflow and make predictions as follows:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf3</span> <span class="op">&lt;-</span> <span class="va">wf2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_frosting.html">remove_frosting</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">wf3</span><span class="op">)</span></span>
 <span><span class="va">p3</span></span>
@@ -518,7 +519,7 @@ the parameter name and update value must be inputted as
 in <code>wf</code> recipe by setting <code>which_step</code> to the step
 number in the order of operations, which can be obtained by inspecting
 <code>r2</code> or the tidy summary of it:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="co"># step_epi_ahead is the third step in r2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
@@ -534,8 +535,9 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; 2. Lagging: <span style="color: #0000BB;">case_rate</span> by <span style="color: #0000BB;">0, 1, 2, 3, 4, 5, 6, 7, 14</span></span></span>
 <span><span class="co">#&gt; 3. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span></span>
 <span><span class="co">#&gt; 4. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span></span>
-<span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
+<span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
@@ -543,13 +545,14 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_8HfdV  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 step      epi_ahead FALSE   FALSE epi_ahead_HIyvQ</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 step      naomit    FALSE   FALSE naomit_vjF0H   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_gF0fi</span></span>
-<span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_gF0fi</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="fl">3</span>, ahead <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></code></pre></div>
 <p>Alternatively, we may adjust that step by name by specifying the full
 name of the step, <code>step_epi_ahead</code>, in
 <code>which_step</code>:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="st">"step_epi_ahead"</span>, ahead <span class="op">=</span> <span class="fl">14</span><span class="op">)</span> <span class="co"># not overwrite r2 because same result</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
@@ -591,7 +594,7 @@ the steps. For example, in <code>r2</code> there are two steps named
 and the second where we lag the case rate. If we want to modify the lags
 for the <code>case_rate</code> variable, we would specify the step
 number of 2 in <code>which_step</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
@@ -614,7 +617,7 @@ number of 2 in <code>which_step</code>.</p>
 recipe in a workflow. The main difference is that we would not input
 <code>wf</code> as the first argument to
 <code><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe()</a></code> but rather <code>r2</code>.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span><span class="va">r2</span>, which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span> <span class="co"># should be same result as above</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
@@ -639,7 +642,7 @@ transfer over to <code>wf</code>. We would need to modify the recipe in
 <code>wf</code>) or update the recipe in <code>wf</code> with a new
 <code>epi_recipe</code> that has undergone the adjustment (using
 <code><a href="../reference/add_epi_recipe.html">update_epi_recipe()</a></code>):</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span><span class="va">r2</span>, which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">21</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
@@ -673,7 +676,7 @@ update value must be inputted as <code>...</code>.</p>
 <p>Let’s work with the frosting object directly instead of working on it
 through the <code>epi_workflow</code> in a simple, illustrative example.
 Recall frosting <code>f2</code> which has the following layers:</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
@@ -688,7 +691,7 @@ threshold to 10 instead of <code>Inf</code>. We can adjust this layer in
 frosting object by setting <code>which_layer</code> to the layer number,
 3 (which can be found by inspecting <code>f2</code> or
 <code>tidy(f2)</code>):</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="va">f2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_frosting.html">adjust_frosting</a></span><span class="op">(</span>which_layer <span class="op">=</span> <span class="fl">2</span>, upper <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">f2</span></span>
@@ -703,7 +706,7 @@ frosting object by setting <code>which_layer</code> to the layer number,
 <p>Alternatively, we may adjust that layer by specifying its full name,
 <code>layer_threshold</code>, in <code>which_layer</code>, to achieve
 the same result:</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_frosting.html">adjust_frosting</a></span><span class="op">(</span>which_layer <span class="op">=</span> <span class="st">"layer_threshold"</span>, upper <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># not overwrite f2 because same result</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
@@ -725,7 +728,7 @@ recipe including the operation number, the operation class (either
 whether <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep()</a></code> has been used to estimate the operation, a
 boolean value to indicate whether the step is applied when
 <code><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake()</a></code> is called, and the id of the operation.</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">r2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
@@ -738,7 +741,7 @@ boolean value to indicate whether the step is applied when
 <p>In contrast, printing the <code>epi_recipe</code> object shows the
 inputs (number and roles of the variables) as well as the ordering and a
 brief written summary of the operations:</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
@@ -763,14 +766,15 @@ the output specific to a recipe such as the roles in the recipe output
 and the trained and skip columns in tidy tibble for it. Thus, the output
 of a frosting object and the tidy tibble are simplified in comparison to
 those for an <code>epi_recipe</code>.</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Layers</span></span>
-<span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span>
-<span></span>
+<span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">#&gt;   number operation type    id                   </span></span>
