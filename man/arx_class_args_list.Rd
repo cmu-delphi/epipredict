@@ -34,11 +34,14 @@ date for which forecasts should be produced.}
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date on which the forecast is created.
-The default \code{NULL} will attempt to determine this automatically.}
+\item{forecast_date}{Date. The date on which the forecast is created.  The
+default \code{NULL} will attempt to determine this automatically either as the
+max time value if there is no latency adjustment, or as the \code{as_of} of
+\code{epi_data} if \code{adjust_latency} is non-\code{NULL}.}
 
-\item{target_date}{Date. The date for which the forecast is intended.
-The default \code{NULL} will attempt to determine this automatically.}
+\item{target_date}{Date. The date for which the forecast is intended. The
+default \code{NULL} will attempt to determine this automatically as
+\code{forecast_date + ahead}.}
 
 \item{outcome_transform}{Scalar character. Whether the outcome should
 be created using growth rates (as the predictors are) or lagged

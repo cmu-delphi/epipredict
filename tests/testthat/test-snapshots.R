@@ -68,6 +68,32 @@ test_that("arx_forecaster snapshots", {
     )
   )
   expect_snapshot_tibble(arx2$predictions)
+  attributes(train_data)$metadata$as_of <- max(train_data$time_value) + 5
+  arx3 <- arx_forecaster(
+    train_data,
+    "death_rate_7d_av",
+    c("death_rate_7d_av", "case_rate_7d_av"),
+    args_list = arx_args_list(
+      ahead = 1L,
+      adjust_latency = "extend_ahead"
+    )
+  )
+  # consistency check
+  expect_snapshot_tibble(arx3$predictions)
+  expect_equal(
+    arx3$predictions$target_date,
+    rep(attributes(train_data)$metadata$as_of + 1, times = 6)
+  )
+  expect_equal(
+    arx3$predictions$target_date,
+    arx2$predictions$target_date + 5
+  )
+  expect_equal(
+    arx3$predictions$forecast_date,
+    arx2$predictions$forecast_date + 5
+  )
+  # not the same predictions
+  expect_false(all(arx2$predictions == arx3$predictions))
 })
 
 test_that("arx_classifier snapshots", {

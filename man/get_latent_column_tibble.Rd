@@ -8,10 +8,11 @@ been changed}
 get_latent_column_tibble(
   shift_cols,
   new_data,
-  as_of,
+  forecast_date,
   latency,
   sign_shift,
   info,
+  epi_keys_checked,
   call = caller_env()
 )
 }
@@ -20,16 +21,16 @@ get_latent_column_tibble(
 
 \item{new_data}{the data transformed so far}
 
-\item{as_of}{the forecast date}
+\item{forecast_date}{the forecast date}
 
-\item{latency}{\code{NULL}, int, or vector, as described in \code{step_eip_latency}}
+\item{latency}{\code{NULL}, int, or vector, as described in \code{step_epi_latency}}
 
 \item{sign_shift}{-1 if ahead, 1 if lag}
 }
 \value{
 a tibble with columns \code{column} (relevant shifted names), \code{shift} (the
 amount that one is shifted), \code{latency} (original columns difference between
-max_time_value and as_of (on a per-initial column basis)),
+the max \code{time_value} and \code{forecast_date} (on a per-initial column basis)),
 \code{effective_shift} (shift+latency), and \code{new_name} (adjusted names with the
 effective_shift)
 }

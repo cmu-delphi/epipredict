@@ -6,7 +6,7 @@ x <- tibble(
   case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
   death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
 ) %>%
-  as_epi_df()
+  as_epi_df(as_of = as.POSIXct("2024-05-17"))
 max_time <- max(x$time_value)
 class(attributes(x)$metadata$as_of)
 as_of <- attributes(x)$metadata$as_of
@@ -25,6 +25,15 @@ slm_fit <- function(recipe, data = x) {
     fit(data = data)
 }
 
+
+# making a toy dataset with lag between geo_values
+x_lagged <- x
+x_lagged$time_value <- x$time_value - 1
+x_lagged$geo_value <- "other"
+x_lagged <- add_row(x, x_lagged)
+x_lagged
+attributes(x_lagged)$metadata$as_of <- testing_as_of
+
 test_that("epi_adjust_latency correctly extends the lags", {
   r5 <- epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
@@ -34,7 +43,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1024"), class = "simpleError")
+  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit5 <- slm_fit(r5, data = real_x)
@@ -158,3 +167,82 @@ test_that("epi_adjust_latency warns against removing NA's beforehand", {
   )
 })
 # todo check that epi_adjust_latency errors for nonsense `as_of`'s
+
+
+
+# todo make sure that `epi_keys_checked` works correctly for extra epi_keys
+test_that("epi_adjust_latency correctly extends the lags", {
+  r5 <- epi_recipe(x_lagged) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead) %>%
+    step_adjust_latency(method = "extend_lags", epi_keys_checked = NULL)
+  # the as_of on x is today's date, which is >970 days in the future
+  # also, there's no data >970 days in the past, so it gets an error trying to
+  # fit on no data
+  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
+
+  # now trying with the as_of a reasonable distance in the future
+  fit5 <- slm_fit(r5, data = x_lagged)
+  expect_equal(
+    names(fit5$pre$mold$predictors),
+    c(
+      "lag_5_death_rate", "lag_11_death_rate", "lag_16_death_rate",
+      "lag_6_case_rate", "lag_10_case_rate"
+    )
+  )
+  latest <- get_test_data(r5, x_lagged)
+  latest$time_value %>% unique()
+  pred <- predict(fit5, latest)
+  point_pred <- pred %>% filter(!is.na(.pred))
+  expect_equal(nrow(point_pred), 1)
+  expect_equal(point_pred$time_value, as.Date(testing_as_of))
+
+  expect_equal(
+    names(fit5$pre$mold$outcomes),
+    glue::glue("ahead_{ahead}_death_rate")
+  )
+  latest <- get_test_data(r5, x)
+  pred <- predict(fit5, latest)
+  actual_solutions <- pred %>% filter(!is.na(.pred))
+  expect_equal(actual_solutions$time_value, testing_as_of)
+
+  # should have four predictors, including the intercept
+  expect_equal(length(fit5$fit$fit$fit$coefficients), 6)
+
+  # result should be equivalent to just immediately doing the adjusted lags by
+  # hand
+  hand_adjusted <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(5, 11, 16)) %>%
+    step_epi_lag(case_rate, lag = c(6, 10)) %>%
+    step_epi_ahead(death_rate, ahead = ahead)
+  fit_hand_adj <- slm_fit(hand_adjusted, data = real_x)
+  expect_equal(
+    fit5$fit$fit$fit$coefficients,
+    fit_hand_adj$fit$fit$fit$coefficients
+  )
+})
+
+test_that("`step_adjust_latency` only allows one instance of itself", {})
+
+test_that("`step_adjust_latency` only uses the columns specified in the `...`", {
+  r5 <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead) %>%
+    step_adjust_latency(case_rate, method = "extend_lags")
+
+  fit5 <- slm_fit(r5, data = real_x)
+  expect_equal(names(fit5$fit$fit$fit$coefficients), c("(Intercept)", "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate", "lag_6_case_rate", "lag_10_case_rate"))
+})
+
+test_that("setting fixed_* works for `step_adjust_latency`", {})
+
+test_that("printing step_adjust_latency results in expected output", {
+  r5 <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead) %>%
+    step_adjust_latency(case_rate, method = "extend_lags")
+  expect_snapshot(r5)
+})

@@ -1,12 +1,13 @@
-# TODO adapt this to latency
 #' Postprocessing step to add the forecast date
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
-#' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
-#' when the forecast date is left unspecified, it is set to the maximum time
-#' value from the data used in pre-processing, fitting the model, and
-#' postprocessing.
+#'   For most cases, this should be specified in the form "yyyy-mm-dd". Note
+#'   that when the forecast date is left unspecified, it is set to one of two
+#'   values.  If there is a `step_adjust_latency` step present, it uses the
+#'   `forecast_date` as set in that function. Otherwise, it uses the maximum
+#'   `time_value` across the data used for pre-processing, fitting the model,
+#'   and postprocessing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -86,17 +87,14 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 }
 
 #' @export
+#' @importFrom workflows extract_preprocessor
 slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
-  if (is.null(object$forecast_date)) {
-    max_time_value <- max(
-      workflows::extract_preprocessor(workflow)$max_time_value,
+  forecast_date <- object$forecast_date %||%
+    get_forecast_date_in_layer(
+      extract_preprocessor(workflow),
       workflow$fit$meta$max_time_value,
-      max(new_data$time_value)
+      new_data
     )
-    forecast_date <- max_time_value
-  } else {
-    forecast_date <- object$forecast_date
-  }
 
   expected_time_type <- attr(
     workflows::extract_preprocessor(workflow)$template, "metadata"

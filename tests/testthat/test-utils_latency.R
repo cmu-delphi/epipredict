@@ -1,13 +1,16 @@
-time_values <- as.Date("2021-01-01") + 0:199
+time_values <- as.Date("2021-01-01") + +floor(seq(0, 100, by = .5))[1:200]
 as_of <- max(time_values) + 5
 max_time <- max(time_values)
 old_data <- tibble(
-  geo_value = rep("place", 200),
-  time_value = as.Date("2021-01-01") + 0:199,
+  geo_value = rep(c("place1", "place2"), 100),
+  time_value = as.Date("2021-01-01") + +floor(seq(0, 100, by = .5))[1:200],
   case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
   tmp_death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
 ) %>%
+  # place2 is slightly more recent than place1
+  mutate(time_value = as.Date(ifelse(geo_value == "place2", time_value + 1, time_value))) %>%
   as_epi_df(as_of = as_of)
+old_data
 keys <- c("time_value", "geo_value")
 old_data <- old_data %>%
   full_join(epi_shift_single(
@@ -54,17 +57,19 @@ test_that("construct_shift_tibble constructs the right tibble", {
 })
 
 test_that("get_latency works", {
-  expect_equal(get_latency(modified_data, as_of, "lag_7_death_rate", 7, 1), 4)
-  expect_equal(get_latency(modified_data, as_of, "lag_3_case_rate", 3, 1), 5)
+  expect_equal(get_latency(modified_data, as_of, "lag_7_death_rate", 7, 1, "geo_value"), 4)
+  expect_equal(get_latency(modified_data, as_of, "lag_3_case_rate", 3, 1, "geo_value"), 5)
   # get_latency does't check the shift_amount
-  expect_equal(get_latency(modified_data, as_of, "lag_3_case_rate", 4, 1), 6)
+  expect_equal(get_latency(modified_data, as_of, "lag_3_case_rate", 4, 1, "geo_value"), 6)
   # ahead works correctly
-  expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, -1), -5)
+  expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, -1, "geo_value"), -5)
   # setting the wrong sign doubles the shift and gets the sign wrong
-  expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, 1), 5 + 4 * 2)
+  expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, 1, "geo_value"), 5 + 4 * 2)
+  # minimizing over everything decreases the latency
+  expect_equal(get_latency(modified_data, as_of, "lag_7_death_rate", 7, 1, NULL), 3)
 })
 
-test_that("get_latency infers max_time to be the minimum `max time` across the columns", {})
+test_that("get_latency infers max_time to be the minimum `max time` across the epi_keys", {})
 
 test_that("get_asof works", {
   info <- tribble(
@@ -75,24 +80,29 @@ test_that("get_asof works", {
     "death_rate", "numeric", "raw", "original",
     "not_real", "numeric", "predictor", "derived"
   )
-  expect_equal(set_asof(modified_data, info), as_of)
+  expect_equal(set_forecast_date(modified_data, info, "geo_value"), as_of)
+  expect_equal(set_forecast_date(modified_data, info, ""), as_of)
+  expect_equal(set_forecast_date(modified_data, info, NULL), as_of)
 })
 
 test_that("get_latent_column_tibble infers latency and works correctly", {
   info <- tibble(variable = c("lag_3_case_rate", "lag_7_death_rate", "ahead_4_case_rate"), type = "numeric", role = c(rep("predictor", 2), "outcome"), source = "derived")
 
   case_lag <- get_latent_column_tibble(
-    shift_cols[1, ], modified_data, as_of, NULL, 1, info
+    shift_cols[1, ], modified_data, as_of, NULL, 1, info,
+    epi_keys_checked = "geo_value"
   )
   expect_equal(case_lag, all_shift_cols[1, ])
 
   death_lag <- get_latent_column_tibble(
-    shift_cols[2, ], modified_data, as_of, NULL, 1, info
+    shift_cols[2, ], modified_data, as_of, NULL, 1, info,
+    epi_keys_checked = "geo_value"
   )
   expect_equal(death_lag, all_shift_cols[2, ])
 
   both_lag <- get_latent_column_tibble(
-    shift_cols, modified_data, as_of, NULL, 1, info
+    shift_cols, modified_data, as_of, NULL, 1, info,
+    epi_keys_checked = "geo_value"
   )
   expect_equal(both_lag, all_shift_cols[1:2, ])
 })
@@ -123,7 +133,7 @@ test_that("get_latent_column_tibble assigns given latencies", {
 
   ahead_shift_cols <- construct_shift_tibble(c("case_rate"), test_recipe, "step_epi_ahead", "ahead")
   case_ahead <- get_latent_column_tibble(
-    ahead_shift_cols, modified_data, as_of, NULL, -1, info
+    ahead_shift_cols, modified_data, as_of, NULL, -1, info, "geo_value"
   )
   expect_equal(case_ahead, all_shift_cols[3, ])
 })
@@ -156,11 +166,52 @@ test_that("extend_either works", {
       epi_shift_single(old_data, "case_rate", -9, "ahead_9_case_rate", keys),
       by = keys
     ) %>%
-    arrange(time_value)
+    dplyr::bind_rows(tibble(
+      geo_value = c("place1", "place2"),
+      time_value = as.Date(c("2021-04-23", "2021-04-24")), case_rate = c(NA, NA), death_rate = c(NA, NA),
+      lag_8_case_rate = c(NA, NA), lag_11_death_rate = c(NA, NA), ahead_9_case_rate = c(NA, NA)
+    )) %>%
+    arrange(time_value, geo_value)
   expect_equal(
-    extend_either(modified_data, all_shift_cols, keys) %>% arrange(time_value),
+    extend_either(modified_data, all_shift_cols, keys) %>% arrange(time_value, geo_value),
     expected_post_shift
   )
+  extended <- extend_either(modified_data, all_shift_cols, keys) %>% arrange(time_value, geo_value)
+})
+
+
+
+
+
+time_range <- as.Date("2021-01-01") + 0:199
+x_adjust_ahead <- tibble(
+  geo_value = rep("place", 200),
+  time_value = time_range,
+  case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
+  death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
+) %>%
+  as_epi_df(as_of = max(time_range) + 3)
+# confirm the delay is right
+
+test_that("adjust_latency extend_ahead works", {
+  # testing that POSIXct converts correctly (as well as basic types)
+  expect_equal(
+    attributes(x_adjust_ahead)$metadata$as_of - max(x_adjust_ahead$time_value),
+    as.difftime(3, units = "days")
+  )
+  object <- list(latency_adjustment = "extend_ahead", ahead = 7)
+  expect_no_error(adjusted_ahead <- adjust_latency(object, x_adjust_ahead))
+  expect_type(adjusted_ahead, "integer")
+  expect_equal(adjusted_ahead, 3 + 7)
+})
+
+test_that("extend_ahead warns in case of extreme adjustment", {
+  # warns if the ahead is relatively small
+  attributes(x_adjust_ahead)$metadata$as_of <-
+    max(x_adjust_ahead$time_value) + 100
+  object <- list(latency_adjustment = "extend_ahead", ahead = 7)
+  attributes(x_adjust_ahead)$metadata$time_type
+  testthat::expect_warning(adjust_latency(object, x_adjust_ahead), regexp = "The ahead has been adjusted by 100")
 })
 
 # todo case where somehow columns of different roles are selected

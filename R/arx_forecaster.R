@@ -1,4 +1,3 @@
-# TODO add latency to default forecaster
 #' Direct autoregressive forecaster with covariates
 #'
 #' This is an autoregressive forecasting model for
@@ -54,7 +53,7 @@ arx_forecaster <- function(
 
   preds <- forecast(
     wf,
-    fill_locf = TRUE,
+    fill_locf = is.null(args_list$adjust_latency),
     n_recent = args_list$nafill_buffer,
     forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
   ) %>%
@@ -119,6 +118,17 @@ arx_fcast_epi_workflow <- function(
   if (!(is.null(trainer) || is_regression(trainer))) {
     cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
   }
+  # forecast_date is first what they set;
+  # if they don't and they're not adjusting latency, it defaults to the max time_value
+  # if they're adjusting as_of, it defaults to the as_of
+  latency_adjust_fd <- if (is.null(args_list$adjust_latency)) {
+    max(epi_data$time_value)
+  } else {
+    attributes(epi_data)$metadata$as_of
+  }
+  forecast_date <- args_list$forecast_date %||% latency_adjust_fd
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
+
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -128,26 +138,34 @@ arx_fcast_epi_workflow <- function(
     r <- step_epi_lag(r, !!p, lag = lags[[l]])
   }
   r <- r %>%
-    step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
-    step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training) %>%
-    {
-      if (!is.null(args_list$check_enough_data_n)) {
-        check_enough_train_data(
-          .,
-          all_predictors(),
-          !!outcome,
-          n = args_list$check_enough_data_n,
-          epi_keys = args_list$check_enough_data_epi_keys,
-          drop_na = FALSE
-        )
-      } else {
-        .
-      }
+    step_epi_ahead(!!outcome, ahead = args_list$ahead)
+  method <- args_list$adjust_latency
+  if (!is.null(method)) {
+    if (method == "extend_ahead") {
+      r <- r %>% step_adjust_latency(all_outcomes(),
+        fixed_forecast_date = forecast_date,
+        method = method
+      )
+    } else if (method == "extend_lags") {
+      r <- r %>% step_adjust_latency(all_predictors(),
+        fixed_forecast_date = forecast_date,
+        method = method
+      )
     }
+  }
+  r <- r %>%
+    step_epi_naomit() %>%
+    step_training_window(n_recent = args_list$n_training)
+  if (!is.null(args_list$check_enough_data_n)) {
+    r <- r %>% check_enough_train_data(
+      all_predictors(),
+      !!outcome,
+      n = args_list$check_enough_data_n,
+      epi_keys = args_list$check_enough_data_epi_keys,
+      drop_na = FALSE
+    )
+  }
 
-  forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
@@ -159,11 +177,11 @@ arx_fcast_epi_workflow <- function(
     ))
     args_list$quantile_levels <- quantile_levels
     trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
-    f <- layer_quantile_distn(f, quantile_levels = quantile_levels) %>%
+    f <- f %>%
+      layer_quantile_distn(quantile_levels = quantile_levels) %>%
       layer_point_from_distn()
   } else {
-    f <- layer_residual_quantiles(
-      f,
+    f <- f %>% layer_residual_quantiles(
       quantile_levels = args_list$quantile_levels,
       symmetrize = args_list$symmetrize,
       by_key = args_list$quantile_by_key
@@ -189,10 +207,15 @@ arx_fcast_epi_workflow <- function(
 #' @param n_training Integer. An upper limit for the number of rows per
 #'   key that are used for training
 #'   (in the time unit of the `epi_df`).
-#' @param forecast_date Date. The date on which the forecast is created.
-#'   The default `NULL` will attempt to determine this automatically.
-#' @param target_date Date. The date for which the forecast is intended.
-#'   The default `NULL` will attempt to determine this automatically.
+#' @param forecast_date Date. The date on which the forecast is created.  The
+#'   default `NULL` will attempt to determine this automatically either as the
+#'   max time value if there is no latency adjustment, or as the `as_of` of
+#'   `epi_data` if `adjust_latency` is non-`NULL`.
+#' @param target_date Date. The date for which the forecast is intended. The
+#'   default `NULL` will attempt to determine this automatically as
+#'   `forecast_date + ahead`.
+#' @param adjust_latency Character or `NULL`. one of the `method`s of
+#'   `step_adjust_latency`, or `NULL` (in which case there is no adjustment).
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
@@ -238,6 +261,7 @@ arx_args_list <- function(
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
+    adjust_latency = NULL,
     quantile_levels = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
@@ -253,7 +277,7 @@ arx_args_list <- function(
 
   arg_is_scalar(ahead, n_training, symmetrize, nonneg)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
-  arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
+  arg_is_scalar(forecast_date, target_date, adjust_latency, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags)
   arg_is_lgl(symmetrize, nonneg)
@@ -282,6 +306,7 @@ arx_args_list <- function(
       quantile_levels,
       forecast_date,
       target_date,
+      adjust_latency,
       symmetrize,
       nonneg,
       max_lags,

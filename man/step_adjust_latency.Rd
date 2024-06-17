@@ -2,7 +2,7 @@
 % Please edit documentation in R/step_adjust_latency.R
 \name{step_adjust_latency}
 \alias{step_adjust_latency}
-\title{Adapt the pipeline to latency in the data}
+\title{Adapt the model to latent data}
 \usage{
 step_adjust_latency(
   recipe,
@@ -10,38 +10,37 @@ step_adjust_latency(
   role = NA,
   trained = FALSE,
   method = c("extend_ahead", "locf", "extend_lags"),
+  epi_keys_checked = c("geo_value"),
   fixed_latency = NULL,
-  fixed_asof = NULL,
+  fixed_forecast_date = NULL,
   default = NA,
   skip = FALSE,
   columns = NULL,
-  id = recipes::rand_id("epi_lag")
+  id = recipes::rand_id("adjust_latency")
 )
 }
 \arguments{
 \item{recipe}{A recipe object. The step will be added to the
 sequence of operations for this recipe.}
 
-\item{...}{One or more selector functions to choose variables for this step.
-See \code{\link[recipes:selections]{recipes::selections()}} for more details. Typically you will not need
-to set this manually, as the necessary adjustments will be done for the
-predictors and outcome.}
+\item{...}{One or more selector functions to choose variables
+for this step. See \code{\link[recipes:selections]{selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
-they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.
-It should be correctly inferred and not need setting}
+they be assigned? \code{lag} is a predictor while \code{ahead} is an outcome.  It
+should be correctly inferred and not need setting}
 
-\item{trained}{A logical to indicate if the quantities for preprocessing have
-been estimated.}
+\item{trained}{A logical to indicate if the quantities for
+preprocessing have been estimated.}
 
 \item{method}{a character. Determines the method by which the
-forecast handles latency. All of these assume the forecast date is the
-\code{as_of} of the \code{epi_df}. The options are:
+forecast handles latency. The options are:
 \itemize{
 \item \code{"extend_ahead"}: Lengthen the ahead so that forecasting from the last
-observation results in a forecast \code{ahead} after the \code{as_of} date. E.g. if
-there are 3 days of latency between the last observation and the \code{as_of}
-date for a 4 day ahead forecast, the ahead used in practice is actually 7.
+observation results in a forecast \code{ahead} after the \code{forecast_date} date.
+E.g. if there are 3 days of latency between the last observation and the
+\code{forecast_date} date for a 4 day ahead forecast, the ahead used in practice
+is actually 7.
 \item \code{"locf"}: carries forward the last observed value(s) up to the forecast
 date. See the Vignette TODO for equivalents using other steps and more
 sophisticated methods of extrapolation.
@@ -51,49 +50,66 @@ lags are \code{c(0,7,14)} for data that is 3 days latent, the actual lags used
 become \code{c(3,10,17)}.
 }}
 
-\item{fixed_latency}{either a positive integer, or a labeled positive integer
-vector. Cannot be set at the same time as \code{fixed_asof}.   If non-\code{NULL},
-the amount to offset the ahead or lag by. If a single integer, this is used
-for all columns; if a labeled vector, the labels must correspond to the
-base column names.  If \code{NULL}, the latency is the distance between the
-\code{epi_df}'s \code{max_time_value} and either the \code{fixed_asof} or the \code{epi_df}'s
-\code{as_of} field.}
+\item{epi_keys_checked}{a character vector. A list of keys to group by before
+finding the \code{max_time_value}.  The default value of this is
+\code{c("geo_value")}, but it can be any collection of \code{epi_keys}.  Different
+locations may have different latencies; to produce a forecast at every
+location, we need to use the largest latency across every location; this
+means taking \code{max_time_value} to be the minimum of the \code{max_time_value}s
+for each \code{geo_value} (or whichever collection of keys are specified).  If
+\code{NULL} or an empty character vector, it will take the maximum across all
+values, irrespective of any keys.}
 
-\item{fixed_asof}{either a date of the same kind used in the \code{epi_df}, or
-NULL. Cannot be set at the same time as \code{fixed_latency}. If a date, it
-gives the date from which the forecast is actually occurring. If \code{NULL},
-the \code{as_of} is determined either from \code{fixed_latency} or automatically.}
+\item{fixed_latency}{either a positive integer, or a labeled positive integer
+vector. Cannot be set at the same time as \code{fixed_forecast_date}. If
+non-\code{NULL}, the amount to offset the ahead or lag by. If a single integer,
+this is used for all columns; if a labeled vector, the labels must
+correspond to the base column names (before lags/aheads).  If \code{NULL}, the
+latency is the distance between the \code{epi_df}'s \code{max_time_value} and either
+the \code{fixed_forecast_date} or the \code{epi_df}'s \code{as_of} field (the default for
+\code{forecast_date}).}
+
+\item{fixed_forecast_date}{either a date of the same kind used in the
+\code{epi_df}, or \code{NULL}. Exclusive with \code{fixed_latency}. If a date, it gives
+the date from which the forecast is actually occurring. If \code{NULL}, the
+\code{forecast_date} is determined either via the \code{fixed_latency}, or is set to
+the \code{epi_df}'s \code{as_of} value if \code{fixed_latency} is also \code{NULL}.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
 
 \item{skip}{A logical. Should the step be skipped when the
-recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
-when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
+recipe is baked by \code{\link[recipes:bake]{bake()}}? While all operations are baked
+when \code{\link[recipes:prep]{prep()}} is run, some operations may not be able to be
 conducted on new data (e.g. processing the outcome variable(s)).
 Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
 
-\item{columns}{A character string of column names to be adjusted; these
-should be the original columns, and not the derived ones}
+\item{columns}{A character string of the selected variable names. This field
+is a placeholder and will be populated once \code{\link[recipes:prep]{prep()}} is used.}
 
-\item{id}{A unique identifier for the step}
+\item{id}{A character string that is unique to this step to identify it.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-In the standard case, the pipeline assumes that the last observation is also
-the day from which the forecast is being made. \code{step_adjust_latency} uses the
-\code{as_of} date of the \code{epi_df} as the \code{forecast_date}. This is most useful in
-realtime and pseudo-prospective forecasting for data where there is some
-delay between the day recorded and when that data is available.
+In the standard case, the arx models assume that the last observation is also
+the day from which the forecast is being made. But if the data has latency,
+then you may wish to adjust the predictors (lags) and/or the outcome (ahead)
+to compensate. This allows the model to create bleeding-edge forecasts using
+the lags actually observed rather than anticipated. \code{step_adjust_latency}
+uses the \code{as_of} date of the \code{epi_df} as the \code{forecast_date}. This is most
+useful in realtime and pseudo-prospective forecasting for data where there is
+some delay between the day recorded and when that data is available.
 }
 \details{
 The step assumes that the pipeline has already applied either
-\code{step_epi_ahead} or \code{step_epi_lag} depending on the value of
-\code{"method"}, and that \code{step_epi_naomit} has NOT been run.
+\code{step_epi_ahead} or \code{step_epi_lag} depending on the value of \code{"method"},
+and that \code{step_epi_naomit} has NOT been run.  By default, the latency will
+be determined using the arguments below, but can be set explicitly using
+either \code{fixed_latency} or \code{fixed_forecast_date}.
 
 The \code{prefix} and \code{id} arguments are unchangeable to ensure that the code runs
 properly and to avoid inconsistency with naming. For \code{step_epi_ahead}, they
@@ -101,11 +117,23 @@ are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
 \code{step_epi_lag}, they are set to \code{"lag_"} and \verb{"epi_lag}, respectively.
 }
 \examples{
+jhu <- case_death_rate_subset \%>\%
+  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+# setting the `as_of` to something realistic
+attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+
 r <- epi_recipe(case_death_rate_subset) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
-  #   step_adjust_latency(method = "extend_ahead") \%>\%
+  step_adjust_latency(method = "extend_ahead") \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 r
+
+jhu_fit <- epi_workflow() \%>\%
+  add_epi_recipe(r) \%>\%
+  add_model(linear_reg()) \%>\%
+  fit(data = jhu)
+jhu_fit
+
 }
 \seealso{
 Other row operation steps: 
