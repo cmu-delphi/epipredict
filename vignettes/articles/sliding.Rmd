@@ -14,6 +14,7 @@ knitr::opts_chunk$set(
 
 ```{r pkgs}
 library(epipredict)
+library(epidatr)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -24,39 +25,15 @@ library(purrr)
 
 # Demonstrations of sliding AR and ARX forecasters
 
-A key function from the epiprocess package is `epi_slide()`, which allows the
-user to apply a function or formula-based computation over variables in an
-`epi_df` over a running window of `n` time steps (see the following `epiprocess`
-vignette to go over the basics of the function: 
-["Slide a computation over signal values"](https://cmu-delphi.github.io/epiprocess/articles/slide.html)).
-The equivalent sliding method for an `epi_archive` object can be called by using
-the wrapper function `epix_slide()` (refer to the following vignette for the
-basics of the function: 
-["Work with archive objects and data revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html)). The
-key difference from `epi_slide()` is that it performs version-aware
-computations. That is, the function only uses data that would have been
-available as of time t for that reference time.
+A key function from the epiprocess package is `epi_slide()`, which allows the user to apply a function or formula-based computation over variables in an `epi_df` over a running window of `n` time steps (see the following `epiprocess` vignette to go over the basics of the function: ["Slide a computation over signal values"](https://cmu-delphi.github.io/epiprocess/articles/slide.html)). The equivalent sliding method for an `epi_archive` object can be called by using the wrapper function `epix_slide()` (refer to the following vignette for the basics of the function: ["Work with archive objects and data revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html)). The key difference from `epi_slide()` is that it performs version-aware computations. That is, the function only uses data that would have been available as of time t for that reference time.
 
-In this vignette, we use `epi_slide()` and `epix_slide()` for backtesting our
-`arx_forecaster` on historical COVID-19 case data from the US and from Canada.
-More precisely, we first demonstrate using `epi_slide()` to slide ARX
-forecasters over an `epi_df` object and compare the results obtained from using
-different forecasting engines. We then compare the results from version-aware
-and unaware forecasting, where the former is obtained from applying
-`epix_slide()` to the `epi_archive` object, while the latter is obtained from
-applying `epi_slide()` to the latest snapshot of the data.
+In this vignette, we use `epi_slide()` and `epix_slide()` for backtesting our `arx_forecaster` on historical COVID-19 case data from the US and from Canada. More precisely, we first demonstrate using `epi_slide()` to slide ARX forecasters over an `epi_df` object and compare the results obtained from using different forecasting engines. We then compare the results from version-aware and unaware forecasting, where the former is obtained from applying `epix_slide()` to the `epi_archive` object, while the latter is obtained from applying `epi_slide()` to the latest snapshot of the data.
 
 ## Comparing different forecasting engines
 
-### Example using CLI and case data from US states 
+### Example using CLI and case data from US states
 
-First, we download the version history (ie. archive) of the percentage of
-doctor’s visits with CLI (COVID-like illness) computed from medical insurance
-claims and the number of new confirmed COVID-19 cases per 100,000 population
-(daily) for all 50 states from the COVIDcast API. We process as before, with the
-modification that we use `sync = locf` in `epix_merge()` so that the last
-version of each observation can be carried forward to extrapolate unavailable
-versions for the less up-to-date input archive.
+First, we download the version history (ie. archive) of the percentage of doctor's visits with CLI (COVID-like illness) computed from medical insurance claims and the number of new confirmed COVID-19 cases per 100,000 population (daily) for all 50 states from the COVIDcast API. We process as before, with the modification that we use `sync = locf` in `epix_merge()` so that the last version of each observation can be carried forward to extrapolate unavailable versions for the less up-to-date input archive.
 
 ```{r grab-epi-data}
 theme_set(theme_bw())
@@ -74,13 +51,9 @@ x <- epix_merge(
 rm(y)
 ```
 
-After obtaining the latest snapshot of the data, we produce forecasts on that
-data using the default engine of simple linear regression and compare to a
-random forest.
+After obtaining the latest snapshot of the data, we produce forecasts on that data using the default engine of simple linear regression and compare to a random forest.
 
-Note that all of the warnings about the forecast date being less than the most
-recent update date of the data have been suppressed to avoid cluttering the
-output.
+Note that all of the warnings about the forecast date being less than the most recent update date of the data have been suppressed to avoid cluttering the output.
 
 ```{r make-arx-kweek, warning = FALSE}
 # Latest snapshot of data, and forecast dates
@@ -129,16 +102,9 @@ fc <- bind_rows(
   pivot_quantiles_wider(fc_.pred_distn)
 ```
 
-Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the
-target (respecting time stamps and locations) along with lags of the features
-(here, the response and doctors visits), estimates a forecasting model using the
-specified engine, creates predictions, and non-parametric confidence bands. 
+Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the target (respecting time stamps and locations) along with lags of the features (here, the response and doctors visits), estimates a forecasting model using the specified engine, creates predictions, and non-parametric confidence bands.
 
-To see how the predictions compare, we plot them on top of the latest case
-rates. Note that even though we've fitted the model on all states, 
-we'll just display the
-results for two states, California (CA) and Florida (FL), to get a sense of the
-model performance while keeping the graphic simple. 
+To see how the predictions compare, we plot them on top of the latest case rates. Note that even though we've fitted the model on all states, we'll just display the results for two states, California (CA) and Florida (FL), to get a sense of the model performance while keeping the graphic simple.
 
 ```{r plot-arx, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
 fc_cafl <- fc %>% filter(geo_value %in% c("ca", "fl"))
@@ -160,40 +126,17 @@ ggplot(fc_cafl, aes(fc_target_date, group = time_value, fill = engine_type)) +
   theme(legend.position = "none")
 ```
 
-For the two states of interest, simple linear regression clearly performs better
-than random forest in terms of accuracy of the predictions and does not
-result in such in overconfident predictions (overly narrow confidence bands).
-Though, in general, neither approach produces amazingly accurate forecasts. 
-This could be because
-the behaviour is rather different across states and the effects of other notable
-factors such as age and public health measures may be important to account for
-in such forecasting. Including such factors as well as making enhancements such
-as correcting for outliers are some improvements one could make to this simple
-model.[^1]
+For the two states of interest, simple linear regression clearly performs better than random forest in terms of accuracy of the predictions and does not result in such in overconfident predictions (overly narrow confidence bands). Though, in general, neither approach produces amazingly accurate forecasts. This could be because the behaviour is rather different across states and the effects of other notable factors such as age and public health measures may be important to account for in such forecasting. Including such factors as well as making enhancements such as correcting for outliers are some improvements one could make to this simple model.[^1]
 
-[^1]: Note that, despite the above caveats, simple models like this tend to
-out-perform many far more complicated models in the online Covid forecasting due
-to those models high variance predictions.
+[^1]: Note that, despite the above caveats, simple models like this tend to out-perform many far more complicated models in the online Covid forecasting due to those models high variance predictions.
 
 ### Example using case data from Canada
 
-By leveraging the flexibility of `epiprocess`, we can apply the same techniques
-to data from other sources. Since some collaborators are in British Columbia,
-Canada, we'll do essentially the same thing for Canada as we did above.
+By leveraging the flexibility of `epiprocess`, we can apply the same techniques to data from other sources. Since some collaborators are in British Columbia, Canada, we'll do essentially the same thing for Canada as we did above.
 
-The [COVID-19 Canada Open Data Working Group](https://opencovid.ca/) collects
-daily time series data on COVID-19 cases, deaths, recoveries, testing and
-vaccinations at the health region and province levels. Data are collected from
-publicly available sources such as government datasets and news releases.
-Unfortunately, there is no simple versioned source, so we have created our own
-from the Github commit history.
+The [COVID-19 Canada Open Data Working Group](https://opencovid.ca/) collects daily time series data on COVID-19 cases, deaths, recoveries, testing and vaccinations at the health region and province levels. Data are collected from publicly available sources such as government datasets and news releases. Unfortunately, there is no simple versioned source, so we have created our own from the Github commit history.
 
-First, we load versioned case rates at the provincial level. After converting
-these to 7-day averages (due to highly variable provincial reporting
-mismatches), we then convert the data to an `epi_archive` object, and extract
-the latest version from it. Finally, we run the same forcasting exercise as for
-the American data, but here we compare the forecasts produced from using simple
-linear regression with those from using boosted regression trees.
+First, we load versioned case rates at the provincial level. After converting these to 7-day averages (due to highly variable provincial reporting mismatches), we then convert the data to an `epi_archive` object, and extract the latest version from it. Finally, we run the same forcasting exercise as for the American data, but here we compare the forecasts produced from using simple linear regression with those from using boosted regression trees.
 
 ```{r get-can-fc, warning = FALSE}
 # source("drafts/canada-case-rates.R)
@@ -227,7 +170,7 @@ can_fc <- bind_rows(
   pivot_quantiles_wider(fc_.pred_distn)
 ```
 
-The figures below shows the results for all of the provinces. 
+The figures below shows the results for all of the provinces.
 
 ```{r plot-can-fc-lr, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
 ggplot(
@@ -279,87 +222,168 @@ ggplot(
   theme(legend.position = "none")
 ```
 
-Both approaches tend to produce quite volatile forecasts (point predictions)
-and/or are overly confident (very narrow bands), particularly when boosted
-regression trees are used. But as this is meant to be a simple demonstration of
-sliding with different engines in `arx_forecaster`, we may devote another
-vignette to work on improving the predictive modelling using the suite of tools
-available in epipredict.
+Both approaches tend to produce quite volatile forecasts (point predictions) and/or are overly confident (very narrow bands), particularly when boosted regression trees are used. But as this is meant to be a simple demonstration of sliding with different engines in `arx_forecaster`, we may devote another vignette to work on improving the predictive modelling using the suite of tools available in epipredict.
 
 ## Version-aware and unaware forecasting
 
-### Example using case data from US states 
+### Example using case data from US states
 
-We will now employ a forecaster that uses properly-versioned data (that would
-have been available in real-time) to forecast future COVID-19 case rates from
-current and past COVID-19 case rates for all states. That is, we can make
-forecasts on the archive, `x`, and compare those to forecasts on the latest
-data, `x_latest` using the same general set-up as above. For version-aware
-forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware
-forecasting, `x_latest` is fed into `epi_slide()`. 
+We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast future COVID-19 case rates from current and past COVID-19 case rates for all states. That is, we can make forecasts on the archive, `x`, and compare those to forecasts on the latest data, `x_latest` using the same general set-up as above. For version-aware forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into `epi_slide()`. In this example, we use a geo-pooled approach (from all US states and territories) to train our model. Our goal for the model is to predict the 7 day average of the COVID-19 case rates across four states with using lagged case rates and death rates as the covariates.
 
-```{r make-ar-kweek-asof}
-k_week_version_aware <- function(ahead = 7, version_aware = TRUE) {
-  if (version_aware) {
-    epix_slide(
-      x,
-      ~ arx_forecaster(
-        .x, "case_rate", c("case_rate", "percent_cli"),
-        args_list = arx_args_list(ahead = ahead)
-      ) %>%
-        extract2("predictions"),
-      before = 120 - 1,
-      ref_time_values = fc_time_values,
-      new_col_name = "fc"
-    ) %>%
-      mutate(engine_type = "lm", version_aware = version_aware) %>%
-      rename(geo_value = fc_geo_value)
-  } else {
-    k_week_ahead(
-      x_latest, "case_rate", c("case_rate", "percent_cli"),
-      ahead, linear_reg()
-    ) %>% mutate(version_aware = version_aware)
-  }
-}
+```{r load-data}
+# loading in the data
+states <- "*"
 
-# Generate the forecasts, and bind them together
-fc <- bind_rows(
-  map(aheads, ~ k_week_version_aware(.x, TRUE)) %>% list_rbind(),
-  map(aheads, ~ k_week_version_aware(.x, FALSE)) %>% list_rbind()
-) %>% pivot_quantiles_wider(fc_.pred_distn)
+confirmed_incidence_num <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "confirmed_incidence_num",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200301, 20211231),
+  geo_values = states,
+  issues = epirange(20000101,20211231)
+) %>%
+  select(geo_value, time_value, version = issue, cases = value) %>%
+  arrange(geo_value, time_value) %>%
+  as_epi_archive(compactify = FALSE)
+
+deaths_incidence_num <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "deaths_incidence_num",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200301, 20211231),
+  geo_values = states,
+  issues = epirange(20000101,20211231)
+) %>%
+  select(geo_value, time_value, version = issue, deaths = value) %>%
+  arrange(geo_value, time_value) %>%
+  as_epi_archive(compactify = FALSE)
+
+confirmed_incidence_prop <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "confirmed_incidence_prop",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200301, 20211231),
+  geo_values = states,
+  issues = epirange(20000101,20211231)
+) %>%
+  select(geo_value, time_value, version = issue, case_rate = value) %>%  
+  arrange(geo_value, time_value) %>%
+  as_epi_archive(compactify = FALSE)
+
+deaths_incidence_prop <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "deaths_incidence_prop",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200301, 20211231),
+  geo_values = states,
+  issues = epirange(20000101,20211231)
+) %>%
+  select(geo_value, time_value, version = issue, death_rate = value) %>%  
+  arrange(geo_value, time_value) %>%
+  as_epi_archive(compactify = FALSE)
+
+x <- epix_merge(
+      epix_merge(confirmed_incidence_num, deaths_incidence_num,
+                 sync = "locf", compactify = FALSE),
+      epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
+                 sync = "locf", compactify = FALSE),
+      sync = "locf",
+      compactify = TRUE
+)
+
+fc_time_values <-  seq(
+  from = as.Date("2020-09-01"),
+  to = as.Date("2021-12-31"),
+  by = "1 month"
+)
+
+# computing the 7-day average of the rates
+x <- x %>%
+  epix_slide(
+    before = 365000L, ref_time_values = fc_time_values,
+    function(x, gk, rtv) {
+      x %>%
+        group_by(geo_value) %>%
+        epi_slide_mean(case_rate, before = 6L) %>%
+        rename(case_rate_7d_av = slide_value_case_rate) %>%
+        epi_slide_mean(death_rate, before = 6L) %>%
+        ungroup() %>%
+        rename(death_rate_7d_av = slide_value_death_rate)
+    }
+  ) %>%
+  rename(version = time_value) %>%
+  rename(time_value = slide_value_time_value, 
+         geo_value = slide_value_geo_value,
+         cases = slide_value_cases,
+         deaths = slide_value_deaths,
+         case_rate = slide_value_case_rate,
+         death_rate = slide_value_death_rate,
+         case_rate_7d_av = slide_value_case_rate_7d_av,
+         death_rate_7d_av = slide_value_death_rate_7d_av) %>% as_epi_archive()
 ```
 
-Now we can plot the results on top of the latest case rates. As before, we will
-only display and focus on the results for FL and CA for simplicity.
+Here we specify the ARX model.
 
-```{r plot-ar-asof, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
-fc_cafl <- fc %>% filter(geo_value %in% c("ca", "fl"))
-x_latest_cafl <- x_latest %>% filter(geo_value %in% c("ca", "fl"))
+```{r make-arx-model}
+lags <- c(0, 7, 14, 21)
+aheads <- c(7, 14, 21)
+engine <- quantile_reg()
 
-ggplot(fc_cafl, aes(x = fc_target_date, group = time_value, fill = version_aware)) +
+forecaster <- function(x, gk, rtv) {
+  map(aheads, function(ahead) {
+    arx_forecaster(epi_data = x,
+               outcome = "death_rate_7d_av",
+               predictors = c("death_rate_7d_av","case_rate_7d_av"),
+               trainer = engine,
+               args_list = arx_args_list(lags = lags, ahead = ahead)
+               ) %>% 
+    .$predictions
+  } ) %>%
+    bind_rows()
+}
+```
+
+We can now use our forecaster function that we've created and use it in the pipeline for forecasting the predictions. We store the predictions into the `x_result` variable and calculate the most up to date version of the data in the epiarchive and store it as `x_latest`.
+
+```{r running-arx-forecaster}
+x_result <- x %>%
+  epix_slide(forecaster, before = 120, ref_time_values = fc_time_values,
+            names_sep = NULL) %>%
+  mutate(engine_type = engine$engine) %>%
+  as_epi_df() 
+x_result$ahead_val <- x_result$target_date - x_result$forecast_date
+
+x_latest <- epix_as_of(x, max_version = max(x$versions_end))
+```
+
+Now we plot both the actual and predicted 7 day average of the death rate for the chosen states
+
+```{r plot-arx-asof, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
+keep <- c("ca","ny","mi", "az")
+fc_states <- x_result %>%
+  filter(geo_value %in% keep) %>%
+   pivot_quantiles_wider(.pred_distn)
+
+x_latest_states <- x_latest %>% filter(geo_value %in% keep)
+
+ggplot(fc_states, aes(target_date, group = time_value, fill = engine_type)) +
   geom_line(
-    data = x_latest_cafl, aes(x = time_value, y = case_rate),
+    data = x_latest_states, aes(x = time_value, y = death_rate_7d_av),
     inherit.aes = FALSE, color = "gray50"
   ) +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`), alpha = 0.4) +
-  geom_line(aes(y = fc_.pred)) +
-  geom_point(aes(y = fc_.pred), size = 0.5) +
+  geom_line(aes(y = .pred)) +
+  geom_point(aes(y = .pred), size = 0.5) +
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
-  facet_grid(geo_value ~ version_aware,
-    scales = "free",
-    labeller = labeller(version_aware = label_both)
-  ) +
+  facet_grid(vars(geo_value), vars(engine_type), scales = "free") +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
-  labs(x = "Date", y = "Reported COVID-19 case rates") +
   scale_fill_brewer(palette = "Set1") +
+  labs(x = "Date", y = "7 day average COVID-19 death rates") +
   theme(legend.position = "none")
 ```
 
-Again, we observe that the results are not great for these two states, but
-that's likely due to the simplicity of the model (ex. the omission of key
-factors such as age and public health measures) and the quality of the data (ex.
-we have not personally corrected for anomalies in the data).
-
-We shall leave it to the reader to try the above version aware and unaware
-forecasting exercise on the Canadian case rate data. The above code for the
-American state data should be readily adaptable for this purpose.
+We shall leave it to the reader to try the above version aware and unaware forecasting exercise on the Canadian case rate data. The above code for the American state data should be readily adaptable for this purpose.
