@@ -46,3 +46,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - refactor `bake.epi_recipe()` and remove `epi_juice()`. 
 - Revise `compat-purrr` to use the r-lang `standalone-*` version (via 
   `{usethis}`)
+- Replaced old version-faithful example in sliding AR & ARX forecasters vignette
