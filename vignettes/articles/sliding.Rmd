@@ -228,7 +228,7 @@ Both approaches tend to produce quite volatile forecasts (point predictions) and
 
 ### Example using case data from US states
 
-We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast future COVID-19 case rates from current and past COVID-19 case rates for all states. That is, we can make forecasts on the archive, `x`, and compare those to forecasts on the latest data, `x_latest` using the same general set-up as above. For version-aware forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into `epi_slide()`. In this example, we use a geo-pooled approach (from all US states and territories) to train our model. Our goal for the model is to predict the 7 day average of the COVID-19 case rates across four states with using lagged case rates and death rates as the covariates.
+We will now employ a forecaster that uses properly-versioned data (that would have been available in real-time) to forecast the 7 day average of future COVID-19 case rates from current and past COVID-19 case rates and death rates for all states. That is, we can make forecasts on the archive, `x`, and compare those to forecasts on the latest data, `x_latest` using the same general set-up as above. For version-aware forecasting, note that `x` is fed into `epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into `epi_slide()`. Note that in this example, we use a geo-pooled approach (using combined data from all US states and territories) to train our model.
 
 ```{r load-data}
 # loading in the data
@@ -314,16 +314,17 @@ x <- x %>%
         ungroup() %>%
         rename(death_rate_7d_av = slide_value_death_rate)
     }
-  ) %>%
+   ) %>%
   rename(version = time_value) %>%
-  rename(time_value = slide_value_time_value, 
+  rename(time_value = slide_value_time_value,
          geo_value = slide_value_geo_value,
          cases = slide_value_cases,
          deaths = slide_value_deaths,
          case_rate = slide_value_case_rate,
          death_rate = slide_value_death_rate,
          case_rate_7d_av = slide_value_case_rate_7d_av,
-         death_rate_7d_av = slide_value_death_rate_7d_av) %>% as_epi_archive()
+         death_rate_7d_av = slide_value_death_rate_7d_av) %>% 
+  as_epi_archive(compactify = TRUE)
 ```
 
 Here we specify the ARX model.
