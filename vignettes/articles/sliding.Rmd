@@ -234,32 +234,6 @@ We will now employ a forecaster that uses properly-versioned data (that would ha
 # loading in the data
 states <- "*"
 
-confirmed_incidence_num <- pub_covidcast(
-  source = "jhu-csse",
-  signals = "confirmed_incidence_num",
-  time_type = "day",
-  geo_type = "state",
-  time_values = epirange(20200301, 20211231),
-  geo_values = states,
-  issues = epirange(20000101, 20211231)
-) %>%
-  select(geo_value, time_value, version = issue, cases = value) %>%
-  arrange(geo_value, time_value) %>%
-  as_epi_archive(compactify = FALSE)
-
-deaths_incidence_num <- pub_covidcast(
-  source = "jhu-csse",
-  signals = "deaths_incidence_num",
-  time_type = "day",
-  geo_type = "state",
-  time_values = epirange(20200301, 20211231),
-  geo_values = states,
-  issues = epirange(20000101, 20211231)
-) %>%
-  select(geo_value, time_value, version = issue, deaths = value) %>%
-  arrange(geo_value, time_value) %>%
-  as_epi_archive(compactify = FALSE)
-
 confirmed_incidence_prop <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_incidence_prop",
@@ -286,16 +260,6 @@ deaths_incidence_prop <- pub_covidcast(
   arrange(geo_value, time_value) %>%
   as_epi_archive(compactify = FALSE)
 
-x <- epix_merge(
-  epix_merge(confirmed_incidence_num, deaths_incidence_num,
-    sync = "locf", compactify = FALSE
-  ),
-  epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
-    sync = "locf", compactify = FALSE
-  ),
-  sync = "locf",
-  compactify = TRUE
-)
 
 fc_time_values <- seq(
   from = as.Date("2020-09-01"),
@@ -303,7 +267,10 @@ fc_time_values <- seq(
   by = "1 month"
 )
 
-# computing the 7-day average of the rates
+x <- epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
+  sync = "locf"
+)
+
 x <- x %>%
   epix_slide(
     before = 365000L, ref_time_values = fc_time_values,
@@ -321,8 +288,6 @@ x <- x %>%
   rename(
     time_value = slide_value_time_value,
     geo_value = slide_value_geo_value,
-    cases = slide_value_cases,
-    deaths = slide_value_deaths,
     case_rate = slide_value_case_rate,
     death_rate = slide_value_death_rate,
     case_rate_7d_av = slide_value_case_rate_7d_av,
