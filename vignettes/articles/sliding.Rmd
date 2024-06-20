@@ -241,7 +241,7 @@ confirmed_incidence_num <- pub_covidcast(
   geo_type = "state",
   time_values = epirange(20200301, 20211231),
   geo_values = states,
-  issues = epirange(20000101,20211231)
+  issues = epirange(20000101, 20211231)
 ) %>%
   select(geo_value, time_value, version = issue, cases = value) %>%
   arrange(geo_value, time_value) %>%
@@ -254,7 +254,7 @@ deaths_incidence_num <- pub_covidcast(
   geo_type = "state",
   time_values = epirange(20200301, 20211231),
   geo_values = states,
-  issues = epirange(20000101,20211231)
+  issues = epirange(20000101, 20211231)
 ) %>%
   select(geo_value, time_value, version = issue, deaths = value) %>%
   arrange(geo_value, time_value) %>%
@@ -267,9 +267,9 @@ confirmed_incidence_prop <- pub_covidcast(
   geo_type = "state",
   time_values = epirange(20200301, 20211231),
   geo_values = states,
-  issues = epirange(20000101,20211231)
+  issues = epirange(20000101, 20211231)
 ) %>%
-  select(geo_value, time_value, version = issue, case_rate = value) %>%  
+  select(geo_value, time_value, version = issue, case_rate = value) %>%
   arrange(geo_value, time_value) %>%
   as_epi_archive(compactify = FALSE)
 
@@ -280,22 +280,24 @@ deaths_incidence_prop <- pub_covidcast(
   geo_type = "state",
   time_values = epirange(20200301, 20211231),
   geo_values = states,
-  issues = epirange(20000101,20211231)
+  issues = epirange(20000101, 20211231)
 ) %>%
-  select(geo_value, time_value, version = issue, death_rate = value) %>%  
+  select(geo_value, time_value, version = issue, death_rate = value) %>%
   arrange(geo_value, time_value) %>%
   as_epi_archive(compactify = FALSE)
 
 x <- epix_merge(
-      epix_merge(confirmed_incidence_num, deaths_incidence_num,
-                 sync = "locf", compactify = FALSE),
-      epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
-                 sync = "locf", compactify = FALSE),
-      sync = "locf",
-      compactify = TRUE
+  epix_merge(confirmed_incidence_num, deaths_incidence_num,
+    sync = "locf", compactify = FALSE
+  ),
+  epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
+    sync = "locf", compactify = FALSE
+  ),
+  sync = "locf",
+  compactify = TRUE
 )
 
-fc_time_values <-  seq(
+fc_time_values <- seq(
   from = as.Date("2020-09-01"),
   to = as.Date("2021-12-31"),
   by = "1 month"
@@ -314,16 +316,18 @@ x <- x %>%
         ungroup() %>%
         rename(death_rate_7d_av = slide_value_death_rate)
     }
-   ) %>%
+  ) %>%
   rename(version = time_value) %>%
-  rename(time_value = slide_value_time_value,
-         geo_value = slide_value_geo_value,
-         cases = slide_value_cases,
-         deaths = slide_value_deaths,
-         case_rate = slide_value_case_rate,
-         death_rate = slide_value_death_rate,
-         case_rate_7d_av = slide_value_case_rate_7d_av,
-         death_rate_7d_av = slide_value_death_rate_7d_av) %>% 
+  rename(
+    time_value = slide_value_time_value,
+    geo_value = slide_value_geo_value,
+    cases = slide_value_cases,
+    deaths = slide_value_deaths,
+    case_rate = slide_value_case_rate,
+    death_rate = slide_value_death_rate,
+    case_rate_7d_av = slide_value_case_rate_7d_av,
+    death_rate_7d_av = slide_value_death_rate_7d_av
+  ) %>%
   as_epi_archive(compactify = TRUE)
 ```
 
@@ -336,14 +340,15 @@ engine <- quantile_reg()
 
 forecaster <- function(x, gk, rtv) {
   map(aheads, function(ahead) {
-    arx_forecaster(epi_data = x,
-               outcome = "death_rate_7d_av",
-               predictors = c("death_rate_7d_av","case_rate_7d_av"),
-               trainer = engine,
-               args_list = arx_args_list(lags = lags, ahead = ahead)
-               ) %>% 
-    .$predictions
-  } ) %>%
+    arx_forecaster(
+      epi_data = x,
+      outcome = "death_rate_7d_av",
+      predictors = c("death_rate_7d_av", "case_rate_7d_av"),
+      trainer = engine,
+      args_list = arx_args_list(lags = lags, ahead = ahead)
+    ) %>%
+      .$predictions
+  }) %>%
     bind_rows()
 }
 ```
@@ -352,10 +357,12 @@ We can now use our forecaster function that we've created and use it in the pipe
 
 ```{r running-arx-forecaster}
 x_result <- x %>%
-  epix_slide(forecaster, before = 120, ref_time_values = fc_time_values,
-            names_sep = NULL) %>%
+  epix_slide(forecaster,
+    before = 120, ref_time_values = fc_time_values,
+    names_sep = NULL
+  ) %>%
   mutate(engine_type = engine$engine) %>%
-  as_epi_df() 
+  as_epi_df()
 x_result$ahead_val <- x_result$target_date - x_result$forecast_date
 
 x_latest <- epix_as_of(x, max_version = max(x$versions_end))
@@ -364,10 +371,10 @@ x_latest <- epix_as_of(x, max_version = max(x$versions_end))
 Now we plot both the actual and predicted 7 day average of the death rate for the chosen states
 
 ```{r plot-arx-asof, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
-keep <- c("ca","ny","mi", "az")
+keep <- c("ca", "ny", "mi", "az")
 fc_states <- x_result %>%
   filter(geo_value %in% keep) %>%
-   pivot_quantiles_wider(.pred_distn)
+  pivot_quantiles_wider(.pred_distn)
 
 x_latest_states <- x_latest %>% filter(geo_value %in% keep)
 
