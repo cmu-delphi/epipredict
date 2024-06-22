@@ -280,11 +280,6 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
 #' @export
 print.step_adjust_latency <-
   function(x, width = max(20, options$width - 35), ...) {
-    if (length(x$terms) == 0) {
-      terms <- "all previous predictors"
-    } else {
-      terms <- x$terms
-    }
     if (!is.null(x$forecast_date)) {
       conj <- "with forecast date"
       extra_text <- x$forecast_date
@@ -299,9 +294,51 @@ print.step_adjust_latency <-
       conj <- "with latency"
       extra_text <- "set at train time"
     }
-    print_epi_step(terms, terms, x$trained, x$method,
-      conjunction = conj,
-      extra_text = extra_text
+    # what follows is a somewhat modified version of print_epi_step, since the case of no arguments for adjust_latency means apply to all relevant columns, and not none of them
+    theme_div_id <- cli::cli_div(
+      theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
     )
+    # this is a slightly modified copy of
+    title <- trimws(x$method)
+    trained_text <- dplyr::if_else(x$trained, "Trained", "")
+    vline_seperator <- dplyr::if_else(trained_text == "", "", "|")
+    comma_seperator <- dplyr::if_else(
+      trained_text != "", true = ",", false = ""
+    )
+    extra_text <- recipes::format_ch_vec(extra_text)
+    width_title <- nchar(paste0(
+      "* ", title, ":", " ", conj, " ", extra_text, " ", vline_seperator,
+      " ", trained_text, " "
+    ))
+    width_diff <- cli::console_width() * 1 - width_title
+    if (x$trained) {
+      elements <- x$columns
+    } else {
+      if (length(x$terms) == 0) {
+        elements <- "all previous predictors"
+      } else {
+        elements <- lapply(x$terms, function(x) {
+          rlang::expr_deparse(rlang::quo_get_expr(x), width = Inf)
+        })
+        elements <- vctrs::list_unchop(elements, ptype = character())
+      }
+    }
+
+    element_print_lengths <- cumsum(nchar(elements)) +
+      c(0L, cumsum(rep(2L, length(elements) - 1))) +
+      c(rep(5L, length(elements) - 1), 0L)
+    first_line <- which(width_diff >= element_print_lengths)
+    first_line <- unname(first_line)
+    first_line <- ifelse(
+      test = identical(first_line, integer(0)),
+      yes = length(element_print_lengths),
+      no = max(first_line)
+    )
+    more_dots <- ifelse(first_line == length(elements), "", ", ...")
+    cli::cli_bullets(
+      c("\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conj} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}")
+    )
+
+    cli::cli_end(theme_div_id)
     invisible(x)
   }

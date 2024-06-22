@@ -245,4 +245,9 @@ test_that("printing step_adjust_latency results in expected output", {
     step_epi_ahead(death_rate, ahead = ahead) %>%
     step_adjust_latency(case_rate, method = "extend_lags")
   expect_snapshot(r5)
+  r <- epi_recipe(case_death_rate_subset) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_adjust_latency(method = "extend_ahead") %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14))
+  expect_snapshot(r)
 })
