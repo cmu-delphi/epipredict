@@ -35,7 +35,7 @@ x_lagged
 attributes(x_lagged)$metadata$as_of <- testing_as_of
 
 test_that("epi_adjust_latency correctly extends the lags", {
-  r5 <- epi_recipe(x) %>%
+  r1 <- epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead) %>%
@@ -43,35 +43,35 @@ test_that("epi_adjust_latency correctly extends the lags", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
+  expect_error(expect_warning(fit1 <- slm_fit(r1), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
-  fit5 <- slm_fit(r5, data = real_x)
+  fit1 <- slm_fit(r1, data = real_x)
 
   expect_equal(
-    names(fit5$pre$mold$predictors),
+    names(fit1$pre$mold$predictors),
     c(
       "lag_5_death_rate", "lag_11_death_rate", "lag_16_death_rate",
       "lag_6_case_rate", "lag_10_case_rate"
     )
   )
-  latest <- get_test_data(r5, x)
-  pred <- predict(fit5, latest)
+  latest <- get_test_data(r1, x)
+  pred <- predict(fit1, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(nrow(point_pred), 1)
   expect_equal(point_pred$time_value, as.Date(testing_as_of))
 
   expect_equal(
-    names(fit5$pre$mold$outcomes),
+    names(fit1$pre$mold$outcomes),
     glue::glue("ahead_{ahead}_death_rate")
   )
-  latest <- get_test_data(r5, x)
-  pred <- predict(fit5, latest)
-  actual_solutions <- pred %>% filter(!is.na(.pred))
+  latest <- get_test_data(r1, x)
+  pred1 <- predict(fit1, latest)
+  actual_solutions <- pred1 %>% filter(!is.na(.pred))
   expect_equal(actual_solutions$time_value, testing_as_of)
 
   # should have four predictors, including the intercept
-  expect_equal(length(fit5$fit$fit$fit$coefficients), 6)
+  expect_equal(length(fit1$fit$fit$fit$coefficients), 6)
 
   # result should be equivalent to just immediately doing the adjusted lags by
   # hand
@@ -81,13 +81,13 @@ test_that("epi_adjust_latency correctly extends the lags", {
     step_epi_ahead(death_rate, ahead = ahead)
   fit_hand_adj <- slm_fit(hand_adjusted, data = real_x)
   expect_equal(
-    fit5$fit$fit$fit$coefficients,
+    fit1$fit$fit$fit$coefficients,
     fit_hand_adj$fit$fit$fit$coefficients
   )
 })
 
 test_that("epi_adjust_latency correctly extends the ahead", {
-  r5 <- epi_recipe(x) %>%
+  r2 <- epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead) %>%
@@ -95,24 +95,24 @@ test_that("epi_adjust_latency correctly extends the ahead", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5)))
+  expect_error(expect_warning(fit5 <- slm_fit(r2)))
   # real date example
-  fit5 <- slm_fit(r5, data = real_x)
+  fit2 <- slm_fit(r2, data = real_x)
   expect_equal(
-    names(fit5$pre$mold$predictors),
+    names(fit2$pre$mold$predictors),
     c(
       "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate",
       "lag_1_case_rate", "lag_5_case_rate"
     )
   )
-  latest <- get_test_data(r5, x)
-  pred <- predict(fit5, latest)
-  point_pred <- pred %>% filter(!is.na(.pred))
+  latest <- get_test_data(r2, x)
+  pred2 <- predict(fit2, latest)
+  point_pred2 <- pred2 %>% filter(!is.na(.pred))
   # max time is still the forecast date
-  expect_equal(point_pred$time_value, as.Date(max_time))
+  expect_equal(point_pred2$time_value, as.Date(max_time))
   # target column renamed
   expect_equal(
-    names(fit5$pre$mold$outcomes),
+    names(fit2$pre$mold$outcomes),
     glue::glue("ahead_{ahead + latency}_death_rate")
   )
   # fit an equivalent forecaster
@@ -123,12 +123,71 @@ test_that("epi_adjust_latency correctly extends the ahead", {
   equiv_fit <- slm_fit(equivalent, data = real_x)
   # adjusting the ahead should do the same thing as directly adjusting the ahead
   expect_equal(
-    fit5$fit$fit$fit$coefficients,
+    fit2$fit$fit$fit$coefficients,
     equiv_fit$fit$fit$fit$coefficients
   )
 
   # should have four predictors, including the intercept
-  expect_equal(length(fit5$fit$fit$fit$coefficients), 6)
+  expect_equal(length(fit2$fit$fit$fit$coefficients), 6)
+})
+
+test_that("epi_adjust_latency extends multiple aheads", {
+  aheads <- 1:3
+  r3 <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = aheads) %>%
+    step_adjust_latency(method = "extend_ahead")
+  fitter <- smooth_quantile_reg(
+    quantile_levels = 0.5,
+    outcome_locations = aheads,
+    degree = 1L
+  )
+  epi_wf <- epi_workflow(r3, fitter)
+  # the as_of on x is today's date, which is >970 days in the future
+  # also, there's no data >970 days in the past, so it gets an error trying to
+  # fit on no data
+  expect_error(expect_warning(fit3 <- fit(epi_wf, data = x)))
+  # real date example
+  fit3 <- fit(epi_wf, data = real_x)
+  expect_equal(
+    names(fit3$pre$mold$outcomes),
+    c(
+      "ahead_6_death_rate", "ahead_7_death_rate", "ahead_8_death_rate"
+    )
+  )
+  expect_equal(
+    names(fit3$pre$mold$predictors),
+    c(
+      "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate",
+      "lag_1_case_rate", "lag_5_case_rate"
+    )
+  )
+  latest <- get_test_data(r3, real_x)
+  pred3 <- predict(fit3, latest)
+  point_pred <- pred3 %>%
+    unnest(.pred) %>%
+    filter(!is.na(distn))
+  # max time is still the forecast date
+  expect_equal(
+    point_pred$time_value,
+    rep(as.Date(max_time), 3)
+  )
+  # fit an equivalent forecaster
+  equivalent <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead + latency)
+  equiv_fit <- fit(epi_wf, data = real_x)
+  # adjusting the ahead should do the same thing as directly adjusting the ahead
+  equiv_fit
+  expect_equal(
+    fit3$fit$fit$fit$rqfit,
+    equiv_fit$fit$fit$fit$rqfit
+  )
+
+  # should have four predictors, including the intercept
+  expect_equal(length(fit3$fit$fit$fit$rqfit$coefficients), 6)
 })
 
 test_that("epi_adjust_latency fixed_* work", {})
