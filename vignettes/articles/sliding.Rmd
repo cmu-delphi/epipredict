@@ -368,18 +368,15 @@ x <- x %>%
 Here we specify the ARX model.
 
 ```{r make-arx-model}
-lags <- c(0, 7, 14, 21)
 aheads <- c(7, 14, 21)
-engine <- quantile_reg()
-
-forecaster <- function(x, gk, rtv) {
+forecaster <- function(x) {
   map(aheads, function(ahead) {
     arx_forecaster(
       epi_data = x,
       outcome = "death_rate_7d_av",
       predictors = c("death_rate_7d_av", "case_rate_7d_av"),
-      trainer = engine,
-      args_list = arx_args_list(lags = lags, ahead = ahead)
+      trainer = quantile_reg(),
+      args_list = arx_args_list(lags = c(0, 7, 14, 21), ahead = ahead)
     ) %>%
       .$predictions
   }) %>%
@@ -394,11 +391,11 @@ epiarchive and store it as `x_latest`.
 
 ```{r running-arx-forecaster}
 x_result <- x %>%
-  epix_slide(forecaster,
+  epix_slide(~forecaster(.x),
     before = 120, ref_time_values = fc_time_values,
     names_sep = NULL
   ) %>%
-  mutate(engine_type = engine$engine) %>%
+  mutate(engine_type = quantile_reg()$engine) %>%
   as_epi_df()
 x_result$ahead_val <- x_result$target_date - x_result$forecast_date
 
@@ -409,12 +406,12 @@ Now we plot both the actual and predicted 7 day average of the death rate for
 the chosen states
 
 ```{r plot-arx-asof, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
-keep <- c("ca", "ny", "mi", "az")
+states_to_show <- c("ca", "ny", "mi", "az")
 fc_states <- x_result %>%
-  filter(geo_value %in% keep) %>%
+  filter(geo_value %in% states_to_show) %>%
   pivot_quantiles_wider(.pred_distn)
 
-x_latest_states <- x_latest %>% filter(geo_value %in% keep)
+x_latest_states <- x_latest %>% filter(geo_value %in% states_to_show)
 
 ggplot(fc_states, aes(target_date, group = time_value, fill = engine_type)) +
   geom_line(
