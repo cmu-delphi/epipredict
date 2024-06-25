@@ -391,7 +391,7 @@ epiarchive and store it as `x_latest`.
 
 ```{r running-arx-forecaster}
 x_result <- x %>%
-  epix_slide(~forecaster(.x),
+  epix_slide(~ forecaster(.x),
     before = 120, ref_time_values = fc_time_values,
     names_sep = NULL
   ) %>%
