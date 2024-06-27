@@ -39,8 +39,8 @@
 #' r
 #'
 #' r %>%
-#'   recipes::prep() %>%
-#'   recipes::bake(case_death_rate_subset)
+#'   prep(case_death_rate_subset) %>%
+#'   bake(case_death_rate_subset)
 step_growth_rate <-
   function(recipe,
            ...,
