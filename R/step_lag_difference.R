@@ -16,12 +16,13 @@
 #' @export
 #' @examples
 #' r <- epi_recipe(case_death_rate_subset) %>%
-#'   step_lag_difference(case_rate, death_rate, horizon = c(7, 14))
+#'   step_lag_difference(case_rate, death_rate, horizon = c(7, 14)) %>%
+#'   step_epi_naomit()
 #' r
 #'
 #' r %>%
-#'   recipes::prep() %>%
-#'   recipes::bake(case_death_rate_subset)
+#'   prep(case_death_rate_subset) %>%
+#'   bake(case_death_rate_subset)
 step_lag_difference <-
   function(recipe,
            ...,
