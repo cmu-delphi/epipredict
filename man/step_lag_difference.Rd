@@ -61,8 +61,8 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
 r
 
 r \%>\%
-  recipes::prep(case_death_rate_subset) \%>\%
-  recipes::bake(case_death_rate_subset)
+  prep(case_death_rate_subset) \%>\%
+  bake(case_death_rate_subset)
 }
 \seealso{
 Other row operation steps: 
