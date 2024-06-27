@@ -21,8 +21,8 @@
 #' r
 #'
 #' r %>%
-#'   recipes::prep(case_death_rate_subset) %>%
-#'   recipes::bake(case_death_rate_subset)
+#'   prep(case_death_rate_subset) %>%
+#'   bake(case_death_rate_subset)
 step_lag_difference <-
   function(recipe,
            ...,
