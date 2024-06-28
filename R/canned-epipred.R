@@ -81,6 +81,7 @@ print.canned_epipred <- function(x, name, ...) {
     }
     cli::cli_li("Time type: {.field {x$metadata$training$time_type}},")
     cli::cli_li("Using data up-to-date as of: {.field {format(x$metadata$training$as_of)}}.")
+    cli::cli_li("With the last data available on {.field {format(max(x$epi_workflow$original_data$time_value))}}")
     cli::cli_end()
   }
   fn_meta()
@@ -103,10 +104,28 @@ print.canned_epipred <- function(x, name, ...) {
     "A total of {.val {nrow(x$predictions)}} prediction{?s}",
     " {?is/are} available for"
   ))
+
   cli::cli_ul(c(
     "{.val {n_geos}} unique geographic region{?s},",
     "At forecast date{?s}: {.val {fds}},",
-    "For target date{?s}: {.val {tds}}."
+    "For target date{?s}: {.val {tds}},"
   ))
+  if (detect_step(x$epi_workflow$pre$actions$recipe$recipe, "adjust_latency")) {
+    latency_step <- keep(x$epi_workflow$pre$mold$blueprint$recipe$steps,
+                         \(x) inherits(x, "step_adjust_latency"))[[1]]
+    latency_per_base_col <- latency_step$shift_cols %>%
+      group_by(latency) %>%
+      reframe(variable = parent_name) %>%
+      distinct() %>%
+      mutate(latency = abs(latency)) %>%
+      relocate(variable, latency)
+    if (nrow(latency_per_base_col)>1) {
+      intro_text <- "Latency adjusted per column: "
+    } else {
+      intro_text <- "Latency adjusted for "
+    }
+    latency_info <- paste0(intro_text, paste(apply(latency_per_base_col, 1, paste0, collapse = "="), collapse = ", "))
+    cli::cli_ul(latency_info)
+  }
   cli::cli_text("")
 }

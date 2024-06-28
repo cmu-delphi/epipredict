@@ -96,6 +96,41 @@ test_that("arx_forecaster snapshots", {
   expect_false(all(arx2$predictions == arx3$predictions))
 })
 
+test_that("arx_forecasrte output format snapshots", {
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value >= as.Date("2021-12-01"))
+  out1 <- arx_forecaster(
+    jhu, "death_rate",
+    c("case_rate", "death_rate")
+  )
+  expect_equal(as.Date(out1$metadata$forecast_created), Sys.Date())
+  out1$metadata$forecast_created <- as.Date("0999-01-01")
+  expect_snapshot(out1)
+  out2 <- arx_forecaster(jhu, "case_rate",
+    c("case_rate", "death_rate"),
+    trainer = quantile_reg(),
+    args_list = arx_args_list(
+      quantile_levels = 1:9 / 10,
+      adjust_latency = "extend_lags",
+      forecast_date = as.Date("2022-01-03")
+    )
+  )
+  expect_equal(as.Date(out2$metadata$forecast_created), Sys.Date())
+  out2$metadata$forecast_created <- as.Date("0999-01-01")
+  expect_snapshot(out2)
+  out3 <- arx_forecaster(jhu, "death_rate",
+    c("case_rate", "death_rate"),
+    trainer = quantile_reg(),
+    args_list = arx_args_list(
+      adjust_latency = "extend_ahead",
+      forecast_date = as.Date("2022-01-03")
+    )
+  )
+  expect_equal(as.Date(out3$metadata$forecast_created), Sys.Date())
+  out3$metadata$forecast_created <- as.Date("0999-01-01")
+  expect_snapshot(out3)
+})
+
 test_that("arx_classifier snapshots", {
   arc1 <- arx_classifier(
     case_death_rate_subset %>%

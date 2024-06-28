@@ -123,7 +123,7 @@ map_if <- function(.x, .p, .f, ...) {
   .x
 }
 .rlang_purrr_probe <- function(.x, .p, ...) {
-  if (is_logical(.p)) {
+  if (rlang::is_logical(.p)) {
     stopifnot(length(.p) == length(.x))
     .p
   } else {

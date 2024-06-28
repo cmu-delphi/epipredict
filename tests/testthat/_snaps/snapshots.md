@@ -1059,6 +1059,77 @@
     18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
+# arx_forecasrte output format snapshots
+
+    Code
+      out1
+    Message
+      == A basic forecaster of type ARX Forecaster ===================================
+      
+      This forecaster was fit on 999-01-01.
+      
+      Training data was an <epi_df> with:
+      * Geography: state,
+      * Time type: day,
+      * Using data up-to-date as of: 2022-05-31 14:08:25.
+      * With the last data available on 2021-12-31
+      
+      -- Predictions -----------------------------------------------------------------
+      
+      A total of 56 predictions are available for
+      * 56 unique geographic regions,
+      * At forecast date: 2021-12-31,
+      * For target date: 2022-01-07,
+      
+
+---
+
+    Code
+      out2
+    Message
+      == A basic forecaster of type ARX Forecaster ===================================
+      
+      This forecaster was fit on 999-01-01.
+      
+      Training data was an <epi_df> with:
+      * Geography: state,
+      * Time type: day,
+      * Using data up-to-date as of: 2022-05-31 14:08:25.
+      * With the last data available on 2021-12-31
+      
+      -- Predictions -----------------------------------------------------------------
+      
+      A total of 56 predictions are available for
+      * 56 unique geographic regions,
+      * At forecast date: 2022-01-03,
+      * For target date: 2022-01-10,
+      * Latency adjusted per column: case_rate=3, death_rate=3
+      
+
+---
+
+    Code
+      out3
+    Message
+      == A basic forecaster of type ARX Forecaster ===================================
+      
+      This forecaster was fit on 999-01-01.
+      
+      Training data was an <epi_df> with:
+      * Geography: state,
+      * Time type: day,
+      * Using data up-to-date as of: 2022-05-31 14:08:25.
+      * With the last data available on 2021-12-31
+      
+      -- Predictions -----------------------------------------------------------------
+      
+      A total of 56 predictions are available for
+      * 56 unique geographic regions,
+      * At forecast date: 2022-01-03,
+      * For target date: 2022-01-10,
+      * Latency adjusted for death_rate=3
+      
+
 # arx_classifier snapshots
 
     structure(list(geo_value = c("ak", "al", "ar", "az", "ca", "co", 

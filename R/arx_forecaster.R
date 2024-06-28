@@ -119,16 +119,25 @@ arx_fcast_epi_workflow <- function(
   if (!(is.null(trainer) || is_regression(trainer))) {
     cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
-  # forecast_date is first what they set;
+  # forecast_date is above all what they set;
   # if they don't and they're not adjusting latency, it defaults to the max time_value
-  # if they're adjusting as_of, it defaults to the as_of
-  latency_adjust_fd <- if (is.null(args_list$adjust_latency)) {
-    max(epi_data$time_value)
+  # if they're adjusting, it defaults to the as_of
+  if (is.null(args_list$adjust_latency)) {
+    forecast_date_default <- max(epi_data$time_value)
+    if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
+      cli::cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+    }
   } else {
-    attributes(epi_data)$metadata$as_of
+    forecast_date_default <- attributes(epi_data)$metadata$as_of
   }
-  forecast_date <- args_list$forecast_date %||% latency_adjust_fd
+  forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
+  if (forecast_date + args_list$ahead != target_date) {
+    cli::cli_warn(c(
+      "`forecast_date` + `ahead` must equal `target_date`.",
+      i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+    ))
+  }
 
   lags <- arx_lags_validator(predictors, args_list$lags)
 
@@ -140,17 +149,17 @@ arx_fcast_epi_workflow <- function(
   }
   r <- r %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead)
-  method <- args_list$adjust_latency
-  if (!is.null(method)) {
-    if (method == "extend_ahead") {
+  method_adjust_latency <- args_list$adjust_latency
+  if (!is.null(method_adjust_latency)) {
+    if (method_adjust_latency == "extend_ahead") {
       r <- r %>% step_adjust_latency(all_outcomes(),
         fixed_forecast_date = forecast_date,
-        method = method
+        method = method_adjust_latency
       )
-    } else if (method == "extend_lags") {
+    } else if (method_adjust_latency == "extend_lags") {
       r <- r %>% step_adjust_latency(all_predictors(),
         fixed_forecast_date = forecast_date,
-        method = method
+        method = method_adjust_latency
       )
     }
   }
@@ -215,8 +224,18 @@ arx_fcast_epi_workflow <- function(
 #' @param target_date Date. The date for which the forecast is intended. The
 #'   default `NULL` will attempt to determine this automatically as
 #'   `forecast_date + ahead`.
-#' @param adjust_latency Character or `NULL`. one of the `method`s of
-#'   `step_adjust_latency`, or `NULL` (in which case there is no adjustment).
+#' @param adjust_latency Character or `NULL`. One of the `method`s of
+#'   [step_adjust_latency()], or `NULL` (in which case there is no adjustment).
+#'   If there is a difference between the `forecast_date` and the last day of
+#'   data, this determines how to shift the model to account for this
+#'   difference. The options are:
+#'   - `NULL` the default, assumes the `forecast_date` is the last day of data
+#'   - `"extend_ahead"`: increase the `ahead` by the latency so it's relative to
+#'   the last day of data. If the last day of data was 3 days ago, the ahead
+#'   becomes `ahead+3`.
+#'   - `"extend_lags"`: increase the lags so they're relative to the actual forecast date. If the lags are
+#'   `c(0,7,14)` and the last day of data was 3 days ago, the lags become
+#'   `c(3,10,17)`.
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.

@@ -81,7 +81,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 get_latent_column_tibble <- function(
     shift_cols, new_data, forecast_date, latency,
     sign_shift, info, epi_keys_checked, call = caller_env()) {
-  shift_cols <- shift_cols %>% mutate(original_name = glue::glue("{prefix}{shift}_{terms}"))
+  shift_cols <- shift_cols %>% mutate(original_name = glue::glue("{prefix}{shift}_{terms}"), parent_name = terms)
   if (is.null(latency)) {
     shift_cols <- shift_cols %>%
       rowwise() %>%
