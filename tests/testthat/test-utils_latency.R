@@ -37,16 +37,18 @@ modified_data <-
 modified_data %>% tail()
 as_of - (modified_data %>% filter(!is.na(ahead_4_case_rate)) %>% pull(time_value) %>% max())
 all_shift_cols <- tibble::tribble(
-  ~terms, ~shift, ~prefix, ~original_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
-  "case_rate", 3, "lag_", "lag_3_case_rate", 5, 8, "lag_8_case_rate", "numeric", "predictor",
-  "death_rate", 7, "lag_", "lag_7_death_rate", 4, 11, "lag_11_death_rate", "numeric", "predictor",
-  "case_rate", 4, "ahead_", "ahead_4_case_rate", -5, 9, "ahead_9_case_rate", "numeric", "outcome"
+  ~terms, ~shift, ~prefix, ~original_name, ~parent_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
+  "case_rate", 3, "lag_", "lag_3_case_rate", "case_rate", 5, 8, "lag_8_case_rate", "numeric", "predictor",
+  "death_rate", 7, "lag_", "lag_7_death_rate", "death_rate", 4, 11, "lag_11_death_rate", "numeric", "predictor",
+  "case_rate", 4, "ahead_", "ahead_4_case_rate", "case_rate", -5, 9, "ahead_9_case_rate", "numeric", "outcome"
 )
 test_recipe <- epi_recipe(modified_data) %>%
   step_epi_lag(case_rate, lag = c(3)) %>%
   step_epi_lag(death_rate, lag = 7) %>%
   step_epi_ahead(case_rate, ahead = 4)
 shift_cols <- construct_shift_tibble(c("case_rate", "death_rate"), test_recipe, "step_epi_lag", "lag")
+
+
 test_that("construct_shift_tibble constructs the right tibble", {
   expected_shift_cols <- tibble::tribble(
     ~terms, ~shift, ~prefix,
@@ -114,17 +116,17 @@ test_that("get_latent_column_tibble assigns given latencies", {
     shift_cols, modified_data, as_of, 50, 1, info
   )
   weird_latencies <- tibble::tribble(
-    ~terms, ~shift, ~prefix, ~original_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
-    "case_rate", 3, "lag_", "lag_3_case_rate", 50, 53, "lag_53_case_rate", "numeric", "predictor",
-    "death_rate", 7, "lag_", "lag_7_death_rate", 50, 57, "lag_57_death_rate", "numeric", "predictor",
+    ~terms, ~shift, ~prefix, ~original_name, ~parent_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
+    "case_rate", 3, "lag_", "lag_3_case_rate", "case_rate", 50, 53, "lag_53_case_rate", "numeric", "predictor",
+    "death_rate", 7, "lag_", "lag_7_death_rate", "death_rate", 50, 57, "lag_57_death_rate", "numeric", "predictor",
   )
   expect_equal(both_lag, weird_latencies)
 
   # supposing we add the latencies by hand, and they're different, and in a different order
   weird_latencies <- tibble::tribble(
-    ~terms, ~shift, ~prefix, ~original_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
-    "case_rate", 3, "lag_", "lag_3_case_rate", 70, 73, "lag_73_case_rate", "numeric", "predictor",
-    "death_rate", 7, "lag_", "lag_7_death_rate", 30, 37, "lag_37_death_rate", "numeric", "predictor",
+    ~terms, ~shift, ~prefix, ~original_name, ~parent_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
+    "case_rate", 3, "lag_", "lag_3_case_rate", "case_rate", 70, 73, "lag_73_case_rate", "numeric", "predictor",
+    "death_rate", 7, "lag_", "lag_7_death_rate", "death_rate", 30, 37, "lag_37_death_rate", "numeric", "predictor",
   )
   both_lag <- get_latent_column_tibble(
     shift_cols, modified_data, as_of, c(death_rate = 30, case_rate = 70), 1, info
