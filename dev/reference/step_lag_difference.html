@@ -146,7 +146,8 @@ sequence of any existing operations.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">case_death_rate_subset</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">step_lag_difference</span><span class="op">(</span><span class="va">case_rate</span>, <span class="va">death_rate</span>, horizon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">step_lag_difference</span><span class="op">(</span><span class="va">case_rate</span>, <span class="va">death_rate</span>, horizon <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="step_epi_naomit.html">step_epi_naomit</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">r</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span>
@@ -159,34 +160,31 @@ sequence of any existing operations.</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Operations </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1. Calculating lag_difference for: <span style="color: #0000BB;">case_rate</span> and <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7, 14</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 2. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 3. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">case_death_rate_subset</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span><span style="color: #BBBB00;">!</span> No training data was supplied to `prep()`.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Unlike a <span style="color: #0000BB;">&lt;recipe&gt;</span>, an <span style="color: #0000BB;">&lt;epi_recipe&gt;</span> does not</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> store the full template data in the object.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> Please supply the training data to the `prep()` function,</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #BBBB00;">!</span> to avoid addtional warning messages.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 20,496 x 8 with metadata:</span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">case_death_rate_subset</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="va">case_death_rate_subset</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 19,712 x 8 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2022-05-31 19:08:25.791826</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 20,496 × 8</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 19,712 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    geo_value time_value case_rate death_rate lag_diff_7_case_rate</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> ak        2020-12-31      35.9      0.158                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> al        2020-12-31      65.1      0.438                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> ar        2020-12-31      66.0      1.27                    <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> as        2020-12-31       0        0                       <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> az        2020-12-31      76.8      1.10                    <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> ca        2020-12-31      96.0      0.751                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> co        2020-12-31      35.8      0.649                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> ct        2020-12-31      52.1      0.819                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> dc        2020-12-31      31.0      0.601                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> de        2020-12-31      65.2      0.807                   <span style="color: #BB0000;">NA</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 20,486 more rows</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> ak        2021-01-14      37.4     0.098<span style="text-decoration: underline;">8</span>               -<span style="color: #BB0000;">4.07</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> al        2021-01-14      73.6     2.51                 -<span style="color: #BB0000;">7.70</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> ar        2021-01-14      87.7     1.42                -<span style="color: #BB0000;">10.3</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> as        2021-01-14       0       0                     0    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> az        2021-01-14     124.      2.14                  0.117</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> ca        2021-01-14     108.      1.21                  2.37 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> co        2021-01-14      40.0     0.526                -<span style="color: #BB0000;">6.33</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> ct        2021-01-14      75.4     1.07                  6.97 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> dc        2021-01-14      41.5     0.681                 6.07 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> de        2021-01-14      75.1     0.792                -<span style="color: #BB0000;">5.53</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 19,702 more rows</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 3 more variables: lag_diff_14_case_rate &lt;dbl&gt;, lag_diff_7_death_rate &lt;dbl&gt;,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   lag_diff_14_death_rate &lt;dbl&gt;</span></span>
 </code></pre></div>
