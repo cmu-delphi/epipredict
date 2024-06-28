@@ -55,12 +55,15 @@ arx_classifier <- function(
   wf <- arx_class_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- fit(wf, epi_data)
 
-  latency_adjust_fd <- if (is.null(args_list$adjust_latency)) {
-    max(epi_data$time_value)
+  if (is.null(args_list$adjust_latency)) {
+    forecast_date_default <- max(epi_data$time_value)
+    if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
+      cli::cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+    }
   } else {
-    attributes(epi_data)$metadata$as_of
+    forecast_date_default <- attributes(epi_data)$metadata$as_of
   }
-  forecast_date <- args_list$forecast_date %||% latency_adjust_fd
+  forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   preds <- forecast(
     wf,
@@ -132,6 +135,18 @@ arx_class_epi_workflow <- function(
   if (!(is.null(trainer) || is_classification(trainer))) {
     cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
   }
+
+  if (is.null(args_list$adjust_latency)) {
+    forecast_date_default <- max(epi_data$time_value)
+    if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
+      cli::cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+    }
+  } else {
+    forecast_date_default <- attributes(epi_data)$metadata$as_of
+  }
+  forecast_date <- args_list$forecast_date %||% forecast_date_default
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
+
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
@@ -180,7 +195,16 @@ arx_class_epi_workflow <- function(
   }
   o2 <- rlang::sym(paste0("ahead_", args_list$ahead, "_", o))
   r <- r %>%
-    step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome") %>%
+    step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome")
+  method_adjust_latency <- args_list$adjust_latency
+  if (!is.null(method_adjust_latency)) {
+    # only extend_ahead is supported atm
+    r <- r %>% step_adjust_latency(all_outcomes(),
+      fixed_forecast_date = forecast_date,
+      method = method_adjust_latency
+    )
+  }
+  r <- r %>%
     recipes::step_mutate(
       outcome_class = cut(!!o2, breaks = args_list$breaks),
       role = "outcome"
@@ -267,6 +291,7 @@ arx_class_args_list <- function(
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
+    adjust_latency = NULL,
     outcome_transform = c("growth_rate", "lag_difference"),
     breaks = 0.25,
     horizon = 7L,
@@ -284,7 +309,10 @@ arx_class_args_list <- function(
   outcome_transform <- rlang::arg_match(outcome_transform)
 
   arg_is_scalar(ahead, n_training, horizon, log_scale)
-  arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
+  arg_is_scalar(forecast_date, target_date, adjust_latency, allow_null = TRUE)
+  if (adjust_latency == "adjust_lags") {
+    cli::cli_abort("step_adjust_latency is not yet implemented for lagged differences and growth rates")
+  }
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags, horizon)
   arg_is_numeric(breaks)
@@ -325,6 +353,7 @@ arx_class_args_list <- function(
       breaks,
       forecast_date,
       target_date,
+      adjust_latency,
       outcome_transform,
       max_lags,
       horizon,
