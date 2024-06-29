@@ -20,6 +20,10 @@ epi_recipe.default <- function(x, ...) {
   if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x)) {
     x <- x[1, , drop = FALSE]
   }
+  cli_warn(
+    "epi_recipe has been called with a non-epi_df object, returning a regular recipe. Various
+    step_epi_* functions will not work."
+  )
   recipes::recipe(x, ...)
 }
 
@@ -147,6 +151,10 @@ epi_recipe.formula <- function(formula, data, ...) {
   data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
+    cli_warn(
+      "epi_recipe has been called with a non-epi_df object, returning a regular recipe. Various
+    step_epi_* functions will not work."
+    )
     return(recipes::recipe(formula, data, ...))
   }
 
@@ -333,15 +341,11 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #' illustrations of the different types of updates.
 #'
 #' @param x A `epi_workflow` or `epi_recipe` object
-#'
 #' @param which_step the number or name of the step to adjust
-#'
 #' @param ... Used to input a parameter adjustment
-#'
 #' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
 #'
-#' @return
-#' `x`, updated with the adjustment to the specified `epi_recipe` step.
+#' @return `x`, updated with the adjustment to the specified `epi_recipe` step.
 #'
 #' @export
 #' @examples
@@ -383,8 +387,7 @@ adjust_epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_workflow <- function(
-    x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+adjust_epi_recipe.epi_workflow <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
   recipe <- adjust_epi_recipe(workflows::extract_preprocessor(x), which_step, ...)
 
   update_epi_recipe(x, recipe, blueprint = blueprint)
@@ -392,8 +395,7 @@ adjust_epi_recipe.epi_workflow <- function(
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_recipe <- function(
-    x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
   if (!(is.numeric(which_step) || is.character(which_step))) {
     cli::cli_abort(
       c("`which_step` must be a number or a character.",
