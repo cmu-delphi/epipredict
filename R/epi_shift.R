@@ -21,7 +21,13 @@ epi_shift_single <- function(x, col, shift_val, newname, key_cols) {
 #' the future back to today
 #' @keywords internal
 get_sign <- function(object) {
-  if (object$prefix == "lag_") {
+  if (!is.null(object$prefix)) {
+    if (object$prefix == "lag_") {
+      return(1)
+    } else {
+      return(-1)
+    }
+  } else if (object$method == "extend_lags") {
     return(1)
   } else {
     return(-1)
@@ -32,13 +38,28 @@ get_sign <- function(object) {
 #' checks missing in `epi_shift_single`
 #' @keywords internal
 #' @importFrom cli cli_abort
+#' @importFrom tidyr expand_grid
+#' @importFrom dplyr mutate left_join join_by
 add_shifted_columns <- function(new_data, object, amount) {
   sign_shift <- get_sign(object)
-  grid <- tidyr::expand_grid(col = object$columns, amount = amount) %>%
-    dplyr::mutate(
-      newname = glue::glue("{object$prefix}{amount}_{col}"),
-      shift_val = sign_shift * amount,
-      amount = NULL
+  latency_table <- attributes(new_data)$metadata$latency_table
+  shift_sign_lat <- attributes(new_data)$metadata$shift_sign
+  if (!is.null(latency_table) &&
+    shift_sign_lat == sign_shift) {
+    #TODO this doesn't work on lags of transforms
+    rel_latency <- latency_table %>% filter(col_name %in% object$columns)
+  } else {
+    rel_latency <- tibble(col_name = object$columns, latency = 0L)
+  }
+  grid <- expand_grid(col = object$columns, amount = sign_shift *amount) %>%
+    left_join(rel_latency, by = join_by(col == col_name), ) %>%
+    tidyr::replace_na(list(latency = 0)) %>%
+    mutate(
+      shift_val = amount + latency) %>%
+    mutate(
+      newname = glue::glue("{object$prefix}{abs(shift_val)}_{col}"), # name is always positive
+      amount = NULL,
+      latency = NULL
     )
 
   ## ensure no name clashes
@@ -56,8 +77,12 @@ add_shifted_columns <- function(new_data, object, amount) {
     dplyr::full_join,
     by = ok
   )
-  dplyr::full_join(new_data, shifted, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(kill_time_value(ok)))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup()
+  processed <- new_data %>%
+    full_join(shifted, by = ok) %>%
+    group_by(dplyr::across(dplyr::all_of(kill_time_value(ok)))) %>%
+    arrange(time_value) %>%
+    ungroup() %>%
+    as_epi_df()
+  attributes(processed)$metadata <- attributes(new_data)$metadata
+  return(processed)
 }

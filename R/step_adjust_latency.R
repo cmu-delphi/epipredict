@@ -74,8 +74,8 @@
 #' attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
 #'
 #' r <- epi_recipe(case_death_rate_subset) %>%
-#'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_adjust_latency(method = "extend_ahead") %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r
 #'
@@ -113,15 +113,14 @@ step_adjust_latency <-
         i = "Use `tidyselect` methods to choose columns to lag."
       ))
     }
-    if ((method == "extend_ahead") && (!detect_step(recipe, "epi_ahead"))) {
-      cli::cli_abort(
-        "If `method` is {.val extend_ahead}, then a step
-        must have already added an outcome."
+    if ((method == "extend_ahead") && (detect_step(recipe, "epi_ahead"))) {
+      cli::cli_warn(
+        "If `method` is {.val extend_ahead}, then the previous `step_epi_ahead` won't be modified."
       )
-    } else if ((method == "extend_lags") && (!detect_step(recipe, "epi_lag"))) {
-      cli::cli_abort(
-        "If `method` is {.val extend_lags} or {.val locf}, then a step
-        must have already added a predictor."
+    } else if ((method == "extend_lags") && detect_step(recipe, "epi_lag")) {
+      cli::cli_warn(
+        "If `method` is {.val extend_lags} or {.val locf},
+then the previous `step_epi_lag`s won't work with modified data."
       )
     }
     if (detect_step(recipe, "naomit")) {
@@ -132,10 +131,18 @@ step_adjust_latency <-
       cli::cli_abort("Only one of `fixed_latency` and `fixed_forecast_date`
  can be non-`NULL` at a time!")
     }
+    if (length(fixed_latency > 1)) {
+      template <- recipe$template
+      data_names <- names(template)[!names(template) %in% epi_keys(template)]
+      wrong_names <- names(fixed_latency)[!names(fixed_latency) %in% data_names]
+      if (length(wrong_names) > 0) {
+        cli::cli_abort("{.val fixed_latency} contains names not in the template dataset: {wrong_names}")
+      }
+    }
 
     method <- rlang::arg_match(method)
     terms_used <- recipes_eval_select(enquos(...), recipe$template, recipe$term_info)
-    if (length(terms_used) == 0) {
+    if (is_empty(terms_used)) {
       terms_used <- recipe$term_info %>%
         filter(role == "raw") %>%
         pull(variable)
@@ -146,18 +153,6 @@ step_adjust_latency <-
     } else if (method == "extend_lags") {
       rel_step_type <- "step_epi_lag"
       shift_name <- "lag"
-    }
-    relevant_shifts <- construct_shift_tibble(terms_used, recipe, rel_step_type, shift_name)
-
-    if (!any(map_lgl(
-      recipe$steps,
-      function(recipe_step) inherits(recipe_step, rel_step_type)
-    ))) {
-      cli::cli_abort(glue::glue(
-        "There is no `{rel_step_type}` defined before this.",
-        " For the method `extend_{shift_name}` of `step_adjust_latency`,",
-        " at least one {shift_name} must be previously defined."
-      ))
     }
 
     recipes::add_step(
@@ -170,7 +165,7 @@ step_adjust_latency <-
         trained = trained,
         forecast_date = fixed_forecast_date,
         latency = fixed_latency,
-        shift_cols = relevant_shifts,
+        latency_table = NULL,
         default = default,
         keys = epi_keys(recipe),
         columns = columns,
@@ -181,7 +176,7 @@ step_adjust_latency <-
   }
 
 step_adjust_latency_new <-
-  function(terms, role, trained, forecast_date, latency, shift_cols, time_type, default,
+  function(terms, role, trained, forecast_date, latency, latency_table, time_type, default,
            keys, method, epi_keys_checked, columns, skip, id) {
     step(
       subclass = "adjust_latency",
@@ -192,7 +187,7 @@ step_adjust_latency_new <-
       trained = trained,
       forecast_date = forecast_date,
       latency = latency,
-      shift_cols = shift_cols,
+      latency_table = latency_table,
       default = default,
       keys = keys,
       columns = columns,
@@ -200,14 +195,44 @@ step_adjust_latency_new <-
       id = id
     )
   }
-
+#' @importFrom recipes recipes_eval_select
+construct_latency_table <- function(x, latency, training, info) {
+  return(latency_table)
+}
 # lags introduces max(lags) NA's after the max_time_value.
 #' @export
 #' @importFrom glue glue
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
+  sign_shift <- get_sign(x)
+  latency <- x$latency
+  forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked)
+  # construct the latency table
+  latency_table <- names(training)[!names(training) %in% epi_keys(training)] %>%
+    tibble(col_name = .)
+    if (length(recipes_eval_select(x$terms, training, info)) > 0) {
+    latency_table <- latency_table %>% filter(col_name %in%
+      recipes_eval_select(x$terms, training, info))
+    }
+
+  if (is.null(latency)) {
+    latency_table <- latency_table %>%
+      mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, x$epi_keys_checked))
+  } else if (length(latency) > 1) {
+    # if latency has a length, it must also have named elements. We assign based on comparing the name in the list
+    # with the column names, and drop any which don't have a latency assigned
+    latency_table <- latency_table %>%
+      filter(col_name %in% names(latency)) %>%
+      rowwise() %>%
+      mutate(latency = unname(latency[names(latency) == col_name])) %>%
+      ungroup()
+  } else {
+    latency_table <- latency_table %>% mutate(latency = latency)
+  }
+  attributes(training)$metadata$latency_table <- latency_table
   # get the columns used, even if it's all of them
   terms_used <- x$terms
-  if (length(terms_used) == 0) {
+  # TODO replace with is_empty as in bake.recipe
+  if (is_empty(terms_used)) {
     terms_used <- info %>%
       filter(role == "raw") %>%
       pull(variable)
@@ -215,20 +240,10 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   # get and check the max_time and forecast_date are the right kinds of dates
   forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked)
 
-  # infer the correct columns to be working with from the previous
-  # transformations
-  x$prefix <- x$shift_cols$prefix[[1]]
-  sign_shift <- get_sign(x)
-  latency_cols <- get_latent_column_tibble(
-    x$shift_cols, training, forecast_date,
-    x$latency, sign_shift, info, x$epi_keys_checked
-  )
-
-  if ((x$method == "extend_ahead") || (x$method == "extend_lags")) {
     # check that the shift amount isn't too extreme
-    latency <- max(latency_cols$latency)
+    latency <- max(latency_table$latency)
     time_type <- attributes(training)$metadata$time_type
-    i_latency <- which.max(latency_cols$latency)
+    i_latency <- which.max(latency_table$latency)
     if (
       (grepl("day", time_type) && (latency >= 10)) ||
         (grepl("week", time_type) && (latency >= 4)) ||
@@ -238,29 +253,27 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     ) {
       cli::cli_warn(paste(
         "!" = paste(
-          "The shift has been adjusted by {latency}, ",
+          "The latency is {latency}, ",
           "which is questionable for it's `time_type` of ",
-          "{time_type}"
+          "{time_type}."
         ),
-        "i" = "input shift: {latency_cols$shift[[i_latency]]}",
-        "i" = "latency adjusted shift: {latency_cols$effective_shift[[i_latency]]}",
+        "i" = "latency: {latency_table$latency[[i_latency]]}",
         "i" = "`max_time` = {max_time} -> `forecast_date` = {forecast_date}"
       ))
     }
-  }
 
   step_adjust_latency_new(
-    terms = latency_cols$original_name,
-    role = latency_cols$role[[1]],
+    terms = x$terms,
+    role = x$role,
     trained = TRUE,
-    shift_cols = latency_cols,
     forecast_date = forecast_date,
-    latency = unique(latency_cols$latency),
+    latency = unique(latency_table$latency),
+    latency_table = latency_table,
     default = x$default,
     keys = x$keys,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
-    columns = recipes_eval_select(latency_cols$original_name, training, info),
+    columns = recipes_eval_select(latency_table$col_name, training, info),
     skip = x$skip,
     id = x$id
   )
@@ -269,14 +282,19 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 #' @importFrom dplyr %>% pull
 #' @export
 bake.step_adjust_latency <- function(object, new_data, ...) {
+  if (!isa(new_data, "epi_df")) {
+    new_data <- new_data %>% as_epi_df(as_of = object$forecast_date)
+  }
+  attributes(new_data)$metadata$latency_method <- object$method
+  attributes(new_data)$metadata$shift_sign <- get_sign(object)
+  attributes(new_data)$metadata$latency_table <- object$latency_table
   if ((object$method == "extend_ahead") || (object$method == "extend_lags")) {
     keys <- object$keys
     return(
-      extend_either(new_data, object$shift_cols, keys)
+      new_data
     )
   }
 }
-
 #' @export
 print.step_adjust_latency <-
   function(x, width = max(20, options$width - 35), ...) {
@@ -314,8 +332,8 @@ print.step_adjust_latency <-
     if (x$trained) {
       elements <- x$columns
     } else {
-      if (length(x$terms) == 0) {
-        elements <- "all previous predictors"
+      if (is_empty(x$terms)) {
+        elements <- "all future predictors"
       } else {
         elements <- lapply(x$terms, function(x) {
           rlang::expr_deparse(rlang::quo_get_expr(x), width = Inf)

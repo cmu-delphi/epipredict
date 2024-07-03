@@ -42,9 +42,9 @@ test_that("Use ahead + max time value from pre, fit, post", {
 })
 test_that("latency adjust doesn't interfere with correct target date", {
   r_latent <- epi_recipe(jhu) %>%
+    step_adjust_latency(method = "extend_ahead") %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
-    step_adjust_latency(method = "extend_ahead") %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
   wf_latent <- epi_workflow(r_latent, parsnip::linear_reg()) %>% fit(jhu)

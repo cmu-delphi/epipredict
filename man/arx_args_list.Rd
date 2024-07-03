@@ -42,8 +42,20 @@ max time value if there is no latency adjustment, or as the \code{as_of} of
 default \code{NULL} will attempt to determine this automatically as
 \code{forecast_date + ahead}.}
 
-\item{adjust_latency}{Character or \code{NULL}. one of the \code{method}s of
-\code{step_adjust_latency}, or \code{NULL} (in which case there is no adjustment).}
+\item{adjust_latency}{Character or \code{NULL}. One of the \code{method}s of
+\code{\link[=step_adjust_latency]{step_adjust_latency()}}, or \code{NULL} (in which case there is no adjustment).
+If there is a difference between the \code{forecast_date} and the last day of
+data, this determines how to shift the model to account for this
+difference. The options are:
+\itemize{
+\item \code{NULL} the default, assumes the \code{forecast_date} is the last day of data
+\item \code{"extend_ahead"}: increase the \code{ahead} by the latency so it's relative to
+the last day of data. If the last day of data was 3 days ago, the ahead
+becomes \code{ahead+3}.
+\item \code{"extend_lags"}: increase the lags so they're relative to the actual forecast date. If the lags are
+\code{c(0,7,14)} and the last day of data was 3 days ago, the lags become
+\code{c(3,10,17)}.
+}}
 
 \item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of

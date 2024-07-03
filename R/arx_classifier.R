@@ -194,8 +194,6 @@ arx_class_epi_workflow <- function(
     }
   }
   o2 <- rlang::sym(paste0("ahead_", args_list$ahead, "_", o))
-  r <- r %>%
-    step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome")
   method_adjust_latency <- args_list$adjust_latency
   if (!is.null(method_adjust_latency)) {
     # only extend_ahead is supported atm
@@ -205,7 +203,9 @@ arx_class_epi_workflow <- function(
     )
   }
   r <- r %>%
-    recipes::step_mutate(
+    step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome")
+  r <- r %>%
+    step_mutate(
       outcome_class = cut(!!o2, breaks = args_list$breaks),
       role = "outcome"
     ) %>%
@@ -222,10 +222,6 @@ arx_class_epi_workflow <- function(
       drop_na = FALSE
     )
   }
-
-
-  forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
@@ -310,9 +306,6 @@ arx_class_args_list <- function(
 
   arg_is_scalar(ahead, n_training, horizon, log_scale)
   arg_is_scalar(forecast_date, target_date, adjust_latency, allow_null = TRUE)
-  if (adjust_latency == "adjust_lags") {
-    cli::cli_abort("step_adjust_latency is not yet implemented for lagged differences and growth rates")
-  }
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags, horizon)
   arg_is_numeric(breaks)
