@@ -143,12 +143,7 @@ arx_fcast_epi_workflow <- function(
 
   # --- preprocessor
   r <- epi_recipe(epi_data)
-  for (l in seq_along(lags)) {
-    p <- predictors[l]
-    r <- step_epi_lag(r, !!p, lag = lags[[l]])
-  }
-  r <- r %>%
-    step_epi_ahead(!!outcome, ahead = args_list$ahead)
+  # adjust latency if the user asks
   method_adjust_latency <- args_list$adjust_latency
   if (!is.null(method_adjust_latency)) {
     if (method_adjust_latency == "extend_ahead") {
@@ -163,6 +158,12 @@ arx_fcast_epi_workflow <- function(
       )
     }
   }
+  for (l in seq_along(lags)) {
+    p <- predictors[l]
+    r <- step_epi_lag(r, !!p, lag = lags[[l]])
+  }
+  r <- r %>%
+    step_epi_ahead(!!outcome, ahead = args_list$ahead)
   r <- r %>%
     step_epi_naomit() %>%
     step_training_window(n_recent = args_list$n_training)

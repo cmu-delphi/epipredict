@@ -63,6 +63,7 @@ print.alist <- function(x, ...) {
 }
 
 #' @export
+#' @importFrom hardhat extract_recipe
 print.canned_epipred <- function(x, name, ...) {
   d <- cli::cli_div(theme = list(rule = list("line-type" = "double")))
   cli::cli_rule("A basic forecaster of type {name}")
@@ -110,19 +111,33 @@ print.canned_epipred <- function(x, name, ...) {
     "At forecast date{?s}: {.val {fds}},",
     "For target date{?s}: {.val {tds}},"
   ))
-  if (detect_step(x$epi_workflow$pre$actions$recipe$recipe, "adjust_latency")) {
-    latency_step <- keep(x$epi_workflow$pre$mold$blueprint$recipe$steps,
-                         \(x) inherits(x, "step_adjust_latency"))[[1]]
-    latency_per_base_col <- latency_step$shift_cols %>%
-      group_by(latency) %>%
-      reframe(variable = parent_name) %>%
-      distinct() %>%
-      mutate(latency = abs(latency)) %>%
-      relocate(variable, latency)
-    if (nrow(latency_per_base_col)>1) {
-      intro_text <- "Latency adjusted per column: "
+  fit_recipe <- extract_recipe(x$epi_workflow)
+  if (detect_step(fit_recipe, "adjust_latency")) {
+    is_adj_latency <- map_lgl(fit_recipe$steps, \(x) inherits(x, "step_adjust_latency"))
+    latency_step <- fit_recipe$steps[is_adj_latency][[1]]
+    # all steps after adjust_latency
+    later_steps <- fit_recipe$steps[-(1:which(is_adj_latency))]
+    if (latency_step$method == "extend_ahead") {
+      step_names <- "step_epi_ahead"
+      type_str <- "Aheads"
+    } else if (latency_step$method == "extend_lags") {
+      step_names <- "step_epi_lag"
+      type_str <- "Lags"
     } else {
-      intro_text <- "Latency adjusted for "
+      step_names <- ""
+      type_str <- "columns locf"
+    }
+    later_steps[[1]]$columns
+    valid_columns <- later_steps %>%
+      keep(\(x) inherits(x, step_names)) %>%
+      purrr::map("columns") %>%
+      reduce(c)
+    latency_per_base_col <- latency_step$latency_table %>%
+      filter(col_name %in% valid_columns) %>% mutate(latency = abs(latency))
+    if (latency_step$method != "locf" && nrow(latency_per_base_col) > 1) {
+      intro_text <- glue::glue("{type_str} adjusted per column: ")
+    } else if (latency_step$method != "locf") {
+      intro_text <- glue::glue("{type_str} adjusted for ")
     }
     latency_info <- paste0(intro_text, paste(apply(latency_per_base_col, 1, paste0, collapse = "="), collapse = ", "))
     cli::cli_ul(latency_info)

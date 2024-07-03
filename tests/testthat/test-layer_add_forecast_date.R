@@ -80,10 +80,12 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
 })
 
 test_that("`layer_add_forecast_date()` infers correct date when using `adjust_latency`", {
-  r_latent <- epi_recipe(jhu) %>%
+  jhu_reasonable_date <- jhu
+  attributes(jhu_reasonable_date)$metadata$as_of <- as.Date("2022-01-03")
+  r_latent <- epi_recipe(jhu_reasonable_date) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-    step_epi_ahead(death_rate, ahead = 7) %>%
     step_adjust_latency(method = "extend_ahead") %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
   frost_latent <- frosting() %>%
@@ -91,7 +93,7 @@ test_that("`layer_add_forecast_date()` infers correct date when using `adjust_la
     layer_add_forecast_date() %>%
     layer_naomit(.pred)
   wf_latent <- epi_workflow(r_latent, parsnip::linear_reg()) %>%
-    fit(jhu) %>%
+    fit(jhu_reasonable_date) %>%
     add_frosting(frost_latent)
   p_latent <- predict(wf_latent, latest)
   expect_equal(

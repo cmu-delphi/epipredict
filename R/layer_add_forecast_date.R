@@ -94,7 +94,7 @@ slather.layer_add_forecast_date <- function(object, components, workflow,
   rlang::check_dots_empty()
   forecast_date <- object$forecast_date %||%
     get_forecast_date_in_layer(
-      extract_preprocessor(workflow),
+      extract_recipe(workflow),
       workflow$fit$meta$max_time_value,
       new_data
     )

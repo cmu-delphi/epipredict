@@ -1,39 +1,3 @@
-#' offset each relevant column by it's appropriate latency
-#' works for either adjusting aheads or lags
-#' note that this may introduce new NA values when one column is shifted farther than another
-#' @param shift_cols a tibble which must have the columns `column`, the name of
-#'   the column to adjust, `latency` the latency of the original column relative
-#'   to the `forecast_date`, `new_name`, the names in `column` adjusted by the
-#'   latencies `latency`
-#' @param new_data just what is says
-#' @param keys the variables which are used as keys
-#' @keywords internal
-extend_either <- function(new_data, shift_cols, keys) {
-  shifted <-
-    shift_cols %>%
-    select(original_name, latency, new_name) %>%
-    pmap(function(original_name, latency, new_name) {
-      epi_shift_single(
-        x = new_data,
-        col = original_name,
-        shift_val = latency,
-        newname = new_name,
-        key_cols = keys
-      )
-    }) %>%
-    reduce(
-      dplyr::full_join,
-      by = keys
-    )
-
-  return(new_data %>%
-    select(-all_of(shift_cols$original_name)) %>% # drop the original versions
-    dplyr::full_join(shifted, by = keys) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(keys[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup())
-}
-
 #' create a table of the columns to modify, their shifts, and their prefixes
 #' @keywords internal
 #' @importFrom dplyr tibble
@@ -62,60 +26,6 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
     unnest(c(terms, shift)) %>%
     unnest(shift)
   return(relevant_shifts)
-}
-
-#' find the columns added with the lags or aheads, and the amounts they have
-#' been changed
-#' @param shift_cols a list of columns to operate on, as created by `construct_shift_tibble`
-#' @param new_data the data transformed so far
-#' @param forecast_date the forecast date
-#' @param latency `NULL`, int, or vector, as described in `step_epi_latency`
-#' @param sign_shift -1 if ahead, 1 if lag
-#' @return a tibble with columns `column` (relevant shifted names), `shift` (the
-#'   amount that one is shifted), `latency` (original columns difference between
-#'   the max `time_value` and `forecast_date` (on a per-initial column basis)),
-#'   `effective_shift` (shift+latency), and `new_name` (adjusted names with the
-#'   effective_shift)
-#' @keywords internal
-#' @importFrom dplyr rowwise left_join join_by
-get_latent_column_tibble <- function(
-    shift_cols, new_data, forecast_date, latency,
-    sign_shift, info, epi_keys_checked, call = caller_env()) {
-  shift_cols <- shift_cols %>% mutate(original_name = glue::glue("{prefix}{shift}_{terms}"), parent_name = terms)
-  if (is.null(latency)) {
-    shift_cols <- shift_cols %>%
-      rowwise() %>%
-      # add the latencies to shift_cols
-      mutate(latency = get_latency(
-        new_data, forecast_date, original_name, shift, sign_shift, epi_keys_checked
-      )) %>%
-      ungroup()
-  } else if (length(latency) > 1) {
-    # if latency has a length, we assign based on comparing the name in the list with the `terms` column
-    shift_cols <- shift_cols %>%
-      rowwise() %>%
-      mutate(latency = unname(latency[names(latency) == terms])) %>%
-      ungroup()
-  } else {
-    shift_cols <- shift_cols %>% mutate(latency = latency)
-  }
-
-  # add the updated names to shift_cols
-  shift_cols <- shift_cols %>%
-    mutate(
-      effective_shift = shift + abs(latency)
-    ) %>%
-    mutate(
-      new_name = glue::glue("{prefix}{effective_shift}_{terms}")
-    )
-  info <- info %>% select(variable, type, role)
-  shift_cols <- left_join(shift_cols, info, by = join_by(original_name == variable))
-  if (length(unique(shift_cols$role)) != 1) {
-    cli::cli_abort("not all roles are the same!",
-      shift_cols = shift_cols
-    )
-  }
-  return(shift_cols)
 }
 
 
@@ -182,7 +92,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked) {
 #' @param sign_shift integer. 1 if lag and -1 if ahead. These represent how you
 #'   need to shift the data to bring the 3 day lagged value to today.
 #' @keywords internal
-get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shift, epi_keys_checked) {
+get_latency <- function(new_data, forecast_date, column, sign_shift, epi_keys_checked) {
   shift_max_date <- new_data %>%
     drop_na(all_of(column))
   # null and "" don't work in `group_by`
@@ -193,7 +103,7 @@ get_latency <- function(new_data, forecast_date, column, shift_amount, sign_shif
     summarise(time_value = max(time_value)) %>%
     pull(time_value) %>%
     min()
-  return(as.integer(sign_shift * (as.Date(forecast_date) - shift_max_date) + shift_amount))
+  return(as.integer(sign_shift * (as.Date(forecast_date) - shift_max_date)))
 }
 
 

@@ -1059,7 +1059,7 @@
     18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
-# arx_forecasrte output format snapshots
+# arx_forecaster output format snapshots
 
     Code
       out1
@@ -1103,7 +1103,7 @@
       * 56 unique geographic regions,
       * At forecast date: 2022-01-03,
       * For target date: 2022-01-10,
-      * Latency adjusted per column: case_rate=3, death_rate=3
+      * Lags adjusted per column: case_rate=3, death_rate=3
       
 
 ---
@@ -1127,7 +1127,7 @@
       * 56 unique geographic regions,
       * At forecast date: 2022-01-03,
       * For target date: 2022-01-10,
-      * Latency adjusted for death_rate=3
+      * Aheads adjusted for death_rate=3
       
 
 # arx_classifier snapshots

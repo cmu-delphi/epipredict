@@ -96,9 +96,9 @@ test_that("arx_forecaster snapshots", {
   expect_false(all(arx2$predictions == arx3$predictions))
 })
 
-test_that("arx_forecasrte output format snapshots", {
+test_that("arx_forecaster output format snapshots", {
   jhu <- case_death_rate_subset %>%
-    dplyr::filter(time_value >= as.Date("2021-12-01"))
+    dplyr::filter(time_value >= as.Date("2021-12-01")) 
   out1 <- arx_forecaster(
     jhu, "death_rate",
     c("case_rate", "death_rate")

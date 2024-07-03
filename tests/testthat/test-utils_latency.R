@@ -22,58 +22,31 @@ old_data <- old_data %>%
 modified_data <-
   old_data %>%
   dplyr::full_join(
-    epi_shift_single(old_data, "case_rate", -4, "ahead_4_case_rate", keys),
+    epi_shift_single(old_data, "case_rate", -4, "case_rate_a", keys),
     by = keys
   ) %>%
   dplyr::full_join(
-    epi_shift_single(old_data, "case_rate", 3, "lag_3_case_rate", keys),
+    epi_shift_single(old_data, "case_rate", 3, "case_rate_b", keys),
     by = keys
   ) %>%
   dplyr::full_join(
-    epi_shift_single(old_data, "death_rate", 7, "lag_7_death_rate", keys),
+    epi_shift_single(old_data, "death_rate", 7, "death_rate_a", keys),
     by = keys
   ) %>%
   arrange(time_value)
-modified_data %>% tail()
-as_of - (modified_data %>% filter(!is.na(ahead_4_case_rate)) %>% pull(time_value) %>% max())
-all_shift_cols <- tibble::tribble(
-  ~terms, ~shift, ~prefix, ~original_name, ~parent_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
-  "case_rate", 3, "lag_", "lag_3_case_rate", "case_rate", 5, 8, "lag_8_case_rate", "numeric", "predictor",
-  "death_rate", 7, "lag_", "lag_7_death_rate", "death_rate", 4, 11, "lag_11_death_rate", "numeric", "predictor",
-  "case_rate", 4, "ahead_", "ahead_4_case_rate", "case_rate", -5, 9, "ahead_9_case_rate", "numeric", "outcome"
-)
-test_recipe <- epi_recipe(modified_data) %>%
-  step_epi_lag(case_rate, lag = c(3)) %>%
-  step_epi_lag(death_rate, lag = 7) %>%
-  step_epi_ahead(case_rate, ahead = 4)
-shift_cols <- construct_shift_tibble(c("case_rate", "death_rate"), test_recipe, "step_epi_lag", "lag")
-
-
-test_that("construct_shift_tibble constructs the right tibble", {
-  expected_shift_cols <- tibble::tribble(
-    ~terms, ~shift, ~prefix,
-    "case_rate", 3, "lag_",
-    "death_rate", 7, "lag_"
-  )
-  expect_equal(shift_cols, expected_shift_cols)
-})
 
 test_that("get_latency works", {
-  expect_equal(get_latency(modified_data, as_of, "lag_7_death_rate", 7, 1, "geo_value"), 4)
-  expect_equal(get_latency(modified_data, as_of, "lag_3_case_rate", 3, 1, "geo_value"), 5)
-  # get_latency does't check the shift_amount
-  expect_equal(get_latency(modified_data, as_of, "lag_3_case_rate", 4, 1, "geo_value"), 6)
-  # ahead works correctly
-  expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, -1, "geo_value"), -5)
-  # setting the wrong sign doubles the shift and gets the sign wrong
-  expect_equal(get_latency(modified_data, as_of, "ahead_4_case_rate", 4, 1, "geo_value"), 5 + 4 * 2)
-  # minimizing over everything decreases the latency
-  expect_equal(get_latency(modified_data, as_of, "lag_7_death_rate", 7, 1, NULL), 3)
+expect_equal(get_latency(modified_data, as_of, "case_rate", 1, "geo_value"), 5)
+expect_equal(get_latency(modified_data, as_of, "case_rate", -1, "geo_value"), -5)
+expect_equal(get_latency(modified_data, as_of, "death_rate", 1, "geo_value"), 4)
+expect_equal(get_latency(modified_data, as_of, "case_rate_a", 1, "geo_value"), 5 + 4)
+expect_equal(get_latency(modified_data, as_of, "case_rate_b", 1, "geo_value"), 5 - 3)
+expect_equal(get_latency(modified_data, as_of, "death_rate_a", 1, "geo_value"), 4 - 7)
 })
 
 test_that("get_latency infers max_time to be the minimum `max time` across the epi_keys", {})
 
-test_that("get_asof works", {
+test_that("set_forecast_date works", {
   info <- tribble(
     ~variable, ~type, ~role, ~source,
     "time_value", "date", "time_value", "original",
@@ -87,99 +60,6 @@ test_that("get_asof works", {
   expect_equal(set_forecast_date(modified_data, info, NULL), as_of)
 })
 
-test_that("get_latent_column_tibble infers latency and works correctly", {
-  info <- tibble(variable = c("lag_3_case_rate", "lag_7_death_rate", "ahead_4_case_rate"), type = "numeric", role = c(rep("predictor", 2), "outcome"), source = "derived")
-
-  case_lag <- get_latent_column_tibble(
-    shift_cols[1, ], modified_data, as_of, NULL, 1, info,
-    epi_keys_checked = "geo_value"
-  )
-  expect_equal(case_lag, all_shift_cols[1, ])
-
-  death_lag <- get_latent_column_tibble(
-    shift_cols[2, ], modified_data, as_of, NULL, 1, info,
-    epi_keys_checked = "geo_value"
-  )
-  expect_equal(death_lag, all_shift_cols[2, ])
-
-  both_lag <- get_latent_column_tibble(
-    shift_cols, modified_data, as_of, NULL, 1, info,
-    epi_keys_checked = "geo_value"
-  )
-  expect_equal(both_lag, all_shift_cols[1:2, ])
-})
-
-test_that("get_latent_column_tibble assigns given latencies", {
-  # non-null latency
-  info <- tibble(variable = c("lag_3_case_rate", "lag_7_death_rate", "ahead_4_case_rate"), type = "numeric", role = c(rep("predictor", 2), "outcome"), source = "derived")
-  both_lag <- get_latent_column_tibble(
-    shift_cols, modified_data, as_of, 50, 1, info
-  )
-  weird_latencies <- tibble::tribble(
-    ~terms, ~shift, ~prefix, ~original_name, ~parent_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
-    "case_rate", 3, "lag_", "lag_3_case_rate", "case_rate", 50, 53, "lag_53_case_rate", "numeric", "predictor",
-    "death_rate", 7, "lag_", "lag_7_death_rate", "death_rate", 50, 57, "lag_57_death_rate", "numeric", "predictor",
-  )
-  expect_equal(both_lag, weird_latencies)
-
-  # supposing we add the latencies by hand, and they're different, and in a different order
-  weird_latencies <- tibble::tribble(
-    ~terms, ~shift, ~prefix, ~original_name, ~parent_name, ~latency, ~effective_shift, ~new_name, ~type, ~role,
-    "case_rate", 3, "lag_", "lag_3_case_rate", "case_rate", 70, 73, "lag_73_case_rate", "numeric", "predictor",
-    "death_rate", 7, "lag_", "lag_7_death_rate", "death_rate", 30, 37, "lag_37_death_rate", "numeric", "predictor",
-  )
-  both_lag <- get_latent_column_tibble(
-    shift_cols, modified_data, as_of, c(death_rate = 30, case_rate = 70), 1, info
-  )
-  expect_equal(both_lag, weird_latencies[1:2, ])
-
-  ahead_shift_cols <- construct_shift_tibble(c("case_rate"), test_recipe, "step_epi_ahead", "ahead")
-  case_ahead <- get_latent_column_tibble(
-    ahead_shift_cols, modified_data, as_of, NULL, -1, info, "geo_value"
-  )
-  expect_equal(case_ahead, all_shift_cols[3, ])
-})
-
-test_that("get_shifted_column_tibble objects to non-columns", {
-  non_shift_cols <- tibble(terms = "not_present", shift = 99, prefix = "lag_")
-  expect_error(
-    get_latent_column_tibble(
-      non_shift_cols, modified_data, as_of, NULL, 1, info
-    ),
-    regexp = "Can't subset elements that don't exist"
-  )
-})
-
-test_that("extend_either works", {
-  keys <- c("geo_value", "time_value")
-  # extend_either doesn't differentiate between the directions, it just moves
-  # things
-  expected_post_shift <-
-    old_data %>%
-    dplyr::full_join(
-      epi_shift_single(old_data, "case_rate", 8, "lag_8_case_rate", keys),
-      by = keys
-    ) %>%
-    dplyr::full_join(
-      epi_shift_single(old_data, "death_rate", 11, "lag_11_death_rate", keys),
-      by = keys
-    ) %>%
-    dplyr::full_join(
-      epi_shift_single(old_data, "case_rate", -9, "ahead_9_case_rate", keys),
-      by = keys
-    ) %>%
-    dplyr::bind_rows(tibble(
-      geo_value = c("place1", "place2"),
-      time_value = as.Date(c("2021-04-23", "2021-04-24")), case_rate = c(NA, NA), death_rate = c(NA, NA),
-      lag_8_case_rate = c(NA, NA), lag_11_death_rate = c(NA, NA), ahead_9_case_rate = c(NA, NA)
-    )) %>%
-    arrange(time_value, geo_value)
-  expect_equal(
-    extend_either(modified_data, all_shift_cols, keys) %>% arrange(time_value, geo_value),
-    expected_post_shift
-  )
-  extended <- extend_either(modified_data, all_shift_cols, keys) %>% arrange(time_value, geo_value)
-})
 
 
 

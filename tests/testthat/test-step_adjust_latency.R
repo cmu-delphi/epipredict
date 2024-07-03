@@ -35,19 +35,44 @@ x_lagged
 attributes(x_lagged)$metadata$as_of <- testing_as_of
 
 test_that("epi_adjust_latency correctly extends the lags", {
+  expect_warning(epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_adjust_latency(method = "extend_lags"))
+
   r1 <- epi_recipe(x) %>%
+    step_adjust_latency(method = "extend_lags") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
-    step_epi_ahead(death_rate, ahead = ahead) %>%
-    step_adjust_latency(method = "extend_lags")
+    step_epi_ahead(death_rate, ahead = ahead)
+
+  # directly checking the shifts
+  baked_x <- r1 %>% prep(real_x) %>% bake(real_x)
+  # map each column to its last non-NA value
+  last_dates <- baked_x %>%
+    tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
+    group_by(name) %>%
+    summarise(last_date = max(time_value)) %>%
+    arrange(desc(last_date))
+  expect_equal(last_dates,
+               tribble(
+    ~name, ~last_date,
+    "lag_16_death_rate", max_time + 16,
+    "lag_11_death_rate", max_time + 11,
+    "lag_10_case_rate", max_time + 10,
+    "lag_6_case_rate", max_time + 6,
+    "lag_5_death_rate", max_time + 5,
+    "case_rate", max_time,
+    "death_rate", max_time,
+    "ahead_7_death_rate", max_time - 7,
+  ))
+
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit1 <- slm_fit(r1), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
+  expect_error(expect_warning(fit1 <- slm_fit(r1, data = x), regexp = "The latency is 1033"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit1 <- slm_fit(r1, data = real_x)
-
   expect_equal(
     names(fit1$pre$mold$predictors),
     c(
@@ -55,7 +80,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
       "lag_6_case_rate", "lag_10_case_rate"
     )
   )
-  latest <- get_test_data(r1, x)
+  latest <- get_test_data(r1, real_x)
   pred <- predict(fit1, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(nrow(point_pred), 1)
@@ -88,10 +113,10 @@ test_that("epi_adjust_latency correctly extends the lags", {
 
 test_that("epi_adjust_latency correctly extends the ahead", {
   r2 <- epi_recipe(x) %>%
+    step_adjust_latency(method = "extend_ahead") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
-    step_epi_ahead(death_rate, ahead = ahead) %>%
-    step_adjust_latency(method = "extend_ahead")
+    step_epi_ahead(death_rate, ahead = ahead)
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
@@ -105,7 +130,7 @@ test_that("epi_adjust_latency correctly extends the ahead", {
       "lag_1_case_rate", "lag_5_case_rate"
     )
   )
-  latest <- get_test_data(r2, x)
+  latest <- get_test_data(r2, real_x)
   pred2 <- predict(fit2, latest)
   point_pred2 <- pred2 %>% filter(!is.na(.pred))
   # max time is still the forecast date
@@ -134,10 +159,10 @@ test_that("epi_adjust_latency correctly extends the ahead", {
 test_that("epi_adjust_latency extends multiple aheads", {
   aheads <- 1:3
   r3 <- epi_recipe(x) %>%
+    step_adjust_latency(method = "extend_ahead") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
-    step_epi_ahead(death_rate, ahead = aheads) %>%
-    step_adjust_latency(method = "extend_ahead")
+    step_epi_ahead(death_rate, ahead = aheads)
   fitter <- smooth_quantile_reg(
     quantile_levels = 0.5,
     outcome_locations = aheads,
@@ -147,7 +172,7 @@ test_that("epi_adjust_latency extends multiple aheads", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit3 <- fit(epi_wf, data = x)))
+  expect_error(fit3 <- fit(epi_wf, data = x))
   # real date example
   fit3 <- fit(epi_wf, data = real_x)
   expect_equal(
@@ -200,16 +225,16 @@ test_that("epi_adjust_latency extend_ahead uses the same adjustment when predict
 
 test_that("epi_adjust_latency works for other time types", {})
 
-test_that("epi_adjust_latency insist there's steps before it", {
-  expect_error(
+test_that("epi_adjust_latency warns there's steps before it", {
+  expect_warning(
     r5 <- epi_recipe(x) %>%
-      step_epi_ahead(death_rate, ahead = ahead) %>%
+      step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
       step_adjust_latency(method = "extend_lags"),
     regexp = "extend_lags"
   )
-  expect_error(
+  expect_warning(
     r5 <- epi_recipe(x) %>%
-      step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+      step_epi_ahead(death_rate, ahead = ahead) %>%
       step_adjust_latency(method = "extend_ahead"),
     regexp = "extend_ahead"
   )
@@ -218,28 +243,27 @@ test_that("epi_adjust_latency insist there's steps before it", {
 test_that("epi_adjust_latency warns against removing NA's beforehand", {
   expect_error(
     r5 <- epi_recipe(x) %>%
-      step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
-      step_epi_lag(case_rate, lag = c(1, 5)) %>%
       step_epi_naomit() %>%
-      step_adjust_latency(method = "extend_lags"),
+      step_adjust_latency(method = "extend_lags") %>%
+      step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+      step_epi_lag(case_rate, lag = c(1, 5)),
     regexp = "adjust_latency needs to occur before any `NA` removal"
   )
 })
 # todo check that epi_adjust_latency errors for nonsense `as_of`'s
 
 
-
 # todo make sure that `epi_keys_checked` works correctly for extra epi_keys
 test_that("epi_adjust_latency correctly extends the lags", {
   r5 <- epi_recipe(x_lagged) %>%
+    step_adjust_latency(method = "extend_lags", epi_keys_checked = NULL) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
-    step_epi_ahead(death_rate, ahead = ahead) %>%
-    step_adjust_latency(method = "extend_lags", epi_keys_checked = NULL)
+    step_epi_ahead(death_rate, ahead = ahead)
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The shift has been adjusted by 1033"), class = "simpleError")
+  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The latency is 1033"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit5 <- slm_fit(r5, data = x_lagged)
@@ -251,7 +275,6 @@ test_that("epi_adjust_latency correctly extends the lags", {
     )
   )
   latest <- get_test_data(r5, x_lagged)
-  latest$time_value %>% unique()
   pred <- predict(fit5, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(nrow(point_pred), 1)
@@ -286,10 +309,10 @@ test_that("`step_adjust_latency` only allows one instance of itself", {})
 
 test_that("`step_adjust_latency` only uses the columns specified in the `...`", {
   r5 <- epi_recipe(x) %>%
-    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_adjust_latency(case_rate, method = "extend_lags") %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11))  %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
-    step_epi_ahead(death_rate, ahead = ahead) %>%
-    step_adjust_latency(case_rate, method = "extend_lags")
+    step_epi_ahead(death_rate, ahead = ahead)
 
   fit5 <- slm_fit(r5, data = real_x)
   expect_equal(names(fit5$fit$fit$fit$coefficients), c("(Intercept)", "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate", "lag_6_case_rate", "lag_10_case_rate"))
@@ -299,14 +322,16 @@ test_that("setting fixed_* works for `step_adjust_latency`", {})
 
 test_that("printing step_adjust_latency results in expected output", {
   r5 <- epi_recipe(x) %>%
+    step_adjust_latency(case_rate, method = "extend_lags") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
-    step_epi_ahead(death_rate, ahead = ahead) %>%
-    step_adjust_latency(case_rate, method = "extend_lags")
+    step_epi_ahead(death_rate, ahead = ahead)
   expect_snapshot(r5)
   r <- epi_recipe(case_death_rate_subset) %>%
-    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_adjust_latency(method = "extend_ahead") %>%
-    step_epi_lag(death_rate, lag = c(0, 7, 14))
+    step_epi_ahead(death_rate, ahead = 7)
   expect_snapshot(r)
 })
+
+test_that("lags of transforms (of transforms etc) work", {})
