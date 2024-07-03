@@ -51,14 +51,9 @@ arx_forecaster <- function(
   wf <- arx_fcast_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- fit(wf, epi_data)
 
-  preds <- forecast(
-    wf,
-    fill_locf = is.null(args_list$adjust_latency),
-    n_recent = args_list$nafill_buffer,
-    forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
-  ) %>%
-    as_tibble() %>%
-    select(-time_value)
+  preds <- forecast(wf) %>%
+    tibble::as_tibble() %>%
+    dplyr::select(-time_value)
 
   structure(
     list(
@@ -252,15 +247,6 @@ arx_fcast_epi_workflow <- function(
 #'   `character(0)` performs no grouping. This argument only applies when
 #'   residual quantiles are used. It is not applicable with
 #'   `trainer = quantile_reg()`, for example.
-#' @param nafill_buffer At predict time, recent values of the training data
-#'   are used to create a forecast. However, these can be `NA` due to, e.g.,
-#'   data latency issues. By default, any missing values will get filled with
-#'   less recent data. Setting this value to `NULL` will result in 1 extra
-#'   recent row (beyond those required for lag creation) to be used. Note that
-#'   we require at least `min(lags)` rows of recent data per `geo_value` to
-#'   create a prediction. For this reason, setting `nafill_buffer < min(lags)`
-#'   will be treated as _additional_ allowed recent data rather than the
-#'   total amount of recent data to examine.
 #' @param check_enough_data_n Integer. A lower limit for the number of rows per
 #'   epi_key that are required for training. If `NULL`, this check is ignored.
 #' @param check_enough_data_epi_keys Character vector. A character vector of
@@ -287,7 +273,6 @@ arx_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf,
     check_enough_data_n = NULL,
     check_enough_data_epi_keys = NULL,
     ...) {
@@ -305,7 +290,6 @@ arx_args_list <- function(
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
@@ -332,7 +316,6 @@ arx_args_list <- function(
       nonneg,
       max_lags,
       quantile_by_key,
-      nafill_buffer,
       check_enough_data_n,
       check_enough_data_epi_keys
     ),

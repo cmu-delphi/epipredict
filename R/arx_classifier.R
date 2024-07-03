@@ -67,9 +67,6 @@ arx_classifier <- function(
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   preds <- forecast(
     wf,
-    fill_locf = is.null(args_list$adjust_latency),
-    n_recent = args_list$nafill_buffer,
-    forecast_date = forecast_date
   ) %>%
     as_tibble() %>%
     select(-time_value)
@@ -294,7 +291,6 @@ arx_class_args_list <- function(
     method = c("rel_change", "linear_reg"),
     log_scale = FALSE,
     additional_gr_args = list(),
-    nafill_buffer = Inf,
     check_enough_data_n = NULL,
     check_enough_data_epi_keys = NULL,
     ...) {
@@ -312,7 +308,6 @@ arx_class_args_list <- function(
   arg_is_lgl(log_scale)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
   if (!is.list(additional_gr_args)) {
     cli_abort(c(
       "`additional_gr_args` must be a {.cls list}.",
@@ -353,7 +348,6 @@ arx_class_args_list <- function(
       method,
       log_scale,
       additional_gr_args,
-      nafill_buffer,
       check_enough_data_n,
       check_enough_data_epi_keys
     ),

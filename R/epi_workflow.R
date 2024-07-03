@@ -267,13 +267,9 @@ forecast.epi_workflow <- function(object, ..., fill_locf = FALSE, n_recent = NUL
       ))
     }
   }
-
   test_data <- get_test_data(
     hardhat::extract_preprocessor(object),
-    object$original_data,
-    fill_locf = fill_locf,
-    n_recent = n_recent %||% Inf,
-    forecast_date = forecast_date %||% frosting_fd %||% max(object$original_data$time_value)
+    object$original_data
   )
 
   predict(object, new_data = test_data)
