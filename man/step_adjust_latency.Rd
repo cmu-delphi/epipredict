@@ -123,8 +123,8 @@ jhu <- case_death_rate_subset \%>\%
 attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
 
 r <- epi_recipe(case_death_rate_subset) \%>\%
-  step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_adjust_latency(method = "extend_ahead") \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 r
 

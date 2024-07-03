@@ -4,7 +4,7 @@
 \alias{set_forecast_date}
 \title{Extract the as_of for the forecast date, and make sure there's nothing very off about it.}
 \usage{
-set_forecast_date(new_data, info, epi_keys_checked)
+set_forecast_date(new_data, info, epi_keys_checked, latency)
 }
 \description{
 Extract the as_of for the forecast date, and make sure there's nothing very off about it.

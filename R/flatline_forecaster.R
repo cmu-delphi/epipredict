@@ -67,9 +67,7 @@ flatline_forecaster <- function(
   wf <- fit(wf, epi_data)
   preds <- suppressWarnings(forecast(
     wf,
-    fill_locf = TRUE,
-    n_recent = args_list$nafill_buffer,
-    forecast_date = forecast_date
+    fill_locf = TRUE
   )) %>%
     as_tibble() %>%
     select(-time_value)
@@ -117,7 +115,6 @@ flatline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf,
     ...) {
   rlang::check_dots_empty()
   arg_is_scalar(ahead, n_training)
@@ -129,7 +126,6 @@ flatline_args_list <- function(
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
@@ -149,8 +145,7 @@ flatline_args_list <- function(
       quantile_levels,
       symmetrize,
       nonneg,
-      quantile_by_key,
-      nafill_buffer
+      quantile_by_key
     ),
     class = c("flat_fcast", "alist")
   )

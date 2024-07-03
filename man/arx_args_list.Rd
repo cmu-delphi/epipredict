@@ -15,7 +15,6 @@ arx_args_list(
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
-  nafill_buffer = Inf,
   check_enough_data_n = NULL,
   check_enough_data_epi_keys = NULL,
   ...
@@ -75,16 +74,6 @@ before calculating residual quantiles. See the \code{by_key} argument to
 \code{character(0)} performs no grouping. This argument only applies when
 residual quantiles are used. It is not applicable with
 \code{trainer = quantile_reg()}, for example.}
-
-\item{nafill_buffer}{At predict time, recent values of the training data
-are used to create a forecast. However, these can be \code{NA} due to, e.g.,
-data latency issues. By default, any missing values will get filled with
-less recent data. Setting this value to \code{NULL} will result in 1 extra
-recent row (beyond those required for lag creation) to be used. Note that
-we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
-create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
-will be treated as \emph{additional} allowed recent data rather than the
-total amount of recent data to examine.}
 
 \item{check_enough_data_n}{Integer. A lower limit for the number of rows per
 epi_key that are required for training. If \code{NULL}, this check is ignored.}

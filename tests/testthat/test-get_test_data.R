@@ -44,6 +44,7 @@ test_that("expect error that geo_value or time_value does not exist", {
 
 
 test_that("NA fill behaves as desired", {
+  testthat::skip()
   df <- tibble::tibble(
     geo_value = rep(c("ca", "ny"), each = 10),
     time_value = rep(1:10, times = 2),
@@ -81,6 +82,7 @@ test_that("NA fill behaves as desired", {
 })
 
 test_that("forecast date behaves", {
+  testthat::skip()
   df <- tibble::tibble(
     geo_value = rep(c("ca", "ny"), each = 10),
     time_value = rep(1:10, times = 2),

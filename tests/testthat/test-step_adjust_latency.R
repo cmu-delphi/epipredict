@@ -316,6 +316,33 @@ test_that("`step_adjust_latency` only uses the columns specified in the `...`", 
 
   fit5 <- slm_fit(r5, data = real_x)
   expect_equal(names(fit5$fit$fit$fit$coefficients), c("(Intercept)", "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate", "lag_6_case_rate", "lag_10_case_rate"))
+
+  r51 <- epi_recipe(x) %>%
+    step_adjust_latency(case_rate, method = "locf") %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11))  %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead)
+
+  baked_x <- r51 %>% prep(real_x) %>% bake(real_x)
+  # map each column to its last non-NA value
+  last_dates <- baked_x %>%
+    tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
+    group_by(name) %>%
+    summarise(last_date = max(time_value)) %>%
+    arrange(desc(last_date)) %>%
+    mutate(locf_date = last_date - latency)
+  # iterate over all columns and make sure the latent time period has the exact same values
+  for (ii in seq(nrow(last_dates))) {
+    baked_var <- baked_x %>%
+      filter(last_dates[[ii,"locf_date"]] <= time_value, time_value <=last_dates[[ii,"last_date"]]) %>%
+      pull(last_dates[[ii,"name"]]) %>%
+      var
+    if (grepl("case_rate", last_dates[[ii, "name"]])) {
+      expect_equal(baked_var, 0)
+    } else {
+      expect_true(baked_var > 0)
+    }
+  }
 })
 
 test_that("setting fixed_* works for `step_adjust_latency`", {})
@@ -334,4 +361,82 @@ test_that("printing step_adjust_latency results in expected output", {
   expect_snapshot(r)
 })
 
+test_that("data with epi_df shorn off works", {})
 test_that("lags of transforms (of transforms etc) work", {})
+test_that("locf works as intended", {
+  expect_warning(epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_adjust_latency(method = "locf"))
+
+  r6 <- epi_recipe(x) %>%
+    step_adjust_latency(method = "locf") %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead)
+
+  # directly checking the shifts
+  baked_x <- r6 %>% prep(real_x) %>% bake(real_x)
+  # map each column to its last non-NA value
+  last_dates <- baked_x %>%
+    tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
+    group_by(name) %>%
+    summarise(last_date = max(time_value)) %>%
+    arrange(desc(last_date)) %>%
+    mutate(locf_date = last_date - latency)
+  # iterate over all columns and make sure the latent time period has the exact same values
+  for (ii in seq(nrow(last_dates))) {
+    baked_x %>%
+      filter(last_dates[[ii,"locf_date"]] <= time_value, time_value <=last_dates[[ii,"last_date"]]) %>%
+      pull(last_dates[[ii,"name"]]) %>%
+      var %>%
+      expect_equal(0)
+  }
+
+  # the as_of on x is today's date, which is >970 days in the future
+  # also, there's no data >970 days in the past, so it gets an error trying to
+  # fit on no data
+  expect_warning(fit6 <- slm_fit(r6, data = x), regexp = "The maximum latency is 1033")
+
+  # now trying with the as_of a reasonable distance in the future
+  fit6 <- slm_fit(r6, data = real_x)
+  expect_equal(
+    names(fit6$pre$mold$predictors),
+    c(
+      "lag_0_death_rate", "lag_6_death_rate", "lag_11_death_rate",
+      "lag_1_case_rate", "lag_5_case_rate"
+    )
+  )
+  latest <- get_test_data(r6, real_x)
+  pred <- predict(fit6, latest)
+  point_pred <- pred %>% filter(!is.na(.pred))
+  expect_equal(max(point_pred$time_value), as.Date(testing_as_of))
+
+  expect_equal(
+    names(fit6$pre$mold$outcomes),
+    glue::glue("ahead_{ahead}_death_rate")
+  )
+  latest <- get_test_data(r6, x)
+  pred1 <- predict(fit6, latest)
+  actual_solutions <- pred1 %>% filter(!is.na(.pred))
+  expect_equal(max(actual_solutions$time_value), testing_as_of)
+
+  # should have four predictors, including the intercept
+  expect_equal(length(fit6$fit$fit$fit$coefficients), 6)
+
+  # result should be equivalent to just immediately doing the adjusted lags by
+  # hand
+  #
+  hand_adjusted <- epi_recipe(x) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead)
+  locf_x <- real_x %>% rbind(tibble(geo_value = rep("place", latency),
+                                    time_value = max_time + 1:latency,
+                                    case_rate = rep(real_x$case_rate[nrow(x)], latency),
+                                    death_rate = rep(real_x$death_rate[nrow(x)], latency)))
+  fit_hand_adj <- slm_fit(hand_adjusted, data = locf_x)
+  expect_equal(
+    fit6$fit$fit$fit$coefficients,
+    fit_hand_adj$fit$fit$fit$coefficients
+  )
+})

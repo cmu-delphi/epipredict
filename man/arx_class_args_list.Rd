@@ -17,7 +17,6 @@ arx_class_args_list(
   method = c("rel_change", "linear_reg"),
   log_scale = FALSE,
   additional_gr_args = list(),
-  nafill_buffer = Inf,
   check_enough_data_n = NULL,
   check_enough_data_epi_keys = NULL,
   ...
@@ -94,16 +93,6 @@ log scale.}
 \item{additional_gr_args}{List. Optional arguments controlling growth rate
 calculation. See \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} and the related Vignette for
 more details.}
-
-\item{nafill_buffer}{At predict time, recent values of the training data
-are used to create a forecast. However, these can be \code{NA} due to, e.g.,
-data latency issues. By default, any missing values will get filled with
-less recent data. Setting this value to \code{NULL} will result in 1 extra
-recent row (beyond those required for lag creation) to be used. Note that
-we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
-create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
-will be treated as \emph{additional} allowed recent data rather than the
-total amount of recent data to examine.}
 
 \item{check_enough_data_n}{Integer. A lower limit for the number of rows per
 epi_key that are required for training. If \code{NULL}, this check is ignored.}

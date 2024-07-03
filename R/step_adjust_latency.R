@@ -122,6 +122,8 @@ step_adjust_latency <-
         "If `method` is {.val extend_lags} or {.val locf},
 then the previous `step_epi_lag`s won't work with modified data."
       )
+    } else if ((method == "locf") && (length(recipe$steps) > 0)) {
+      cli::cli_warn("There are steps before `step_adjust_latency`. With the method {.val locf}, it is recommended to include this step before any others")
     }
     if (detect_step(recipe, "naomit")) {
       cli::cli_abort("adjust_latency needs to occur before any `NA` removal,
@@ -205,14 +207,14 @@ construct_latency_table <- function(x, latency, training, info) {
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   sign_shift <- get_sign(x)
   latency <- x$latency
-  forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked)
+  forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked, latency)
   # construct the latency table
   latency_table <- names(training)[!names(training) %in% epi_keys(training)] %>%
     tibble(col_name = .)
-    if (length(recipes_eval_select(x$terms, training, info)) > 0) {
+  if (length(recipes_eval_select(x$terms, training, info)) > 0) {
     latency_table <- latency_table %>% filter(col_name %in%
       recipes_eval_select(x$terms, training, info))
-    }
+  }
 
   if (is.null(latency)) {
     latency_table <- latency_table %>%
@@ -237,30 +239,28 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
       filter(role == "raw") %>%
       pull(variable)
   }
-  # get and check the max_time and forecast_date are the right kinds of dates
-  forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked)
 
-    # check that the shift amount isn't too extreme
-    latency <- max(latency_table$latency)
-    time_type <- attributes(training)$metadata$time_type
-    i_latency <- which.max(latency_table$latency)
-    if (
-      (grepl("day", time_type) && (latency >= 10)) ||
-        (grepl("week", time_type) && (latency >= 4)) ||
-        ((time_type == "yearmonth") && (latency >= 2)) ||
-        ((time_type == "yearquarter") && (latency >= 1)) ||
-        ((time_type == "year") && (latency >= 1))
-    ) {
-      cli::cli_warn(paste(
-        "!" = paste(
-          "The latency is {latency}, ",
-          "which is questionable for it's `time_type` of ",
-          "{time_type}."
-        ),
-        "i" = "latency: {latency_table$latency[[i_latency]]}",
-        "i" = "`max_time` = {max_time} -> `forecast_date` = {forecast_date}"
-      ))
-    }
+  # check that the shift amount isn't too extreme
+  latency_max <- max(abs(latency_table$latency))
+  time_type <- attributes(training)$metadata$time_type
+  i_latency <- which.max(latency_table$latency)
+  if (
+    (grepl("day", time_type) && (latency_max >= 10)) ||
+      (grepl("week", time_type) && (latency_max >= 4)) ||
+      ((time_type == "yearmonth") && (latency_max >= 2)) ||
+      ((time_type == "yearquarter") && (latency_max >= 1)) ||
+      ((time_type == "year") && (latency_max >= 1))
+  ) {
+    cli::cli_warn(paste(
+      "!" = paste(
+        "The maximum latency is {latency_max}, ",
+        "which is questionable for it's `time_type` of ",
+        "{time_type}."
+      ),
+      "i" = "latency: {latency_table$latency[[i_latency]]}",
+      "i" = "`max_time` = {max_time} -> `forecast_date` = {forecast_date}"
+    ))
+  }
 
   step_adjust_latency_new(
     terms = x$terms,
@@ -279,20 +279,33 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   )
 }
 
-#' @importFrom dplyr %>% pull
+#' @importFrom dplyr %>% pull group_by_at
+#' @importFrom tidyr fill
 #' @export
 bake.step_adjust_latency <- function(object, new_data, ...) {
   if (!isa(new_data, "epi_df")) {
+    # TODO if new_data actually has keys other than geo_value and time_value, this is going to cause problems
     new_data <- new_data %>% as_epi_df(as_of = object$forecast_date)
   }
-  attributes(new_data)$metadata$latency_method <- object$method
-  attributes(new_data)$metadata$shift_sign <- get_sign(object)
-  attributes(new_data)$metadata$latency_table <- object$latency_table
-  if ((object$method == "extend_ahead") || (object$method == "extend_lags")) {
+  if (object$method == "extend_ahead" || object$method == "extend_lags") {
+    attributes(new_data)$metadata$latency_method <- object$method
+    attributes(new_data)$metadata$shift_sign <- get_sign(object)
+    attributes(new_data)$metadata$latency_table <- object$latency_table
     keys <- object$keys
-    return(
-      new_data
-    )
+    return(new_data)
+  } else if (object$method == "locf") {
+    # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
+    rel_keys <- setdiff(epi_keys(new_data), "time_value")
+    object$forecast_date
+    unnamed_columns <- object$columns %>% unname()
+    new_data %>%
+      pad_to_end(rel_keys, object$forecast_date) %>%
+      # group_by_at(rel_keys) %>%
+      arrange(time_value) %>%
+      as_tibble() %>%
+      tidyr::fill(.direction = "down", any_of(unnamed_columns)) %>%
+      ungroup() %>%
+      return()
   }
 }
 #' @export

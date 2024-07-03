@@ -32,7 +32,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
 #' @keywords internal
 #' @importFrom dplyr select
-set_forecast_date <- function(new_data, info, epi_keys_checked) {
+set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
   original_columns <- info %>%
     filter(source == "original") %>%
     pull(variable)
@@ -58,7 +58,11 @@ set_forecast_date <- function(new_data, info, epi_keys_checked) {
     summarise(time_value = max(time_value)) %>%
     pull(time_value) %>%
     min()
-  forecast_date <- attributes(new_data)$metadata$as_of
+  if (is.null(latency)) {
+    forecast_date <- attributes(new_data)$metadata$as_of
+  } else {
+    forecast_date <- max_time + latency
+  }
   # make sure the as_of is sane
   if (!inherits(forecast_date, class(max_time)) & !inherits(forecast_date, "POSIXt")) {
     cli::cli_abort(paste(
@@ -141,4 +145,47 @@ get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new
     }
   }
   max_time_value
+}
+
+
+fill_locf <- function(x, forecast_date) {
+  cannot_be_used <- x %>%
+    dplyr::filter(forecast_date - time_value <= n_recent) %>%
+    dplyr::mutate(fillers = forecast_date - time_value > keep) %>%
+    dplyr::summarise(
+      dplyr::across(
+        -tidyselect::any_of(epi_keys(recipe)),
+        ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))
+      ),
+      .groups = "drop"
+    ) %>%
+    dplyr::select(-fillers) %>%
+    dplyr::summarise(dplyr::across(
+      -tidyselect::any_of(epi_keys(recipe)), ~ any(.x)
+    )) %>%
+    unlist()
+  x <- tidyr::fill(x, !time_value)
+}
+
+pad_to_end <- function(x, groups, end_date) {
+  itval <- epiprocess:::guess_period(c(x$time_value, end_date), "time_value")
+  completed_time_values <- x %>%
+    dplyr::group_by(dplyr::across(tidyselect::all_of(groups))) %>%
+    dplyr::summarise(
+      time_value = rlang::list2(
+        time_value = seq_null_swap(max(time_value) + itval, end_date, itval)
+      )
+    ) %>%
+    unnest("time_value") %>%
+    mutate(time_value = vctrs::vec_cast(time_value, x$time_value))
+
+  dplyr::bind_rows(x, completed_time_values) %>%
+    dplyr::arrange(dplyr::across(tidyselect::all_of(c("time_value", groups))))
+}
+
+seq_null_swap <- function(from, to, by) {
+  if (from > to) {
+    return(NULL)
+  }
+  seq(from = from, to = to, by = by)
 }
