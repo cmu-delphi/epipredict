@@ -9,6 +9,7 @@
 #' @import recipes
 #' @export
 epi_recipe <- function(x, ...) {
+  # deprecate_soft("This function is being deprecated. Use `recipe()` instead.")
   UseMethod("epi_recipe")
 }
 
@@ -16,10 +17,10 @@ epi_recipe <- function(x, ...) {
 #' @rdname epi_recipe
 #' @export
 epi_recipe.default <- function(x, ...) {
-  ## if not a formula or an epi_df, we just pass to recipes::recipe
-  if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x)) {
-    x <- x[1, , drop = FALSE]
-  }
+  # if not a formula or an epi_df, we just pass to recipes::recipe
+  # if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x)) {
+  #   x <- x[1, , drop = FALSE]
+  # }
   recipes::recipe(x, ...)
 }
 
@@ -57,6 +58,7 @@ epi_recipe.default <- function(x, ...) {
 #' r
 epi_recipe.epi_df <-
   function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
+    return(recipe(x, formula = formula, ..., vars = vars, roles = roles))
     if (!is.null(formula)) {
       if (!is.null(vars)) {
         rlang::abort(
@@ -144,7 +146,7 @@ epi_recipe.epi_df <-
 #' @export
 epi_recipe.formula <- function(formula, data, ...) {
   # we ensure that there's only 1 row in the template
-  data <- data[1, ]
+  return(recipe(data, formula, ...))
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
     return(recipes::recipe(formula, data, ...))
@@ -157,7 +159,8 @@ epi_recipe.formula <- function(formula, data, ...) {
 
   # Check for other in-line functions
   args <- epi_form2args(formula, data, ...)
-  obj <- epi_recipe.epi_df(
+  # browser()
+  obj <- recipe.epi_df(
     x = args$x,
     formula = NULL,
     ...,

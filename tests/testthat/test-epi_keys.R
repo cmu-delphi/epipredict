@@ -18,8 +18,9 @@ test_that("Extracts keys from an epi_df", {
   expect_equal(epi_keys(case_death_rate_subset), c("time_value", "geo_value"))
 })
 
-test_that("Extracts keys from a recipe; roles are NA, giving an empty vector", {
-  expect_equal(epi_keys(recipe(case_death_rate_subset)), character(0L))
+test_that("Extracts keys from a recipe", {
+  expect_equal(epi_keys(recipe(case_death_rate_subset)), c("time_value", "geo_value"))
+  expect_equal(epi_keys(recipe(cars)), character(0L))
 })
 
 test_that("epi_keys_mold extracts time_value and geo_value, but not raw", {

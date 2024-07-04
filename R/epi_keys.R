@@ -6,34 +6,16 @@
 #' @return If an `epi_df`, this returns all "keys". Otherwise `NULL`
 #' @keywords internal
 #' @export
-epi_keys <- function(x, ...) {
-  UseMethod("epi_keys")
-}
+epi_keys <- key_colnames
+
 
 #' @export
-epi_keys.default <- function(x, ...) {
-  character(0L)
-}
-
-#' @export
-epi_keys.data.frame <- function(x, other_keys = character(0L), ...) {
-  arg_is_chr(other_keys, allow_empty = TRUE)
-  nm <- c("time_value", "geo_value", other_keys)
-  intersect(nm, names(x))
-}
-
-#' @export
-epi_keys.epi_df <- function(x, ...) {
-  c("time_value", "geo_value", attr(x, "metadata")$other_keys)
-}
-
-#' @export
-epi_keys.recipe <- function(x, ...) {
+key_colnames.recipe <- function(x, ...) {
   x$var_info$variable[x$var_info$role %in% c("time_value", "geo_value", "key")]
 }
 
 #' @export
-epi_keys.epi_workflow <- function(x, ...) {
+key_colnames.epi_workflow <- function(x, ...) {
   epi_keys_mold(hardhat::extract_mold(x))
 }
 
