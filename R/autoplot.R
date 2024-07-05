@@ -183,6 +183,9 @@ autoplot.epi_workflow <- function(
 
   if (".pred" %in% names(predictions)) {
     ntarget_dates <- dplyr::n_distinct(predictions$time_value)
+    if (distributional::is_distribution(predictions$.pred)) {
+      predictions <- dplyr::mutate(predictions, .pred = median(.pred))
+    }
     if (ntarget_dates > 1L) {
       bp <- bp +
         ggplot2::geom_line(
