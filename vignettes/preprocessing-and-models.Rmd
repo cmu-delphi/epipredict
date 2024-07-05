@@ -44,9 +44,9 @@ will create a classification model for hotspot predictions.
 library(tidyr)
 library(dplyr)
 library(epidatr)
-library(epipredict)
 library(recipes)
 library(workflows)
+library(epipredict)
 library(poissonreg)
 ```
 
@@ -147,9 +147,10 @@ manipulate variable roles easily.
 
 ---
 
-Notice in the following preprocessing steps, we used `add_role()` on
-`geo_value_factor` since, currently, the default role for it is `raw`, but
-we would like to reuse this variable as `predictor`s.
+Notice in the following preprocessing steps, we used `update_role()` on
+`geo_value_factor` since, currently, the default role for it is `NA`, but
+we would like to reuse this variable as `predictor`s. (If is had a non-`NA`
+role, then we would use `add_role()` instead.)
 
 ```{r}
 counts_subset <- counts_subset %>%
@@ -159,7 +160,7 @@ counts_subset <- counts_subset %>%
 epi_recipe(counts_subset)
 
 r <- epi_recipe(counts_subset) %>%
-  add_role(geo_value_factor, new_role = "predictor") %>%
+  update_role(geo_value_factor, new_role = "predictor") %>%
   step_dummy(geo_value_factor) %>%
   ## Occasionally, data reporting errors / corrections result in negative
   ## cases / deaths
@@ -174,17 +175,15 @@ modeling and producing the prediction for death count, 7 days after the
 latest available date in the dataset.
 
 ```{r}
-latest <- get_test_data(r, counts_subset)
-
 wf <- epi_workflow(r, parsnip::poisson_reg()) %>%
   fit(counts_subset)
 
-predict(wf, latest) %>% filter(!is.na(.pred))
+forecast(wf) %>% filter(!is.na(.pred))
 ```
 
 Note that the `time_value` corresponds to the last available date in the
 training set, **NOT** to the target date of the forecast
-(`r max(latest$time_value) + 7`).
+(`r max(counts_subset$time_value) + 7`).
 
 Let's take a look at the fit:
 
@@ -320,8 +319,8 @@ jhu <- jhu %>%
   left_join(behav_ind, by = c("geo_value", "time_value")) %>%
   as_epi_df()
 
-r <- epi_recipe(jhu) %>%
-  add_role(geo_value_factor, new_role = "predictor") %>%
+r <- recipe(jhu) %>%
+  update_role(geo_value_factor, new_role = "predictor") %>%
   step_dummy(geo_value_factor) %>%
   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
   step_mutate(
@@ -351,6 +350,7 @@ f <- frosting() %>%
   layer_add_target_date("2022-01-07") %>%
   layer_threshold(.pred, lower = 0) %>%
   layer_quantile_distn() %>%
+  layer_point_from_distn() %>%
   layer_naomit(.pred) %>%
   layer_population_scaling(
     .pred, .pred_distn,
@@ -361,8 +361,8 @@ f <- frosting() %>%
   )
 
 wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.05, .5, .95))) %>%
-  fit(jhu) %>%
-  add_frosting(f)
+  add_frosting(f) %>%
+  fit(jhu)
 
 p <- forecast(wf)
 p
@@ -456,9 +456,9 @@ jhu <- case_death_rate_subset %>%
   ) %>%
   mutate(geo_value_factor = as.factor(geo_value))
 
-r <- epi_recipe(jhu) %>%
+r <- recipe(jhu) %>%
   add_role(time_value, new_role = "predictor") %>%
-  step_dummy(geo_value_factor) %>%
+  step_dummy(geo_value_factor, role = "predictor") %>%
   step_growth_rate(case_rate, role = "none", prefix = "gr_") %>%
   step_epi_lag(starts_with("gr_"), lag = c(0, 7, 14)) %>%
   step_epi_ahead(starts_with("gr_"), ahead = 7, role = "none") %>%
@@ -471,7 +471,7 @@ r <- epi_recipe(jhu) %>%
     ),
     role = "outcome"
   ) %>%
-  step_rm(has_role("none"), has_role("raw")) %>%
+  step_rm(has_role("none"), has_role(NA)) %>%
   step_epi_naomit()
 ```
 

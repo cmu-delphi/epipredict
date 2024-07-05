@@ -1,8 +1,8 @@
 ---
-title: "Using the add/update/remove and adjust functions"
+title: "Using the add, update, remove, and adjust functions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using the update and adjust functions}
+  %\VignetteIndexEntry{Using the add, update, remove, and adjust functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
