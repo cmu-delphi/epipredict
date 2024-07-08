@@ -129,7 +129,7 @@ pivot_quantiles_wider <- function(.data, ...) {
   # tidyr::pivot_wider can crash if there are duplicates, this generally won't
   # happen in our context. To avoid, silently add an index column and remove it
   # later
-  .hidden_index = seq_len(nrow(.data))
+  .hidden_index <- seq_len(nrow(.data))
   .data <- tibble::add_column(.data, .hidden_index = .hidden_index)
   if (length(cols) > 1L) {
     for (col in cols) {
