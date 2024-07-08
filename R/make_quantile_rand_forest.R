@@ -1,16 +1,10 @@
 make_quantile_random_forest <- function() {
-  model_env <- get_model_env()
-  if (!("quantile_reg" %in% model_env$models)) {
-    parsnip::set_new_model("quantile_reg")
-    parsnip::set_model_mode("quantile_reg", "regression")
-  }
-  parsnip::set_model_engine("quantile_reg", "regression", "grf")
-  parsnip::set_dependency("quantile_reg", "grf", "grf", mode = "regression")
-
+  parsnip::set_model_engine("rand_forest", "regression", "grf")
+  parsnip::set_dependency("rand_forest", "grf", "grf", mode = "regression")
 
 
   parsnip::set_model_arg(
-    model = "quantile_reg",
+    model = "rand_forest",
     eng = "grf",
     parsnip = "mtry",
     original = "mtry",
@@ -18,7 +12,7 @@ make_quantile_random_forest <- function() {
     has_submodel = FALSE
   )
   parsnip::set_model_arg(
-    model = "quantile_reg",
+    model = "rand_forest",
     eng = "grf",
     parsnip = "trees",
     original = "num.trees",
@@ -26,39 +20,16 @@ make_quantile_random_forest <- function() {
     has_submodel = FALSE
   )
   parsnip::set_model_arg(
-    model = "quantile_reg",
+    model = "rand_forest",
     eng = "grf",
     parsnip = "min_n",
     original = "min.node.size",
     func = list(pkg = "dials", fun = "min_n"),
     has_submodel = FALSE
   )
-  parsnip::set_model_arg(
-    model = "quantile_reg",
-    eng = "grf",
-    parsnip = "quantile_levels",
-    original = "quantiles",
-    func = list(pkg = "grf", fun = "quantile_forest"),
-    has_submodel = FALSE
-  )
-  parsnip::set_model_arg(
-    model = "quantile_reg",
-    eng = "grf",
-    parsnip = "x",
-    original = "X",
-    func = list(pkg = "grf", fun = "quantile_forest"),
-    has_submodel = FALSE
-  )
-  parsnip::set_model_arg(
-    model = "quantile_reg",
-    eng = "grf",
-    parsnip = "y",
-    original = "Y",
-    func = list(pkg = "grf", fun = "quantile_forest"),
-    has_submodel = FALSE
-  )
+
   parsnip::set_fit(
-    model = "quantile_reg",
+    model = "rand_forest",
     eng = "grf",
     mode = "regression",
     value = list(
@@ -67,14 +38,15 @@ make_quantile_random_forest <- function() {
       data = c(x = "X", y = "Y"),
       func = c(pkg = "grf", fun = "quantile_forest"),
       defaults = list(
-        num.threads = 1,
+        quantiles = c(0.1, 0.5, 0.9),
+        num.threads = 1L,
         seed = expr(runif(1, 0, .Machine$integer.max))
       )
     )
   )
 
   parsnip::set_encoding(
-    model = "quantile_reg",
+    model = "rand_forest",
     eng = "grf",
     mode = "regression",
     options = list(
@@ -94,7 +66,7 @@ make_quantile_random_forest <- function() {
   }
 
   parsnip::set_pred(
-    model = "quantile_reg",
+    model = "rand_forest",
     eng = "grf",
     mode = "regression",
     type = "numeric",
