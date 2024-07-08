@@ -150,7 +150,7 @@ epi_recipe.formula <- function(formula, data, ...) {
     return(recipes::recipe(formula, data, ...))
   }
 
-  f_funcs <- recipes:::fun_calls(formula)
+  f_funcs <- recipes:::fun_calls(formula, data)
   if (any(f_funcs == "-")) {
     abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
   }
@@ -173,7 +173,7 @@ epi_form2args <- function(formula, data, ...) {
   if (!rlang::is_formula(formula)) formula <- as.formula(formula)
 
   ## check for in-line formulas
-  recipes:::inline_check(formula)
+  recipes:::inline_check(formula, data)
 
   ## use rlang to get both sides of the formula
   outcomes <- recipes:::get_lhs_vars(formula, data)
