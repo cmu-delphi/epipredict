@@ -1,4 +1,3 @@
-
 make_quantile_random_forest <- function() {
   model_env <- get_model_env()
   if (!("quantile_reg" %in% model_env$models)) {

@@ -3,12 +3,13 @@
 #' @description
 #' `quantile_reg()` generates a quantile regression model _specification_ for
 #' the [tidymodels](https://www.tidymodels.org/) framework. Currently, the
-#' only supported engine is "rq" which uses [quantreg::rq()].
+#' only supported engines are "rq", which uses [quantreg::rq()], and "grf",
+#' which uses [grf::quantile_forest()].
 #'
 #' @param mode A single character string for the type of model.
 #'   The only possible value for this model is "regression".
 #' @param engine Character string naming the fitting function. Currently, only
-#'   "rq" is supported.
+#'   "rq" and "grf" are supported.
 #' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
 #'   quantiles to estimate (default is 0.5).
 #'
@@ -16,12 +17,18 @@
 #'
 #' @seealso [fit.model_spec()], [set_engine()]
 #'
-#' @importFrom quantreg rq
+#'
 #' @examples
+#' library(quantreg)
 #' tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
 #' rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
+#'
+#' library(grf)
+#' grf_spec <- quantile_reg(engine = "grf", quantile_levels = c(.1, .5, .9))
+#' gg <- grf_spec %>% fit(y ~ ., data = tib)
+#' predict(gg, new_data = tib)
 quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0.5) {
   # Check for correct mode
   if (mode != "regression") {
