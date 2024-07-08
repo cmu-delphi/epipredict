@@ -5,72 +5,54 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="epipredict">
 <title>Using the add/update/remove and adjust functions • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Using the add/update/remove and adjust functions">
-<meta property="og:description" content="epipredict">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Using the add/update/remove and adjust functions">
 <meta name="robots" content="noindex">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
     <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/epipredict.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
-    <a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a>
-    <a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="../articles/index.html">More articles...</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
+    <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -79,7 +61,8 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Using the add/update/remove and adjust functions</h1>
+
+      <h1>Using the add/update/remove and adjust functions</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/update.Rmd" class="external-link"><code>vignettes/update.Rmd</code></a></small>
@@ -114,8 +97,8 @@ to add/update/remove an entire <code>epi_recipe</code> in an
 <code>epi_workflow</code> as well as <code><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe()</a></code> to
 adjust a particular step in an <code>epi_recipe</code> or
 <code>epi_workflow</code> by the step number or name. For a model, one
-may <code><a href="../reference/add_model.html">Add_model()</a></code>, <code><a href="../reference/add_model.html">Update_model()</a></code>, or
-<code><a href="../reference/add_model.html">Remove_model()</a></code> in an <code>epi_workflow</code>.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;We capitalize these names to avoid possible clashes with
+may <code><a href="../reference/Add_model.html">Add_model()</a></code>, <code><a href="../reference/Add_model.html">Update_model()</a></code>, or
+<code><a href="../reference/Add_model.html">Remove_model()</a></code> in an <code>epi_workflow</code>.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;We capitalize these names to avoid possible clashes with
 the &lt;a href="https://github.com/tidymodels/workflows" class="external-link"&gt;workflows&lt;/a&gt; versions of these functions. The lower-case
 versions are also available, however, if you load
 &lt;a href="https://github.com/tidymodels/workflows" class="external-link"&gt;workflows&lt;/a&gt; after &lt;a href="https://github.com/cmu-delphi/epipredict/" class="external-link"&gt;epipredict&lt;/a&gt;, these will be
@@ -151,8 +134,8 @@ function uses by processing step is shown by the following table:</p>
 <tr class="even">
 <td>Model specification</td>
 <td>
-<code><a href="../reference/add_model.html">Add_model()</a></code>, <code><a href="../reference/add_model.html">Update_model()</a></code>
-<code><a href="../reference/add_model.html">Remove_model()</a></code>
+<code><a href="../reference/Add_model.html">Add_model()</a></code>, <code><a href="../reference/Add_model.html">Update_model()</a></code>
+<code><a href="../reference/Add_model.html">Remove_model()</a></code>
 </td>
 <td></td>
 </tr>
@@ -324,9 +307,8 @@ that we ensure that we retain the <code>epi_workflow</code> class.</p>
 and then inspect the class of <code>wf</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class before</span></span>
-<span><span class="co">#&gt; [1] "epi_workflow" "workflow"</span></span></code></pre></div>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/add_recipe.html" class="external-link">remove_recipe</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class after removing recipe using workflows function</span></span>
+<span><span class="co">#&gt; [1] "epi_workflow" "workflow"</span></span>
+<span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/add_recipe.html" class="external-link">remove_recipe</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class after removing recipe using workflows function</span></span>
 <span><span class="co">#&gt; [1] "workflow"</span></span></code></pre></div>
 <p>We can observe that <code>wf</code> is no longer an
 <code>epi_workflow</code> and a <code>workflow</code>. It has been
@@ -340,7 +322,7 @@ be used from the <a href="https://github.com/cmu-delphi/epipredict/" class="exte
 <code>epi_recipe</code> if we remove it, note that we did not actually
 store that change to <code>wf</code>. Hence, our
 <code>epi_workflow</code> remains unchanged.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
@@ -373,11 +355,11 @@ old recipe are not updated automatically. So we should be careful to fit
 the model using the new recipe, <code>r2</code>. Similarly, if
 predictions were made using the old recipe, then they should be
 re-generated using the version <code>epi_workflow</code> that contains
-the updated recipe. We can use <code><a href="../reference/add_model.html">Update_model()</a></code> to replace
+the updated recipe. We can use <code><a href="../reference/Add_model.html">Update_model()</a></code> to replace
 the model used in <code>wf</code>, and then fit as before:</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit linear model</span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
@@ -409,8 +391,8 @@ the model used in <code>wf</code>, and then fit as before:</p>
 <span><span class="co">#&gt;   lag_7_case_rate   lag_14_case_rate  </span></span>
 <span><span class="co">#&gt;          0.011286           0.011721</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
-<p>Alternatively, we may use the <code><a href="../reference/add_model.html">Remove_model()</a></code> followed by
-<code><a href="../reference/add_model.html">Add_model()</a></code> combination for the same effect.</p>
+<p>Alternatively, we may use the <code><a href="../reference/Add_model.html">Remove_model()</a></code> followed by
+<code><a href="../reference/Add_model.html">Add_model()</a></code> combination for the same effect.</p>
 </div>
 <div class="section level2">
 <h2 id="addupdateremove-a-frosting-object-in-an-epi_workflow">Add/update/remove a <code>frosting</code> object in an
@@ -420,7 +402,7 @@ the model used in <code>wf</code>, and then fit as before:</p>
 post-processing predictions. In our initial frosting object,
 <code>f</code>, we simply implement predictions on the fitted
 <code>epi_workflow</code>:</p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -445,7 +427,7 @@ include the forecast and target dates as separate columns.</p>
 <p>To update the <code>frosting</code> while leaving the remainder of
 the <code>epi_workflow</code> the same, we can use the
 <code><a href="../reference/add_frosting.html">update_frosting()</a></code> function as follows:</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Update frosting in a workflow and predict</span></span>
 <span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -470,7 +452,7 @@ the <code>epi_workflow</code> the same, we can use the
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31 0.352  2021-12-31    2022-01-07</span></span></code></pre></div>
 <p>Internally, this works by removing the old frosting followed by
 adding the new frosting, just like when we update a recipe or model.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">update_frosting</span></span>
 <span><span class="co">#&gt; function (x, frosting, ...) </span></span>
 <span><span class="co">#&gt; {</span></span>
@@ -478,12 +460,12 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x5577aedffdf8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55d13bdfa850&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
 from the workflow and make predictions as follows:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf3</span> <span class="op">&lt;-</span> <span class="va">wf2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/add_frosting.html">remove_frosting</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">p3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">wf3</span><span class="op">)</span></span>
 <span><span class="va">p3</span></span>
@@ -519,7 +501,7 @@ the parameter name and update value must be inputted as
 in <code>wf</code> recipe by setting <code>which_step</code> to the step
 number in the order of operations, which can be obtained by inspecting
 <code>r2</code> or the tidy summary of it:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="co"># step_epi_ahead is the third step in r2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
@@ -535,9 +517,8 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; 2. Lagging: <span style="color: #0000BB;">case_rate</span> by <span style="color: #0000BB;">0, 1, 2, 3, 4, 5, 6, 7, 14</span></span></span>
 <span><span class="co">#&gt; 3. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span></span>
 <span><span class="co">#&gt; 4. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span></span>
-<span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
+<span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
@@ -545,14 +526,13 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_8HfdV  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      3 step      epi_ahead FALSE   FALSE epi_ahead_HIyvQ</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>      4 step      naomit    FALSE   FALSE naomit_vjF0H   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_gF0fi</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>      5 step      naomit    FALSE   TRUE  naomit_gF0fi</span></span>
+<span></span>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="fl">3</span>, ahead <span class="op">=</span> <span class="fl">14</span><span class="op">)</span></span></code></pre></div>
 <p>Alternatively, we may adjust that step by name by specifying the full
 name of the step, <code>step_epi_ahead</code>, in
 <code>which_step</code>:</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="st">"step_epi_ahead"</span>, ahead <span class="op">=</span> <span class="fl">14</span><span class="op">)</span> <span class="co"># not overwrite r2 because same result</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
@@ -594,7 +574,7 @@ the steps. For example, in <code>r2</code> there are two steps named
 and the second where we lag the case rate. If we want to modify the lags
 for the <code>case_rate</code> variable, we would specify the step
 number of 2 in <code>which_step</code>.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
@@ -617,7 +597,7 @@ number of 2 in <code>which_step</code>.</p>
 recipe in a workflow. The main difference is that we would not input
 <code>wf</code> as the first argument to
 <code><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe()</a></code> but rather <code>r2</code>.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span><span class="va">r2</span>, which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span> <span class="co"># should be same result as above</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
@@ -642,7 +622,7 @@ transfer over to <code>wf</code>. We would need to modify the recipe in
 <code>wf</code>) or update the recipe in <code>wf</code> with a new
 <code>epi_recipe</code> that has undergone the adjustment (using
 <code><a href="../reference/add_epi_recipe.html">update_epi_recipe()</a></code>):</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span><span class="va">r2</span>, which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">21</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
@@ -676,7 +656,7 @@ update value must be inputted as <code>...</code>.</p>
 <p>Let’s work with the frosting object directly instead of working on it
 through the <code>epi_workflow</code> in a simple, illustrative example.
 Recall frosting <code>f2</code> which has the following layers:</p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
@@ -691,7 +671,7 @@ threshold to 10 instead of <code>Inf</code>. We can adjust this layer in
 frosting object by setting <code>which_layer</code> to the layer number,
 3 (which can be found by inspecting <code>f2</code> or
 <code>tidy(f2)</code>):</p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span> <span class="op">&lt;-</span> <span class="va">f2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_frosting.html">adjust_frosting</a></span><span class="op">(</span>which_layer <span class="op">=</span> <span class="fl">2</span>, upper <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">f2</span></span>
@@ -706,7 +686,7 @@ frosting object by setting <code>which_layer</code> to the layer number,
 <p>Alternatively, we may adjust that layer by specifying its full name,
 <code>layer_threshold</code>, in <code>which_layer</code>, to achieve
 the same result:</p>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_frosting.html">adjust_frosting</a></span><span class="op">(</span>which_layer <span class="op">=</span> <span class="st">"layer_threshold"</span>, upper <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># not overwrite f2 because same result</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
@@ -728,7 +708,7 @@ recipe including the operation number, the operation class (either
 whether <code><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep()</a></code> has been used to estimate the operation, a
 boolean value to indicate whether the step is applied when
 <code><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake()</a></code> is called, and the id of the operation.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">r2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
@@ -741,7 +721,7 @@ boolean value to indicate whether the step is applied when
 <p>In contrast, printing the <code>epi_recipe</code> object shows the
 inputs (number and roles of the variables) as well as the ordering and a
 brief written summary of the operations:</p>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
@@ -766,15 +746,14 @@ the output specific to a recipe such as the roles in the recipe output
 and the trained and skip columns in tidy tibble for it. Thus, the output
 of a frosting object and the tidy tibble are simplified in comparison to
 those for an <code>epi_recipe</code>.</p>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Layers</span></span>
-<span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
+<span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span>
+<span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
 <span><span class="co">#&gt;   number operation type    id                   </span></span>
@@ -782,7 +761,7 @@ those for an <code>epi_recipe</code>.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 layer     predict predict_default_qZ3vE</span></span></code></pre></div>
 </div>
 
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -793,15 +772,15 @@ those for an <code>epi_recipe</code>.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

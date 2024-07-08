@@ -5,72 +5,54 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="epipredict">
 <title>Using epipredict on non-epidemic panel data • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Using epipredict on non-epidemic panel data">
-<meta property="og:description" content="epipredict">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Using epipredict on non-epidemic panel data">
 <meta name="robots" content="noindex">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
     <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/epipredict.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
-    <a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a>
-    <a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="../articles/index.html">More articles...</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
+    <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -79,7 +61,8 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Using epipredict on non-epidemic panel data</h1>
+
+      <h1>Using epipredict on non-epidemic panel data</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/panel-data.Rmd" class="external-link"><code>vignettes/panel-data.Rmd</code></a></small>
@@ -267,29 +250,47 @@ dates.</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"bottom"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="panel-data_files/figure-html/employ-small-graph-1.png" width="90%" style="display: block; margin: auto;"></p>
 <p>We will predict the standardized number of graduates (a proportion)
-in the next year (time <span class="math inline">\(t+1\)</span>) using
-an autoregressive model with three lags (i.e., an AR(3) model). Such a
-model is represented algebraically like this:</p>
-<p><span class="math display">\[
-  y_{t+1,ijk} =
-  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3
-y_{t-2,ijk} + \epsilon_{tijk}
-\]</span></p>
-<p>where <span class="math inline">\(y_{tij}\)</span> is the proportion
-of graduates at time <span class="math inline">\(t\)</span> in location
-<span class="math inline">\(i\)</span> and age group <span class="math inline">\(j\)</span> with education quality <span class="math inline">\(k\)</span>.</p>
+in the next year (time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">t+1</annotation></semantics></math>)
+using an autoregressive model with three lags (i.e., an AR(3) model).
+Such a model is represented algebraically like this:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>=</mo><msub><mi>α</mi><mn>0</mn></msub><mo>+</mo><msub><mi>α</mi><mn>1</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>2</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>3</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">
+  y_{t+1,ijk} = 
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk} + \epsilon_{tijk}
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">y_{tij}</annotation></semantics></math>
+is the proportion of graduates at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+in location
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>
+and age group
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+with education quality
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>.</p>
 <p>In the pre-processing step, we need to create additional columns in
-<code>employ</code> for each of <span class="math inline">\(y_{t+1,ijk}\)</span>, <span class="math inline">\(y_{tijk}\)</span>, <span class="math inline">\(y_{t-1,ijk}\)</span>, and <span class="math inline">\(y_{t-2,ijk}\)</span>. We do this via an
-<code>epi_recipe</code>. Note that creating an <code>epi_recipe</code>
-alone doesn’t add these outcome and predictor columns; the recipe just
-stores the instructions for adding them.</p>
+<code>employ</code> for each of
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t+1,ijk}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{tijk}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t-1,ijk}</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t-2,ijk}</annotation></semantics></math>.
+We do this via an <code>epi_recipe</code>. Note that creating an
+<code>epi_recipe</code> alone doesn’t add these outcome and predictor
+columns; the recipe just stores the instructions for adding them.</p>
 <p>Our <code>epi_recipe</code> should add one <code>ahead</code> column
-representing <span class="math inline">\(y_{t+1,ijk}\)</span> and 3
-<code>lag</code> columns representing <span class="math inline">\(y_{tijk}\)</span>, <span class="math inline">\(y_{t-1,ijk}\)</span>, and <span class="math inline">\(y_{t-2,ijk}\)</span> (it’s more accurate to think
-of the 0th “lag” as the “current” value with 2 lags, but that’s not
-quite how the processing works). Also note that since we specified our
-<code>time_type</code> to be <code>year</code>, our <code>lag</code> and
-<code>lead</code> values are both in years.</p>
+representing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t+1,ijk}</annotation></semantics></math>
+and 3 <code>lag</code> columns representing
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{tijk}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t-1,ijk}</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t-2,ijk}</annotation></semantics></math>
+(it’s more accurate to think of the 0th “lag” as the “current” value
+with 2 lags, but that’s not quite how the processing works). Also note
+that since we specified our <code>time_type</code> to be
+<code>year</code>, our <code>lag</code> and <code>lead</code> values are
+both in years.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">employ_small</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">num_graduates_prop</span>, ahead <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -345,12 +346,18 @@ columns.</p>
 created new columns according to our <code>epi_recipe</code>:</p>
 <ul>
 <li>
-<code>ahead_1_num_graduates_prop</code> corresponds to <span class="math inline">\(y_{t+1,ijk}\)</span>
+<code>ahead_1_num_graduates_prop</code> corresponds to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t+1,ijk}</annotation></semantics></math>
 </li>
 <li>
 <code>lag_0_num_graduates_prop</code>,
 <code>lag_1_num_graduates_prop</code>, and
-<code>lag_2_num_graduates_prop</code> correspond to <span class="math inline">\(y_{tijk}\)</span>, <span class="math inline">\(y_{t-1,ijk}\)</span>, and <span class="math inline">\(y_{t-2,ijk}\)</span> respectively.</li>
+<code>lag_2_num_graduates_prop</code> correspond to
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{tijk}</annotation></semantics></math>,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t-1,ijk}</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{t-2,ijk}</annotation></semantics></math>
+respectively.</li>
 </ul>
 </div>
 <div class="section level3">
@@ -365,7 +372,8 @@ using ordinary least squares.</p>
 with the <code><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">parsnip::linear_reg()</a></code> model. Note that
 <code>epi_workflow</code> is a container and doesn’t actually do the
 fitting. We have to pass the workflow into <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> to get our
-estimated model coefficients <span class="math inline">\(\widehat{\alpha}_i,\ i=0,...,3\)</span>.</p>
+estimated model coefficients
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>,</mo><mspace width="0.222em"></mspace><mi>i</mi><mo>=</mo><mn>0</mn><mo>,</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>,</mo><mn>3</mn></mrow><annotation encoding="application/x-tex">\widehat{\alpha}_i,\ i=0,...,3</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf_linreg</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">employ_small</span><span class="op">)</span></span>
@@ -391,12 +399,16 @@ estimated model coefficients <span class="math inline">\(\widehat{\alpha}_i,\ i=
 <span><span class="co">#&gt; Multiple R-squared:  0.07029,    Adjusted R-squared:  0.06568 </span></span>
 <span><span class="co">#&gt; F-statistic: 15.25 on 3 and 605 DF,  p-value: 1.415e-09</span></span></code></pre></div>
 <p>This output tells us the coefficients of the fitted model; for
-instance, the estimated intercept is <span class="math inline">\(\widehat{\alpha}_0 =\)</span> 0.16 and the
-coefficient for <span class="math inline">\(y_{tijk}\)</span> is <span class="math inline">\(\widehat\alpha_1 =\)</span> 0.222. The summary
-also tells us that all estimated coefficients are significantly
-different from zero. Extracting the 95% confidence intervals for the
-coefficients also leads us to the same conclusion: all the coefficient
-estimates are significantly different from 0.</p>
+instance, the estimated intercept is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mn>0</mn></msub><mo>=</mo></mrow><annotation encoding="application/x-tex">\widehat{\alpha}_0 =</annotation></semantics></math>
+0.16 and the coefficient for
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{tijk}</annotation></semantics></math>
+is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mover><mi>α</mi><mo accent="true">̂</mo></mover><mn>1</mn></msub><mo>=</mo></mrow><annotation encoding="application/x-tex">\widehat\alpha_1 =</annotation></semantics></math>
+0.222. The summary also tells us that all estimated coefficients are
+significantly different from zero. Extracting the 95% confidence
+intervals for the coefficients also leads us to the same conclusion: all
+the coefficient estimates are significantly different from 0.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_fit_engine</a></span><span class="op">(</span><span class="va">wf_linreg</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;                               2.5 %      97.5 %</span></span>
@@ -450,8 +462,10 @@ in the original dataset.</p>
 <div class="section level3">
 <h3 id="model-diagnostics">Model diagnostics<a class="anchor" aria-label="anchor" href="#model-diagnostics"></a>
 </h3>
-<p>First, we’ll plot the residuals (that is, <span class="math inline">\(y_{tijk} - \widehat{y}_{tijk}\)</span>) against
-the fitted values (<span class="math inline">\(\widehat{y}_{tijk}\)</span>).</p>
+<p>First, we’ll plot the residuals (that is,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>−</mo><msub><mover><mi>y</mi><mo accent="true">̂</mo></mover><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{tijk} - \widehat{y}_{tijk}</annotation></semantics></math>)
+against the fitted values
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>y</mi><mo accent="true">̂</mo></mover><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">\widehat{y}_{tijk}</annotation></semantics></math>).</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span>, mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">3</span>, <span class="fl">1.2</span>, <span class="fl">0</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_fit_engine</a></span><span class="op">(</span><span class="va">wf_linreg</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -482,20 +496,31 @@ information from the other two time-series in our dataset: the 2-year
 employment income and the number of graduates in the previous 2 years.
 We would do this using an autoregressive model with exogenous inputs,
 defined as follows:</p>
-<p><span class="math display">\[
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>α</mi><mn>0</mn></msub><mo>+</mo><msub><mi>α</mi><mn>1</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>2</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>3</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mspace width="1.0em"></mspace><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mspace width="1.0em"></mspace><mo>+</mo><msub><mi>γ</mi><mn>2</mn></msub><msub><mi>z</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>γ</mi><mn>2</mn></msub><msub><mi>z</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
-  y_{t+1,ijk} &amp;=
-  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3
-y_{t-2,ijk}\\
+  y_{t+1,ijk} &amp;= 
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk}\\
   &amp;\quad + \beta_1 x_{tijk} + \beta_2 x_{t-1,ijk}\\
-  &amp;\quad + \gamma_2 z_{tijk} + \gamma_2 z_{t-1,ijk} +
-\epsilon_{tijk}
+  &amp;\quad + \gamma_2 z_{tijk} + \gamma_2 z_{t-1,ijk} + \epsilon_{tijk}
 \end{aligned}
-\]</span></p>
-<p>where <span class="math inline">\(y_{tijk}\)</span> is the 5-year
-median income (proportion) at time <span class="math inline">\(t\)</span> (in location <span class="math inline">\(i\)</span>, age group <span class="math inline">\(j\)</span> with education quality <span class="math inline">\(k\)</span>), <span class="math inline">\(x_{tijk}\)</span> is the 2-year median income
-(proportion) at time <span class="math inline">\(t\)</span>, and <span class="math inline">\(z_{tijk}\)</span> is the number of graduates
-(proportion) at time <span class="math inline">\(t\)</span>.</p>
+</annotation></semantics></math></p>
+<p>where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{tijk}</annotation></semantics></math>
+is the 5-year median income (proportion) at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+(in location
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>i</mi><annotation encoding="application/x-tex">i</annotation></semantics></math>,
+age group
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>j</mi><annotation encoding="application/x-tex">j</annotation></semantics></math>
+with education quality
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>k</mi><annotation encoding="application/x-tex">k</annotation></semantics></math>),
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>x</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">x_{tijk}</annotation></semantics></math>
+is the 2-year median income (proportion) at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>,
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>z</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">z_{tijk}</annotation></semantics></math>
+is the number of graduates (proportion) at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.</p>
 <div class="section level3">
 <h3 id="pre-processing-1">Pre-processing<a class="anchor" aria-label="anchor" href="#pre-processing-1"></a>
 </h3>
@@ -650,9 +675,12 @@ that are proportions within each group by the keys in our
 <p>In this first example, we’ll use <code>flatline_forecaster</code> to
 make a simple prediction of the 2-year median income for the next year,
 based on one previous time point. This model is representated
-algebraically as: <span class="math display">\[y_{t+1,ijk} = y_{tijk} +
-\epsilon_{tijk}\]</span> where <span class="math inline">\(y_{tijk}\)</span> is the 2-year median income
-(proportion) at time <span class="math inline">\(t\)</span>.</p>
+algebraically as:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>=</mo><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mrow><annotation encoding="application/x-tex">y_{t+1,ijk} = y_{tijk} + \epsilon_{tijk}</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><annotation encoding="application/x-tex">y_{tijk}</annotation></semantics></math>
+is the 2-year median income (proportion) at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_fl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/flatline_forecaster.html">flatline_forecaster</a></span><span class="op">(</span><span class="va">employ_small</span>, <span class="st">"med_income_2y_prop"</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="../reference/flatline_args_list.html">flatline_args_list</a></span><span class="op">(</span>ahead <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
@@ -661,7 +689,7 @@ algebraically as: <span class="math display">\[y_{t+1,ijk} = y_{tijk} +
 <span><span class="va">out_fl</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type flatline ═════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-06-29 07:40:44</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-07-08 19:35:21</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -700,7 +728,7 @@ article, but where all inputs have the same number of lags.</p>
 <span><span class="va">out_arx_lr</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-06-29 07:40:45</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-07-08 19:35:21</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -729,7 +757,7 @@ linear regression.</p>
 <span><span class="va">out_arx_rf</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-06-29 07:40:46</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-07-08 19:35:22</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -754,7 +782,7 @@ linear regression.</p>
 easily adapted (both the workflows and the canned forecasters) to work
 for generic panel data modelling.</p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -765,15 +793,15 @@ for generic panel data modelling.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

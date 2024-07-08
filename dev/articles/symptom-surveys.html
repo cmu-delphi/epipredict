@@ -5,72 +5,54 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="epipredict">
 <title>Can symptoms surveys improve COVID-19 forecasts? • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Can symptoms surveys improve COVID-19 forecasts?">
-<meta property="og:description" content="epipredict">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Can symptoms surveys improve COVID-19 forecasts?">
 <meta name="robots" content="noindex">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
     <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/epipredict.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
-    <a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a>
-    <a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="../articles/index.html">More articles...</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
+    <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -79,7 +61,8 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Can symptoms surveys improve COVID-19 forecasts?</h1>
+
+      <h1>Can symptoms surveys improve COVID-19 forecasts?</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/articles/symptom-surveys.Rmd" class="external-link"><code>vignettes/articles/symptom-surveys.Rmd</code></a></small>
@@ -123,27 +106,38 @@ followed by a discussion of the results.</p>
 counties that had at least 200 confirmed cases by May 14, 2020 (the end
 of the Google survey data) and in which both the Facebook and Google %
 CLI-in-community signals are available.</p>
-<p>To set the notation, let <span class="math inline">\(Y_{l,t}\)</span>
+<p>To set the notation, let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">Y_{l,t}</annotation></semantics></math>
 denote the smoothed COVID-19 case incidence rate for location (county)
-<span class="math inline">\(l\)</span> and day <span class="math inline">\(t\)</span>. Let <span class="math inline">\(F_{l,t}\)</span> and <span class="math inline">\(G_{l,t}\)</span> denote the Facebook and Google %
-CLI-in-community signals, respectively, for location <span class="math inline">\(l\)</span> and time <span class="math inline">\(t\)</span>. Note that we rescale all these signals
-from their given values in our API so that they are true proportions. We
-then evaluate the following four models:</p>
-<p><span class="math display">\[
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+and day
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
+Let
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>F</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">F_{l,t}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>G</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">G_{l,t}</annotation></semantics></math>
+denote the Facebook and Google % CLI-in-community signals, respectively,
+for location
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+and time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
+Note that we rescale all these signals from their given values in our
+API so that they are true proportions. We then evaluate the following
+four models:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>+</mo><mi>d</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≈</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>β</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>+</mo><mi>d</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≈</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>β</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>γ</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>F</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>+</mo><mi>d</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≈</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>β</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>τ</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>+</mo><mi>d</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>≈</mo><mi>α</mi><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>β</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>γ</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>F</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>0</mn></mrow><mn>2</mn></munderover><msub><mi>τ</mi><mi>j</mi></msub><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>G</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn><mi>j</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{align}
-h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j})
-\\
-h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j})
-+ \sum_{j = 0}^2 \gamma_j h(F_{l, t-7j}) \\
-h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j})
-+ \sum_{j = 0}^2 \tau_j h(G_{l, t-7j}) \\
-h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j})
-+ \sum_{j = 0}^2 \gamma_j h(F_{l, t-7j}) + \sum_{j = 0}^2 \tau_j h(G_{l,
-t-7j})
+h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j}) \\
+h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j}) + \sum_{j = 0}^2 \gamma_j h(F_{l, t-7j}) \\
+h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j}) + \sum_{j = 0}^2 \tau_j h(G_{l, t-7j}) \\
+h(Y_{l,t+d}) &amp;\approx \alpha + \sum_{j = 0}^2 \beta_j h(Y_{l,t-7j}) + \sum_{j = 0}^2 \gamma_j h(F_{l, t-7j}) + \sum_{j = 0}^2 \tau_j h(G_{l, t-7j})
 \end{align}
-\]</span> Here <span class="math inline">\(d = 7\)</span> or <span class="math inline">\(d = 14\)</span> depending on the target value, and
-<span class="math inline">\(h\)</span> is a transformation to be
-specified later.</p>
+</annotation></semantics></math> Here
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>=</mo><mn>7</mn></mrow><annotation encoding="application/x-tex">d = 7</annotation></semantics></math>
+or
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mo>=</mo><mn>14</mn></mrow><annotation encoding="application/x-tex">d = 14</annotation></semantics></math>
+depending on the target value, and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>h</mi><annotation encoding="application/x-tex">h</annotation></semantics></math>
+is a transformation to be specified later.</p>
 <p>We’ll call the first model the “Cases” model because it bases its
 predictions of future case rates on COVID-19 case rates (from 0, 1 and 2
 weeks back). The second model is called “Cases + Facebook” because it
@@ -153,20 +147,25 @@ exactly the same as the second but substitutes the Google signal instead
 of the Facebook one. The fourth and final model model, “Cases + Facebook
 + Google”, uses both Facebook and Google signals. For each model, we use
 our canned autoregressive forecaster with quantile regression to
-forecast at time <span class="math inline">\(t_0\)</span> (and predict
-case rates at <span class="math inline">\(t_0 + d\)</span>). We train
-over training over all locations, <span class="math inline">\(l\)</span>
-(all 442 counties), and all time <span class="math inline">\(t\)</span>
+forecast at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mn>0</mn></msub><annotation encoding="application/x-tex">t_0</annotation></semantics></math>
+(and predict case rates at
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>t</mi><mn>0</mn></msub><mo>+</mo><mi>d</mi></mrow><annotation encoding="application/x-tex">t_0 + d</annotation></semantics></math>).
+We train over training over all locations,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+(all 442 counties), and all time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
 that are within the most recent 14 days of data available up to and
-including time <span class="math inline">\(t_0\)</span>. In other words,
-we use 14 trailing days for the training set.</p>
-<p>The forecasts are denoted by <span class="math inline">\(\hat{Y}_{l,
-t_0 + d}\)</span>. To see how accurate these forecasts are, we use the
-scaled absolute error:</p>
-<p><span class="math display">\[
-\frac{| \hat{Y}_{l, t_0 + d} - Y_{l, t_0 + d} |} {| Y_{l, t_0} - Y_{l,
-t_0 + d} |}
-\]</span></p>
+including time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mn>0</mn></msub><annotation encoding="application/x-tex">t_0</annotation></semantics></math>.
+In other words, we use 14 trailing days for the training set.</p>
+<p>The forecasts are denoted by
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>l</mi><mo>,</mo><msub><mi>t</mi><mn>0</mn></msub><mo>+</mo><mi>d</mi></mrow></msub><annotation encoding="application/x-tex">\hat{Y}_{l, t_0 + d}</annotation></semantics></math>.
+To see how accurate these forecasts are, we use the scaled absolute
+error:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac><mrow><mo stretchy="true" form="prefix">|</mo><msub><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mrow><mi>l</mi><mo>,</mo><msub><mi>t</mi><mn>0</mn></msub><mo>+</mo><mi>d</mi></mrow></msub><mo>−</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><msub><mi>t</mi><mn>0</mn></msub><mo>+</mo><mi>d</mi></mrow></msub><mo stretchy="true" form="postfix">|</mo></mrow><mrow><mo stretchy="true" form="prefix">|</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><msub><mi>t</mi><mn>0</mn></msub></mrow></msub><mo>−</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><msub><mi>t</mi><mn>0</mn></msub><mo>+</mo><mi>d</mi></mrow></msub><mo stretchy="true" form="postfix">|</mo></mrow></mfrac><annotation encoding="application/x-tex">
+\frac{| \hat{Y}_{l, t_0 + d} - Y_{l, t_0 + d} |} {| Y_{l, t_0} - Y_{l, t_0 + d} |}
+</annotation></semantics></math></p>
 <p>where the error in the denominator is the strawman model error. This
 model simply uses the most recent case rate for future predictions. You
 may recognize this as an application of the flatline forecaster from
@@ -185,22 +184,30 @@ the county-to-county differences.</p>
 </h3>
 <p>To help stabilize the variance of the case, Facebook and Google data,
 we chose to use the logit transformation on their proportions. In
-actuality, we use a “padded” version <span class="math inline">\(h(x) =
-\log (\frac{x+a}{1-x+a})\)</span> such that the numerator and
-denominator are pushed away from zero by a small constant, <span class="math inline">\(a = 0.01\)</span>. An alternative to the logit
-transform is using a log transform (as in <span class="math inline">\(h(x) = \log (x+a)\)</span> where <span class="math inline">\(a\)</span> is for padding). Note that such
-variance-stabilizing transformations are used in the model fitting. When
-we calculate the errors, we back-transform the values for comparison
-using the inverse transform <span class="math inline">\(h^{-1}\)</span>
+actuality, we use a “padded” version
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mi>x</mi><mo>+</mo><mi>a</mi></mrow><mrow><mn>1</mn><mo>−</mo><mi>x</mi><mo>+</mo><mi>a</mi></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(x) = \log (\frac{x+a}{1-x+a})</annotation></semantics></math>
+such that the numerator and denominator are pushed away from zero by a
+small constant,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>0.01</mn></mrow><annotation encoding="application/x-tex">a = 0.01</annotation></semantics></math>.
+An alternative to the logit transform is using a log transform (as in
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>h</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo>+</mo><mi>a</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">h(x) = \log (x+a)</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>a</mi><annotation encoding="application/x-tex">a</annotation></semantics></math>
+is for padding). Note that such variance-stabilizing transformations are
+used in the model fitting. When we calculate the errors, we
+back-transform the values for comparison using the inverse transform
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>h</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><annotation encoding="application/x-tex">h^{-1}</annotation></semantics></math>
 so that we may calculate them on the original scale.</p>
 </div>
 <div class="section level3">
 <h3 id="forecasting-code">Forecasting Code<a class="anchor" aria-label="anchor" href="#forecasting-code"></a>
 </h3>
-<p>The code below marches the forecast date <span class="math inline">\(t_0\)</span> forward, one day at a time for the
-nine forecasting dates for which the four models can all be fit (May 6,
-2020 to May 14, 2020). Then, it fits the models, makes predictions 7 and
-14 days ahead (as permissible by the data), and records the errors.</p>
+<p>The code below marches the forecast date
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mn>0</mn></msub><annotation encoding="application/x-tex">t_0</annotation></semantics></math>
+forward, one day at a time for the nine forecasting dates for which the
+four models can all be fit (May 6, 2020 to May 14, 2020). Then, it fits
+the models, makes predictions 7 and 14 days ahead (as permissible by the
+data), and records the errors.</p>
 <p>There are a number of benefits to using <code>epipredict</code> over
 writing the code from scratch to fit and predict under each of the
 models. First, we do not have to reformat the data for input into a
@@ -591,7 +598,7 @@ Cases + Facebook + Google
 </tr>
 </tbody>
 </table>
-<p><span class="math display">\[\\[0.01in]\]</span> Are these
+<p><span class="math display">$$\\[0.01in]$$</span> Are these
 differences in median scaled errors significant? Some basic hypothesis
 testing suggests that some probably are: Below we conduct a sign test
 for whether the difference in the “Cases” model’s scaled error and each
@@ -683,7 +690,7 @@ Cases vs Cases + Facebook + Google
 </tr>
 </tbody>
 </table>
-<p><span class="math display">\[\\[0.01in]\]</span> We should take these
+<p><span class="math display">$$\\[0.01in]$$</span> We should take these
 test results with a grain of salt because the sign test assumes
 independence of observations, which clearly cannot be true given the
 spatiotemporal structure of our forecasting problem. To mitigate the
@@ -938,7 +945,7 @@ Cases + Facebook
 </tr>
 </tbody>
 </table>
-<p><span class="math display">\[\\[0.01in]\]</span></p>
+<p><span class="math display">$$\\[0.01in]$$</span></p>
 <p>Thanks to the extended length of the test period, we can also plot
 the trajectories of the median scaled errors over time, as we do below,
 with the left plot concerning 7-day-ahead forecasts, and the right
@@ -1041,7 +1048,7 @@ Cases &gt; Cases + Facebook
 </tr>
 </tbody>
 </table>
-<p><span class="math display">\[\\[0.01in]\]</span></p>
+<p><span class="math display">$$\\[0.01in]$$</span></p>
 <p>If we stratify and recompute p-values by forecast date, the bulk of
 p-values are quite small.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
@@ -1172,7 +1179,8 @@ forecasts portray uncertainty in a transparent way, which is important
 in practice.</p></li>
 <li><p>The way we trained our forecast models does not account for data
 latency and revisions, which are critical issues. For each
-(retrospective) forecast date, <span class="math inline">\(t_0\)</span>,
+(retrospective) forecast date,
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>t</mi><mn>0</mn></msub><annotation encoding="application/x-tex">t_0</annotation></semantics></math>,
 we constructed forecasts by training on data that we fetched from the
 API today, “as of” the day of writing this, and not “as of” the forecast
 date. This matters because nearly all signals are subject to latency and
@@ -1195,7 +1203,7 @@ your hand at implementing the suggested improvements or develop your own
 novel analytic approach to extract insights from this data.</p>
 </div>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -1206,15 +1214,15 @@ novel analytic approach to extract insights from this data.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>

@@ -1,17 +1,16 @@
 pandoc: 3.1.11
-pkgdown: 2.0.9
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   arx-classifier: arx-classifier.html
   epipredict: epipredict.html
   panel-data: panel-data.html
   preprocessing-and-models: preprocessing-and-models.html
-  sliding: sliding.html
-  smooth-qr: smooth-qr.html
-  symptom-surveys: symptom-surveys.html
+  articles/sliding: sliding.html
+  articles/smooth-qr: smooth-qr.html
+  articles/symptom-surveys: symptom-surveys.html
   update: update.html
-last_built: 2024-06-29T07:39Z
+last_built: 2024-07-08T19:33Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles
-

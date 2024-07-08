@@ -5,72 +5,54 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="epipredict">
 <title>Auto-regressive classifier • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Auto-regressive classifier">
-<meta property="og:description" content="epipredict">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Auto-regressive classifier">
 <meta name="robots" content="noindex">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-primary" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
     <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../articles/epipredict.html">Get started</a>
-</li>
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../articles/epipredict.html">Get started</a></li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a>
-    <a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a>
-    <a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a>
-    <div class="dropdown-divider"></div>
-    <a class="dropdown-item" href="../articles/index.html">More articles...</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
+    <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
+  </ul>
 </li>
-<li class="nav-item">
-  <a class="nav-link" href="../news/index.html">Changelog</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav">
-<li class="nav-item">
-  <a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="github">
-    <span class="fab fa fab fa-github fa-lg"></span>
-     
-  </a>
-</li>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -79,7 +61,8 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Auto-regressive classifier</h1>
+
+      <h1>Auto-regressive classifier</h1>
             
       
       <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/arx-classifier.Rmd" class="external-link"><code>vignettes/arx-classifier.Rmd</code></a></small>
@@ -234,40 +217,51 @@ upswings and downswings of case rates rather than the raw case rates
 themselves. For this situation, our target is to predict whether there
 is an increase in case rates or not. Following <a href="https://www.pnas.org/doi/full/10.1073/pnas.2111453118" class="external-link">McDonald,
 Bien, Green, Hu, et al.(2021)</a>, we look at the relative change
-between <span class="math inline">\(Y_{l,t}\)</span> and <span class="math inline">\(Y_{l, t+a}\)</span>, where the former is the case
-rate at location <span class="math inline">\(l\)</span> at time <span class="math inline">\(t\)</span> and the latter is the rate for that
-location at time <span class="math inline">\(t+a\)</span>. Using these
-variables, we define a categorical response variable with two
-classes</p>
-<p><span class="math display">\[\begin{align}
+between
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">Y_{l,t}</annotation></semantics></math>
+and
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>+</mo><mi>a</mi></mrow></msub><annotation encoding="application/x-tex">Y_{l, t+a}</annotation></semantics></math>,
+where the former is the case rate at location
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>
+and the latter is the rate for that location at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>+</mo><mi>a</mi></mrow><annotation encoding="application/x-tex">t+a</annotation></semantics></math>.
+Using these variables, we define a categorical response variable with
+two classes</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">up,</mtext></mtd><mtd columnalign="center" style="text-align: center"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><mo>&gt;</mo><mn>0.25</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">not up,</mtext></mtd><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">otherwise</mtext></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
 Z_{l,t} = \left\{\begin{matrix}
-\text{up,} &amp; \text{if } Y_{l,t}^\Delta &gt; 0.25\\
+\text{up,} &amp; \text{if } Y_{l,t}^\Delta &gt; 0.25\\ 
 \text{not up,} &amp; \text{otherwise}
 \end{matrix}\right.
-\end{align}\]</span> where <span class="math inline">\(Y_{l,t}^\Delta =
-(Y_{l, t} - Y_{l, t-7} / Y_{l, t-7}\)</span>. If <span class="math inline">\(Y_{l,t}^\Delta\)</span> &gt; 0.25, meaning that
-the number of new cases over the week has increased by over 25%, then
-<span class="math inline">\(Z_{l,t}\)</span> is up. This is the criteria
-for location <span class="math inline">\(l\)</span> to be a hotspot at
-time <span class="math inline">\(t\)</span>. On the other hand, if <span class="math inline">\(Y_{l,t}^\Delta\)</span> $, then then <span class="math inline">\(Z_{l,t}\)</span> is categorized as not up, meaning
-that there has not been a &gt;25% increase in the new cases over the
-past week.</p>
+\end{align}</annotation></semantics></math> where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><mo>=</mo><mo stretchy="false" form="prefix">(</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>−</mo><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn></mrow></msub><mi>/</mi><msub><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn></mrow></msub></mrow><annotation encoding="application/x-tex">Y_{l,t}^\Delta = (Y_{l, t} - Y_{l, t-7} / Y_{l, t-7}</annotation></semantics></math>.
+If
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><annotation encoding="application/x-tex">Y_{l,t}^\Delta</annotation></semantics></math>
+&gt; 0.25, meaning that the number of new cases over the week has
+increased by over 25%, then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">Z_{l,t}</annotation></semantics></math>
+is up. This is the criteria for location
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>l</mi><annotation encoding="application/x-tex">l</annotation></semantics></math>
+to be a hotspot at time
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
+On the other hand, if
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><annotation encoding="application/x-tex">Y_{l,t}^\Delta</annotation></semantics></math>
+$, then then
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><annotation encoding="application/x-tex">Z_{l,t}</annotation></semantics></math>
+is categorized as not up, meaning that there has not been a &gt;25%
+increase in the new cases over the past week.</p>
 <p>The logistic regression model we use to predict this binary response
 can be considered to be a simplification of the multinomial regression
 model presented in
 <code><a href="../articles/preprocessing-and-models.html">vignette("preprocessing-and-models")</a></code>:</p>
-<p><span class="math display">\[\begin{align}
-\pi_{\text{up}}(x) &amp;= Pr(Z_{l, t} = \text{up}|x) =
-\frac{e^{g_{\text{up}}(x)}}{1 + e^{g_{\text{up}}(x)}}, \\
-\pi_{\text{not up}}(x)&amp;= Pr(Z_{l, t} = \text{not up}|x) = 1 -
-Pr(Z_{l, t} = \text{up}|x)  = \frac{1}{1 + e^{g_{\text{up}}(x)}}
-\end{align}\]</span> where</p>
-<p><span class="math display">\[
-g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert
-x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} +
-\beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta +
-\beta_{13}Y_{l,t-14}^\Delta.
-\]</span></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>π</mi><mtext mathvariant="normal">up</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>P</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mtext mathvariant="normal">up</mtext><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><msup><mi>e</mi><mrow><msub><mi>g</mi><mtext mathvariant="normal">up</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><msub><mi>g</mi><mtext mathvariant="normal">up</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mrow></mfrac><mo>,</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>π</mi><mtext mathvariant="normal">not up</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><mi>P</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mtext mathvariant="normal">not up</mtext><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>1</mn><mo>−</mo><mi>P</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mtext mathvariant="normal">up</mtext><mo stretchy="false" form="prefix">|</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><msub><mi>g</mi><mtext mathvariant="normal">up</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></msup></mrow></mfrac></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
+\pi_{\text{up}}(x) &amp;= Pr(Z_{l, t} = \text{up}|x) = \frac{e^{g_{\text{up}}(x)}}{1 + e^{g_{\text{up}}(x)}}, \\
+\pi_{\text{not up}}(x)&amp;= Pr(Z_{l, t} = \text{not up}|x) = 1 - Pr(Z_{l, t} = \text{up}|x)  = \frac{1}{1 + e^{g_{\text{up}}(x)}}
+\end{align}</annotation></semantics></math> where</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>g</mi><mtext mathvariant="normal">up</mtext></msub><mrow><mo stretchy="true" form="prefix">(</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mo>log</mo><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mtext mathvariant="normal">up</mtext><mo stretchy="false" form="postfix">|</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow><mrow><mo>Pr</mo><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mtext mathvariant="normal">not up</mtext><mo stretchy="false" form="postfix">|</mo><mi>x</mi><mo stretchy="true" form="postfix">)</mo></mrow></mrow></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><msub><mi>β</mi><mn>10</mn></msub><mo>+</mo><msub><mi>β</mi><mn>11</mn></msub><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><mo>+</mo><msub><mi>β</mi><mn>12</mn></msub><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>7</mn></mrow><mi>Δ</mi></msubsup><mo>+</mo><msub><mi>β</mi><mn>13</mn></msub><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi><mo>−</mo><mn>14</mn></mrow><mi>Δ</mi></msubsup><mi>.</mi></mrow><annotation encoding="application/x-tex">
+g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} + \beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta + \beta_{13}Y_{l,t-14}^\Delta.
+</annotation></semantics></math></p>
 <p>Now then, we will operate on the same subset of the
 <code>case_death_rate_subset</code> that we used in our above example.
 This time, we will use it to investigate whether the number of newly
@@ -391,7 +385,7 @@ classifier by hand, consider translating this binary classification
 model example to an <code>epi_workflow</code>, akin to that in
 <code><a href="../articles/preprocessing-and-models.html">vignette("preprocessing-and-models")</a></code>.</p>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -402,15 +396,15 @@ model example to an <code>epi_workflow</code>, akin to that in
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
