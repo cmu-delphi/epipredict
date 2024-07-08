@@ -101,17 +101,17 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
         the_frosting, "layer_add_forecast_date", "forecast_date"
       ))) {
     validate_date(forecast_date, expected_time_type,
-      call = expr(layer_add_forecast_date())
+      call = rlang::expr(layer_add_forecast_date())
     )
     forecast_date <- coerce_time_type(forecast_date, expected_time_type)
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
     target_date <- forecast_date + ahead
   } else {
-    max_time_value <- max(
+    max_time_value <- as.Date(max(
       workflows::extract_preprocessor(workflow)$max_time_value,
       workflow$fit$meta$max_time_value,
       max(new_data$time_value)
-    )
+    ))
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
     target_date <- max_time_value + ahead
   }
