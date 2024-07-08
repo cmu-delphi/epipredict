@@ -106,7 +106,7 @@ make_quantile_reg <- function() {
     out <- switch(type,
       rq = dist_quantiles(unname(as.list(x)), object$quantile_levels), # one quantile
       rqs = {
-        x <- lapply(unname(split(x, seq(nrow(x)))), function(q) sort(q))
+        x <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
         dist_quantiles(x, list(object$tau))
       },
       cli_abort(c(
@@ -114,7 +114,7 @@ make_quantile_reg <- function() {
         i = "See {.fun quantreg::rq}."
       ))
     )
-    return(data.frame(.pred = out))
+    return(dplyr::tibble(.pred = out))
   }
 
 

@@ -1,7 +1,7 @@
 ## usethis namespace: start
 #' @importFrom tibble tibble
 #' @importFrom rlang := !! %||% as_function global_env set_names !!!
-#' @importFrom rlang is_logical is_true inject
+#' @importFrom rlang is_logical is_true inject expr
 #' @importFrom stats poly predict lm residuals quantile
 #' @importFrom cli cli_abort
 #' @importFrom checkmate assert assert_character assert_int assert_scalar
