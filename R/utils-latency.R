@@ -121,11 +121,11 @@ get_latency <- function(new_data, forecast_date, column, sign_shift, epi_keys_ch
 #'   a potentially different max_time_value
 #' @keywords internal
 get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new_data) {
-  max_time_value <- max(
+  max_time_value <- as.Date(max(
     workflow_max_time_value,
     this_recipe$max_time_value,
     max(new_data$time_value)
-  )
+  ))
   if (this_recipe %>% recipes::detect_step("adjust_latency")) {
     # get the as_of in an `adjust_latency` step, regardless of where
     handpicked_forecast_date <- map(
