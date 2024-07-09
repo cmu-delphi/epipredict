@@ -45,12 +45,18 @@ layer_predict <-
            id = rand_id("predict_default")) {
     arg_is_chr_scalar(id)
     arg_is_chr_scalar(type, allow_null = TRUE)
+    dots_list <- rlang::dots_list(..., .homonyms = "error", .check_assign = TRUE)
+    if (any(rlang::names2(dots_list) == "")) {
+      cli_abort("All `...` arguments must be named.",
+        class = "epipredict__layer_predict__unnamed_dot"
+      )
+    }
     add_layer(
       frosting,
       layer_predict_new(
         type = type,
         opts = opts,
-        dots_list = rlang::list2(...), # can't figure how to use this
+        dots_list = dots_list,
         id = id
       )
     )
@@ -63,13 +69,16 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 
 #' @export
 slather.layer_predict <- function(object, components, workflow, new_data, ...) {
+  rlang::check_dots_empty()
+
   the_fit <- workflows::extract_fit_parsnip(workflow)
 
-  components$predictions <- predict(
+  components$predictions <- rlang::inject(predict(
     the_fit,
     components$forged$predictors,
-    type = object$type, opts = object$opts
-  )
+    type = object$type, opts = object$opts,
+    !!!object$dots_list
+  ))
   components$predictions <- dplyr::bind_cols(
     components$keys, components$predictions
   )
