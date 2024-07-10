@@ -62,7 +62,7 @@
 #'
 #' library(dplyr)
 #' dat <- case_death_rate_subset %>%
-#'   filter(time_value > as.Date("2021-09-01"))
+#'   filter(time_value > as.Date("2021-10-01"))
 #' rec <- epi_recipe(dat) %>%
 #'   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
@@ -70,9 +70,14 @@
 #' frost <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_threshold(.pred)
+#' spec <- rand_forest(mode = "regression") %>%
+#'   set_engine(engine = "grf_quantiles", quantiles = c(.25, .5, .75))
 #'
 #' ewf <- epi_workflow(rec, spec, frost) %>% fit(dat) %>% forecast()
-#' ewf
+#' ewf %>%
+#'   rename(forecast_date = time_value) %>%
+#'   mutate(target_date = forecast_date + 7L) %>%
+#'   pivot_quantiles_wider(.pred)
 #'
 #' @name grf_quantiles
 NULL
