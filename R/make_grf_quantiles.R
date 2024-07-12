@@ -73,7 +73,9 @@
 #' spec <- rand_forest(mode = "regression") %>%
 #'   set_engine(engine = "grf_quantiles", quantiles = c(.25, .5, .75))
 #'
-#' ewf <- epi_workflow(rec, spec, frost) %>% fit(dat) %>% forecast()
+#' ewf <- epi_workflow(rec, spec, frost) %>%
+#'   fit(dat) %>%
+#'   forecast()
 #' ewf %>%
 #'   rename(forecast_date = time_value) %>%
 #'   mutate(target_date = forecast_date + 7L) %>%
@@ -183,7 +185,7 @@ make_grf_quantiles <- function() {
       args = list(
         object = quote(object$fit),
         newdata = quote(new_data),
-        seed = expr(sample.int(10 ^ 5, 1)),
+        seed = expr(sample.int(10^5, 1)),
         verbose = FALSE
       )
     )
