@@ -54,7 +54,11 @@ applying `epi_slide()` to the latest snapshot of the data.
 First, we download the version history (ie. archive) of the percentage of
 doctor's visits with CLI (COVID-like illness) computed from medical insurance
 claims and the number of new confirmed COVID-19 cases per 100,000 population
-(daily) for all 50 states from the COVIDcast API. We process as before, with the
+(daily) for all 50 states from the COVIDcast API. 
+
+<details>
+
+We process as before, with the
 modification that we use `sync = locf` in `epix_merge()` so that the last
 version of each observation can be carried forward to extrapolate unavailable
 versions for the less up-to-date input archive.
@@ -74,6 +78,8 @@ x <- epix_merge(
 )
 rm(y)
 ```
+
+</details>
 
 After obtaining the latest snapshot of the data, we produce forecasts on that
 data using the default engine of simple linear regression and compare to a
@@ -174,7 +180,10 @@ make to this simple model.[^1]
 out-perform many far more complicated models in the online Covid forecasting due
 to those models high variance predictions.
 
+
 ### Example using case data from Canada
+
+<details>
 
 By leveraging the flexibility of `epiprocess`, we can apply the same techniques
 to data from other sources. Since some collaborators are in British Columbia,
@@ -283,9 +292,11 @@ and/or are overly confident (very narrow bands), particularly when boosted
 regression trees are used. But as this is meant to be a simple demonstration of
 sliding with different engines in `arx_forecaster`, we may devote another
 vignette to work on improving the predictive modelling using the suite of tools
-available in epipredict.
+available in `{epipredict}`.
 
-## Version-aware and unaware forecasting
+</details>
+
+## Version-aware forecasting
 
 ### Example using case data from US states
 
@@ -299,7 +310,9 @@ as above. For version-aware forecasting, note that `x` is fed into
 `epi_slide()`. Note that in this example, we use a geo-pooled approach (using
 combined data from all US states and territories) to train our model.
 
-```{r load-data}
+<details>
+
+```{r load-data, eval=FALSE}
 # loading in the data
 states <- "*"
 
@@ -363,7 +376,17 @@ x <- x %>%
     death_rate_7d_av = slide_value_death_rate_7d_av
   ) %>%
   as_epi_archive(compactify = TRUE)
+
+saveRDS(x$DT, file = "case_death_rate_archive.rds")
 ```
+
+```{r load-stored-data, eval=FALSE}
+x <- readRDS("case_death_rate_archive.rds")
+x <- as_epi_archive(x)
+```
+
+
+</details>
 
 Here we specify the ARX model.
 
@@ -377,8 +400,7 @@ forecaster <- function(x) {
       predictors = c("death_rate_7d_av", "case_rate_7d_av"),
       trainer = quantile_reg(),
       args_list = arx_args_list(lags = c(0, 7, 14, 21), ahead = ahead)
-    ) %>%
-      .$predictions
+    )$predictions
   }) %>%
     bind_rows()
 }
@@ -413,22 +435,19 @@ fc_states <- x_result %>%
 
 x_latest_states <- x_latest %>% filter(geo_value %in% states_to_show)
 
-ggplot(fc_states, aes(target_date, group = time_value, fill = engine_type)) +
+ggplot(fc_states, aes(target_date, group = time_value)) +
+  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = geo_value), alpha = 0.4) +
   geom_line(
     data = x_latest_states, aes(x = time_value, y = death_rate_7d_av),
     inherit.aes = FALSE, color = "gray50"
   ) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`), alpha = 0.4) +
-  geom_line(aes(y = .pred)) +
-  geom_point(aes(y = .pred), size = 0.5) +
+  geom_line(aes(y = .pred, color = geo_value)) +
+  geom_point(aes(y = .pred, color = geo_value), size = 0.5) +
   geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
-  facet_grid(vars(geo_value), vars(engine_type), scales = "free") +
+  facet_wrap(~geo_value, scales = "free_y", ncol = 1L) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   scale_fill_brewer(palette = "Set1") +
+  scale_color_brewer(palette = "Set1") +
   labs(x = "Date", y = "7 day average COVID-19 death rates") +
   theme(legend.position = "none")
 ```
-
-We shall leave it to the reader to try the above version aware and unaware
-forecasting exercise on the Canadian case rate data. The above code for the
-American state data should be readily adaptable for this purpose.
