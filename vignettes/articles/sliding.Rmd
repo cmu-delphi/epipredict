@@ -58,6 +58,8 @@ claims and the number of new confirmed COVID-19 cases per 100,000 population
 
 <details>
 
+<summary>Load a data archive</summary>
+
 We process as before, with the
 modification that we use `sync = locf` in `epix_merge()` so that the last
 version of each observation can be carried forward to extrapolate unavailable
@@ -89,7 +91,7 @@ Note that all of the warnings about the forecast date being less than the most
 recent update date of the data have been suppressed to avoid cluttering the
 output.
 
-```{r make-arx-kweek, warning = FALSE}
+```{r arx-kweek-preliminaries, warning = FALSE}
 # Latest snapshot of data, and forecast dates
 x_latest <- epix_as_of(x, max_version = max(x$versions_end))
 fc_time_values <- seq(
@@ -105,8 +107,7 @@ k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
     ~ arx_forecaster(
       .x, outcome, predictors, engine,
       args_list = arx_args_list(ahead = ahead)
-    ) %>%
-      extract2("predictions") %>%
+    )$predictions %>%
       select(-geo_value),
     before = 120 - 1,
     ref_time_values = fc_time_values,
@@ -115,7 +116,9 @@ k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
     select(geo_value, time_value, starts_with("fc")) %>%
     mutate(engine_type = engine$engine)
 }
+```
 
+```{r make-arx-kweek}
 # Generate the forecasts and bind them together
 fc <- bind_rows(
   map(
@@ -146,11 +149,14 @@ rates. Note that even though we've fitted the model on all states, we'll just
 display the results for two states, California (CA) and Florida (FL), to get a
 sense of the model performance while keeping the graphic simple.
 
-```{r plot-arx, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
+<details>
+
+<summary>Code for plotting</summary>
+```{r plot-arx, message = FALSE, warning = FALSE}
 fc_cafl <- fc %>% filter(geo_value %in% c("ca", "fl"))
 x_latest_cafl <- x_latest %>% filter(geo_value %in% c("ca", "fl"))
 
-ggplot(fc_cafl, aes(fc_target_date, group = time_value, fill = engine_type)) +
+p1 <- ggplot(fc_cafl, aes(fc_target_date, group = time_value, fill = engine_type)) +
   geom_line(
     data = x_latest_cafl, aes(x = time_value, y = case_rate),
     inherit.aes = FALSE, color = "gray50"
@@ -164,6 +170,11 @@ ggplot(fc_cafl, aes(fc_target_date, group = time_value, fill = engine_type)) +
   scale_fill_brewer(palette = "Set1") +
   labs(x = "Date", y = "Reported COVID-19 case rates") +
   theme(legend.position = "none")
+```
+</details>
+
+```{r show-plot1, fig.width = 9, fig.height = 6, echo=FALSE}
+p1
 ```
 
 For the two states of interest, simple linear regression clearly performs better
@@ -184,6 +195,8 @@ to those models high variance predictions.
 ### Example using case data from Canada
 
 <details>
+
+<summary>Data and forecasts. Similar to the above.</summary>
 
 By leveraging the flexibility of `epiprocess`, we can apply the same techniques
 to data from other sources. Since some collaborators are in British Columbia,
@@ -312,6 +325,7 @@ combined data from all US states and territories) to train our model.
 
 <details>
 
+<summary>Download data using `{epidatr}`</summary>
 ```{r load-data, eval=FALSE}
 # loading in the data
 states <- "*"
@@ -342,12 +356,6 @@ deaths_incidence_prop <- pub_covidcast(
   arrange(geo_value, time_value) %>%
   as_epi_archive(compactify = FALSE)
 
-
-fc_time_values <- seq(
-  from = as.Date("2020-09-01"),
-  to = as.Date("2021-12-31"),
-  by = "1 month"
-)
 
 x <- epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
   sync = "locf"
@@ -380,18 +388,21 @@ x <- x %>%
 saveRDS(x$DT, file = "case_death_rate_archive.rds")
 ```
 
-```{r load-stored-data, eval=FALSE}
+```{r load-stored-data}
 x <- readRDS("case_death_rate_archive.rds")
 x <- as_epi_archive(x)
 ```
-
-
 </details>
 
 Here we specify the ARX model.
 
 ```{r make-arx-model}
 aheads <- c(7, 14, 21)
+fc_time_values <- seq(
+  from = as.Date("2020-09-01"),
+  to = as.Date("2021-12-31"),
+  by = "1 month"
+)
 forecaster <- function(x) {
   map(aheads, function(ahead) {
     arx_forecaster(
@@ -408,18 +419,18 @@ forecaster <- function(x) {
 
 We can now use our forecaster function that we've created and use it in the
 pipeline for forecasting the predictions. We store the predictions into the
-`x_result` variable and calculate the most up to date version of the data in the
-epiarchive and store it as `x_latest`.
+`arx_preds` variable and calculate the most up to date version of the data in the
+epi archive and store it as `x_latest`.
 
 ```{r running-arx-forecaster}
-x_result <- x %>%
+arx_preds <- x %>%
   epix_slide(~ forecaster(.x),
     before = 120, ref_time_values = fc_time_values,
     names_sep = NULL
   ) %>%
   mutate(engine_type = quantile_reg()$engine) %>%
-  as_epi_df()
-x_result$ahead_val <- x_result$target_date - x_result$forecast_date
+  as_epi_df() %>%
+  mutate(ahead_val = target_date - forecast_date)
 
 x_latest <- epix_as_of(x, max_version = max(x$versions_end))
 ```
@@ -427,15 +438,18 @@ x_latest <- epix_as_of(x, max_version = max(x$versions_end))
 Now we plot both the actual and predicted 7 day average of the death rate for
 the chosen states
 
-```{r plot-arx-asof, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 6}
+<details>
+
+<summary>Code for the plot</summary>
+```{r plot-arx-asof, message = FALSE, warning = FALSE}
 states_to_show <- c("ca", "ny", "mi", "az")
-fc_states <- x_result %>%
+fc_states <- arx_preds %>%
   filter(geo_value %in% states_to_show) %>%
   pivot_quantiles_wider(.pred_distn)
 
 x_latest_states <- x_latest %>% filter(geo_value %in% states_to_show)
 
-ggplot(fc_states, aes(target_date, group = time_value)) +
+p2 <- ggplot(fc_states, aes(target_date, group = time_value)) +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = geo_value), alpha = 0.4) +
   geom_line(
     data = x_latest_states, aes(x = time_value, y = death_rate_7d_av),
@@ -450,4 +464,9 @@ ggplot(fc_states, aes(target_date, group = time_value)) +
   scale_color_brewer(palette = "Set1") +
   labs(x = "Date", y = "7 day average COVID-19 death rates") +
   theme(legend.position = "none")
+```
+</details>
+
+```{r show-plot2, fig.width = 9, fig.height = 6, echo = FALSE}
+p2
 ```
