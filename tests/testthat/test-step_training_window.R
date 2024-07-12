@@ -11,8 +11,8 @@ toy_epi_df <- tibble::tibble(
 test_that("step_training_window works with default n_recent", {
   p <- epi_recipe(y ~ x, data = toy_epi_df) %>%
     step_training_window() %>%
-    recipes::prep(toy_epi_df) %>%
-    recipes::bake(new_data = NULL)
+    prep(toy_epi_df) %>%
+    bake(new_data = NULL)
 
   expect_equal(nrow(p), 100L)
   expect_equal(ncol(p), 4L)
@@ -28,8 +28,8 @@ test_that("step_training_window works with default n_recent", {
 test_that("step_training_window works with specified n_recent", {
   p2 <- epi_recipe(y ~ x, data = toy_epi_df) %>%
     step_training_window(n_recent = 5) %>%
-    recipes::prep(toy_epi_df) %>%
-    recipes::bake(new_data = NULL)
+    prep(toy_epi_df) %>%
+    bake(new_data = NULL)
 
   expect_equal(nrow(p2), 10L)
   expect_equal(ncol(p2), 4L)
@@ -48,8 +48,8 @@ test_that("step_training_window does not proceed with specified new_data", {
   # testing data.
   p3 <- epi_recipe(y ~ x, data = toy_epi_df) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(toy_epi_df) %>%
-    recipes::bake(new_data = toy_epi_df[1:10, ])
+    prep(toy_epi_df) %>%
+    bake(new_data = toy_epi_df[1:10, ])
 
   expect_equal(nrow(p3), 10L)
   expect_equal(ncol(p3), 4L)
@@ -78,8 +78,8 @@ test_that("step_training_window works with multiple keys", {
 
   p4 <- epi_recipe(y ~ x, data = toy_epi_df2) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(toy_epi_df2) %>%
-    recipes::bake(new_data = NULL)
+    prep(toy_epi_df2) %>%
+    bake(new_data = NULL)
 
   expect_equal(nrow(p4), 12L)
   expect_equal(ncol(p4), 5L)
@@ -112,20 +112,20 @@ test_that("step_training_window and step_naomit interact", {
 
   e1 <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL)
+    prep(tib) %>%
+    bake(new_data = NULL)
 
   e2 <- epi_recipe(y ~ x, data = tib) %>%
-    recipes::step_naomit() %>%
+    step_naomit() %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL)
+    prep(tib) %>%
+    bake(new_data = NULL)
 
   e3 <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::step_naomit() %>%
-    recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL)
+    step_naomit() %>%
+    prep(tib) %>%
+    bake(new_data = NULL)
 
   expect_identical(e1, e2)
   expect_identical(e2, e3)
