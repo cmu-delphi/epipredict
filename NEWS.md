@@ -47,3 +47,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Revise `compat-purrr` to use the r-lang `standalone-*` version (via
   `{usethis}`)
 - `epi_recipe()` will now warn when given non-`epi_df` data
+- Add quantile random forests (via `{grf}`) as a parsnip engine
