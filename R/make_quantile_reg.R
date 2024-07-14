@@ -3,8 +3,9 @@
 #' @description
 #' `quantile_reg()` generates a quantile regression model _specification_ for
 #' the [tidymodels](https://www.tidymodels.org/) framework. Currently, the
-#' only supported engines are "rq", which uses [quantreg::rq()], and "grf",
-#' which uses [grf::quantile_forest()].
+#' only supported engines are "rq", which uses [quantreg::rq()].
+#' Quantile regression is also possible by combining [parsnip::rand_forest()]
+#' with the `grf` engine. See [grf_quantiles].
 #'
 #' @param mode A single character string for the type of model.
 #'   The only possible value for this model is "regression".

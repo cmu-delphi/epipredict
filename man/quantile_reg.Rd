@@ -19,8 +19,9 @@ quantiles to estimate (default is 0.5).}
 \description{
 \code{quantile_reg()} generates a quantile regression model \emph{specification} for
 the \href{https://www.tidymodels.org/}{tidymodels} framework. Currently, the
-only supported engines are "rq", which uses \code{\link[quantreg:rq]{quantreg::rq()}}, and "grf",
-which uses \code{\link[grf:quantile_forest]{grf::quantile_forest()}}.
+only supported engines are "rq", which uses \code{\link[quantreg:rq]{quantreg::rq()}}.
+Quantile regression is also possible by combining \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}}
+with the \code{grf} engine. See \link{grf_quantiles}.
 }
 \examples{
 library(quantreg)
