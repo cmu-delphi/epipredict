@@ -41,7 +41,7 @@
 #'
 #' @examples
 #' library(grf)
-#' tib <- tibble(
+#' tib <- data.frame(
 #'   y = rnorm(100), x = rnorm(100), z = rnorm(100),
 #'   f = factor(sample(letters[1:3], 100, replace = TRUE))
 #' )

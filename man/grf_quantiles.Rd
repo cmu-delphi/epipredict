@@ -65,7 +65,7 @@ Case weights are not supported.
 
 \examples{
 library(grf)
-tib <- tibble(
+tib <- data.frame(
   y = rnorm(100), x = rnorm(100), z = rnorm(100),
   f = factor(sample(letters[1:3], 100, replace = TRUE))
 )
@@ -97,7 +97,9 @@ frost <- frosting() \%>\%
 spec <- rand_forest(mode = "regression") \%>\%
   set_engine(engine = "grf_quantiles", quantiles = c(.25, .5, .75))
 
-ewf <- epi_workflow(rec, spec, frost) \%>\% fit(dat) \%>\% forecast()
+ewf <- epi_workflow(rec, spec, frost) \%>\%
+  fit(dat) \%>\%
+  forecast()
 ewf \%>\%
   rename(forecast_date = time_value) \%>\%
   mutate(target_date = forecast_date + 7L) \%>\%

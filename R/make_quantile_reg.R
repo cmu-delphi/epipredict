@@ -24,11 +24,6 @@
 #' rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
-#'
-#' library(grf)
-#' grf_spec <- quantile_reg(engine = "grf", quantile_levels = c(.1, .5, .9))
-#' gg <- grf_spec %>% fit(y ~ ., data = tib)
-#' predict(gg, new_data = tib)
 quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0.5) {
   # Check for correct mode
   if (mode != "regression") {
