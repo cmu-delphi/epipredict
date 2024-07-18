@@ -86,3 +86,46 @@ test_that("layer_predict is added by default if missing", {
 
   expect_equal(forecast(wf1), forecast(wf2))
 })
+
+
+test_that("parsnip settings can be passed through predict.epi_workflow", {
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_naomit()
+
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+
+  latest <- get_test_data(r, jhu)
+
+  f1 <- frosting() %>% layer_predict()
+  f2 <- frosting() %>% layer_predict(type = "pred_int")
+  f3 <- frosting() %>% layer_predict(type = "pred_int", level = 0.6)
+
+  pred2 <- wf %>% add_frosting(f2) %>% predict(latest)
+  pred3 <- wf %>% add_frosting(f3) %>% predict(latest)
+
+  pred2_re <- wf %>% add_frosting(f1) %>% predict(latest, type = "pred_int")
+  pred3_re <- wf %>% add_frosting(f1) %>% predict(latest, type = "pred_int", level = 0.6)
+
+  expect_identical(pred2, pred2_re)
+  expect_identical(pred3, pred3_re)
+
+  f4 <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred, lower = 0)
+
+  expect_error(wf %>% add_frosting(f4) %>% predict(latest, type = "pred_int"),
+               class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers")
+
+  # We also refuse to continue when just passing the level, which might not be ideal:
+  f5 <- frosting() %>%
+    layer_predict(type = "pred_int") %>%
+    layer_threshold(.pred_lower, .pred_upper, lower = 0)
+
+  expect_error(wf %>% add_frosting(f5) %>% predict(latest, level = 0.6),
+               class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers")
+})

@@ -61,17 +61,33 @@ test_that("layer_predict dots validation", {
 })
 
 test_that("layer_predict dots are forwarded", {
-  f_lm_int_level <- frosting() %>%
+  f_lm_int_level_95 <- frosting() %>%
+    layer_predict(type = "pred_int")
+  f_lm_int_level_80 <- frosting() %>%
     layer_predict(type = "pred_int", level = 0.8)
-  wf_lm_int_level <- wf %>% add_frosting(f_lm_int_level)
+  wf_lm_int_level_95 <- wf %>% add_frosting(f_lm_int_level_95)
+  wf_lm_int_level_80 <- wf %>% add_frosting(f_lm_int_level_80)
   p <- predict(wf, latest)
-  p_lm_int_level <- predict(wf_lm_int_level, latest)
-  expect_contains(names(p_lm_int_level), c(".pred_lower", ".pred_upper"))
-  expect_equal(nrow(na.omit(p)), nrow(na.omit(p_lm_int_level)))
-  expect_true(cbind(p, p_lm_int_level[c(".pred_lower", ".pred_upper")]) %>%
-    na.omit() %>%
-    mutate(sandwiched = .pred_lower <= .pred & .pred <= .pred_upper) %>%
-    `[[`("sandwiched") %>%
-    all())
+  p_lm_int_level_95 <- predict(wf_lm_int_level_95, latest)
+  p_lm_int_level_80 <- predict(wf_lm_int_level_80, latest)
+  expect_contains(names(p_lm_int_level_95), c(".pred_lower", ".pred_upper"))
+  expect_contains(names(p_lm_int_level_80), c(".pred_lower", ".pred_upper"))
+  expect_equal(nrow(na.omit(p)), nrow(na.omit(p_lm_int_level_95)))
+  expect_equal(nrow(na.omit(p)), nrow(na.omit(p_lm_int_level_80)))
+  expect_true(
+    cbind(
+      p,
+      p_lm_int_level_95 %>% dplyr::select(.pred_lower_95 = .pred_lower, .pred_upper_95 = .pred_upper),
+      p_lm_int_level_80 %>% dplyr::select(.pred_lower_80 = .pred_lower, .pred_upper_80 = .pred_upper)
+    ) %>%
+      na.omit() %>%
+      mutate(sandwiched =
+               .pred_lower_95 <= .pred_lower_80 &
+               .pred_lower_80 <= .pred          &
+               .pred          <= .pred_upper_80 &
+               .pred_upper_80 <= .pred_upper_95) %>%
+      `[[`("sandwiched") %>%
+      all()
+  )
   # There are many possible other valid configurations that aren't tested here.
 })

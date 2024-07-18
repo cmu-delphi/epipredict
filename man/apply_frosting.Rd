@@ -11,7 +11,7 @@ apply_frosting(workflow, ...)
 
 \method{apply_frosting}{default}(workflow, components, ...)
 
-\method{apply_frosting}{epi_workflow}(workflow, components, new_data, ...)
+\method{apply_frosting}{epi_workflow}(workflow, components, new_data, type = NULL, opts = list(), ...)
 }
 \arguments{
 \item{workflow}{An object of class workflow}

@@ -357,7 +357,7 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @importFrom rlang abort
 #' @export
 apply_frosting.epi_workflow <-
-  function(workflow, components, new_data, ...) {
+  function(workflow, components, new_data, type = NULL, opts = list(), ...) {
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (!has_postprocessor(workflow)) {
@@ -397,10 +397,28 @@ apply_frosting.epi_workflow <-
         layers
       )
     }
+    if (length(layers) > 1L &&
+          (!is.null(type) || !identical(opts, list()) || rlang::dots_n(...) > 0L)) {
+      cli_abort("
+        Passing `type`, `opts`, or `...` into `predict.epi_workflow()` is not
+        supported if you have frosting layers other than `layer_predict`. Please
+        provide these arguments earlier (i.e. while constructing the frosting
+        object) by passing them into an explicit call to `layer_predict(), and
+        adjust the remaining layers to account for resulting differences in
+        output format from these settings.
+      ", class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers")
+    }
 
     for (l in seq_along(layers)) {
       la <- layers[[l]]
-      components <- slather(la, components, workflow, new_data)
+      if (inherits(la, "layer_predict")) {
+        components <- slather(la, components, workflow, new_data, type = type, opts = opts, ...)
+      } else {
+        # The check above should ensure we have default `type` and `opts` and
+        # empty `...`; don't forward these default `type` and `opts`, to avoid
+        # upsetting some slather method validation.
+        components <- slather(la, components, workflow, new_data)
+      }
     }
 
     return(components)

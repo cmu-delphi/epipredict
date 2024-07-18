@@ -76,16 +76,16 @@ layer_point_from_distn_new <- function(type, name, id) {
 #' @export
 slather.layer_point_from_distn <-
   function(object, components, workflow, new_data, ...) {
-    rlang::check_dots_empty()
     dstn <- components$predictions$.pred
     if (!inherits(dstn, "distribution")) {
       rlang::warn(
         c("`layer_point_from_distn` requires distributional predictions.",
           i = "These are of class {class(dstn)}. Ignoring this layer."
-        )
+          )
       )
       return(components)
     }
+    rlang::check_dots_empty()
 
     dstn <- match.fun(object$type)(dstn)
     if (is.null(object$name)) {

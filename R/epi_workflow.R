@@ -152,7 +152,7 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' preds <- predict(wf, latest)
 #' preds
-predict.epi_workflow <- function(object, new_data, ...) {
+predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), ...) {
   if (!workflows::is_trained_workflow(object)) {
     cli::cli_abort(c(
       "Can't predict on an untrained epi_workflow.",
@@ -168,7 +168,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
     components$forged,
     components$mold, new_data
   )
-  components <- apply_frosting(object, components, new_data, ...)
+  components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
   components$predictions
 }
 

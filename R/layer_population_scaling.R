@@ -128,11 +128,11 @@ layer_population_scaling_new <-
 #' @export
 slather.layer_population_scaling <-
   function(object, components, workflow, new_data, ...) {
-    rlang::check_dots_empty()
     stopifnot(
       "Only one population column allowed for scaling" =
         length(object$df_pop_col) == 1
     )
+    rlang::check_dots_empty()
 
     if (is.null(object$by)) {
       object$by <- intersect(
