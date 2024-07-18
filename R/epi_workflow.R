@@ -123,13 +123,13 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'   possible. Specifically, the output will have `time_value` and
 #'   `geo_value` columns as well as the prediction.
 #'
-#' @inheritParams workflows::predict.workflow
-#'
 #' @param object An epi_workflow that has been fit by
 #'   [workflows::fit.workflow()]
 #'
 #' @param new_data A data frame containing the new predictors to preprocess
 #'   and predict on
+#'
+#' @inheritParams parsnip::predict.model_fit
 #'
 #' @return
 #' A data frame of model predictions, with as many rows as `new_data` has.
