@@ -114,6 +114,9 @@ test_that("parsnip settings can be passed through predict.epi_workflow", {
   expect_identical(pred2, pred2_re)
   expect_identical(pred3, pred3_re)
 
+  expect_error(wf %>% add_frosting(f2) %>% predict(latest, type = "raw"),
+               class = "epipredict__layer_predict__conflicting_type_settings")
+
   f4 <- frosting() %>%
     layer_predict() %>%
     layer_threshold(.pred, lower = 0)

@@ -71,6 +71,14 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 #' @export
 slather.layer_predict <- function(object, components, workflow, new_data, type = NULL, opts = list(), ...) {
   arg_is_chr_scalar(type, allow_null = TRUE)
+  if (!is.null(object$type) && !is.null(type) && !identical(object$type, type)) {
+    cli_abort("
+      Conflicting `type` settings were specified during frosting construction
+      (in call to `layer_predict()`) and while slathering (in call to
+      `slather()`/ `predict()`/etc.): {object$type} vs. {type}.  Please remove
+      one of these `type` settings.
+    ", class = "epipredict__layer_predict__conflicting_type_settings")
+  }
   assert_class(opts, "list")
 
   the_fit <- workflows::extract_fit_parsnip(workflow)
