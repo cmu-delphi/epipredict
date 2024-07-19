@@ -39,6 +39,7 @@ Imports:
     quantreg,
     recipes (>= 1.0.4),
     rlang (>= 1.0.0),
+    slider,
     smoothqr,
     stats,
     tibble,
