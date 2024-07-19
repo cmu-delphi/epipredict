@@ -376,7 +376,7 @@ apply_frosting.epi_workflow <-
         "Returning unpostprocessed predictions."
       ))
       components$predictions <- predict(
-        the_fit, components$forged$predictors, ...
+        the_fit, components$forged$predictors, type, opts, ...
       )
       components$predictions <- dplyr::bind_cols(
         components$keys, components$predictions
