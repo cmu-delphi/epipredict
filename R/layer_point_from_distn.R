@@ -81,7 +81,7 @@ slather.layer_point_from_distn <-
       rlang::warn(
         c("`layer_point_from_distn` requires distributional predictions.",
           i = "These are of class {class(dstn)}. Ignoring this layer."
-          )
+        )
       )
       return(components)
     }

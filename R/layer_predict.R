@@ -49,8 +49,8 @@ layer_predict <-
     dots_list <- rlang::dots_list(..., .homonyms = "error", .check_assign = TRUE)
     if (any(rlang::names2(dots_list) == "")) {
       cli_abort("All `...` arguments must be named.",
-                class = "epipredict__layer_predict__unnamed_dot"
-                )
+        class = "epipredict__layer_predict__unnamed_dot"
+      )
     }
     add_layer(
       frosting,

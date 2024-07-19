@@ -355,6 +355,8 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @rdname apply_frosting
 #' @importFrom rlang is_null
 #' @importFrom rlang abort
+#' @param type,opts,... forwarded to [`predict.model_fit()`] and [`slather()`]
+#'   for supported layers
 #' @export
 apply_frosting.epi_workflow <-
   function(workflow, components, new_data, type = NULL, opts = list(), ...) {
@@ -398,7 +400,7 @@ apply_frosting.epi_workflow <-
       )
     }
     if (length(layers) > 1L &&
-          (!is.null(type) || !identical(opts, list()) || rlang::dots_n(...) > 0L)) {
+      (!is.null(type) || !identical(opts, list()) || rlang::dots_n(...) > 0L)) {
       cli_abort("
         Passing `type`, `opts`, or `...` into `predict.epi_workflow()` is not
         supported if you have frosting layers other than `layer_predict`. Please
@@ -414,7 +416,7 @@ apply_frosting.epi_workflow <-
       if (inherits(la, "layer_predict")) {
         components <- slather(la, components, workflow, new_data, type = type, opts = opts, ...)
       } else {
-        # The check above should ensure we have default `type` and `opts` and
+        # The check above should ensure we have default `type` and `opts`, and
         # empty `...`; don't forward these default `type` and `opts`, to avoid
         # upsetting some slather method validation.
         components <- slather(la, components, workflow, new_data)

@@ -105,24 +105,34 @@ test_that("parsnip settings can be passed through predict.epi_workflow", {
   f2 <- frosting() %>% layer_predict(type = "pred_int")
   f3 <- frosting() %>% layer_predict(type = "pred_int", level = 0.6)
 
-  pred2 <- wf %>% add_frosting(f2) %>% predict(latest)
-  pred3 <- wf %>% add_frosting(f3) %>% predict(latest)
+  pred2 <- wf %>%
+    add_frosting(f2) %>%
+    predict(latest)
+  pred3 <- wf %>%
+    add_frosting(f3) %>%
+    predict(latest)
 
-  pred2_re <- wf %>% add_frosting(f1) %>% predict(latest, type = "pred_int")
-  pred3_re <- wf %>% add_frosting(f1) %>% predict(latest, type = "pred_int", level = 0.6)
+  pred2_re <- wf %>%
+    add_frosting(f1) %>%
+    predict(latest, type = "pred_int")
+  pred3_re <- wf %>%
+    add_frosting(f1) %>%
+    predict(latest, type = "pred_int", level = 0.6)
 
   expect_identical(pred2, pred2_re)
   expect_identical(pred3, pred3_re)
 
   expect_error(wf %>% add_frosting(f2) %>% predict(latest, type = "raw"),
-               class = "epipredict__layer_predict__conflicting_type_settings")
+    class = "epipredict__layer_predict__conflicting_type_settings"
+  )
 
   f4 <- frosting() %>%
     layer_predict() %>%
     layer_threshold(.pred, lower = 0)
 
   expect_error(wf %>% add_frosting(f4) %>% predict(latest, type = "pred_int"),
-               class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers")
+    class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers"
+  )
 
   # We also refuse to continue when just passing the level, which might not be ideal:
   f5 <- frosting() %>%
@@ -130,5 +140,6 @@ test_that("parsnip settings can be passed through predict.epi_workflow", {
     layer_threshold(.pred_lower, .pred_upper, lower = 0)
 
   expect_error(wf %>% add_frosting(f5) %>% predict(latest, level = 0.6),
-               class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers")
+    class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers"
+  )
 })

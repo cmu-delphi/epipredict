@@ -81,11 +81,13 @@ test_that("layer_predict dots are forwarded", {
       p_lm_int_level_80 %>% dplyr::select(.pred_lower_80 = .pred_lower, .pred_upper_80 = .pred_upper)
     ) %>%
       na.omit() %>%
-      mutate(sandwiched =
-               .pred_lower_95 <= .pred_lower_80 &
-               .pred_lower_80 <= .pred          &
-               .pred          <= .pred_upper_80 &
-               .pred_upper_80 <= .pred_upper_95) %>%
+      mutate(
+        sandwiched =
+          .pred_lower_95 <= .pred_lower_80 &
+            .pred_lower_80 <= .pred &
+            .pred <= .pred_upper_80 &
+            .pred_upper_80 <= .pred_upper_95
+      ) %>%
       `[[`("sandwiched") %>%
       all()
   )
