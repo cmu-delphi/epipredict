@@ -355,8 +355,8 @@ apply_frosting.default <- function(workflow, components, ...) {
 #' @rdname apply_frosting
 #' @importFrom rlang is_null
 #' @importFrom rlang abort
-#' @param type,opts,... forwarded to [`predict.model_fit()`] and [`slather()`]
-#'   for supported layers
+#' @param type,opts forwarded (along with `...`) to [`predict.model_fit()`] and
+#'   [`slather()`] for supported layers
 #' @export
 apply_frosting.epi_workflow <-
   function(workflow, components, new_data, type = NULL, opts = list(), ...) {

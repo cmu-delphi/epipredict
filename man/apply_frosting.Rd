@@ -35,8 +35,8 @@ here for ease.
 \item{new_data}{a data frame containing the new predictors to preprocess
 and predict on}
 
-\item{type, opts, ...}{forwarded to \code{\link[=predict.model_fit]{predict.model_fit()}} and \code{\link[=slather]{slather()}}
-for supported layers}
+\item{type, opts}{forwarded (along with \code{...}) to \code{\link[=predict.model_fit]{predict.model_fit()}} and
+\code{\link[=slather]{slather()}} for supported layers}
 }
 \description{
 This function is intended for internal use. It implements postprocessing
