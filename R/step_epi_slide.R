@@ -6,17 +6,23 @@
 #'
 #'
 #' @inheritParams step_epi_lag
-#' @inheritParams epiprocess::epi_slide
 #' @param .f A function in one of the following formats:
 #'  1. An unquoted function name with no arguments, e.g., `mean`
-#'  2. A base `R` lambda function, e.g., `function(x) mean(x, na.rm = TRUE)`
-#'  3. A new-style base `R` lambda function, e.g., `\(x) mean(x, na.rm = TRUE)`
-#'  4. A one-sided formula like `~ mean(.x, na.rm = TRUE)`.
+#'  2. A character string name of a function, e.g., `"mean"`. Note that this
+#'     can be difficult to examine for mistakes (so the misspelling `"maen"`
+#'     won't produce an error until you try to actually fit the model)
+#'  3. A base `R` lambda function, e.g., `function(x) mean(x, na.rm = TRUE)`
+#'  4. A new-style base `R` lambda function, e.g., `\(x) mean(x, na.rm = TRUE)`
+#'  5. A one-sided formula like `~ mean(.x, na.rm = TRUE)`.
 #'
-#'  Note that in cases 2 and 3, `x` can be any variable name you like (for
-#'  example `\(dog) mean(dog, na.rm = TRUE)` will work). But in case 4, the
+#'  Note that in cases 3 and 4, `x` can be any variable name you like (for
+#'  example `\(dog) mean(dog, na.rm = TRUE)` will work). But in case 5, the
 #'  argument must be named `.x`. A common, though very difficult to debug
 #'  error is using something like `function(x) mean`. This will not work.
+#' @param f_name a character string of at most 20 characters that describes
+#'   the function. This will be combined with `prefix` and the columns in `...`
+#'   to name the result using `{prefix}{f_name}_{column}`. It will be determined
+#'   automatically using `clean_f_name()`.
 #' @param before,after non-negative integers.
 #'   How far `before` and `after` each `time_value` should
 #'   the sliding window extend? Any value provided for either
@@ -31,7 +37,9 @@
 #'   * For leading/left-aligned windows from `time_value` to
 #'   `time_value + time_step(k)`, use `after=k, after=0`.
 #'
-#'   You may also pass a [lubridate::period], like `lubridate::weeks(1)`.
+#'   You may also pass a [lubridate::period], like `lubridate::weeks(1)` or a
+#'   character string that is coercible to a [lubridate::period], like
+#'   `"2 weeks"`.
 #' @template step-return
 #'
 #' @export
@@ -49,53 +57,40 @@ step_epi_slide <-
   function(recipe,
            ...,
            .f,
-           before,
+           before = 0L,
            after = 0L,
            role = "predictor",
            prefix = "epi_slide_",
+           f_name = clean_f_name(.f),
            skip = FALSE,
            id = rand_id("epi_slide")) {
     if (!is_epi_recipe(recipe)) {
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
     }
-    if (rlang::quo(.f) %>% rlang::quo_is_missing()) {
-      cli_abort("In, `step_epi_slide()`, `.f` may not be missing.")
-    }
-    if (rlang::is_formula(.f)) {
-      if (!is.null(rlang::f_lhs(.f))) {
-        cli_abort("In, `step_epi_slide()`, `.f` must be a one-sided formula.")
-      }
-      f_name <- rlang::f_name(.f)
-    } else if (rlang::is_character(.f)) {
-      f_name <- paste0(.f, "(.x)")
-      .f <- rlang::as_function(.f)
-    } else if (rlang::is_function(.f)) {
-      f_name <- as.character(rlang::fn_body(.f))[2]
-    } else {
-      cli_abort("In, `step_epi_slide()`, `.f` must be a function.")
-    }
-    if (nchar(f_name) > 20L) f_name <- paste0(substr(f_name, 1L, 17L), "...")
+    .f <- validate_slide_fun(.f)
+    arg_is_scalar(before, after)
+    before <- try_period(before)
+    after <- try_period(after)
 
     if (is.numeric(before)) {
       arg_is_nonneg_int(before)
     } else {
-      checkmate::assert_class(before, "Period")
+      before <- try_period(before)
     }
     if (is.numeric(after)) {
       arg_is_nonneg_int(after)
     } else {
-      checkmate::assert_class(after, "Period")
+      after <- try_period(after)
     }
-    arg_is_chr(role)
-    arg_is_chr_scalar(prefix, id)
+    arg_is_chr_scalar(role, prefix, id)
     arg_is_lgl_scalar(skip)
 
     add_step(
       recipe,
       step_epi_slide_new(
         terms = enquos(...),
-        before = enquo(before),
-        after = enquo(after),
+        before = before,
+        after = after,
         .f = .f,
         f_name = f_name,
         role = role,
@@ -197,7 +192,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
         dplyr::all_of(object$columns),
         ~ slider::slide_index_vec(
           .x, .i = time_value,
-          object$.f, .before = !!object$before, .after = !!object$after
+          object$.f, .before = object$before, .after = object$after
         )
       )
     ) %>%
@@ -217,3 +212,79 @@ print.step_epi_slide <- function(x, width = max(20, options()$width - 30), ...) 
   )
   invisible(x)
 }
+
+#' Create short function names
+#'
+#' @param .f a function, character string, or lambda. For example, `mean`,
+#'   `"mean"`, `~ mean(.x)` or `\(x) mean(x, na.rm = TRUE)`.
+#' @param max_length integer determining how long names can be
+#'
+#' @return a character string of length at most `max_length` that
+#'   (partially) describes the function.
+#' @export
+#'
+#' @examples
+#' clean_f_name(mean)
+#' clean_f_name("mean")
+#' clean_f_name(~ mean(.x, na.rm = TRUE))
+#' clean_f_name(\(x) mean(x, na.rm = TRUE))
+#' clean_f_name(function(x) mean(x, na.rm = TRUE, trim = 0.2357862))
+clean_f_name <- function(.f, max_length = 20L) {
+  if (rlang::is_formula(.f, scoped = TRUE)) {
+    f_name <- rlang::f_name(.f)
+  } else if (rlang::is_character(.f)) {
+    f_name <- .f
+  } else if (rlang::is_function(.f)) {
+    f_name <- as.character(substitute(.f))
+    if (length(f_name) > 1L) {
+      f_name <- f_name[3]
+      if (nchar(f_name) > max_length - 5L) {
+        f_name <- paste0(substr(f_name, 1L, max(max_length - 8L, 5L)), "...")
+      }
+      f_name <- paste0("[ ]{", f_name, "}")
+    }
+  }
+  if (nchar(f_name) > max_length) {
+    f_name <- paste0(substr(f_name, 1L, max_length - 3L), "...")
+  }
+  f_name
+}
+
+
+validate_slide_fun <- function(.f) {
+  if (rlang::quo(.f) %>% rlang::quo_is_missing()) {
+    cli_abort("In, `step_epi_slide()`, `.f` may not be missing.")
+  }
+  if (rlang::is_formula(.f, scoped = TRUE)) {
+    if (!is.null(rlang::f_lhs(.f))) {
+      cli_abort("In, `step_epi_slide()`, `.f` must be a one-sided formula.")
+    }
+  } else if (rlang::is_character(.f)) {
+    .f <- rlang::as_function(.f)
+  } else if (!rlang::is_function(.f)) {
+    cli_abort("In, `step_epi_slide()`, `.f` must be a function.")
+  }
+  .f
+}
+
+try_period <- function(x) {
+  err <- is.na(x)
+  if (!err) {
+    if (is.numeric(x) ) {
+      err <- !rlang::is_integerish(x) || x < 0
+    } else {
+      x <- lubridate::as.period(x)
+      err <- is.na(x)
+    }
+  }
+  if (err) {
+    cli_abort(paste(
+      'The value supplied to `before` or `after` must be a non-negative integer',
+      'a {.cls lubridate::period} or a character scalar that can be coerced',
+      'as a {.cls lubridate::period}, e.g., `"1 week"`.'
+    ),
+      )
+  }
+  x
+}
+

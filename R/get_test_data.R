@@ -65,12 +65,9 @@ get_test_data <- function(
       i = "The following required columns are missing: {check$missing_names}"
     ))
   }
-
   if (class(forecast_date) != class(x$time_value)) {
     cli::cli_abort("`forecast_date` must be the same class as `x$time_value`.")
   }
-
-
   if (forecast_date < max(x$time_value)) {
     cli::cli_abort("`forecast_date` must be no earlier than `max(x$time_value)`")
   }
@@ -78,7 +75,8 @@ get_test_data <- function(
   min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% Inf)), Inf)
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
   max_horizon <- max(map_dbl(recipe$steps, ~ max(.x$horizon %||% 0)), 0)
-  min_required <- max_lags + max_horizon
+  max_slide <- max(map_dbl(recipe$steps, ~ max(.x$before %||% 0)), 0)
+  min_required <- max_lags + max_horizon + max_slide
   if (is.null(n_recent)) n_recent <- min_required + 1 # one extra for filling
   if (n_recent <= min_required) n_recent <- min_required + n_recent
 
@@ -164,8 +162,6 @@ pad_to_end <- function(x, groups, end_date) {
 }
 
 Seq <- function(from, to, by) {
-  if (from > to) {
-    return(NULL)
-  }
+  if (from > to) return(NULL)
   seq(from = from, to = to, by = by)
 }

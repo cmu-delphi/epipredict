@@ -8,10 +8,11 @@ step_epi_slide(
   recipe,
   ...,
   .f,
-  before,
+  before = 0L,
   after = 0L,
   role = "predictor",
   prefix = "epi_slide_",
+  f_name = clean_f_name(.f),
   skip = FALSE,
   id = rand_id("epi_slide")
 )
@@ -26,13 +27,16 @@ for this step. See \code{\link[recipes:selections]{recipes::selections()}} for m
 \item{.f}{A function in one of the following formats:
 \enumerate{
 \item An unquoted function name with no arguments, e.g., \code{mean}
+\item A character string name of a function, e.g., \code{"mean"}. Note that this
+can be difficult to examine for mistakes (so the misspelling \code{"maen"}
+won't produce an error until you try to actually fit the model)
 \item A base \code{R} lambda function, e.g., \code{function(x) mean(x, na.rm = TRUE)}
 \item A new-style base \code{R} lambda function, e.g., \verb{\\(x) mean(x, na.rm = TRUE)}
 \item A one-sided formula like \code{~ mean(.x, na.rm = TRUE)}.
 }
 
-Note that in cases 2 and 3, \code{x} can be any variable name you like (for
-example \verb{\\(dog) mean(dog, na.rm = TRUE)} will work). But in case 4, the
+Note that in cases 3 and 4, \code{x} can be any variable name you like (for
+example \verb{\\(dog) mean(dog, na.rm = TRUE)} will work). But in case 5, the
 argument must be named \code{.x}. A common, though very difficult to debug
 error is using something like \code{function(x) mean}. This will not work.}
 
@@ -52,12 +56,19 @@ for the purposes of forecasting.
 \code{time_value + time_step(k)}, use \verb{after=k, after=0}.
 }
 
-You may also pass a \link[lubridate:period]{lubridate::period}, like \code{lubridate::weeks(1)}.}
+You may also pass a \link[lubridate:period]{lubridate::period}, like \code{lubridate::weeks(1)} or a
+character string that is coercible to a \link[lubridate:period]{lubridate::period}, like
+\code{"2 weeks"}.}
 
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
 \item{prefix}{A prefix to indicate what type of variable this is}
+
+\item{f_name}{a character string of at most 20 characters that describes
+the function. This will be combined with \code{prefix} and the columns in \code{...}
+to name the result using \verb{\{prefix\}\{f_name\}_\{column\}}. It will be determined
+automatically using \code{clean_f_name()}.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
