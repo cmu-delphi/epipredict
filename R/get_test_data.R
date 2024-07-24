@@ -162,6 +162,8 @@ pad_to_end <- function(x, groups, end_date) {
 }
 
 Seq <- function(from, to, by) {
-  if (from > to) return(NULL)
+  if (from > to) {
+    return(NULL)
+  }
   seq(from = from, to = to, by = by)
 }

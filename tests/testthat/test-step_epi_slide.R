@@ -55,7 +55,6 @@ rolled_after <- edf %>%
 
 
 test_that("epi_slide handles classed before/after", {
-
   baseline <- r %>%
     step_epi_slide(value, .f = mean, before = 3L) %>%
     prep(edf) %>%

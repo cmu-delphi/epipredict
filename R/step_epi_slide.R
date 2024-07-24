@@ -139,7 +139,6 @@ step_epi_slide_new <-
 
 #' @export
 prep.step_epi_slide <- function(x, training, info = NULL, ...) {
-
   col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
   check_type(training[, col_names], types = c("double", "integer"))
@@ -164,7 +163,6 @@ prep.step_epi_slide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_slide <- function(object, new_data, ...) {
-
   recipes::check_new_data(names(object$columns), object, new_data)
   col_names <- object$columns
   name_prefix <- paste0(object$prefix, object$f_name, "_")
@@ -176,7 +174,8 @@ bake.step_epi_slide <- function(object, new_data, ...) {
     nms <- new_data_names[intersection]
     cli_abort(
       c("Name collision occured. The following variable names already exist:",
-      `*` = "{.var {nms}}"),
+        `*` = "{.var {nms}}"
+      ),
       call = caller_env()
     )
   }
@@ -191,7 +190,8 @@ bake.step_epi_slide <- function(object, new_data, ...) {
       dplyr::across(
         dplyr::all_of(object$columns),
         ~ slider::slide_index_vec(
-          .x, .i = time_value,
+          .x,
+          .i = time_value,
           object$.f, .before = object$before, .after = object$after
         )
       )
@@ -270,7 +270,7 @@ validate_slide_fun <- function(.f) {
 try_period <- function(x) {
   err <- is.na(x)
   if (!err) {
-    if (is.numeric(x) ) {
+    if (is.numeric(x)) {
       err <- !rlang::is_integerish(x) || x < 0
     } else {
       x <- lubridate::as.period(x)
@@ -279,12 +279,10 @@ try_period <- function(x) {
   }
   if (err) {
     cli_abort(paste(
-      'The value supplied to `before` or `after` must be a non-negative integer',
-      'a {.cls lubridate::period} or a character scalar that can be coerced',
+      "The value supplied to `before` or `after` must be a non-negative integer",
+      "a {.cls lubridate::period} or a character scalar that can be coerced",
       'as a {.cls lubridate::period}, e.g., `"1 week"`.'
-    ),
-      )
+    ), )
   }
   x
 }
-
