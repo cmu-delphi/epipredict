@@ -71,17 +71,6 @@ step_epi_slide <-
     arg_is_scalar(before, after)
     before <- try_period(before)
     after <- try_period(after)
-
-    if (is.numeric(before)) {
-      arg_is_nonneg_int(before)
-    } else {
-      before <- try_period(before)
-    }
-    if (is.numeric(after)) {
-      arg_is_nonneg_int(after)
-    } else {
-      after <- try_period(after)
-    }
     arg_is_chr_scalar(role, prefix, id)
     arg_is_lgl_scalar(skip)
 
