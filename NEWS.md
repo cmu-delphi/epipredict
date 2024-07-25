@@ -47,5 +47,5 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Revise `compat-purrr` to use the r-lang `standalone-*` version (via
   `{usethis}`)
 - `epi_recipe()` will now warn when given non-`epi_df` data
-- `layer_predict()` will now appropriately forward `...` args intended for
-  `predict.workflow()`
+- `layer_predict()` and `predict.epi_workflow()` will now appropriately forward
+  `...` args intended for `predict.model_fit()`
