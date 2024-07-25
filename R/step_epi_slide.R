@@ -18,10 +18,11 @@
 #'  Note that in cases 3 and 4, `x` can be any variable name you like (for
 #'  example `\(dog) mean(dog, na.rm = TRUE)` will work). But in case 5, the
 #'  argument must be named `.x`. A common, though very difficult to debug
-#'  error is using something like `function(x) mean`. This will not work.
+#'  error is using something like `function(x) mean`. This will not work
+#'  because it returns the function mean, rather than `mean(x)`
 #' @param f_name a character string of at most 20 characters that describes
 #'   the function. This will be combined with `prefix` and the columns in `...`
-#'   to name the result using `{prefix}{f_name}_{column}`. It will be determined
+#'   to name the result using `{prefix}{f_name}_{column}`. By default it will be determined
 #'   automatically using `clean_f_name()`.
 #' @param before,after non-negative integers.
 #'   How far `before` and `after` each `time_value` should
@@ -162,7 +163,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
   if (any(intersection)) {
     nms <- new_data_names[intersection]
     cli_abort(
-      c("Name collision occured. The following variable names already exist:",
+      c("In `step_epi_slide()` a name collision occurred. The following variable names already exist:",
         `*` = "{.var {nms}}"
       ),
       call = caller_env()
