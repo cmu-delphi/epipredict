@@ -49,15 +49,13 @@ test_that("layer_predict dots validation", {
   expect_no_error(f_bad_arg <- frosting() %>% layer_predict(bogus_argument = "something"))
   wf_bad_arg <- wf %>% add_frosting(f_bad_arg)
   expect_error(predict(wf_bad_arg, latest))
-  # Some argument names only apply for some prediction `type`s; we don't check for ignored arguments, and neither does workflows:
-  expect_no_error(frosting() %>% layer_predict(eval_time = "preferably this would error"))
+  # ^ (currently with a awful error message, due to an extra comma in parsnip::check_pred_type_dots)
 
-  # ^ (currently with a truly awful error message, due to an extra comma in parsnip::check_pred_type_dots)
-  #
-  # Unfortunately, we outright ignore attempts to pass args via `predict.epi_workflow`:
-  f_predict <- frosting() %>% layer_predict()
-  wf_predict <- wf %>% add_frosting(f_predict)
-  expect_no_error(predict(wf_predict, latest, type = "pred_int"))
+  # Some argument names only apply for some prediction `type`s; we don't check
+  # for invalid pairings, nor does {parsnip}, so we end up producing a forecast
+  # that silently ignores some arguments some of the time. ({workflows} doesn't
+  # check for these either.)
+  expect_no_error(frosting() %>% layer_predict(eval_time = "preferably this would error"))
 })
 
 test_that("layer_predict dots are forwarded", {
