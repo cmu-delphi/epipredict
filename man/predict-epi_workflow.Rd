@@ -5,7 +5,7 @@
 \alias{predict.epi_workflow}
 \title{Predict from an epi_workflow}
 \usage{
-\method{predict}{epi_workflow}(object, new_data, ...)
+\method{predict}{epi_workflow}(object, new_data, type = NULL, opts = list(), ...)
 }
 \arguments{
 \item{object}{An epi_workflow that has been fit by
@@ -13,6 +13,16 @@
 
 \item{new_data}{A data frame containing the new predictors to preprocess
 and predict on}
+
+\item{type}{A single character value or \code{NULL}. Possible values
+are \code{"numeric"}, \code{"class"}, \code{"prob"}, \code{"conf_int"}, \code{"pred_int"},
+\code{"quantile"}, \code{"time"}, \code{"hazard"}, \code{"survival"}, or \code{"raw"}. When \code{NULL},
+\code{predict()} will choose an appropriate value based on the model's mode.}
+
+\item{opts}{A list of optional arguments to the underlying
+predict function that will be used when \code{type = "raw"}. The
+list should not include options for the model object or the
+new data being predicted.}
 
 \item{...}{Additional \code{parsnip}-related options, depending on the
 value of \code{type}. Arguments to the underlying model's prediction

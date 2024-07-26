@@ -86,6 +86,7 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 
 #' @export
 slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
+  rlang::check_dots_empty()
   if (is.null(object$forecast_date)) {
     max_time_value <- as.Date(max(
       workflows::extract_preprocessor(workflow)$max_time_value,

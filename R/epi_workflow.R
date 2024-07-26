@@ -119,17 +119,17 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' - Call [parsnip::predict.model_fit()] for you using the underlying fit
 #'   parsnip model.
 #'
-#' - Ensure that the returned object is an [epiprocess::epi_df] where
+#' - Ensure that the returned object is an [epiprocess::epi_df][epiprocess::as_epi_df] where
 #'   possible. Specifically, the output will have `time_value` and
 #'   `geo_value` columns as well as the prediction.
-#'
-#' @inheritParams parsnip::predict.model_fit
 #'
 #' @param object An epi_workflow that has been fit by
 #'   [workflows::fit.workflow()]
 #'
 #' @param new_data A data frame containing the new predictors to preprocess
 #'   and predict on
+#'
+#' @inheritParams parsnip::predict.model_fit
 #'
 #' @return
 #' A data frame of model predictions, with as many rows as `new_data` has.
@@ -152,7 +152,7 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' preds <- predict(wf, latest)
 #' preds
-predict.epi_workflow <- function(object, new_data, ...) {
+predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), ...) {
   if (!workflows::is_trained_workflow(object)) {
     cli::cli_abort(c(
       "Can't predict on an untrained epi_workflow.",
@@ -168,7 +168,7 @@ predict.epi_workflow <- function(object, new_data, ...) {
     components$forged,
     components$mold, new_data
   )
-  components <- apply_frosting(object, components, new_data, ...)
+  components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
   components$predictions
 }
 

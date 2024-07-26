@@ -29,6 +29,7 @@ layer_{{{ name }}}_new <- function(terms, args, more_args, id) {
 #' @export
 slather.layer_{{{ name }}} <-
   function(object, components, workflow, new_data, ...) {
+    rlang::check_dots_empty()
 
     # if layer_ used ... in tidyselect, we need to evaluate it now
     exprs <- rlang::expr(c(!!!object$terms))
