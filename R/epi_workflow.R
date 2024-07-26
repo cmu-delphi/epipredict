@@ -119,7 +119,7 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' - Call [parsnip::predict.model_fit()] for you using the underlying fit
 #'   parsnip model.
 #'
-#' - Ensure that the returned object is an [epiprocess::epi_df] where
+#' - Ensure that the returned object is an [epiprocess::epi_df][epiprocess::as_epi_df] where
 #'   possible. Specifically, the output will have `time_value` and
 #'   `geo_value` columns as well as the prediction.
 #'

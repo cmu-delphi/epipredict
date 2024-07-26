@@ -1,7 +1,7 @@
 #' Get test data for prediction based on longest lag period
 #'
 #' Based on the longest lag period in the recipe,
-#' `get_test_data()` creates an [epi_df]
+#' `get_test_data()` creates an [epi_df][epiprocess::as_epi_df]
 #' with columns `geo_value`, `time_value`
 #' and other variables in the original dataset,
 #' which will be used to create features necessary to produce forecasts.

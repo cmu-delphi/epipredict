@@ -245,7 +245,7 @@ is_epi_recipe <- function(x) {
 #' @details
 #' `add_epi_recipe` has the same behaviour as
 #' [workflows::add_recipe()] but sets a different
-#' default blueprint to automatically handle [epiprocess::epi_df] data.
+#' default blueprint to automatically handle [epiprocess::epi_df][epiprocess::as_epi_df] data.
 #'
 #' @param x A `workflow` or `epi_workflow`
 #'
