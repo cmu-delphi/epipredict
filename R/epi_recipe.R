@@ -572,9 +572,13 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
   }
   new_data <- NextMethod("bake")
   if (!is.null(meta)) {
+    # Baking should have dropped epi_df-ness and metadata. Re-infer some
+    # metadata and assume others remain the same as the object/template:
     new_data <- as_epi_df(
-      new_data, meta$geo_type, meta$time_type, meta$as_of,
-      meta$additional_metadata %||% list()
+      new_data,
+      as_of = meta$as_of,
+      # avoid NULL if meta is from saved older epi_df:
+      additional_metadata = meta$additional_metadata %||% list()
     )
   }
   new_data

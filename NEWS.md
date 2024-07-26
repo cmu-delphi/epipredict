@@ -49,3 +49,5 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - `epi_recipe()` will now warn when given non-`epi_df` data
 - `layer_predict()` and `predict.epi_workflow()` will now appropriately forward
   `...` args intended for `predict.model_fit()`
+- `bake.epi_recipe()` will now re-infer the geo and time type in case baking the
+  steps has changed the appropriate values
