@@ -24,6 +24,13 @@ test_that("single dist_quantiles works, quantiles are accessible", {
     extrapolate_quantiles(z, c(.3, .7), middle = "linear"),
     new_quantiles(values = c(1, 1.5, 2, 3, 4, 4.5, 5), quantile_levels = 2:8 / 10)
   )
+  # empty values slot results in a length zero distribution
+  # see issue #361
+  expect_length(dist_quantiles(list(), c(.1, .9)), 0L)
+  expect_identical(
+    dist_quantiles(list(), c(.1, .9)),
+    distributional::dist_degenerate(double())
+  )
 })
 
 

@@ -5,6 +5,7 @@ new_quantiles <- function(values = double(), quantile_levels = double()) {
   vec_cast(values, double())
   vec_cast(quantile_levels, double())
   stopifnot(length(values) == length(quantile_levels))
+  if (length(values) == 0L) return(distributional::dist_degenerate(double()))
   stopifnot(!vctrs::vec_duplicate_any(quantile_levels))
   if (is.unsorted(quantile_levels)) {
     o <- vctrs::vec_order(quantile_levels)
@@ -60,6 +61,7 @@ dist_quantiles <- function(values, quantile_levels) {
   values <- as_list_of(values, .ptype = double())
   quantile_levels <- as_list_of(quantile_levels, .ptype = double())
   args <- vec_recycle_common(values = values, quantile_levels = quantile_levels)
+  if (length(args$values) == 0L) return(distributional::dist_degenerate(double()))
   qntls <- as_list_of(map2(args$values, args$quantile_levels, new_quantiles))
   new_vctr(qntls, class = "distribution")
 }
