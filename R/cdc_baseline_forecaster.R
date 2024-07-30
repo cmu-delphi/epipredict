@@ -79,7 +79,8 @@ cdc_baseline_forecaster <- function(
 
 
   latest <- get_test_data(
-    epi_recipe(epi_data), epi_data)
+    epi_recipe(epi_data), epi_data
+  )
 
   f <- frosting() %>%
     layer_predict() %>%

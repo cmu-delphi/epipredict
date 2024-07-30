@@ -36,15 +36,24 @@ modified_data <-
   arrange(time_value)
 
 test_that("get_latency works", {
-expect_equal(get_latency(modified_data, as_of, "case_rate", 1, "geo_value"), 5)
-expect_equal(get_latency(modified_data, as_of, "case_rate", -1, "geo_value"), -5)
-expect_equal(get_latency(modified_data, as_of, "death_rate", 1, "geo_value"), 4)
-expect_equal(get_latency(modified_data, as_of, "case_rate_a", 1, "geo_value"), 5 + 4)
-expect_equal(get_latency(modified_data, as_of, "case_rate_b", 1, "geo_value"), 5 - 3)
-expect_equal(get_latency(modified_data, as_of, "death_rate_a", 1, "geo_value"), 4 - 7)
+  expect_equal(get_latency(modified_data, as_of, "case_rate", 1, "geo_value"), 5)
+  expect_equal(get_latency(modified_data, as_of, "case_rate", -1, "geo_value"), -5)
+  expect_equal(get_latency(modified_data, as_of, "death_rate", 1, "geo_value"), 4)
+  expect_equal(get_latency(modified_data, as_of, "case_rate_a", 1, "geo_value"), 5 + 4)
+  expect_equal(get_latency(modified_data, as_of, "case_rate_b", 1, "geo_value"), 5 - 3)
+  expect_equal(get_latency(modified_data, as_of, "death_rate_a", 1, "geo_value"), 4 - 7)
 })
 
-test_that("get_latency infers max_time to be the minimum `max time` across the epi_keys", {})
+test_that("get_latency infers max_time to be the minimum `max time` across grouping the specified keys", {
+  # place 2 is already 1 day less latent than place 1, so decreasing it's
+  # latency it should have no effect
+  place2_delayed_data <- modified_data %>% mutate(time_value = time_value + 3 * (geo_value == "place2"))
+  expect_equal(get_latency(place2_delayed_data, as_of, "case_rate", 1, "geo_value"), 5)
+  # decreaseing the latency of place1 more than 1 pushes it past place2, so at most changes the latency by 1
+  place1_delayed_data <- modified_data %>% mutate(time_value = time_value + 5 * (geo_value == "place1"))
+  expect_equal(get_latency(place1_delayed_data, as_of, "case_rate", 1, "geo_value"), 4)
+})
+
 
 test_that("set_forecast_date works", {
   info <- tribble(
@@ -55,15 +64,10 @@ test_that("set_forecast_date works", {
     "death_rate", "numeric", "raw", "original",
     "not_real", "numeric", "predictor", "derived"
   )
-  expect_equal(set_forecast_date(modified_data, info, "geo_value"), as_of)
-  expect_equal(set_forecast_date(modified_data, info, ""), as_of)
-  expect_equal(set_forecast_date(modified_data, info, NULL), as_of)
+  expect_equal(set_forecast_date(modified_data, info, "geo_value", NULL), as_of)
+  expect_equal(set_forecast_date(modified_data, info, "", NULL), as_of)
+  expect_equal(set_forecast_date(modified_data, info, NULL, NULL), as_of)
 })
-
-
-
-
-
 
 time_range <- as.Date("2021-01-01") + 0:199
 x_adjust_ahead <- tibble(

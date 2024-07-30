@@ -86,7 +86,7 @@
 #' jhu_fit
 #'
 #' @importFrom recipes detect_step
-#' @importFrom rlang enquos
+#' @importFrom rlang enquos is_empty
 step_adjust_latency <-
   function(recipe,
            ...,
@@ -106,39 +106,43 @@ step_adjust_latency <-
            id = recipes::rand_id("adjust_latency")) {
     arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
-      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
+      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.", class = "epipredict__step_adjust_latency__epi_recipe_only")
     }
     if (!is.null(columns)) {
       cli::cli_abort(c("The `columns` argument must be `NULL`.",
         i = "Use `tidyselect` methods to choose columns to lag."
-      ))
+      ), class = "epipredict__step_adjust_latency__cols_not_null")
     }
     if ((method == "extend_ahead") && (detect_step(recipe, "epi_ahead"))) {
       cli::cli_warn(
-        "If `method` is {.val extend_ahead}, then the previous `step_epi_ahead` won't be modified."
+        "If `method` is {.val extend_ahead}, then the previous `step_epi_ahead` won't be modified.",
+        class = "epipredict__step_adjust_latency__misordered_step_warning"
       )
     } else if ((method == "extend_lags") && detect_step(recipe, "epi_lag")) {
       cli::cli_warn(
         "If `method` is {.val extend_lags} or {.val locf},
-then the previous `step_epi_lag`s won't work with modified data."
+then the previous `step_epi_lag`s won't work with modified data.",
+        class = "epipredict__step_adjust_latency__misordered_step_warning"
       )
     } else if ((method == "locf") && (length(recipe$steps) > 0)) {
-      cli::cli_warn("There are steps before `step_adjust_latency`. With the method {.val locf}, it is recommended to include this step before any others")
+      cli::cli_warn("There are steps before `step_adjust_latency`. With the method {.val locf}, it is recommended to include this step before any others",
+        class = "epipredict__step_adjust_latency__misordered_step_warning"
+      )
     }
     if (detect_step(recipe, "naomit")) {
       cli::cli_abort("adjust_latency needs to occur before any `NA` removal,
-                      as columns may be moved around")
+                      as columns may be moved around", class = "epipredict__step_adjust_latency__post_NA_error")
     }
     if (!is.null(fixed_latency) && !is.null(fixed_forecast_date)) {
       cli::cli_abort("Only one of `fixed_latency` and `fixed_forecast_date`
- can be non-`NULL` at a time!")
+ can be non-`NULL` at a time!", class = "epipredict__step_adjust_latency__too_many_args_error")
     }
     if (length(fixed_latency > 1)) {
       template <- recipe$template
       data_names <- names(template)[!names(template) %in% epi_keys(template)]
       wrong_names <- names(fixed_latency)[!names(fixed_latency) %in% data_names]
       if (length(wrong_names) > 0) {
-        cli::cli_abort("{.val fixed_latency} contains names not in the template dataset: {wrong_names}")
+        cli::cli_abort("{.val fixed_latency} contains names not in the template dataset: {wrong_names}", class = "epipredict__step_adjust_latency__undefined_names_error")
       }
     }
 
@@ -258,8 +262,8 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
         "{time_type}."
       ),
       "i" = "latency: {latency_table$latency[[i_latency]]}",
-      "i" = "`max_time` = {max_time} -> `forecast_date` = {forecast_date}"
-    ))
+      "i" = "`max_time` = {max(training$time_value)} -> `forecast_date` = {forecast_date}"
+    ), class = "epipredict__prep.step_latency__very_large_latency")
   }
 
   step_adjust_latency_new(

@@ -46,12 +46,12 @@ add_shifted_columns <- function(new_data, object, amount) {
   shift_sign_lat <- attributes(new_data)$metadata$shift_sign
   if (!is.null(latency_table) &&
     shift_sign_lat == sign_shift) {
-    #TODO this doesn't work on lags of transforms
+    # TODO this doesn't work on lags of transforms
     rel_latency <- latency_table %>% filter(col_name %in% object$columns)
   } else {
     rel_latency <- tibble(col_name = object$columns, latency = 0L)
   }
-  grid <- expand_grid(col = object$columns, amount = sign_shift *amount) %>%
+  grid <- expand_grid(col = object$columns, amount = sign_shift * amount) %>%
     left_join(rel_latency, by = join_by(col == col_name), ) %>%
     tidyr::replace_na(list(latency = 0)) %>%
     mutate(
