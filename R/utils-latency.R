@@ -38,11 +38,14 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
     pull(variable)
   # make sure that there's enough column names
   if (length(original_columns) < 3) {
-    cli::cli_abort(glue::glue(
-      "The original columns of `time_value`, ",
-      "`geo_value` and at least one signal. The current colums are \n",
-      paste(capture.output(object$info), collapse = "\n\n")
-    ))
+    cli::cli_abort(
+      glue::glue(
+        "The original columns of `time_value`, ",
+        "`geo_value` and at least one signal. The current colums are \n",
+        paste(capture.output(object$info), collapse = "\n\n")
+      ),
+      class = "epipredict__set_forecast_date__too_few_data_columns"
+    )
   }
   # the source data determines the actual time_values
   # these are the non-na time_values;
@@ -65,25 +68,34 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
   }
   # make sure the as_of is sane
   if (!inherits(forecast_date, class(max_time)) & !inherits(forecast_date, "POSIXt")) {
-    cli::cli_abort(paste(
-      "the data matrix `forecast_date` value is {forecast_date}, ",
-      "and not a valid `time_type` with type ",
-      "matching `time_value`'s type of ",
-      "{class(max_time)}."
-    ))
+    cli::cli_abort(
+      paste(
+        "the data matrix `forecast_date` value is {forecast_date}, ",
+        "and not a valid `time_type` with type ",
+        "matching `time_value`'s type of ",
+        "{class(max_time)}."
+      ),
+      class = "epipredict__set_forecast_date__wrong_time_value_type_error"
+    )
   }
   if (is.null(forecast_date) || is.na(forecast_date)) {
-    cli::cli_warn(paste(
-      "epi_data's `forecast_date` was {forecast_date}, setting to ",
-      "the latest time value, {max_time}."
-    ))
+    cli::cli_warn(
+      paste(
+        "epi_data's `forecast_date` was {forecast_date}, setting to ",
+        "the latest time value, {max_time}."
+      ),
+      class = "epipredict__set_forecast_date__max_time_warning"
+    )
     forecast_date <- max_time
   } else if (forecast_date < max_time) {
-    cli::cli_abort(paste(
-      "`forecast_date` ({(forecast_date)}) is before the most ",
-      "recent data ({max_time}). Remove before ",
-      "predicting."
-    ))
+    cli::cli_abort(
+      paste(
+        "`forecast_date` ({(forecast_date)}) is before the most ",
+        "recent data ({max_time}). Remove before ",
+        "predicting."
+      ),
+      class = "epipredict__set_forecast_date__misordered_forecast_date_error"
+    )
   }
   # TODO cover the rest of the possible types for as_of and max_time...
   if (inherits(max_time, "Date")) {

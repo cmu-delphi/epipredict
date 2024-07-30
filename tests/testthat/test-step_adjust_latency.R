@@ -1,4 +1,9 @@
 library(dplyr)
+# Test ideas that were dropped:
+# - "epi_adjust_latency works correctly when there's gaps in the timeseries"
+# - "epi_adjust_latency extend_ahead uses the same adjustment when predicting on new data after being baked"
+# - "`step_adjust_latency` only allows one instance of itself"
+# - "data with epi_df shorn off works"
 
 x <- tibble(
   geo_value = rep("place", 200),
@@ -46,30 +51,34 @@ test_that("epi_adjust_latency correctly extends the lags", {
     step_epi_ahead(death_rate, ahead = ahead)
 
   # directly checking the shifts
-  baked_x <- r1 %>% prep(real_x) %>% bake(real_x)
+  baked_x <- r1 %>%
+    prep(real_x) %>%
+    bake(real_x)
   # map each column to its last non-NA value
   last_dates <- baked_x %>%
     tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
     group_by(name) %>%
     summarise(last_date = max(time_value)) %>%
     arrange(desc(last_date))
-  expect_equal(last_dates,
-               tribble(
-    ~name, ~last_date,
-    "lag_16_death_rate", max_time + 16,
-    "lag_11_death_rate", max_time + 11,
-    "lag_10_case_rate", max_time + 10,
-    "lag_6_case_rate", max_time + 6,
-    "lag_5_death_rate", max_time + 5,
-    "case_rate", max_time,
-    "death_rate", max_time,
-    "ahead_7_death_rate", max_time - 7,
-  ))
+  expect_equal(
+    last_dates,
+    tribble(
+      ~name, ~last_date,
+      "lag_16_death_rate", max_time + 16,
+      "lag_11_death_rate", max_time + 11,
+      "lag_10_case_rate", max_time + 10,
+      "lag_6_case_rate", max_time + 6,
+      "lag_5_death_rate", max_time + 5,
+      "case_rate", max_time,
+      "death_rate", max_time,
+      "ahead_7_death_rate", max_time - 7,
+    )
+  )
 
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit1 <- slm_fit(r1, data = x), regexp = "The latency is 1033"), class = "simpleError")
+  expect_error(expect_warning(fit1 <- slm_fit(r1, data = x), class = "epipredict__prep.step_latency__very_large_latency"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit1 <- slm_fit(r1, data = real_x)
@@ -120,7 +129,7 @@ test_that("epi_adjust_latency correctly extends the ahead", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r2)))
+  expect_error(expect_warning(fit5 <- slm_fit(r2), class = "epipredict__prep.step_latency__very_large_latency"), class = "simpleError")
   # real date example
   fit2 <- slm_fit(r2, data = real_x)
   expect_equal(
@@ -172,7 +181,7 @@ test_that("epi_adjust_latency extends multiple aheads", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(fit3 <- fit(epi_wf, data = x))
+  expect_error(expect_warning(fit3 <- fit(epi_wf, data = x), class = "epipredict__prep.step_latency__very_large_latency"), class = "simpleError")
   # real date example
   fit3 <- fit(epi_wf, data = real_x)
   expect_equal(
@@ -205,7 +214,6 @@ test_that("epi_adjust_latency extends multiple aheads", {
     step_epi_ahead(death_rate, ahead = ahead + latency)
   equiv_fit <- fit(epi_wf, data = real_x)
   # adjusting the ahead should do the same thing as directly adjusting the ahead
-  equiv_fit
   expect_equal(
     fit3$fit$fit$fit$rqfit,
     equiv_fit$fit$fit$fit$rqfit
@@ -215,13 +223,71 @@ test_that("epi_adjust_latency extends multiple aheads", {
   expect_equal(length(fit3$fit$fit$fit$rqfit$coefficients), 6)
 })
 
-test_that("epi_adjust_latency fixed_* work", {})
+test_that("epi_adjust_latency fixed_forecast_date works", {
+  r4 <- epi_recipe(x) %>%
+    step_adjust_latency(method = "extend_lags", fixed_forecast_date = max_time + 14) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead)
+  expect_warning(baked_x <- r4 %>% prep(real_x) %>% bake(real_x), class = "epipredict__prep.step_latency__very_large_latency")
+  # map each column to its last non-NA value
+  last_dates <- baked_x %>%
+    tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
+    group_by(name) %>%
+    summarise(last_date = max(time_value)) %>%
+    arrange(desc(last_date))
+  expect_equal(
+    last_dates,
+    tribble(
+      ~name, ~last_date,
+      "lag_25_death_rate", max_time + 25,
+      "lag_20_death_rate", max_time + 20,
+      "lag_19_case_rate", max_time + 19,
+      "lag_15_case_rate", max_time + 15,
+      "lag_14_death_rate", max_time + 14,
+      "case_rate", max_time,
+      "death_rate", max_time,
+      "ahead_7_death_rate", max_time - 7,
+    )
+  )
+})
+
+test_that("epi_adjust_latency fixed_latency works", {
+  r4.1 <- epi_recipe(x) %>%
+    step_adjust_latency(method = "extend_lags", fixed_latency = 2) %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
+    step_epi_lag(case_rate, lag = c(1, 5)) %>%
+    step_epi_ahead(death_rate, ahead = ahead)
+  baked_x <- r4.1 %>%
+    prep(real_x) %>%
+    bake(real_x)
+  # map each column to its last non-NA value
+  last_dates <- baked_x %>%
+    tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
+    group_by(name) %>%
+    summarise(last_date = max(time_value)) %>%
+    arrange(desc(last_date))
+  expect_equal(
+    last_dates,
+    tribble(
+      ~name, ~last_date,
+      "lag_13_death_rate", max_time + 13,
+      "lag_8_death_rate", max_time + 8,
+      "lag_7_case_rate", max_time + 7,
+      "lag_3_case_rate", max_time + 3,
+      "lag_2_death_rate", max_time + 2,
+      "case_rate", max_time,
+      "death_rate", max_time,
+      "ahead_7_death_rate", max_time - 7,
+    )
+  )
+})
+
+
 # todo test variants on the columns for which this is applied
 # todo need to have both on columns 1, and 2
 
-test_that("epi_adjust_latency works correctly when there's gaps in the timeseries", {})
 
-test_that("epi_adjust_latency extend_ahead uses the same adjustment when predicting on new data after being baked", {})
 
 test_that("epi_adjust_latency works for other time types", {})
 
@@ -263,7 +329,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit5 <- slm_fit(r5), regexp = "The latency is 1033"), class = "simpleError")
+  expect_error(expect_warning(fit5 <- slm_fit(r5, data = x), class = "epipredict__prep.step_latency__very_large_latency"), class = "simpleError")
 
   # now trying with the as_of a reasonable distance in the future
   fit5 <- slm_fit(r5, data = x_lagged)
@@ -305,12 +371,11 @@ test_that("epi_adjust_latency correctly extends the lags", {
   )
 })
 
-test_that("`step_adjust_latency` only allows one instance of itself", {})
 
 test_that("`step_adjust_latency` only uses the columns specified in the `...`", {
   r5 <- epi_recipe(x) %>%
     step_adjust_latency(case_rate, method = "extend_lags") %>%
-    step_epi_lag(death_rate, lag = c(0, 6, 11))  %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
 
@@ -319,11 +384,13 @@ test_that("`step_adjust_latency` only uses the columns specified in the `...`", 
 
   r51 <- epi_recipe(x) %>%
     step_adjust_latency(case_rate, method = "locf") %>%
-    step_epi_lag(death_rate, lag = c(0, 6, 11))  %>%
+    step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
 
-  baked_x <- r51 %>% prep(real_x) %>% bake(real_x)
+  baked_x <- r51 %>%
+    prep(real_x) %>%
+    bake(real_x)
   # map each column to its last non-NA value
   last_dates <- baked_x %>%
     tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
@@ -334,9 +401,9 @@ test_that("`step_adjust_latency` only uses the columns specified in the `...`", 
   # iterate over all columns and make sure the latent time period has the exact same values
   for (ii in seq(nrow(last_dates))) {
     baked_var <- baked_x %>%
-      filter(last_dates[[ii,"locf_date"]] <= time_value, time_value <=last_dates[[ii,"last_date"]]) %>%
-      pull(last_dates[[ii,"name"]]) %>%
-      var
+      filter(last_dates[[ii, "locf_date"]] <= time_value, time_value <= last_dates[[ii, "last_date"]]) %>%
+      pull(last_dates[[ii, "name"]]) %>%
+      var()
     if (grepl("case_rate", last_dates[[ii, "name"]])) {
       expect_equal(baked_var, 0)
     } else {
@@ -344,8 +411,6 @@ test_that("`step_adjust_latency` only uses the columns specified in the `...`", 
     }
   }
 })
-
-test_that("setting fixed_* works for `step_adjust_latency`", {})
 
 test_that("printing step_adjust_latency results in expected output", {
   r5 <- epi_recipe(x) %>%
@@ -361,8 +426,6 @@ test_that("printing step_adjust_latency results in expected output", {
   expect_snapshot(r)
 })
 
-test_that("data with epi_df shorn off works", {})
-test_that("lags of transforms (of transforms etc) work", {})
 test_that("locf works as intended", {
   expect_warning(epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
@@ -375,7 +438,9 @@ test_that("locf works as intended", {
     step_epi_ahead(death_rate, ahead = ahead)
 
   # directly checking the shifts
-  baked_x <- r6 %>% prep(real_x) %>% bake(real_x)
+  baked_x <- r6 %>%
+    prep(real_x) %>%
+    bake(real_x)
   # map each column to its last non-NA value
   last_dates <- baked_x %>%
     tidyr::pivot_longer(cols = contains("rate"), values_drop_na = TRUE) %>%
@@ -386,9 +451,9 @@ test_that("locf works as intended", {
   # iterate over all columns and make sure the latent time period has the exact same values
   for (ii in seq(nrow(last_dates))) {
     baked_x %>%
-      filter(last_dates[[ii,"locf_date"]] <= time_value, time_value <=last_dates[[ii,"last_date"]]) %>%
-      pull(last_dates[[ii,"name"]]) %>%
-      var %>%
+      filter(last_dates[[ii, "locf_date"]] <= time_value, time_value <= last_dates[[ii, "last_date"]]) %>%
+      pull(last_dates[[ii, "name"]]) %>%
+      var() %>%
       expect_equal(0)
   }
 
@@ -430,10 +495,12 @@ test_that("locf works as intended", {
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
-  locf_x <- real_x %>% rbind(tibble(geo_value = rep("place", latency),
-                                    time_value = max_time + 1:latency,
-                                    case_rate = rep(real_x$case_rate[nrow(x)], latency),
-                                    death_rate = rep(real_x$death_rate[nrow(x)], latency)))
+  locf_x <- real_x %>% rbind(tibble(
+    geo_value = rep("place", latency),
+    time_value = max_time + 1:latency,
+    case_rate = rep(real_x$case_rate[nrow(x)], latency),
+    death_rate = rep(real_x$death_rate[nrow(x)], latency)
+  ))
   fit_hand_adj <- slm_fit(hand_adjusted, data = locf_x)
   expect_equal(
     fit6$fit$fit$fit$coefficients,

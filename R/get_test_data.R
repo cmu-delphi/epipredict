@@ -11,18 +11,9 @@
 #' used if growth rate calculations are requested by the recipe. This is
 #' calculated internally.
 #'
-#' It also optionally fills missing values
-#' using the last-observation-carried-forward (LOCF) method. If this
-#' is not possible (say because there would be only `NA`'s in some location),
-#' it will produce an error suggesting alternative options to handle missing
-#' values with more advanced techniques.
-#'
 #' @param recipe A recipe object.
 #' @param x An epi_df. The typical usage is to
 #'   pass the same data as that used for fitting the recipe.
-#' @param forecast_date By default, this is set to the maximum
-#'   `time_value` in `x`. But if there is data latency such that recent `NA`'s
-#'   should be filled, this may be _after_ the last available `time_value`.
 #'
 #' @return An object of the same type as `x` with columns `geo_value`, `time_value`, any additional
 #'   keys, as well other variables in the original dataset.
@@ -35,9 +26,8 @@
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @importFrom rlang %@%
 #' @export
-get_test_data <- function(
-    recipe,
-    x) {
+
+get_test_data <- function(recipe, x) {
   if (!is_epi_df(x)) cli::cli_abort("`x` must be an `epi_df`.")
 
   check <- hardhat::check_column_names(x, colnames(recipe$template))
@@ -63,7 +53,10 @@ get_test_data <- function(
       "!" = "but `x` contains only {avail_recent}."
     ))
   }
-  max_time_value <- x %>% na.omit %>% pull(time_value) %>% max
+  max_time_value <- x %>%
+    na.omit() %>%
+    pull(time_value) %>%
+    max()
   x <- arrange(x, time_value)
   groups <- epi_keys_only(recipe)
 

@@ -133,7 +133,8 @@ print.canned_epipred <- function(x, name, ...) {
       purrr::map("columns") %>%
       reduce(c)
     latency_per_base_col <- latency_step$latency_table %>%
-      filter(col_name %in% valid_columns) %>% mutate(latency = abs(latency))
+      filter(col_name %in% valid_columns) %>%
+      mutate(latency = abs(latency))
     if (latency_step$method != "locf" && nrow(latency_per_base_col) > 1) {
       intro_text <- glue::glue("{type_str} adjusted per column: ")
     } else if (latency_step$method != "locf") {
