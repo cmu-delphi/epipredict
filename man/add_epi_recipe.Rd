@@ -35,7 +35,7 @@ Add an \code{epi_recipe} to a workflow
 \details{
 \code{add_epi_recipe} has the same behaviour as
 \code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
-default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
+default blueprint to automatically handle \link[epiprocess:as_epi_df]{epiprocess::epi_df} data.
 }
 \examples{
 library(dplyr)

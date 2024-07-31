@@ -60,7 +60,7 @@ workflow was created and fit. This is accomplished using
 \code{\link[recipes:bake]{recipes::bake()}} if a recipe was supplied.
 \item Call \code{\link[parsnip:predict.model_fit]{parsnip::predict.model_fit()}} for you using the underlying fit
 parsnip model.
-\item Ensure that the returned object is an \link[epiprocess:epi_df]{epiprocess::epi_df} where
+\item Ensure that the returned object is an \link[epiprocess:as_epi_df]{epiprocess::epi_df} where
 possible. Specifically, the output will have \code{time_value} and
 \code{geo_value} columns as well as the prediction.
 }

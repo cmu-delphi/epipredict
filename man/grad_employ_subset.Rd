@@ -5,7 +5,7 @@
 \alias{grad_employ_subset}
 \title{Subset of Statistics Canada median employment income for postsecondary graduates}
 \format{
-An \link[epiprocess:epi_df]{epiprocess::epi_df} with 10193 rows and 8 variables:
+An \link[epiprocess:as_epi_df]{epiprocess::epi_df} with 10193 rows and 8 variables:
 \describe{
 \item{geo_value}{The province in Canada associated with each
 row of measurements.}

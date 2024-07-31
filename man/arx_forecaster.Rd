@@ -37,7 +37,7 @@ workflow
 }
 \description{
 This is an autoregressive forecasting model for
-\link[epiprocess:epi_df]{epiprocess::epi_df} data. It does "direct" forecasting, meaning
+\link[epiprocess:as_epi_df]{epiprocess::epi_df} data. It does "direct" forecasting, meaning
 that it estimates a model for a particular target horizon.
 }
 \examples{

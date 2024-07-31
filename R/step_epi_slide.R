@@ -50,7 +50,7 @@
 #'   filter(time_value >= as.Date("2021-01-01"), geo_value %in% c("ca", "ny"))
 #' rec <- epi_recipe(jhu) %>%
 #'   step_epi_slide(case_rate, death_rate,
-#'     .f = ~ mean(.x, na.rm = TRUE),
+#'     .f = \(x) mean(x, na.rm = TRUE),
 #'     before = 6L
 #'   )
 #' bake(prep(rec, jhu), new_data = NULL)
@@ -193,7 +193,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
 #'   columns. Surprisingly, lapply is several orders of magnitude faster than
 #'   using roughly equivalent tidy select style.
 #' @param fns vector of functions, even if it's length 1.
-#' @param group_keys the keys to group by. likely epi_keys[-1] (to remove time_value)
+#' @param group_keys the keys to group by. likely `epi_keys[-1]` (to remove time_value)
 #' @importFrom tidyr crossing
 #' @importFrom dplyr bind_cols group_by ungroup
 #' @importFrom epiprocess epi_slide
