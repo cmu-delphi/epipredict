@@ -18,7 +18,7 @@ epi_slide_wrapper(
 \arguments{
 \item{fns}{vector of functions, even if it's length 1.}
 
-\item{group_keys}{the keys to group by. likely epi_keys\link{-1} (to remove time_value)}
+\item{group_keys}{the keys to group by. likely \code{epi_keys[-1]} (to remove time_value)}
 }
 \description{
 This should simplify somewhat in the future when we can run \code{epi_slide} on
