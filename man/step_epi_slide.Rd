@@ -38,7 +38,8 @@ won't produce an error until you try to actually fit the model)
 Note that in cases 3 and 4, \code{x} can be any variable name you like (for
 example \verb{\\(dog) mean(dog, na.rm = TRUE)} will work). But in case 5, the
 argument must be named \code{.x}. A common, though very difficult to debug
-error is using something like \code{function(x) mean}. This will not work.}
+error is using something like \code{function(x) mean}. This will not work
+because it returns the function mean, rather than \code{mean(x)}}
 
 \item{before, after}{non-negative integers.
 How far \code{before} and \code{after} each \code{time_value} should
@@ -67,7 +68,7 @@ they be assigned? \code{lag} is default a predictor while \code{ahead} is an out
 
 \item{f_name}{a character string of at most 20 characters that describes
 the function. This will be combined with \code{prefix} and the columns in \code{...}
-to name the result using \verb{\{prefix\}\{f_name\}_\{column\}}. It will be determined
+to name the result using \verb{\{prefix\}\{f_name\}_\{column\}}. By default it will be determined
 automatically using \code{clean_f_name()}.}
 
 \item{skip}{A logical. Should the step be skipped when the

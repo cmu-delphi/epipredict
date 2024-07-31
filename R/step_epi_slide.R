@@ -166,30 +166,71 @@ bake.step_epi_slide <- function(object, new_data, ...) {
       c("In `step_epi_slide()` a name collision occurred. The following variable names already exist:",
         `*` = "{.var {nms}}"
       ),
-      call = caller_env()
+      call = caller_env(),
+      class = "epipredict__step__name_collision_error"
     )
   }
-
-  ok <- object$keys
-  names(col_names) <- newnames
-  gr <- new_data %>%
-    dplyr::select(dplyr::all_of(c(ok, object$columns))) %>%
-    group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::mutate(
-      dplyr::across(
-        dplyr::all_of(object$columns),
-        ~ slider::slide_index_vec(
-          .x,
-          .i = time_value,
-          object$.f, .before = object$before, .after = object$after
-        )
-      )
+  if (any(vapply(c(mean, sum), \(x) identical(x, object$.f), logical(1L)))) {
+    cli_warn(
+      c("There is an optimized version of both mean and sum. See `step_epi_slide_mean`, `step_epi_slide_sum`, or `step_epi_slide_opt`."
+        ),
+      class = "epipredict__step_epi_slide__optimized_version"
+    )
+  }
+  epi_slide_wrapper(
+    new_data,
+    object$before,
+    object$after,
+    object$columns,
+    c(object$.f),
+    object$f_name,
+    object$keys[-1],
+    object$prefix
+  )
+}
+#' wrapper to handle epi_slide particulars
+#' @description
+#' This should simplify somewhat in the future when we can run `epi_slide` on
+#'   columns. Surprisingly, lapply is several orders of magnitude faster than
+#'   using roughly equivalent tidy select style.
+#' @param fns vector of functions, even if it's length 1.
+#' @param group_keys the keys to group by. likely epi_keys[-1] (to remove time_value)
+#' @importFrom tidyr crossing
+#' @importFrom dplyr bind_cols group_by ungroup
+#' @importFrom epiprocess epi_slide
+#' @keywords internal
+epi_slide_wrapper <- function(new_data, before, after, columns, fns, fn_names, group_keys, name_prefix) {
+  cols_fns <- tidyr::crossing(col_name = columns, fn_name = fn_names, fn = fns)
+  seq_len(nrow(cols_fns)) %>%
+    lapply( # iterate over the rows of cols_fns
+      # takes in the row number, outputs the transformed column
+      function(comp_i) {
+        # extract values from the row
+        col_name <- cols_fns[[comp_i, "col_name"]]
+        fn_name <- cols_fns[[comp_i, "fn_name"]]
+        fn <- cols_fns[[comp_i, "fn"]][[1L]]
+        result_name <- paste(name_prefix, fn_name, col_name, sep="_")
+        result <- new_data %>%
+          group_by(across(group_keys)) %>%
+          epi_slide(
+            before = before,
+            after = after,
+            new_col_name = result_name,
+            f = function(slice, geo_key, ref_time_value) {
+              fn(slice[[col_name]])
+            }
+          ) %>%
+          ungroup()
+        # the first result needs to include all of the original columns
+        if (comp_i == 1L) {
+          result
+        } else {
+          # everything else just needs that  column transformed
+          result[result_name]
+        }
+      }
     ) %>%
-    dplyr::rename(dplyr::all_of(col_names)) %>%
-    dplyr::ungroup()
-
-  dplyr::left_join(new_data, gr, by = ok)
+    bind_cols()
 }
 
 

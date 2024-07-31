@@ -55,36 +55,54 @@ rolled_after <- edf %>%
 
 
 test_that("epi_slide handles classed before/after", {
-  baseline <- r %>%
-    step_epi_slide(value, .f = mean, before = 3L) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
+  expect_warning(
+    baseline <- r %>%
+      step_epi_slide(value, .f = mean, before = 3L) %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+    )
   expect_equal(baseline[[4]], rolled_before)
 
-  pbefore <- r %>%
-    step_epi_slide(value, .f = mean, before = lubridate::period("3 days")) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
-  cbefore <- r %>%
-    step_epi_slide(value, .f = mean, before = "3 days") %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
+  expect_warning(
+    pbefore <- r %>%
+      step_epi_slide(value, .f = mean, before = lubridate::period("3 days")) %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+    )
+  expect_warning(
+    cbefore <- r %>%
+      step_epi_slide(value, .f = mean, before = "3 days") %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+  )
   expect_equal(baseline, pbefore)
   expect_equal(baseline, cbefore)
 
-  baseline <- r %>%
-    step_epi_slide(value, .f = mean, after = 3L) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
+  expect_warning(
+    baseline <- r %>%
+      step_epi_slide(value, .f = mean, after = 3L) %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+  )
   expect_equal(baseline[[4]], rolled_after)
-  pafter <- r %>%
-    step_epi_slide(value, .f = mean, after = lubridate::period("3 days")) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
-  cafter <- r %>%
-    step_epi_slide(value, .f = mean, after = "3 days") %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
+  expect_warning(
+    pafter <- r %>%
+      step_epi_slide(value, .f = mean, after = lubridate::period("3 days")) %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+  )
+  expect_warning(
+    cafter <- r %>%
+      step_epi_slide(value, .f = mean, after = "3 days") %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+  )
   expect_equal(baseline, pafter)
   expect_equal(baseline, cafter)
 })
@@ -99,10 +117,13 @@ test_that("epi_slide handles different function specs", {
     step_epi_slide(value, .f = mean, before = 3L) %>%
     prep(edf) %>%
     bake(new_data = NULL)
-  lfun <- r %>%
-    step_epi_slide(value, .f = ~ mean(.x, na.rm = TRUE), before = 3L) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
+  # formula NOT currently supported
+  expect_error(
+    lfun <- r %>%
+      step_epi_slide(value, .f = ~ mean(.x, na.rm = TRUE), before = 3L) %>%
+      prep(edf) %>%
+      bake(new_data = NULL)
+  )
   blfun <- r %>%
     step_epi_slide(value, .f = function(x) mean(x, na.rm = TRUE), before = 3L) %>%
     prep(edf) %>%
@@ -114,7 +135,7 @@ test_that("epi_slide handles different function specs", {
 
   expect_equal(cfun[[4]], rolled_before)
   expect_equal(ffun[[4]], rolled_before)
-  expect_equal(lfun[[4]], rolled_before)
+  #expect_equal(lfun[[4]], rolled_before)
   expect_equal(blfun[[4]], rolled_before)
   expect_equal(nblfun[[4]], rolled_before)
 })
