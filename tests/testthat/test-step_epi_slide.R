@@ -61,7 +61,7 @@ test_that("epi_slide handles classed before/after", {
       prep(edf) %>%
       bake(new_data = NULL),
     regexp = "There is an optimized version"
-    )
+  )
   expect_equal(baseline[[4]], rolled_before)
 
   expect_warning(
@@ -70,7 +70,7 @@ test_that("epi_slide handles classed before/after", {
       prep(edf) %>%
       bake(new_data = NULL),
     regexp = "There is an optimized version"
-    )
+  )
   expect_warning(
     cbefore <- r %>%
       step_epi_slide(value, .f = mean, before = "3 days") %>%
@@ -109,14 +109,20 @@ test_that("epi_slide handles classed before/after", {
 
 
 test_that("epi_slide handles different function specs", {
-  cfun <- r %>%
-    step_epi_slide(value, .f = "mean", before = 3L) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
-  ffun <- r %>%
-    step_epi_slide(value, .f = mean, before = 3L) %>%
-    prep(edf) %>%
-    bake(new_data = NULL)
+  expect_warning(
+    cfun <- r %>%
+      step_epi_slide(value, .f = "mean", before = 3L) %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+  )
+  expect_warning(
+    ffun <- r %>%
+      step_epi_slide(value, .f = mean, before = 3L) %>%
+      prep(edf) %>%
+      bake(new_data = NULL),
+    regexp = "There is an optimized version"
+  )
   # formula NOT currently supported
   expect_error(
     lfun <- r %>%
@@ -135,7 +141,7 @@ test_that("epi_slide handles different function specs", {
 
   expect_equal(cfun[[4]], rolled_before)
   expect_equal(ffun[[4]], rolled_before)
-  #expect_equal(lfun[[4]], rolled_before)
+  # expect_equal(lfun[[4]], rolled_before)
   expect_equal(blfun[[4]], rolled_before)
   expect_equal(nblfun[[4]], rolled_before)
 })

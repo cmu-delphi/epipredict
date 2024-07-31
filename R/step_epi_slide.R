@@ -172,8 +172,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
   }
   if (any(vapply(c(mean, sum), \(x) identical(x, object$.f), logical(1L)))) {
     cli_warn(
-      c("There is an optimized version of both mean and sum. See `step_epi_slide_mean`, `step_epi_slide_sum`, or `step_epi_slide_opt`."
-        ),
+      c("There is an optimized version of both mean and sum. See `step_epi_slide_mean`, `step_epi_slide_sum`, or `step_epi_slide_opt`."),
       class = "epipredict__step_epi_slide__optimized_version"
     )
   }
@@ -209,9 +208,9 @@ epi_slide_wrapper <- function(new_data, before, after, columns, fns, fn_names, g
         col_name <- cols_fns[[comp_i, "col_name"]]
         fn_name <- cols_fns[[comp_i, "fn_name"]]
         fn <- cols_fns[[comp_i, "fn"]][[1L]]
-        result_name <- paste(name_prefix, fn_name, col_name, sep="_")
+        result_name <- paste(name_prefix, fn_name, col_name, sep = "_")
         result <- new_data %>%
-          group_by(across(group_keys)) %>%
+          group_by(across(all_of(group_keys))) %>%
           epi_slide(
             before = before,
             after = after,
