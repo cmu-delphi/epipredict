@@ -20,8 +20,9 @@ ahead (unique horizon) for each unique combination of \code{key_vars}.
 }
 \description{
 This is a simple forecasting model for
-\link[epiprocess:epi_df]{epiprocess::epi_df} data. It uses the most recent observation as the
-forcast for any future date, and produces intervals based on the quantiles
+\link[epiprocess:epi_df]{epiprocess::epi_df} data. It uses the most recent
+observation as the
+forecast for any future date, and produces intervals based on the quantiles
 of the residuals of such a "flatline" forecast over all available training
 data.
 }
