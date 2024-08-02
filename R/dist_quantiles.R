@@ -1,13 +1,19 @@
 #' @importFrom vctrs field vec_cast new_rcrd
-new_quantiles <- function(values = double(), quantile_levels = double()) {
+new_quantiles <- function(values = double(1), quantile_levels = double(1)) {
   arg_is_probabilities(quantile_levels)
 
   vec_cast(values, double())
   vec_cast(quantile_levels, double())
-  stopifnot(length(values) == length(quantile_levels))
+  values <- unname(values)
   if (length(values) == 0L) {
-    return(distributional::dist_degenerate(double()))
+    return(new_rcrd(
+      list(values = rep(NA_real_, length(quantile_levels)),
+           quantile_levels = quantile_levels),
+      class = c("dist_quantiles", "dist_default")
+    ))
   }
+  stopifnot(length(values) == length(quantile_levels))
+
   stopifnot(!vctrs::vec_duplicate_any(quantile_levels))
   if (is.unsorted(quantile_levels)) {
     o <- vctrs::vec_order(quantile_levels)
@@ -40,13 +46,23 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 
 #' A distribution parameterized by a set of quantiles
 #'
-#' @param values A vector of values
-#' @param quantile_levels A vector of probabilities corresponding to `values`
+#' @param values A vector (or list of vectors) of values.
+#' @param quantile_levels A vector (or list of vectors) of probabilities
+#'   corresponding to `values`.
+#'
+#' When creating multiple sets of `values`/`quantile_levels` resulting in
+#' different distributions, the sizes must match. See the examples below.
+#'
+#' @return A vector of class `"distribution"`.
 #'
 #' @export
 #'
 #' @examples
-#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
+#' dist_quantiles(1:4, 1:4 / 5)
+#' dist_quantiles(list(1:3, 1:4), list(1:3 / 4, 1:4 / 5))
+#' dstn <- dist_quantiles(list(1:4, 8:11), c(.2, .4, .6, .8))
+#' dstn
+#'
 #' quantile(dstn, p = c(.1, .25, .5, .9))
 #' median(dstn)
 #'
@@ -54,19 +70,26 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #' distributional::parameters(dstn[1])
 #' nested_quantiles(dstn[1])[[1]]
 #'
-#' dist_quantiles(1:4, 1:4 / 5)
 #' @importFrom vctrs as_list_of vec_recycle_common new_vctr
 dist_quantiles <- function(values, quantile_levels) {
-  if (!is.list(values)) values <- list(values)
-  if (!is.list(quantile_levels)) quantile_levels <- list(quantile_levels)
+
+  if (!is.list(quantile_levels)) {
+    assert_numeric(quantile_levels, lower = 0, upper = 1, any.missing = FALSE, min.len = 1L)
+    quantile_levels <- list(quantile_levels)
+  }
+  if (!is.list(values)) {
+    if (length(values) == 0L) values = NA_real_
+    values <- list(values)
+  }
 
   values <- as_list_of(values, .ptype = double())
   quantile_levels <- as_list_of(quantile_levels, .ptype = double())
   args <- vec_recycle_common(values = values, quantile_levels = quantile_levels)
-  if (length(args$values) == 0L) {
-    return(distributional::dist_degenerate(double()))
-  }
-  qntls <- as_list_of(map2(args$values, args$quantile_levels, new_quantiles))
+
+  qntls <- as_list_of(
+    map2(args$values, args$quantile_levels, new_quantiles),
+    .ptype = new_quantiles(NA_real_, 0.5)
+  )
   new_vctr(qntls, class = "distribution")
 }
 

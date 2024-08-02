@@ -8,7 +8,8 @@
 #' of COVID-19 forecasting.
 #'
 #' @param x dist_quantiles. A vector of class [dist_quantiles()].
-#' @param actual_value double. Actual value(s)
+#' @param actual double. Actual value(s)
+#' @param ... not used
 #'
 #' @return a vector of nonnegative scores.
 #'
@@ -55,7 +56,7 @@ weighted_interval_score.distribution <- function(x, actual, ...) {
 }
 
 #' @export
-weighted_interval_score.dist_default <- function(x, actual) {
+weighted_interval_score.dist_default <- function(x, actual, ...) {
   cli_warn(c(
     "Weighted interval score is only meaningful for {.cls dist_quantiles}.",
     "This {.cls distribution} vector contains {.cls {class(x)}}.",
@@ -65,7 +66,7 @@ weighted_interval_score.dist_default <- function(x, actual) {
 }
 
 #' @export
-weighted_interval_score.dist_quantiles <- function(x, actual) {
+weighted_interval_score.dist_quantiles <- function(x, actual, ...) {
   q <- vctrs::field(x, "values")
   tau <- vctrs::field(x, "quantile_levels")
   2 * mean(pmax(tau * (actual - q), (1 - tau) * (q - actual)), na.rm = TRUE)

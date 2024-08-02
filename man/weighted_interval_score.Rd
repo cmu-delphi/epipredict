@@ -9,7 +9,9 @@ weighted_interval_score(x, actual, ...)
 \arguments{
 \item{x}{dist_quantiles. A vector of class \code{\link[=dist_quantiles]{dist_quantiles()}}.}
 
-\item{actual_value}{double. Actual value(s)}
+\item{actual}{double. Actual value(s)}
+
+\item{...}{not used}
 }
 \value{
 a vector of nonnegative scores.
@@ -34,8 +36,8 @@ library(dplyr)
 jhu <- case_death_rate_subset \%>\%
   filter(time_value >= "2021-10-01", time_value <= "2021-12-01")
 preds <- flatline_forecaster(
-    jhu, "death_rate",
-    flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
+  jhu, "death_rate",
+  flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
 )$predictions
 actuals <- case_death_rate_subset \%>\%
   filter(time_value == as.Date("2021-12-01") + 7) \%>\%
