@@ -7,8 +7,10 @@ new_quantiles <- function(values = double(1), quantile_levels = double(1)) {
   values <- unname(values)
   if (length(values) == 0L) {
     return(new_rcrd(
-      list(values = rep(NA_real_, length(quantile_levels)),
-           quantile_levels = quantile_levels),
+      list(
+        values = rep(NA_real_, length(quantile_levels)),
+        quantile_levels = quantile_levels
+      ),
       class = c("dist_quantiles", "dist_default")
     ))
   }
@@ -72,13 +74,12 @@ format.dist_quantiles <- function(x, digits = 2, ...) {
 #'
 #' @importFrom vctrs as_list_of vec_recycle_common new_vctr
 dist_quantiles <- function(values, quantile_levels) {
-
   if (!is.list(quantile_levels)) {
     assert_numeric(quantile_levels, lower = 0, upper = 1, any.missing = FALSE, min.len = 1L)
     quantile_levels <- list(quantile_levels)
   }
   if (!is.list(values)) {
-    if (length(values) == 0L) values = NA_real_
+    if (length(values) == 0L) values <- NA_real_
     values <- list(values)
   }
 
