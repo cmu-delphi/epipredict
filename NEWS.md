@@ -53,3 +53,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - `bake.epi_recipe()` will now re-infer the geo and time type in case baking the
   steps has changed the appropriate values
 - produce length 0 `dist_quantiles()`
+- add functionality to calculate weighted interval scores for `dist_quantiles()`
