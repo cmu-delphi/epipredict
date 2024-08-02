@@ -12,7 +12,7 @@ test_that("wis dispatches and produces the correct values", {
   expect_equal(weighted_interval_score(dstn, actual), expected)
 
   # works with a single dstn
-  q <- sort(10*rexp(23))
+  q <- sort(10 * rexp(23))
   tau0 <- c(.01, .025, 1:19 / 20, .975, .99)
   dst <- dist_quantiles(q, tau0)
   expect_equal(weighted_interval_score(dst, 10), wis_one_pred(q, tau0, 10))
@@ -36,15 +36,14 @@ test_that("wis dispatches and produces the correct values", {
   expect_warning(w <- weighted_interval_score(dist_normal(1), 10))
   expect_true(all(is.na(w)))
   expect_warning(w <- weighted_interval_score(
-    c(dist_normal(), dist_quantiles(1:5, 1:5/6)),
+    c(dist_normal(), dist_quantiles(1:5, 1:5 / 6)),
     10
   ))
-  expect_equal(w, c(NA, wis_one_pred(1:5, 1:5/6, 10)))
+  expect_equal(w, c(NA, wis_one_pred(1:5, 1:5 / 6, 10)))
 
   # errors if sizes don't match
   expect_error(weighted_interval_score(
     dist_quantiles(list(1:4, 8:11), 1:4 / 5), # length 2
     1:3
   ))
-
 })

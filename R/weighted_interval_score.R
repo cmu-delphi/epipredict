@@ -1,4 +1,3 @@
-
 #' Compute weighted interval score
 #'
 #' Weighted interval score (WIS), a well-known quantile-based
@@ -27,8 +26,8 @@
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value >= "2021-10-01", time_value <= "2021-12-01")
 #' preds <- flatline_forecaster(
-#'     jhu, "death_rate",
-#'     flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
+#'   jhu, "death_rate",
+#'   flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
 #' )$predictions
 #' actuals <- case_death_rate_subset %>%
 #'   filter(time_value == as.Date("2021-12-01") + 7) %>%
@@ -39,7 +38,6 @@
 #'   mutate(wis = weighted_interval_score(.pred_distn, actual))
 #' preds
 weighted_interval_score <- function(x, actual, ...) {
-
   UseMethod("weighted_interval_score")
 }
 
@@ -69,8 +67,6 @@ weighted_interval_score.dist_default <- function(x, actual) {
 #' @export
 weighted_interval_score.dist_quantiles <- function(x, actual) {
   q <- vctrs::field(x, "values")
-  if (all(is.na(q))) return(NA)
-  if (is.na(actual)) return(NA)
   tau <- vctrs::field(x, "quantile_levels")
   2 * mean(pmax(tau * (actual - q), (1 - tau) * (q - actual)), na.rm = TRUE)
 }
