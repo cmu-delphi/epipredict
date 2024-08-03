@@ -52,3 +52,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   `...` args intended for `predict.model_fit()`
 - `bake.epi_recipe()` will now re-infer the geo and time type in case baking the
   steps has changed the appropriate values
+- Add `step_epi_slide` to produce generic sliding computations over an `epi_df`

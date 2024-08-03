@@ -116,6 +116,9 @@ reference:
       - extrapolate_quantiles
       - nested_quantiles
       - starts_with("pivot_quantiles")
+  - title: Other utilities
+    contents:
+      - clean_f_name
   - title: Included datasets
     contents:
       - case_death_rate_subset
