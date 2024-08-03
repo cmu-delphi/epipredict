@@ -41,30 +41,14 @@ argument must be named \code{.x}. A common, though very difficult to debug
 error is using something like \code{function(x) mean}. This will not work
 because it returns the function mean, rather than \code{mean(x)}}
 
-\item{before, after}{non-negative integers.
-How far \code{before} and \code{after} each \code{time_value} should
-the sliding window extend? Any value provided for either
-argument must be a single, non-\code{NA}, non-negative,
-\link[vctrs:vec_cast]{integer-compatible} number of time steps. Endpoints of
-the window are inclusive. Common settings:
-\itemize{
-\item For trailing/right-aligned windows from \code{time_value - time_step(k)} to
-\code{time_value}, use \verb{before=k, after=0}. This is the most likely use case
-for the purposes of forecasting.
-\item For center-aligned windows from \code{time_value - time_step(k)} to
-\code{time_value + time_step(k)}, use \verb{before=k, after=k}.
-\item For leading/left-aligned windows from \code{time_value} to
-\code{time_value + time_step(k)}, use \verb{after=k, after=0}.
-}
-
-You may also pass a \link[lubridate:period]{lubridate::period}, like \code{lubridate::weeks(1)} or a
-character string that is coercible to a \link[lubridate:period]{lubridate::period}, like
-\code{"2 weeks"}.}
+\item{before, after}{the size of the sliding window on the left and the right
+of the center. Usually non-negative integers for data indexed by date, but
+more restrictive in other cases (see \code{\link[epiprocess:epi_slide]{epiprocess::epi_slide()}} for details).}
 
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
-\item{prefix}{A prefix to indicate what type of variable this is}
+\item{prefix}{A character string that will be prefixed to the new column.}
 
 \item{f_name}{a character string of at most 20 characters that describes
 the function. This will be combined with \code{prefix} and the columns in \code{...}

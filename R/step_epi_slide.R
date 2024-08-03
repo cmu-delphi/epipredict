@@ -4,7 +4,6 @@
 #'   that will generate one or more new columns of derived data by "sliding"
 #'   a computation along existing data.
 #'
-#'
 #' @inheritParams step_epi_lag
 #' @param .f A function in one of the following formats:
 #'  1. An unquoted function name with no arguments, e.g., `mean`
@@ -20,27 +19,15 @@
 #'  argument must be named `.x`. A common, though very difficult to debug
 #'  error is using something like `function(x) mean`. This will not work
 #'  because it returns the function mean, rather than `mean(x)`
+#' @param before,after the size of the sliding window on the left and the right
+#'  of the center. Usually non-negative integers for data indexed by date, but
+#'  more restrictive in other cases (see [epiprocess::epi_slide()] for details).
+#' @param prefix A character string that will be prefixed to the new column.
 #' @param f_name a character string of at most 20 characters that describes
 #'   the function. This will be combined with `prefix` and the columns in `...`
 #'   to name the result using `{prefix}{f_name}_{column}`. By default it will be determined
 #'   automatically using `clean_f_name()`.
-#' @param before,after non-negative integers.
-#'   How far `before` and `after` each `time_value` should
-#'   the sliding window extend? Any value provided for either
-#'   argument must be a single, non-`NA`, non-negative,
-#'   [integer-compatible][vctrs::vec_cast] number of time steps. Endpoints of
-#'   the window are inclusive. Common settings:
-#'   * For trailing/right-aligned windows from `time_value - time_step(k)` to
-#'   `time_value`, use `before=k, after=0`. This is the most likely use case
-#'   for the purposes of forecasting.
-#'   * For center-aligned windows from `time_value - time_step(k)` to
-#'   `time_value + time_step(k)`, use `before=k, after=k`.
-#'   * For leading/left-aligned windows from `time_value` to
-#'   `time_value + time_step(k)`, use `after=k, after=0`.
 #'
-#'   You may also pass a [lubridate::period], like `lubridate::weeks(1)` or a
-#'   character string that is coercible to a [lubridate::period], like
-#'   `"2 weeks"`.
 #' @template step-return
 #'
 #' @export
@@ -69,9 +56,8 @@ step_epi_slide <-
       rlang::abort("This recipe step can only operate on an `epi_recipe`.")
     }
     .f <- validate_slide_fun(.f)
-    arg_is_scalar(before, after)
-    before <- try_period(before)
-    after <- try_period(after)
+    epiprocess:::validate_slide_window_arg(before, attributes(recipe$template)$metadata$time_type)
+    epiprocess:::validate_slide_window_arg(after, attributes(recipe$template)$metadata$time_type)
     arg_is_chr_scalar(role, prefix, id)
     arg_is_lgl_scalar(skip)
 
@@ -126,7 +112,6 @@ step_epi_slide_new <-
   }
 
 
-
 #' @export
 prep.step_epi_slide <- function(x, training, info = NULL, ...) {
   col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
@@ -150,7 +135,6 @@ prep.step_epi_slide <- function(x, training, info = NULL, ...) {
 }
 
 
-
 #' @export
 bake.step_epi_slide <- function(object, new_data, ...) {
   recipes::check_new_data(names(object$columns), object, new_data)
@@ -170,12 +154,16 @@ bake.step_epi_slide <- function(object, new_data, ...) {
       class = "epipredict__step__name_collision_error"
     )
   }
-  if (any(vapply(c(mean, sum), \(x) identical(x, object$.f), logical(1L)))) {
-    cli_warn(
-      c("There is an optimized version of both mean and sum. See `step_epi_slide_mean`, `step_epi_slide_sum`, or `step_epi_slide_opt`."),
-      class = "epipredict__step_epi_slide__optimized_version"
-    )
-  }
+  # TODO: Uncomment this whenever we make the optimized versions available.
+  # if (any(vapply(c(mean, sum), \(x) identical(x, object$.f), logical(1L)))) {
+  #   cli_warn(
+  #     c(
+  #       "There is an optimized version of both mean and sum. See `step_epi_slide_mean`, `step_epi_slide_sum`,
+  #      or `step_epi_slide_opt`."
+  #     ),
+  #     class = "epipredict__step_epi_slide__optimized_version"
+  #   )
+  # }
   epi_slide_wrapper(
     new_data,
     object$before,
@@ -187,48 +175,51 @@ bake.step_epi_slide <- function(object, new_data, ...) {
     object$prefix
   )
 }
-#' wrapper to handle epi_slide particulars
+
+
+#' Wrapper to handle epi_slide particulars
+#'
 #' @description
 #' This should simplify somewhat in the future when we can run `epi_slide` on
 #'   columns. Surprisingly, lapply is several orders of magnitude faster than
 #'   using roughly equivalent tidy select style.
+#'
 #' @param fns vector of functions, even if it's length 1.
 #' @param group_keys the keys to group by. likely `epi_keys[-1]` (to remove time_value)
+#'
 #' @importFrom tidyr crossing
 #' @importFrom dplyr bind_cols group_by ungroup
 #' @importFrom epiprocess epi_slide
 #' @keywords internal
 epi_slide_wrapper <- function(new_data, before, after, columns, fns, fn_names, group_keys, name_prefix) {
   cols_fns <- tidyr::crossing(col_name = columns, fn_name = fn_names, fn = fns)
+  # Iterate over the rows of cols_fns. For each row number, we will output a
+  # transformed column. The first result returns all the original columns along
+  # with the new column. The rest just return the new column.
   seq_len(nrow(cols_fns)) %>%
-    lapply( # iterate over the rows of cols_fns
-      # takes in the row number, outputs the transformed column
-      function(comp_i) {
-        # extract values from the row
-        col_name <- cols_fns[[comp_i, "col_name"]]
-        fn_name <- cols_fns[[comp_i, "fn_name"]]
-        fn <- cols_fns[[comp_i, "fn"]][[1L]]
-        result_name <- paste(name_prefix, fn_name, col_name, sep = "_")
-        result <- new_data %>%
-          group_by(across(all_of(group_keys))) %>%
-          epi_slide(
-            before = before,
-            after = after,
-            new_col_name = result_name,
-            f = function(slice, geo_key, ref_time_value) {
-              fn(slice[[col_name]])
-            }
-          ) %>%
-          ungroup()
-        # the first result needs to include all of the original columns
-        if (comp_i == 1L) {
-          result
-        } else {
-          # everything else just needs that  column transformed
-          result[result_name]
-        }
+    lapply(function(comp_i) {
+      col_name <- cols_fns[[comp_i, "col_name"]]
+      fn_name <- cols_fns[[comp_i, "fn_name"]]
+      fn <- cols_fns[[comp_i, "fn"]][[1L]]
+      result_name <- paste(name_prefix, fn_name, col_name, sep = "_")
+      result <- new_data %>%
+        group_by(across(all_of(group_keys))) %>%
+        epi_slide(
+          before = before,
+          after = after,
+          new_col_name = result_name,
+          f = function(slice, geo_key, ref_time_value) {
+            fn(slice[[col_name]])
+          }
+        ) %>%
+        ungroup()
+
+      if (comp_i == 1L) {
+        result
+      } else {
+        result[result_name]
       }
-    ) %>%
+    }) %>%
     bind_cols()
 }
 
@@ -286,33 +277,11 @@ validate_slide_fun <- function(.f) {
     cli_abort("In, `step_epi_slide()`, `.f` may not be missing.")
   }
   if (rlang::is_formula(.f, scoped = TRUE)) {
-    if (!is.null(rlang::f_lhs(.f))) {
-      cli_abort("In, `step_epi_slide()`, `.f` must be a one-sided formula.")
-    }
+    cli_abort("In, `step_epi_slide()`, `.f` cannot be a formula.")
   } else if (rlang::is_character(.f)) {
     .f <- rlang::as_function(.f)
   } else if (!rlang::is_function(.f)) {
     cli_abort("In, `step_epi_slide()`, `.f` must be a function.")
   }
   .f
-}
-
-try_period <- function(x) {
-  err <- is.na(x)
-  if (!err) {
-    if (is.numeric(x)) {
-      err <- !rlang::is_integerish(x) || x < 0
-    } else {
-      x <- lubridate::as.period(x)
-      err <- is.na(x)
-    }
-  }
-  if (err) {
-    cli_abort(paste(
-      "The value supplied to `before` or `after` must be a non-negative integer",
-      "a {.cls lubridate::period} or a character scalar that can be coerced",
-      'as a {.cls lubridate::period}, e.g., `"1 week"`.'
-    ), )
-  }
-  x
 }

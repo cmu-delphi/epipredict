@@ -2,7 +2,7 @@
 % Please edit documentation in R/step_epi_slide.R
 \name{epi_slide_wrapper}
 \alias{epi_slide_wrapper}
-\title{wrapper to handle epi_slide particulars}
+\title{Wrapper to handle epi_slide particulars}
 \usage{
 epi_slide_wrapper(
   new_data,

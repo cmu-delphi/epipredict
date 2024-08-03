@@ -11,7 +11,7 @@ cdc_baseline_forecaster(
 )
 }
 \arguments{
-\item{epi_data}{An \code{\link[epiprocess:as_epi_df]{epiprocess::epi_df}}}
+\item{epi_data}{An \code{\link[epiprocess:epi_df]{epiprocess::epi_df}}}
 
 \item{outcome}{A scalar character for the column name we wish to predict.}
 
@@ -24,7 +24,7 @@ horizons) for each unique combination of \code{key_vars}.
 }
 \description{
 This is a simple forecasting model for
-\link[epiprocess:as_epi_df]{epiprocess::epi_df} data. It uses the most recent observation as the
+\link[epiprocess:epi_df]{epiprocess::epi_df} data. It uses the most recent observation as the
 forecast for any future date, and produces intervals by shuffling the quantiles
 of the residuals of such a "flatline" forecast and incrementing these
 forward over all available training data.

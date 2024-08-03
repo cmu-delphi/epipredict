@@ -7,7 +7,7 @@
 flatline_forecaster(epi_data, outcome, args_list = flatline_args_list())
 }
 \arguments{
-\item{epi_data}{An \link[epiprocess:as_epi_df]{epiprocess::epi_df}}
+\item{epi_data}{An \link[epiprocess:epi_df]{epiprocess::epi_df}}
 
 \item{outcome}{A scalar character for the column name we wish to predict.}
 
@@ -20,7 +20,7 @@ ahead (unique horizon) for each unique combination of \code{key_vars}.
 }
 \description{
 This is a simple forecasting model for
-\link[epiprocess:as_epi_df]{epiprocess::epi_df} data. It uses the most recent observation as the
+\link[epiprocess:epi_df]{epiprocess::epi_df} data. It uses the most recent observation as the
 forcast for any future date, and produces intervals based on the quantiles
 of the residuals of such a "flatline" forecast over all available training
 data.
