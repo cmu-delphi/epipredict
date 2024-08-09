@@ -38,7 +38,8 @@
 #' weighted_interval_score(dstn, 2.5, 1:9 / 10, na_handling = "drop")
 #' weighted_interval_score(dstn, 2.5, na_handling = "propagate")
 #' weighted_interval_score(dist_quantiles(1:4, 1:4 / 5), 2.5, 1:9 / 10,
-#'   na_handling = "fail")
+#'   na_handling = "fail"
+#' )
 #'
 #'
 #' # Using some actual forecasts --------
@@ -121,8 +122,12 @@ weighted_interval_score.dist_quantiles <- function(
     na_handling = c("impute", "drop", "propagate", "fail"),
     ...) {
   rlang::check_dots_empty()
-  if (is.na(actual)) return(NA)
-  if (all(is.na(vctrs::field(x, "values")))) return(NA)
+  if (is.na(actual)) {
+    return(NA)
+  }
+  if (all(is.na(vctrs::field(x, "values")))) {
+    return(NA)
+  }
   na_handling <- rlang::arg_match(na_handling)
   old_quantile_levels <- field(x, "quantile_levels")
   if (na_handling == "fail") {
@@ -137,6 +142,6 @@ weighted_interval_score.dist_quantiles <- function(
   tau <- quantile_levels %||% old_quantile_levels
   x <- extrapolate_quantiles(x, probs = tau, replace_na = (na_handling == "impute"))
   q <- field(x, "values")[field(x, "quantile_levels") %in% tau]
-  na_rm = (na_handling == "drop")
+  na_rm <- (na_handling == "drop")
   2 * mean(pmax(tau * (actual - q), (1 - tau) * (q - actual)), na.rm = na_rm)
 }

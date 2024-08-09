@@ -1,4 +1,3 @@
-
 #' Summarize a distribution with a set of quantiles
 #'
 #' @param x a `distribution` vector
