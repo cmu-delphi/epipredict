@@ -117,59 +117,6 @@ validate_dist_quantiles <- function(values, quantile_levels) {
 }
 
 
-#' Summarize a distribution with a set of quantiles
-#'
-#' @param x a `distribution` vector
-#' @param probs a vector of probabilities at which to calculate quantiles
-#' @param ... additional arguments passed on to the `quantile` method
-#'
-#' @return a `distribution` vector containing `dist_quantiles`
-#' @export
-#'
-#' @examples
-#' library(distributional)
-#' dstn <- dist_normal(c(10, 2), c(5, 10))
-#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
-#'
-#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-#' # because this distribution is already quantiles, any extra quantiles are
-#' # appended
-#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
-#'
-#' dstn <- c(
-#'   dist_normal(c(10, 2), c(5, 10)),
-#'   dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-#' )
-#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
-extrapolate_quantiles <- function(x, probs, ...) {
-  UseMethod("extrapolate_quantiles")
-}
-
-#' @export
-#' @importFrom vctrs vec_data
-extrapolate_quantiles.distribution <- function(x, probs, ...) {
-  arg_is_probabilities(probs)
-  dstn <- lapply(vec_data(x), extrapolate_quantiles, probs = probs, ...)
-  new_vctr(dstn, vars = NULL, class = "distribution")
-}
-
-#' @export
-extrapolate_quantiles.dist_default <- function(x, probs, ...) {
-  values <- quantile(x, probs, ...)
-  new_quantiles(values = values, quantile_levels = probs)
-}
-
-#' @export
-extrapolate_quantiles.dist_quantiles <- function(x, probs, ...) {
-  new_values <- quantile(x, probs, ...)
-  quantile_levels <- field(x, "quantile_levels")
-  values <- field(x, "values")
-  new_quantiles(
-    values = c(values, new_values),
-    quantile_levels = c(quantile_levels, probs)
-  )
-}
-
 is_dist_quantiles <- function(x) {
   is_distribution(x) & all(stats::family(x) == "quantiles")
 }
@@ -213,18 +160,20 @@ quantile.dist_quantiles <- function(x, p, ..., middle = c("cubic", "linear")) {
 quantile_extrapolate <- function(x, tau_out, middle) {
   tau <- field(x, "quantile_levels")
   qvals <- field(x, "values")
-  r <- range(tau, na.rm = TRUE)
+  nas <- is.na(qvals)
   qvals_out <- rep(NA, length(tau_out))
+  qvals <- qvals[!nas]
+  tau <- tau[!nas]
 
   # short circuit if we aren't actually extrapolating
   # matches to ~15 decimals
   if (all(tau_out %in% tau)) {
     return(qvals[match(tau_out, tau)])
   }
-  if (length(qvals) < 2) {
-    cli::cli_abort(c(
+  if (length(tau) < 2) {
+    cli::cli_abort(
       "Quantile extrapolation is not possible with fewer than 2 quantiles."
-    ))
+    )
     return(qvals_out)
   }
 
