@@ -25,12 +25,6 @@ test_that("wis dispatches and produces the correct values", {
     c(NA, wis_one_pred(q2, tau, actual))
   )
 
-  # non-NA where possible
-  expect_equal(
-    weighted_interval_score(dist_quantiles(c(1, 2, NA, 4), 1:4 / 5), 3),
-    2 / 3
-  )
-
   # errors for non distributions
   expect_error(weighted_interval_score(1:10, 10))
   expect_warning(w <- weighted_interval_score(dist_normal(1), 10))
@@ -46,4 +40,21 @@ test_that("wis dispatches and produces the correct values", {
     dist_quantiles(list(1:4, 8:11), 1:4 / 5), # length 2
     1:3
   ))
+
+  #' # Missing value behaviours
+  dstn <- dist_quantiles(c(1, 2, NA, 4), 1:4 / 5)
+  expect_equal(weighted_interval_score(dstn, 2.5), 0.5)
+  expect_equal(weighted_interval_score(dstn, 2.5, c(2, 4, 5, 6, 8) / 10), 0.4)
+  expect_equal(
+    weighted_interval_score(dist_quantiles(c(1, 2, NA, 4), 1:4 / 5), 3, na_handling = "drop"),
+    2 / 3
+  )
+  expect_equal(
+    weighted_interval_score(dstn, 2.5, c(2, 4, 5, 6, 8) / 10, na_handling = "drop"),
+    0.4
+  )
+  expect_true(is.na(
+    weighted_interval_score(dstn, 2.5, na_handling = "propagate")
+  ))
+  weighted_interval_score(dist_quantiles(1:4, 1:4 / 5), 2.5, 1:9 / 10, na_handling = "fail")
 })

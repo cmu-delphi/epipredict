@@ -46,6 +46,17 @@ test_that("quantile extrapolator works", {
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
   expect_length(parameters(qq[1])$quantile_levels[[1]], 7L)
+
+  dstn <- dist_quantiles(1:4, 1:4 / 5)
+  qq <- extrapolate_quantiles(dstn, 1:9 / 10)
+  dstn_na <- dist_quantiles(c(1, 2, NA, 4), 1:4 / 5)
+  qq2 <- extrapolate_quantiles(dstn_na, 1:9 / 10)
+  expect_equal(qq, qq2)
+  qq3 <- extrapolate_quantiles(dstn_na, 1:9 / 10, replace_na = FALSE)
+  qq2_vals <- field(vec_data(qq2)[[1]], "values")
+  qq3_vals <- field(vec_data(qq3)[[1]], "values")
+  qq2_vals[6] <- NA
+  expect_equal(qq2_vals, qq3_vals)
 })
 
 test_that("small deviations of quantile requests work", {
