@@ -2,9 +2,14 @@
 #'
 #' @param x a `distribution` vector
 #' @param probs a vector of probabilities at which to calculate quantiles
+#' @param replace_na logical. If `x` contains `NA`'s, these are imputed if
+#'   possible (if `TRUE`) or retained (if `FALSE`). This only effects
+#'   elements of class `dist_quantiles`.
 #' @param ... additional arguments passed on to the `quantile` method
 #'
-#' @return a `distribution` vector containing `dist_quantiles`
+#' @return a `distribution` vector containing `dist_quantiles`. Any elements
+#'   of `x` which were originally `dist_quantiles` will now have a superset
+#'   of the original `quantile_values` (the union of those and `probs`).
 #' @export
 #'
 #' @examples

@@ -74,7 +74,8 @@ weighted_interval_score(dstn, 2.5, 1:9 / 10)
 weighted_interval_score(dstn, 2.5, 1:9 / 10, na_handling = "drop")
 weighted_interval_score(dstn, 2.5, na_handling = "propagate")
 weighted_interval_score(dist_quantiles(1:4, 1:4 / 5), 2.5, 1:9 / 10,
-  na_handling = "fail")
+  na_handling = "fail"
+)
 
 
 # Using some actual forecasts --------

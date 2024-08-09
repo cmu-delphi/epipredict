@@ -11,10 +11,16 @@ extrapolate_quantiles(x, probs, replace_na = TRUE, ...)
 
 \item{probs}{a vector of probabilities at which to calculate quantiles}
 
+\item{replace_na}{logical. If \code{x} contains \code{NA}'s, these are imputed if
+possible (if \code{TRUE}) or retained (if \code{FALSE}). This only effects
+elements of class \code{dist_quantiles}.}
+
 \item{...}{additional arguments passed on to the \code{quantile} method}
 }
 \value{
-a \code{distribution} vector containing \code{dist_quantiles}
+a \code{distribution} vector containing \code{dist_quantiles}. Any elements
+of \code{x} which were originally \code{dist_quantiles} will now have a superset
+of the original \code{quantile_values} (the union of those and \code{probs}).
 }
 \description{
 Summarize a distribution with a set of quantiles
