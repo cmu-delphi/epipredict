@@ -1,7 +1,7 @@
 #' @import recipes
 #' @export
 epi_recipe <- function(x, ...) {
-  # deprecate_soft("This function is being deprecated. Use `recipe()` instead.")
+  deprecate_soft("This function is being deprecated. Use `recipe()` instead.")
   UseMethod("epi_recipe")
 }
 

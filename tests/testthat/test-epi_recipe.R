@@ -5,12 +5,12 @@ test_that("recipe produces default recipe", {
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5)
   )
   rec <- recipe(tib)
-  expect_identical(rec, epi_recipe(tib))
+  expect_identical(rec, suppressWarnings(epi_recipe(tib)))
   expect_equal(nrow(rec$template), 5L)
 
 
   rec <- recipe(y ~ x, tib)
-  expect_identical(rec, epi_recipe(y ~ x, tib))
+  expect_identical(rec, suppressWarnings(epi_recipe(y ~ x, tib)))
   expect_equal(nrow(rec$template), 5L)
 
 
@@ -56,7 +56,7 @@ test_that("recipe formula works", {
   ) %>% epiprocess::as_epi_df(additional_metadata = list(other_keys = "z"))
 
   # with an additional key
-  r <- epi_recipe(y ~ x + geo_value, tib)
+  r <- recipe(y ~ x + geo_value, tib)
   ref_var_info <- ref_var_info %>%
     tibble::add_row(
       variable = "z", type = list(c("string", "unordered", "nominal")),
@@ -74,7 +74,7 @@ test_that("recipe epi_df works", {
     geo_value = "ca"
   ) %>% epiprocess::as_epi_df()
 
-  r <- epi_recipe(tib)
+  r <- recipe(tib)
   ref_var_info <- tibble::tribble(
     ~variable, ~type, ~role, ~source,
     "time_value", "date", "time_value", "original",
@@ -85,7 +85,7 @@ test_that("recipe epi_df works", {
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 5L)
 
-  r <- epi_recipe(tib, formula = y ~ x)
+  r <- recipe(tib, formula = y ~ x)
   ref_var_info <- tibble::tribble(
     ~variable, ~type, ~role, ~source,
     "x", c("integer", "numeric"), "predictor", "original",
@@ -97,7 +97,7 @@ test_that("recipe epi_df works", {
   expect_equal(nrow(r$template), 5L)
 
 
-  r <- epi_recipe(
+  r <- recipe(
     tib,
     roles = c("geo_value", "funny_business", "predictor", "outcome")
   )
@@ -115,7 +115,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
   library(workflows)
   jhu <- case_death_rate_subset
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14))
@@ -132,7 +132,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
   expect_equal(class(steps[[3]]), c("step_epi_lag", "step"))
   expect_equal(steps[[3]]$lag, c(0, 7, 14))
 
-  r2 <- epi_recipe(jhu) %>%
+  r2 <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 1)) %>%
     step_epi_ahead(death_rate, ahead = 1)
 
