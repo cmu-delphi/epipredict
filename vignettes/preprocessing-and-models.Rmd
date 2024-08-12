@@ -157,9 +157,9 @@ counts_subset <- counts_subset %>%
   mutate(geo_value_factor = as.factor(geo_value)) %>%
   as_epi_df()
 
-epi_recipe(counts_subset)
+recipe(counts_subset)
 
-r <- epi_recipe(counts_subset) %>%
+r <- recipe(counts_subset) %>%
   update_role(geo_value_factor, new_role = "predictor") %>%
   step_dummy(geo_value_factor) %>%
   ## Occasionally, data reporting errors / corrections result in negative
@@ -490,7 +490,7 @@ We can also look at the estimated coefficients and model summary information:
 extract_fit_engine(wf)
 ```
 
-One could also use a formula in `epi_recipe()` to achieve the same results as
+One could also use a formula in `recipe()` to achieve the same results as
 above. However, only one of `add_formula()`, `add_recipe()`, or
 `workflow_variables()` can be specified. For the purpose of demonstrating
 `add_formula` rather than `add_recipe`, we will `prep` and `bake` our recipe to
@@ -532,7 +532,7 @@ latest available date in our dataset.
 We will compare two methods of trying to create lags and leads:
 
 ```{r}
-p1 <- epi_recipe(ex) %>%
+p1 <- recipe(ex) %>%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7, role = "outcome") %>%
@@ -543,7 +543,7 @@ b1 <- bake(p1, ex)
 b1
 
 
-p2 <- epi_recipe(ex) %>%
+p2 <- recipe(ex) %>%
   step_mutate(
     lag0case_rate = lag(case_rate, 0),
     lag7case_rate = lag(case_rate, 7),

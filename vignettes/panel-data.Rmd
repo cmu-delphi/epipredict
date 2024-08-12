@@ -189,7 +189,7 @@ since we specified our `time_type` to be `year`, our `lag` and `lead`
 values are both in years. 
 
 ```{r make-recipe, include=T, eval=T}
-r <- epi_recipe(employ_small) %>%
+r <- recipe(employ_small) %>%
   step_epi_ahead(num_graduates_prop, ahead = 1) %>%
   step_epi_lag(num_graduates_prop, lag = 0:2) %>%
   step_epi_naomit()
@@ -327,7 +327,7 @@ $z_{tijk}$ is the number of graduates (proportion) at time $t$.
 Again, we construct an `epi_recipe` detailing the pre-processing steps.
 
 ```{r custom-arx, include=T}
-rx <- epi_recipe(employ_small) %>%
+rx <- recipe(employ_small) %>%
   step_epi_ahead(med_income_5y_prop, ahead = 1) %>%
   # 5-year median income has current, and two lags c(0, 1, 2)
   step_epi_lag(med_income_5y_prop, lag = 0:2) %>%

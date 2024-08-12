@@ -20,6 +20,6 @@ Unified NA omission wrapper function for recipes
 }
 \examples{
 case_death_rate_subset \%>\%
-  epi_recipe() \%>\%
+  recipe() \%>\%
   step_epi_naomit()
 }

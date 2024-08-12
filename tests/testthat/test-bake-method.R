@@ -1,11 +1,11 @@
 test_that("bake method works in all cases", {
   edf <- case_death_rate_subset %>%
     filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-  r <- epi_recipe(edf) %>%
+  r <- recipe(edf) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7)
 
-  r2 <- epi_recipe(edf) %>%
+  r2 <- recipe(edf) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_naomit()

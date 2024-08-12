@@ -21,7 +21,7 @@ slm_fit <- function(recipe, data = x) {
 
 test_that("Values for ahead and lag must be integer values", {
   expect_error(
-    r1 <- epi_recipe(x) %>%
+    r1 <- recipe(x) %>%
       step_epi_ahead(death_rate, ahead = 3.6) %>%
       step_epi_lag(death_rate, lag = 1.9)
   )
@@ -29,7 +29,7 @@ test_that("Values for ahead and lag must be integer values", {
 
 test_that("A negative lag value should should throw an error", {
   expect_error(
-    r2 <- epi_recipe(x) %>%
+    r2 <- recipe(x) %>%
       step_epi_ahead(death_rate, ahead = 7) %>%
       step_epi_lag(death_rate, lag = -7)
   )
@@ -37,14 +37,14 @@ test_that("A negative lag value should should throw an error", {
 
 test_that("A nonpositive ahead value should throw an error", {
   expect_error(
-    r3 <- epi_recipe(x) %>%
+    r3 <- recipe(x) %>%
       step_epi_ahead(death_rate, ahead = -7) %>%
       step_epi_lag(death_rate, lag = 7)
   )
 })
 
 test_that("Values for ahead and lag cannot be duplicates", {
-  r4 <- epi_recipe(x) %>%
+  r4 <- recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = 7) %>%
     step_epi_lag(death_rate, lag = 7)
@@ -54,7 +54,7 @@ test_that("Values for ahead and lag cannot be duplicates", {
 })
 
 test_that("Check that epi_lag shifts applies the shift", {
-  r5 <- epi_recipe(x) %>%
+  r5 <- recipe(x) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14))
 

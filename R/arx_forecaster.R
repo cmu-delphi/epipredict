@@ -121,7 +121,7 @@ arx_fcast_epi_workflow <- function(
   lags <- arx_lags_validator(predictors, args_list$lags)
 
   # --- preprocessor
-  r <- epi_recipe(epi_data)
+  r <- recipe(epi_data)
   for (l in seq_along(lags)) {
     p <- predictors[l]
     r <- step_epi_lag(r, !!p, lag = lags[[l]])

@@ -128,7 +128,7 @@ arx_class_epi_workflow <- function(
 
   # --- preprocessor
   # ------- predictors
-  r <- epi_recipe(epi_data) %>%
+  r <- recipe(epi_data) %>%
     step_growth_rate(
       tidyselect::all_of(predictors),
       role = "grp",

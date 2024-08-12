@@ -7,13 +7,13 @@ test_that("Column names can be passed with and without the tidy way", {
 
   newdata <- case_death_rate_subset %>% filter(geo_value %in% c("ak", "al", "ar", "as", "az", "ca"))
 
-  r1 <- epi_recipe(newdata) %>%
+  r1 <- recipe(newdata) %>%
     step_population_scaling(c("case_rate", "death_rate"),
       df = pop_data,
       df_pop_col = "value", by = c("geo_value" = "states")
     )
 
-  r2 <- epi_recipe(newdata) %>%
+  r2 <- recipe(newdata) %>%
     step_population_scaling(case_rate, death_rate,
       df = pop_data,
       df_pop_col = "value", by = c("geo_value" = "states")
@@ -47,9 +47,9 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
     case = 1:10,
     death = 1:10
   ) %>%
-    epiprocess::as_epi_df()
+    epiprocess::as_epi_df(additional_metadata = list(other_keys = "county"))
 
-  r <- epi_recipe(newdata) %>%
+  r <- recipe(newdata) %>%
     step_population_scaling(c("case", "death"),
       df = pop_data,
       df_pop_col = "value", by = c("geo_value" = "states", "county" = "counties"),
@@ -65,7 +65,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
 
 
 
-  r <- epi_recipe(newdata) %>%
+  r <- recipe(newdata) %>%
     step_population_scaling(
       df = pop_data,
       df_pop_col = "value",
@@ -92,7 +92,7 @@ test_that("Postprocessing workflow works and values correct", {
     value = c(20000, 30000)
   )
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_population_scaling(cases,
       df = pop_data,
       df_pop_col = "value",
@@ -152,7 +152,7 @@ test_that("Postprocessing to get cases from case rate", {
     value = c(1 / 20000, 1 / 30000)
   )
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_population_scaling(
       df = reverse_pop_data,
       df_pop_col = "value",
@@ -196,7 +196,7 @@ test_that("test joining by default columns", {
     values = c(1 / 20000, 1 / 30000)
   )
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_population_scaling(case_rate,
       df = reverse_pop_data,
       df_pop_col = "values",
@@ -242,7 +242,7 @@ test_that("expect error if `by` selector does not match", {
     values = c(1 / 20000, 1 / 30000)
   )
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_population_scaling(case_rate,
       df = reverse_pop_data,
       df_pop_col = "values",
@@ -270,7 +270,7 @@ test_that("expect error if `by` selector does not match", {
       add_frosting(f)
   )
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_population_scaling(case_rate,
       df = reverse_pop_data,
       df_pop_col = "values",
@@ -314,7 +314,7 @@ test_that("Rate rescaling behaves as expected", {
     value = c(1 / 1000)
   )
 
-  r <- epi_recipe(x) %>%
+  r <- recipe(x) %>%
     step_population_scaling(
       df = reverse_pop_data,
       df_pop_col = "value",
@@ -343,7 +343,7 @@ test_that("Rate rescaling behaves as expected", {
   ) %>%
     as_epi_df()
 
-  r <- epi_recipe(x) %>%
+  r <- recipe(x) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate, ahead = 7, role = "outcome") %>% # cases
     recipes::step_naomit(recipes::all_predictors()) %>%
@@ -385,7 +385,7 @@ test_that("Extra Columns are ignored", {
     value = c(1 / 1000),
     extra_col = c("full name")
   )
-  recip <- epi_recipe(x) %>%
+  recip <- recipe(x) %>%
     step_population_scaling(
       df = reverse_pop_data,
       df_pop_col = "value",

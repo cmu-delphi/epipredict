@@ -8,15 +8,16 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7)
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'   filter(time_value >= max(time_value) - 14)
 #'
 #' # Add frosting to a workflow and predict
 #' f <- frosting() %>%
@@ -125,14 +126,15 @@ update_frosting <- function(x, frosting, ...) {
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' # in the frosting from the workflow
 #' f1 <- frosting() %>%
@@ -266,15 +268,16 @@ new_frosting <- function() {
 #' wf <- epi_workflow() %>% add_frosting(f)
 #'
 #' # A more realistic example
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%

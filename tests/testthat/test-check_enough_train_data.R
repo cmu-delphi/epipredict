@@ -17,14 +17,14 @@ toy_epi_df <- tibble::tibble(
 test_that("check_enough_train_data works on pooled data", {
   # Check both columns have enough data
   expect_no_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n, drop_na = FALSE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
   )
   # Check both column don't have enough data
   expect_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n + 1, drop_na = FALSE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL),
@@ -32,7 +32,7 @@ test_that("check_enough_train_data works on pooled data", {
   )
   # Check drop_na works
   expect_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 1, drop_na = TRUE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
@@ -42,14 +42,14 @@ test_that("check_enough_train_data works on pooled data", {
 test_that("check_enough_train_data works on unpooled data", {
   # Check both columns have enough data
   expect_no_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n, epi_keys = "geo_value", drop_na = FALSE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
   )
   # Check one column don't have enough data
   expect_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n + 1, epi_keys = "geo_value", drop_na = FALSE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL),
@@ -57,7 +57,7 @@ test_that("check_enough_train_data works on unpooled data", {
   )
   # Check drop_na works
   expect_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 3, epi_keys = "geo_value", drop_na = TRUE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
@@ -66,7 +66,7 @@ test_that("check_enough_train_data works on unpooled data", {
 
 test_that("check_enough_train_data outputs the correct recipe values", {
   expect_no_error(
-    p <- epi_recipe(toy_epi_df) %>%
+    p <- recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 2) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
@@ -91,14 +91,14 @@ test_that("check_enough_train_data only checks train data", {
     slice(3:10) %>%
     epiprocess::as_epi_df()
   expect_no_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n - 2, epi_keys = "geo_value") %>%
       prep(toy_epi_df) %>%
       bake(new_data = toy_test_data)
   )
   # Same thing, but skip = FALSE
   expect_no_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       check_enough_train_data(y, n = n - 2, epi_keys = "geo_value", skip = FALSE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = toy_test_data)
@@ -108,14 +108,14 @@ test_that("check_enough_train_data only checks train data", {
 test_that("check_enough_train_data works with all_predictors() downstream of constructed terms", {
   # With a lag of 2, we will get 2 * n - 6 non-NA rows
   expect_no_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
       check_enough_train_data(all_predictors(), y, n = 2 * n - 6) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
   )
   expect_error(
-    epi_recipe(toy_epi_df) %>%
+    recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
       check_enough_train_data(all_predictors(), y, n = 2 * n - 5) %>%
       prep(toy_epi_df) %>%

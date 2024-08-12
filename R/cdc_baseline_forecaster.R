@@ -36,25 +36,25 @@
 #' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
 #' preds <- pivot_quantiles_wider(cdc$predictions, .pred_distn)
 #'
-#' if (require(ggplot2)) {
-#'   forecast_date <- unique(preds$forecast_date)
-#'   four_states <- c("ca", "pa", "wa", "ny")
-#'   preds %>%
-#'     filter(geo_value %in% four_states) %>%
-#'     ggplot(aes(target_date)) +
-#'     geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
-#'     geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
-#'     geom_line(aes(y = .pred), color = "orange") +
-#'     geom_line(
-#'       data = weekly_deaths %>% filter(geo_value %in% four_states),
-#'       aes(x = time_value, y = deaths)
-#'     ) +
-#'     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
-#'     labs(x = "Date", y = "Weekly deaths") +
-#'     facet_wrap(~geo_value, scales = "free_y") +
-#'     theme_bw() +
-#'     geom_vline(xintercept = forecast_date)
-#' }
+#' library(ggplot2)
+#' forecast_date <- unique(preds$forecast_date)
+#' four_states <- c("ca", "pa", "wa", "ny")
+#' preds %>%
+#'   filter(geo_value %in% four_states) %>%
+#'   ggplot(aes(target_date)) +
+#'   geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
+#'   geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
+#'   geom_line(aes(y = .pred), color = "orange") +
+#'   geom_line(
+#'     data = weekly_deaths %>% filter(geo_value %in% four_states),
+#'     aes(x = time_value, y = deaths)
+#'   ) +
+#'   scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
+#'   labs(x = "Date", y = "Weekly deaths") +
+#'   facet_wrap(~geo_value, scales = "free_y") +
+#'   theme_bw() +
+#'   geom_vline(xintercept = forecast_date)
+#'
 cdc_baseline_forecaster <- function(
     epi_data,
     outcome,
@@ -68,7 +68,7 @@ cdc_baseline_forecaster <- function(
   outcome <- rlang::sym(outcome)
 
 
-  r <- epi_recipe(epi_data) %>%
+  r <- recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$data_frequency, skip = TRUE) %>%
     recipes::update_role(!!outcome, new_role = "predictor") %>%
     recipes::add_role(tidyselect::all_of(keys), new_role = "predictor") %>%
@@ -79,7 +79,7 @@ cdc_baseline_forecaster <- function(
 
 
   latest <- get_test_data(
-    epi_recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
+    recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
     forecast_date
   )
 

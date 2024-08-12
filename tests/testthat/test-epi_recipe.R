@@ -13,28 +13,9 @@ test_that("recipe produces default recipe", {
   expect_identical(rec, epi_recipe(y ~ x, tib))
   expect_equal(nrow(rec$template), 5L)
 
-  m <- as.matrix(tib)
-  rec <- recipe(m)
-  expect_identical(rec, epi_recipe(m))
-  expect_equal(nrow(rec$template), 5L)
-  expected_rec <- recipes::recipe(tib)
-  expected_rec$template <- expected_rec$template[1, ]
-  expect_warning(rec <- epi_recipe(tib), regexp = "epi_recipe has been called with a non-epi_df object")
-  expect_identical(expected_rec, rec)
-  expect_equal(nrow(rec$template), 1L)
 
   expected_rec <- recipes::recipe(y ~ x, tib)
-  expected_rec$template <- expected_rec$template[1, ]
-  expect_warning(rec <- epi_recipe(y ~ x, tib), regexp = "epi_recipe has been called with a non-epi_df object")
   expect_identical(expected_rec, rec)
-  expect_equal(nrow(rec$template), 1L)
-
-  m <- as.matrix(tib)
-  expected_rec <- recipes::recipe(m)
-  expected_rec$template <- expected_rec$template[1, ]
-  expect_warning(rec <- epi_recipe(m), regexp = "epi_recipe has been called with a non-epi_df object")
-  expect_identical(expected_rec, rec)
-  expect_equal(nrow(rec$template), 1L)
 })
 
 test_that("recipe formula works", {

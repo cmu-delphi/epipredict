@@ -32,13 +32,11 @@
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(
-#'     time_value > "2021-11-01",
-#'     geo_value %in% c("ak", "ca", "ny")
-#'   )
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7)
 #'
@@ -49,7 +47,7 @@
 #' wf <- wf %>% Add_model(rf_model)
 #' wf
 #'
-#' lm_model <- parsnip::linear_reg()
+#' lm_model <- linear_reg()
 #'
 #' wf <- Update_model(wf, lm_model)
 #' wf

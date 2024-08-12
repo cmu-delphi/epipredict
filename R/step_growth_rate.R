@@ -34,7 +34,7 @@
 #' @importFrom epiprocess growth_rate
 #' @export
 #' @examples
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' r <- recipe(case_death_rate_subset) %>%
 #'   step_growth_rate(case_rate, death_rate)
 #' r
 #'

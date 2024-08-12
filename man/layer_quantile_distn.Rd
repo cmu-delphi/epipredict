@@ -37,10 +37,11 @@ If this engine is used, then this layer will grab out estimated (or extrapolated
 quantiles at the requested quantile values.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
-r <- epi_recipe(jhu) \%>\%
+r <- recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()

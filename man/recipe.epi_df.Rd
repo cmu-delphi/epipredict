@@ -5,9 +5,12 @@
 \alias{epi_recipe}
 \alias{epi_recipe.default}
 \alias{epi_recipe.formula}
+\alias{recipe.formula}
 \title{Create a recipe for preprocessing panel data}
 \usage{
 \method{recipe}{epi_df}(x, formula = NULL, ..., vars = NULL, roles = NULL)
+
+\method{recipe}{formula}(formula, data, ...)
 }
 \arguments{
 \item{x, data}{A data frame, tibble, or epi_df of the \emph{template} data set
@@ -52,17 +55,19 @@ columns present in an \code{\link[epiprocess:epi_df]{epiprocess::epi_df}}: \code
 additional keys.
 }
 \examples{
+library(dplyr)
+library(recipes)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value > "2021-08-01") \%>\%
-  dplyr::arrange(geo_value, time_value)
+  filter(time_value > "2021-08-01") \%>\%
+  arrange(geo_value, time_value)
 
-r <- epi_recipe(jhu) \%>\%
+r <- recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  recipes::step_naomit(recipes::all_predictors()) \%>\%
+  step_naomit(recipes::all_predictors()) \%>\%
   # below, `skip` means we don't do this at predict time
-  recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+  step_naomit(recipes::all_outcomes(), skip = TRUE)
 
 r
 }

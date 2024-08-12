@@ -65,7 +65,7 @@ is_epi_recipe <- function(x) {
 #'   filter(time_value > "2021-08-01") %>%
 #'   arrange(geo_value, time_value)
 #'
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -77,7 +77,7 @@ is_epi_recipe <- function(x) {
 #'
 #' workflow
 #'
-#' r2 <- epi_recipe(jhu) %>%
+#' r2 <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7)
 #'
@@ -147,12 +147,12 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #'
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
 #'   filter(time_value >= max(time_value) - 14)
 #'
@@ -239,16 +239,19 @@ prep.epi_recipe <- function(
   lvls <- lapply(training, recipes:::get_levels)
   lvls <- kill_levels(lvls, keys) # don't do anything to the epi_keys
   training <- recipes:::strings2factors(training, lvls)
-  strings_as_factors <- FALSE # now they're already done
 
-  x <- NextMethod("prep")
+  # browser()
+  x <- NextMethod("prep", training = training, fresh = fresh,
+                  verbose = verbose,
+                  retain = retain, log_changes = log_changes,
+                  strings_as_factors = FALSE, ...)
   # Now, we undo the conversion.
 
   lvls <- lapply(x$template, recipes:::get_levels)
   lvls <- kill_levels(lvls, keys)
   check_lvls <- recipes:::has_lvls(lvls)
   if (!any(check_lvls)) lvls <- NULL
-  x$lvls <- lvls
+  x$levels <- lvls
   x$orig_lvls <- orig_lvls
   x
 }
