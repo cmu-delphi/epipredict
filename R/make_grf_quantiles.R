@@ -143,7 +143,7 @@ make_grf_quantiles <- function() {
       defaults = list(
         quantiles = c(0.1, 0.5, 0.9),
         num.threads = 1L,
-        seed = expr(runif(1, 0, .Machine$integer.max))
+        seed = rlang::expr(stats::runif(1, 0, .Machine$integer.max))
       )
     )
   )
@@ -185,7 +185,7 @@ make_grf_quantiles <- function() {
       args = list(
         object = quote(object$fit),
         newdata = quote(new_data),
-        seed = expr(sample.int(10^5, 1)),
+        seed = rlang::expr(sample.int(10^5, 1)),
         verbose = FALSE
       )
     )
