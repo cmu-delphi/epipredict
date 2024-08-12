@@ -1,3 +1,43 @@
+#' Create a recipe for preprocessing panel data
+#'
+#' A recipe is a description of the steps to be applied to a data set in
+#'   order to prepare it for data analysis. This is an S3 method for
+#'  [recipes::recipe()] to properly handle the additional (panel data)
+#'   columns present in an [`epiprocess::epi_df`]: `time_value`, `geo_value`, and any
+#'   additional keys.
+#'
+#' @aliases epi_recipe epi_recipe.default epi_recipe.formula
+#' @inheritParams recipes::recipe
+#' @param roles A character string (the same length of `vars`) that
+#'   describes a single role that the variable will take. This value could be
+#'   anything but common roles are `"outcome"`, `"predictor"`,
+#'   `"time_value"`, and `"geo_value"`
+#' @param ... Further arguments passed to or from other methods (not currently
+#'   used).
+#' @param formula A model formula. No in-line functions should be used here
+#'  (e.g. `log(x)`, `x:y`, etc.) and minus signs are not allowed. These types of
+#'  transformations should be enacted using `step` functions in this package.
+#'  Dots are allowed as are simple multivariate outcome terms (i.e. no need for
+#'  `cbind`; see Examples).
+#' @param x,data A data frame, tibble, or epi_df of the *template* data set
+#'   (see below). This is always coerced to the first row to avoid memory issues
+#' @inherit recipes::recipe return
+#'
+#' @export
+#' @examples
+#' jhu <- case_death_rate_subset %>%
+#'   dplyr::filter(time_value > "2021-08-01") %>%
+#'   dplyr::arrange(geo_value, time_value)
+#'
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
+#'   recipes::step_naomit(recipes::all_predictors()) %>%
+#'   # below, `skip` means we don't do this at predict time
+#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#'
+#' r
 #' @importFrom recipes recipe
 #' @export
 recipe.epi_df <- function(x, formula = NULL, ..., vars = NULL, roles = NULL) {

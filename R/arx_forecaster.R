@@ -1,7 +1,7 @@
 #' Direct autoregressive forecaster with covariates
 #'
 #' This is an autoregressive forecasting model for
-#' [epiprocess::epi_df] data. It does "direct" forecasting, meaning
+#' [`epiprocess::epi_df`] data. It does "direct" forecasting, meaning
 #' that it estimates a model for a particular target horizon.
 #'
 #'

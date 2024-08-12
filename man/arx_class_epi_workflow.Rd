@@ -20,7 +20,7 @@ arx_class_epi_workflow(
 be real-valued. Conversion of this data to unordered classes is handled
 internally based on the \code{breaks} argument to \code{\link[=arx_class_args_list]{arx_class_args_list()}}.
 If discrete classes are already in the \code{epi_df}, it is recommended to
-code up a classifier from scratch using \code{\link[=epi_recipe]{epi_recipe()}}.}
+code up a classifier from scratch using \code{\link[=recipe]{recipe()}}.}
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
 This defaults to the \code{outcome}. However, if manually specified, only those variables
