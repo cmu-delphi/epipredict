@@ -43,7 +43,8 @@ new_default_epi_recipe_blueprint <- function(intercept = FALSE,
     recipe = recipe,
     extra_role_ptypes = extra_role_ptypes,
     ...,
-    subclass = c(subclass, "default_epi_recipe_blueprint", "default_recipe_blueprint"))
+    subclass = c(subclass, "default_epi_recipe_blueprint", "default_recipe_blueprint")
+  )
 }
 
 
@@ -66,4 +67,3 @@ run_mold.default_epi_recipe_blueprint <- function(blueprint, ..., data) {
 refresh_blueprint.default_epi_recipe_blueprint <- function(blueprint) {
   do.call(new_default_epi_recipe_blueprint, as.list(blueprint))
 }
-

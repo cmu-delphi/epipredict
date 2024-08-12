@@ -226,8 +226,9 @@ adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default
 prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
-
-  if (!strings_as_factors) return(NextMethod("prep"))
+  if (!strings_as_factors) {
+    return(NextMethod("prep"))
+  }
   # workaround to avoid converting strings2factors with recipes::prep.recipe()
   # We do the conversion here, then set it to FALSE
   training <- recipes:::check_training_set(training, x, fresh)
@@ -241,10 +242,12 @@ prep.epi_recipe <- function(
   training <- recipes:::strings2factors(training, lvls)
 
   # browser()
-  x <- NextMethod("prep", training = training, fresh = fresh,
-                  verbose = verbose,
-                  retain = retain, log_changes = log_changes,
-                  strings_as_factors = FALSE, ...)
+  x <- NextMethod("prep",
+    training = training, fresh = fresh,
+    verbose = verbose,
+    retain = retain, log_changes = log_changes,
+    strings_as_factors = FALSE, ...
+  )
   # Now, we undo the conversion.
 
   lvls <- lapply(x$template, recipes:::get_levels)

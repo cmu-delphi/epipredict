@@ -83,7 +83,7 @@ add_epi_df_roles_to_recipe <- function(r, epi_df) {
     source = "original"
   )
   # reconstruct the constituents
-  r$template <- epi_df[ ,unique(c(edf_keys, r$var_info$variable))]
+  r$template <- epi_df[, unique(c(edf_keys, r$var_info$variable))]
   r$var_info <- r$var_info %>%
     dplyr::filter(!((variable %in% edf_keys) & is.na(role))) %>%
     dplyr::bind_rows(info) %>%
