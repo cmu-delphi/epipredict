@@ -28,6 +28,7 @@ layer_unnest_new <- function(terms, id) {
 #' @export
 slather.layer_unnest <-
   function(object, components, workflow, new_data, ...) {
+    rlang::check_dots_empty()
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)

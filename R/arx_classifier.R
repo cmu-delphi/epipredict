@@ -1,7 +1,7 @@
 #' Direct autoregressive classifier with covariates
 #'
 #' This is an autoregressive classification model for
-#' [epiprocess::epi_df] data. It does "direct" forecasting, meaning
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It does "direct" forecasting, meaning
 #' that it estimates a class at a particular target horizon.
 #'
 #' @inheritParams arx_forecaster

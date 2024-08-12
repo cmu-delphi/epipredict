@@ -1,7 +1,7 @@
 #' Predict the future with the most recent value
 #'
 #' This is a simple forecasting model for
-#' [epiprocess::epi_df] data. It uses the most recent observation as the
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent observation as the
 #' forecast for any future date, and produces intervals by shuffling the quantiles
 #' of the residuals of such a "flatline" forecast and incrementing these
 #' forward over all available training data.
@@ -12,7 +12,7 @@
 #' This forecaster is meant to produce exactly the CDC Baseline used for
 #' [COVID19ForecastHub](https://covid19forecasthub.org)
 #'
-#' @param epi_data An [`epiprocess::epi_df`]
+#' @param epi_data An [`epiprocess::epi_df`][epiprocess::as_epi_df]
 #' @param outcome A scalar character for the column name we wish to predict.
 #' @param args_list A list of additional arguments as created by the
 #'   [cdc_baseline_args_list()] constructor function.

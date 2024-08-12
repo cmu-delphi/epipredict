@@ -43,6 +43,13 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - `arx_fcast_epi_workflow()` and `arx_class_epi_workflow()` now default to
   `trainer = parsnip::logistic_reg()` to match their more canned versions.
 - add a `forecast()` method simplify generating forecasts
-- refactor `bake.epi_recipe()` and remove `epi_juice()`. 
-- Revise `compat-purrr` to use the r-lang `standalone-*` version (via 
+- refactor `bake.epi_recipe()` and remove `epi_juice()`.
+- Revise `compat-purrr` to use the r-lang `standalone-*` version (via
   `{usethis}`)
+- Replaced old version-faithful example in sliding AR & ARX forecasters vignette
+- `epi_recipe()` will now warn when given non-`epi_df` data
+- `layer_predict()` and `predict.epi_workflow()` will now appropriately forward
+  `...` args intended for `predict.model_fit()`
+- `bake.epi_recipe()` will now re-infer the geo and time type in case baking the
+  steps has changed the appropriate values
+- Add `step_epi_slide` to produce generic sliding computations over an `epi_df`
