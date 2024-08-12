@@ -84,6 +84,8 @@ slather.layer_quantile_distn <-
         "These are of class {.cls {class(dstn)}}."
       ))
     }
+    rlang::check_dots_empty()
+
     dstn <- dist_quantiles(
       quantile(dstn, object$quantile_levels),
       object$quantile_levels

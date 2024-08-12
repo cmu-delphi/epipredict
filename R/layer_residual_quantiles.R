@@ -75,6 +75,8 @@ layer_residual_quantiles_new <- function(
 #' @export
 slather.layer_residual_quantiles <-
   function(object, components, workflow, new_data, ...) {
+    rlang::check_dots_empty()
+
     the_fit <- workflows::extract_fit_parsnip(workflow)
 
     if (is.null(object$quantile_levels)) {

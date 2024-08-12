@@ -1,7 +1,7 @@
 #' Predict the future with today's value
 #'
 #' This is a simple forecasting model for
-#' [epiprocess::epi_df] data. It uses the most recent observation as the
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent observation as the
 #' forcast for any future date, and produces intervals based on the quantiles
 #' of the residuals of such a "flatline" forecast over all available training
 #' data.
@@ -13,7 +13,7 @@
 #' This forecaster is very similar to that used by the
 #' [COVID19ForecastHub](https://covid19forecasthub.org)
 #'
-#' @param epi_data An [epiprocess::epi_df]
+#' @param epi_data An [epiprocess::epi_df][epiprocess::as_epi_df]
 #' @param outcome A scalar character for the column name we wish to predict.
 #' @param args_list A list of dditional arguments as created by the
 #'   [flatline_args_list()] constructor function.

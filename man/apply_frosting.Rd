@@ -11,7 +11,7 @@ apply_frosting(workflow, ...)
 
 \method{apply_frosting}{default}(workflow, components, ...)
 
-\method{apply_frosting}{epi_workflow}(workflow, components, new_data, ...)
+\method{apply_frosting}{epi_workflow}(workflow, components, new_data, type = NULL, opts = list(), ...)
 }
 \arguments{
 \item{workflow}{An object of class workflow}
@@ -34,6 +34,9 @@ here for ease.
 
 \item{new_data}{a data frame containing the new predictors to preprocess
 and predict on}
+
+\item{type, opts}{forwarded (along with \code{...}) to \code{\link[=predict.model_fit]{predict.model_fit()}} and
+\code{\link[=slather]{slather()}} for supported layers}
 }
 \description{
 This function is intended for internal use. It implements postprocessing
