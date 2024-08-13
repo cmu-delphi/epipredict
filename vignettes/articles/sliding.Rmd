@@ -429,7 +429,6 @@ arx_preds <- x %>%
     names_sep = NULL
   ) %>%
   mutate(engine_type = quantile_reg()$engine) %>%
-  as_epi_df() %>%
   mutate(ahead_val = target_date - forecast_date)
 
 x_latest <- epix_as_of(x, max_version = max(x$versions_end))
