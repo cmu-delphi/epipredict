@@ -9,7 +9,7 @@ inside of the predict() method for a fitted workflow."><meta name="robots" conte
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@ inside of the <code><a href="https://rdrr.io/r/stats/predict.html" class="extern
 <span><span class="fu">apply_frosting</span><span class="op">(</span><span class="va">workflow</span>, <span class="va">components</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'epi_workflow'</span></span>
-<span><span class="fu">apply_frosting</span><span class="op">(</span><span class="va">workflow</span>, <span class="va">components</span>, <span class="va">new_data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">apply_frosting</span><span class="op">(</span><span class="va">workflow</span>, <span class="va">components</span>, <span class="va">new_data</span>, type <span class="op">=</span> <span class="cn">NULL</span>, opts <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -89,6 +89,11 @@ here for ease.</p></li>
 <dt id="arg-new-data">new_data<a class="anchor" aria-label="anchor" href="#arg-new-data"></a></dt>
 <dd><p>a data frame containing the new predictors to preprocess
 and predict on</p></dd>
+
+
+<dt id="arg-type-opts">type, opts<a class="anchor" aria-label="anchor" href="#arg-type-opts"></a></dt>
+<dd><p>forwarded (along with <code>...</code>) to <code><a href="https://parsnip.tidymodels.org/reference/predict.model_fit.html" class="external-link">predict.model_fit()</a></code> and
+<code><a href="slather.html">slather()</a></code> for supported layers</p></dd>
 
 </dl></div>
 

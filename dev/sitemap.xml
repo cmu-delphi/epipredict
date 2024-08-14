@@ -34,10 +34,12 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/cdc_baseline_forecaster.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/check_enough_train_data.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/check_pname.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/clean_f_name.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/dist_quantiles.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_keys.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_recipe.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_shift.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_slide_wrapper.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_workflow.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/extract_argument.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/extract_frosting.html</loc></url>
@@ -82,6 +84,7 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/state_census.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_naomit.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_shift.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_slide.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_growth_rate.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_lag_difference.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_population_scaling.html</loc></url>

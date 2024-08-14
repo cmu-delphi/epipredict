@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -142,7 +142,7 @@ packages.</p>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, deaths <span class="op">=</span> <span class="va">value</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">counts_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">full_join</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>counts_subset</code> dataset comes from the
 <code>epidatr</code> package, and contains the number of confirmed cases
 and deaths from June 4, 2021 to Dec 31, 2021 in some U.S. states.</p>
@@ -211,7 +211,7 @@ like to reuse this variable as <code>predictor</code>s.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">counts_subset</span> <span class="op">&lt;-</span> <span class="va">counts_subset</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>geo_value_factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">geo_value</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">counts_subset</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -246,7 +246,7 @@ dataset.</p>
 <span><span class="co">#&gt; An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2024-07-12 22:48:05.704296</span></span>
+<span><span class="co">#&gt; * as_of     = 2024-08-13 23:02:49.501159</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   geo_value time_value .pred</span></span>
@@ -384,7 +384,7 @@ meaningful interpretation of the intercept.</p>
 <code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">jhu</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>geo_value_factor <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">geo_value</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">left_join</a></span><span class="op">(</span><span class="va">behav_ind</span>, by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"time_value"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">add_role</a></span><span class="op">(</span><span class="va">geo_value_factor</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>

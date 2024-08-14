@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,7 +132,7 @@ qualification.</li>
 </ul>
 <p>To use this data with <code>epipredict</code>, we need to convert it
 into <code>epi_df</code> format using
-<code><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">epiprocess::as_epi_df()</a></code> with additional keys. In our case,
+<code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_df.html" class="external-link">epiprocess::as_epi_df()</a></code> with additional keys. In our case,
 the additional keys are <code>age_group</code>, and
 <code>edu_qual</code>. Note that in the above modifications, we encoded
 <code>time_value</code> as type <code>integer</code>. This lets us set
@@ -327,7 +327,7 @@ columns.</p>
 <span><span class="va">r</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu">bake_and_show_sample</span><span class="op">(</span><span class="va">employ_small</span><span class="op">)</span></span>
 <span><span class="co">#&gt; An `epi_df` object, 5 x 14 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = custom</span></span>
-<span><span class="co">#&gt; * time_type = year</span></span>
+<span><span class="co">#&gt; * time_type = integer</span></span>
 <span><span class="co">#&gt; * as_of     = 2022-07-19</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 14</span></span></span>
@@ -539,7 +539,7 @@ pre-processing steps.</p>
 <span><span class="fu">bake_and_show_sample</span><span class="op">(</span><span class="va">rx</span>, <span class="va">employ_small</span><span class="op">)</span></span>
 <span><span class="co">#&gt; An `epi_df` object, 5 x 18 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = custom</span></span>
-<span><span class="co">#&gt; * time_type = year</span></span>
+<span><span class="co">#&gt; * time_type = integer</span></span>
 <span><span class="co">#&gt; * as_of     = 2022-07-19</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 18</span></span></span>
@@ -689,7 +689,7 @@ is the 2-year median income (proportion) at time
 <span><span class="va">out_fl</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type flatline ═════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-07-12 22:47:58</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-08-13 23:02:41</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -728,7 +728,7 @@ article, but where all inputs have the same number of lags.</p>
 <span><span class="va">out_arx_lr</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-07-12 22:47:59</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-08-13 23:02:41</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -757,7 +757,7 @@ linear regression.</p>
 <span><span class="va">out_arx_rf</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-07-12 22:47:59</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-08-13 23:02:42</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>

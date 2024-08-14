@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,6 +94,13 @@
 <li>Replaced old version-faithful example in sliding AR &amp; ARX forecasters vignette</li>
 <li>
 <code><a href="../reference/epi_recipe.html">epi_recipe()</a></code> will now warn when given non-<code>epi_df</code> data</li>
+<li>
+<code><a href="../reference/layer_predict.html">layer_predict()</a></code> and <code><a href="../reference/predict-epi_workflow.html">predict.epi_workflow()</a></code> will now appropriately forward <code>...</code> args intended for <code><a href="https://parsnip.tidymodels.org/reference/predict.model_fit.html" class="external-link">predict.model_fit()</a></code>
+</li>
+<li>
+<code>bake.epi_recipe()</code> will now re-infer the geo and time type in case baking the steps has changed the appropriate values</li>
+<li>Add <code>step_epi_slide</code> to produce generic sliding computations over an <code>epi_df</code>
+</li>
 </ul></div>
   </main></div>
 

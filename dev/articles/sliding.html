@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.16</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -459,7 +459,6 @@ most up to date version of the data in the epi archive and store it as
 <span>    names_sep <span class="op">=</span> <span class="cn">NULL</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>engine_type <span class="op">=</span> <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">engine</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/as_epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>ahead_val <span class="op">=</span> <span class="va">target_date</span> <span class="op">-</span> <span class="va">forecast_date</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">x_latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">x</span>, max_version <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">versions_end</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
