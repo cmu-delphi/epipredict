@@ -18,6 +18,8 @@ library(tidyverse)
 library(epipredict)
 ```
 
+First we get some forecasts.
+
 ```{r forecast-output}
 jhu <- case_death_rate_subset
 fc_time_values <- seq(as.Date("2021-03-09"), as.Date("2021-12-01"), by = "4 weeks")
@@ -46,6 +48,7 @@ out <- left_join(
 )
 ```
 
+Now we set up the "quantile conformal score" and the tangent integrator.
 
 ```{r necessary-funs}
 quantile_conformal_score <- function(x, actual) {
@@ -80,7 +83,15 @@ tangent_integrator <- function(x, t, KI = 1000, Csat = 2) {
 }
 ```
 
+Score the forecasts.
+
 ```{r score-fcasts}
 out <- out |>
   mutate(qc_scores = quantile_conformal_score(.pred_distn, death_rate))
 ```
+
+Now we would need a "scorecaster". The paper has code here: 
+https://github.com/aangelopoulos/conformal-time-series/blob/b729c3f5ff633bfc43f0f7ca08199b549c2573ac/tests/datasets/covid-ts-proc/statewide/death-forecasting-perstate-lasso-qr.ipynb
+
+Not quite sure what the model is. Note that `epipredict::quantile_reg()` may work
+(without the $\ell_1$ penalty).
