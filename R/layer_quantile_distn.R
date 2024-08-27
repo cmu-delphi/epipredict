@@ -1,9 +1,14 @@
 #' Returns predictive quantiles
 #'
 #' This function calculates quantiles when the prediction was _distributional_.
-#' Currently, the only distributional engine is `quantile_reg()`.
-#' If this engine is used, then this layer will grab out estimated (or extrapolated)
-#' quantiles at the requested quantile values.
+#'
+#' Currently, the only distributional modes/engines are
+#' * `quantile_reg()`
+#' * `smooth_quantile_reg()`
+#' * `rand_forest(mode = "regression") %>% set_engine("grf_quantiles")`
+#'
+#' If these engines were used, then this layer will grab out estimated
+#' (or extrapolated) quantiles at the requested quantile values.
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.

@@ -11,7 +11,7 @@ quantile_reg(mode = "regression", engine = "rq", quantile_levels = 0.5)
 The only possible value for this model is "regression".}
 
 \item{engine}{Character string naming the fitting function. Currently, only
-"rq" is supported.}
+"rq" and "grf" are supported.}
 
 \item{quantile_levels}{A scalar or vector of values in (0, 1) to determine which
 quantiles to estimate (default is 0.5).}
@@ -19,9 +19,12 @@ quantiles to estimate (default is 0.5).}
 \description{
 \code{quantile_reg()} generates a quantile regression model \emph{specification} for
 the \href{https://www.tidymodels.org/}{tidymodels} framework. Currently, the
-only supported engine is "rq" which uses \code{\link[quantreg:rq]{quantreg::rq()}}.
+only supported engines are "rq", which uses \code{\link[quantreg:rq]{quantreg::rq()}}.
+Quantile regression is also possible by combining \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}}
+with the \code{grf} engine. See \link{grf_quantiles}.
 }
 \examples{
+library(quantreg)
 tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
 rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) \%>\% set_engine("rq")
 ff <- rq_spec \%>\% fit(y ~ ., data = tib)

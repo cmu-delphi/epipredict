@@ -3,12 +3,14 @@
 #' @description
 #' `quantile_reg()` generates a quantile regression model _specification_ for
 #' the [tidymodels](https://www.tidymodels.org/) framework. Currently, the
-#' only supported engine is "rq" which uses [quantreg::rq()].
+#' only supported engines are "rq", which uses [quantreg::rq()].
+#' Quantile regression is also possible by combining [parsnip::rand_forest()]
+#' with the `grf` engine. See [grf_quantiles].
 #'
 #' @param mode A single character string for the type of model.
 #'   The only possible value for this model is "regression".
 #' @param engine Character string naming the fitting function. Currently, only
-#'   "rq" is supported.
+#'   "rq" and "grf" are supported.
 #' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
 #'   quantiles to estimate (default is 0.5).
 #'
@@ -16,8 +18,9 @@
 #'
 #' @seealso [fit.model_spec()], [set_engine()]
 #'
-#' @importFrom quantreg rq
+#'
 #' @examples
+#' library(quantreg)
 #' tib <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100))
 #' rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
@@ -106,7 +109,7 @@ make_quantile_reg <- function() {
     out <- switch(type,
       rq = dist_quantiles(unname(as.list(x)), object$quantile_levels), # one quantile
       rqs = {
-        x <- lapply(unname(split(x, seq(nrow(x)))), function(q) sort(q))
+        x <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
         dist_quantiles(x, list(object$tau))
       },
       cli_abort(c(
@@ -114,7 +117,7 @@ make_quantile_reg <- function() {
         i = "See {.fun quantreg::rq}."
       ))
     )
-    return(data.frame(.pred = out))
+    return(dplyr::tibble(.pred = out))
   }
 
 
