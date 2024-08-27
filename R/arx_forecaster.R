@@ -42,14 +42,14 @@ arx_forecaster <- function(
     epi_data,
     outcome,
     predictors = outcome,
-    trainer = parsnip::linear_reg(),
+    trainer = linear_reg(),
     args_list = arx_args_list()) {
   if (!is_regression(trainer)) {
-    cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
+    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
 
   wf <- arx_fcast_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
-  wf <- generics::fit(wf, epi_data)
+  wf <- fit(wf, epi_data)
 
   preds <- forecast(
     wf,
@@ -57,8 +57,8 @@ arx_forecaster <- function(
     n_recent = args_list$nafill_buffer,
     forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
   ) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value)
+    as_tibble() %>%
+    select(-time_value)
 
   structure(
     list(
@@ -91,8 +91,9 @@ arx_forecaster <- function(
 #' @seealso [arx_forecaster()]
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value >= as.Date("2021-12-01"))
+#'   filter(time_value >= as.Date("2021-12-01"))
 #'
 #' arx_fcast_epi_workflow(
 #'   jhu, "death_rate",
@@ -108,15 +109,15 @@ arx_fcast_epi_workflow <- function(
     epi_data,
     outcome,
     predictors = outcome,
-    trainer = parsnip::linear_reg(),
+    trainer = linear_reg(),
     args_list = arx_args_list()) {
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_fcast", "alist"))) {
-    cli::cli_abort("args_list was not created using `arx_args_list().")
+    cli_abort("`args_list` was not created using `arx_args_list()`.")
   }
   if (!(is.null(trainer) || is_regression(trainer))) {
-    cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
+    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
   lags <- arx_lags_validator(predictors, args_list$lags)
 
@@ -129,21 +130,19 @@ arx_fcast_epi_workflow <- function(
   r <- r %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
     step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training) %>%
-    {
-      if (!is.null(args_list$check_enough_data_n)) {
-        check_enough_train_data(
-          .,
-          all_predictors(),
-          !!outcome,
-          n = args_list$check_enough_data_n,
-          epi_keys = args_list$check_enough_data_epi_keys,
-          drop_na = FALSE
-        )
-      } else {
-        .
-      }
-    }
+    step_training_window(n_recent = args_list$n_training)
+
+  if (!is.null(args_list$check_enough_data_n)) {
+    r <- check_enough_train_data(
+      r,
+      all_predictors(),
+      !!outcome,
+      n = args_list$check_enough_data_n,
+      epi_keys = args_list$check_enough_data_epi_keys,
+      drop_na = FALSE
+    )
+  }
+
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
@@ -157,7 +156,7 @@ arx_fcast_epi_workflow <- function(
       rlang::eval_tidy(trainer$args$quantile_levels)
     ))
     args_list$quantile_levels <- quantile_levels
-    trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
+    trainer$args$quantile_levels <- enquo(quantile_levels)
     f <- layer_quantile_distn(f, quantile_levels = quantile_levels) %>%
       layer_point_from_distn()
   } else {
@@ -265,7 +264,7 @@ arx_args_list <- function(
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
-      cli::cli_warn(c(
+      cli_warn(c(
         "`forecast_date` + `ahead` must equal `target_date`.",
         i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
       ))
@@ -316,7 +315,7 @@ compare_quantile_args <- function(alist, tlist) {
       if (setequal(alist, tlist)) {
         return(sort(unique(alist)))
       }
-      rlang::abort(c(
+      cli_abort(c(
         "You have specified different, non-default, quantiles in the trainier and `arx_args` options.",
         i = "Please only specify quantiles in one location."
       ))

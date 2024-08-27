@@ -8,7 +8,7 @@ arx_classifier(
   epi_data,
   outcome,
   predictors,
-  trainer = parsnip::logistic_reg(),
+  trainer = logistic_reg(),
   args_list = arx_class_args_list()
 )
 }

@@ -61,18 +61,18 @@ flatline_forecaster <- function(
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
-  eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
+  eng <- linear_reg(engine = "flatline")
 
   wf <- epi_workflow(r, eng, f)
-  wf <- generics::fit(wf, epi_data)
+  wf <- fit(wf, epi_data)
   preds <- suppressWarnings(forecast(
     wf,
     fill_locf = TRUE,
     n_recent = args_list$nafill_buffer,
     forecast_date = forecast_date
   )) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value)
+    as_tibble() %>%
+    select(-time_value)
 
   structure(
     list(

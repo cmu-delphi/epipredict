@@ -16,7 +16,7 @@ epi_check_training_set <- function(x, rec) {
   if (!is.null(old_ok)) {
     if (all(old_ok %in% colnames(x))) { # case 1
       if (!all(old_ok %in% new_ok)) {
-        cli::cli_warn(c(
+        cli_warn(c(
           "The recipe specifies additional keys. Because these are available,",
           "they are being added to the metadata of the training data."
         ))
@@ -25,7 +25,7 @@ epi_check_training_set <- function(x, rec) {
     }
     missing_ok <- setdiff(old_ok, colnames(x))
     if (length(missing_ok) > 0) { # case 2
-      cli::cli_abort(c(
+      cli_abort(c(
         "The recipe specifies keys which are not in the training data.",
         i = "The training set is missing columns for {missing_ok}."
       ))
@@ -45,8 +45,8 @@ validate_meta_match <- function(x, template, meta, warn_or_abort = "warn") {
   )
   if (new_meta != old_meta) {
     switch(warn_or_abort,
-      warn = cli::cli_warn(msg),
-      abort = cli::cli_abort(msg)
+      warn = cli_warn(msg),
+      abort = cli_abort(msg)
     )
   }
 }

@@ -47,9 +47,9 @@ before fitting and predicting. Supplying a trainer to the function
 may alter the returned \code{epi_workflow} object but can be omitted.
 }
 \examples{
-
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value >= as.Date("2021-11-01"))
+  filter(time_value >= as.Date("2021-11-01"))
 
 arx_class_epi_workflow(jhu, "death_rate", c("case_rate", "death_rate"))
 
@@ -57,7 +57,7 @@ arx_class_epi_workflow(
   jhu,
   "death_rate",
   c("case_rate", "death_rate"),
-  trainer = parsnip::multinom_reg(),
+  trainer = multinom_reg(),
   args_list = arx_class_args_list(
     breaks = c(-.05, .1), ahead = 14,
     horizon = 14, method = "linear_reg"

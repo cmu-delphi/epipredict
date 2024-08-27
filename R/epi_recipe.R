@@ -46,17 +46,19 @@ epi_recipe.default <- function(x, ...) {
 #'
 #' @export
 #' @examples
+#' library(dplyr)
+#' library(recipes)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-08-01") %>%
-#'   dplyr::arrange(geo_value, time_value)
+#'   filter(time_value > "2021-08-01") %>%
+#'   arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   recipes::step_naomit(recipes::all_predictors()) %>%
+#'   step_naomit(all_predictors()) %>%
 #'   # below, `skip` means we don't do this at predict time
-#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#'   step_naomit(all_outcomes(), skip = TRUE)
 #'
 #' r
 epi_recipe.epi_df <-
@@ -501,7 +503,7 @@ prep.epi_recipe <- function(
           as_epi_df(training), before_template
         )
       }
-      training <- dplyr::relocate(training, dplyr::all_of(key_colnames(training)))
+      training <- dplyr::relocate(training, all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
       if (!is.na(x$steps[[i]]$role)) {
         new_vars <- setdiff(x$term_info$variable, running_info$variable)

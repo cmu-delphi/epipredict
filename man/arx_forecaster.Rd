@@ -8,7 +8,7 @@ arx_forecaster(
   epi_data,
   outcome,
   predictors = outcome,
-  trainer = parsnip::linear_reg(),
+  trainer = linear_reg(),
   args_list = arx_args_list()
 )
 }
