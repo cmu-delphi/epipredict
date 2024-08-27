@@ -115,6 +115,7 @@ reference:
       - dist_quantiles
       - extrapolate_quantiles
       - nested_quantiles
+      - weighted_interval_score
       - starts_with("pivot_quantiles")
   - title: Other utilities
     contents:

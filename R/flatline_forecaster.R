@@ -1,8 +1,9 @@
 #' Predict the future with today's value
 #'
 #' This is a simple forecasting model for
-#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent observation as the
-#' forcast for any future date, and produces intervals based on the quantiles
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent
+#' observation as the
+#' forecast for any future date, and produces intervals based on the quantiles
 #' of the residuals of such a "flatline" forecast over all available training
 #' data.
 #'

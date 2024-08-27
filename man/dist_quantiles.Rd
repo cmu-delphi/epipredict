@@ -7,15 +7,26 @@
 dist_quantiles(values, quantile_levels)
 }
 \arguments{
-\item{values}{A vector of values}
+\item{values}{A vector (or list of vectors) of values.}
 
-\item{quantile_levels}{A vector of probabilities corresponding to \code{values}}
+\item{quantile_levels}{A vector (or list of vectors) of probabilities
+corresponding to \code{values}.
+
+When creating multiple sets of \code{values}/\code{quantile_levels} resulting in
+different distributions, the sizes must match. See the examples below.}
+}
+\value{
+A vector of class \code{"distribution"}.
 }
 \description{
 A distribution parameterized by a set of quantiles
 }
 \examples{
-dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
+dist_quantiles(1:4, 1:4 / 5)
+dist_quantiles(list(1:3, 1:4), list(1:3 / 4, 1:4 / 5))
+dstn <- dist_quantiles(list(1:4, 8:11), c(.2, .4, .6, .8))
+dstn
+
 quantile(dstn, p = c(.1, .25, .5, .9))
 median(dstn)
 
@@ -23,5 +34,4 @@ median(dstn)
 distributional::parameters(dstn[1])
 nested_quantiles(dstn[1])[[1]]
 
-dist_quantiles(1:4, 1:4 / 5)
 }
