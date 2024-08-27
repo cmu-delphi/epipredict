@@ -26,8 +26,9 @@
 #'  `type` (the method, e.g. "predict", "naomit"), and a character column `id`.
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -52,21 +53,17 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
   num_oper <- length(x$layers)
   pattern <- "^layer_"
 
-  if (length(id) != 1L) {
-    rlang::abort("If `id` is provided, it must be a length 1 character vector.")
-  }
-
-  if (length(number) != 1L) {
-    rlang::abort("If `number` is provided, it must be a length 1 integer vector.")
-  }
+  arg_is_chr_scalar(id, allow_na = TRUE)
+  arg_is_scalar(number, allow_na = TRUE)
+  arg_is_int(number, allow_na = TRUE)
 
   if (!is.na(id)) {
     if (!is.na(number)) {
-      rlang::abort("You may specify `number` or `id`, but not both.")
+      cli_abort("You may specify `number` or `id`, but not both.")
     }
     layer_ids <- vapply(x$layers, function(x) x$id, character(1))
     if (!(id %in% layer_ids)) {
-      rlang::abort("Supplied `id` not found in the frosting.")
+      cli_abort("Supplied `id` not found in the frosting.")
     }
     number <- which(id == layer_ids)
   }
@@ -89,13 +86,7 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
     )
   } else {
     if (number > num_oper || length(number) > 1) {
-      rlang::abort(
-        paste0(
-          "`number` should be a single value between 1 and ",
-          num_oper,
-          "."
-        )
-      )
+      cli_abort("`number` should be a single value between 1 and {num_oper}.")
     }
 
     res <- tidy(x$layers[[number]], ...)

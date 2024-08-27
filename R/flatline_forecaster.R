@@ -34,7 +34,7 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("flat_fcast", "alist"))) {
-    cli_stop("args_list was not created using `flatline_args_list().")
+    cli_abort("`args_list` was not created using `flatline_args_list().")
   }
   keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)

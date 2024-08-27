@@ -7,7 +7,6 @@
 step_training_window(
   recipe,
   role = NA,
-  trained = FALSE,
   n_recent = 50,
   epi_keys = NULL,
   id = rand_id("training_window")
@@ -17,10 +16,8 @@ step_training_window(
 \item{recipe}{A recipe object. The step will be added to the
 sequence of operations for this recipe.}
 
-\item{role}{Not used by this step since no new variables are created.}
-
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
+\item{role}{For model terms created by this step, what analysis role should
+they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
 \item{n_recent}{An integer value that represents the number of most recent
 observations that are to be kept in the training window per key
@@ -30,7 +27,7 @@ The default value is 50.}
 to group on. The default, \code{NULL}, ensures that every key combination is
 limited.}
 
-\item{id}{A character string that is unique to this step to identify it.}
+\item{id}{A unique identifier for the step}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
@@ -47,13 +44,10 @@ Note that \code{step_epi_lead()} and \code{step_epi_lag()} should come
 after any filtering step.
 }
 \examples{
-tib <- tibble::tibble(
+tib <- tibble(
   x = 1:10,
   y = 1:10,
-  time_value = rep(seq(as.Date("2020-01-01"),
-    by = 1,
-    length.out = 5
-  ), times = 2),
+  time_value = rep(seq(as.Date("2020-01-01"), by = 1, length.out = 5), 2),
   geo_value = rep(c("ca", "hi"), each = 5)
 ) \%>\%
   as_epi_df()
@@ -64,7 +58,7 @@ epi_recipe(y ~ x, data = tib) \%>\%
   bake(new_data = NULL)
 
 epi_recipe(y ~ x, data = tib) \%>\%
-  recipes::step_naomit() \%>\%
+  step_epi_naomit() \%>\%
   step_training_window(n_recent = 3) \%>\%
   prep(tib) \%>\%
   bake(new_data = NULL)

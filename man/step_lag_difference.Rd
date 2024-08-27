@@ -11,7 +11,6 @@ step_lag_difference(
   trained = FALSE,
   horizon = 7,
   prefix = "lag_diff_",
-  columns = NULL,
   skip = FALSE,
   id = rand_id("lag_diff")
 )
@@ -26,16 +25,10 @@ for this step. See \code{\link[recipes:selections]{recipes::selections()}} for m
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
-
 \item{horizon}{Scalar or vector. Time period(s) over which to calculate
 differences.}
 
-\item{prefix}{A prefix to indicate what type of variable this is}
-
-\item{columns}{A character string of variable names that will
-be populated (eventually) by the \code{terms} argument.}
+\item{prefix}{A character string that will be prefixed to the new column.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked

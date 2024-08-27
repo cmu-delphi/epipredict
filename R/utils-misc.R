@@ -48,13 +48,13 @@ grab_forged_keys <- function(forged, mold, new_data) {
       "in `new_data`. Predictions will have only the available keys."
     ))
   }
-  if (epiprocess::is_epi_df(new_data)) {
-    extras <- epiprocess::as_epi_df(extras)
+  if (is_epi_df(new_data)) {
+    extras <- as_epi_df(extras)
     attr(extras, "metadata") <- attr(new_data, "metadata")
   } else if (all(keys[1:2] %in% new_keys)) {
     l <- list()
     if (length(new_keys) > 2) l <- list(other_keys = new_keys[-c(1:2)])
-    extras <- epiprocess::as_epi_df(extras, additional_metadata = l)
+    extras <- as_epi_df(extras, additional_metadata = l)
   }
   extras
 }
@@ -64,11 +64,10 @@ get_parsnip_mode <- function(trainer) {
     return(trainer$mode)
   }
   cc <- class(trainer)
-  cli::cli_abort(
-    c("`trainer` must be a `parsnip` model.",
-      i = "This trainer has class(s) {.cls {cc}}."
-    )
-  )
+  cli_abort(c(
+    "`trainer` must be a `parsnip` model.",
+    i = "This trainer has class{?s}: {.cls {cc}}."
+  ))
 }
 
 is_classification <- function(trainer) {

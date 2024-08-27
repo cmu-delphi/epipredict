@@ -20,14 +20,15 @@
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   dfilter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' # Use ahead + forecast date
 #' f <- frosting() %>%
@@ -79,7 +80,8 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 }
 
 #' @export
-slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
+slather.layer_add_target_date <- function(object, components, workflow,
+                                          new_data, ...) {
   rlang::check_dots_empty()
   the_recipe <- workflows::extract_recipe(workflow)
   the_frosting <- extract_frosting(workflow)
@@ -91,7 +93,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
 
   if (!is.null(object$target_date)) {
     target_date <- object$target_date
-    validate_date(target_date, expected_time_type,
+    validate_date(
+      target_date, expected_time_type,
       call = expr(layer_add_target_date())
     )
     target_date <- coerce_time_type(target_date, expected_time_type)
@@ -100,7 +103,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
       !is.null(forecast_date <- extract_argument(
         the_frosting, "layer_add_forecast_date", "forecast_date"
       ))) {
-    validate_date(forecast_date, expected_time_type,
+    validate_date(
+      forecast_date, expected_time_type,
       call = rlang::expr(layer_add_forecast_date())
     )
     forecast_date <- coerce_time_type(forecast_date, expected_time_type)
@@ -117,7 +121,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   }
 
   object$target_date <- target_date
-  components$predictions <- dplyr::bind_cols(components$predictions,
+  components$predictions <- bind_cols(
+    components$predictions,
     target_date = target_date
   )
   components

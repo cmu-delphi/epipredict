@@ -42,14 +42,13 @@
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @importFrom rlang %@%
 #' @export
-
 get_test_data <- function(
     recipe,
     x,
     fill_locf = FALSE,
     n_recent = NULL,
     forecast_date = max(x$time_value)) {
-  if (!is_epi_df(x)) cli::cli_abort("`x` must be an `epi_df`.")
+  if (!is_epi_df(x)) cli_abort("`x` must be an `epi_df`.")
   arg_is_lgl(fill_locf)
   arg_is_scalar(fill_locf)
   arg_is_scalar(n_recent, allow_null = TRUE)
@@ -60,16 +59,16 @@ get_test_data <- function(
 
   check <- hardhat::check_column_names(x, colnames(recipe$template))
   if (!check$ok) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "Some variables used for training are not available in {.arg x}.",
       i = "The following required columns are missing: {check$missing_names}"
     ))
   }
   if (class(forecast_date) != class(x$time_value)) {
-    cli::cli_abort("`forecast_date` must be the same class as `x$time_value`.")
+    cli_abort("`forecast_date` must be the same class as `x$time_value`.")
   }
   if (forecast_date < max(x$time_value)) {
-    cli::cli_abort("`forecast_date` must be no earlier than `max(x$time_value)`")
+    cli_abort("`forecast_date` must be no earlier than `max(x$time_value)`")
   }
 
   min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% Inf)), Inf)
@@ -84,7 +83,7 @@ get_test_data <- function(
   # Probably needs a fix based on the time_type of the epi_df
   avail_recent <- diff(range(x$time_value))
   if (avail_recent < min_required) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "You supplied insufficient recent data for this recipe. ",
       "!" = "You need at least {min_required} days of data,",
       "!" = "but `x` contains only {avail_recent}."
@@ -97,39 +96,37 @@ get_test_data <- function(
   # If we skip NA completion, we remove undesirably early time values
   # Happens globally, over all groups
   keep <- max(n_recent, min_required + 1)
-  x <- dplyr::filter(x, forecast_date - time_value <= keep)
+  x <- filter(x, forecast_date - time_value <= keep)
 
   # Pad with explicit missing values up to and including the forecast_date
   # x is grouped here
   x <- pad_to_end(x, groups, forecast_date) %>%
-    group_by(dplyr::across(dplyr::all_of(groups)))
+    group_by(across(all_of(groups)))
 
   # If all(lags > 0), then we get rid of recent data
   if (min_lags > 0 && min_lags < Inf) {
-    x <- dplyr::filter(x, forecast_date - time_value >= min_lags)
+    x <- filter(x, forecast_date - time_value >= min_lags)
   }
 
   # Now, fill forward missing data if requested
   if (fill_locf) {
     cannot_be_used <- x %>%
-      dplyr::filter(forecast_date - time_value <= n_recent) %>%
-      dplyr::mutate(fillers = forecast_date - time_value > min_required) %>%
-      dplyr::summarize(
-        dplyr::across(
-          -dplyr::any_of(key_colnames(recipe)),
+      filter(forecast_date - time_value <= n_recent) %>%
+      mutate(fillers = forecast_date - time_value > min_required) %>%
+      summarize(
+        across(
+          -any_of(key_colnames(recipe)),
           ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))
         ),
         .groups = "drop"
       ) %>%
-      dplyr::select(-fillers) %>%
-      dplyr::summarise(dplyr::across(
-        -dplyr::any_of(key_colnames(recipe)), ~ any(.x)
-      )) %>%
+      select(-fillers) %>%
+      summarise(across(-any_of(key_colnames(recipe)), ~ any(.x))) %>%
       unlist()
     if (any(cannot_be_used)) {
       bad_vars <- names(cannot_be_used)[cannot_be_used]
       if (recipes::is_trained(recipe)) {
-        cli::cli_abort(c(
+        cli_abort(c(
           "The variables {.var {bad_vars}} have too many recent missing",
           `!` = "values to be filled automatically. ",
           i = "You should either choose `n_recent` larger than its current ",
@@ -141,15 +138,15 @@ get_test_data <- function(
     x <- tidyr::fill(x, !time_value)
   }
 
-  dplyr::filter(x, forecast_date - time_value <= min_required) %>%
+  filter(x, forecast_date - time_value <= min_required) %>%
     ungroup()
 }
 
 pad_to_end <- function(x, groups, end_date) {
   itval <- guess_period(c(x$time_value, end_date), "time_value")
   completed_time_values <- x %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(groups))) %>%
-    dplyr::summarise(
+    group_by(across(all_of(groups))) %>%
+    summarise(
       time_value = rlang::list2(
         time_value = Seq(max(time_value) + itval, end_date, itval)
       )
@@ -157,8 +154,8 @@ pad_to_end <- function(x, groups, end_date) {
     unnest("time_value") %>%
     mutate(time_value = vctrs::vec_cast(time_value, x$time_value))
 
-  dplyr::bind_rows(x, completed_time_values) %>%
-    dplyr::arrange(dplyr::across(dplyr::all_of(c("time_value", groups))))
+  bind_rows(x, completed_time_values) %>%
+    arrange(across(all_of(c("time_value", groups))))
 }
 
 Seq <- function(from, to, by) {

@@ -8,6 +8,9 @@
 \alias{forecast}
 \alias{prep}
 \alias{bake}
+\alias{rand_id}
+\alias{tibble}
+\alias{tidy}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -15,10 +18,12 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{generics}{\code{\link[generics]{fit}}, \code{\link[generics]{forecast}}}
+  \item{generics}{\code{\link[generics]{fit}}, \code{\link[generics]{forecast}}, \code{\link[generics]{tidy}}}
 
   \item{ggplot2}{\code{\link[ggplot2]{autoplot}}}
 
-  \item{recipes}{\code{\link[recipes]{bake}}, \code{\link[recipes]{prep}}}
+  \item{recipes}{\code{\link[recipes]{bake}}, \code{\link[recipes]{prep}}, \code{\link[recipes]{rand_id}}}
+
+  \item{tibble}{\code{\link[tibble]{tibble}}}
 }}
 

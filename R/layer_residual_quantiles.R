@@ -14,19 +14,23 @@
 #'   residual quantiles added to the prediction
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(quantile_levels = c(0.0275, 0.975), symmetrize = FALSE) %>%
+#'   layer_residual_quantiles(
+#'     quantile_levels = c(0.0275, 0.975),
+#'     symmetrize = FALSE
+#'    ) %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
@@ -34,7 +38,10 @@
 #'
 #' f2 <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_residual_quantiles(quantile_levels = c(0.3, 0.7), by_key = "geo_value") %>%
+#'   layer_residual_quantiles(
+#'     quantile_levels = c(0.3, 0.7),
+#'     by_key = "geo_value"
+#'   ) %>%
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
@@ -88,7 +95,7 @@ slather.layer_residual_quantiles <-
 
     ## Handle any grouping requests
     if (length(object$by_key) > 0L) {
-      key_cols <- dplyr::bind_cols(
+      key_cols <- bind_cols(
         geo_value = components$mold$extras$roles$geo_value,
         components$mold$extras$roles$key
       )
@@ -101,23 +108,23 @@ slather.layer_residual_quantiles <-
         ))
       }
       if (length(common) > 0L) {
-        r <- r %>% dplyr::select(tidyselect::any_of(c(common, ".resid")))
+        r <- r %>% select(any_of(c(common, ".resid")))
         common_in_r <- common[common %in% names(r)]
         if (length(common_in_r) == length(common)) {
-          r <- dplyr::left_join(key_cols, r, by = common_in_r)
+          r <- left_join(key_cols, r, by = common_in_r)
         } else {
           cli::cli_warn(c(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
-          r <- dplyr::bind_cols(key_cols, r %>% dplyr::select(.resid)) %>%
-            dplyr::group_by(!!!rlang::syms(common))
+          r <- bind_cols(key_cols, select(r, .resid)) %>%
+            group_by(!!!rlang::syms(common))
         }
       }
     }
 
     r <- r %>%
-      dplyr::summarize(
+      summarize(
         dstn = list(quantile(
           c(.resid, s * .resid),
           probs = object$quantile_levels, na.rm = TRUE
@@ -132,11 +139,11 @@ slather.layer_residual_quantiles <-
     }
 
     estimate <- components$predictions$.pred
-    res <- tibble::tibble(
+    res <- tibble(
       .pred_distn = dist_quantiles(map2(estimate, r$dstn, "+"), object$quantile_levels)
     )
     res <- check_pname(res, components$predictions, object)
-    components$predictions <- dplyr::mutate(components$predictions, !!!res)
+    components$predictions <- mutate(components$predictions, !!!res)
     components
   }
 

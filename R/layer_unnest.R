@@ -15,7 +15,7 @@ layer_unnest <- function(frosting, ..., id = rand_id("unnest")) {
   add_layer(
     frosting,
     layer_unnest_new(
-      terms = dplyr::enquos(...),
+      terms = enquos(...),
       id = id
     )
   )

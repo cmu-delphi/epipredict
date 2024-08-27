@@ -64,7 +64,7 @@ validate_date <- function(x, expected, arg = rlang::caller_arg(x),
   time_type_x <- guess_time_type(x)
   ok <- time_type_x == expected
   if (!ok) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "The {.arg {arg}} was given as a {.val {time_type_x}} while the",
       `!` = "`time_type` of the training data was {.val {expected}}.",
       i = "See {.topic epiprocess::epi_df} for descriptions of these are determined."

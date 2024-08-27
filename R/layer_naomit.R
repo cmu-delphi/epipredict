@@ -11,14 +11,15 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7)
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
@@ -33,7 +34,7 @@ layer_naomit <- function(frosting, ..., id = rand_id("naomit")) {
   add_layer(
     frosting,
     layer_naomit_new(
-      terms = dplyr::enquos(...),
+      terms = enquos(...),
       id = id
     )
   )
@@ -50,7 +51,7 @@ slather.layer_naomit <- function(object, components, workflow, new_data, ...) {
   pos <- tidyselect::eval_select(exprs, components$predictions)
   col_names <- names(pos)
   components$predictions <- components$predictions %>%
-    dplyr::filter(dplyr::if_any(dplyr::all_of(col_names), ~ !is.na(.x)))
+    filter(dplyr::if_any(all_of(col_names), ~ !is.na(.x)))
   components
 }
 

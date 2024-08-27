@@ -11,17 +11,7 @@
 #' passed will *divide* the selected variables while the `rate_rescaling`
 #' argument is a common *multiplier* of the selected variables.
 #'
-#' @param recipe A recipe object. The step will be added to the sequence of
-#' operations for this recipe. The recipe should contain information about the
-#' `epi_df` such as column names.
-#' @param ... One or more selector functions to scale variables
-#'  for this step. See [recipes::selections()] for more details.
-#' @param role For model terms created by this step, what analysis role should
-#' they be assigned? By default, the new columns created by this step from the
-#' original variables will be used as predictors in a model. Other options can
-#' be ard are not limited to "outcome".
-#' @param trained A logical to indicate if the quantities for preprocessing
-#' have been estimated.
+#' @inheritParams step_epi_lag
 #' @param df a data frame that contains the population data to be used for
 #'   inverting the existing scaling.
 #' @param by A (possibly named) character vector of variables to join by.
@@ -49,25 +39,15 @@
 #' @param create_new TRUE to create a new column and keep the original column
 #' in the `epi_df`
 #' @param suffix a character. The suffix added to the column name if
-#' `crete_new = TRUE`. Default to "_scaled".
-#' @param columns A character string of variable names that will
-#'  be populated (eventually) by the `terms` argument.
-#' @param skip A logical. Should the step be skipped when the
-#'  recipe is baked by [bake()]? While all operations are baked
-#'  when [prep()] is run, some operations may not be able to be
-#'  conducted on new data (e.g. processing the outcome variable(s)).
-#'  Care should be taken when using `skip = TRUE` as it may affect
-#'  the computations for subsequent operations.
-#' @param id A unique identifier for the step
+#' `create_new = TRUE`. Default to "_scaled".
 #'
 #' @return Scales raw data by the population
 #' @export
 #' @examples
-#' library(epiprocess)
-#' library(epipredict)
-#' jhu <- epiprocess::jhu_csse_daily_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
-#'   dplyr::select(geo_value, time_value, cases)
+#' library(dplyr)
+#' jhu <- jhu_csse_daily_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+#'   select(geo_value, time_value, cases)
 #'
 #' pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
@@ -92,7 +72,7 @@
 #'     df_pop_col = "value"
 #'   )
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+#' wf <- epi_workflow(r, linear_reg()) %>%
 #'   fit(jhu) %>%
 #'   add_frosting(f)
 #'
@@ -101,37 +81,35 @@ step_population_scaling <-
   function(recipe,
            ...,
            role = "raw",
-           trained = FALSE,
            df,
            by = NULL,
            df_pop_col,
            rate_rescaling = 1,
            create_new = TRUE,
            suffix = "_scaled",
-           columns = NULL,
            skip = FALSE,
            id = rand_id("population_scaling")) {
-    arg_is_scalar(role, trained, df_pop_col, rate_rescaling, create_new, suffix, id)
+    arg_is_scalar(role, df_pop_col, rate_rescaling, create_new, suffix, id)
     arg_is_lgl(create_new, skip)
     arg_is_chr(df_pop_col, suffix, id)
-    arg_is_chr(by, columns, allow_null = TRUE)
+    arg_is_chr(by, allow_null = TRUE)
     if (rate_rescaling <= 0) {
-      cli_stop("`rate_rescaling` should be a positive number")
+      cli_abort("`rate_rescaling` must be a positive number.")
     }
 
-    add_step(
+    recipes::add_step(
       recipe,
       step_population_scaling_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
-        trained = trained,
+        trained = FALSE,
         df = df,
         by = by,
         df_pop_col = df_pop_col,
         rate_rescaling = rate_rescaling,
         create_new = create_new,
         suffix = suffix,
-        columns = columns,
+        columns = NULL,
         skip = skip,
         id = id
       )
@@ -141,7 +119,7 @@ step_population_scaling <-
 step_population_scaling_new <-
   function(role, trained, df, by, df_pop_col, rate_rescaling, terms, create_new,
            suffix, columns, skip, id) {
-    step(
+    recipes::step(
       subclass = "population_scaling",
       terms = terms,
       role = role,
@@ -170,7 +148,7 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
     rate_rescaling = x$rate_rescaling,
     create_new = x$create_new,
     suffix = x$suffix,
-    columns = recipes_eval_select(x$terms, training, info),
+    columns = recipes::recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
   )
@@ -185,15 +163,10 @@ bake.step_population_scaling <- function(object,
       length(object$df_pop_col) == 1
   )
 
-  try_join <- try(dplyr::left_join(new_data, object$df, by = object$by),
-    silent = TRUE
-  )
-  if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
-    cli_stop(c(
-      "columns in `by` selectors of `step_population_scaling` ",
-      "must be present in data and match"
-    ))
-  }
+
+  hardhat::validate_column_names(new_data, object$by)
+  hardhat::validate_column_names(object$df, object$by)
+
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
     cli::cli_warn(c(
@@ -202,23 +175,22 @@ bake.step_population_scaling <- function(object,
     ))
   }
 
-  object$df <- object$df %>%
-    dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
+  object$df <- mutate(object$df, across(dplyr::where(is.character), tolower))
 
   pop_col <- rlang::sym(object$df_pop_col)
   suffix <- ifelse(object$create_new, object$suffix, "")
   col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
-  dplyr::left_join(new_data,
-    object$df,
-    by = object$by, suffix = c("", ".df")
-  ) %>%
-    dplyr::mutate(dplyr::across(dplyr::all_of(object$columns),
-      ~ .x * object$rate_rescaling / !!pop_col,
-      .names = "{.col}{suffix}"
-    )) %>%
+  left_join(new_data, object$df, by = object$by, suffix = c("", ".df")) %>%
+    mutate(
+      across(
+        all_of(object$columns),
+        ~ .x * object$rate_rescaling / !!pop_col,
+        .names = "{.col}{suffix}"
+      )
+    ) %>%
     # removed so the models do not use the population column
-    dplyr::select(-dplyr::any_of(col_to_remove))
+    select(any_of(col_to_remove))
 }
 
 #' @export

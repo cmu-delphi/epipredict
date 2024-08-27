@@ -16,9 +16,11 @@ a list-col
 Turn a vector of quantile distributions into a list-col
 }
 \examples{
+library(dplyr)
+library(tidyr)
 edf <- case_death_rate_subset[1:3, ]
 edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
 
-edf_nested <- edf \%>\% dplyr::mutate(q = nested_quantiles(q))
-edf_nested \%>\% tidyr::unnest(q)
+edf_nested <- edf \%>\% mutate(q = nested_quantiles(q))
+edf_nested \%>\% unnest(q)
 }
