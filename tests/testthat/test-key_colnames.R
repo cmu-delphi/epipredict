@@ -1,25 +1,5 @@
-library(parsnip)
-library(workflows)
-library(dplyr)
-
-test_that("epi_keys returns empty for an object that isn't an epi_df", {
-  expect_identical(epi_keys(data.frame(x = 1:3, y = 2:4)), character(0L))
-})
-
-test_that("epi_keys returns possible keys if they exist", {
-  expect_identical(
-    epi_keys(data.frame(time_value = 1:3, geo_value = 2:4)),
-    c("time_value", "geo_value")
-  )
-})
-
-
-test_that("Extracts keys from an epi_df", {
-  expect_equal(epi_keys(case_death_rate_subset), c("time_value", "geo_value"))
-})
-
 test_that("Extracts keys from a recipe; roles are NA, giving an empty vector", {
-  expect_equal(epi_keys(recipe(case_death_rate_subset)), character(0L))
+  expect_equal(key_colnames(recipe(case_death_rate_subset)), character(0L))
 })
 
 test_that("epi_keys_mold extracts time_value and geo_value, but not raw", {
@@ -35,12 +15,12 @@ test_that("epi_keys_mold extracts time_value and geo_value, but not raw", {
     fit(data = case_death_rate_subset)
 
   expect_setequal(
-    epi_keys_mold(my_workflow$pre$mold),
+    key_colnames(my_workflow$pre$mold),
     c("time_value", "geo_value")
   )
 })
 
-test_that("epi_keys_mold extracts additional keys when they are present", {
+test_that("key_colnames extracts additional keys when they are present", {
   my_data <- tibble::tibble(
     geo_value = rep(c("ca", "fl", "pa"), each = 3),
     time_value = rep(seq(as.Date("2020-06-01"), as.Date("2020-06-03"),
@@ -50,7 +30,7 @@ test_that("epi_keys_mold extracts additional keys when they are present", {
     state = rep(c("ca", "fl", "pa"), each = 3), # extra key
     value = 1:length(geo_value) + 0.01 * rnorm(length(geo_value))
   ) %>%
-    epiprocess::as_epi_df(
+    as_epi_df(
       additional_metadata = list(other_keys = c("state", "pol"))
     )
 
@@ -61,7 +41,7 @@ test_that("epi_keys_mold extracts additional keys when they are present", {
   my_workflow <- epi_workflow(my_recipe, linear_reg()) %>% fit(my_data)
 
   expect_setequal(
-    epi_keys_mold(my_workflow$pre$mold),
+    key_colnames(my_workflow$pre$mold),
     c("time_value", "geo_value", "state", "pol")
   )
 })

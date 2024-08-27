@@ -184,8 +184,8 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
 #' @export
 augment.epi_workflow <- function(x, new_data, ...) {
   predictions <- predict(x, new_data, ...)
-  if (epiprocess::is_epi_df(predictions)) {
-    join_by <- epi_keys(predictions)
+  if (is_epi_df(predictions)) {
+    join_by <- key_colnames(predictions)
   } else {
     rlang::abort(
       c(

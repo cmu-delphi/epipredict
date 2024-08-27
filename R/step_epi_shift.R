@@ -89,7 +89,7 @@ step_epi_lag <-
         lag = as.integer(lag),
         prefix = prefix,
         default = default,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
         id = id
@@ -133,13 +133,13 @@ step_epi_ahead <-
     add_step(
       recipe,
       step_epi_ahead_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
         trained = trained,
         ahead = as.integer(ahead),
         prefix = prefix,
         default = default,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
         id = id

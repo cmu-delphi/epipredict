@@ -63,7 +63,7 @@ cdc_baseline_forecaster <- function(
   if (!inherits(args_list, c("cdc_flat_fcast", "alist"))) {
     cli_stop("args_list was not created using `cdc_baseline_args_list().")
   }
-  keys <- epi_keys(epi_data)
+  keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 

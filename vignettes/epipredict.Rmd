@@ -448,7 +448,7 @@ To illustrate everything above, here is (roughly) the code for the
 r <- epi_recipe(jhu) %>%
   step_epi_ahead(case_rate, ahead = 7, skip = TRUE) %>%
   update_role(case_rate, new_role = "predictor") %>%
-  add_role(all_of(epi_keys(jhu)), new_role = "predictor")
+  add_role(all_of(key_colnames(jhu)), new_role = "predictor")
 
 f <- frosting() %>%
   layer_predict() %>%

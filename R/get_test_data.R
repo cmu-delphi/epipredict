@@ -92,7 +92,7 @@ get_test_data <- function(
   }
 
   x <- arrange(x, time_value)
-  groups <- kill_time_value(epi_keys(recipe))
+  groups <- kill_time_value(key_colnames(recipe))
 
   # If we skip NA completion, we remove undesirably early time values
   # Happens globally, over all groups
@@ -102,7 +102,7 @@ get_test_data <- function(
   # Pad with explicit missing values up to and including the forecast_date
   # x is grouped here
   x <- pad_to_end(x, groups, forecast_date) %>%
-    epiprocess::group_by(dplyr::across(dplyr::all_of(groups)))
+    group_by(dplyr::across(dplyr::all_of(groups)))
 
   # If all(lags > 0), then we get rid of recent data
   if (min_lags > 0 && min_lags < Inf) {
@@ -116,14 +116,14 @@ get_test_data <- function(
       dplyr::mutate(fillers = forecast_date - time_value > min_required) %>%
       dplyr::summarize(
         dplyr::across(
-          -tidyselect::any_of(epi_keys(recipe)),
+          -dplyr::any_of(key_colnames(recipe)),
           ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))
         ),
         .groups = "drop"
       ) %>%
       dplyr::select(-fillers) %>%
       dplyr::summarise(dplyr::across(
-        -tidyselect::any_of(epi_keys(recipe)), ~ any(.x)
+        -dplyr::any_of(key_colnames(recipe)), ~ any(.x)
       )) %>%
       unlist()
     if (any(cannot_be_used)) {
@@ -142,13 +142,13 @@ get_test_data <- function(
   }
 
   dplyr::filter(x, forecast_date - time_value <= min_required) %>%
-    epiprocess::ungroup()
+    ungroup()
 }
 
 pad_to_end <- function(x, groups, end_date) {
-  itval <- epiprocess:::guess_period(c(x$time_value, end_date), "time_value")
+  itval <- guess_period(c(x$time_value, end_date), "time_value")
   completed_time_values <- x %>%
-    dplyr::group_by(dplyr::across(tidyselect::all_of(groups))) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(groups))) %>%
     dplyr::summarise(
       time_value = rlang::list2(
         time_value = Seq(max(time_value) + itval, end_date, itval)
@@ -158,7 +158,7 @@ pad_to_end <- function(x, groups, end_date) {
     mutate(time_value = vctrs::vec_cast(time_value, x$time_value))
 
   dplyr::bind_rows(x, completed_time_values) %>%
-    dplyr::arrange(dplyr::across(tidyselect::all_of(c("time_value", groups))))
+    dplyr::arrange(dplyr::across(dplyr::all_of(c("time_value", groups))))
 }
 
 Seq <- function(from, to, by) {

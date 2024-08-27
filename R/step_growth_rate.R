@@ -87,7 +87,7 @@ step_growth_rate <-
     add_step(
       recipe,
       step_growth_rate_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
         trained = trained,
         horizon = horizon,
@@ -95,7 +95,7 @@ step_growth_rate <-
         log_scale = log_scale,
         replace_Inf = replace_Inf,
         prefix = prefix,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
         id = id,

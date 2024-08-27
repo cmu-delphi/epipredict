@@ -125,7 +125,7 @@ autoplot.epi_workflow <- function(
   if (!is.null(shift)) {
     edf <- dplyr::mutate(edf, time_value = time_value + shift)
   }
-  extra_keys <- setdiff(epi_keys_mold(mold), c("time_value", "geo_value"))
+  extra_keys <- setdiff(key_colnames(mold), c("time_value", "geo_value"))
   if (length(extra_keys) == 0L) extra_keys <- NULL
   edf <- as_epi_df(edf,
     as_of = object$fit$meta$as_of,
@@ -145,7 +145,7 @@ autoplot.epi_workflow <- function(
     }
     predictions <- dplyr::rename(predictions, time_value = target_date)
   }
-  pred_cols_ok <- hardhat::check_column_names(predictions, epi_keys(edf))
+  pred_cols_ok <- hardhat::check_column_names(predictions, key_colnames(edf))
   if (!pred_cols_ok$ok) {
     cli::cli_warn(c(
       "`predictions` is missing required variables: {.var {pred_cols_ok$missing_names}}.",
@@ -165,7 +165,7 @@ autoplot.epi_workflow <- function(
   )
 
   # Now, prepare matching facets in the predictions
-  ek <- kill_time_value(epi_keys(edf))
+  ek <- kill_time_value(key_colnames(edf))
   predictions <- predictions %>%
     dplyr::mutate(
       .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "/"),

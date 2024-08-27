@@ -52,12 +52,12 @@ step_lag_difference <-
     add_step(
       recipe,
       step_lag_difference_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
         trained = trained,
         horizon = horizon,
         prefix = prefix,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
         id = id

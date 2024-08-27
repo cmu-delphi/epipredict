@@ -90,7 +90,7 @@ epi_recipe.epi_df <-
       rlang::abort("1 or more elements of `vars` are not in the data")
     }
 
-    keys <- epi_keys(x) # we know x is an epi_df
+    keys <- key_colnames(x) # we know x is an epi_df
 
     var_info <- tibble(variable = vars)
     key_roles <- c("time_value", "geo_value", rep("key", length(keys) - 2))
@@ -186,7 +186,7 @@ epi_form2args <- function(formula, data, ...) {
   ## use rlang to get both sides of the formula
   outcomes <- recipes:::get_lhs_vars(formula, data)
   predictors <- recipes:::get_rhs_vars(formula, data, no_lhs = TRUE)
-  keys <- epi_keys(data)
+  keys <- key_colnames(data)
 
   ## if . was used on the rhs, subtract out the outcomes
   predictors <- predictors[!(predictors %in% outcomes)]
@@ -444,9 +444,9 @@ prep.epi_recipe <- function(
   }
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
-  training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
+  training <- dplyr::relocate(training, dplyr::all_of(key_colnames(training)))
   tr_data <- recipes:::train_info(training)
-  keys <- epi_keys(x)
+  keys <- key_colnames(x)
 
   orig_lvls <- lapply(training, recipes:::get_levels)
   orig_lvls <- kill_levels(orig_lvls, keys)
@@ -498,10 +498,10 @@ prep.epi_recipe <- function(
         # tidymodels killed our class
         # for now, we only allow step_epi_* to alter the metadata
         training <- dplyr::dplyr_reconstruct(
-          epiprocess::as_epi_df(training), before_template
+          as_epi_df(training), before_template
         )
       }
-      training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
+      training <- dplyr::relocate(training, dplyr::all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
       if (!is.na(x$steps[[i]]$role)) {
         new_vars <- setdiff(x$term_info$variable, running_info$variable)

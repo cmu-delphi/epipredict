@@ -72,7 +72,7 @@ step_epi_slide <-
         role = role,
         trained = FALSE,
         prefix = prefix,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = NULL,
         skip = skip,
         id = id

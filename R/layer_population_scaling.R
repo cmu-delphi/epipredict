@@ -136,7 +136,7 @@ slather.layer_population_scaling <-
 
     if (is.null(object$by)) {
       object$by <- intersect(
-        kill_time_value(epi_keys(components$predictions)),
+        kill_time_value(key_colnames(components$predictions)),
         colnames(dplyr::select(object$df, !object$df_pop_col))
       )
     }
