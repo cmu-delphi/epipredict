@@ -478,7 +478,7 @@ r <- epi_recipe(jhu) %>%
 We will fit the multinomial regression and examine the predictions:
 
 ```{r, warning=FALSE}
-wf <- epi_workflow(r, parsnip::multinom_reg()) %>%
+wf <- epi_workflow(r, multinom_reg()) %>%
   fit(jhu)
 
 forecast(wf) %>% filter(!is.na(.pred_class))
