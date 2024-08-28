@@ -190,7 +190,6 @@ bake.step_growth_rate <- function(object, new_data, ...) {
 
 
   if (!is.null(object$replace_Inf)) {
-    browser()
     gr <- gr %>%
       mutate(across(!all_of(ok), ~ vec_replace_inf(.x, object$replace_Inf)))
   }
