@@ -95,7 +95,7 @@ epi_recipe.epi_df <-
     keys <- key_colnames(x) # we know x is an epi_df
 
     var_info <- tibble(variable = vars)
-    key_roles <- c("time_value", "geo_value", rep("key", length(keys) - 2))
+    key_roles <- c("geo_value", "time_value", rep("key", length(keys) - 2))
 
     ## Check and add roles when available
     if (!is.null(roles)) {
