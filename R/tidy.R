@@ -55,7 +55,7 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
 
   arg_is_chr_scalar(id, allow_na = TRUE)
   arg_is_scalar(number, allow_na = TRUE)
-  arg_is_int(number, allow_na = TRUE)
+  if (!is.na(number)) arg_is_int(number)
 
   if (!is.na(id)) {
     if (!is.na(number)) {

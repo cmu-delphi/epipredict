@@ -186,7 +186,6 @@ test_that("Postprocessing to get cases from case rate", {
 
 
 test_that("test joining by default columns", {
-  skip()
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
@@ -208,9 +207,9 @@ test_that("test joining by default columns", {
     recipes::step_naomit(recipes::all_predictors()) %>%
     recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
-  suppressMessages(prep <- prep(r, jhu))
+  expect_silent(prep(r, jhu))
 
-  suppressMessages(b <- bake(prep, jhu))
+  expect_silent(bake(prep(r, jhu), new_data = NULL))
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -222,13 +221,13 @@ test_that("test joining by default columns", {
       df_pop_col = "values"
     )
 
-  suppressMessages(
+  expect_silent(
     wf <- epi_workflow(r, parsnip::linear_reg()) %>%
       fit(jhu) %>%
       add_frosting(f)
   )
 
-  suppressMessages(p <- forecast(wf))
+  expect_silent(forecast(wf))
 })
 
 

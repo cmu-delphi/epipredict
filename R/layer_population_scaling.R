@@ -139,8 +139,9 @@ slather.layer_population_scaling <-
       kill_time_value(key_colnames(components$predictions)),
       colnames(select(object$df, !object$df_pop_col))
     )
-    hardhat::validate_column_names(components$predictions, object$by)
-    hardhat::validate_column_names(object$df, object$by)
+    joinby <- list(x = names(object$by) %||% object$by, y = object$by)
+    hardhat::validate_column_names(components$predictions, joinby$x)
+    hardhat::validate_column_names(object$df, joinby$y)
 
     # object$df <- object$df %>%
     #  dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))

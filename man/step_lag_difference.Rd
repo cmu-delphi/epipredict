@@ -8,7 +8,6 @@ step_lag_difference(
   recipe,
   ...,
   role = "predictor",
-  trained = FALSE,
   horizon = 7,
   prefix = "lag_diff_",
   skip = FALSE,

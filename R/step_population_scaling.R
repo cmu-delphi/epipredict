@@ -155,18 +155,15 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 }
 
 #' @export
-bake.step_population_scaling <- function(object,
-                                         new_data,
-                                         ...) {
-  stopifnot(
-    "Only one population column allowed for scaling" =
-      length(object$df_pop_col) == 1
+bake.step_population_scaling <- function(object, new_data, ...) {
+
+  object$by <- object$by %||% intersect(
+    kill_time_value(key_colnames(new_data)),
+    colnames(select(object$df, !object$df_pop_col))
   )
-
-
-  hardhat::validate_column_names(new_data, object$by)
-  hardhat::validate_column_names(object$df, object$by)
-
+  joinby <- list(x = names(object$by) %||% object$by, y = object$by)
+  hardhat::validate_column_names(new_data, joinby$x)
+  hardhat::validate_column_names(object$df, joinby$y)
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
     cli::cli_warn(c(
@@ -190,7 +187,7 @@ bake.step_population_scaling <- function(object,
       )
     ) %>%
     # removed so the models do not use the population column
-    select(any_of(col_to_remove))
+    select(!any_of(col_to_remove))
 }
 
 #' @export

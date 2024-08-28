@@ -27,7 +27,6 @@ step_lag_difference <-
   function(recipe,
            ...,
            role = "predictor",
-           trained = FALSE,
            horizon = 7,
            prefix = "lag_diff_",
            skip = FALSE,
