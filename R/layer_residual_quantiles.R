@@ -30,7 +30,7 @@
 #'   layer_residual_quantiles(
 #'     quantile_levels = c(0.0275, 0.975),
 #'     symmetrize = FALSE
-#'    ) %>%
+#'   ) %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
