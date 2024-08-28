@@ -171,7 +171,7 @@ bake.step_growth_rate <- function(object, new_data, ...) {
 
   ok <- object$keys
   gr <- new_data %>%
-    group_by(across(all_of(ok[-1]))) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
     dplyr::transmute(
       time_value = time_value,
       across(
@@ -188,13 +188,15 @@ bake.step_growth_rate <- function(object, new_data, ...) {
     ungroup() %>%
     mutate(time_value = time_value + object$horizon) # shift x0 right
 
+
   if (!is.null(object$replace_Inf)) {
+    browser()
     gr <- gr %>%
       mutate(across(!all_of(ok), ~ vec_replace_inf(.x, object$replace_Inf)))
   }
 
   left_join(new_data, gr, by = ok) %>%
-    group_by(across(all_of(ok[-1]))) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
     arrange(time_value) %>%
     ungroup()
 }

@@ -137,7 +137,7 @@ bake.step_lag_difference <- function(object, new_data, ...) {
   )
 
   left_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(ok[-1]))) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
     arrange(time_value) %>%
     ungroup()
 }

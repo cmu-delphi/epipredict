@@ -228,7 +228,7 @@ bake.step_epi_lag <- function(object, new_data, ...) {
   )
 
   full_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(ok[-1]))) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
     arrange(time_value) %>%
     ungroup()
 }
@@ -259,7 +259,7 @@ bake.step_epi_ahead <- function(object, new_data, ...) {
   )
 
   full_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(ok[-1]))) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
     arrange(time_value) %>%
     ungroup()
 }

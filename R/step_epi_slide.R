@@ -170,7 +170,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
     object$columns,
     c(object$.f),
     object$f_name,
-    object$keys[-1],
+    kill_time_value(object$keys),
     object$prefix
   )
 }
@@ -184,7 +184,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
 #'   using roughly equivalent tidy select style.
 #'
 #' @param fns vector of functions, even if it's length 1.
-#' @param group_keys the keys to group by. likely `epi_keys[-1]` (to remove time_value)
+#' @param group_keys the keys to group by. likely `epi_keys` (without `time_value`)
 #'
 #' @importFrom tidyr crossing
 #' @importFrom dplyr bind_cols group_by ungroup
