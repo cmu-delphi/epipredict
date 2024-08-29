@@ -218,8 +218,9 @@ test_that("test joining by default columns", {
   b <- bake(p, new_data = NULL)
   expect_named(
     b,
-    c("geo_value", "time_value", "case_rate", "case_rate_scaled",
-      paste0("lag_", c(0,7,14), "_case_rate_scaled"),
+    c(
+      "geo_value", "time_value", "case_rate", "case_rate_scaled",
+      paste0("lag_", c(0, 7, 14), "_case_rate_scaled"),
       "ahead_7_case_rate_scaled"
     )
   )
