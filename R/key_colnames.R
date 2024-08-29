@@ -1,16 +1,19 @@
 #' @export
 key_colnames.recipe <- function(x, ...) {
-  x$var_info$variable[x$var_info$role %in% c("geo_value", "time_value", "key")]
+  possible_keys <- c("geo_value", "time_value", "key")
+  keys <- x$var_info$variable[x$var_info$role %in% possible_keys]
+  keys[order(match(keys, possible_keys))] %||% character(0L)
 }
 
 #' @export
 key_colnames.epi_workflow <- function(x, ...) {
   # safer to look at the mold than the preprocessor
   mold <- hardhat::extract_mold(x)
-  keys <- c("geo_value", "time_value", "key")
+  possible_keys <- c("geo_value", "time_value", "key")
   molded_names <- names(mold$extras$roles)
-  mold_keys <- map(mold$extras$roles[molded_names %in% keys], names)
-  unname(unlist(mold_keys)) %||% character(0L)
+  keys <- map(mold$extras$roles[molded_names %in% possible_keys], names)
+  keys <- unname(unlist(keys))
+  keys[order(match(keys, possible_keys))] %||% character(0L)
 }
 
 kill_time_value <- function(v) {
