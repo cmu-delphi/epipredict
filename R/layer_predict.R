@@ -16,6 +16,7 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
@@ -24,7 +25,7 @@
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #'
 #' # Predict layer alone
@@ -90,9 +91,7 @@ slather.layer_predict <- function(object, components, workflow, new_data, type =
     opts = c(object$opts, opts),
     !!!object$dots_list, ...
   ))
-  components$predictions <- dplyr::bind_cols(
-    components$keys, components$predictions
-  )
+  components$predictions <- bind_cols(components$keys, components$predictions)
   components
 }
 

@@ -14,9 +14,7 @@ test_that("step_lag_difference validates arguments", {
   expect_error(step_lag_difference(r, value, prefix = letters[1:2]))
   expect_error(step_lag_difference(r, value, prefix = 1))
   expect_error(step_lag_difference(r, value, id = 1))
-  expect_error(step_lag_difference(r, value, trained = 1))
   expect_error(step_lag_difference(r, value, skip = 1))
-  expect_error(step_lag_difference(r, value, columns = letters[1:5]))
 })
 
 

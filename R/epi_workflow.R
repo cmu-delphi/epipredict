@@ -164,10 +164,7 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
   components$forged <- hardhat::forge(new_data,
     blueprint = components$mold$blueprint
   )
-  components$keys <- grab_forged_keys(
-    components$forged,
-    components$mold, new_data
-  )
+  components$keys <- grab_forged_keys(components$forged, object, new_data)
   components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
   components$predictions
 }
@@ -184,27 +181,23 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
 #' @export
 augment.epi_workflow <- function(x, new_data, ...) {
   predictions <- predict(x, new_data, ...)
-  if (epiprocess::is_epi_df(predictions)) {
-    join_by <- epi_keys(predictions)
+  if (is_epi_df(predictions)) {
+    join_by <- key_colnames(predictions)
   } else {
-    rlang::abort(
-      c(
-        "Cannot determine how to join new_data with the predictions.",
-        "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
-      )
-    )
+    cli_abort(c(
+      "Cannot determine how to join new_data with the predictions.",
+      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
+    ))
   }
   complete_overlap <- intersect(names(new_data), join_by)
   if (length(complete_overlap) < length(join_by)) {
-    rlang::warn(
-      glue::glue(
-        "Your original training data had keys {join_by}, but",
-        "`new_data` only has {complete_overlap}. The output",
-        "may be strange."
-      )
-    )
+    rlang::warn(glue::glue(
+      "Your original training data had keys {join_by}, but",
+      "`new_data` only has {complete_overlap}. The output",
+      "may be strange."
+    ))
   }
-  dplyr::full_join(predictions, new_data, by = join_by)
+  full_join(predictions, new_data, by = join_by)
 }
 
 new_epi_workflow <- function(

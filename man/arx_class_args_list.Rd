@@ -13,7 +13,7 @@ arx_class_args_list(
   outcome_transform = c("growth_rate", "lag_difference"),
   breaks = 0.25,
   horizon = 7L,
-  method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
+  method = c("rel_change", "linear_reg"),
   log_scale = FALSE,
   additional_gr_args = list(),
   nafill_buffer = Inf,

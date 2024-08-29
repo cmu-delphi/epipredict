@@ -84,6 +84,7 @@ the future. This version continues to use the same set of residuals, and
 adds them on to produce wider intervals as \code{ahead} increases.
 }
 \examples{
+library(dplyr)
 r <- epi_recipe(case_death_rate_subset) \%>\%
   # data is "daily", so we fit this to 1 ahead, the result will contain
   # 1 day ahead residuals
@@ -97,16 +98,16 @@ f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_cdc_flatline_quantiles(aheads = c(7, 14, 21, 28), symmetrize = TRUE)
 
-eng <- parsnip::linear_reg() \%>\% parsnip::set_engine("flatline")
+eng <- linear_reg(engine = "flatline")
 
 wf <- epi_workflow(r, eng, f) \%>\% fit(case_death_rate_subset)
 preds <- forecast(wf) \%>\%
-  dplyr::select(-time_value) \%>\%
-  dplyr::mutate(forecast_date = forecast_date)
+  select(-time_value) \%>\%
+  mutate(forecast_date = forecast_date)
 preds
 
 preds <- preds \%>\%
-  unnest(.pred_distn_all) \%>\%
+  tidyr::unnest(.pred_distn_all) \%>\%
   pivot_quantiles_wider(.pred_distn) \%>\%
   mutate(target_date = forecast_date + ahead)
 

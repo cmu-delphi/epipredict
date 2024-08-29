@@ -1,4 +1,4 @@
-#' @importFrom ggplot2 autoplot
+#' @importFrom ggplot2 autoplot aes geom_point geom_line geom_ribbon geom_linerange
 #' @export
 ggplot2::autoplot
 
@@ -28,6 +28,7 @@ ggplot2::autoplot
 #'
 #' @name autoplot-epipred
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #'
@@ -41,26 +42,26 @@ ggplot2::autoplot
 #'   layer_residual_quantiles(
 #'     quantile_levels = c(.025, .1, .25, .75, .9, .975)
 #'   ) %>%
-#'   layer_threshold(dplyr::starts_with(".pred")) %>%
+#'   layer_threshold(starts_with(".pred")) %>%
 #'   layer_add_target_date()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg(), f) %>% fit(jhu)
 #'
 #' autoplot(wf)
 #'
-#' latest <- jhu %>% dplyr::filter(time_value >= max(time_value) - 14)
+#' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #' preds <- predict(wf, latest)
 #' autoplot(wf, preds, .max_facets = 4)
 #'
 #' # ------- Show multiple horizons
 #'
-#' p <- lapply(c(7, 14, 21, 28), \(h) {
+#' p <- lapply(c(7, 14, 21, 28), function(h) {
 #'   r <- epi_recipe(jhu) %>%
 #'     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'     step_epi_ahead(death_rate, ahead = h) %>%
 #'     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
 #'     step_epi_naomit()
-#'   ewf <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu)
+#'   ewf <- epi_workflow(r, linear_reg(), f) %>% fit(jhu)
 #'   forecast(ewf)
 #' })
 #'
@@ -69,7 +70,8 @@ ggplot2::autoplot
 #'
 #' # ------- Plotting canned forecaster output
 #'
-#' jhu <- case_death_rate_subset %>% filter(time_value >= as.Date("2021-11-01"))
+#' jhu <- case_death_rate_subset %>%
+#'   filter(time_value >= as.Date("2021-11-01"))
 #' flat <- flatline_forecaster(jhu, "death_rate")
 #' autoplot(flat, .max_facets = 4)
 #'
@@ -95,7 +97,7 @@ autoplot.epi_workflow <- function(
   rlang::arg_match(.facet_by)
 
   if (!workflows::is_trained_workflow(object)) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "Can't plot an untrained {.cls epi_workflow}.",
       i = "Do you need to call `fit()`?"
     ))
@@ -105,27 +107,27 @@ autoplot.epi_workflow <- function(
   y <- mold$outcomes
   if (ncol(y) > 1) {
     y <- y[, 1]
-    cli::cli_warn("Multiple outcome variables were detected. Displaying only 1.")
+    cli_warn("Multiple outcome variables were detected. Displaying only 1.")
   }
-  keys <- c("time_value", "geo_value", "key")
+  keys <- c("geo_value", "time_value", "key")
   mold_roles <- names(mold$extras$roles)
-  edf <- dplyr::bind_cols(mold$extras$roles[mold_roles %in% keys], y)
+  edf <- bind_cols(mold$extras$roles[mold_roles %in% keys], y)
   if (starts_with_impl("ahead_", names(y))) {
     old_name_y <- unlist(strsplit(names(y), "_"))
     shift <- as.numeric(old_name_y[2])
     new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
-    edf <- dplyr::rename(edf, !!new_name_y := !!names(y))
+    edf <- rename(edf, !!new_name_y := !!names(y))
   } else if (starts_with_impl("lag_", names(y))) {
     old_name_y <- unlist(strsplit(names(y), "_"))
     shift <- -as.numeric(old_name_y[2])
     new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
-    edf <- dplyr::rename(edf, !!new_name_y := !!names(y))
+    edf <- rename(edf, !!new_name_y := !!names(y))
   }
 
   if (!is.null(shift)) {
-    edf <- dplyr::mutate(edf, time_value = time_value + shift)
+    edf <- mutate(edf, time_value = time_value + shift)
   }
-  extra_keys <- setdiff(epi_keys_mold(mold), c("time_value", "geo_value"))
+  extra_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
   if (length(extra_keys) == 0L) extra_keys <- NULL
   edf <- as_epi_df(edf,
     as_of = object$fit$meta$as_of,
@@ -141,13 +143,13 @@ autoplot.epi_workflow <- function(
 
   if ("target_date" %in% names(predictions)) {
     if ("time_value" %in% names(predictions)) {
-      predictions <- dplyr::select(predictions, -time_value)
+      predictions <- select(predictions, -time_value)
     }
-    predictions <- dplyr::rename(predictions, time_value = target_date)
+    predictions <- rename(predictions, time_value = target_date)
   }
-  pred_cols_ok <- hardhat::check_column_names(predictions, epi_keys(edf))
+  pred_cols_ok <- hardhat::check_column_names(predictions, key_colnames(edf))
   if (!pred_cols_ok$ok) {
-    cli::cli_warn(c(
+    cli_warn(c(
       "`predictions` is missing required variables: {.var {pred_cols_ok$missing_names}}.",
       i = "Plotting the original data."
     ))
@@ -165,15 +167,15 @@ autoplot.epi_workflow <- function(
   )
 
   # Now, prepare matching facets in the predictions
-  ek <- kill_time_value(epi_keys(edf))
+  ek <- epi_keys_only(edf)
   predictions <- predictions %>%
-    dplyr::mutate(
+    mutate(
       .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "/"),
     )
   if (.max_facets < Inf) {
     top_n <- levels(as.factor(bp$data$.facets))[seq_len(.max_facets)]
-    predictions <- dplyr::filter(predictions, .facets %in% top_n) %>%
-      dplyr::mutate(.facets = droplevels(.facets))
+    predictions <- filter(predictions, .facets %in% top_n) %>%
+      mutate(.facets = droplevels(.facets))
   }
 
 
@@ -182,17 +184,17 @@ autoplot.epi_workflow <- function(
   }
 
   if (".pred" %in% names(predictions)) {
-    ntarget_dates <- dplyr::n_distinct(predictions$time_value)
+    ntarget_dates <- n_distinct(predictions$time_value)
     if (ntarget_dates > 1L) {
       bp <- bp +
-        ggplot2::geom_line(
-          data = predictions, ggplot2::aes(y = .data$.pred),
+        geom_line(
+          data = predictions, aes(y = .data$.pred),
           color = .point_pred_color
         )
     } else {
       bp <- bp +
-        ggplot2::geom_point(
-          data = predictions, ggplot2::aes(y = .data$.pred),
+        geom_point(
+          data = predictions, aes(y = .data$.pred),
           color = .point_pred_color
         )
     }
@@ -243,7 +245,7 @@ plot_bands <- function(
   ntarget_dates <- dplyr::n_distinct(predictions$time_value)
 
   predictions <- predictions %>%
-    dplyr::mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, l), l)) %>%
+    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, l), l)) %>%
     pivot_quantiles_wider(.pred_distn)
   qnames <- setdiff(names(predictions), innames)
 
@@ -253,32 +255,32 @@ plot_bands <- function(
     if (i == 1) {
       if (ntarget_dates > 1L) {
         base_plot <- base_plot +
-          ggplot2::geom_ribbon(
+          geom_ribbon(
             data = predictions,
-            ggplot2::aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
             alpha = 0.2, linewidth = linewidth, fill = fill
           )
       } else {
         base_plot <- base_plot +
-          ggplot2::geom_linerange(
+          geom_linerange(
             data = predictions,
-            ggplot2::aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
             alpha = 0.2, linewidth = 2, color = fill
           )
       }
     } else {
       if (ntarget_dates > 1L) {
         base_plot <- base_plot +
-          ggplot2::geom_ribbon(
+          geom_ribbon(
             data = predictions,
-            ggplot2::aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
             fill = fill, alpha = alpha
           )
       } else {
         base_plot <- base_plot +
-          ggplot2::geom_linerange(
+          geom_linerange(
             data = predictions,
-            ggplot2::aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
             color = fill, alpha = alpha, linewidth = 2
           )
       }

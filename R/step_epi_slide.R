@@ -22,7 +22,6 @@
 #' @param before,after the size of the sliding window on the left and the right
 #'  of the center. Usually non-negative integers for data indexed by date, but
 #'  more restrictive in other cases (see [epiprocess::epi_slide()] for details).
-#' @param prefix A character string that will be prefixed to the new column.
 #' @param f_name a character string of at most 20 characters that describes
 #'   the function. This will be combined with `prefix` and the columns in `...`
 #'   to name the result using `{prefix}{f_name}_{column}`. By default it will be determined
@@ -53,7 +52,7 @@ step_epi_slide <-
            skip = FALSE,
            id = rand_id("epi_slide")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
     .f <- validate_slide_fun(.f)
     epiprocess:::validate_slide_window_arg(before, attributes(recipe$template)$metadata$time_type)
@@ -61,7 +60,7 @@ step_epi_slide <-
     arg_is_chr_scalar(role, prefix, id)
     arg_is_lgl_scalar(skip)
 
-    add_step(
+    recipes::add_step(
       recipe,
       step_epi_slide_new(
         terms = enquos(...),
@@ -72,7 +71,7 @@ step_epi_slide <-
         role = role,
         trained = FALSE,
         prefix = prefix,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = NULL,
         skip = skip,
         id = id
@@ -94,7 +93,7 @@ step_epi_slide_new <-
            columns,
            skip,
            id) {
-    step(
+    recipes::step(
       subclass = "epi_slide",
       terms = terms,
       before = before,
@@ -116,7 +115,7 @@ step_epi_slide_new <-
 prep.step_epi_slide <- function(x, training, info = NULL, ...) {
   col_names <- recipes::recipes_eval_select(x$terms, data = training, info = info)
 
-  check_type(training[, col_names], types = c("double", "integer"))
+  recipes::check_type(training[, col_names], types = c("double", "integer"))
 
   step_epi_slide_new(
     terms = x$terms,
@@ -147,7 +146,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
   if (any(intersection)) {
     nms <- new_data_names[intersection]
     cli_abort(
-      c("In `step_epi_slide()` a name collision occurred. The following variable names already exist:",
+      c("In `step_epi_slide()` a name collision occurred. The following variable name{?s} already exist{?/s}:",
         `*` = "{.var {nms}}"
       ),
       call = caller_env(),
@@ -171,7 +170,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
     object$columns,
     c(object$.f),
     object$f_name,
-    object$keys[-1],
+    kill_time_value(object$keys),
     object$prefix
   )
 }
@@ -185,7 +184,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
 #'   using roughly equivalent tidy select style.
 #'
 #' @param fns vector of functions, even if it's length 1.
-#' @param group_keys the keys to group by. likely `epi_keys[-1]` (to remove time_value)
+#' @param group_keys the keys to group by. likely `epi_keys` (without `time_value`)
 #'
 #' @importFrom tidyr crossing
 #' @importFrom dplyr bind_cols group_by ungroup

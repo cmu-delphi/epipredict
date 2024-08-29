@@ -19,15 +19,16 @@
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'   filter(time_value >= max(time_value) - 14)
 #'
 #' # Don't specify `forecast_date` (by default, this should be last date in latest)
 #' f <- frosting() %>%
@@ -85,7 +86,8 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 }
 
 #' @export
-slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
+slather.layer_add_forecast_date <- function(object, components, workflow,
+                                            new_data, ...) {
   rlang::check_dots_empty()
   if (is.null(object$forecast_date)) {
     max_time_value <- as.Date(max(
@@ -102,12 +104,13 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
     workflows::extract_preprocessor(workflow)$template, "metadata"
   )$time_type
   if (expected_time_type == "week") expected_time_type <- "day"
-  validate_date(forecast_date, expected_time_type,
+  validate_date(
+    forecast_date, expected_time_type,
     call = rlang::expr(layer_add_forecast_date())
   )
   forecast_date <- coerce_time_type(forecast_date, expected_time_type)
   object$forecast_date <- forecast_date
-  components$predictions <- dplyr::bind_cols(
+  components$predictions <- bind_cols(
     components$predictions,
     forecast_date = forecast_date
   )

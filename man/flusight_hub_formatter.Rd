@@ -41,25 +41,24 @@ be done via the \code{...} argument. See the examples below. The specific requir
 format for this forecast task is \href{https://github.com/cdcepi/FluSight-forecast-hub/blob/main/model-output/README.md}{here}.
 }
 \examples{
-if (require(dplyr)) {
-  weekly_deaths <- case_death_rate_subset \%>\%
-    filter(
-      time_value >= as.Date("2021-09-01"),
-      geo_value \%in\% c("ca", "ny", "dc", "ga", "vt")
-    ) \%>\%
-    select(geo_value, time_value, death_rate) \%>\%
-    left_join(state_census \%>\% select(pop, abbr), by = c("geo_value" = "abbr")) \%>\%
-    mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) \%>\%
-    select(-pop, -death_rate) \%>\%
-    group_by(geo_value) \%>\%
-    epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") \%>\%
-    ungroup() \%>\%
-    filter(weekdays(time_value) == "Saturday")
+library(dplyr)
+weekly_deaths <- case_death_rate_subset \%>\%
+  filter(
+    time_value >= as.Date("2021-09-01"),
+    geo_value \%in\% c("ca", "ny", "dc", "ga", "vt")
+  ) \%>\%
+  select(geo_value, time_value, death_rate) \%>\%
+  left_join(state_census \%>\% select(pop, abbr), by = c("geo_value" = "abbr")) \%>\%
+  mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) \%>\%
+  select(-pop, -death_rate) \%>\%
+  group_by(geo_value) \%>\%
+  epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") \%>\%
+  ungroup() \%>\%
+  filter(weekdays(time_value) == "Saturday")
 
-  cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
-  flusight_hub_formatter(cdc)
-  flusight_hub_formatter(cdc, target = "wk inc covid deaths")
-  flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
-  flusight_hub_formatter(cdc, target = "wk inc covid deaths", output_type = "quantile")
-}
+cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+flusight_hub_formatter(cdc)
+flusight_hub_formatter(cdc, target = "wk inc covid deaths")
+flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
+flusight_hub_formatter(cdc, target = "wk inc covid deaths", output_type = "quantile")
 }

@@ -8,15 +8,16 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7)
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'   filter(time_value >= max(time_value) - 14)
 #'
 #' # Add frosting to a workflow and predict
 #' f <- frosting() %>%
@@ -84,7 +85,8 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
   rlang::check_dots_empty()
   has_postprocessor <- has_postprocessor_frosting(x)
   if (!has_postprocessor) {
-    message <- c("The workflow must have a frosting postprocessor.",
+    message <- c(
+      "The workflow must have a frosting postprocessor.",
       i = "Provide one with `add_frosting()`."
     )
     rlang::abort(message, call = call)
@@ -125,6 +127,7 @@ update_frosting <- function(x, frosting, ...) {
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
@@ -132,7 +135,7 @@ update_frosting <- function(x, frosting, ...) {
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' # in the frosting from the workflow
 #' f1 <- frosting() %>%
@@ -177,11 +180,10 @@ adjust_frosting.epi_workflow <- function(
 adjust_frosting.frosting <- function(
     x, which_layer, ...) {
   if (!(is.numeric(which_layer) || is.character(which_layer))) {
-    cli::cli_abort(
-      c("`which_layer` must be a number or a character.",
-        i = "`which_layer` has class {.cls {class(which_layer)[1]}}."
-      )
-    )
+    cli_abort(c(
+      "`which_layer` must be a number or a character.",
+      i = "`which_layer` has class {.cls {class(which_layer)[1]}}."
+    ))
   } else if (is.numeric(which_layer)) {
     x$layers[[which_layer]] <- update(x$layers[[which_layer]], ...)
   } else {
@@ -190,7 +192,7 @@ adjust_frosting.frosting <- function(
     if (!starts_with_layer) which_layer <- paste0("layer_", which_layer)
 
     if (!(which_layer %in% layer_names)) {
-      cli::cli_abort(c(
+      cli_abort(c(
         "`which_layer` does not appear in the available `frosting` layer names. ",
         i = "The layer names are {.val {layer_names}}."
       ))
@@ -199,7 +201,7 @@ adjust_frosting.frosting <- function(
     if (length(which_layer_idx) == 1) {
       x$layers[[which_layer_idx]] <- update(x$layers[[which_layer_idx]], ...)
     } else {
-      cli::cli_abort(c(
+      cli_abort(c(
         "`which_layer` is not unique. Matches layers: {.val {which_layer_idx}}.",
         i = "Please use the layer number instead for precise alterations."
       ))
@@ -216,7 +218,7 @@ add_postprocessor <- function(x, postprocessor, ..., call = caller_env()) {
   if (is_frosting(postprocessor)) {
     return(add_frosting(x, postprocessor))
   }
-  cli::cli_abort("`postprocessor` must be a frosting object.", call = call)
+  cli_abort("`postprocessor` must be a frosting object.", call = call)
 }
 
 is_frosting <- function(x) {
@@ -227,7 +229,7 @@ is_frosting <- function(x) {
 validate_frosting <- function(x, ..., arg = "`x`", call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_frosting(x)) {
-    cli::cli_abort(
+    cli_abort(
       "{arg} must be a frosting postprocessor, not a {.cls {class(x)[[1]]}}.",
       .call = call
     )
@@ -260,14 +262,14 @@ new_frosting <- function() {
 #' @export
 #'
 #' @examples
-#'
+#' library(dplyr)
 #' # Toy example to show that frosting can be created and added for postprocessing
 #' f <- frosting()
 #' wf <- epi_workflow() %>% add_frosting(f)
 #'
 #' # A more realistic example
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -307,7 +309,7 @@ extract_frosting <- function(x, ...) {
 
 #' @export
 extract_frosting.default <- function(x, ...) {
-  cli::cli_abort(c(
+  cli_abort(c(
     "Frosting is only available for epi_workflows currently.",
     i = "Can you use `epi_workflow()` instead of `workflow()`?"
   ))
@@ -319,7 +321,7 @@ extract_frosting.epi_workflow <- function(x, ...) {
   if (has_postprocessor_frosting(x)) {
     return(x$post$actions$frosting$frosting)
   } else {
-    cli_stop("The epi_workflow does not have a postprocessor.")
+    cli_abort("The epi_workflow does not have a postprocessor.")
   }
 }
 
@@ -342,7 +344,7 @@ apply_frosting <- function(workflow, ...) {
 #' @export
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "Postprocessing is only available for epi_workflows currently.",
       i = "Can you use `epi_workflow()` instead of `workflow()`?"
     ))
@@ -373,7 +375,7 @@ apply_frosting.epi_workflow <-
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      cli::cli_warn(c(
+      cli_warn(c(
         "Only postprocessors of class {.cls frosting} are allowed.",
         "Returning unpostprocessed predictions."
       ))
