@@ -77,7 +77,7 @@ step_training_window_new <-
 
 #' @export
 prep.step_training_window <- function(x, training, info = NULL, ...) {
-  ekt <- kill_time_value(key_colnames(training))
+  ekt <- epi_keys_only(training)
   ek <- x$epi_keys %||% ekt %||% character(0L)
 
   hardhat::validate_column_names(training, ek)

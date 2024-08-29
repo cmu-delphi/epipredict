@@ -91,7 +91,7 @@ get_test_data <- function(
   }
 
   x <- arrange(x, time_value)
-  groups <- kill_time_value(key_colnames(recipe))
+  groups <- epi_keys_only(recipe)
 
   # If we skip NA completion, we remove undesirably early time values
   # Happens globally, over all groups

@@ -169,7 +169,7 @@ slather.layer_cdc_flatline_quantiles <-
       ))
     }
     p <- components$predictions
-    ek <- kill_time_value(key_colnames(components$mold))
+    ek <- epi_keys_only(workflow)
     r <- grab_residuals(the_fit, components)
 
     avail_grps <- character(0L)

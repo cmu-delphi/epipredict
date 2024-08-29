@@ -32,14 +32,14 @@ check_pname <- function(res, preds, object, newname = NULL) {
 }
 
 
-grab_forged_keys <- function(forged, mold, new_data) {
-  keys <- c("time_value", "geo_value", "key")
+grab_forged_keys <- function(forged, workflow, new_data) {
+  keys <- c("geo_value", "time_value", "key")
   forged_roles <- names(forged$extras$roles)
   extras <- dplyr::bind_cols(forged$extras$roles[forged_roles %in% keys])
   # 1. these are the keys in the test data after prep/bake
   new_keys <- names(extras)
   # 2. these are the keys in the training data
-  old_keys <- key_colnames(mold)
+  old_keys <- key_colnames(workflow)
   # 3. these are the keys in the test data as input
   new_df_keys <- key_colnames(new_data, extra_keys = setdiff(new_keys, keys[1:2]))
   if (!(setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {

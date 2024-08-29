@@ -157,7 +157,7 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_population_scaling <- function(object, new_data, ...) {
   object$by <- object$by %||% intersect(
-    kill_time_value(key_colnames(new_data)),
+    epi_keys_only(new_data),
     colnames(select(object$df, !object$df_pop_col))
   )
   joinby <- list(x = names(object$by) %||% object$by, y = object$by)

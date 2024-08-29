@@ -109,7 +109,7 @@ autoplot.epi_workflow <- function(
     y <- y[, 1]
     cli_warn("Multiple outcome variables were detected. Displaying only 1.")
   }
-  keys <- c("time_value", "geo_value", "key")
+  keys <- c("geo_value", "time_value", "key")
   mold_roles <- names(mold$extras$roles)
   edf <- bind_cols(mold$extras$roles[mold_roles %in% keys], y)
   if (starts_with_impl("ahead_", names(y))) {
@@ -127,7 +127,7 @@ autoplot.epi_workflow <- function(
   if (!is.null(shift)) {
     edf <- mutate(edf, time_value = time_value + shift)
   }
-  extra_keys <- setdiff(key_colnames(mold), c("time_value", "geo_value"))
+  extra_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
   if (length(extra_keys) == 0L) extra_keys <- NULL
   edf <- as_epi_df(edf,
     as_of = object$fit$meta$as_of,
@@ -167,7 +167,7 @@ autoplot.epi_workflow <- function(
   )
 
   # Now, prepare matching facets in the predictions
-  ek <- kill_time_value(key_colnames(edf))
+  ek <- epi_keys_only(edf)
   predictions <- predictions %>%
     mutate(
       .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "/"),

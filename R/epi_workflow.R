@@ -164,10 +164,7 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
   components$forged <- hardhat::forge(new_data,
     blueprint = components$mold$blueprint
   )
-  components$keys <- grab_forged_keys(
-    components$forged,
-    components$mold, new_data
-  )
+  components$keys <- grab_forged_keys(components$forged, object, new_data)
   components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
   components$predictions
 }

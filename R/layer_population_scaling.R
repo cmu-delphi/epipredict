@@ -136,7 +136,7 @@ slather.layer_population_scaling <-
     rlang::check_dots_empty()
 
     object$by <- object$by %||% intersect(
-      kill_time_value(key_colnames(components$predictions)),
+      epi_keys_only(components$predictions),
       colnames(select(object$df, !object$df_pop_col))
     )
     joinby <- list(x = names(object$by) %||% object$by, y = object$by)
