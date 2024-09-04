@@ -301,7 +301,7 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
     unnamed_columns <- object$columns %>% unname()
-    new_data %>%
+    new_data <- new_data %>%
       pad_to_end(rel_keys, object$forecast_date) %>%
       # group_by_at(rel_keys) %>%
       arrange(time_value) %>%
