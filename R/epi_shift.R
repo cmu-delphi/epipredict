@@ -55,7 +55,8 @@ add_shifted_columns <- function(new_data, object, amount) {
     left_join(rel_latency, by = join_by(col == col_name), ) %>%
     tidyr::replace_na(list(latency = 0)) %>%
     mutate(
-      shift_val = amount + latency) %>%
+      shift_val = amount + latency
+    ) %>%
     mutate(
       newname = glue::glue("{object$prefix}{abs(shift_val)}_{col}"), # name is always positive
       amount = NULL,

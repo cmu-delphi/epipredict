@@ -180,22 +180,59 @@ fill_locf <- function(x, forecast_date) {
   x <- tidyr::fill(x, !time_value)
 }
 
-pad_to_end <- function(x, groups, end_date) {
+#' pad every group at the right interval
+#' @description
+#' Perform last observation carried forward on a group by group basis. It uses
+#'   `guess_period` to find the appropriate interval to fill-forward by. It
+#'   maintains the grouping structure it recieves. It does *not* fill any
+#'   "interior" `NA` values occurring in the data beforehand.
+#' @param x an epi_df to be filled forward.
+#' @param columns_to_complete which columns to apply completion to. By default every non-key column of an epi_df
+#' @param groups the grouping by which to fill forward
+#' @importFrom dplyr across, arrange, bind_rows, group_by, summarise
+#' @importFrom tidyselect all_of
+#' @importFrom rlang list2
+#' @importFrom vctrs vec_cast
+#' @keywords internal
+pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
+  if (is.null(columns_to_complete)) {
+    columns_to_complete <- setdiff(names(x), key_colnames(x))
+  }
   itval <- epiprocess:::guess_period(c(x$time_value, end_date), "time_value")
-  completed_time_values <- x %>%
-    dplyr::group_by(dplyr::across(tidyselect::all_of(groups))) %>%
-    dplyr::summarise(
-      time_value = rlang::list2(
-        time_value = seq_null_swap(max(time_value) + itval, end_date, itval)
+  # get the time values we need to fill in
+  completed_time_values <-
+    x %>%
+    group_by(across(all_of(groups))) %>%
+    summarise(
+      time_value = list2(
+        time_value = seq_null_swap(from = max(time_value) + itval, to = end_date, by = itval)
       )
     ) %>%
     unnest("time_value") %>%
-    mutate(time_value = vctrs::vec_cast(time_value, x$time_value))
+    mutate(time_value = vec_cast(time_value, x$time_value))
+  # pull the last value in each group and fill forward
+  filled_values <- x %>%
+    group_by(across(all_of(groups))) %>%
+    slice_tail() %>%
+    bind_rows(completed_time_values) %>%
+    arrange(across(all_of(c("time_value", groups)))) %>%
+    fill(all_of(columns_to_complete), .direction = "down") %>%
+    slice(-1)
 
-  dplyr::bind_rows(x, completed_time_values) %>%
-    dplyr::arrange(dplyr::across(tidyselect::all_of(c("time_value", groups))))
+  bind_rows(x, filled_values) %>%
+    arrange(across(all_of(key_colnames(x)))) %>%
+    ungroup() %>%
+    group_by(across(all_of(get_grouping_columns(x))))
 }
 
+#' return the names of the grouped columns, or `NULL`
+get_grouping_columns <- function(x) {
+  group_names <- names(attributes(x)$groups)
+  head(group_names, -1)
+}
+
+#' seq, but returns null if from is larger
+#' @keywords internal
 seq_null_swap <- function(from, to, by) {
   if (from > to) {
     return(NULL)

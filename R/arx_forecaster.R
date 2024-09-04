@@ -227,11 +227,11 @@ arx_fcast_epi_workflow <- function(
 #'   difference. The options are:
 #'   - `NULL` the default, assumes the `forecast_date` is the last day of data
 #'   - `"extend_ahead"`: increase the `ahead` by the latency so it's relative to
-#'   the last day of data. If the last day of data was 3 days ago, the ahead
-#'   becomes `ahead+3`.
-#'   - `"extend_lags"`: increase the lags so they're relative to the actual forecast date. If the lags are
-#'   `c(0,7,14)` and the last day of data was 3 days ago, the lags become
-#'   `c(3,10,17)`.
+#'   the last day of data. For example, if the last day of data was 3 days ago,
+#'   the ahead becomes `ahead+3`.
+#'   - `"extend_lags"`: increase the lags so they're relative to the actual
+#'   forecast date. For example, if the lags are `c(0,7,14)` and the last day of
+#'   data was 3 days ago, the lags become `c(3,10,17)`.
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
