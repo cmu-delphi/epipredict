@@ -33,6 +33,7 @@ You can also build the docs manually and launch the site with python. From the t
 
 ```bash
 R -e 'devtools::document()'
+R -e 'pkgdown::build_site()'
 python -m http.server -d docs
 ```
 

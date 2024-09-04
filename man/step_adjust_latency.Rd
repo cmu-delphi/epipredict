@@ -42,8 +42,7 @@ E.g. if there are 3 days of latency between the last observation and the
 \code{forecast_date} date for a 4 day ahead forecast, the ahead used in practice
 is actually 7.
 \item \code{"locf"}: carries forward the last observed value(s) up to the forecast
-date. See the Vignette TODO for equivalents using other steps and more
-sophisticated methods of extrapolation.
+date.
 \item \code{"extend_lags"}: per \code{epi_key} and \code{predictor}, adjusts the lag so that
 the shortest lag at predict time is at the last observation. E.g. if the
 lags are \code{c(0,7,14)} for data that is 3 days latent, the actual lags used
@@ -98,11 +97,13 @@ sequence of any existing operations.
 In the standard case, the arx models assume that the last observation is also
 the day from which the forecast is being made. But if the data has latency,
 then you may wish to adjust the predictors (lags) and/or the outcome (ahead)
-to compensate. This allows the model to create bleeding-edge forecasts using
-the lags actually observed rather than anticipated. \code{step_adjust_latency}
-uses the \code{as_of} date of the \code{epi_df} as the \code{forecast_date}. This is most
-useful in realtime and pseudo-prospective forecasting for data where there is
-some delay between the day recorded and when that data is available.
+to compensate. This allows the user to create models on the most recent data,
+regardless of latency patterns. Instead of using the last observation date,
+\code{step_adjust_latency} uses the \code{as_of} date of the \code{epi_df} as the
+\code{forecast_date}, potentially using different dates depending on the
+\code{epi_keys}, such as geography. This is most useful in realtime and
+pseudo-prospective forecasting for data where there is some delay between the
+event occurring and the event being reported.
 }
 \details{
 The step assumes that the pipeline has already applied either

@@ -34,6 +34,14 @@ modified_data <-
     by = keys
   ) %>%
   arrange(time_value)
+time_range <- as.Date("2021-01-01") + 0:199
+x_adjust_ahead <- tibble(
+  geo_value = rep("place", 200),
+  time_value = time_range,
+  case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
+  death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
+) %>%
+  as_epi_df(as_of = max(time_range) + 3)
 
 test_that("get_latency works", {
   expect_equal(get_latency(modified_data, as_of, "case_rate", 1, "geo_value"), 5)
@@ -69,16 +77,7 @@ test_that("set_forecast_date works", {
   expect_equal(set_forecast_date(modified_data, info, NULL, NULL), as_of)
 })
 
-time_range <- as.Date("2021-01-01") + 0:199
-x_adjust_ahead <- tibble(
-  geo_value = rep("place", 200),
-  time_value = time_range,
-  case_rate = sqrt(1:200) + atan(0.1 * 1:200) + sin(5 * 1:200) + 1,
-  death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
-) %>%
-  as_epi_df(as_of = max(time_range) + 3)
 # confirm the delay is right
-
 test_that("adjust_latency extend_ahead works", {
   # testing that POSIXct converts correctly (as well as basic types)
   expect_equal(
@@ -100,4 +99,57 @@ test_that("extend_ahead warns in case of extreme adjustment", {
   testthat::expect_warning(adjust_latency(object, x_adjust_ahead), regexp = "The ahead has been adjusted by 100")
 })
 
+test_that("pad_to_end works correctly", {
+  single_ex <- tribble(
+    ~geo_value, ~time_value, ~a, ~b,
+    "1", as.Date("1066-10-13"), 2, -.6,
+    "1", as.Date("1066-10-14"), NA, NA,
+    "1", as.Date("1066-10-15"), 1, -.5,
+    "2", as.Date("1066-10-13"), 3, .9
+  ) %>%
+    as_epi_df(as_of = "1066-10-16")
+  expect_equal(
+    single_ex %>% pad_to_end("geo_value", as.Date("1066-10-16")),
+    rbind(
+      single_ex,
+      tibble(geo_value = "1", time_value = as.Date("1066-10-16"), a = 1, b = -.5),
+      tibble(
+        geo_value = "2",
+        time_value = seq.Date(
+          from = as.Date("1066-10-14"),
+          to = as.Date("1066-10-16"),
+          by = 1
+        ),
+        a = 3, b = .9
+      )
+    ) %>% arrange(geo_value, time_value)
+  )
+})
+
+
+test_that("pad_to_end handles weeks", {
+  single_ex <- tribble(
+    ~geo_value, ~time_value, ~a, ~b,
+    "1", as.Date("1066-10-14"), 2, -.6,
+    "1", as.Date("1066-10-21"), 1, -.5,
+    "2", as.Date("1066-10-14"), 3, .9
+  ) %>%
+    as_epi_df(as_of = "1066-10-28")
+  expect_equal(
+    single_ex %>% pad_to_end("geo_value", as.Date("1066-10-28")),
+    rbind(
+      single_ex,
+      tibble(geo_value = "1", time_value = as.Date("1066-10-28"), a = 1, b = -.5),
+      tibble(
+        geo_value = "2",
+        time_value = seq.Date(
+          from = as.Date("1066-10-21"),
+          to = as.Date("1066-10-28"),
+          by = 7
+        ),
+        a = 3, b = .9
+      )
+    ) %>% arrange(time_value, geo_value)
+  )
+})
 # todo case where somehow columns of different roles are selected

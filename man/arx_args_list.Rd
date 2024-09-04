@@ -49,11 +49,11 @@ difference. The options are:
 \itemize{
 \item \code{NULL} the default, assumes the \code{forecast_date} is the last day of data
 \item \code{"extend_ahead"}: increase the \code{ahead} by the latency so it's relative to
-the last day of data. If the last day of data was 3 days ago, the ahead
-becomes \code{ahead+3}.
-\item \code{"extend_lags"}: increase the lags so they're relative to the actual forecast date. If the lags are
-\code{c(0,7,14)} and the last day of data was 3 days ago, the lags become
-\code{c(3,10,17)}.
+the last day of data. For example, if the last day of data was 3 days ago,
+the ahead becomes \code{ahead+3}.
+\item \code{"extend_lags"}: increase the lags so they're relative to the actual
+forecast date. For example, if the lags are \code{c(0,7,14)} and the last day of
+data was 3 days ago, the lags become \code{c(3,10,17)}.
 }}
 
 \item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce

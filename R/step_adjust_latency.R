@@ -3,11 +3,13 @@
 #' In the standard case, the arx models assume that the last observation is also
 #' the day from which the forecast is being made. But if the data has latency,
 #' then you may wish to adjust the predictors (lags) and/or the outcome (ahead)
-#' to compensate. This allows the model to create bleeding-edge forecasts using
-#' the lags actually observed rather than anticipated. `step_adjust_latency`
-#' uses the `as_of` date of the `epi_df` as the `forecast_date`. This is most
-#' useful in realtime and pseudo-prospective forecasting for data where there is
-#' some delay between the day recorded and when that data is available.
+#' to compensate. This allows the user to create models on the most recent data,
+#' regardless of latency patterns. Instead of using the last observation date,
+#' `step_adjust_latency` uses the `as_of` date of the `epi_df` as the
+#' `forecast_date`, potentially using different dates depending on the
+#' `epi_keys`, such as geography. This is most useful in realtime and
+#' pseudo-prospective forecasting for data where there is some delay between the
+#' event occurring and the event being reported.
 #'
 #' @param method a character. Determines the method by which the
 #'   forecast handles latency. The options are:
@@ -17,8 +19,7 @@
 #'   `forecast_date` date for a 4 day ahead forecast, the ahead used in practice
 #'   is actually 7.
 #'   - `"locf"`: carries forward the last observed value(s) up to the forecast
-#'   date. See the Vignette TODO for equivalents using other steps and more
-#'   sophisticated methods of extrapolation.
+#'   date.
 #'   - `"extend_lags"`: per `epi_key` and `predictor`, adjusts the lag so that
 #'   the shortest lag at predict time is at the last observation. E.g. if the
 #'   lags are `c(0,7,14)` for data that is 3 days latent, the actual lags used
@@ -296,11 +297,9 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     attributes(new_data)$metadata$shift_sign <- get_sign(object)
     attributes(new_data)$metadata$latency_table <- object$latency_table
     keys <- object$keys
-    return(new_data)
   } else if (object$method == "locf") {
     # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
-    object$forecast_date
     unnamed_columns <- object$columns %>% unname()
     new_data %>%
       pad_to_end(rel_keys, object$forecast_date) %>%
@@ -308,9 +307,9 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
       arrange(time_value) %>%
       as_tibble() %>%
       tidyr::fill(.direction = "down", any_of(unnamed_columns)) %>%
-      ungroup() %>%
-      return()
+      ungroup()
   }
+  return(new_data)
 }
 #' @export
 print.step_adjust_latency <-
