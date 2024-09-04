@@ -32,6 +32,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
 #' @keywords internal
 #' @importFrom dplyr select
+#' @importFrom tidyr drop_na
 set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
   original_columns <- info %>%
     filter(source == "original") %>%
@@ -166,14 +167,14 @@ fill_locf <- function(x, forecast_date) {
     dplyr::mutate(fillers = forecast_date - time_value > keep) %>%
     dplyr::summarise(
       dplyr::across(
-        -tidyselect::any_of(epi_keys(recipe)),
+        -tidyselect::any_of(key_colnames(recipe)),
         ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))
       ),
       .groups = "drop"
     ) %>%
     dplyr::select(-fillers) %>%
     dplyr::summarise(dplyr::across(
-      -tidyselect::any_of(epi_keys(recipe)), ~ any(.x)
+      -tidyselect::any_of(key_colnames(recipe)), ~ any(.x)
     )) %>%
     unlist()
   x <- tidyr::fill(x, !time_value)

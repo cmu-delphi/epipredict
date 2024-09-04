@@ -23,7 +23,6 @@ step_epi_ahead(
   role = "outcome",
   prefix = "ahead_",
   default = NA,
-  columns = NULL,
   skip = FALSE,
   id = rand_id("epi_ahead")
 )

@@ -139,7 +139,7 @@ then the previous `step_epi_lag`s won't work with modified data.",
     }
     if (length(fixed_latency > 1)) {
       template <- recipe$template
-      data_names <- names(template)[!names(template) %in% epi_keys(template)]
+      data_names <- names(template)[!names(template) %in% key_colnames(template)]
       wrong_names <- names(fixed_latency)[!names(fixed_latency) %in% data_names]
       if (length(wrong_names) > 0) {
         cli::cli_abort("{.val fixed_latency} contains names not in the template dataset: {wrong_names}", class = "epipredict__step_adjust_latency__undefined_names_error")
@@ -173,7 +173,7 @@ then the previous `step_epi_lag`s won't work with modified data.",
         latency = fixed_latency,
         latency_table = NULL,
         default = default,
-        keys = epi_keys(recipe),
+        keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
         id = id
@@ -213,7 +213,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   latency <- x$latency
   forecast_date <- x$forecast_date %||% set_forecast_date(training, info, x$epi_keys_checked, latency)
   # construct the latency table
-  latency_table <- names(training)[!names(training) %in% epi_keys(training)] %>%
+  latency_table <- names(training)[!names(training) %in% key_colnames(training)] %>%
     tibble(col_name = .)
   if (length(recipes_eval_select(x$terms, training, info)) > 0) {
     latency_table <- latency_table %>% filter(col_name %in%
@@ -299,7 +299,7 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     return(new_data)
   } else if (object$method == "locf") {
     # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
-    rel_keys <- setdiff(epi_keys(new_data), "time_value")
+    rel_keys <- setdiff(key_colnames(new_data), "time_value")
     object$forecast_date
     unnamed_columns <- object$columns %>% unname()
     new_data %>%
