@@ -19,10 +19,6 @@
 #'  be the lag or lead for each value in the vector. Lag integers must be
 #'  nonnegative, while ahead integers must be positive.
 #' @param prefix A character string that will be prefixed to the new column.
-#' @param latency_adjustment a character. Determines the method by which the forecast handles data that doesn't extend to the day the forecast is made. The options are:
-#'   - `"extend_ahead"`: actually forecasts from the last date. E.g. if there are 3 days of latency for a 4 day ahead forecast, the ahead used in practice is actually 7.
-#'   - `"locf"`: carries forward the last observed value up to the forecast date.
-#'   - `"extend_lags"`: per `epi_key` and `predictor`, adjusts the lag so that the shortest lag at predict time is
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
 #' @param skip A logical. Should the step be skipped when the
@@ -71,12 +67,6 @@ step_epi_lag <-
     }
     arg_is_nonneg_int(lag)
     arg_is_chr_scalar(prefix, id)
-    if (!is.null(columns)) {
-      cli::cli_abort(c(
-        "The `columns` argument must be `NULL`.",
-        i = "Use `tidyselect` methods to choose columns to lag."
-      ))
-    }
     recipes::add_step(
       recipe,
       step_epi_lag_new(
@@ -87,8 +77,7 @@ step_epi_lag <-
         prefix = prefix,
         default = default,
         keys = key_colnames(recipe),
-        columns = columns,
-        latency_adjustment = latency_adjustment,
+        columns = NULL,
         skip = skip,
         id = id
       )
@@ -107,7 +96,6 @@ step_epi_ahead <-
            role = "outcome",
            prefix = "ahead_",
            default = NA,
-           columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
     if (!is_epi_recipe(recipe)) {
@@ -121,7 +109,7 @@ step_epi_ahead <-
       ))
     }
     arg_is_nonneg_int(ahead)
-    arg_is_chr_scalar(prefix, id, latency_adjustment)
+    arg_is_chr_scalar(prefix, id)
     recipes::add_step(
       recipe,
       step_epi_ahead_new(
@@ -132,8 +120,7 @@ step_epi_ahead <-
         prefix = prefix,
         default = default,
         keys = key_colnames(recipe),
-        latency_adjustment = latency_adjustment,
-        columns = columns,
+        columns = NULL,
         skip = skip,
         id = id
       )
@@ -143,7 +130,7 @@ step_epi_ahead <-
 
 step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
-           latency_adjustment, columns, skip, id) {
+           columns, skip, id) {
     recipes::step(
       subclass = "epi_lag",
       terms = terms,
@@ -189,7 +176,6 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    latency_adjustment = x$latency_adjustment,
     columns = recipes::recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
@@ -206,7 +192,6 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    latency_adjustment = x$latency_adjustment,
     columns = recipes::recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
