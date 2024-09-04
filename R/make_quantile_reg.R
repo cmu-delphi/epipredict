@@ -11,6 +11,8 @@
 #'   "rq" is supported.
 #' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
 #'   quantiles to estimate (default is 0.5).
+#' @param method A fitting method used by [quantreg::rq()]. See the
+#'   documentation for a list of options.
 #'
 #' @export
 #'
