@@ -33,6 +33,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' @keywords internal
 #' @importFrom dplyr select
 #' @importFrom tidyr drop_na
+#' @importFrom utils capture.output
 set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
   original_columns <- info %>%
     filter(source == "original") %>%
@@ -161,25 +162,6 @@ get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new
 }
 
 
-fill_locf <- function(x, forecast_date) {
-  cannot_be_used <- x %>%
-    dplyr::filter(forecast_date - time_value <= n_recent) %>%
-    dplyr::mutate(fillers = forecast_date - time_value > keep) %>%
-    dplyr::summarise(
-      dplyr::across(
-        -tidyselect::any_of(key_colnames(recipe)),
-        ~ all(is.na(.x[fillers])) & is.na(head(.x[!fillers], 1))
-      ),
-      .groups = "drop"
-    ) %>%
-    dplyr::select(-fillers) %>%
-    dplyr::summarise(dplyr::across(
-      -tidyselect::any_of(key_colnames(recipe)), ~ any(.x)
-    )) %>%
-    unlist()
-  x <- tidyr::fill(x, !time_value)
-}
-
 #' pad every group at the right interval
 #' @description
 #' Perform last observation carried forward on a group by group basis. It uses
@@ -226,6 +208,9 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
 }
 
 #' return the names of the grouped columns, or `NULL`
+#' @param x an epi_df
+#' @keywords internal
+#' @importFrom utils head
 get_grouping_columns <- function(x) {
   group_names <- names(attributes(x)$groups)
   head(group_names, -1)

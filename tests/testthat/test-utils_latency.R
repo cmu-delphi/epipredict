@@ -149,7 +149,7 @@ test_that("pad_to_end handles weeks", {
         ),
         a = 3, b = .9
       )
-    ) %>% arrange(time_value, geo_value)
+    ) %>% arrange(geo_value, time_value)
   )
 })
 # todo case where somehow columns of different roles are selected

@@ -94,6 +94,19 @@ test_that("arx_forecaster snapshots", {
   )
   # not the same predictions
   expect_false(all(arx2$predictions == arx3$predictions))
+
+
+  arx4 <- arx_forecaster(
+    train_data,
+    "death_rate_7d_av",
+    c("death_rate_7d_av", "case_rate_7d_av"),
+    args_list = arx_args_list(
+      ahead = 1L,
+      adjust_latency = "locf"
+    )
+  )
+  # consistency check
+  expect_snapshot_tibble(arx3$predictions)
 })
 
 test_that("arx_forecaster output format snapshots", {

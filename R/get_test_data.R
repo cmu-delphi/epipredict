@@ -25,8 +25,8 @@
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14))
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @importFrom rlang %@%
+#' @importFrom stats na.omit
 #' @export
-
 get_test_data <- function(recipe, x) {
   if (!is_epi_df(x)) cli::cli_abort("`x` must be an `epi_df`.")
 

@@ -186,14 +186,14 @@ test_that("epi_adjust_latency correctly locfs", {
     last_dates,
     tribble(
       ~name, ~last_date,
-      "lag_11_death_rate", max_time + 11,
-      "lag_6_death_rate", max_time + 6,
-      "lag_5_case_rate", max_time + 5,
-      "lag_1_case_rate", max_time + 1,
-      "case_rate", max_time,
-      "death_rate", max_time,
-      "lag_0_death_rate", max_time + 0,
-      "ahead_7_death_rate", max_time - 7,
+      "lag_11_death_rate", max_time + 16,
+      "lag_6_death_rate", max_time + 11,
+      "lag_5_case_rate", max_time + 10,
+      "lag_1_case_rate", max_time + 6,
+      "case_rate", max_time + 5,
+      "death_rate", max_time + 5,
+      "lag_0_death_rate", max_time + 5,
+      "ahead_7_death_rate", max_time - 2,
     )
   )
   # we expect a 5-fold repetition of the last values found in the original
@@ -204,7 +204,7 @@ test_that("epi_adjust_latency correctly locfs", {
     slice_tail() %>%
     ungroup() %>%
     select(case_rate, death_rate) %>%
-    uncount(5)
+    tidyr::uncount(5)
   # pulling just the region between the last day and the prediction day
   filled_values <-
     baked_x %>%
@@ -450,7 +450,7 @@ test_that("`step_adjust_latency` only uses the columns specified in the `...`", 
     summarise(last_date = max(time_value)) %>%
     arrange(desc(last_date)) %>%
     mutate(locf_date = last_date - latency)
-  # iterate over all columns and make sure the latent time period has the exact same values
+  # iterate over all columns and make sure the latent time period has the exact same values (so the variance is zero)
   for (ii in seq(nrow(last_dates))) {
     baked_var <- baked_x %>%
       filter(last_dates[[ii, "locf_date"]] <= time_value, time_value <= last_dates[[ii, "last_date"]]) %>%
