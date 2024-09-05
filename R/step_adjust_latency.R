@@ -302,7 +302,7 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
     unnamed_columns <- object$columns %>% unname()
     new_data <- new_data %>%
-      pad_to_end(rel_keys, object$forecast_date) %>%
+      pad_to_end(rel_keys, object$forecast_date, unnamed_columns) %>%
       # group_by_at(rel_keys) %>%
       arrange(time_value) %>%
       as_tibble() %>%

@@ -6,6 +6,10 @@
 \usage{
 get_grouping_columns(x)
 }
+\arguments{
+\item{x}{an epi_df}
+}
 \description{
 return the names of the grouped columns, or \code{NULL}
 }
+\keyword{internal}
