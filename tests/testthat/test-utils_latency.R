@@ -103,15 +103,19 @@ test_that("pad_to_end works correctly", {
   single_ex <- tribble(
     ~geo_value, ~time_value, ~a, ~b,
     "1", as.Date("1066-10-13"), 2, -.6,
+    # internal NA
     "1", as.Date("1066-10-14"), NA, NA,
     "1", as.Date("1066-10-15"), 1, -.5,
-    "2", as.Date("1066-10-13"), 3, .9
+    "2", as.Date("1066-10-13"), 3, .9,
+    # note these are intentionally out of order
+    "3", as.Date("1066-10-14"), 2.5, NA,
+    "3", as.Date("1066-10-13"), 2, -.6,
   ) %>%
     as_epi_df(as_of = "1066-10-16")
   expect_equal(
     single_ex %>% pad_to_end("geo_value", as.Date("1066-10-16")),
     rbind(
-      single_ex,
+      single_ex[-5, ],
       tibble(geo_value = "1", time_value = as.Date("1066-10-16"), a = 1, b = -.5),
       tibble(
         geo_value = "2",
@@ -121,6 +125,15 @@ test_that("pad_to_end works correctly", {
           by = 1
         ),
         a = 3, b = .9
+      ),
+      tibble(
+        geo_value = "3",
+        time_value = seq.Date(
+          from = as.Date("1066-10-14"),
+          to = as.Date("1066-10-16"),
+          by = 1
+        ),
+        a = 2.5, b = -0.6
       )
     ) %>% arrange(geo_value, time_value)
   )

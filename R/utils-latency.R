@@ -171,10 +171,10 @@ get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new
 #' @param x an epi_df to be filled forward.
 #' @param columns_to_complete which columns to apply completion to. By default every non-key column of an epi_df
 #' @param groups the grouping by which to fill forward
-#' @importFrom dplyr across, arrange, bind_rows, group_by, summarise
 #' @importFrom tidyselect all_of
 #' @importFrom rlang list2
 #' @importFrom vctrs vec_cast
+#' @importFrom dplyr across arrange bind_rows group_by summarise
 #' @keywords internal
 pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
   if (is.null(columns_to_complete)) {
@@ -193,15 +193,20 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
     unnest("time_value") %>%
     mutate(time_value = vec_cast(time_value, x$time_value))
   # pull the last value in each group and fill forward
-  filled_values <- x %>%
-    group_by(across(all_of(groups))) %>%
-    slice_tail() %>%
+  grouped_and_arranged <- x %>%
+    arrange(across(all_of(c("time_value", groups)))) %>%
+    group_by(across(all_of(groups)))
+  values_to_fill <- grouped_and_arranged %>%
+    slice(min(across(columns_to_complete, count_single_column)):n())
+
+  filled_values <- values_to_fill %>%
     bind_rows(completed_time_values) %>%
     arrange(across(all_of(c("time_value", groups)))) %>%
     fill(all_of(columns_to_complete), .direction = "down") %>%
-    slice(-1)
-
-  bind_rows(x, filled_values) %>%
+    slice(-1) # remove the oirginal rows
+  grouped_and_arranged %>%
+    slice(1:min(across(columns_to_complete, count_single_column))) %>%
+    bind_rows(filled_values) %>%
     arrange(across(all_of(key_colnames(x)))) %>%
     ungroup() %>%
     group_by(across(all_of(get_grouping_columns(x))))
@@ -215,6 +220,22 @@ get_grouping_columns <- function(x) {
   group_names <- names(attributes(x)$groups)
   head(group_names, -1)
 }
+
+#' get the location of the last real value
+#' @param col the relevant column
+#' @param from_last instead of the number of columns
+#' @keywords internal
+count_single_column <- function(col, from_last) {
+  run_lengths <- rle(is.na(col))
+  n_el <- length(col)
+  if (tail(run_lengths$values, 1)) {
+    n_at_end <- tail(run_lengths$lengths, 1)
+    return(n_el - n_at_end)
+  } else {
+    return(n_el)
+  }
+}
+
 
 #' seq, but returns null if from is larger
 #' @keywords internal
