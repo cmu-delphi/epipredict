@@ -101,7 +101,6 @@ step_adjust_latency <-
            epi_keys_checked = c("geo_value"),
            fixed_latency = NULL,
            fixed_forecast_date = NULL,
-           default = NA,
            skip = FALSE,
            columns = NULL,
            id = recipes::rand_id("adjust_latency")) {
@@ -173,7 +172,6 @@ then the previous `step_epi_lag`s won't work with modified data.",
         forecast_date = fixed_forecast_date,
         latency = fixed_latency,
         latency_table = NULL,
-        default = default,
         keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
@@ -183,8 +181,8 @@ then the previous `step_epi_lag`s won't work with modified data.",
   }
 
 step_adjust_latency_new <-
-  function(terms, role, trained, forecast_date, latency, latency_table, time_type, default,
-           keys, method, epi_keys_checked, columns, skip, id) {
+  function(terms, role, trained, forecast_date, latency, latency_table,
+           time_type, keys, method, epi_keys_checked, columns, skip, id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
@@ -195,7 +193,6 @@ step_adjust_latency_new <-
       forecast_date = forecast_date,
       latency = latency,
       latency_table = latency_table,
-      default = default,
       keys = keys,
       columns = columns,
       skip = skip,
@@ -274,7 +271,6 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     forecast_date = forecast_date,
     latency = unique(latency_table$latency),
     latency_table = latency_table,
-    default = x$default,
     keys = x$keys,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
