@@ -1095,7 +1095,7 @@
       Training data was an <epi_df> with:
       * Geography: state,
       * Time type: day,
-      * Using data up-to-date as of: 2022-05-31 14:08:25.
+      * Using data up-to-date as of: 2022-05-31.
       * With the last data available on 2021-12-31
       
       -- Predictions -----------------------------------------------------------------
@@ -1118,7 +1118,7 @@
       Training data was an <epi_df> with:
       * Geography: state,
       * Time type: day,
-      * Using data up-to-date as of: 2022-05-31 14:08:25.
+      * Using data up-to-date as of: 2022-05-31.
       * With the last data available on 2021-12-31
       
       -- Predictions -----------------------------------------------------------------
@@ -1142,7 +1142,7 @@
       Training data was an <epi_df> with:
       * Geography: state,
       * Time type: day,
-      * Using data up-to-date as of: 2022-05-31 14:08:25.
+      * Using data up-to-date as of: 2022-05-31.
       * With the last data available on 2021-12-31
       
       -- Predictions -----------------------------------------------------------------
