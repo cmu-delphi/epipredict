@@ -112,6 +112,7 @@ test_that("arx_forecaster snapshots", {
 test_that("arx_forecaster output format snapshots", {
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value >= as.Date("2021-12-01"))
+  attributes(jhu)$metadata$as_of <- as.Date(attributes(jhu)$metadata$as_of)
   out1 <- arx_forecaster(
     jhu, "death_rate",
     c("case_rate", "death_rate")
