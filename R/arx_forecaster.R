@@ -120,7 +120,10 @@ arx_fcast_epi_workflow <- function(
   if (is.null(args_list$adjust_latency)) {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli::cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+      cli::cli_warn(
+        "The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is actually occurring {forecast_date_default}.",
+        class = "epipredict__arx_forecaster__forecast_date_defaulting"
+      )
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -128,10 +131,11 @@ arx_fcast_epi_workflow <- function(
   forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   if (forecast_date + args_list$ahead != target_date) {
-    cli::cli_warn(c(
+    cli::cli_abort(c(
       "`forecast_date` + `ahead` must equal `target_date`.",
       i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
-    ))
+    ),
+    class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecaste_date")
   }
 
   lags <- arx_lags_validator(predictors, args_list$lags)
@@ -292,15 +296,6 @@ arx_args_list <- function(
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
-
-  if (!is.null(forecast_date) && !is.null(target_date)) {
-    if (forecast_date + ahead != target_date) {
-      cli_warn(c(
-        "`forecast_date` + `ahead` must equal `target_date`.",
-        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
-      ))
-    }
-  }
 
   max_lags <- max(lags)
   structure(
