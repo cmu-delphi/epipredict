@@ -95,7 +95,9 @@ test_that("`layer_add_forecast_date()` infers correct date when using `adjust_la
   wf_latent <- epi_workflow(r_latent, parsnip::linear_reg()) %>%
     fit(jhu_reasonable_date) %>%
     add_frosting(frost_latent)
-  p_latent <- predict(wf_latent, latest)
+  reasonable_date <- jhu %>%
+    dplyr::filter(time_value >= max(time_value) - 14)
+  p_latent <- predict(wf_latent, reasonable_date)
   expect_equal(
     p_latent$forecast_date,
     rep(as.Date("2022-01-03"), times = 3)

@@ -213,18 +213,18 @@ arx_fcast_epi_workflow <- function(
 #' @param n_training Integer. An upper limit for the number of rows per
 #'   key that are used for training
 #'   (in the time unit of the `epi_df`).
-#' @param forecast_date Date. The date on which the forecast is created.  The
-#'   default `NULL` will attempt to determine this automatically either as the
-#'   max time value if there is no latency adjustment, or as the `as_of` of
-#'   `epi_data` if `adjust_latency` is non-`NULL`.
-#' @param target_date Date. The date for which the forecast is intended. The
-#'   default `NULL` will attempt to determine this automatically as
-#'   `forecast_date + ahead`.
+#' @param forecast_date Date. The date from which the forecast is occurring.
+#'   The default `NULL` will determine this automatically from either
+#'   1. the maximum time value for which there's data if there is no latency
+#'   adjustment (the default case), or
+#'   2. the `as_of` date of `epi_data` if `adjust_latency` is
+#'   non-`NULL`.
+#' @param target_date Date. The date that is being forecast. The default `NULL`
+#'   will determine this automatically as `forecast_date + ahead`.
 #' @param adjust_latency Character or `NULL`. One of the `method`s of
 #'   [step_adjust_latency()], or `NULL` (in which case there is no adjustment).
-#'   If there is a difference between the `forecast_date` and the last day of
-#'   data, this determines how to shift the model to account for this
-#'   difference. The options are:
+#'   If the `forecast_date` is after the last day of data, this determines how
+#'   to shift the model to account for this difference. The options are:
 #'   - `NULL` the default, assumes the `forecast_date` is the last day of data
 #'   - `"extend_ahead"`: increase the `ahead` by the latency so it's relative to
 #'   the last day of data. For example, if the last day of data was 3 days ago,

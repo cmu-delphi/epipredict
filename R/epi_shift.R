@@ -46,9 +46,12 @@ add_shifted_columns <- function(new_data, object, amount) {
   shift_sign_lat <- attributes(new_data)$metadata$shift_sign
   if (!is.null(latency_table) &&
     shift_sign_lat == sign_shift) {
-    # TODO this doesn't work on lags of transforms
+    # are we adding an unreasonable amount of latency?
+    check_interminable_latency(new_data, latency_table, object$columns, attributes(new_data)$metadata$forecast_date)
+    # get the actually used latencies
     rel_latency <- latency_table %>% filter(col_name %in% object$columns)
   } else {
+    # adding zero if there's no latency table
     rel_latency <- tibble(col_name = object$columns, latency = 0L)
   }
   grid <- expand_grid(col = object$columns, amount = sign_shift * amount) %>%

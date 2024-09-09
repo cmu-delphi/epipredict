@@ -34,20 +34,22 @@ date for which forecasts should be produced.}
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date on which the forecast is created.  The
-default \code{NULL} will attempt to determine this automatically either as the
-max time value if there is no latency adjustment, or as the \code{as_of} of
-\code{epi_data} if \code{adjust_latency} is non-\code{NULL}.}
+\item{forecast_date}{Date. The date from which the forecast is occurring.
+The default \code{NULL} will determine this automatically from either
+\enumerate{
+\item the maximum time value for which there's data if there is no latency
+adjustment (the default case), or
+\item the \code{as_of} date of \code{epi_data} if \code{adjust_latency} is
+non-\code{NULL}.
+}}
 
-\item{target_date}{Date. The date for which the forecast is intended. The
-default \code{NULL} will attempt to determine this automatically as
-\code{forecast_date + ahead}.}
+\item{target_date}{Date. The date that is being forecast. The default \code{NULL}
+will determine this automatically as \code{forecast_date + ahead}.}
 
 \item{adjust_latency}{Character or \code{NULL}. One of the \code{method}s of
 \code{\link[=step_adjust_latency]{step_adjust_latency()}}, or \code{NULL} (in which case there is no adjustment).
-If there is a difference between the \code{forecast_date} and the last day of
-data, this determines how to shift the model to account for this
-difference. The options are:
+If the \code{forecast_date} is after the last day of data, this determines how
+to shift the model to account for this difference. The options are:
 \itemize{
 \item \code{NULL} the default, assumes the \code{forecast_date} is the last day of data
 \item \code{"extend_ahead"}: increase the \code{ahead} by the latency so it's relative to

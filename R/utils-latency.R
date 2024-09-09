@@ -197,15 +197,15 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
     arrange(across(all_of(c("time_value", groups)))) %>%
     group_by(across(all_of(groups)))
   values_to_fill <- grouped_and_arranged %>%
-    slice(min(across(columns_to_complete, count_single_column)):n())
-
+    slice(min(across(all_of(columns_to_complete), count_single_column)):n())
   filled_values <- values_to_fill %>%
     bind_rows(completed_time_values) %>%
     arrange(across(all_of(c("time_value", groups)))) %>%
     fill(all_of(columns_to_complete), .direction = "down") %>%
     slice(-1) # remove the oirginal rows
+
   grouped_and_arranged %>%
-    slice(1:min(across(columns_to_complete, count_single_column))) %>%
+    slice(1:min(across(all_of(columns_to_complete), count_single_column))) %>%
     bind_rows(filled_values) %>%
     arrange(across(all_of(key_colnames(x)))) %>%
     ungroup() %>%
@@ -244,4 +244,51 @@ seq_null_swap <- function(from, to, by) {
     return(NULL)
   }
   seq(from = from, to = to, by = by)
+}
+
+
+#' warn when the latency is larger than would be reasonable
+#' @param dataset the epi_df
+#' @param latency_table the whole collection of latencies
+#' @param target_columns the names of the columns that we're adjusting, and whether its unreasonably latent
+#' @keywords internal
+check_interminable_latency <- function(dataset, latency_table, target_columns, forecast_date, call = caller_env()) {
+  # check that the shift amount isn't too extreme
+  rel_latency_table <- latency_table %>%
+    filter(col_name %in% target_columns)
+  # no relevant columns, so this error definitely isn't happening
+  if (nrow(rel_latency_table) == 0) {
+    return()
+  }
+  latency_max <- rel_latency_table %>%
+    pull(latency) %>%
+    abs() %>%
+    max()
+  time_type <- attributes(dataset)$metadata$time_type
+  i_latency <- which.max(latency_table$latency)
+  if (
+    (grepl("day", time_type) && (latency_max >= 28)) ||
+      (grepl("week", time_type) && (latency_max >= 4)) ||
+      ((time_type == "yearmonth") && (latency_max >= 2)) ||
+      ((time_type == "yearquarter") && (latency_max >= 1)) ||
+      ((time_type == "year") && (latency_max >= 1))
+  ) {
+    max_time_value <- dataset %>%
+      filter(!is.na(!!(latency_table[[i_latency, "col_name"]]))) %>%
+      pull(time_value) %>%
+      max()
+    cli::cli_warn(
+      message = c(
+        paste(
+          "The maximum latency is {latency_max}, ",
+          "which is questionable for it's `time_type` of ",
+          "{time_type}."
+        ),
+        "i" = "latency: {latency_table$latency[[i_latency]]}",
+        "i" = "`max_time` = {max_time_value} -> `forecast_date` = {forecast_date}"
+      ),
+      class = "epipredict__prep.step_latency__very_large_latency",
+      call = call
+    )
+  }
 }
