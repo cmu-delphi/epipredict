@@ -43,7 +43,6 @@ epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL)
   if (!is_null(postprocessor)) {
     out <- add_postprocessor(out, postprocessor)
   }
-
   out
 }
 

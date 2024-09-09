@@ -28,14 +28,17 @@ So for example, \code{ahead = 7} will create residuals by comparing values
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date on which the forecast is created.  The
-default \code{NULL} will attempt to determine this automatically either as the
-max time value if there is no latency adjustment, or as the \code{as_of} of
-\code{epi_data} if \code{adjust_latency} is non-\code{NULL}.}
+\item{forecast_date}{Date. The date from which the forecast is occurring.
+The default \code{NULL} will determine this automatically from either
+\enumerate{
+\item the maximum time value for which there's data if there is no latency
+adjustment (the default case), or
+\item the \code{as_of} date of \code{epi_data} if \code{adjust_latency} is
+non-\code{NULL}.
+}}
 
-\item{target_date}{Date. The date for which the forecast is intended. The
-default \code{NULL} will attempt to determine this automatically as
-\code{forecast_date + ahead}.}
+\item{target_date}{Date. The date that is being forecast. The default \code{NULL}
+will determine this automatically as \code{forecast_date + ahead}.}
 
 \item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of

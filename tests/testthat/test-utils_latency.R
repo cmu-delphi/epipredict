@@ -43,6 +43,23 @@ x_adjust_ahead <- tibble(
 ) %>%
   as_epi_df(as_of = max(time_range) + 3)
 
+modified_data %>% arrange(geo_value, desc(time_value))
+modified_data %>%
+  group_by(geo_value) %>%
+  filter(!is.na(case_rate)) %>%
+  summarise(max(time_value))
+as_of
+
+toy_df <- tribble(
+  ~geo_value, ~time_value, ~a, ~b,
+  "ma", as.Date("2015-01-11"), 20, 6,
+  "ma", as.Date("2015-01-12"), 23, NA,
+  "ma", as.Date("2015-01-13"), 25, NA,
+  "ca", as.Date("2015-01-11"), 100, 5,
+  "ca", as.Date("2015-01-12"), 103, 10,
+) %>%
+  as_epi_df(as_of = as.Date("2015-01-14"))
+
 test_that("get_latency works", {
   expect_equal(get_latency(modified_data, as_of, "case_rate", 1, "geo_value"), 5)
   expect_equal(get_latency(modified_data, as_of, "case_rate", -1, "geo_value"), -5)
@@ -50,6 +67,10 @@ test_that("get_latency works", {
   expect_equal(get_latency(modified_data, as_of, "case_rate_a", 1, "geo_value"), 5 + 4)
   expect_equal(get_latency(modified_data, as_of, "case_rate_b", 1, "geo_value"), 5 - 3)
   expect_equal(get_latency(modified_data, as_of, "death_rate_a", 1, "geo_value"), 4 - 7)
+  expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "a", 1, "geo_value"), 2)
+  expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "a", -1, "geo_value"), -2)
+  expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "b", 1, "geo_value"), 3)
+  expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "b", -1, "geo_value"), -3)
 })
 
 test_that("get_latency infers max_time to be the minimum `max time` across grouping the specified keys", {

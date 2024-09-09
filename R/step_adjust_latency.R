@@ -1,15 +1,132 @@
 #' Adapt the model to latent data
 #'
+#' @description
 #' In the standard case, the arx models assume that the last observation is also
 #' the day from which the forecast is being made. But if the data has latency,
 #' then you may wish to adjust the predictors (lags) and/or the outcome (ahead)
-#' to compensate. This allows the user to create models on the most recent data,
-#' regardless of latency patterns. Instead of using the last observation date,
-#' `step_adjust_latency` uses the `as_of` date of the `epi_df` as the
-#' `forecast_date`, potentially using different dates depending on the
-#' `epi_keys`, such as geography. This is most useful in realtime and
+#' to compensate.
+#' This is most useful in realtime and
 #' pseudo-prospective forecasting for data where there is some delay between the
 #' event occurring and the event being reported.
+#'
+#' @details
+#' This step allows the user to create models on the most recent
+#' data, automatically accounting for latency patterns. Instead of using the last observation
+#' date, `step_adjust_latency` uses the `as_of` date of the `epi_df` as the
+#' `forecast_date`, and adjusts the model so that there is data available. To
+#'   demonstrate some of the subtleties, let's consider a toy dataset:
+#' ```{r toy_df}
+#' toy_df <- tribble(
+#'  ~geo_value, ~time_value, ~a, ~b,
+#'  "ma", as.Date("2015-01-11"), 20, 6,
+#'  "ma", as.Date("2015-01-12"), 23, NA,
+#'  "ma", as.Date("2015-01-13"), 25, NA,
+#'  "ca", as.Date("2015-01-11"), 100, 5,
+#'  "ca", as.Date("2015-01-12"), 103, 10,
+#' ) %>%
+#'    as_epi_df(as_of = as.Date("2015-01-14"))
+#' ```
+#' If we're looking to predict the value on the 15th, forecasting from the 14th (the `as_of` date above),
+#'   there are two issues we will need to address:
+#' 1. `"ca"` is latent by 2 days, whereas `"ma"` is latent by 1
+#' 2. if we want to use `b` as an exogenous variable, for `"ma"` it is latent by 3 days instead of just 1.
+#'
+#' Regardless of `method`, `epi_keys_checked="geo_value"` guarantees tha the
+#'   difference between `"ma"` and `"ca"` is accounted for by making  the
+#'   latency adjustment at least 2. For some comparison, here's what the various
+#'   methods will do:
+#'
+#' ## `locf`
+#' Short for "last observation carried forward", `locf` assumes that every day
+#'   between the last observation and the forecast day is exactly the same.
+#'   This is a very straightforward assumption, but wrecks any features that
+#'   depend on changes in value over time, such as the growth rate, or even
+#'   adjacent lags. A more robust version of this falls under the heading of
+#'   nowcasting, an eventual aim for this package. On the toy dataset, it
+#'   doesn't matter which day we're trying to predict, since it just fills
+#'   forward to the `forecast_date`:
+#'   ```{r toy_df}
+#'   toy_recipe <- epi_recipe(toy_df) %>%
+#'     step_adjust_latency(method="locf")
+#'
+#'   toy_recipe %>%
+#'     prep(toy_df) %>%
+#'     bake(toy_df) %>%
+#'     arrange(geo_value, time_value)
+#'   ```
+#'
+#' ## `extend_lags`
+#' `extend_lags` increases the lags so that they are guaranteed to have
+#'   data. This has the advantage of being applicable on
+#'   a per-column basis; if cases and deaths are reported at different
+#'   latencies, the lags for each are adjusted separately. In the toy example:
+#'   ```{r toy_df}
+#'   toy_recipe <- epi_recipe(toy_df) %>%
+#'     step_adjust_latency(method="extend_lags") %>%
+#'     step_epi_lag(a,lag=1) %>%
+#'     step_epi_lag(b,lag=1) %>%
+#'     step_epi_ahead(a, ahead=1)
+#'
+#'   toy_recipe %>%
+#'     prep(toy_df) %>%
+#'     bake(toy_df) %>%
+#'     arrange(geo_value, time_value)
+#'   ```
+#' The maximum latency in column `a` is 2 days, so the lag is increased to 3,
+#'   while the max latency in column `b` is 3, so the same lag is increased to
+#'   4; both of these changes are reflected in the column names. Meanwhile the
+#'   ahead is uneffected.
+#'
+#'   As a side-note, lag/ahead can be somewhat ambiguous about direction. Here,
+#'   the values are brought forward in time, so that for a given row, column
+#'   `lag_3_a` represents the value 3 days before.
+#'
+#' ## `extend_ahead`
+#' `extend_ahead` increases the ahead, turning a 3 day ahead forecast
+#'   into a 7 day one; this has the advantage of simplicity and is reflective of
+#'   the actual modelling task, but potentially leaves information unused if
+#'   different data sources have different latencies; it must use the latency of
+#'   the most latent data to insure there is data available. In the toy example:
+#'   ```{r toy_df}
+#'   toy_recipe <- epi_recipe(toy_df) %>%
+#'     step_adjust_latency(method="extend_ahead") %>%
+#'     step_epi_lag(a,lag=0) %>%
+#'     step_epi_ahead(a, ahead=1)
+#'
+#'   toy_recipe %>%
+#'     prep(toy_df) %>%
+#'     bake(toy_df) %>%
+#'     arrange(geo_value, time_value)
+#'   ```
+#'   Even though we're doing a 1 day ahead forecast, because our worst latency
+#'   is 3 days from column `b`'s `"ma"` data, our outcome column is `ahead_4_a`
+#'   (so 4 days ahead). If we want to ignore any latency in column `b`, we need
+#'   to explicitly set the columns to consider while adjusting like this:
+#'   `step_adjust_latency(a, method="extend_ahead")`.
+#'
+#' # Programmatic details
+#' `step_adjust_latency` uses the metadata, such as `time_type` and `as_of`, of
+#'   the `epi_df` used in the initial prep step, rather than baking or
+#'   prediction. This means reusing the same forecaster on new data is not
+#'   advised, though typically it is not advised in general.
+#'
+#' The latency adjustment only applies to columns created after this step, so
+#'   this step should go before both `step_epi_ahead` and `step_epi_lag`. This will work:
+#'  ```{r}
+#'  toy_recipe <- epi_recipe(toy_df) %>%
+#'     # non-lag steps
+#'     step_adjust_latency(a, method = "extend_lags") %>%
+#'     step_epi_lag(a, lag=0) # other steps
+#'  ```
+#'  while this will not:
+#'  ```{r}
+#'  toy_recipe <- epi_recipe(toy_df) %>%
+#'     step_epi_lag(a, lag=0) %>%
+#'     step_adjust_latency(a, method = "extend_lags")
+#'  ```
+#' If you create columns that you then apply lags to (such as
+#'   `step_growth_rate()`), these should be created before
+#'   `step_adjust_latency`, so any subseqent latency can be addressed.
 #'
 #' @param method a character. Determines the method by which the
 #'   forecast handles latency. The options are:
@@ -25,22 +142,22 @@
 #'   lags are `c(0,7,14)` for data that is 3 days latent, the actual lags used
 #'   become `c(3,10,17)`.
 #' @param epi_keys_checked a character vector. A list of keys to group by before
-#'   finding the `max_time_value`.  The default value of this is
-#'   `c("geo_value")`, but it can be any collection of `epi_keys`.  Different
-#'   locations may have different latencies; to produce a forecast at every
-#'   location, we need to use the largest latency across every location; this
-#'   means taking `max_time_value` to be the minimum of the `max_time_value`s
-#'   for each `geo_value` (or whichever collection of keys are specified).  If
-#'   `NULL` or an empty character vector, it will take the maximum across all
-#'   values, irrespective of any keys.
+#'   finding the `max_time_value` (the last day of data), defaulting to
+#'   `geo_value`. Different locations may have different latencies; to produce a
+#'   forecast at every location, we need to guarantee data at every location by
+#'   using the largest latency across every location; this means taking
+#'   `max_time_value` to be the minimum of the `max_time_value`s for each set of
+#'   key values (so the earliest date).  If `NULL` or an empty character vector,
+#'   it will take the maximum across all values, irrespective of any keys.
+#'
+#'   Note that this is a separate concern from different latencies across
+#'   different *data columns*, which is only handled by the choice of `method`.
 #' @param fixed_latency either a positive integer, or a labeled positive integer
 #'   vector. Cannot be set at the same time as `fixed_forecast_date`. If
 #'   non-`NULL`, the amount to offset the ahead or lag by. If a single integer,
 #'   this is used for all columns; if a labeled vector, the labels must
 #'   correspond to the base column names (before lags/aheads).  If `NULL`, the
-#'   latency is the distance between the `epi_df`'s `max_time_value` and either
-#'   the `fixed_forecast_date` or the `epi_df`'s `as_of` field (the default for
-#'   `forecast_date`).
+#'   latency is the distance between the `epi_df`'s `max_time_value` and the `forecast_date`.
 #' @param fixed_forecast_date either a date of the same kind used in the
 #'   `epi_df`, or `NULL`. Exclusive with `fixed_latency`. If a date, it gives
 #'   the date from which the forecast is actually occurring. If `NULL`, the
@@ -49,21 +166,9 @@
 #' @param role For model terms created by this step, what analysis role should
 #'   they be assigned? `lag` is a predictor while `ahead` is an outcome.  It
 #'   should be correctly inferred and not need setting
-#' @param default Determines what fills empty rows
-#'   left by leading/lagging (defaults to NA).
 #' @template step-return
 #' @inheritParams recipes::step_lag
 #'
-#' @details The step assumes that the pipeline has already applied either
-#'   `step_epi_ahead` or `step_epi_lag` depending on the value of `"method"`,
-#'   and that `step_epi_naomit` has NOT been run.  By default, the latency will
-#'   be determined using the arguments below, but can be set explicitly using
-#'   either `fixed_latency` or `fixed_forecast_date`.
-#'
-#' The `prefix` and `id` arguments are unchangeable to ensure that the code runs
-#' properly and to avoid inconsistency with naming. For `step_epi_ahead`, they
-#' are always set to `"ahead_"` and `"epi_ahead"` respectively, while for
-#' `step_epi_lag`, they are set to `"lag_"` and `"epi_lag`, respectively.
 #'
 #' @family row operation steps
 #' @rdname step_adjust_latency
@@ -88,6 +193,7 @@
 #'
 #' @importFrom recipes detect_step
 #' @importFrom rlang enquos is_empty
+#' @importFrom dplyr tribble n
 step_adjust_latency <-
   function(recipe,
            ...,
@@ -172,6 +278,7 @@ then the previous `step_epi_lag`s won't work with modified data.",
         forecast_date = fixed_forecast_date,
         latency = fixed_latency,
         latency_table = NULL,
+        metadata = NULL,
         keys = key_colnames(recipe),
         columns = columns,
         skip = skip,
@@ -182,7 +289,8 @@ then the previous `step_epi_lag`s won't work with modified data.",
 
 step_adjust_latency_new <-
   function(terms, role, trained, forecast_date, latency, latency_table,
-           time_type, keys, method, epi_keys_checked, columns, skip, id) {
+           metadata, time_type, keys, method, epi_keys_checked, columns, skip,
+           id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
@@ -193,19 +301,17 @@ step_adjust_latency_new <-
       forecast_date = forecast_date,
       latency = latency,
       latency_table = latency_table,
+      metadata = metadata,
       keys = keys,
       columns = columns,
       skip = skip,
       id = id
     )
   }
-#' @importFrom recipes recipes_eval_select
-construct_latency_table <- function(x, latency, training, info) {
-  return(latency_table)
-}
 # lags introduces max(lags) NA's after the max_time_value.
 #' @export
 #' @importFrom glue glue
+#' @importFrom dplyr rowwise
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   sign_shift <- get_sign(x)
   latency <- x$latency
@@ -220,6 +326,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 
   if (is.null(latency)) {
     latency_table <- latency_table %>%
+      rowwise() %>%
       mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, x$epi_keys_checked))
   } else if (length(latency) > 1) {
     # if latency has a length, it must also have named elements. We assign based on comparing the name in the list
@@ -242,27 +349,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
       pull(variable)
   }
 
-  # check that the shift amount isn't too extreme
-  latency_max <- max(abs(latency_table$latency))
-  time_type <- attributes(training)$metadata$time_type
-  i_latency <- which.max(latency_table$latency)
-  if (
-    (grepl("day", time_type) && (latency_max >= 10)) ||
-      (grepl("week", time_type) && (latency_max >= 4)) ||
-      ((time_type == "yearmonth") && (latency_max >= 2)) ||
-      ((time_type == "yearquarter") && (latency_max >= 1)) ||
-      ((time_type == "year") && (latency_max >= 1))
-  ) {
-    cli::cli_warn(paste(
-      "!" = paste(
-        "The maximum latency is {latency_max}, ",
-        "which is questionable for it's `time_type` of ",
-        "{time_type}."
-      ),
-      "i" = "latency: {latency_table$latency[[i_latency]]}",
-      "i" = "`max_time` = {max(training$time_value)} -> `forecast_date` = {forecast_date}"
-    ), class = "epipredict__prep.step_latency__very_large_latency")
-  }
+
 
   step_adjust_latency_new(
     terms = x$terms,
@@ -271,6 +358,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     forecast_date = forecast_date,
     latency = unique(latency_table$latency),
     latency_table = latency_table,
+    metadata = attributes(training)$metadata,
     keys = x$keys,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
@@ -286,23 +374,28 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 bake.step_adjust_latency <- function(object, new_data, ...) {
   if (!isa(new_data, "epi_df")) {
     # TODO if new_data actually has keys other than geo_value and time_value, this is going to cause problems
-    new_data <- new_data %>% as_epi_df(as_of = object$forecast_date)
+    new_data <- as_epi_df(new_data)
+    attributes(new_data)$metadata <- object$metadata
+    attributes(new_data)$metadata$as_of <- object$forecast_date
   }
   if (object$method == "extend_ahead" || object$method == "extend_lags") {
     attributes(new_data)$metadata$latency_method <- object$method
     attributes(new_data)$metadata$shift_sign <- get_sign(object)
     attributes(new_data)$metadata$latency_table <- object$latency_table
+    attributes(new_data)$metadata$forecast_date <- object$forecast_date
     keys <- object$keys
   } else if (object$method == "locf") {
     # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
-    unnamed_columns <- object$columns %>% unname()
+    modified_columns <- object$columns %>% unname()
+    check_interminable_latency(new_data, object$latency_table, modified_columns, object$forecast_date)
+
     new_data <- new_data %>%
-      pad_to_end(rel_keys, object$forecast_date, unnamed_columns) %>%
+      pad_to_end(rel_keys, object$forecast_date, modified_columns) %>%
       # group_by_at(rel_keys) %>%
       arrange(time_value) %>%
       as_tibble() %>%
-      tidyr::fill(.direction = "down", any_of(unnamed_columns)) %>%
+      tidyr::fill(.direction = "down", any_of(modified_columns)) %>%
       ungroup()
   }
   return(new_data)
