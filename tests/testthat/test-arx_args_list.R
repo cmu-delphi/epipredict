@@ -26,12 +26,14 @@ test_that("arx_args checks inputs", {
   expect_error(arx_args_list(n_training_min = "de"))
   expect_error(arx_args_list(epi_keys = 1))
 
-  expect_error(arx_args_list(
-    forecast_date = as.Date("2022-01-01"),
-    target_date = as.Date("2022-01-04"),
-    ahead = 1L
-  ),
-  class =  "epipredict__arx_args__inconsistent_target_ahead_forecaste_date")
+  expect_error(
+    arx_args_list(
+      forecast_date = as.Date("2022-01-01"),
+      target_date = as.Date("2022-01-04"),
+      ahead = 1L
+    ),
+    class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
+  )
 })
 
 test_that("arx forecaster disambiguates quantiles", {

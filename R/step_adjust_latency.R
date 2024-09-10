@@ -213,7 +213,8 @@ step_adjust_latency <-
     arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
       cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
-                     class = "epipredict__step_adjust_latency__epi_recipe_only")
+        class = "epipredict__step_adjust_latency__epi_recipe_only"
+      )
     }
     if (!is.null(columns)) {
       cli::cli_abort(c("The `columns` argument must be `NULL`.",

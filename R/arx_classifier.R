@@ -205,9 +205,10 @@ arx_class_epi_workflow <- function(
     step_mutate(
       across(
         starts_with("ahead"),
-        ~cut(.x, breaks = args_list$breaks),
+        ~ cut(.x, breaks = args_list$breaks),
         .names = "outcome_class",
-        .unpack = TRUE),
+        .unpack = TRUE
+      ),
       role = "outcome"
     ) %>%
     step_epi_naomit() %>%
@@ -324,10 +325,13 @@ arx_class_args_list <- function(
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
-      cli::cli_warn(c(
-        "`forecast_date` + `ahead` must equal `target_date`.",
-        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."),
-      class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date")
+      cli::cli_warn(
+        c(
+          "`forecast_date` + `ahead` must equal `target_date`.",
+          i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+        ),
+        class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
+      )
     }
   }
 
