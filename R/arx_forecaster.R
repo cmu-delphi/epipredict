@@ -297,6 +297,15 @@ arx_args_list <- function(
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
+  if (!is.null(forecast_date) && !is.null(target_date)) {
+    if (forecast_date + ahead != target_date) {
+      cli_abort(c(
+        "`forecast_date` + `ahead` must equal `target_date`.",
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."),
+        class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date")
+    }
+  }
+
   max_lags <- max(lags)
   structure(
     enlist(
