@@ -56,6 +56,7 @@
 #'
 #' @examples
 #' library(recipes)
+#' library(dplyr)
 #' r <- recipe(case_death_rate_subset) %>%
 #'   # data is "daily", so we fit this to 1 ahead, the result will contain
 #'   # 1 day ahead residuals
@@ -69,7 +70,7 @@
 #'   layer_predict() %>%
 #'   layer_cdc_flatline_quantiles(aheads = c(7, 14, 21, 28), symmetrize = TRUE)
 #'
-#' eng <- linear_reg() %>% set_engine("flatline")
+#' eng <- linear_reg(engine = "flatline")
 #'
 #' wf <- epi_workflow(r, eng, f) %>% fit(case_death_rate_subset)
 #' preds <- forecast(wf) %>%
@@ -78,7 +79,7 @@
 #' preds
 #'
 #' preds <- preds %>%
-#'   unnest(.pred_distn_all) %>%
+#'   tidyr::unnest(.pred_distn_all) %>%
 #'   pivot_quantiles_wider(.pred_distn) %>%
 #'   mutate(target_date = forecast_date + ahead)
 #'
@@ -162,15 +163,13 @@ slather.layer_cdc_flatline_quantiles <-
     }
     the_fit <- workflows::extract_fit_parsnip(workflow)
     if (!inherits(the_fit, "_flatline")) {
-      cli::cli_warn(
-        c(
-          "Predictions for this workflow were not produced by the {.cls flatline}",
-          "{.pkg parsnip} engine. Results may be unexpected. See {.fn epipredict::flatline}."
-        )
-      )
+      cli::cli_warn(c(
+        "Predictions for this workflow were not produced by the {.cls flatline}",
+        "{.pkg parsnip} engine. Results may be unexpected. See {.fn epipredict::flatline}."
+      ))
     }
     p <- components$predictions
-    ek <- kill_time_value(epi_keys_mold(components$mold))
+    ek <- epi_keys_only(workflow)
     r <- grab_residuals(the_fit, components)
 
     avail_grps <- character(0L)
@@ -196,7 +195,7 @@ slather.layer_cdc_flatline_quantiles <-
           c(cols_in_preds$missing_names, cols_in_resids$missing_names)
         ))
       } else { # not flatline, but we'll try
-        key_cols <- dplyr::bind_cols(
+        key_cols <- bind_cols(
           geo_value = components$mold$extras$roles$geo_value,
           components$mold$extras$roles$key
         )
@@ -211,26 +210,26 @@ slather.layer_cdc_flatline_quantiles <-
           object$by_key,
           c(cols_in_preds$missing_names, cols_in_resids$missing_names)
         ))
-        r <- dplyr::bind_cols(key_cols, r)
+        r <- bind_cols(key_cols, r)
       }
     }
     r <- r %>%
-      dplyr::select(tidyselect::all_of(c(avail_grps, ".resid"))) %>%
-      dplyr::group_by(!!!rlang::syms(avail_grps)) %>%
-      dplyr::summarise(.resid = list(.resid), .groups = "drop")
+      select(all_of(c(avail_grps, ".resid"))) %>%
+      group_by(!!!rlang::syms(avail_grps)) %>%
+      summarise(.resid = list(.resid), .groups = "drop")
 
-    res <- dplyr::left_join(p, r, by = avail_grps) %>%
+    res <- left_join(p, r, by = avail_grps) %>%
       dplyr::rowwise() %>%
-      dplyr::mutate(
+      mutate(
         .pred_distn_all = propagate_samples(
           .resid, .pred, object$quantile_levels,
           object$aheads, object$nsim, object$symmetrize, object$nonneg
         )
       ) %>%
-      dplyr::select(tidyselect::all_of(c(avail_grps, ".pred_distn_all")))
+      select(all_of(c(avail_grps, ".pred_distn_all")))
 
     # res <- check_pname(res, components$predictions, object)
-    components$predictions <- dplyr::left_join(
+    components$predictions <- left_join(
       components$predictions,
       res,
       by = avail_grps
@@ -267,7 +266,7 @@ propagate_samples <- function(
     }
   }
   res <- res[aheads]
-  list(tibble::tibble(
+  list(tibble(
     ahead = aheads,
     .pred_distn = map_vec(
       res, ~ dist_quantiles(quantile(.x, quantile_levels), quantile_levels)

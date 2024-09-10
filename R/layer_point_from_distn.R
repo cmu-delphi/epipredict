@@ -93,9 +93,9 @@ slather.layer_point_from_distn <-
     if (is.null(object$name)) {
       components$predictions$.pred <- dstn
     } else {
-      dstn <- tibble::tibble(dstn = dstn)
+      dstn <- tibble(dstn = dstn)
       dstn <- check_pname(dstn, components$predictions, object)
-      components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
+      components$predictions <- mutate(components$predictions, !!!dstn)
     }
     components
   }

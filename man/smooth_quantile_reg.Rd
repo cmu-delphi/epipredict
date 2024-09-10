@@ -36,6 +36,7 @@ the \href{https://www.tidymodels.org/}{tidymodels} framework. Currently, the
 only supported engine is \code{\link[smoothqr:smooth_qr]{smoothqr::smooth_qr()}}.
 }
 \examples{
+library(smoothqr)
 tib <- data.frame(
   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),

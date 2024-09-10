@@ -86,7 +86,8 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 }
 
 #' @export
-slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
+slather.layer_add_forecast_date <- function(object, components, workflow,
+                                            new_data, ...) {
   rlang::check_dots_empty()
   if (is.null(object$forecast_date)) {
     max_time_value <- as.Date(max(
@@ -103,12 +104,13 @@ slather.layer_add_forecast_date <- function(object, components, workflow, new_da
     workflows::extract_preprocessor(workflow)$template, "metadata"
   )$time_type
   if (expected_time_type == "week") expected_time_type <- "day"
-  validate_date(forecast_date, expected_time_type,
+  validate_date(
+    forecast_date, expected_time_type,
     call = rlang::expr(layer_add_forecast_date())
   )
   forecast_date <- coerce_time_type(forecast_date, expected_time_type)
   object$forecast_date <- forecast_date
-  components$predictions <- dplyr::bind_cols(
+  components$predictions <- bind_cols(
     components$predictions,
     forecast_date = forecast_date
   )

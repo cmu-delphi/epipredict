@@ -92,9 +92,9 @@ slather.layer_predictive_distn <-
     if (!all(is.infinite(truncate))) {
       dstn <- distributional::dist_truncated(dstn, truncate[1], truncate[2])
     }
-    dstn <- tibble::tibble(dstn = dstn)
+    dstn <- tibble(dstn = dstn)
     dstn <- check_pname(dstn, components$predictions, object)
-    components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
+    components$predictions <- mutate(components$predictions, !!!dstn)
     components
   }
 

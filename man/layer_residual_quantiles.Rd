@@ -52,7 +52,10 @@ wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantiles(quantile_levels = c(0.0275, 0.975), symmetrize = FALSE) \%>\%
+  layer_residual_quantiles(
+    quantile_levels = c(0.0275, 0.975),
+    symmetrize = FALSE
+  ) \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
@@ -60,7 +63,10 @@ p <- forecast(wf1)
 
 f2 <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_residual_quantiles(quantile_levels = c(0.3, 0.7), by_key = "geo_value") \%>\%
+  layer_residual_quantiles(
+    quantile_levels = c(0.3, 0.7),
+    by_key = "geo_value"
+  ) \%>\%
   layer_naomit(.pred)
 wf2 <- wf \%>\% add_frosting(f2)
 

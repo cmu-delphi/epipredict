@@ -8,7 +8,7 @@ arx_classifier(
   epi_data,
   outcome,
   predictors,
-  trainer = parsnip::logistic_reg(),
+  trainer = logistic_reg(),
   args_list = arx_class_args_list()
 )
 }
@@ -48,8 +48,9 @@ This is an autoregressive classification model for
 that it estimates a class at a particular target horizon.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value >= as.Date("2021-11-01"))
+  filter(time_value >= as.Date("2021-11-01"))
 
 out <- arx_classifier(jhu, "death_rate", c("case_rate", "death_rate"))
 

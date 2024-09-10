@@ -123,7 +123,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
   wf <- epi_workflow() %>%
     add_epi_recipe(r)
 
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 3)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 7, 14))
@@ -138,7 +138,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   wf <- update_epi_recipe(wf, r2)
 
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 1))
@@ -147,7 +147,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   # adjust_epi_recipe using step number
   wf <- adjust_epi_recipe(wf, which_step = 2, ahead = 7)
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 1))
@@ -156,7 +156,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   # adjust_epi_recipe using step name
   wf <- adjust_epi_recipe(wf, which_step = "step_epi_ahead", ahead = 8)
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 1))
@@ -165,6 +165,6 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
 
   wf <- remove_epi_recipe(wf)
-  expect_error(extract_preprocessor(wf)$steps)
+  expect_error(workflows::extract_preprocessor(wf)$steps)
   expect_equal(wf$pre$actions$recipe$recipe, NULL)
 })

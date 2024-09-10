@@ -80,7 +80,8 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 }
 
 #' @export
-slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
+slather.layer_add_target_date <- function(object, components, workflow,
+                                          new_data, ...) {
   rlang::check_dots_empty()
   the_recipe <- workflows::extract_recipe(workflow)
   the_frosting <- extract_frosting(workflow)
@@ -92,7 +93,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
 
   if (!is.null(object$target_date)) {
     target_date <- object$target_date
-    validate_date(target_date, expected_time_type,
+    validate_date(
+      target_date, expected_time_type,
       call = expr(layer_add_target_date())
     )
     target_date <- coerce_time_type(target_date, expected_time_type)
@@ -101,7 +103,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
       !is.null(forecast_date <- extract_argument(
         the_frosting, "layer_add_forecast_date", "forecast_date"
       ))) {
-    validate_date(forecast_date, expected_time_type,
+    validate_date(
+      forecast_date, expected_time_type,
       call = rlang::expr(layer_add_forecast_date())
     )
     forecast_date <- coerce_time_type(forecast_date, expected_time_type)
@@ -118,7 +121,8 @@ slather.layer_add_target_date <- function(object, components, workflow, new_data
   }
 
   object$target_date <- target_date
-  components$predictions <- dplyr::bind_cols(components$predictions,
+  components$predictions <- bind_cols(
+    components$predictions,
     target_date = target_date
   )
   components

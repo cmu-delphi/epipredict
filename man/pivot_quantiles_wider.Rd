@@ -30,6 +30,6 @@ d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
 tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 
 pivot_quantiles_wider(tib, c("d1", "d2"))
-pivot_quantiles_wider(tib, tidyselect::starts_with("d"))
+pivot_quantiles_wider(tib, dplyr::starts_with("d"))
 pivot_quantiles_wider(tib, d2)
 }

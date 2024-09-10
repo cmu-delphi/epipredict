@@ -24,6 +24,13 @@ test_that("single dist_quantiles works, quantiles are accessible", {
     extrapolate_quantiles(z, c(.3, .7), middle = "linear"),
     new_quantiles(values = c(1, 1.5, 2, 3, 4, 4.5, 5), quantile_levels = 2:8 / 10)
   )
+  # empty values slot results in a length zero distribution
+  # see issue #361
+  expect_length(dist_quantiles(list(), c(.1, .9)), 0L)
+  expect_identical(
+    dist_quantiles(list(), c(.1, .9)),
+    distributional::dist_degenerate(double())
+  )
 })
 
 
@@ -39,6 +46,17 @@ test_that("quantile extrapolator works", {
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
   expect_length(parameters(qq[1])$quantile_levels[[1]], 7L)
+
+  dstn <- dist_quantiles(1:4, 1:4 / 5)
+  qq <- extrapolate_quantiles(dstn, 1:9 / 10)
+  dstn_na <- dist_quantiles(c(1, 2, NA, 4), 1:4 / 5)
+  qq2 <- extrapolate_quantiles(dstn_na, 1:9 / 10)
+  expect_equal(qq, qq2)
+  qq3 <- extrapolate_quantiles(dstn_na, 1:9 / 10, replace_na = FALSE)
+  qq2_vals <- field(vec_data(qq2)[[1]], "values")
+  qq3_vals <- field(vec_data(qq3)[[1]], "values")
+  qq2_vals[6] <- NA
+  expect_equal(qq2_vals, qq3_vals)
 })
 
 test_that("small deviations of quantile requests work", {

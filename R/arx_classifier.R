@@ -26,8 +26,9 @@
 #' @seealso [arx_class_epi_workflow()], [arx_class_args_list()]
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value >= as.Date("2021-11-01"))
+#'   filter(time_value >= as.Date("2021-11-01"))
 #'
 #' out <- arx_classifier(jhu, "death_rate", c("case_rate", "death_rate"))
 #'
@@ -45,14 +46,14 @@ arx_classifier <- function(
     epi_data,
     outcome,
     predictors,
-    trainer = parsnip::logistic_reg(),
+    trainer = logistic_reg(),
     args_list = arx_class_args_list()) {
   if (!is_classification(trainer)) {
-    cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
+    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
   }
 
   wf <- arx_class_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
-  wf <- generics::fit(wf, epi_data)
+  wf <- fit(wf, epi_data)
 
   preds <- forecast(
     wf,
@@ -60,8 +61,8 @@ arx_classifier <- function(
     n_recent = args_list$nafill_buffer,
     forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
   ) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value)
+    as_tibble() %>%
+    select(-time_value)
 
   structure(
     list(
@@ -95,9 +96,9 @@ arx_classifier <- function(
 #' @export
 #' @seealso [arx_classifier()]
 #' @examples
-#'
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value >= as.Date("2021-11-01"))
+#'   filter(time_value >= as.Date("2021-11-01"))
 #'
 #' arx_class_epi_workflow(jhu, "death_rate", c("case_rate", "death_rate"))
 #'
@@ -105,7 +106,7 @@ arx_classifier <- function(
 #'   jhu,
 #'   "death_rate",
 #'   c("case_rate", "death_rate"),
-#'   trainer = parsnip::multinom_reg(),
+#'   trainer = multinom_reg(),
 #'   args_list = arx_class_args_list(
 #'     breaks = c(-.05, .1), ahead = 14,
 #'     horizon = 14, method = "linear_reg"
@@ -119,10 +120,10 @@ arx_class_epi_workflow <- function(
     args_list = arx_class_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_class", "alist"))) {
-    rlang::abort("args_list was not created using `arx_class_args_list().")
+    cli_abort("`args_list` was not created using `arx_class_args_list()`.")
   }
   if (!(is.null(trainer) || is_classification(trainer))) {
-    rlang::abort("`trainer` must be a `{parsnip}` model of mode 'classification'.")
+    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
   }
   lags <- arx_lags_validator(predictors, args_list$lags)
 
@@ -130,7 +131,7 @@ arx_class_epi_workflow <- function(
   # ------- predictors
   r <- recipe(epi_data) %>%
     step_growth_rate(
-      tidyselect::all_of(predictors),
+      dplyr::all_of(predictors),
       role = "grp",
       horizon = args_list$horizon,
       method = args_list$method,
@@ -173,26 +174,24 @@ arx_class_epi_workflow <- function(
   o2 <- rlang::sym(paste0("ahead_", args_list$ahead, "_", o))
   r <- r %>%
     step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome") %>%
-    step_mutate(
+    recipes::step_mutate(
       outcome_class = cut(!!o2, breaks = args_list$breaks),
       role = "outcome"
     ) %>%
     step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training) %>%
-    {
-      if (!is.null(args_list$check_enough_data_n)) {
-        check_enough_train_data(
-          .,
-          all_predictors(),
-          !!outcome,
-          n = args_list$check_enough_data_n,
-          epi_keys = args_list$check_enough_data_epi_keys,
-          drop_na = FALSE
-        )
-      } else {
-        .
-      }
-    }
+    step_training_window(n_recent = args_list$n_training)
+
+  if (!is.null(args_list$check_enough_data_n)) {
+    r <- check_enough_train_data(
+      r,
+      recipes::all_predictors(),
+      recipes::all_outcomes(),
+      n = args_list$check_enough_data_n,
+      epi_keys = args_list$check_enough_data_epi_keys,
+      drop_na = FALSE
+    )
+  }
+
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
@@ -264,7 +263,7 @@ arx_class_args_list <- function(
     outcome_transform = c("growth_rate", "lag_difference"),
     breaks = 0.25,
     horizon = 7L,
-    method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
+    method = c("rel_change", "linear_reg"),
     log_scale = FALSE,
     additional_gr_args = list(),
     nafill_buffer = Inf,
@@ -274,8 +273,8 @@ arx_class_args_list <- function(
   rlang::check_dots_empty()
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
-  method <- match.arg(method)
-  outcome_transform <- match.arg(outcome_transform)
+  method <- rlang::arg_match(method)
+  outcome_transform <- rlang::arg_match(outcome_transform)
 
   arg_is_scalar(ahead, n_training, horizon, log_scale)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
@@ -287,12 +286,11 @@ arx_class_args_list <- function(
   if (is.finite(n_training)) arg_is_pos_int(n_training)
   if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
   if (!is.list(additional_gr_args)) {
-    cli::cli_abort(
-      c("`additional_gr_args` must be a {.cls list}.",
-        "!" = "This is a {.cls {class(additional_gr_args)}}.",
-        i = "See `?epiprocess::growth_rate` for available arguments."
-      )
-    )
+    cli_abort(c(
+      "`additional_gr_args` must be a {.cls list}.",
+      "!" = "This is a {.cls {class(additional_gr_args)}}.",
+      i = "See `?epiprocess::growth_rate` for available arguments."
+    ))
   }
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)

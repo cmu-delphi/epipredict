@@ -22,7 +22,7 @@ to hold steps for postprocessing predictions.
 The arguments are currently placeholders and must be NULL
 }
 \examples{
-
+library(dplyr)
 # Toy example to show that frosting can be created and added for postprocessing
 f <- frosting()
 wf <- epi_workflow() \%>\% add_frosting(f)

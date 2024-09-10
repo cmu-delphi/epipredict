@@ -44,7 +44,7 @@ the 0, 7 and 14 day case rates:
 
 ```{r}
 jhu <- case_death_rate_subset %>%
-  dplyr::filter(
+  filter(
     time_value >= "2021-06-04",
     time_value <= "2021-12-31",
     geo_value %in% c("ca", "fl", "tx", "ny", "nj")

@@ -32,9 +32,17 @@ quantiles will be added to the predictions.
 }
 \description{
 This function calculates quantiles when the prediction was \emph{distributional}.
-Currently, the only distributional engine is \code{quantile_reg()}.
-If this engine is used, then this layer will grab out estimated (or extrapolated)
-quantiles at the requested quantile values.
+}
+\details{
+Currently, the only distributional modes/engines are
+\itemize{
+\item \code{quantile_reg()}
+\item \code{smooth_quantile_reg()}
+\item \code{rand_forest(mode = "regression") \%>\% set_engine("grf_quantiles")}
+}
+
+If these engines were used, then this layer will grab out estimated
+(or extrapolated) quantiles at the requested quantile values.
 }
 \examples{
 library(dplyr)

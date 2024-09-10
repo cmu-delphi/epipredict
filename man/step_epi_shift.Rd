@@ -10,10 +10,8 @@ step_epi_lag(
   ...,
   lag,
   role = "predictor",
-  trained = FALSE,
   prefix = "lag_",
   default = NA,
-  columns = NULL,
   skip = FALSE,
   id = rand_id("epi_lag")
 )
@@ -23,10 +21,8 @@ step_epi_ahead(
   ...,
   ahead,
   role = "outcome",
-  trained = FALSE,
   prefix = "ahead_",
   default = NA,
-  columns = NULL,
   skip = FALSE,
   id = rand_id("epi_ahead")
 )
@@ -45,16 +41,10 @@ nonnegative, while ahead integers must be positive.}
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
-
-\item{prefix}{A prefix to indicate what type of variable this is}
+\item{prefix}{A character string that will be prefixed to the new column.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
-
-\item{columns}{A character string of variable names that will
-be populated (eventually) by the \code{terms} argument.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked

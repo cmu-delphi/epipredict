@@ -1,6 +1,6 @@
 validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
-  if (!epiprocess::is_epi_df(epi_data)) {
-    cli::cli_abort(c(
+  if (!is_epi_df(epi_data)) {
+    cli_abort(c(
       "`epi_data` must be an {.cls epi_df}.",
       "!" = "This one is a {.cls {class(epi_data)}}."
     ))
@@ -8,11 +8,11 @@ validate_forecaster_inputs <- function(epi_data, outcome, predictors) {
   arg_is_chr_scalar(outcome)
   arg_is_chr(predictors)
   if (!outcome %in% names(epi_data)) {
-    cli::cli_abort("{.var {outcome}} was not found in the training data.")
+    cli_abort("{.var {outcome}} was not found in the training data.")
   }
   check <- hardhat::check_column_names(epi_data, predictors)
   if (!check$ok) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "At least one predictor was not found in the training data.",
       "!" = "The following required columns are missing: {.val {check$missing_names}}."
     ))
@@ -29,7 +29,7 @@ arx_lags_validator <- function(predictors, lags) {
   if (l == 1) {
     lags <- rep(lags, p)
   } else if (length(lags) != p) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "You have requested {p} predictor(s) but {l} different lags.",
       i = "Lags must be a vector or a list with length == number of predictors."
     ))
@@ -39,7 +39,7 @@ arx_lags_validator <- function(predictors, lags) {
         lags <- lags[order(match(names(lags), predictors))]
       } else {
         predictors_miss <- setdiff(predictors, names(lags))
-        cli::cli_abort(c(
+        cli_abort(c(
           "If lags is a named list, then all predictors must be present.",
           i = "The predictors are {.var {predictors}}.",
           i = "So lags is missing {.var {predictors_miss}}'."

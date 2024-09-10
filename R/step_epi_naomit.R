@@ -22,6 +22,6 @@ step_epi_naomit <- function(recipe) {
 print.step_naomit <- # not exported from recipes package
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "Removing rows with NA values in "
-    print_step(x$columns, x$terms, x$trained, title, width)
+    recipes::print_step(x$columns, x$terms, x$trained, title, width)
     invisible(x)
   }

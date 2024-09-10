@@ -8,7 +8,7 @@ arx_fcast_epi_workflow(
   epi_data,
   outcome,
   predictors = outcome,
-  trainer = parsnip::linear_reg(),
+  trainer = linear_reg(),
   args_list = arx_args_list()
 )
 }
@@ -42,8 +42,9 @@ may alter the returned \code{epi_workflow} object (e.g., if you intend to
 use \code{\link[=quantile_reg]{quantile_reg()}}) but can be omitted.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value >= as.Date("2021-12-01"))
+  filter(time_value >= as.Date("2021-12-01"))
 
 arx_fcast_epi_workflow(
   jhu, "death_rate",

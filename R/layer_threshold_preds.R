@@ -45,7 +45,7 @@ layer_threshold <-
     add_layer(
       frosting,
       layer_threshold_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         lower = lower,
         upper = upper,
         id = id
@@ -102,12 +102,7 @@ slather.layer_threshold <-
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)
     components$predictions <- components$predictions %>%
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::all_of(col_names),
-          ~ snap(.x, object$lower, object$upper)
-        )
-      )
+      mutate(across(all_of(col_names), ~ snap(.x, object$lower, object$upper)))
     components
   }
 

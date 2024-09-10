@@ -30,18 +30,17 @@ test_that("epi_keys_mold extracts time_value and geo_value, but not raw", {
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
     step_epi_naomit()
 
+  expect_identical(key_colnames(my_recipe), c("geo_value", "time_value"))
+
   my_workflow <- epi_workflow() %>%
     add_epi_recipe(my_recipe) %>%
     add_model(linear_reg()) %>%
     fit(data = case_death_rate_subset)
 
-  expect_setequal(
-    epi_keys_mold(my_workflow$pre$mold),
-    c("time_value", "geo_value")
-  )
+  expect_identical(key_colnames(my_workflow), c("geo_value", "time_value"))
 })
 
-test_that("epi_keys_mold extracts additional keys when they are present", {
+test_that("key_colnames extracts additional keys when they are present", {
   my_data <- tibble::tibble(
     geo_value = rep(c("ca", "fl", "pa"), each = 3),
     time_value = rep(seq(as.Date("2020-06-01"), as.Date("2020-06-03"),
@@ -51,7 +50,7 @@ test_that("epi_keys_mold extracts additional keys when they are present", {
     state = rep(c("ca", "fl", "pa"), each = 3), # extra key
     value = 1:length(geo_value) + 0.01 * rnorm(length(geo_value))
   ) %>%
-    epiprocess::as_epi_df(
+    as_epi_df(
       additional_metadata = list(other_keys = c("state", "pol"))
     )
 
@@ -59,10 +58,17 @@ test_that("epi_keys_mold extracts additional keys when they are present", {
     step_epi_ahead(value, ahead = 7) %>%
     step_epi_naomit()
 
+  # order of the additional keys may be different
+  expect_setequal(
+    key_colnames(my_recipe),
+    c("geo_value", "time_value", "state", "pol")
+  )
+
   my_workflow <- epi_workflow(my_recipe, linear_reg()) %>% fit(my_data)
 
+  # order of the additional keys may be different
   expect_setequal(
-    epi_keys_mold(my_workflow$pre$mold),
-    c("time_value", "geo_value", "state", "pol")
+    key_colnames(my_workflow),
+    c("geo_value", "time_value", "state", "pol")
   )
 })

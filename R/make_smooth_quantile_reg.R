@@ -21,8 +21,8 @@
 #'
 #' @seealso [fit.model_spec()], [set_engine()]
 #'
-#' @importFrom smoothqr smooth_qr
 #' @examples
+#' library(smoothqr)
 #' tib <- data.frame(
 #'   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
 #'   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),

@@ -32,7 +32,7 @@ r <- recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7)
 
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
+wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%

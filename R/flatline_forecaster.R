@@ -1,8 +1,9 @@
 #' Predict the future with today's value
 #'
 #' This is a simple forecasting model for
-#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent observation as the
-#' forcast for any future date, and produces intervals based on the quantiles
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent
+#' observation as the
+#' forecast for any future date, and produces intervals based on the quantiles
 #' of the residuals of such a "flatline" forecast over all available training
 #' data.
 #'
@@ -33,9 +34,9 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("flat_fcast", "alist"))) {
-    cli_stop("args_list was not created using `flatline_args_list().")
+    cli_abort("`args_list` was not created using `flatline_args_list().")
   }
-  keys <- epi_keys(epi_data)
+  keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 
@@ -60,18 +61,18 @@ flatline_forecaster <- function(
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
-  eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
+  eng <- linear_reg(engine = "flatline")
 
   wf <- epi_workflow(r, eng, f)
-  wf <- generics::fit(wf, epi_data)
+  wf <- fit(wf, epi_data)
   preds <- suppressWarnings(forecast(
     wf,
     fill_locf = TRUE,
     n_recent = args_list$nafill_buffer,
     forecast_date = forecast_date
   )) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value)
+    as_tibble() %>%
+    select(-time_value)
 
   structure(
     list(

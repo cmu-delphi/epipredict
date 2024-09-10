@@ -14,6 +14,20 @@ recipes::prep
 #' @export
 recipes::bake
 
+
 #' @importFrom recipes prep
 #' @export
 recipes::recipe
+
+#' @importFrom recipes rand_id
+#' @export
+recipes::rand_id
+
+#' @importFrom tibble tibble
+#' @export
+tibble::tibble
+
+#' @importFrom generics tidy
+#' @export
+generics::tidy
+

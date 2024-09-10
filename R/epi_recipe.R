@@ -233,15 +233,16 @@ prep.epi_recipe <- function(
   # We do the conversion here, then set it to FALSE
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
-  training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
-  keys <- epi_keys(x)
+  training <- dplyr::relocate(training, dplyr::all_of(key_colnames(training)))
+  tr_data <- recipes:::train_info(training)
+  keys <- key_colnames(x)
+
   orig_lvls <- lapply(training, recipes:::get_levels)
   orig_lvls <- kill_levels(orig_lvls, keys)
   lvls <- lapply(training, recipes:::get_levels)
   lvls <- kill_levels(lvls, keys) # don't do anything to the epi_keys
   training <- recipes:::strings2factors(training, lvls)
 
-  # browser()
   x <- NextMethod("prep",
     training = training, fresh = fresh,
     verbose = verbose,

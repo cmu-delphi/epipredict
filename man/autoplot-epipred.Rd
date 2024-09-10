@@ -97,13 +97,13 @@ autoplot(wf, preds, .max_facets = 4)
 
 # ------- Show multiple horizons
 
-p <- lapply(c(7, 14, 21, 28), \(h) {
+p <- lapply(c(7, 14, 21, 28), function(h) {
   r <- recipe(jhu) \%>\%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
     step_epi_ahead(death_rate, ahead = h) \%>\%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
     step_epi_naomit()
-  ewf <- epi_workflow(r, parsnip::linear_reg(), f) \%>\% fit(jhu)
+  ewf <- epi_workflow(r, linear_reg(), f) \%>\% fit(jhu)
   forecast(ewf)
 })
 
@@ -112,7 +112,8 @@ autoplot(wf, p, .max_facets = 4)
 
 # ------- Plotting canned forecaster output
 
-jhu <- case_death_rate_subset \%>\% filter(time_value >= as.Date("2021-11-01"))
+jhu <- case_death_rate_subset \%>\%
+  filter(time_value >= as.Date("2021-11-01"))
 flat <- flatline_forecaster(jhu, "death_rate")
 autoplot(flat, .max_facets = 4)
 

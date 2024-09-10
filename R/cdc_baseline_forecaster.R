@@ -61,9 +61,9 @@ cdc_baseline_forecaster <- function(
     args_list = cdc_baseline_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("cdc_flat_fcast", "alist"))) {
-    cli_stop("args_list was not created using `cdc_baseline_args_list().")
+    cli_abort("`args_list` was not created using `cdc_baseline_args_list().")
   }
-  keys <- epi_keys(epi_data)
+  keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 
@@ -98,14 +98,14 @@ cdc_baseline_forecaster <- function(
   # layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, ".pred")
 
-  eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
+  eng <- linear_reg(engine = "flatline")
 
   wf <- epi_workflow(r, eng, f)
-  wf <- generics::fit(wf, epi_data)
+  wf <- fit(wf, epi_data)
   preds <- suppressWarnings(predict(wf, new_data = latest)) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value) %>%
-    dplyr::mutate(target_date = forecast_date + ahead * args_list$data_frequency)
+    as_tibble() %>%
+    select(-time_value) %>%
+    mutate(target_date = forecast_date + ahead * args_list$data_frequency)
 
   structure(
     list(
@@ -218,11 +218,11 @@ parse_period <- function(x) {
       mult <- switch(mult,
         day = 1L,
         wee = 7L,
-        cli::cli_abort("incompatible timespan in `aheads`.")
+        cli_abort("incompatible timespan in `aheads`.")
       )
       x <- as.numeric(x[1]) * mult
     }
-    if (length(x) > 2L) cli::cli_abort("incompatible timespan in `aheads`.")
+    if (length(x) > 2L) cli_abort("incompatible timespan in `aheads`.")
   }
   stopifnot(rlang::is_integerish(x))
   as.integer(x)

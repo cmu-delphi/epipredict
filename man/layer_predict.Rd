@@ -58,6 +58,7 @@ postprocessing. This would typically be the first layer in a \code{frosting}
 postprocessor.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 

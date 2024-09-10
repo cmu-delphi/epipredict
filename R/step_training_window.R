@@ -5,18 +5,13 @@
 #'   observations in `time_value` per group, where the groups are formed
 #'   based on the remaining `epi_keys`.
 #'
-#' @param recipe A recipe object. The step will be added to the
-#'   sequence of operations for this recipe.
-#' @param role Not used by this step since no new variables are created.
-#' @param trained A logical to indicate if the quantities for
-#'   preprocessing have been estimated.
 #' @param n_recent An integer value that represents the number of most recent
 #'   observations that are to be kept in the training window per key
 #'   The default value is 50.
 #' @param epi_keys An optional character vector for specifying "key" variables
 #'   to group on. The default, `NULL`, ensures that every key combination is
 #'   limited.
-#' @param id A character string that is unique to this step to identify it.
+#' @inheritParams step_epi_lag
 #' @template step-return
 #'
 #' @details Note that `step_epi_lead()` and `step_epi_lag()` should come
@@ -25,13 +20,10 @@
 #' @export
 #'
 #' @examples
-#' tib <- tibble::tibble(
+#' tib <- tibble(
 #'   x = 1:10,
 #'   y = 1:10,
-#'   time_value = rep(seq(as.Date("2020-01-01"),
-#'     by = 1,
-#'     length.out = 5
-#'   ), times = 2),
+#'   time_value = rep(seq(as.Date("2020-01-01"), by = 1, length.out = 5), 2),
 #'   geo_value = rep(c("ca", "hi"), each = 5)
 #' ) %>%
 #'   as_epi_df()
@@ -50,11 +42,9 @@
 step_training_window <-
   function(recipe,
            role = NA,
-           trained = FALSE,
            n_recent = 50,
            epi_keys = NULL,
            id = rand_id("training_window")) {
-    arg_is_lgl_scalar(trained)
     arg_is_scalar(n_recent, id)
     arg_is_pos(n_recent)
     if (is.finite(n_recent)) arg_is_pos_int(n_recent)
@@ -64,7 +54,7 @@ step_training_window <-
       recipe,
       step_training_window_new(
         role = role,
-        trained = trained,
+        trained = FALSE,
         n_recent = n_recent,
         epi_keys = epi_keys,
         skip = TRUE,
@@ -88,7 +78,7 @@ step_training_window_new <-
 
 #' @export
 prep.step_training_window <- function(x, training, info = NULL, ...) {
-  ekt <- kill_time_value(epi_keys(training))
+  ekt <- epi_keys_only(training)
   ek <- x$epi_keys %||% ekt %||% character(0L)
 
   hardhat::validate_column_names(training, ek)
@@ -109,10 +99,10 @@ bake.step_training_window <- function(object, new_data, ...) {
 
   if (object$n_recent < Inf) {
     new_data <- new_data %>%
-      dplyr::group_by(dplyr::across(dplyr::all_of(object$epi_keys))) %>%
-      dplyr::arrange(time_value) %>%
+      group_by(across(all_of(object$epi_keys))) %>%
+      arrange(time_value) %>%
       dplyr::slice_tail(n = object$n_recent) %>%
-      dplyr::ungroup()
+      ungroup()
   }
 
   new_data
@@ -123,10 +113,7 @@ print.step_training_window <-
   function(x, width = max(20, options()$width - 30), ...) {
     title <- "# of recent observations per key limited to:"
     n_recent <- x$n_recent
-    tr_obj <- format_selectors(rlang::enquos(n_recent), width)
-    recipes::print_step(
-      tr_obj, rlang::enquos(n_recent),
-      x$trained, title, width
-    )
+    tr_obj <- recipes::format_selectors(rlang::enquos(n_recent), width)
+    recipes::print_step(tr_obj, rlang::enquos(n_recent), x$trained, title, width)
     invisible(x)
   }
