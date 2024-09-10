@@ -21,6 +21,6 @@ test_that("arx_forecaster errors if forecast date, target date, and ahead are in
     c("death_rate_7d_av", "case_rate_7d_av"),
     args_list = (arx_args_list(ahead = 5, target_date = max_date, forecast_date = max_date))
     ),
-    class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecaste_date"
+    class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
   )
 })

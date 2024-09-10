@@ -212,7 +212,8 @@ step_adjust_latency <-
            id = recipes::rand_id("adjust_latency")) {
     arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
-      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.", class = "epipredict__step_adjust_latency__epi_recipe_only")
+      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
+                     class = "epipredict__step_adjust_latency__epi_recipe_only")
     }
     if (!is.null(columns)) {
       cli::cli_abort(c("The `columns` argument must be `NULL`.",
@@ -251,14 +252,7 @@ then the previous `step_epi_lag`s won't work with modified data.",
         cli::cli_abort("{.val fixed_latency} contains names not in the template dataset: {wrong_names}", class = "epipredict__step_adjust_latency__undefined_names_error")
       }
     }
-
     method <- rlang::arg_match(method)
-    terms_used <- recipes_eval_select(enquos(...), recipe$template, recipe$term_info)
-    if (is_empty(terms_used)) {
-      terms_used <- recipe$term_info %>%
-        filter(role == "raw") %>%
-        pull(variable)
-    }
     if (method == "extend_ahead") {
       rel_step_type <- "step_epi_ahead"
       shift_name <- "ahead"
