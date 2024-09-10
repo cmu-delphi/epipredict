@@ -153,4 +153,13 @@ test_that("arx_classifier snapshots", {
     c("case_rate", "death_rate")
   )
   expect_snapshot_tibble(arc1$predictions)
+  max_date <-case_death_rate_subset$time_value %>% max
+  arc2 <- arx_classifier(
+    case_death_rate_subset %>%
+      dplyr::filter(time_value >= as.Date("2021-11-01")),
+    "death_rate",
+    c("case_rate", "death_rate"),
+    args_list = arx_class_args_list(adjust_latency = "extend_ahead", forecast_date = max_date+2)
+  )
+  expect_snapshot_tibble(arc2$predictions)
 })
