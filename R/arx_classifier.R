@@ -158,13 +158,13 @@ arx_class_epi_workflow <- function(
       additional_gr_args_list = args_list$additional_gr_args
     )
   for (l in seq_along(lags)) {
-    p <- predictors[l]
-    p <- as.character(glue::glue_data(args_list, "gr_{horizon}_{method}_{p}"))
-    r <- step_epi_lag(r, !!p, lag = lags[[l]])
+    pred_names <- predictors[l]
+    pred_names <- as.character(glue::glue_data(args_list, "gr_{horizon}_{method}_{pred_names}"))
+    r <- step_epi_lag(r, !!pred_names, lag = lags[[l]])
   }
   # ------- outcome
   if (args_list$outcome_transform == "lag_difference") {
-    o <- as.character(
+    pre_out_name <- as.character(
       glue::glue_data(args_list, "lag_diff_{horizon}_{outcome}")
     )
     r <- r %>%
@@ -175,7 +175,7 @@ arx_class_epi_workflow <- function(
       )
   }
   if (args_list$outcome_transform == "growth_rate") {
-    o <- as.character(
+    pre_out_name <- as.character(
       glue::glue_data(args_list, "gr_{horizon}_{method}_{outcome}")
     )
     if (!(outcome %in% predictors)) {
@@ -190,20 +190,24 @@ arx_class_epi_workflow <- function(
         )
     }
   }
-  o2 <- rlang::sym(paste0("ahead_", args_list$ahead, "_", o))
+  ahead_out_name <- rlang::sym(paste0("ahead_", args_list$ahead, "_", pre_out_name))
   method_adjust_latency <- args_list$adjust_latency
   if (!is.null(method_adjust_latency)) {
     # only extend_ahead is supported atm
-    r <- r %>% step_adjust_latency(all_outcomes(),
+    r <- r %>% step_adjust_latency(!!pre_out_name,
       fixed_forecast_date = forecast_date,
       method = method_adjust_latency
     )
   }
   r <- r %>%
-    step_epi_ahead(!!o, ahead = args_list$ahead, role = "pre-outcome")
+    step_epi_ahead(!!pre_out_name, ahead = args_list$ahead, role = "pre-outcome")
   r <- r %>%
     step_mutate(
-      outcome_class = cut(!!o2, breaks = args_list$breaks),
+      across(
+        starts_with("ahead"),
+        ~cut(.x, breaks = args_list$breaks),
+        .names = "outcome_class",
+        .unpack = TRUE),
       role = "outcome"
     ) %>%
     step_epi_naomit() %>%
@@ -322,8 +326,8 @@ arx_class_args_list <- function(
     if (forecast_date + ahead != target_date) {
       cli::cli_warn(c(
         "`forecast_date` + `ahead` must equal `target_date`.",
-        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
-      ))
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."),
+      class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date")
     }
   }
 
