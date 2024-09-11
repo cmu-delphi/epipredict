@@ -30,4 +30,3 @@ tibble::tibble
 #' @importFrom generics tidy
 #' @export
 generics::tidy
-
