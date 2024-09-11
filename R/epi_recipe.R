@@ -431,7 +431,7 @@ prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
   if (is.null(training)) {
-    cli::cli_warn(paste(
+    cli::cli_warn(c(
       "!" = "No training data was supplied to {.fn prep}.",
       "!" = "Unlike a {.cls recipe}, an {.cls epi_recipe} does not ",
       "!" = "store the full template data in the object.",
@@ -582,6 +582,7 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
   }
   new_data
 }
+
 
 kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)

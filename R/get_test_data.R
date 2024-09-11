@@ -26,9 +26,10 @@
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @importFrom rlang %@%
 #' @importFrom stats na.omit
+#' @importFrom cli cli_abort cli_warn
 #' @export
 get_test_data <- function(recipe, x) {
-  if (!is_epi_df(x)) cli::cli_abort("`x` must be an `epi_df`.")
+  if (!is_epi_df(x)) cli_abort("`x` must be an `epi_df`.")
 
   check <- hardhat::check_column_names(x, colnames(recipe$template))
   if (!check$ok) {
@@ -47,7 +48,7 @@ get_test_data <- function(recipe, x) {
   # Probably needs a fix based on the time_type of the epi_df
   avail_recent <- diff(range(x$time_value))
   if (avail_recent < keep) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "You supplied insufficient recent data for this recipe. ",
       "!" = "You need at least {min_required} days of data,",
       "!" = "but `x` contains only {avail_recent}."

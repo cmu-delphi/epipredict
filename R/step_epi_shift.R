@@ -67,6 +67,7 @@ step_epi_lag <-
     }
     arg_is_nonneg_int(lag)
     arg_is_chr_scalar(prefix, id)
+
     recipes::add_step(
       recipe,
       step_epi_lag_new(
@@ -110,6 +111,7 @@ step_epi_ahead <-
     }
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id)
+
     recipes::add_step(
       recipe,
       step_epi_ahead_new(
@@ -204,6 +206,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 bake.step_epi_lag <- function(object, new_data, ...) {
   add_shifted_columns(new_data, object, object$lag)
 }
+
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
   add_shifted_columns(new_data, object, object$ahead)
@@ -217,6 +220,7 @@ print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
   )
   invisible(x)
 }
+
 
 #' @export
 print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {

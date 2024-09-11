@@ -30,6 +30,7 @@
 #'
 #' @family row operation steps
 #' @importFrom epiprocess growth_rate
+#' @importFrom cli cli_abort
 #' @export
 #' @examples
 #' r <- epi_recipe(case_death_rate_subset) %>%
@@ -58,7 +59,7 @@ step_growth_rate <-
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
     if (!is.null(replace_Inf)) {
-      if (length(replace_Inf) != 1L) cli::cli_abort("`replace_Inf` must be a scalar.")
+      if (length(replace_Inf) != 1L) cli_abort("`replace_Inf` must be a scalar.")
       if (!is.na(replace_Inf)) arg_is_numeric(replace_Inf)
     }
     arg_is_chr(role)
