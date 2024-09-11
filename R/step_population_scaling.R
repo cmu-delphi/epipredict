@@ -171,7 +171,7 @@ bake.step_population_scaling <- function(object, new_data, ...) {
     ))
   }
 
-  object$df <- mutate(object$df, across(dplyr::where(is.character), tolower))
+  # object$df <- mutate(object$df, across(dplyr::where(is.character), tolower))
 
   pop_col <- rlang::sym(object$df_pop_col)
   suffix <- ifelse(object$create_new, object$suffix, "")

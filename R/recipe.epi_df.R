@@ -73,8 +73,8 @@ recipe.formula <- function(formula, data, ...) {
 }
 
 add_epi_df_roles_to_recipe <- function(r, epi_df) {
-  edf_keys <- epiprocess::key_colnames(epi_df)
-  edf_roles <- c("time_value", "geo_value", rep("key", length(edf_keys) - 2))
+  edf_keys <- key_colnames(epi_df)
+  edf_roles <- c("geo_value", "time_value", rep("key", length(edf_keys) - 2))
   types <- recipes:::get_types(epi_df[, edf_keys])$type
   info <- tibble(
     variable = edf_keys,

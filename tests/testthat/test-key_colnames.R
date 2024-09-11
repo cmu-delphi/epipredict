@@ -2,25 +2,12 @@ library(parsnip)
 library(workflows)
 library(dplyr)
 
-test_that("epi_keys returns empty for an object that isn't an epi_df", {
-  expect_identical(epi_keys(data.frame(x = 1:3, y = 2:4)), character(0L))
-})
-
-test_that("epi_keys returns possible keys if they exist", {
-  expect_identical(
-    epi_keys(data.frame(time_value = 1:3, geo_value = 2:4)),
-    c("time_value", "geo_value")
-  )
-})
-
-
-test_that("Extracts keys from an epi_df", {
-  expect_equal(epi_keys(case_death_rate_subset), c("time_value", "geo_value"))
-})
-
 test_that("Extracts keys from a recipe", {
-  expect_equal(epi_keys(recipe(case_death_rate_subset)), c("time_value", "geo_value"))
-  expect_equal(epi_keys(recipe(cars)), character(0L))
+  expect_equal(
+    key_colnames(recipe(case_death_rate_subset)),
+    c("geo_value", "time_value")
+  )
+  expect_equal(key_colnames(recipe(cars)), character(0L))
 })
 
 test_that("epi_keys_mold extracts time_value and geo_value, but not raw", {
