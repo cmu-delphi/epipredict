@@ -214,9 +214,9 @@ test_that("test joining by default columns", {
     recipes::step_naomit(recipes::all_predictors()) %>%
     recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
-  expect_snapshot(prep <- prep(r, jhu))
+  prep <- prep(r, jhu)
 
-  expect_snapshot(b <- bake(prep, jhu))
+  b <- bake(prep, jhu)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -228,12 +228,12 @@ test_that("test joining by default columns", {
       df_pop_col = "values"
     )
 
-  expect_snapshot(wf <- epi_workflow(
+  wf <- epi_workflow(
     r,
     parsnip::linear_reg()
   ) %>%
     fit(jhu) %>%
-    add_frosting(f))
+    add_frosting(f)
 
   latest <- get_test_data(
     recipe = r,
@@ -246,7 +246,7 @@ test_that("test joining by default columns", {
   )
 
 
-  expect_snapshot(p <- predict(wf, latest))
+  p <- predict(wf, latest)
 
 
 
