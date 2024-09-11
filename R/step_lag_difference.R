@@ -13,6 +13,7 @@
 #'
 #'
 #' @family row operation steps
+#' @importFrom cli cli_abort cli_warn
 #' @export
 #' @examples
 #' r <- epi_recipe(case_death_rate_subset) %>%
@@ -32,7 +33,7 @@ step_lag_difference <-
            skip = FALSE,
            id = rand_id("lag_diff")) {
     if (!is_epi_recipe(recipe)) {
-      cli::cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
+      cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
     arg_is_pos_int(horizon)
     arg_is_chr(role)

@@ -64,13 +64,6 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
     layer_naomit(.pred)
   wf3 <- wf %>% add_frosting(f3)
 
-  # this warning has been removed
-  # expect_warning(
-  #   p3 <- predict(wf3, latest),
-  #   "forecast_date is less than the most recent update date of the data."
-  # )
-  p3 <- predict(wf3, latest)
-  p3
   expect_silent(p3 <- predict(wf3, latest))
   expect_equal(ncol(p3), 4L)
   expect_s3_class(p3, "epi_df")

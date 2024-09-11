@@ -66,8 +66,7 @@ flatline_forecaster <- function(
   wf <- epi_workflow(r, eng, f)
   wf <- fit(wf, epi_data)
   preds <- suppressWarnings(forecast(
-    wf,
-    fill_locf = TRUE
+    wf
   )) %>%
     as_tibble() %>%
     select(-time_value)
@@ -106,6 +105,7 @@ flatline_forecaster <- function(
 #' flatline_args_list()
 #' flatline_args_list(symmetrize = FALSE)
 #' flatline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
+#' @importFrom cli cli_abort cli_warn
 flatline_args_list <- function(
     ahead = 7L,
     n_training = Inf,
@@ -129,7 +129,7 @@ flatline_args_list <- function(
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
-      cli::cli_warn(c(
+      cli_warn(c(
         "`forecast_date` + `ahead` must equal `target_date`.",
         i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
       ))

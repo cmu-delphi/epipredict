@@ -51,7 +51,16 @@ arx_forecaster <- function(
   wf <- arx_fcast_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- fit(wf, epi_data)
 
-  preds <- forecast(wf) %>%
+  # get the forecast date for the forecast function
+  if (is.null(args_list$adjust_latency)) {
+    forecast_date_default <- max(epi_data$time_value)
+  } else {
+    forecast_date_default <- attributes(epi_data)$metadata$as_of
+  }
+  forecast_date <- args_list$forecast_date %||% forecast_date_default
+
+
+  preds <- forecast(wf, forecast_date = forecast_date) %>%
     tibble::as_tibble() %>%
     dplyr::select(-time_value)
 

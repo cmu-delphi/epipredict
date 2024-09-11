@@ -356,6 +356,7 @@ apply_frosting.default <- function(workflow, components, ...) {
 
 #' @rdname apply_frosting
 #' @importFrom rlang is_null
+#' @importFrom cli cli_abort cli_warn
 #' @param type,opts forwarded (along with `...`) to [`predict.model_fit()`] and
 #'   [`slather()`] for supported layers
 #' @export
@@ -374,7 +375,7 @@ apply_frosting.epi_workflow <-
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      cli::cli_warn(paste(
+      cli_warn(paste(
         "Only postprocessors of class {.cls frosting} are allowed.",
         "Returning unpostprocessed predictions."
       ))
