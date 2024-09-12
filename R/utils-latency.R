@@ -40,7 +40,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
     pull(variable)
   # make sure that there's enough column names
   if (length(original_columns) < 3) {
-    cli::cli_abort(
+    cli_abort(
       glue::glue(
         "The original columns of `time_value`, ",
         "`geo_value` and at least one signal. The current colums are \n",
@@ -70,7 +70,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
   }
   # make sure the as_of is sane
   if (!inherits(forecast_date, class(max_time)) & !inherits(forecast_date, "POSIXt")) {
-    cli::cli_abort(
+    cli_abort(
       paste(
         "the data matrix `forecast_date` value is {forecast_date}, ",
         "and not a valid `time_type` with type ",
@@ -81,7 +81,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
     )
   }
   if (is.null(forecast_date) || is.na(forecast_date)) {
-    cli::cli_warn(
+    cli_warn(
       paste(
         "epi_data's `forecast_date` was {forecast_date}, setting to ",
         "the latest time value, {max_time}."
@@ -90,7 +90,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
     )
     forecast_date <- max_time
   } else if (forecast_date < max_time) {
-    cli::cli_abort(
+    cli_abort(
       paste(
         "`forecast_date` ({(forecast_date)}) is before the most ",
         "recent data ({max_time}). Remove before ",
@@ -277,7 +277,7 @@ check_interminable_latency <- function(dataset, latency_table, target_columns, f
       filter(!is.na(!!(latency_table[[i_latency, "col_name"]]))) %>%
       pull(time_value) %>%
       max()
-    cli::cli_warn(
+    cli_warn(
       message = c(
         paste(
           "The maximum latency is {latency_max}, ",

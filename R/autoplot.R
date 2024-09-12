@@ -217,7 +217,7 @@ autoplot.canned_epipred <- function(
 
   ewf <- object$epi_workflow
   predictions <- object$predictions %>%
-    dplyr::rename(time_value = target_date)
+    rename(time_value = target_date)
 
   autoplot(ewf, predictions,
     .color_by = .color_by, .facet_by = .facet_by,

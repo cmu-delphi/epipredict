@@ -22,7 +22,7 @@ create_layer <- function(name = NULL, open = rlang::is_interactive()) {
   if (substr(name, 1, 5) == "layer") {
     nn <- substring(name, 6)
     if (substr(nn, 1, 1) == "_") nn <- substring(nn, 2)
-    cli::cli_abort(
+    cli_abort(
       c('`name` should not begin with "layer" or "layer_".',
         i = 'Did you mean to use `create_layer("{ nn }")`?'
       )

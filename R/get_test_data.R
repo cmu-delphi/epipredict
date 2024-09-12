@@ -26,7 +26,6 @@
 #' get_test_data(recipe = rec, x = case_death_rate_subset)
 #' @importFrom rlang %@%
 #' @importFrom stats na.omit
-#' @importFrom cli cli_abort cli_warn
 #' @export
 get_test_data <- function(recipe, x) {
   if (!is_epi_df(x)) cli_abort("`x` must be an `epi_df`.")
@@ -63,13 +62,13 @@ get_test_data <- function(recipe, x) {
 
   # If we skip NA completion, we remove undesirably early time values
   # Happens globally, over all groups
-  x <- dplyr::filter(x, max_time_value - time_value <= keep)
+  x <- filter(x, max_time_value - time_value <= keep)
 
   # If all(lags > 0), then we get rid of recent data
   if (min_lags > 0 && min_lags < Inf) {
-    x <- dplyr::filter(x, max_time_value - time_value >= min_lags)
+    x <- filter(x, max_time_value - time_value >= min_lags)
   }
 
-  dplyr::filter(x, max_time_value - time_value <= keep) %>%
+  filter(x, max_time_value - time_value <= keep) %>%
     epiprocess::ungroup()
 }

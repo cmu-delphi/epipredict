@@ -8,7 +8,7 @@ enframer <- function(df, x, fill = NA) {
   if (any(names(df) %in% x)) {
     stop("In enframer: some new cols match existing column names")
   }
-  for (v in x) df <- dplyr::mutate(df, !!v := fill)
+  for (v in x) df <- mutate(df, !!v := fill)
   df
 }
 

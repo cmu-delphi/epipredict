@@ -30,7 +30,6 @@
 #'
 #' @family row operation steps
 #' @importFrom epiprocess growth_rate
-#' @importFrom cli cli_abort
 #' @export
 #' @examples
 #' r <- epi_recipe(case_death_rate_subset) %>%
