@@ -35,7 +35,7 @@ check_pname <- function(res, preds, object, newname = NULL) {
 grab_forged_keys <- function(forged, workflow, new_data) {
   keys <- c("geo_value", "time_value", "key")
   forged_roles <- names(forged$extras$roles)
-  extras <- dplyr::bind_cols(forged$extras$roles[forged_roles %in% keys])
+  extras <- bind_cols(forged$extras$roles[forged_roles %in% keys])
   # 1. these are the keys in the test data after prep/bake
   new_keys <- names(extras)
   # 2. these are the keys in the training data
@@ -43,7 +43,7 @@ grab_forged_keys <- function(forged, workflow, new_data) {
   # 3. these are the keys in the test data as input
   new_df_keys <- key_colnames(new_data, extra_keys = setdiff(new_keys, keys[1:2]))
   if (!(setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
-    cli::cli_warn(paste(
+    cli_warn(paste(
       "Not all epi keys that were present in the training data are available",
       "in `new_data`. Predictions will have only the available keys."
     ))

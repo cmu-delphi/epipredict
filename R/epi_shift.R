@@ -37,9 +37,8 @@ get_sign <- function(object) {
 #' backend for both `bake.step_epi_ahead` and `bake.step_epi_lag`, performs the
 #' checks missing in `epi_shift_single`
 #' @keywords internal
-#' @importFrom cli cli_abort
 #' @importFrom tidyr expand_grid
-#' @importFrom dplyr mutate left_join join_by
+#' @importFrom dplyr join_by
 add_shifted_columns <- function(new_data, object, amount) {
   sign_shift <- get_sign(object)
   latency_table <- attributes(new_data)$metadata$latency_table
@@ -78,12 +77,12 @@ add_shifted_columns <- function(new_data, object, amount) {
   ok <- object$keys
   shifted <- reduce(
     pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    dplyr::full_join,
+    full_join,
     by = ok
   )
   processed <- new_data %>%
     full_join(shifted, by = ok) %>%
-    group_by(dplyr::across(dplyr::all_of(kill_time_value(ok)))) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
     arrange(time_value) %>%
     ungroup() %>%
     as_epi_df()

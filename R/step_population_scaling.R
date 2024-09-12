@@ -165,7 +165,7 @@ bake.step_population_scaling <- function(object, new_data, ...) {
   hardhat::validate_column_names(object$df, joinby$y)
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
-    cli::cli_warn(c(
+    cli_warn(c(
       "Custom `suffix` {.val {object$suffix}} was ignored in `step_population_scaling`.",
       i = "Perhaps `create_new` should be {.val {TRUE}}?"
     ))

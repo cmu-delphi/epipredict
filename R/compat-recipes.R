@@ -18,7 +18,7 @@ inline_check <- function(x) {
   funs <- fun_calls(x)
   funs <- funs[!(funs %in% c("~", "+", "-"))]
   if (length(funs) > 0) {
-    cli::cli_abort(paste0(
+    cli_abort(paste0(
       "No in-line functions should be used here; ",
       "use steps to define baking actions."
     ))

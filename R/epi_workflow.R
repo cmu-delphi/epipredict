@@ -152,7 +152,6 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' preds <- predict(wf, latest)
 #' preds
-#' @importFrom cli cli_abort
 predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), ...) {
   if (!workflows::is_trained_workflow(object)) {
     cli_abort(c(
@@ -185,12 +184,10 @@ augment.epi_workflow <- function(x, new_data, ...) {
   if (is_epi_df(predictions)) {
     join_by <- key_colnames(predictions)
   } else {
-    cli::cli_abort(
-      c(
+    cli_abort(c(
         "Cannot determine how to join `new_data` with the `predictions`.",
         "Try converting `new_data` to an {.cls epi_df} with `as_epi_df(new_data)`."
-      )
-    )
+      ))
   }
   complete_overlap <- intersect(names(new_data), join_by)
   if (length(complete_overlap) < length(join_by)) {

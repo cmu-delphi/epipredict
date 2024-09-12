@@ -12,7 +12,7 @@ adjust_latency <- function(object, new_data) {
   } else if (method == "extend_ahead") {
     as_of <- attributes(new_data)$metadata$as_of
     if (FALSE && (typeof(as_of) != typeof(new_data$time_value))) {
-      cli::cli_abort(paste(
+      cli_abort(paste(
         "the data matrix `as_of` value is {as_of}, ",
         "and not a valid `time_type` with type ",
         "matching `time_value`'s type of ",
@@ -27,13 +27,13 @@ adjust_latency <- function(object, new_data) {
       max_time <- max(time_values)
       shift_amount <- as.Date(as_of) - max_time
       if (is.null(as_of) || is.na(as_of)) {
-        cli::cli_warn(paste(
+        cli_warn(paste(
           "epi_data's `as_of` was {as_of}, setting to ",
           "the latest time value, {max_time}."
         ))
         as_of <- max_time
       } else if (as_of < max_time) {
-        cli::cli_abort(paste(
+        cli_abort(paste(
           "`as_of` ({(as_of)}) is before the most ",
           "recent data ({max_time}). Remove before ",
           "predicting."
@@ -47,7 +47,7 @@ adjust_latency <- function(object, new_data) {
         ((time_type == "yearmonth") && (shift_amount >= 2)) ||
         ((time_type == "yearquarter") && (shift_amount >= 1)) ||
         ((time_type == "year") && (shift_amount >= 1))) {
-        cli::cli_warn(paste(
+        cli_warn(paste(
           "!" = glue::glue(
             "The ahead has been adjusted by {shift_amount}, ",
             "which is questionable for it's `time_type` of ",
@@ -60,10 +60,10 @@ adjust_latency <- function(object, new_data) {
       }
       return(effective_ahead)
     } else {
-      cli::cli_abort("the `time_value` column of `new_data` is empty")
+      cli_abort("the `time_value` column of `new_data` is empty")
     }
   } else {
-    cli::cli_abort(paste(
+    cli_abort(paste(
       "Latency adjustment method {method} has not yet ",
       "been implemented for `step_epi_ahead`."
     ))

@@ -58,7 +58,7 @@ arx_classifier <- function(
   if (is.null(args_list$adjust_latency)) {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli::cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+      cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -136,7 +136,7 @@ arx_class_epi_workflow <- function(
   if (is.null(args_list$adjust_latency)) {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli::cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+      cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -150,7 +150,7 @@ arx_class_epi_workflow <- function(
   # ------- predictors
   r <- epi_recipe(epi_data) %>%
     step_growth_rate(
-      dplyr::all_of(predictors),
+      all_of(predictors),
       role = "grp",
       horizon = args_list$horizon,
       method = args_list$method,
@@ -325,7 +325,7 @@ arx_class_args_list <- function(
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
-      cli::cli_warn(
+      cli_warn(
         c(
           "`forecast_date` + `ahead` must equal `target_date`.",
           i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."

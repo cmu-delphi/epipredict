@@ -105,7 +105,6 @@ flatline_forecaster <- function(
 #' flatline_args_list()
 #' flatline_args_list(symmetrize = FALSE)
 #' flatline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
-#' @importFrom cli cli_abort cli_warn
 flatline_args_list <- function(
     ahead = 7L,
     n_training = Inf,

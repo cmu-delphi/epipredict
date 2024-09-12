@@ -62,7 +62,7 @@ arx_forecaster <- function(
 
   preds <- forecast(wf, forecast_date = forecast_date) %>%
     tibble::as_tibble() %>%
-    dplyr::select(-time_value)
+    select(-time_value)
 
   structure(
     list(
@@ -129,7 +129,7 @@ arx_fcast_epi_workflow <- function(
   if (is.null(args_list$adjust_latency)) {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli::cli_warn(
+      cli_warn(
         "The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is actually occurring {forecast_date_default}.",
         class = "epipredict__arx_forecaster__forecast_date_defaulting"
       )
@@ -140,7 +140,7 @@ arx_fcast_epi_workflow <- function(
   forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   if (forecast_date + args_list$ahead != target_date) {
-    cli::cli_abort(
+    cli_abort(
       c(
         "`forecast_date` + `ahead` must equal `target_date`.",
         i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
