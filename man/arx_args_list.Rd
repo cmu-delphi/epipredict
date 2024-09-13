@@ -11,6 +11,7 @@ arx_args_list(
   forecast_date = NULL,
   target_date = NULL,
   adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
+  warn_latency = TRUE,
   quantile_levels = c(0.05, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
@@ -57,6 +58,9 @@ the ahead becomes \code{ahead+3}.
 forecast date. For example, if the lags are \code{c(0,7,14)} and the last day of
 data was 3 days ago, the lags become \code{c(3,10,17)}.
 }}
+
+\item{warn_latency}{by default, \code{step_adjust_latency} warns the user if the
+latency is large. If this is \code{FALSE}, that warning is turned off.}
 
 \item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of

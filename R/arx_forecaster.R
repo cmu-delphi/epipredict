@@ -52,7 +52,7 @@ arx_forecaster <- function(
   wf <- fit(wf, epi_data)
 
   # get the forecast date for the forecast function
-  if (is.null(args_list$adjust_latency)) {
+  if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -247,6 +247,8 @@ arx_fcast_epi_workflow <- function(
 #'   - `"extend_lags"`: increase the lags so they're relative to the actual
 #'   forecast date. For example, if the lags are `c(0,7,14)` and the last day of
 #'   data was 3 days ago, the lags become `c(3,10,17)`.
+#' @param warn_latency by default, `step_adjust_latency` warns the user if the
+#'   latency is large. If this is `FALSE`, that warning is turned off.
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
@@ -284,6 +286,7 @@ arx_args_list <- function(
     forecast_date = NULL,
     target_date = NULL,
     adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
+    warn_latency = TRUE,
     quantile_levels = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
@@ -297,7 +300,7 @@ arx_args_list <- function(
   if (is.list(lags)) lags <- unlist(lags)
 
   adjust_latency <- rlang::arg_match(adjust_latency)
-  arg_is_scalar(ahead, n_training, symmetrize, nonneg, adjust_latency)
+  arg_is_scalar(ahead, n_training, symmetrize, nonneg, adjust_latency, warn_latency)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
@@ -331,6 +334,7 @@ arx_args_list <- function(
       forecast_date,
       target_date,
       adjust_latency,
+      warn_latency,
       symmetrize,
       nonneg,
       max_lags,

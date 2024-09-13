@@ -84,7 +84,7 @@ test_that("get_latency infers max_time to be the minimum `max time` across group
 })
 
 
-test_that("set_forecast_date works", {
+test_that("get_forecast_date works", {
   info <- tribble(
     ~variable, ~type, ~role, ~source,
     "time_value", "date", "time_value", "original",
@@ -93,9 +93,9 @@ test_that("set_forecast_date works", {
     "death_rate", "numeric", "raw", "original",
     "not_real", "numeric", "predictor", "derived"
   )
-  expect_equal(set_forecast_date(modified_data, info, "geo_value", NULL), as_of)
-  expect_equal(set_forecast_date(modified_data, info, "", NULL), as_of)
-  expect_equal(set_forecast_date(modified_data, info, NULL, NULL), as_of)
+  expect_equal(get_forecast_date(modified_data, info, "geo_value", NULL), as_of)
+  expect_equal(get_forecast_date(modified_data, info, "", NULL), as_of)
+  expect_equal(get_forecast_date(modified_data, info, NULL, NULL), as_of)
 })
 
 test_that("pad_to_end works correctly", {
