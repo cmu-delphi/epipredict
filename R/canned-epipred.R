@@ -113,7 +113,7 @@ print.canned_epipred <- function(x, name, ...) {
   ))
   fit_recipe <- extract_recipe(x$epi_workflow)
   if (detect_step(fit_recipe, "adjust_latency")) {
-    is_adj_latency <- map_lgl(fit_recipe$steps, \(x) inherits(x, "step_adjust_latency"))
+    is_adj_latency <- map_lgl(fit_recipe$steps, function(x) inherits(x, "step_adjust_latency"))
     latency_step <- fit_recipe$steps[is_adj_latency][[1]]
     # all steps after adjust_latency
     later_steps <- fit_recipe$steps[-(1:which(is_adj_latency))]
@@ -129,7 +129,7 @@ print.canned_epipred <- function(x, name, ...) {
     }
     later_steps[[1]]$columns
     valid_columns <- later_steps %>%
-      keep(\(x) inherits(x, step_names)) %>%
+      keep(function(x) inherits(x, step_names)) %>%
       purrr::map("columns") %>%
       reduce(c)
     latency_per_base_col <- latency_step$latency_table %>%

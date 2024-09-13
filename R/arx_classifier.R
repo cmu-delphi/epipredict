@@ -204,7 +204,7 @@ arx_class_epi_workflow <- function(
   r <- r %>%
     step_mutate(
       across(
-        starts_with("ahead"),
+        starts_with("ahead_"),
         ~ cut(.x, breaks = args_list$breaks),
         .names = "outcome_class",
         .unpack = TRUE

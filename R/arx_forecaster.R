@@ -126,7 +126,7 @@ arx_fcast_epi_workflow <- function(
   # forecast_date is above all what they set;
   # if they don't and they're not adjusting latency, it defaults to the max time_value
   # if they're adjusting, it defaults to the as_of
-  if (is.null(args_list$adjust_latency)) {
+  if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
       cli_warn(
@@ -236,11 +236,11 @@ arx_fcast_epi_workflow <- function(
 #'   non-`NULL`.
 #' @param target_date Date. The date that is being forecast. The default `NULL`
 #'   will determine this automatically as `forecast_date + ahead`.
-#' @param adjust_latency Character or `NULL`. One of the `method`s of
-#'   [step_adjust_latency()], or `NULL` (in which case there is no adjustment).
+#' @param adjust_latency Character. One of the `method`s of
+#'   [step_adjust_latency()], or `"none"` (in which case there is no adjustment).
 #'   If the `forecast_date` is after the last day of data, this determines how
 #'   to shift the model to account for this difference. The options are:
-#'   - `NULL` the default, assumes the `forecast_date` is the last day of data
+#'   - `"none"` the default, assumes the `forecast_date` is the last day of data
 #'   - `"extend_ahead"`: increase the `ahead` by the latency so it's relative to
 #'   the last day of data. For example, if the last day of data was 3 days ago,
 #'   the ahead becomes `ahead+3`.
@@ -283,7 +283,7 @@ arx_args_list <- function(
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
-    adjust_latency = NULL,
+    adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
     quantile_levels = c(0.05, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
@@ -296,9 +296,10 @@ arx_args_list <- function(
   .lags <- lags
   if (is.list(lags)) lags <- unlist(lags)
 
-  arg_is_scalar(ahead, n_training, symmetrize, nonneg)
+  adjust_latency <- rlang::arg_match(adjust_latency)
+  arg_is_scalar(ahead, n_training, symmetrize, nonneg, adjust_latency)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
-  arg_is_scalar(forecast_date, target_date, adjust_latency, allow_null = TRUE)
+  arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags)
   arg_is_lgl(symmetrize, nonneg)

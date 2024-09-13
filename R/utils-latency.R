@@ -223,17 +223,9 @@ get_grouping_columns <- function(x) {
 
 #' get the location of the last real value
 #' @param col the relevant column
-#' @param from_last instead of the number of columns
 #' @keywords internal
-count_single_column <- function(col, from_last) {
-  run_lengths <- rle(is.na(col))
-  n_el <- length(col)
-  if (tail(run_lengths$values, 1)) {
-    n_at_end <- tail(run_lengths$lengths, 1)
-    return(n_el - n_at_end)
-  } else {
-    return(n_el)
-  }
+count_single_column <- function(col) {
+  max(which(!is.na(col)))
 }
 
 

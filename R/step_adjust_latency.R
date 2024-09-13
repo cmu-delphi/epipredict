@@ -163,9 +163,9 @@
 #'   the date from which the forecast is actually occurring. If `NULL`, the
 #'   `forecast_date` is determined either via the `fixed_latency`, or is set to
 #'   the `epi_df`'s `as_of` value if `fixed_latency` is also `NULL`.
-#' @param role For model terms created by this step, what analysis role should
-#'   they be assigned? `lag` is a predictor while `ahead` is an outcome.  It
-#'   should be correctly inferred and not need setting
+#' @param check_latency_length bool, determines whether to warn if the latency
+#'   is unusually high. Turn off if you know your forecast is going to be far
+#'   into the future.
 #' @template step-return
 #' @inheritParams recipes::step_lag
 #'
@@ -197,29 +197,21 @@
 step_adjust_latency <-
   function(recipe,
            ...,
-           role = NA,
-           trained = FALSE,
            method = c(
              "extend_ahead",
              "locf",
              "extend_lags"
            ),
-           epi_keys_checked = c("geo_value"),
+           epi_keys_checked = NULL,
            fixed_latency = NULL,
            fixed_forecast_date = NULL,
-           skip = FALSE,
-           columns = NULL,
-           id = recipes::rand_id("adjust_latency")) {
+           check_latency_length = TRUE,
+           id = rand_id("adjust_latency")) {
     arg_is_chr_scalar(id, method)
     if (!is_epi_recipe(recipe)) {
       cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
         class = "epipredict__step_adjust_latency__epi_recipe_only"
       )
-    }
-    if (!is.null(columns)) {
-      cli_abort(c("The `columns` argument must be `NULL`.",
-        i = "Use `tidyselect` methods to choose columns to lag."
-      ), class = "epipredict__step_adjust_latency__cols_not_null")
     }
     if ((method == "extend_ahead") && (detect_step(recipe, "epi_ahead"))) {
       cli_warn(
@@ -261,22 +253,25 @@ then the previous `step_epi_lag`s won't work with modified data.",
       rel_step_type <- "step_epi_lag"
       shift_name <- "lag"
     }
-
+    if (is.null(epi_keys_checked)) {
+      epi_keys_checked <- kill_time_value(key_colnames(recipe$template))
+    }
     recipes::add_step(
       recipe,
       step_adjust_latency_new(
         terms = enquos(...),
-        role = role,
+        role = NA,
         method = method,
         epi_keys_checked = epi_keys_checked,
-        trained = trained,
+        check_latency_length = check_latency_length,
+        trained = FALSE,
         forecast_date = fixed_forecast_date,
         latency = fixed_latency,
         latency_table = NULL,
         metadata = NULL,
         keys = key_colnames(recipe),
-        columns = columns,
-        skip = skip,
+        columns = NULL,
+        skip = FALSE,
         id = id
       )
     )
@@ -284,7 +279,7 @@ then the previous `step_epi_lag`s won't work with modified data.",
 
 step_adjust_latency_new <-
   function(terms, role, trained, forecast_date, latency, latency_table,
-           metadata, time_type, keys, method, epi_keys_checked, columns, skip,
+           metadata, time_type, keys, method, epi_keys_checked, check_latency_length, columns, skip,
            id) {
     step(
       subclass = "adjust_latency",
@@ -292,6 +287,7 @@ step_adjust_latency_new <-
       role = role,
       method = method,
       epi_keys_checked = epi_keys_checked,
+      check_latency_length = check_latency_length,
       trained = trained,
       forecast_date = forecast_date,
       latency = latency,
@@ -337,7 +333,6 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   attributes(training)$metadata$latency_table <- latency_table
   # get the columns used, even if it's all of them
   terms_used <- x$terms
-  # TODO replace with is_empty as in bake.recipe
   if (is_empty(terms_used)) {
     terms_used <- info %>%
       filter(role == "raw") %>%
@@ -357,6 +352,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     keys = x$keys,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
+    check_latency_length = x$check_latency_length,
     columns = recipes_eval_select(latency_table$col_name, training, info),
     skip = x$skip,
     id = x$id
@@ -383,7 +379,9 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
     modified_columns <- object$columns %>% unname()
-    check_interminable_latency(new_data, object$latency_table, modified_columns, object$forecast_date)
+    if (object$check_latency_length) {
+      check_interminable_latency(new_data, object$latency_table, modified_columns, object$forecast_date)
+    }
 
     new_data <- new_data %>%
       pad_to_end(rel_keys, object$forecast_date, modified_columns) %>%

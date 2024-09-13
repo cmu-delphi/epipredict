@@ -63,11 +63,9 @@ flatline_forecaster <- function(
 
   eng <- linear_reg(engine = "flatline")
 
-  wf <- epi_workflow(r, eng, f)
-  wf <- fit(wf, epi_data)
-  preds <- suppressWarnings(forecast(
-    wf
-  )) %>%
+  wf <- epi_workflow(r, eng, f) %>%
+    fit(epi_data)
+  preds <- suppressWarnings(forecast(wf)) %>%
     as_tibble() %>%
     select(-time_value)
 

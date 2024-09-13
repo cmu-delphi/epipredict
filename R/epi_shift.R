@@ -45,8 +45,6 @@ add_shifted_columns <- function(new_data, object, amount) {
   shift_sign_lat <- attributes(new_data)$metadata$shift_sign
   if (!is.null(latency_table) &&
     shift_sign_lat == sign_shift) {
-    # are we adding an unreasonable amount of latency?
-    check_interminable_latency(new_data, latency_table, object$columns, attributes(new_data)$metadata$forecast_date)
     # get the actually used latencies
     rel_latency <- latency_table %>% filter(col_name %in% object$columns)
   } else {
@@ -56,9 +54,7 @@ add_shifted_columns <- function(new_data, object, amount) {
   grid <- expand_grid(col = object$columns, amount = sign_shift * amount) %>%
     left_join(rel_latency, by = join_by(col == col_name), ) %>%
     tidyr::replace_na(list(latency = 0)) %>%
-    mutate(
-      shift_val = amount + latency
-    ) %>%
+    mutate(shift_val = amount + latency) %>%
     mutate(
       newname = glue::glue("{object$prefix}{abs(shift_val)}_{col}"), # name is always positive
       amount = NULL,
