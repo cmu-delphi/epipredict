@@ -260,6 +260,8 @@ while this will not:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{toy_recipe <- epi_recipe(toy_df) \%>\%
    step_epi_lag(a, lag=0) \%>\%
    step_adjust_latency(a, method = "extend_lags")
+#> Warning: If `method` is "extend_lags" or "locf", then the previous `step_epi_lag`s won't work with modified
+#> data.
 }\if{html}{\out{</div>}}
 
 If you create columns that you then apply lags to (such as

@@ -15,7 +15,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
     return(NULL)
   }
   rel_list <- recipe$steps %>%
-    purrr::map(extract_named_rates) %>%
+    map(extract_named_rates) %>%
     unlist(recursive = FALSE) %>%
     split(c("term", "shift", "prefix"))
   relevant_shifts <- tibble(
@@ -34,26 +34,28 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' @importFrom dplyr select
 #' @importFrom tidyr drop_na
 #' @importFrom utils capture.output
-set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
-  original_columns <- info %>%
-    filter(source == "original") %>%
-    pull(variable)
-  # make sure that there's enough column names
-  if (length(original_columns) < 3) {
-    cli_abort(
-      glue::glue(
-        "The original columns of `time_value`, ",
-        "`geo_value` and at least one signal. The current colums are \n",
-        paste(capture.output(object$info), collapse = "\n\n")
-      ),
-      class = "epipredict__set_forecast_date__too_few_data_columns"
-    )
+get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns = NULL) {
+  if (is.null(columns)) {
+    columns <- info %>%
+      filter(source == "original") %>%
+      pull(variable)
+    # make sure that there's enough column names
+    if (length(columns) < 3) {
+      cli_abort(
+        glue::glue(
+          "The original columns of `time_value`, ",
+          "`geo_value` and at least one signal. The current colums are \n",
+          paste(capture.output(object$info), collapse = "\n\n")
+        ),
+        class = "epipredict__get_forecast_date__too_few_data_columns"
+      )
+    }
   }
   # the source data determines the actual time_values
   # these are the non-na time_values;
   # get the minimum value across the checked epi_keys' maximum time values
   max_time <- new_data %>%
-    select(all_of(original_columns)) %>%
+    select(all_of(columns)) %>%
     drop_na()
   # null and "" don't work in `group_by`
   if (!is.null(epi_keys_checked) && (epi_keys_checked != "")) {
@@ -77,7 +79,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
         "matching `time_value`'s type of ",
         "{class(max_time)}."
       ),
-      class = "epipredict__set_forecast_date__wrong_time_value_type_error"
+      class = "epipredict__get_forecast_date__wrong_time_value_type_error"
     )
   }
   if (is.null(forecast_date) || is.na(forecast_date)) {
@@ -86,7 +88,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
         "epi_data's `forecast_date` was {forecast_date}, setting to ",
         "the latest time value, {max_time}."
       ),
-      class = "epipredict__set_forecast_date__max_time_warning"
+      class = "epipredict__get_forecast_date__max_time_warning"
     )
     forecast_date <- max_time
   } else if (forecast_date < max_time) {
@@ -96,7 +98,7 @@ set_forecast_date <- function(new_data, info, epi_keys_checked, latency) {
         "recent data ({max_time}). Remove before ",
         "predicting."
       ),
-      class = "epipredict__set_forecast_date__misordered_forecast_date_error"
+      class = "epipredict__get_forecast_date__misordered_forecast_date_error"
     )
   }
   # TODO cover the rest of the possible types for as_of and max_time...
@@ -135,7 +137,7 @@ get_latency <- function(new_data, forecast_date, column, sign_shift, epi_keys_ch
 #'   a potentially different max_time_value
 #' @keywords internal
 get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new_data) {
-  max_time_value <- as.Date(max(
+  forecast_date <- as.Date(max(
     workflow_max_time_value,
     this_recipe$max_time_value,
     max(new_data$time_value)
@@ -149,16 +151,16 @@ get_forecast_date_in_layer <- function(this_recipe, workflow_max_time_value, new
       }
     ) %>% Filter(Negate(is.null), .)
     if (length(handpicked_forecast_date) > 0) {
-      max_time_value <- handpicked_forecast_date[[1]]
+      forecast_date <- handpicked_forecast_date[[1]]
     } else {
       # if we haven't chosen one, use either the max_time_value or the as_of
-      max_time_value <- max(
-        max_time_value,
+      forecast_date <- max(
+        forecast_date,
         attributes(new_data)$metadata$as_of
       )
     }
   }
-  max_time_value
+  forecast_date
 }
 
 
@@ -208,17 +210,7 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
     slice(1:min(across(all_of(columns_to_complete), count_single_column))) %>%
     bind_rows(filled_values) %>%
     arrange(across(all_of(key_colnames(x)))) %>%
-    ungroup() %>%
-    group_by(across(all_of(get_grouping_columns(x))))
-}
-
-#' return the names of the grouped columns, or `NULL`
-#' @param x an epi_df
-#' @keywords internal
-#' @importFrom utils head
-get_grouping_columns <- function(x) {
-  group_names <- names(attributes(x)$groups)
-  head(group_names, -1)
+    ungroup()
 }
 
 #' get the location of the last real value
@@ -283,4 +275,46 @@ check_interminable_latency <- function(dataset, latency_table, target_columns, f
       call = call
     )
   }
+}
+
+#' create the latency table
+#' This is a table of column names and the latency adjustment necessary for that column. An example:
+#'
+#'   col_name   latency
+#'   <chr>        <int>
+#' 1 case_rate        5
+#' 2 death_rate       5
+#' @keywords internal
+#' @importFrom dplyr rowwise
+get_latency_table <- function(training, columns, forecast_date, latency, sign_shift, epi_keys_checked, info, terms) {
+  if (is.null(columns)) {
+    columns <- recipes_eval_select(terms, training, info)
+  }
+  # construct the latency table
+  latency_table <- names(training)[!names(training) %in% key_colnames(training)] %>%
+    tibble(col_name = .)
+  if (length(columns) > 0) {
+    latency_table <- latency_table %>% filter(col_name %in%
+      columns)
+  }
+
+  if (is.null(latency)) {
+    latency_table <- latency_table %>%
+      rowwise() %>%
+      mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, epi_keys_checked))
+  } else if (length(latency) > 1) {
+    # if latency has a length, it must also have named elements. We assign based on comparing the name in the list
+    # with the column names, and drop any which don't have a latency assigned
+    latency_table <- latency_table %>%
+      filter(col_name %in% names(latency)) %>%
+      rowwise() %>%
+      mutate(latency = unname(latency[names(latency) == col_name]))
+  } else {
+    tmp_latency_table <- latency_table %>%
+      rowwise() %>%
+      mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, epi_keys_checked))
+    if (latency )
+    latency_table <- latency_table %>% mutate(latency = latency)
+  }
+  return(latency_table %>% ungroup())
 }

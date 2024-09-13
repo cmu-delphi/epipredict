@@ -55,7 +55,7 @@ arx_classifier <- function(
   wf <- arx_class_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- fit(wf, epi_data)
 
-  if (is.null(args_list$adjust_latency)) {
+  if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
       cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
@@ -133,7 +133,7 @@ arx_class_epi_workflow <- function(
     cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
   }
 
-  if (is.null(args_list$adjust_latency)) {
+  if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
       cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
@@ -190,9 +190,9 @@ arx_class_epi_workflow <- function(
         )
     }
   }
-  ahead_out_name <- rlang::sym(paste0("ahead_", args_list$ahead, "_", pre_out_name))
+  ahead_out_name <- glue::glue("ahead_[0-9]*_{pre_out_name}")
   method_adjust_latency <- args_list$adjust_latency
-  if (!is.null(method_adjust_latency)) {
+  if (method_adjust_latency   != "none") {
     # only extend_ahead is supported atm
     r <- r %>% step_adjust_latency(!!pre_out_name,
       fixed_forecast_date = forecast_date,
@@ -204,7 +204,7 @@ arx_class_epi_workflow <- function(
   r <- r %>%
     step_mutate(
       across(
-        starts_with("ahead_"),
+        matches(ahead_out_name),
         ~ cut(.x, breaks = args_list$breaks),
         .names = "outcome_class",
         .unpack = TRUE
@@ -289,7 +289,8 @@ arx_class_args_list <- function(
     n_training = Inf,
     forecast_date = NULL,
     target_date = NULL,
-    adjust_latency = NULL,
+    adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
+    warn_latency = TRUE,
     outcome_transform = c("growth_rate", "lag_difference"),
     breaks = 0.25,
     horizon = 7L,
@@ -305,8 +306,9 @@ arx_class_args_list <- function(
   method <- rlang::arg_match(method)
   outcome_transform <- rlang::arg_match(outcome_transform)
 
-  arg_is_scalar(ahead, n_training, horizon, log_scale)
-  arg_is_scalar(forecast_date, target_date, adjust_latency, allow_null = TRUE)
+  adjust_latency <- rlang::arg_match(adjust_latency)
+  arg_is_scalar(ahead, n_training, horizon, log_scale, adjust_latency, warn_latency)
+  arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags, horizon)
   arg_is_numeric(breaks)
