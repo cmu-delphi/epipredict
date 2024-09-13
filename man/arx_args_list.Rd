@@ -10,7 +10,7 @@ arx_args_list(
   n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
-  adjust_latency = NULL,
+  adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
   quantile_levels = c(0.05, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
@@ -44,12 +44,12 @@ non-\code{NULL}.
 \item{target_date}{Date. The date that is being forecast. The default \code{NULL}
 will determine this automatically as \code{forecast_date + ahead}.}
 
-\item{adjust_latency}{Character or \code{NULL}. One of the \code{method}s of
-\code{\link[=step_adjust_latency]{step_adjust_latency()}}, or \code{NULL} (in which case there is no adjustment).
+\item{adjust_latency}{Character. One of the \code{method}s of
+\code{\link[=step_adjust_latency]{step_adjust_latency()}}, or \code{"none"} (in which case there is no adjustment).
 If the \code{forecast_date} is after the last day of data, this determines how
 to shift the model to account for this difference. The options are:
 \itemize{
-\item \code{NULL} the default, assumes the \code{forecast_date} is the last day of data
+\item \code{"none"} the default, assumes the \code{forecast_date} is the last day of data
 \item \code{"extend_ahead"}: increase the \code{ahead} by the latency so it's relative to
 the last day of data. For example, if the last day of data was 3 days ago,
 the ahead becomes \code{ahead+3}.

@@ -4,12 +4,10 @@
 \alias{count_single_column}
 \title{get the location of the last real value}
 \usage{
-count_single_column(col, from_last)
+count_single_column(col)
 }
 \arguments{
 \item{col}{the relevant column}
-
-\item{from_last}{instead of the number of columns}
 }
 \description{
 get the location of the last real value

@@ -32,6 +32,7 @@ The `main` version is available at `file:///<local path>/epidatr/epipredict/inde
 You can also build the docs manually and launch the site with python. From the terminal, this looks like
 
 ```bash
+R -e 'pkgdown::clean_site()'
 R -e 'devtools::document()'
 R -e 'pkgdown::build_site()'
 python -m http.server -d docs

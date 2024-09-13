@@ -7,15 +7,12 @@
 step_adjust_latency(
   recipe,
   ...,
-  role = NA,
-  trained = FALSE,
   method = c("extend_ahead", "locf", "extend_lags"),
-  epi_keys_checked = c("geo_value"),
+  epi_keys_checked = NULL,
   fixed_latency = NULL,
   fixed_forecast_date = NULL,
-  skip = FALSE,
-  columns = NULL,
-  id = recipes::rand_id("adjust_latency")
+  check_latency_length = TRUE,
+  id = rand_id("adjust_latency")
 )
 }
 \arguments{
@@ -24,13 +21,6 @@ sequence of operations for this recipe.}
 
 \item{...}{One or more selector functions to choose variables
 for this step. See \code{\link[recipes:selections]{selections()}} for more details.}
-
-\item{role}{For model terms created by this step, what analysis role should
-they be assigned? \code{lag} is a predictor while \code{ahead} is an outcome.  It
-should be correctly inferred and not need setting}
-
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
 
 \item{method}{a character. Determines the method by which the
 forecast handles latency. The options are:
@@ -73,15 +63,9 @@ the date from which the forecast is actually occurring. If \code{NULL}, the
 \code{forecast_date} is determined either via the \code{fixed_latency}, or is set to
 the \code{epi_df}'s \code{as_of} value if \code{fixed_latency} is also \code{NULL}.}
 
-\item{skip}{A logical. Should the step be skipped when the
-recipe is baked by \code{\link[recipes:bake]{bake()}}? While all operations are baked
-when \code{\link[recipes:prep]{prep()}} is run, some operations may not be able to be
-conducted on new data (e.g. processing the outcome variable(s)).
-Care should be taken when using \code{skip = TRUE} as it may affect
-the computations for subsequent operations.}
-
-\item{columns}{A character string of the selected variable names. This field
-is a placeholder and will be populated once \code{\link[recipes:prep]{prep()}} is used.}
+\item{check_latency_length}{bool, determines whether to warn if the latency
+is unusually high. Turn off if you know your forecast is going to be far
+into the future.}
 
 \item{id}{A character string that is unique to this step to identify it.}
 }
@@ -276,8 +260,6 @@ while this will not:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{toy_recipe <- epi_recipe(toy_df) \%>\%
    step_epi_lag(a, lag=0) \%>\%
    step_adjust_latency(a, method = "extend_lags")
-#> Warning: If `method` is "extend_lags" or "locf", then the previous `step_epi_lag`s won't work with modified
-#> data.
 }\if{html}{\out{</div>}}
 
 If you create columns that you then apply lags to (such as
