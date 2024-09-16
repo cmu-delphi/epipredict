@@ -207,44 +207,9 @@ step_adjust_latency <-
            fixed_forecast_date = NULL,
            check_latency_length = TRUE,
            id = rand_id("adjust_latency")) {
-    arg_is_chr_scalar(id, method)
-    if (!is_epi_recipe(recipe)) {
-      cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
-        class = "epipredict__step_adjust_latency__epi_recipe_only"
-      )
-    }
-    if ((method == "extend_ahead") && (detect_step(recipe, "epi_ahead"))) {
-      cli_warn(
-        "If `method` is {.val extend_ahead}, then the previous `step_epi_ahead` won't be modified.",
-        class = "epipredict__step_adjust_latency__misordered_step_warning"
-      )
-    } else if ((method == "extend_lags") && detect_step(recipe, "epi_lag")) {
-      cli_warn(
-        "If `method` is {.val extend_lags} or {.val locf},
-then the previous `step_epi_lag`s won't work with modified data.",
-        class = "epipredict__step_adjust_latency__misordered_step_warning"
-      )
-    } else if ((method == "locf") && (length(recipe$steps) > 0)) {
-      cli_warn("There are steps before `step_adjust_latency`. With the method {.val locf}, it is recommended to include this step before any others",
-        class = "epipredict__step_adjust_latency__misordered_step_warning"
-      )
-    }
-    if (detect_step(recipe, "naomit")) {
-      cli_abort("adjust_latency needs to occur before any `NA` removal,
-                      as columns may be moved around", class = "epipredict__step_adjust_latency__post_NA_error")
-    }
-    if (!is.null(fixed_latency) && !is.null(fixed_forecast_date)) {
-      cli_abort("Only one of `fixed_latency` and `fixed_forecast_date`
- can be non-`NULL` at a time!", class = "epipredict__step_adjust_latency__too_many_args_error")
-    }
-    if (length(fixed_latency > 1)) {
-      template <- recipe$template
-      data_names <- names(template)[!names(template) %in% key_colnames(template)]
-      wrong_names <- names(fixed_latency)[!names(fixed_latency) %in% data_names]
-      if (length(wrong_names) > 0) {
-        cli_abort("{.val fixed_latency} contains names not in the template dataset: {wrong_names}", class = "epipredict__step_adjust_latency__undefined_names_error")
-      }
-    }
+    step_adjust_latency_checks(
+      id, method, recipe, fixed_latency, fixed_forecast_date
+    )
     method <- rlang::arg_match(method)
     if (method == "extend_ahead") {
       rel_step_type <- "step_epi_ahead"
@@ -310,7 +275,8 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 
   latency_table <- get_latency_table(
     training, NULL, forecast_date, latency,
-    get_sign(x), x$epi_keys_checked, info, x$terms)
+    get_sign(x), x$epi_keys_checked, info, x$terms
+  )
   attributes(training)$metadata$latency_table <- latency_table
   # get the columns used, even if it's all of them
   terms_used <- x$terms
@@ -319,7 +285,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
       filter(role == "raw") %>%
       pull(variable)
   }
-  
+
   step_adjust_latency_new(
     terms = x$terms,
     role = x$role,
@@ -354,29 +320,38 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
       )
     local_latency_table <- get_latency_table(
       new_data, object$columns, current_forecast_date, latency,
-      get_sign(object), object$epi_keys_checked, NULL, NULL)
+      get_sign(object), object$epi_keys_checked, NULL, NULL
+    )
     comparison_table <- local_latency_table %>%
       ungroup() %>%
-      dplyr::full_join(object$latency_table %>% ungroup(), by = join_by(col_name), suffix = c(".bake",".prep")) %>%
+      dplyr::full_join(object$latency_table %>% ungroup(), by = join_by(col_name), suffix = c(".bake", ".prep")) %>%
       mutate(bakeMprep = latency.bake - latency.prep)
     if (any(comparison_table$bakeMprep > 0)) {
-      cli_abort(paste0(
-        "There is more latency at bake time than there was at prep time.",
-        " You will need to fit a model with more latency to predict on this dataset."),
+      cli_abort(
+        paste0(
+          "There is more latency at bake time than there was at prep time.",
+          " You will need to fit a model with more latency to predict on this dataset."
+        ),
         class = "epipredict__latency__bake_prep_difference_error",
-        latency_table = comparison_table)
+        latency_table = comparison_table
+      )
     }
     if (any(comparison_table$bakeMprep < 0)) {
-      cli_warn(paste0(
-        "There is less latency at bake time than there was at prep time.",
-        " This will still fit, but will discard the most recent data."),
+      cli_warn(
+        paste0(
+          "There is less latency at bake time than there was at prep time.",
+          " This will still fit, but will discard the most recent data."
+        ),
         class = "epipredict__latency__bake_prep_difference_warn",
-        latency_table = comparison_table)
+        latency_table = comparison_table
+      )
     }
-    if (current_forecast_date != object$forecast_date){
-      cli_warn(paste0(
-        "The forecast date differs from the one set at train time; ",
-        " this means any dates added by `layer_forecast_date` will be inaccurate."),
+    if (current_forecast_date != object$forecast_date) {
+      cli_warn(
+        paste0(
+          "The forecast date differs from the one set at train time; ",
+          " this means any dates added by `layer_forecast_date` will be inaccurate."
+        ),
         class = "epipredict__latency__bake_prep_forecast_date_warn"
       )
     }

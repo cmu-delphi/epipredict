@@ -192,7 +192,7 @@ arx_class_epi_workflow <- function(
   }
   ahead_out_name <- glue::glue("ahead_[0-9]*_{pre_out_name}")
   method_adjust_latency <- args_list$adjust_latency
-  if (method_adjust_latency   != "none") {
+  if (method_adjust_latency != "none") {
     # only extend_ahead is supported atm
     r <- r %>% step_adjust_latency(!!pre_out_name,
       fixed_forecast_date = forecast_date,
