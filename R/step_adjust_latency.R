@@ -211,13 +211,6 @@ step_adjust_latency <-
       id, method, recipe, fixed_latency, fixed_forecast_date
     )
     method <- rlang::arg_match(method)
-    if (method == "extend_ahead") {
-      rel_step_type <- "step_epi_ahead"
-      shift_name <- "ahead"
-    } else if (method == "extend_lags") {
-      rel_step_type <- "step_epi_lag"
-      shift_name <- "lag"
-    }
     if (is.null(epi_keys_checked)) {
       epi_keys_checked <- kill_time_value(key_colnames(recipe$template))
     }
@@ -226,15 +219,15 @@ step_adjust_latency <-
       step_adjust_latency_new(
         terms = enquos(...),
         role = NA,
-        method = method,
-        epi_keys_checked = epi_keys_checked,
-        check_latency_length = check_latency_length,
         trained = FALSE,
         fixed_forecast_date = fixed_forecast_date,
         forecast_date = NULL,
         latency = fixed_latency,
         latency_table = NULL,
         metadata = NULL,
+        method = method,
+        epi_keys_checked = epi_keys_checked,
+        check_latency_length = check_latency_length,
         columns = NULL,
         skip = FALSE,
         id = id
@@ -243,22 +236,22 @@ step_adjust_latency <-
   }
 
 step_adjust_latency_new <-
-  function(terms, role, trained, fixed_forecast_date, forecast_date, latency, latency_table,
-           metadata, time_type, method, epi_keys_checked, check_latency_length, columns, skip,
-           id) {
+  function(terms, role, trained, fixed_forecast_date, forecast_date, latency,
+           latency_table, metadata, method, epi_keys_checked,
+           check_latency_length, columns, skip, id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
       role = role,
-      method = method,
-      epi_keys_checked = epi_keys_checked,
-      check_latency_length = check_latency_length,
       trained = trained,
       fixed_forecast_date = fixed_forecast_date,
       forecast_date = forecast_date,
       latency = latency,
       latency_table = latency_table,
       metadata = metadata,
+      method = method,
+      epi_keys_checked = epi_keys_checked,
+      check_latency_length = check_latency_length,
       columns = columns,
       skip = skip,
       id = id
@@ -271,13 +264,13 @@ step_adjust_latency_new <-
 #' @importFrom dplyr rowwise
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   latency <- x$latency
-  forecast_date <- x$fixed_forecast_date %||% get_forecast_date(training, info, x$epi_keys_checked, latency)
+  forecast_date <- x$fixed_forecast_date %||%
+    get_forecast_date(training, info, x$epi_keys_checked, latency)
 
   latency_table <- get_latency_table(
     training, NULL, forecast_date, latency,
     get_sign(x), x$epi_keys_checked, info, x$terms
   )
-  attributes(training)$metadata$latency_table <- latency_table
   # get the columns used, even if it's all of them
   terms_used <- x$terms
   if (is_empty(terms_used)) {
@@ -310,13 +303,14 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 bake.step_adjust_latency <- function(object, new_data, ...) {
   if (!inherits(new_data, "epi_df") || is.null(attributes(new_data)$metadata$as_of)) {
     new_data <- as_epi_df(new_data)
-    attributes(new_data)$metadata <- object$metadata
+    attributes(new_data)$metadata <- object$metadata # DJM: why? detected above?
     attributes(new_data)$metadata$as_of <- object$forecast_date
   } else {
     latency <- object$latency
     current_forecast_date <- object$fixed_forecast_date %||%
       get_forecast_date(
-        new_data, NULL, object$epi_keys_checked, latency, c(key_colnames(new_data), object$columns)
+        new_data, NULL, object$epi_keys_checked, latency,
+        c(key_colnames(new_data), object$columns)
       )
     local_latency_table <- get_latency_table(
       new_data, object$columns, current_forecast_date, latency,
@@ -324,7 +318,11 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     )
     comparison_table <- local_latency_table %>%
       ungroup() %>%
-      dplyr::full_join(object$latency_table %>% ungroup(), by = join_by(col_name), suffix = c(".bake", ".prep")) %>%
+      dplyr::full_join(
+        object$latency_table %>% ungroup(),
+        by = join_by(col_name),
+        suffix = c(".bake", ".prep")
+      ) %>%
       mutate(bakeMprep = latency.bake - latency.prep)
     if (any(comparison_table$bakeMprep > 0)) {
       cli_abort(
@@ -362,11 +360,14 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
     attributes(new_data)$metadata$latency_table <- object$latency_table
     attributes(new_data)$metadata$forecast_date <- object$forecast_date
   } else if (object$method == "locf") {
-    # locf doesn't need to mess with the metadata at all, it just forward-fills the requested columns
+    # locf doesn't need to mess with the metadata at all, it just forward-fills
+    # the requested columns
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
     modified_columns <- object$columns %>% unname()
     if (object$check_latency_length) {
-      check_interminable_latency(new_data, object$latency_table, modified_columns, object$forecast_date)
+      check_interminable_latency(
+        new_data, object$latency_table, modified_columns, object$forecast_date
+      )
     }
 
     new_data <- new_data %>%
@@ -379,6 +380,9 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
   }
   return(new_data)
 }
+
+
+
 #' @export
 print.step_adjust_latency <-
   function(x, width = max(20, options$width - 35), ...) {

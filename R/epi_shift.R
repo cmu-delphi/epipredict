@@ -51,15 +51,8 @@ add_shifted_columns <- function(new_data, object, amount) {
     # adding zero if there's no latency table
     rel_latency <- tibble(col_name = object$columns, latency = 0L)
   }
-  grid <- expand_grid(col = object$columns, amount = sign_shift * amount) %>%
-    left_join(rel_latency, by = join_by(col == col_name), ) %>%
-    tidyr::replace_na(list(latency = 0)) %>%
-    mutate(shift_val = amount + latency) %>%
-    mutate(
-      newname = glue::glue("{object$prefix}{abs(shift_val)}_{col}"), # name is always positive
-      amount = NULL,
-      latency = NULL
-    )
+  grid <- object$shift_grid %>%
+    mutate(newname = glue::glue("{object$prefix}{abs(shift_val)}_{col}"))
 
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
