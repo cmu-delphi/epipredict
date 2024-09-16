@@ -28,34 +28,33 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
   return(relevant_shifts)
 }
 
-
-adjust_recipe_latency_before_bake <- function(object) {
-  if (detect_step(object, "adjust_latency")) {
-    latency_step <- object$steps[[which(tidy(object)$type == "adjust_latency")]]
-    if (length(latency_step) > 1) {
-      cli_abort("Only one `step_adjust_latency()` is allowed.")
-    }
+#
+adjust_recipe_latency_before_bake <- function(rec) {
+  if (detect_step(rec, "adjust_latency")) {
+    step_types <- tidy(rec)$type
+    # can only be 1, or we would have aborted on recipe creation
+    latency_step <- rec$steps[[which(step_types == "adjust_latency")]]
     latency_table <- latency_step$latency_table
     method <- latency_step$method
     if (method == "extend_ahead") {
-      loc <- which(tidy(object)$type == "epi_ahead")
+      loc <- which(step_types == "epi_ahead")
       sign_shift <- -1
     } else if (method == "extend_lags") {
-      loc <- which(tidy(object))$type == "epi_lag"
+      loc <- which(step_types == "epi_lag")
       sign_shift <- 1
     }
     if (method != "locf") {
       for (s in seq_along(loc)) {
-        sgrid <- object$steps[[s]]$shift_grid
+        sgrid <- rec$steps[[s]]$shift_grid
         sgrid <- sgrid %>%
           left_join(latency_table, by = join_by(col == col_name)) %>%
           tidyr::replace_na(list(latency = 0)) %>%
           mutate(shift_val = shift_val + latency, amount = NULL)
-        object$steps[[s]]$shift_grid <- sgrid
+        rec$steps[[s]]$shift_grid <- sgrid
       }
     }
   }
-  object
+  rec
 }
 
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
