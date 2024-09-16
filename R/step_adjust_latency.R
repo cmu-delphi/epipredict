@@ -354,12 +354,7 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
       )
     }
   }
-  if (object$method == "extend_ahead" || object$method == "extend_lags") {
-    attributes(new_data)$metadata$latency_method <- object$method
-    attributes(new_data)$metadata$shift_sign <- get_sign(object)
-    attributes(new_data)$metadata$latency_table <- object$latency_table
-    attributes(new_data)$metadata$forecast_date <- object$forecast_date
-  } else if (object$method == "locf") {
+  if (object$method == "locf") {
     # locf doesn't need to mess with the metadata at all, it just forward-fills
     # the requested columns
     rel_keys <- setdiff(key_colnames(new_data), "time_value")
