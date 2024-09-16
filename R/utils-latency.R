@@ -313,8 +313,61 @@ get_latency_table <- function(training, columns, forecast_date, latency, sign_sh
     tmp_latency_table <- latency_table %>%
       rowwise() %>%
       mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, epi_keys_checked))
-    if (latency )
-    latency_table <- latency_table %>% mutate(latency = latency)
+    if (latency) {
+      latency_table <- latency_table %>% mutate(latency = latency)
+    }
   }
   return(latency_table %>% ungroup())
+}
+
+
+#' checks: the recipe type, whether a previous step is the relevant epi_shift,
+#' that either `fixed_latency` or `fixed_forecast_date` is non-null, and that
+#' `fixed_latency` only references columns that exist at the time of the step
+#' inclusion
+#' @keywords internal
+step_adjust_latency_checks <- function(id, method, recipe, fixed_latency, fixed_forecast_date, call = caller_env()) {
+  arg_is_chr_scalar(id, method)
+  if (!is_epi_recipe(recipe)) {
+    cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
+      class = "epipredict__step_adjust_latency__epi_recipe_only"
+    )
+  }
+  if ((method == "extend_ahead") && (detect_step(recipe, "epi_ahead"))) {
+    cli_warn(
+      "If `method` is {.val extend_ahead}, then the previous `step_epi_ahead` won't be modified.",
+      class = "epipredict__step_adjust_latency__misordered_step_warning"
+    )
+  } else if ((method == "extend_lags") && detect_step(recipe, "epi_lag")) {
+    cli_warn(
+      "If `method` is {.val extend_lags} or {.val locf},
+then the previous `step_epi_lag`s won't work with modified data.",
+      class = "epipredict__step_adjust_latency__misordered_step_warning"
+    )
+  } else if ((method == "locf") && (length(recipe$steps) > 0)) {
+    cli_warn(
+      paste0(
+        "There are steps before `step_adjust_latency`.",
+        " With the method {.val locf}, it is recommended to include this step before any others"
+      ),
+      class = "epipredict__step_adjust_latency__misordered_step_warning"
+    )
+  }
+  if (!is.null(fixed_latency) && !is.null(fixed_forecast_date)) {
+    cli_abort(
+      "Only one of `fixed_latency` and `fixed_forecast_date` can be non-`NULL` at a time!",
+      class = "epipredict__step_adjust_latency__too_many_args_error"
+    )
+  }
+  if (length(fixed_latency > 1)) {
+    template <- recipe$template
+    data_names <- names(template)[!names(template) %in% key_colnames(template)]
+    wrong_names <- names(fixed_latency)[!names(fixed_latency) %in% data_names]
+    if (length(wrong_names) > 0) {
+      cli_abort(
+        "{.val fixed_latency} contains names not in the template dataset: {wrong_names}",
+        class = "epipredict__step_adjust_latency__undefined_names_error"
+      )
+    }
+  }
 }
