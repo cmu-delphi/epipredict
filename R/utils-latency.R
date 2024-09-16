@@ -29,6 +29,35 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 }
 
 
+adjust_recipe_latency_before_bake <- function(object) {
+  if (detect_step(object, "adjust_latency")) {
+    latency_step <- object$steps[[which(tidy(object)$type == "adjust_latency")]]
+    if (length(latency_step) > 1) {
+      cli_abort("Only one `step_adjust_latency()` is allowed.")
+    }
+    latency_table <- latency_step$latency_table
+    method <- latency_step$method
+    if (method == "extend_ahead") {
+      loc <- which(tidy(object)$type == "epi_ahead")
+      sign_shift <- -1
+    } else if (method == "extend_lags") {
+      loc <- which(tidy(object))$type == "epi_lag"
+      sign_shift <- 1
+    }
+    if (method != "locf") {
+      for (s in seq_along(loc)) {
+        sgrid <- object$steps[[s]]$shift_grid
+        sgrid <- sgrid %>%
+          left_join(latency_table, by = join_by(col == col_name)) %>%
+          tidyr::replace_na(list(latency = 0)) %>%
+          mutate(shift_val = shift_val + latency, amount = NULL)
+        object$steps[[s]]$shift_grid <- sgrid
+      }
+    }
+  }
+  object
+}
+
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
 #' @keywords internal
 #' @importFrom dplyr select
@@ -277,6 +306,10 @@ check_interminable_latency <- function(dataset, latency_table, target_columns, f
   }
 }
 
+`%nin%` <- function(x, table) {
+  !(x %in% table)
+}
+
 #' create the latency table
 #' This is a table of column names and the latency adjustment necessary for that column. An example:
 #'
@@ -286,33 +319,38 @@ check_interminable_latency <- function(dataset, latency_table, target_columns, f
 #' 2 death_rate       5
 #' @keywords internal
 #' @importFrom dplyr rowwise
-get_latency_table <- function(training, columns, forecast_date, latency, sign_shift, epi_keys_checked, info, terms) {
+get_latency_table <- function(training, columns, forecast_date, latency,
+                              sign_shift, epi_keys_checked, info, terms) {
   if (is.null(columns)) {
     columns <- recipes_eval_select(terms, training, info)
   }
   # construct the latency table
-  latency_table <- names(training)[!names(training) %in% key_colnames(training)] %>%
-    tibble(col_name = .)
+  latency_table <- tibble(col_name = names(training)) %>%
+    filter(col_name %nin% key_colnames(training))
   if (length(columns) > 0) {
-    latency_table <- latency_table %>% filter(col_name %in%
-      columns)
+    latency_table <- latency_table %>% filter(col_name %in% columns)
   }
 
   if (is.null(latency)) {
     latency_table <- latency_table %>%
       rowwise() %>%
-      mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, epi_keys_checked))
+      mutate(latency = get_latency(
+        training, forecast_date, col_name, sign_shift, epi_keys_checked
+      ))
   } else if (length(latency) > 1) {
-    # if latency has a length, it must also have named elements. We assign based on comparing the name in the list
+    # if latency has a length, it must also have named elements.
+    # We assign based on comparing the name in the list
     # with the column names, and drop any which don't have a latency assigned
     latency_table <- latency_table %>%
       filter(col_name %in% names(latency)) %>%
       rowwise() %>%
       mutate(latency = unname(latency[names(latency) == col_name]))
   } else {
-    tmp_latency_table <- latency_table %>%
+    latency_table <- latency_table %>%
       rowwise() %>%
-      mutate(latency = get_latency(training, forecast_date, col_name, sign_shift, epi_keys_checked))
+      mutate(latency = get_latency(
+        training, forecast_date, col_name, sign_shift, epi_keys_checked
+      ))
     if (latency) {
       latency_table <- latency_table %>% mutate(latency = latency)
     }
@@ -328,6 +366,10 @@ get_latency_table <- function(training, columns, forecast_date, latency, sign_sh
 #' @keywords internal
 step_adjust_latency_checks <- function(id, method, recipe, fixed_latency, fixed_forecast_date, call = caller_env()) {
   arg_is_chr_scalar(id, method)
+  if (detect_step(recipe, "adjust_latency")) {
+    cli_abort("Only one `step_adjust_latency()` can be included in a recipe.",
+      class = "epipredict__step_adjust_latency__multiple_steps")
+  }
   if (!is_epi_recipe(recipe)) {
     cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
       class = "epipredict__step_adjust_latency__epi_recipe_only"

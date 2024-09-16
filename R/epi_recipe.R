@@ -568,6 +568,10 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     }
     composition <- "tibble"
   }
+
+  ## Latency checks/adjustments
+  object <- adjust_recipe_latency_before_bake(object)
+
   new_data <- NextMethod("bake")
   if (!is.null(meta)) {
     # Baking should have dropped epi_df-ness and metadata. Re-infer some

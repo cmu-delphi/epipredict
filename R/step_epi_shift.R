@@ -79,6 +79,7 @@ step_epi_lag <-
         default = default,
         keys = key_colnames(recipe),
         columns = NULL,
+        shift_grid = NULL,
         skip = skip,
         id = id
       )
@@ -123,6 +124,7 @@ step_epi_ahead <-
         default = default,
         keys = key_colnames(recipe),
         columns = NULL,
+        shift_grid = NULL,
         skip = skip,
         id = id
       )
@@ -132,7 +134,7 @@ step_epi_ahead <-
 
 step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
-           columns, skip, id) {
+           columns, shift_grid, skip, id) {
     recipes::step(
       subclass = "epi_lag",
       terms = terms,
@@ -143,6 +145,7 @@ step_epi_lag_new <-
       default = default,
       keys = keys,
       columns = columns,
+      shift_grid = shift_grid,
       skip = skip,
       id = id
     )
@@ -150,7 +153,7 @@ step_epi_lag_new <-
 
 step_epi_ahead_new <-
   function(terms, role, trained, ahead, prefix, default, keys,
-           columns, skip, id) {
+           columns, shift_grid, skip, id) {
     recipes::step(
       subclass = "epi_ahead",
       terms = terms,
@@ -161,6 +164,7 @@ step_epi_ahead_new <-
       default = default,
       keys = keys,
       columns = columns,
+      shift_grid = shift_grid,
       skip = skip,
       id = id
     )
@@ -170,6 +174,10 @@ step_epi_ahead_new <-
 
 #' @export
 prep.step_epi_lag <- function(x, training, info = NULL, ...) {
+  columns <- recipes::recipes_eval_select(x$terms, training, info)
+  sgn <- get_sign(x)
+  shift_grid <- expand_grid(col = columns, shift_val = sgn * x$lag)
+
   step_epi_lag_new(
     terms = x$terms,
     role = x$role,
@@ -178,7 +186,8 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    columns = recipes::recipes_eval_select(x$terms, training, info),
+    columns = columns,
+    shift_grid = shift_grid,
     skip = x$skip,
     id = x$id
   )
@@ -186,6 +195,10 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
 
 #' @export
 prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
+  columns <- recipes::recipes_eval_select(x$terms, training, info)
+  sgn <- get_sign(x)
+  shift_grid <- expand_grid(col = columns, shift_val = sgn * x$ahead)
+
   step_epi_ahead_new(
     terms = x$terms,
     role = x$role,
@@ -194,7 +207,8 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    columns = recipes::recipes_eval_select(x$terms, training, info),
+    columns = columns,
+    shift_grid = shift_grid,
     skip = x$skip,
     id = x$id
   )
