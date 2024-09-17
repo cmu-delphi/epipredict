@@ -80,6 +80,7 @@ step_epi_lag <-
         keys = key_colnames(recipe),
         columns = NULL,
         shift_grid = NULL,
+        latency_adjusted = FALSE,
         skip = skip,
         id = id
       )
@@ -125,6 +126,7 @@ step_epi_ahead <-
         keys = key_colnames(recipe),
         columns = NULL,
         shift_grid = NULL,
+        latency_adjusted = FALSE,
         skip = skip,
         id = id
       )
@@ -134,7 +136,7 @@ step_epi_ahead <-
 
 step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
-           columns, shift_grid, skip, id) {
+           columns, shift_grid, latency_adjusted, skip, id) {
     recipes::step(
       subclass = "epi_lag",
       terms = terms,
@@ -146,6 +148,7 @@ step_epi_lag_new <-
       keys = keys,
       columns = columns,
       shift_grid = shift_grid,
+      latency_adjusted = latency_adjusted,
       skip = skip,
       id = id
     )
@@ -153,7 +156,7 @@ step_epi_lag_new <-
 
 step_epi_ahead_new <-
   function(terms, role, trained, ahead, prefix, default, keys,
-           columns, shift_grid, skip, id) {
+           columns, shift_grid, latency_adjusted, skip, id) {
     recipes::step(
       subclass = "epi_ahead",
       terms = terms,
@@ -165,6 +168,7 @@ step_epi_ahead_new <-
       keys = keys,
       columns = columns,
       shift_grid = shift_grid,
+      latency_adjusted = latency_adjusted,
       skip = skip,
       id = id
     )
@@ -175,13 +179,20 @@ step_epi_ahead_new <-
 #' @export
 prep.step_epi_lag <- function(x, training, info = NULL, ...) {
   columns <- recipes::recipes_eval_select(x$terms, training, info)
-  sgn <- get_sign(x)
-  shift_grid <- expand_grid(
-    col = columns,
-    shift_val = sgn * x$lag,
-    newname = glue::glue("{x$prefix}{abs(shift_val)}_{col}")
-  )
-
+  if (!x$latency_adjusted) {
+    tmp <- create_shift_grid(
+      x$prefix,
+      x$lag,
+      get_sign(x),
+      columns,
+      attributes(training)$metadata$latency_table,
+      attributes(training)$metadata$latency_sign
+    )
+    shift_grid <- tmp[[1]]
+    latency_adjusted <- tmp[[2]]
+  } else {
+    shift_grid <- x$shift_grid
+  }
 
   step_epi_lag_new(
     terms = x$terms,
@@ -193,6 +204,7 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     keys = x$keys,
     columns = columns,
     shift_grid = shift_grid,
+    latency_adjusted = latency_adjusted,
     skip = x$skip,
     id = x$id
   )
@@ -201,12 +213,20 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
 #' @export
 prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
   columns <- recipes::recipes_eval_select(x$terms, training, info)
-  sgn <- get_sign(x)
-  shift_grid <- expand_grid(
-    col = columns,
-    shift_val = sgn * x$ahead,
-    newname = glue::glue("{x$prefix}{abs(shift_val)}_{col}")
-  )
+  if (!x$latency_adjusted) {
+    tmp <- create_shift_grid(
+      x$prefix,
+      x$ahead,
+      get_sign(x),
+      columns,
+      attributes(training)$metadata$latency_table,
+      attributes(training)$metadata$latency_sign
+    )
+    shift_grid <- tmp[[1]]
+    latency_adjusted <- tmp[[2]]
+  } else {
+    shift_grid <- x$shift_grid
+  }
 
   step_epi_ahead_new(
     terms = x$terms,
@@ -218,6 +238,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     keys = x$keys,
     columns = columns,
     shift_grid = shift_grid,
+    latency_adjusted = latency_adjusted,
     skip = x$skip,
     id = x$id
   )
@@ -227,12 +248,14 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  add_shifted_columns(new_data, object, object$lag)
+  names(object)
+  object$shift_grid
+  add_shifted_columns(new_data, object)
 }
 
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
-  add_shifted_columns(new_data, object, object$ahead)
+  add_shifted_columns(new_data, object)
 }
 
 #' @export

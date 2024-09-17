@@ -224,6 +224,7 @@ step_adjust_latency <-
         forecast_date = NULL,
         latency = fixed_latency,
         latency_table = NULL,
+        latency_sign = NULL,
         metadata = NULL,
         method = method,
         epi_keys_checked = epi_keys_checked,
@@ -237,7 +238,7 @@ step_adjust_latency <-
 
 step_adjust_latency_new <-
   function(terms, role, trained, fixed_forecast_date, forecast_date, latency,
-           latency_table, metadata, method, epi_keys_checked,
+           latency_table, latency_sign, metadata, method, epi_keys_checked,
            check_latency_length, columns, skip, id) {
     step(
       subclass = "adjust_latency",
@@ -248,6 +249,7 @@ step_adjust_latency_new <-
       forecast_date = forecast_date,
       latency = latency,
       latency_table = latency_table,
+      latency_sign = latency_sign,
       metadata = metadata,
       method = method,
       epi_keys_checked = epi_keys_checked,
@@ -287,6 +289,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     forecast_date = forecast_date,
     latency = x$latency,
     latency_table = latency_table,
+    latency_sign = get_sign(x),
     metadata = attributes(training)$metadata,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
@@ -303,56 +306,10 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 bake.step_adjust_latency <- function(object, new_data, ...) {
   if (!inherits(new_data, "epi_df") || is.null(attributes(new_data)$metadata$as_of)) {
     new_data <- as_epi_df(new_data)
-    attributes(new_data)$metadata <- object$metadata # DJM: why? detected above?
+    attributes(new_data)$metadata <- object$metadata
     attributes(new_data)$metadata$as_of <- object$forecast_date
   } else {
-    latency <- object$latency
-    current_forecast_date <- object$fixed_forecast_date %||%
-      get_forecast_date(
-        new_data, NULL, object$epi_keys_checked, latency,
-        c(key_colnames(new_data), object$columns)
-      )
-    local_latency_table <- get_latency_table(
-      new_data, object$columns, current_forecast_date, latency,
-      get_sign(object), object$epi_keys_checked, NULL, NULL
-    )
-    comparison_table <- local_latency_table %>%
-      ungroup() %>%
-      dplyr::full_join(
-        object$latency_table %>% ungroup(),
-        by = join_by(col_name),
-        suffix = c(".bake", ".prep")
-      ) %>%
-      mutate(bakeMprep = latency.bake - latency.prep)
-    if (any(comparison_table$bakeMprep > 0)) {
-      cli_abort(
-        paste0(
-          "There is more latency at bake time than there was at prep time.",
-          " You will need to fit a model with more latency to predict on this dataset."
-        ),
-        class = "epipredict__latency__bake_prep_difference_error",
-        latency_table = comparison_table
-      )
-    }
-    if (any(comparison_table$bakeMprep < 0)) {
-      cli_warn(
-        paste0(
-          "There is less latency at bake time than there was at prep time.",
-          " This will still fit, but will discard the most recent data."
-        ),
-        class = "epipredict__latency__bake_prep_difference_warn",
-        latency_table = comparison_table
-      )
-    }
-    if (current_forecast_date != object$forecast_date) {
-      cli_warn(
-        paste0(
-          "The forecast date differs from the one set at train time; ",
-          " this means any dates added by `layer_forecast_date` will be inaccurate."
-        ),
-        class = "epipredict__latency__bake_prep_forecast_date_warn"
-      )
-    }
+    compare_bake_prep_latencies(object, new_data)
   }
   if (object$method == "locf") {
     # locf doesn't need to mess with the metadata at all, it just forward-fills

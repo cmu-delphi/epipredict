@@ -28,36 +28,6 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
   return(relevant_shifts)
 }
 
-#
-adjust_recipe_latency_before_bake <- function(rec) {
-  if (detect_step(rec, "adjust_latency")) {
-    step_types <- tidy(rec)$type
-    # can only be 1, or we would have aborted on recipe creation
-    latency_step <- rec$steps[[which(step_types == "adjust_latency")]]
-    latency_table <- latency_step$latency_table
-    method <- latency_step$method
-    if (method == "extend_ahead") {
-      loc <- which(step_types == "epi_ahead")
-      sign_shift <- -1
-    } else if (method == "extend_lags") {
-      loc <- which(step_types == "epi_lag")
-      sign_shift <- 1
-    }
-    if (method != "locf") {
-      for (s in loc) {
-        pfx <- rec$steps[[s]]$prefix
-        sgrid <- rec$steps[[s]]$shift_grid
-        sgrid <- sgrid %>%
-          left_join(latency_table, by = join_by(col == col_name)) %>%
-          tidyr::replace_na(list(latency = 0)) %>%
-          mutate(shift_val = shift_val + latency, amount = NULL, latency = NULL)
-        rec$steps[[s]]$shift_grid <- sgrid
-      }
-    }
-  }
-  rec
-}
-
 #' Extract the as_of for the forecast date, and make sure there's nothing very off about it.
 #' @keywords internal
 #' @importFrom dplyr select
@@ -413,4 +383,82 @@ then the previous `step_epi_lag`s won't work with modified data.",
       )
     }
   }
+}
+
+compare_bake_prep_latencies <- function(object, new_data, call = caller_env()) {
+  latency <- object$latency
+  current_forecast_date <- object$fixed_forecast_date %||%
+    get_forecast_date(
+      new_data, NULL, object$epi_keys_checked, latency,
+      c(key_colnames(new_data), object$columns)
+    )
+  local_latency_table <- get_latency_table(
+    new_data, object$columns, current_forecast_date, latency,
+    get_sign(object), object$epi_keys_checked, NULL, NULL
+  )
+  comparison_table <- local_latency_table %>%
+    ungroup() %>%
+    dplyr::full_join(
+      object$latency_table %>% ungroup(),
+      by = join_by(col_name),
+      suffix = c(".bake", ".prep")
+    ) %>%
+    mutate(bakeMprep = latency.bake - latency.prep)
+  if (any(comparison_table$bakeMprep > 0)) {
+    cli_abort(
+      paste0(
+        "There is more latency at bake time than there was at prep time.",
+        " You will need to fit a model with more latency to predict on this dataset."
+      ),
+      class = "epipredict__latency__bake_prep_difference_error",
+      latency_table = comparison_table,
+      call = call
+    )
+  }
+  if (any(comparison_table$bakeMprep < 0)) {
+    cli_warn(
+      paste0(
+        "There is less latency at bake time than there was at prep time.",
+        " This will still fit, but will discard the most recent data."
+      ),
+      class = "epipredict__latency__bake_prep_difference_warn",
+      latency_table = comparison_table,
+      call = call
+    )
+  }
+  if (current_forecast_date != object$forecast_date) {
+    cli_warn(
+      paste0(
+        "The forecast date differs from the one set at train time; ",
+        " this means any dates added by `layer_forecast_date` will be inaccurate."
+      ),
+      class = "epipredict__latency__bake_prep_forecast_date_warn",
+      call = call
+    )
+  }
+}
+
+
+#' @keywords internal
+create_shift_grid <- function(prefix, amount, target_sign, columns, latency_table, latency_sign) {
+  if (!is.null(latency_table) &&
+    latency_sign == target_sign) {
+    # get the actually used latencies
+    rel_latency <- latency_table %>% filter(col_name %in% columns)
+    latency_adjusted <- TRUE
+  } else {
+    # adding zero if there's no latency table
+    rel_latency <- tibble(col_name = columns, latency = 0L)
+    latency_adjusted <- FALSE
+  }
+  shift_grid <- expand_grid(col = columns, amount = target_sign * amount) %>%
+    left_join(rel_latency, by = join_by(col == col_name), ) %>%
+    tidyr::replace_na(list(latency = 0)) %>%
+    mutate(shift_val = amount + latency) %>%
+    mutate(
+      newname = glue::glue("{prefix}{abs(shift_val)}_{col}"), # name is always positive
+      amount = NULL,
+      latency = NULL
+    )
+  return(list(shift_grid, latency_adjusted))
 }
