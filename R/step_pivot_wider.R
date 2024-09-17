@@ -28,16 +28,19 @@ step_pivot_wider <- function(
 
   arg_is_chr_scalar(role, id)
 
+  id_cols <- enquos(id_cols)
+  names_from <- enquos(names_from)
+
   add_step(
     recipe,
     step_pivot_wider_new(
       terms = enquos(...),
       role = role,
       trained = FALSE,
-      user_id_cols = if (is.null(id_cols)) NULL else enquos(id_cols),
+      user_id_cols = id_cols,
       edf_id_cols = key_colnames(recipe),
       id_expand = id_expand,
-      names_from = enquos(names_from),
+      names_from = names_from,
       values_fill = values_fill,
       values_fn = values_fn,
       values_from = NULL,
@@ -106,7 +109,7 @@ bake.step_pivot_wider <- function(object, new_data, ...) {
   } else {
     pivotted <- tidyr::pivot_wider(
       new_data,
-      id_cols = id_cols,
+      id_cols = unname(id_cols),
       id_expand = object$id_expand,
       names_from = unname(object$names_from),
       values_from = unname(object$values_from),
