@@ -176,7 +176,12 @@ step_epi_ahead_new <-
 prep.step_epi_lag <- function(x, training, info = NULL, ...) {
   columns <- recipes::recipes_eval_select(x$terms, training, info)
   sgn <- get_sign(x)
-  shift_grid <- expand_grid(col = columns, shift_val = sgn * x$lag)
+  shift_grid <- expand_grid(
+    col = columns,
+    shift_val = sgn * x$lag,
+    newname = glue::glue("{x$prefix}{abs(shift_val)}_{col}")
+  )
+
 
   step_epi_lag_new(
     terms = x$terms,
@@ -197,7 +202,11 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
 prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
   columns <- recipes::recipes_eval_select(x$terms, training, info)
   sgn <- get_sign(x)
-  shift_grid <- expand_grid(col = columns, shift_val = sgn * x$ahead)
+  shift_grid <- expand_grid(
+    col = columns,
+    shift_val = sgn * x$ahead,
+    newname = glue::glue("{x$prefix}{abs(shift_val)}_{col}")
+  )
 
   step_epi_ahead_new(
     terms = x$terms,

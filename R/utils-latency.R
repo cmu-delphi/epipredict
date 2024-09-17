@@ -45,11 +45,12 @@ adjust_recipe_latency_before_bake <- function(rec) {
     }
     if (method != "locf") {
       for (s in loc) {
+        pfx <- rec$steps[[s]]$prefix
         sgrid <- rec$steps[[s]]$shift_grid
         sgrid <- sgrid %>%
           left_join(latency_table, by = join_by(col == col_name)) %>%
           tidyr::replace_na(list(latency = 0)) %>%
-          mutate(shift_val = shift_val + latency, amount = NULL)
+          mutate(shift_val = shift_val + latency, amount = NULL, latency = NULL)
         rec$steps[[s]]$shift_grid <- sgrid
       }
     }
