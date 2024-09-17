@@ -49,7 +49,6 @@ test_that("epi_adjust_latency correctly extends the lags", {
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
-
   # directly checking the shifts
   baked_x <- r1 %>%
     prep(real_x) %>%
@@ -512,11 +511,13 @@ test_that("printing step_adjust_latency results in expected output", {
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
   expect_snapshot(r5)
-  r <- epi_recipe(case_death_rate_subset) %>%
+  expect_snapshot(prep(r5, real_x))
+  r6 <- epi_recipe(case_death_rate_subset) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_adjust_latency(method = "extend_ahead") %>%
     step_epi_ahead(death_rate, ahead = 7)
-  expect_snapshot(r)
+  expect_snapshot(r6)
+  expect_snapshot(prep(r6, case_death_rate_subset))
 })
 
 test_that("locf works as intended", {

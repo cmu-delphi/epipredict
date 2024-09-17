@@ -260,9 +260,15 @@ bake.step_epi_ahead <- function(object, new_data, ...) {
 
 #' @export
 print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
+  if (x$latency_adjusted && x$trained) {
+    lag <- x$shift_grid$shift_val
+    lag <- c(lag, "(lat adj)")
+  } else {
+    lag <- x$lag
+  }
   print_epi_step(x$columns, x$terms, x$trained, "Lagging",
     conjunction = "by",
-    extra_text = x$lag
+    extra_text = lag
   )
   invisible(x)
 }
@@ -270,9 +276,15 @@ print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
 
 #' @export
 print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {
+  if (x$latency_adjusted && x$trained) {
+    ahead <- x$shift_grid$shift_val
+    ahead <- c(ahead, "(lat adj)")
+  } else {
+    ahead <- x$ahead
+  }
   print_epi_step(x$columns, x$terms, x$trained, "Leading",
     conjunction = "by",
-    extra_text = x$ahead
+    extra_text = ahead
   )
   invisible(x)
 }
