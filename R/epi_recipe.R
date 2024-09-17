@@ -499,6 +499,13 @@ prep.epi_recipe <- function(
         training <- dplyr::dplyr_reconstruct(
           as_epi_df(training), before_template
         )
+      } else if (
+        inherits(x$steps[[i]], "step_adjust_latency") &&
+          (x$steps[[i]]$method == "extend_ahead" || x$steps[[i]]$method == "extend_lags")
+      ) {
+        # pass along the latency table and shift sign from the latency adjustment step
+        attributes(training)$metadata$latency_table <- x$steps[[i]]$latency_table
+        attributes(training)$metadata$latency_sign <- x$steps[[i]]$latency_sign
       }
       training <- relocate(training, all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
@@ -569,9 +576,6 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     }
     composition <- "tibble"
   }
-
-  ## Latency checks/adjustments
-  object <- adjust_recipe_latency_before_bake(object)
 
   new_data <- NextMethod("bake")
   if (!is.null(meta)) {

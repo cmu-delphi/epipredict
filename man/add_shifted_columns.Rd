@@ -5,7 +5,7 @@
 \title{backend for both \code{bake.step_epi_ahead} and \code{bake.step_epi_lag}, performs the
 checks missing in \code{epi_shift_single}}
 \usage{
-add_shifted_columns(new_data, object, amount)
+add_shifted_columns(new_data, object)
 }
 \description{
 backend for both \code{bake.step_epi_ahead} and \code{bake.step_epi_lag}, performs the
