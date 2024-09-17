@@ -4,17 +4,35 @@ tib <- expand_grid(
   gv = letters[1:2],
   cl = letters[2:4]
 )
-tib$val1 <- rnorm(nrow(tib))
-tib$val2 <- rnorm(nrow(tib))
+tib$val1 <- 1:nrow(tib) + .1
+tib$val2 <- nrow(tib):1 - .1
 
-recipe(tib) %>%
-  step_pivot_wider(starts_with(val),
-    names_from = cl,
-    values_fill = list(val1 = 0, val2 = 0)
-  ) %>%
-  prep()
-  bake(new_data = NULL)
 
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
+test_that("works with recipe, various possible pivots", {
+  out <- recipe(tib) %>%
+    step_pivot_wider(val1, names_from = cl) %>%
+    prep(training = tib) %>% bake(new_data = NULL)
+  expect_snapshot(out)
+
+  out <- recipe(tib) %>%
+    step_pivot_wider(val1, names_from = cl, values_fill = 0) %>%
+    prep(training = tib) %>% bake(new_data = NULL)
+  expect_snapshot(out)
+
+  out <- recipe(tib) %>%
+    step_pivot_wider(starts_with("val"), names_from = cl) %>%
+    prep(training = tib) %>% bake(new_data = NULL)
+  expect_snapshot(out)
+
+  out <- recipe(tib) %>%
+    step_pivot_wider(val1, names_from = gv:cl) %>%
+    prep(training = tib) %>% bake(new_data = NULL)
+  expect_snapshot(out)
+
+  #fails
+  out <- recipe(tib) %>%
+    step_pivot_wider(val1, id_cols = tv:cl, names_from = cl) %>%
+    prep(training = tib) %>% bake(new_data = NULL)
+
+  edf <- tib %>% as_epi_df()
 })

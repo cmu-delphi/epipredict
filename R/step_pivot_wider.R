@@ -92,7 +92,6 @@ bake.step_pivot_wider <- function(object, new_data, ...) {
   hardhat::validate_column_names(new_data, object$edf_id_cols)
   id_cols <- union(object$user_id_cols, object$edf_id_cols)
   id_cols <- union(id_cols, key_colnames(new_data))
-  browser()
   if (length(id_cols) == 0L) {
     pivotted <- tidyr::pivot_wider(
       new_data,
