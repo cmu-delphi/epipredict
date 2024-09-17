@@ -40,7 +40,6 @@ get_sign <- function(object) {
 #' @importFrom tidyr expand_grid
 #' @importFrom dplyr join_by
 add_shifted_columns <- function(new_data, object, amount) {
-
   grid <- object$shift_grid
 
   ## ensure no name clashes

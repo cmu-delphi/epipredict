@@ -368,7 +368,8 @@ step_adjust_latency_checks <- function(id, method, recipe, fixed_latency, fixed_
   arg_is_chr_scalar(id, method)
   if (detect_step(recipe, "adjust_latency")) {
     cli_abort("Only one `step_adjust_latency()` can be included in a recipe.",
-      class = "epipredict__step_adjust_latency__multiple_steps")
+      class = "epipredict__step_adjust_latency__multiple_steps"
+    )
   }
   if (!is_epi_recipe(recipe)) {
     cli_abort("This recipe step can only operate on an {.cls epi_recipe}.",
