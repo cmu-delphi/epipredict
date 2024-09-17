@@ -467,8 +467,8 @@ prep.epi_recipe <- function(
   if (fresh) x$term_info <- x$var_info
 
   running_info <- x$term_info %>% mutate(number = 0, skip = FALSE)
-  for (i in seq(along.with = x$steps)) {
-    needs_tuning <- map_lgl(x$steps[[i]], recipes:::is_tune)
+  for (ii in seq(along.with = x$steps)) {
+    needs_tuning <- map_lgl(x$steps[[ii]], recipes:::is_tune)
     if (any(needs_tuning)) {
       arg <- names(needs_tuning)[needs_tuning]
       arg <- paste0("'", arg, "'", collapse = ", ")
@@ -478,18 +478,18 @@ prep.epi_recipe <- function(
       )
       cli_abort(msg)
     }
-    note <- paste("oper", i, gsub("_", " ", class(x$steps[[i]])[1]))
-    if (!x$steps[[i]]$trained | fresh) {
+    note <- paste("oper", ii, gsub("_", " ", class(x$steps[[ii]])[1]))
+    if (!x$steps[[ii]]$trained || fresh) {
       if (verbose) {
         cat(note, "[training]", "\n")
       }
       before_nms <- names(training)
       before_template <- training[1, ]
-      x$steps[[i]] <- prep(x$steps[[i]],
+      x$steps[[ii]] <- prep(x$steps[[ii]],
         training = training,
         info = x$term_info
       )
-      training <- bake(x$steps[[i]], new_data = training)
+      training <- bake(x$steps[[ii]], new_data = training)
       if (!tibble::is_tibble(training)) {
         cli_abort("`bake()` methods should always return {.cls tibble}.")
       }
@@ -500,27 +500,27 @@ prep.epi_recipe <- function(
           as_epi_df(training), before_template
         )
       } else if (
-        inherits(x$steps[[i]], "step_adjust_latency") &&
-          (x$steps[[i]]$method == "extend_ahead" || x$steps[[i]]$method == "extend_lags")
+        inherits(x$steps[[ii]], "step_adjust_latency") &&
+          (x$steps[[ii]]$method == "extend_ahead" || x$steps[[ii]]$method == "extend_lags")
       ) {
         # pass along the latency table and shift sign from the latency adjustment step
-        attributes(training)$metadata$latency_table <- x$steps[[i]]$latency_table
-        attributes(training)$metadata$latency_sign <- x$steps[[i]]$latency_sign
+        attributes(training)$metadata$latency_table <- x$steps[[ii]]$latency_table
+        attributes(training)$metadata$latency_sign <- x$steps[[ii]]$latency_sign
       }
       training <- relocate(training, all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
-      if (!is.na(x$steps[[i]]$role)) {
+      if (!is.na(x$steps[[ii]]$role)) {
         new_vars <- setdiff(x$term_info$variable, running_info$variable)
         pos_new_var <- x$term_info$variable %in% new_vars
         pos_new_and_na_role <- pos_new_var & is.na(x$term_info$role)
         pos_new_and_na_source <- pos_new_var & is.na(x$term_info$source)
-        x$term_info$role[pos_new_and_na_role] <- x$steps[[i]]$role
+        x$term_info$role[pos_new_and_na_role] <- x$steps[[ii]]$role
         x$term_info$source[pos_new_and_na_source] <- "derived"
       }
       recipes:::changelog(log_changes, before_nms, names(training), x$steps[[i]])
       running_info <- rbind(
         running_info,
-        mutate(x$term_info, number = i, skip = x$steps[[i]]$skip)
+        mutate(x$term_info, number = ii, skip = x$steps[[ii]]$skip)
       )
     } else {
       if (verbose) cat(note, "[pre-trained]\n")
