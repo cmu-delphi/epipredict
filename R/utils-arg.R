@@ -102,3 +102,26 @@ arg_to_date <- function(x, allow_null = FALSE) {
   arg_is_date(x, allow_null = allow_null)
   x
 }
+
+check_tidyselect_cols_exist <- function(selection, data, call = caller_env()) {
+  name_pos <- tidyselect::eval_select(selection, data, error_call = call)
+  if (length(name_pos) == 0L) {
+    return(list(ok = TRUE, missing_names = selection))
+  }
+  hardhat::check_column_names(data, names(name_pos))
+}
+
+validate_tidyselect_cols_exist <- function(selection, data, call = caller_env()) {
+  check <- check_tidyselect_cols_exist(selection, data, call)
+  if (!check$ok) {
+    missing_names <- glue::glue_collapse(
+      glue::single_quote(check$missing_names),
+      sep = ", "
+    )
+    message <- glue::glue(
+      "The {selection} results in missing columns: {missing_names}."
+    )
+    cli_abort(message, call = call)
+  }
+  invisible(data)
+}
