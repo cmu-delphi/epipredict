@@ -40,19 +40,8 @@ get_sign <- function(object) {
 #' @importFrom tidyr expand_grid
 #' @importFrom dplyr join_by
 add_shifted_columns <- function(new_data, object, amount) {
-  sign_shift <- get_sign(object)
-  latency_table <- attributes(new_data)$metadata$latency_table
-  shift_sign_lat <- attributes(new_data)$metadata$shift_sign
-  if (!is.null(latency_table) &&
-    shift_sign_lat == sign_shift) {
-    # get the actually used latencies
-    rel_latency <- latency_table %>% filter(col_name %in% object$columns)
-  } else {
-    # adding zero if there's no latency table
-    rel_latency <- tibble(col_name = object$columns, latency = 0L)
-  }
-  grid <- object$shift_grid %>%
-    mutate(newname = glue::glue("{object$prefix}{abs(shift_val)}_{col}"))
+
+  grid <- object$shift_grid
 
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
