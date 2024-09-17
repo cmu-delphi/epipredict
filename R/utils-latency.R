@@ -44,7 +44,7 @@ adjust_recipe_latency_before_bake <- function(rec) {
       sign_shift <- 1
     }
     if (method != "locf") {
-      for (s in seq_along(loc)) {
+      for (s in loc) {
         sgrid <- rec$steps[[s]]$shift_grid
         sgrid <- sgrid %>%
           left_join(latency_table, by = join_by(col == col_name)) %>%
