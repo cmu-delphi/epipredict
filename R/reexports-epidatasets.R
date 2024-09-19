@@ -51,3 +51,21 @@ delayedAssign("covid_case_death_rates", epidatasets::covid_case_death_rates)
 #' data(state_census, package = "epipredict")
 #' @export
 delayedAssign("state_census", epidatasets::state_census)
+
+#' @inherit epidatasets::counts_subset description source references title
+#' @inheritSection epidatasets::counts_subset Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::counts_subset
+#'
+#' # works
+#' library(epipredict)
+#' counts_subset
+#'
+#' # fails
+#' data(counts_subset, package = "epipredict")
+#' @export
+delayedAssign("counts_subset", epidatasets::counts_subset)
