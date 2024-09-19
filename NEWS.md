@@ -57,3 +57,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Add `step_epi_slide` to produce generic sliding computations over an `epi_df`
 - Add quantile random forests (via `{grf}`) as a parsnip engine
 - Replace `epi_keys()` with `epiprocess::key_colnames()`, #352
+- More descriptive error messages from `arg_is_*()`, #287

@@ -23,8 +23,10 @@ arg_is_scalar <- function(..., allow_null = FALSE, allow_na = FALSE,
 arg_is_lgl <- function(..., allow_null = FALSE, allow_na = FALSE,
                        allow_empty = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
-    ok <- test_logical(value, null.ok = allow_null, any.missing = allow_na,
-                       min.len = as.integer(!allow_empty))
+    ok <- test_logical(value,
+      null.ok = allow_null, any.missing = allow_na,
+      min.len = as.integer(!allow_empty)
+    )
     if (!ok) {
       cli_abort("{.arg {name}} must be of type {.cls logical}.", call = call)
     }
@@ -34,8 +36,10 @@ arg_is_lgl <- function(..., allow_null = FALSE, allow_na = FALSE,
 arg_is_lgl_scalar <- function(..., allow_null = FALSE, allow_na = FALSE,
                               call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
-    ok <- test_logical(value, null.ok = allow_null, any.missing = allow_na,
-                       min.len = 1, max.len = 1)
+    ok <- test_logical(value,
+      null.ok = allow_null, any.missing = allow_na,
+      min.len = 1, max.len = 1
+    )
     if (!ok) {
       cli_abort(
         "{.arg {name}} must be a scalar of type {.cls logical}.",
@@ -57,7 +61,8 @@ arg_is_numeric <- function(..., allow_null = FALSE, call = caller_env()) {
 arg_is_pos <- function(..., allow_null = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
     ok <- test_numeric(
-      value, lower = .Machine$double.eps,
+      value,
+      lower = .Machine$double.eps,
       null.ok = allow_null, any.missing = FALSE
     )
     if (!ok) {
@@ -138,8 +143,10 @@ arg_is_date <- function(..., allow_null = FALSE, call = caller_env()) {
 arg_is_probabilities <- function(..., allow_null = FALSE, allow_na = FALSE,
                                  call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
-    ok <- test_numeric(value, lower = 0, upper = 1, null.ok = allow_null,
-                       any.missing = allow_na)
+    ok <- test_numeric(value,
+      lower = 0, upper = 1, null.ok = allow_null,
+      any.missing = allow_na
+    )
     if (!ok) {
       cli_abort("{.arg {name}} must lie in [0, 1].", call = call)
     }
@@ -149,8 +156,10 @@ arg_is_probabilities <- function(..., allow_null = FALSE, allow_na = FALSE,
 arg_is_chr <- function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = FALSE,
                        call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
-    ok <- test_character(value, null.ok = allow_null, any.missing = allow_na,
-                         min.len = as.integer(!allow_empty))
+    ok <- test_character(value,
+      null.ok = allow_null, any.missing = allow_na,
+      min.len = as.integer(!allow_empty)
+    )
     if (!ok) {
       cli_abort("{.arg {name}} must be of type {.cls character}.", call = call)
     }
@@ -160,12 +169,15 @@ arg_is_chr <- function(..., allow_null = FALSE, allow_na = FALSE, allow_empty = 
 arg_is_chr_scalar <- function(..., allow_null = FALSE, allow_na = FALSE,
                               call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
-    ok <- test_character(value, null.ok = allow_null, any.missing = allow_na,
-                         len = 1L)
+    ok <- test_character(value,
+      null.ok = allow_null, any.missing = allow_na,
+      len = 1L
+    )
     if (!ok) {
       cli_abort(
         "{.arg {name}} must be a scalar of type {.cls character}.",
-        call = call)
+        call = call
+      )
     }
   })
 }
