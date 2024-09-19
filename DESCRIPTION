@@ -31,6 +31,7 @@ Imports:
     cli,
     distributional,
     dplyr,
+    epidatasets,
     generics,
     ggplot2,
     glue,
@@ -66,6 +67,7 @@ Suggests:
 VignetteBuilder:
     knitr
 Remotes:
+    cmu-delphi/epidatasets,
     cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
     dajmcdon/smoothqr

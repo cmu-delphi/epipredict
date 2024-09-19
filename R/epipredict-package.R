@@ -10,6 +10,6 @@
 #' @importFrom checkmate assert assert_character assert_int assert_scalar
 #'             assert_logical assert_numeric assert_number assert_integer
 #'             assert_integerish assert_date assert_function assert_class
-#' @import epiprocess parsnip
+#' @import epiprocess parsnip epidatasets
 ## usethis namespace: end
 NULL
