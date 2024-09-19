@@ -16,6 +16,24 @@
 #' @export
 delayedAssign("grad_employ_subset", epidatasets::grad_employ_subset)
 
+#' @inherit epidatasets::covid_case_death_rates description source references title
+#' @inheritSection epidatasets::covid_case_death_rates Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::covid_case_death_rates
+#'
+#' # works
+#' library(epipredict)
+#' covid_case_death_rates
+#'
+#' # fails
+#' data(covid_case_death_rates, package = "epipredict")
+#' @export
+delayedAssign("covid_case_death_rates", epidatasets::covid_case_death_rates)
+
 #' @inherit epidatasets::state_census description source references title
 #' @inheritSection epidatasets::state_census Data dictionary
 #' @examples
