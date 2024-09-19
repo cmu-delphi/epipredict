@@ -125,16 +125,18 @@ test_that("chr", {
   expect_snapshot(error = TRUE, arg_is_chr(d))
   expect_snapshot(error = TRUE, arg_is_chr(v))
   expect_snapshot(error = TRUE, arg_is_chr(ll))
-  expect_snapshot(error = TRUE, arg_is_chr(z = character(0)))
-  expect_silent(arg_is_chr(z = character(0), allow_empty = TRUE))
+  z <- character(0)
+  expect_snapshot(error = TRUE, arg_is_chr(z))
+  expect_silent(arg_is_chr(z, allow_empty = TRUE))
 })
 
 test_that("function", {
   expect_silent(arg_is_function(f, g, parsnip::linear_reg))
   expect_snapshot(error = TRUE, arg_is_function(c(a, b)))
   expect_snapshot(error = TRUE, arg_is_function(c(f, g)))
-  expect_snapshot(error = TRUE, arg_is_function(f = NULL))
-  expect_silent(arg_is_function(g, f = NULL, allow_null = TRUE))
+  f <- NULL
+  expect_snapshot(error = TRUE, arg_is_function(f))
+  expect_silent(arg_is_function(g, f, allow_null = TRUE))
 })
 
 test_that("coerce scalar to date", {
