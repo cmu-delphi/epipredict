@@ -57,7 +57,7 @@ abbr_to_location <- function(abbr) {
 #'
 #' @examples
 #' library(dplyr)
-#' weekly_deaths <- case_death_rate_subset %>%
+#' weekly_deaths <- covid_case_death_rates %>%
 #'   filter(
 #'     time_value >= as.Date("2021-09-01"),
 #'     geo_value %in% c("ca", "ny", "dc", "ga", "vt")

@@ -122,6 +122,6 @@ reference:
       - clean_f_name
   - title: Included datasets
     contents:
-      - case_death_rate_subset
+      - covid_case_death_rates
       - state_census
       - grad_employ_subset

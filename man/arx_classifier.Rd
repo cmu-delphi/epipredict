@@ -49,7 +49,7 @@ that it estimates a class at a particular target horizon.
 }
 \examples{
 library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 
 out <- arx_classifier(jhu, "death_rate", c("case_rate", "death_rate"))

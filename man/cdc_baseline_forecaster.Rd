@@ -38,7 +38,7 @@ This forecaster is meant to produce exactly the CDC Baseline used for
 }
 \examples{
 library(dplyr)
-weekly_deaths <- case_death_rate_subset \%>\%
+weekly_deaths <- covid_case_death_rates \%>\%
   select(geo_value, time_value, death_rate) \%>\%
   left_join(state_census \%>\% select(pop, abbr), by = c("geo_value" = "abbr")) \%>\%
   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) \%>\%

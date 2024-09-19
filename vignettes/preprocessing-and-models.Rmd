@@ -295,11 +295,11 @@ behav_ind %>%
 ```
 
 We will take a subset of death rate and case rate data from the built-in dataset
-`case_death_rate_subset`.
+`covid_case_death_rates`.
 
 ```{r}
 jhu <- filter(
-  case_death_rate_subset,
+  covid_case_death_rates,
   time_value >= "2021-06-04",
   time_value <= "2021-12-31",
   geo_value %in% c("ca", "fl", "tx", "ny", "nj")
@@ -445,10 +445,10 @@ g_{\text{up}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{up}\mid x)}{Pr(Z_{\ell,t
 Preprocessing steps are similar to the previous models with an additional step
 of categorizing the response variables. Again, we will use a subset of death
 rate and case rate data from our built-in dataset
-`case_death_rate_subset`.
+`covid_case_death_rates`.
 
 ```{r}
-jhu <- case_death_rate_subset %>%
+jhu <- covid_case_death_rates %>%
   dplyr::filter(
     time_value >= "2021-06-04",
     time_value <= "2021-12-31",
@@ -517,7 +517,7 @@ Let's start with a simple dataset and preprocessing:
 
 ```{r}
 ex <- filter(
-  case_death_rate_subset,
+  covid_case_death_rates,
   time_value >= "2021-12-01",
   time_value <= "2021-12-31",
   geo_value == "ca"

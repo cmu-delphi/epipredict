@@ -72,7 +72,7 @@ test_that("arx_forecaster snapshots", {
 
 test_that("arx_classifier snapshots", {
   arc1 <- arx_classifier(
-    case_death_rate_subset %>%
+    covid_case_death_rates %>%
       dplyr::filter(time_value >= as.Date("2021-11-01")),
     "death_rate",
     c("case_rate", "death_rate")

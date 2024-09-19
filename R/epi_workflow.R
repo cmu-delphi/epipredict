@@ -20,7 +20,7 @@
 #' @importFrom generics augment
 #' @export
 #' @examples
-#' jhu <- case_death_rate_subset
+#' jhu <- covid_case_death_rates
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -84,7 +84,7 @@ is_epi_workflow <- function(x) {
 #' @name fit-epi_workflow
 #' @export
 #' @examples
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
@@ -139,7 +139,7 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' @name predict-epi_workflow
 #' @export
 #' @examples
-#' jhu <- case_death_rate_subset
+#' jhu <- covid_case_death_rates
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%

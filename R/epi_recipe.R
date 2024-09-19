@@ -48,7 +48,7 @@ epi_recipe.default <- function(x, ...) {
 #' @examples
 #' library(dplyr)
 #' library(recipes)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-08-01") %>%
 #'   arrange(geo_value, time_value)
 #'
@@ -270,7 +270,7 @@ is_epi_recipe <- function(x) {
 #' library(dplyr)
 #' library(recipes)
 #'
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-08-01") %>%
 #'   arrange(geo_value, time_value)
 #'
@@ -354,7 +354,7 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #' library(dplyr)
 #' library(workflows)
 #'
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%

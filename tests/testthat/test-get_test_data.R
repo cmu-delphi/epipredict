@@ -1,17 +1,17 @@
 library(dplyr)
 test_that("return expected number of rows and returned dataset is ungrouped", {
-  r <- epi_recipe(case_death_rate_subset) %>%
+  r <- epi_recipe(covid_case_death_rates) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14, 21, 28)) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
 
-  test <- get_test_data(recipe = r, x = case_death_rate_subset)
+  test <- get_test_data(recipe = r, x = covid_case_death_rates)
 
   expect_equal(
     nrow(test),
-    dplyr::n_distinct(case_death_rate_subset$geo_value) * 29
+    dplyr::n_distinct(covid_case_death_rates$geo_value) * 29
   )
 
   expect_false(dplyr::is.grouped_df(test))
@@ -19,25 +19,25 @@ test_that("return expected number of rows and returned dataset is ungrouped", {
 
 
 test_that("expect insufficient training data error", {
-  r <- epi_recipe(case_death_rate_subset) %>%
+  r <- epi_recipe(covid_case_death_rates) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 367)) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
 
-  expect_error(get_test_data(recipe = r, x = case_death_rate_subset))
+  expect_error(get_test_data(recipe = r, x = covid_case_death_rates))
 })
 
 
 test_that("expect error that geo_value or time_value does not exist", {
-  r <- epi_recipe(case_death_rate_subset) %>%
+  r <- epi_recipe(covid_case_death_rates) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)
 
-  wrong_epi_df <- case_death_rate_subset %>% dplyr::select(-geo_value)
+  wrong_epi_df <- covid_case_death_rates %>% dplyr::select(-geo_value)
 
   expect_error(get_test_data(recipe = r, x = wrong_epi_df))
 })
@@ -137,7 +137,7 @@ test_that("Omit end rows according to minimum lag when that’s not lag 0", {
 
   # Ex. using real built-in data
 
-  ca <- case_death_rate_subset %>%
+  ca <- covid_case_death_rates %>%
     filter(geo_value == "ca")
 
   rec <- epi_recipe(ca) %>%

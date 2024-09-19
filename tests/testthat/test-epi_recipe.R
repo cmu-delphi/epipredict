@@ -118,7 +118,7 @@ test_that("epi_recipe epi_df works", {
 
 
 test_that("add/update/adjust/remove epi_recipe works as intended", {
-  jhu <- case_death_rate_subset
+  jhu <- covid_case_death_rates
 
   r <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%

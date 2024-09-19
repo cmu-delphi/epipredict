@@ -31,13 +31,13 @@ theme_set(theme_bw())
 [Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
 contain cross-sectional measurements of subjects over time. The `epipredict` 
 package is most suitable for running forecasters on epidemiological panel data. 
-A built-in example of this is the [`case_death_rate_subset`](
-  https://cmu-delphi.github.io/epipredict/reference/case_death_rate_subset.html) 
+A built-in example of this is the [`covid_case_death_rates`](
+  https://cmu-delphi.github.io/epipredict/reference/covid_case_death_rates.html)
 dataset, which contains daily state-wise measures of `case_rate` and 
 `death_rate` for COVID-19 in 2021:
 
 ```{r epi-panel-ex, include=T}
-head(case_death_rate_subset, 3)
+head(covid_case_death_rates, 3)
 ```
 
 `epipredict` functions work with data in 

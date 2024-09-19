@@ -47,14 +47,14 @@ sequence of any existing operations.
 that will generate one or more new columns of derived data.
 }
 \examples{
-r <- epi_recipe(case_death_rate_subset) \%>\%
+r <- epi_recipe(covid_case_death_rates) \%>\%
   step_lag_difference(case_rate, death_rate, horizon = c(7, 14)) \%>\%
   step_epi_naomit()
 r
 
 r \%>\%
-  prep(case_death_rate_subset) \%>\%
-  bake(case_death_rate_subset)
+  prep(covid_case_death_rates) \%>\%
+  bake(covid_case_death_rates)
 }
 \seealso{
 Other row operation steps: 
