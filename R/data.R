@@ -33,32 +33,3 @@
 #'   June 7 is the average of the underlying data for June 1 through 7,
 #'   inclusive.
 "case_death_rate_subset"
-
-#' Subset of Statistics Canada median employment income for postsecondary graduates
-#'
-#' @format An [epiprocess::epi_df][epiprocess::as_epi_df] with 10193 rows and 8 variables:
-#' \describe{
-#'   \item{geo_value}{The province in Canada associated with each
-#'      row of measurements.}
-#'   \item{time_value}{The time value, a year integer in YYYY format}
-#'   \item{edu_qual}{The education qualification}
-#'   \item{fos}{The field of study}
-#'   \item{age_group}{The age group; either 15 to 34 or 35 to 64}
-#'   \item{num_graduates}{The number of graduates for the given row of characteristics}
-#'   \item{med_income_2y}{The median employment income two years after graduation}
-#'   \item{med_income_5y}{The median employment income five years after graduation}
-#' }
-#' @source This object contains modified data from the following Statistics Canada
-#' data table: \href{https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710011501}{
-#'  Characteristics and median employment income of longitudinal cohorts of postsecondary
-#'  graduates two and five years after graduation, by educational qualification and
-#'  field of study (primary groupings)
-#' }
-#'
-#' Modifications:
-#' * Only provincial-level geo_values are kept
-#' * Only age group, field of study, and educational qualification are kept as
-#'   covariates. For the remaining covariates, we keep aggregated values and
-#'   drop the level-specific rows.
-#' * No modifications were made to the time range of the data
-"grad_employ_subset"
