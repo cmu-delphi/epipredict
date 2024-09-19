@@ -1,9 +1,8 @@
 ## usethis namespace: start
 #' @import epiprocess parsnip
-#' @importFrom checkmate assert assert_character assert_int assert_scalar
-#' @importFrom checkmate assert_integerish assert_date assert_function
-#' @importFrom checkmate assert_class assert_logical assert_numeric assert_number
-#' @importFrom checkmate assert_integer
+#' @importFrom checkmate assert_class assert_numeric
+#' @importFrom checkmate test_scalar test_logical test_numeric test_integerish
+#' @importFrom checkmate test_date test_character test_function
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom dplyr relocate summarise summarize everything
 #' @importFrom dplyr filter mutate select left_join rename ungroup full_join
