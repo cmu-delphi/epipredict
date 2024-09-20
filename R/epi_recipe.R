@@ -499,13 +499,6 @@ prep.epi_recipe <- function(
         training <- dplyr::dplyr_reconstruct(
           as_epi_df(training), before_template
         )
-      } else if (
-        inherits(x$steps[[ii]], "step_adjust_latency") &&
-          (x$steps[[ii]]$method == "extend_ahead" || x$steps[[ii]]$method == "extend_lags")
-      ) {
-        # pass along the latency table and shift sign from the latency adjustment step
-        attributes(training)$metadata$latency_table <- x$steps[[ii]]$latency_table
-        attributes(training)$metadata$latency_sign <- x$steps[[ii]]$latency_sign
       }
       training <- relocate(training, all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)

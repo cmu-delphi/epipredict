@@ -329,6 +329,9 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
       as_tibble() %>%
       tidyr::fill(.direction = "down", any_of(modified_columns)) %>%
       ungroup()
+  } else if (object$method == "extend_lags" || object$method == "extend_ahead") {
+    attributes(new_data)$metadata$latency_table <- object$latency_table
+    attributes(new_data)$metadata$latency_sign <- object$latency_sign
   }
   return(new_data)
 }
