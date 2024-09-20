@@ -340,7 +340,7 @@ Some models like `lm` internally handle `NA`s, but not everything does, so we
 deal with them explicitly. The code to do this (inside the forecaster) is
 
 ```{r}
-er <- epi_recipe(jhu) %>%
+er <- recipe(jhu) %>%
   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_naomit()
@@ -445,7 +445,7 @@ To illustrate everything above, here is (roughly) the code for the
 `flatline_forecaster()` applied to the `case_rate`.
 
 ```{r}
-r <- epi_recipe(jhu) %>%
+r <- recipe(jhu) %>%
   step_epi_ahead(case_rate, ahead = 7, skip = TRUE) %>%
   update_role(case_rate, new_role = "predictor") %>%
   add_role(all_of(key_colnames(jhu)), new_role = "predictor")

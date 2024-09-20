@@ -32,7 +32,7 @@ ggplot2::autoplot
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #'
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -56,7 +56,7 @@ ggplot2::autoplot
 #' # ------- Show multiple horizons
 #'
 #' p <- lapply(c(7, 14, 21, 28), function(h) {
-#'   r <- epi_recipe(jhu) %>%
+#'   r <- recipe(jhu) %>%
 #'     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'     step_epi_ahead(death_rate, ahead = h) %>%
 #'     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -184,7 +184,10 @@ autoplot.epi_workflow <- function(
   }
 
   if (".pred" %in% names(predictions)) {
-    ntarget_dates <- n_distinct(predictions$time_value)
+    ntarget_dates <- dplyr::n_distinct(predictions$time_value)
+    if (distributional::is_distribution(predictions$.pred)) {
+      predictions <- dplyr::mutate(predictions, .pred = median(.pred))
+    }
     if (ntarget_dates > 1L) {
       bp <- bp +
         geom_line(

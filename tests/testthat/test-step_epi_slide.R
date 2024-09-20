@@ -8,7 +8,7 @@ edf <- data.frame(
 ) %>%
   as_epi_df()
 
-r <- epi_recipe(edf)
+r <- recipe(edf)
 rolled_before <- edf %>%
   group_by(geo_value) %>%
   epi_slide(value = mean(value), before = 3L) %>%
@@ -21,7 +21,7 @@ rolled_after <- edf %>%
 
 test_that("epi_slide errors when needed", {
   # not an epi_recipe
-  expect_error(recipe(edf) %>% step_epi_slide(value, .f = mean, before = 6L))
+  expect_error(recipe(as_tibble(edf)) %>% step_epi_slide(value, .f = mean, before = 6L))
 
   # non-scalar args
   expect_error(r %>% step_epi_slide(value, .f = mean, before = c(3L, 6L)))

@@ -1,5 +1,5 @@
 test_that("postprocesser was evaluated", {
-  r <- epi_recipe(case_death_rate_subset)
+  r <- recipe(case_death_rate_subset)
   s <- parsnip::linear_reg()
   f <- frosting()
 
@@ -14,7 +14,7 @@ test_that("postprocesser was evaluated", {
 test_that("outcome of the two methods are the same", {
   jhu <- case_death_rate_subset
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(case_rate, lag = c(7)) %>%
@@ -36,7 +36,7 @@ test_that("model can be added/updated/removed from epi_workflow", {
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7)
 
@@ -66,7 +66,7 @@ test_that("model can be added/updated/removed from epi_workflow", {
 test_that("forecast method works", {
   jhu <- case_death_rate_subset %>%
     filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_naomit()
@@ -97,7 +97,7 @@ test_that("forecast method works", {
 test_that("forecast method errors when workflow not fit", {
   jhu <- case_death_rate_subset %>%
     filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_naomit()

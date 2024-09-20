@@ -12,7 +12,7 @@ x <- tibble(
   epiprocess::as_epi_df()
 
 # Preparing the datasets to be used for comparison
-r <- epi_recipe(x) %>%
+r <- recipe(x) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 

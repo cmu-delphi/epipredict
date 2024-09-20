@@ -34,9 +34,9 @@
 #' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value >= as.Date("2021-01-01"), geo_value %in% c("ca", "ny"))
-#' rec <- epi_recipe(jhu) %>%
+#' rec <- recipe(jhu) %>%
 #'   step_epi_slide(case_rate, death_rate,
-#'     .f = \(x) mean(x, na.rm = TRUE),
+#'     .f = function(x) mean(x, na.rm = TRUE),
 #'     before = 6L
 #'   )
 #' bake(prep(rec, jhu), new_data = NULL)

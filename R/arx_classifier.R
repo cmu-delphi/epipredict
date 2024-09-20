@@ -10,7 +10,7 @@
 #'   be real-valued. Conversion of this data to unordered classes is handled
 #'   internally based on the `breaks` argument to [arx_class_args_list()].
 #'   If discrete classes are already in the `epi_df`, it is recommended to
-#'   code up a classifier from scratch using [epi_recipe()].
+#'   code up a classifier from scratch using [recipe()].
 #' @param trainer A `{parsnip}` model describing the type of estimation.
 #'   For now, we enforce `mode = "classification"`. Typical values are
 #'   [parsnip::logistic_reg()] or [parsnip::multinom_reg()]. More complicated
@@ -129,7 +129,7 @@ arx_class_epi_workflow <- function(
 
   # --- preprocessor
   # ------- predictors
-  r <- epi_recipe(epi_data) %>%
+  r <- recipe(epi_data) %>%
     step_growth_rate(
       dplyr::all_of(predictors),
       role = "grp",

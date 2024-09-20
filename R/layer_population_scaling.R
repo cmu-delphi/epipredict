@@ -54,7 +54,7 @@
 #'
 #' pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
-#' r <- epi_recipe(jhu) %>%
+#' r <- recipe(jhu) %>%
 #'   step_population_scaling(
 #'     df = pop_data,
 #'     df_pop_col = "value",

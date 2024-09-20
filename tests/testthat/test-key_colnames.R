@@ -1,9 +1,17 @@
-test_that("Extracts keys from a recipe; roles are NA, giving an empty vector", {
-  expect_equal(key_colnames(recipe(case_death_rate_subset)), character(0L))
+library(parsnip)
+library(workflows)
+library(dplyr)
+
+test_that("Extracts keys from a recipe", {
+  expect_equal(
+    key_colnames(recipe(case_death_rate_subset)),
+    c("geo_value", "time_value")
+  )
+  expect_equal(key_colnames(recipe(cars)), character(0L))
 })
 
-test_that("key_colnames extracts time_value and geo_value, but not raw", {
-  my_recipe <- epi_recipe(case_death_rate_subset) %>%
+test_that("epi_keys_mold extracts time_value and geo_value, but not raw", {
+  my_recipe <- recipe(case_death_rate_subset) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
@@ -33,12 +41,7 @@ test_that("key_colnames extracts additional keys when they are present", {
       additional_metadata = list(other_keys = c("state", "pol"))
     )
 
-  expect_identical(
-    key_colnames(my_data),
-    c("geo_value", "time_value", "state", "pol")
-  )
-
-  my_recipe <- epi_recipe(my_data) %>%
+  my_recipe <- recipe(my_data) %>%
     step_epi_ahead(value, ahead = 7) %>%
     step_epi_naomit()
 

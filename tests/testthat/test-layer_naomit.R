@@ -1,7 +1,7 @@
 jhu <- case_death_rate_subset %>%
   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 
-r <- epi_recipe(jhu) %>%
+r <- recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14, 30)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   recipes::step_naomit(all_predictors()) %>%

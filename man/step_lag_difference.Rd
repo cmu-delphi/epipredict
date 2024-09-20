@@ -47,7 +47,7 @@ sequence of any existing operations.
 that will generate one or more new columns of derived data.
 }
 \examples{
-r <- epi_recipe(case_death_rate_subset) \%>\%
+r <- recipe(case_death_rate_subset) \%>\%
   step_lag_difference(case_rate, death_rate, horizon = c(7, 14)) \%>\%
   step_epi_naomit()
 r

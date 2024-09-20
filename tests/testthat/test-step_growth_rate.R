@@ -4,7 +4,7 @@ test_that("step_growth_rate validates arguments", {
   expect_error(step_growth_rate(r))
 
   edf <- as_epi_df(df)
-  r <- epi_recipe(edf)
+  r <- recipe(edf)
 
   expect_error(step_growth_rate(r, value, role = 1))
   expect_error(step_growth_rate(r, value, method = "abc"))
@@ -28,7 +28,7 @@ test_that("step_growth_rate validates arguments", {
 test_that("step_growth_rate works for a single signal", {
   df <- data.frame(time_value = 1:5, geo_value = rep("a", 5), value = 6:10)
   edf <- as_epi_df(df)
-  r <- epi_recipe(edf)
+  r <- recipe(edf)
 
   res <- r %>%
     step_growth_rate(value, horizon = 1) %>%
@@ -41,7 +41,7 @@ test_that("step_growth_rate works for a single signal", {
     data.frame(time_value = 1:5, geo_value = rep("b", 5), value = 6:10)
   )
   edf <- as_epi_df(df)
-  r <- epi_recipe(edf)
+  r <- recipe(edf)
   res <- r %>%
     step_growth_rate(value, horizon = 1) %>%
     prep(edf) %>%
@@ -57,7 +57,7 @@ test_that("step_growth_rate works for a two signals", {
     v1 = 6:10, v2 = 1:5
   )
   edf <- as_epi_df(df)
-  r <- epi_recipe(edf)
+  r <- recipe(edf)
 
   res <- r %>%
     step_growth_rate(v1, v2, horizon = 1) %>%
@@ -71,7 +71,7 @@ test_that("step_growth_rate works for a two signals", {
     data.frame(time_value = 1:5, geo_value = rep("b", 5), v1 = 6:10, v2 = 1:5)
   )
   edf <- as_epi_df(df)
-  r <- epi_recipe(edf)
+  r <- recipe(edf)
   res <- r %>%
     step_growth_rate(v1, v2, horizon = 1) %>%
     prep(edf) %>%

@@ -78,7 +78,7 @@ reference:
       - smooth_quantile_reg
   - title: Custom panel data forecasting workflows
     contents:
-    - epi_recipe
+    - recipe.epi_df
     - epi_workflow
     - add_epi_recipe
     - adjust_epi_recipe

@@ -41,7 +41,7 @@ flatline_forecaster <- function(
   outcome <- rlang::sym(outcome)
 
 
-  r <- epi_recipe(epi_data) %>%
+  r <- recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead, skip = TRUE) %>%
     recipes::update_role(!!outcome, new_role = "predictor") %>%
     recipes::add_role(tidyselect::all_of(keys), new_role = "predictor") %>%

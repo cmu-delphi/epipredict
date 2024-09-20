@@ -1,95 +1,65 @@
+#' Default epi_recipe blueprint
+#'
 #' Recipe blueprint that accounts for `epi_df` panel data
+#' Used for simplicity. See [hardhat::default_recipe_blueprint()] for more
+#' details. This subclass is nearly the same, except it ensures that
+#' downstream processing doesn't drop the epi_df class from the data.
 #'
-#' Used for simplicity. See [hardhat::new_recipe_blueprint()] or
-#' [hardhat::default_recipe_blueprint()] for more details.
-#'
-#' @inheritParams hardhat::new_recipe_blueprint
-#'
-#' @details The `bake_dependent_roles` are automatically set to `epi_df` defaults.
-#' @return A recipe blueprint.
-#'
+#' @inheritParams hardhat::default_recipe_blueprint
+#' @return A `epi_recipe` blueprint.
+#' @export
 #' @keywords internal
-#' @export
-new_epi_recipe_blueprint <-
-  function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
-           composition = "tibble",
-           ptypes = NULL, recipe = NULL, ..., subclass = character()) {
-    hardhat::new_recipe_blueprint(
-      intercept = intercept,
-      allow_novel_levels = allow_novel_levels,
-      fresh = fresh,
-      composition = composition,
-      ptypes = ptypes,
-      recipe = recipe,
-      ...,
-      subclass = c(subclass, "epi_recipe_blueprint")
-    )
-  }
+default_epi_recipe_blueprint <- function(intercept = FALSE,
+                                         allow_novel_levels = FALSE,
+                                         fresh = TRUE,
+                                         strings_as_factors = FALSE,
+                                         composition = "tibble") {
+  new_default_epi_recipe_blueprint(
+    intercept = intercept,
+    allow_novel_levels = allow_novel_levels,
+    fresh = fresh,
+    strings_as_factors = strings_as_factors,
+    composition = composition
+  )
+}
 
+new_default_epi_recipe_blueprint <- function(intercept = FALSE,
+                                             allow_novel_levels = TRUE,
+                                             fresh = TRUE,
+                                             strings_as_factors = FALSE,
+                                             composition = "tibble",
+                                             ptypes = NULL,
+                                             recipe = NULL,
+                                             extra_role_ptypes = NULL,
+                                             ...,
+                                             subclass = character()) {
+  hardhat::new_recipe_blueprint(
+    intercept = intercept,
+    allow_novel_levels = allow_novel_levels,
+    fresh = fresh,
+    strings_as_factors = strings_as_factors,
+    composition = composition,
+    ptypes = ptypes,
+    recipe = recipe,
+    extra_role_ptypes = extra_role_ptypes,
+    ...,
+    subclass = c(subclass, "default_epi_recipe_blueprint", "default_recipe_blueprint")
+  )
+}
 
-#' @rdname new_epi_recipe_blueprint
-#' @export
-epi_recipe_blueprint <-
-  function(intercept = FALSE, allow_novel_levels = FALSE,
-           fresh = TRUE,
-           composition = "tibble") {
-    new_epi_recipe_blueprint(
-      intercept = intercept,
-      allow_novel_levels = allow_novel_levels,
-      fresh = fresh,
-      composition = composition
-    )
-  }
-
-#' @rdname new_epi_recipe_blueprint
-#' @export
-default_epi_recipe_blueprint <-
-  function(intercept = FALSE, allow_novel_levels = FALSE, fresh = TRUE,
-           composition = "tibble") {
-    new_default_epi_recipe_blueprint(
-      intercept = intercept,
-      allow_novel_levels = allow_novel_levels,
-      fresh = fresh,
-      composition = composition
-    )
-  }
-
-#' @rdname new_epi_recipe_blueprint
-#' @inheritParams hardhat::new_default_recipe_blueprint
-#' @export
-new_default_epi_recipe_blueprint <-
-  function(intercept = FALSE, allow_novel_levels = FALSE,
-           fresh = TRUE,
-           composition = "tibble", ptypes = NULL, recipe = NULL,
-           extra_role_ptypes = NULL, ..., subclass = character()) {
-    new_epi_recipe_blueprint(
-      intercept = intercept,
-      allow_novel_levels = allow_novel_levels,
-      fresh = fresh,
-      composition = composition,
-      ptypes = ptypes,
-      recipe = recipe,
-      extra_role_ptypes = extra_role_ptypes,
-      ...,
-      subclass = c(subclass, "default_epi_recipe_blueprint", "default_recipe_blueprint")
-    )
-  }
 
 #' @importFrom hardhat run_mold
 #' @export
 run_mold.default_epi_recipe_blueprint <- function(blueprint, ..., data) {
   rlang::check_dots_empty0(...)
-  # blueprint <- hardhat:::patch_recipe_default_blueprint(blueprint)
-  cleaned <- mold_epi_recipe_default_clean(blueprint = blueprint, data = data)
-  blueprint <- cleaned$blueprint
-  data <- cleaned$data
+  # we don't do the "cleaning" in `hardhat:::run_mold.default_recipe_blueprint`
+  # That function drops the epi_df class without any recourse.
+  # The only way we should be here at all is if `data` is an epi_df, but just
+  # in case...
+  if (!is_epi_df(data)) {
+    cli_warn("`data` is not an {.cls epi_df}. It has class {.cls {class(data)}}.")
+  }
   hardhat:::mold_recipe_default_process(blueprint = blueprint, data = data)
-}
-
-mold_epi_recipe_default_clean <- function(blueprint, data) {
-  hardhat:::check_data_frame_or_matrix(data)
-  if (!is_epi_df(data)) data <- hardhat:::coerce_to_tibble(data)
-  hardhat:::new_mold_clean(blueprint, data)
 }
 
 #' @importFrom hardhat refresh_blueprint
@@ -97,15 +67,3 @@ mold_epi_recipe_default_clean <- function(blueprint, data) {
 refresh_blueprint.default_epi_recipe_blueprint <- function(blueprint) {
   do.call(new_default_epi_recipe_blueprint, as.list(blueprint))
 }
-
-
-## removing this function?
-# er_check_is_data_like <- function(.x, .x_nm) {
-#   if (rlang::is_missing(.x_nm)) {
-#     .x_nm <- rlang::as_label(rlang::enexpr(.x))
-#   }
-#   if (!hardhat:::is_new_data_like(.x)) {
-#     hardhat:::glubort("`{.x_nm}` must be a data.frame or a matrix, not a {class1(.x)}.")
-#   }
-#   .x
-# }

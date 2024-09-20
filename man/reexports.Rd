@@ -8,6 +8,7 @@
 \alias{forecast}
 \alias{prep}
 \alias{bake}
+\alias{recipe}
 \alias{rand_id}
 \alias{tibble}
 \alias{tidy}
@@ -22,7 +23,7 @@ below to see their documentation.
 
   \item{ggplot2}{\code{\link[ggplot2]{autoplot}}}
 
-  \item{recipes}{\code{\link[recipes]{bake}}, \code{\link[recipes]{prep}}, \code{\link[recipes]{rand_id}}}
+  \item{recipes}{\code{\link[recipes]{bake}}, \code{\link[recipes]{prep}}, \code{\link[recipes]{rand_id}}, \code{\link[recipes]{recipe}}}
 
   \item{tibble}{\code{\link[tibble]{tibble}}}
 }}

@@ -1,8 +1,8 @@
 ---
-title: "Using the add/update/remove and adjust functions"
+title: "Using the add, update, remove, and adjust functions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using the add/update/remove and adjust functions}
+  %\VignetteIndexEntry{Using the add, update, remove, and adjust functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -37,7 +37,7 @@ wish to make a change to the pre-processing, fitting, or post-processing.
 In the context of pre-processing, the goal of the update functions is to
 add/remove/update an `epi_recipe` or a step in it. For this, we have
 `add_epi_recipe()`, `update_epi_recipe()`, and `remove_epi_recipe()` to
-add/update/remove an entire `epi_recipe` in an `epi_workflow` as well as
+add/update/remove an entire `recipe` in an `epi_workflow` as well as
 `adjust_epi_recipe()` to adjust a particular step in an `epi_recipe` or
 `epi_workflow` by the step number or name. For a model, one may `Add_model()`,
 `Update_model()`, or `Remove_model()` in an `epi_workflow`.[^1] For post-processing,
@@ -84,7 +84,7 @@ in all predictors and then in all outcomes (and set `skip = TRUE` to skip over
 this processing of the outcome variable when the recipe is baked).
 
 ```{r}
-r <- epi_recipe(jhu) %>%
+r <- recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 14) %>%
   step_naomit(all_predictors()) %>%
@@ -117,7 +117,7 @@ same. We can use the `update_epi_recipe()` function to trade our current recipe
 `r` for another recipe `r2` in `wf` as follows:
 
 ```{r}
-r2 <- epi_recipe(jhu) %>%
+r2 <- recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 1, 7, 14)) %>%
   step_epi_lag(case_rate, lag = c(0:7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%

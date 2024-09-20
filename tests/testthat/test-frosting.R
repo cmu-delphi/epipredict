@@ -42,7 +42,7 @@ test_that("frosting can be created/added/updated/adjusted/removed", {
 test_that("prediction works without any postprocessor", {
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_naomit(all_predictors()) %>%
@@ -65,7 +65,7 @@ test_that("layer_predict is added by default if missing", {
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_naomit()
@@ -92,7 +92,7 @@ test_that("parsnip settings can be passed through predict.epi_workflow", {
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 
-  r <- epi_recipe(jhu) %>%
+  r <- recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_naomit()

@@ -14,6 +14,11 @@ recipes::prep
 #' @export
 recipes::bake
 
+
+#' @importFrom recipes prep
+#' @export
+recipes::recipe
+
 #' @importFrom recipes rand_id
 #' @export
 recipes::rand_id

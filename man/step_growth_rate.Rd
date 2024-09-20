@@ -73,7 +73,7 @@ sequence of any existing operations.
 that will generate one or more new columns of derived data.
 }
 \examples{
-r <- epi_recipe(case_death_rate_subset) \%>\%
+r <- recipe(case_death_rate_subset) \%>\%
   step_growth_rate(case_rate, death_rate)
 r
 
