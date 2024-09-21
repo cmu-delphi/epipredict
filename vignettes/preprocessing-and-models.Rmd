@@ -43,7 +43,6 @@ will create a classification model for hotspot predictions.
 ```{r, warning=FALSE, message=FALSE}
 library(tidyr)
 library(dplyr)
-library(epidatr)
 library(epipredict)
 library(recipes)
 library(workflows)
@@ -64,14 +63,29 @@ Although there are many state-of-the-art models, we choose to use Poisson
 regression, the textbook example for modeling count data, as an illustration
 for using the `epipredict` package with other existing tidymodels packages.
 
+The `counts_subset` dataset is included in this package (via the
+[`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+and contains the number of confirmed cases and deaths from June 4, 2021 to Dec
+31, 2021 in some U.S. states. It can be loaded with:
+
 ```{r poisson-reg-data}
+x <- counts_subset
+```
+
+The data can also be fetched from the Delphi API with the following query:
+```{r, eval = FALSE}
+library(epidatr)
+
+d <- as.Date("2024-03-20")
+
 x <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_incidence_num",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj"
+  geo_values = "ca,fl,tx,ny,nj",
+  as_of = d
 ) %>%
   select(geo_value, time_value, cases = value)
 
@@ -81,17 +95,14 @@ y <- pub_covidcast(
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj"
+  geo_values = "ca,fl,tx,ny,nj",
+  as_of = d
 ) %>%
   select(geo_value, time_value, deaths = value)
 
-counts_subset <- full_join(x, y, by = c("geo_value", "time_value")) %>%
-  as_epi_df()
+x <- full_join(x, y, by = c("geo_value", "time_value")) %>%
+  as_epi_df(as_of = d)
 ```
-
-The `counts_subset` dataset comes from the `epidatr` package, and
-contains the number of confirmed cases and deaths from June 4, 2021 to
-Dec 31, 2021 in some U.S. states.
 
 We wish to predict the 7-day ahead death counts with lagged cases and deaths.
 Furthermore, we will let each state be a dummy variable. Using differential
@@ -247,18 +258,33 @@ most or all of the time while in public in the past 7 days and the estimated
 percentage of respondents who reported that all or most people they encountered
 in public in the past 7 days maintained a distance of at least 6 feet.
 
-State-wise population data from the 2019 U.S. Census is included in this package
-and will be used in `layer_population_scaling()`.
+State-wise population data from the 2019 U.S. Census will be used in 
+`layer_population_scaling()`.
+
+Both datasets are included in this package (via the
+[`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+and can be loaded with:
 
 ```{r}
+behav_ind <- ctis_covid_behaviours
+pop_dat <- state_census %>% select(abbr, pop)
+```
+
+The data can also be fetched from the Delphi API with the following query:
+```{r, eval = FALSE}
+library(epidatr)
+
+d <- as.Date("2024-03-20")
+
 behav_ind_mask <- pub_covidcast(
   source = "fb-survey",
   signals = "smoothed_wwearing_mask_7d",
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj"
-) %>%
+  geo_values = "ca,fl,tx,ny,nj",
+  as_of = d
+)  %>%
   select(geo_value, time_value, masking = value)
 
 behav_ind_distancing <- pub_covidcast(
@@ -267,14 +293,16 @@ behav_ind_distancing <- pub_covidcast(
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20210604, 20211231),
-  geo_values = "ca,fl,tx,ny,nj"
-) %>%
+  geo_values = "ca,fl,tx,ny,nj",
+  as_of = d
+)  %>%
   select(geo_value, time_value, distancing = value)
 
-pop_dat <- state_census %>% select(abbr, pop)
-
 behav_ind <- behav_ind_mask %>%
-  full_join(behav_ind_distancing, by = c("geo_value", "time_value"))
+  full_join(behav_ind_distancing, by = c("geo_value", "time_value")) %>%
+  as_epi_df(as_of = d)
+
+pop_dat <- state_census %>% select(abbr, pop)
 ```
 
 Rather than using raw mask-wearing / social-distancing metrics, for the sake

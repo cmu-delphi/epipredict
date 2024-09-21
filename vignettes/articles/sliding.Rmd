@@ -14,7 +14,6 @@ knitr::opts_chunk$set(
 
 ```{r pkgs}
 library(epipredict)
-library(epidatr)
 library(data.table)
 library(dplyr)
 library(tidyr)
@@ -60,25 +59,54 @@ claims and the number of new confirmed COVID-19 cases per 100,000 population
 
 <summary>Load a data archive</summary>
 
-We process as before, with the
-modification that we use `sync = locf` in `epix_merge()` so that the last
-version of each observation can be carried forward to extrapolate unavailable
-versions for the less up-to-date input archive.
+This dataset is processed as before, with the modification that we use `sync =
+locf` in `epix_merge()` so that the last version of each observation can be
+carried forward to extrapolate unavailable versions for the less up-to-date
+input archive.
 
 ```{r grab-epi-data}
 theme_set(theme_bw())
 
-y <- readRDS("all_states_covidcast_signals.rds")
+x <- archive_cases_dv_subset_all_states
+```
 
-y <- purrr::map(y, ~ select(.x, geo_value, time_value, version = issue, value))
+The data can also be constructed from data the Delphi API with the following code:
 
-x <- epix_merge(
-  y[[1]] %>% rename(percent_cli = value) %>% as_epi_archive(compactify = FALSE),
-  y[[2]] %>% rename(case_rate = value) %>% as_epi_archive(compactify = FALSE),
+```{r generate-data, eval=FALSE}
+library(epidatr)
+
+dv_subset <- pub_covidcast(
+  source = "doctor-visits",
+  signals = "smoothed_adj_cli",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200601, 20211201),
+  geo_values = "*",
+  issues = epirange(20200601, 20211201)
+) %>%
+  select(geo_value, time_value, version = issue, percent_cli = value) %>%
+  # We're using compactify=FALSE here and below to avoid some testthat test
+  # failures on tests that were based on a non-compactified version.
+  as_epi_archive(compactify = FALSE)
+
+case_rate_subset <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "confirmed_7dav_incidence_prop",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200601, 20211201),
+  geo_values = "*",
+  issues = epirange(20200601, 20211201)
+) %>%
+  select(geo_value, time_value, version = issue, case_rate_7d_av = value) %>%
+  as_epi_archive(compactify = FALSE)
+
+# Use `epiprocess::epix_merge` to avoid having to reimplement `sync`ing
+# behavior. After merging, convert DT component back to tibble.
+archive_cases_dv_subset_all_states_dt = epix_merge(
+  dv_subset, case_rate_subset,
   sync = "locf",
-  compactify = TRUE
-)
-rm(y)
+  compactify = TRUE)
 ```
 
 </details>
@@ -217,11 +245,7 @@ the American data, but here we compare the forecasts produced from using simple
 linear regression with those from using boosted regression trees.
 
 ```{r get-can-fc, warning = FALSE}
-# source("drafts/canada-case-rates.R)
-can <- readRDS(system.file(
-  "extdata", "can_prov_cases.rds",
-  package = "epipredict", mustWork = TRUE
-))
+can <- can_prov_cases
 
 can <- can %>%
   group_by(version, geo_value) %>%
@@ -325,9 +349,20 @@ combined data from all US states and territories) to train our model.
 
 <details>
 
-<summary>Download data using `{epidatr}`</summary>
-```{r load-data, eval=FALSE}
-# loading in the data
+<summary>Fetch data</summary>
+The data are included in this package (via the
+[`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+and can be loaded with:
+
+```{r load-data, message = FALSE, warning = FALSE}
+x <- case_death_rate_archive
+```
+
+The data can also be constructed from data the Delphi API with the following code:
+
+```{r generate-data, eval=FALSE}
+library(epidatr)
+
 states <- "*"
 
 confirmed_incidence_prop <- pub_covidcast(
@@ -384,13 +419,6 @@ x <- x %>%
     death_rate_7d_av = slide_value_death_rate_7d_av
   ) %>%
   as_epi_archive(compactify = TRUE)
-
-saveRDS(x$DT, file = "case_death_rate_archive.rds")
-```
-
-```{r load-stored-data}
-x <- readRDS("case_death_rate_archive.rds")
-x <- as_epi_archive(x)
 ```
 </details>
 

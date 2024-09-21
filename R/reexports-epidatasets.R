@@ -87,3 +87,57 @@ delayedAssign("counts_subset", epidatasets::counts_subset)
 #' data(ctis_covid_behaviours, package = "epipredict")
 #' @export
 delayedAssign("ctis_covid_behaviours", epidatasets::ctis_covid_behaviours)
+
+#' @inherit epidatasets::county_smoothed_cli_comparison description source references title
+#' @inheritSection epidatasets::county_smoothed_cli_comparison Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::county_smoothed_cli_comparison
+#'
+#' # works
+#' library(epipredict)
+#' county_smoothed_cli_comparison
+#'
+#' # fails
+#' data(county_smoothed_cli_comparison, package = "epipredict")
+#' @export
+delayedAssign("county_smoothed_cli_comparison", epidatasets::county_smoothed_cli_comparison)
+
+#' @inherit epidatasets::case_death_rate_archive description source references title
+#' @inheritSection epidatasets::case_death_rate_archive Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::case_death_rate_archive
+#'
+#' # works
+#' library(epipredict)
+#' case_death_rate_archive
+#'
+#' # fails
+#' data(case_death_rate_archive, package = "epipredict")
+#' @export
+delayedAssign("case_death_rate_archive", epidatasets::case_death_rate_archive)
+
+#' @inherit epidatasets::archive_cases_dv_subset_all_states description source references title
+#' @inheritSection epidatasets::archive_cases_dv_subset_all_states Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::archive_cases_dv_subset_all_states
+#'
+#' # works
+#' library(epipredict)
+#' archive_cases_dv_subset_all_states
+#'
+#' # fails
+#' data(archive_cases_dv_subset_all_states, package = "epipredict")
+#' @export
+delayedAssign("archive_cases_dv_subset_all_states", epidatasets::archive_cases_dv_subset_all_states)
