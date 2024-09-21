@@ -95,7 +95,9 @@ add_epi_recipe <- function(
 #' @rdname add_epi_recipe
 #' @export
 remove_epi_recipe <- function(x) {
-  workflows::remove_recipe(x)
+  wf <- workflows::remove_recipe(x)
+  class(wf) <- c("epi_workflow", class(wf))
+  wf
 }
 
 
@@ -222,6 +224,7 @@ prep.epi_recipe <- function(
   if (!strings_as_factors) {
     return(NextMethod("prep"))
   }
+  browser()
   # workaround to avoid converting strings2factors with recipes::prep.recipe()
   # We do the conversion here, then set it to FALSE
   training <- recipes:::check_training_set(training, x, fresh)

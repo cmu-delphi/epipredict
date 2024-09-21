@@ -96,7 +96,6 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
     as_of = attributes(data)$metadata$as_of
   )
   object$original_data <- data
-
   NextMethod()
 }
 
