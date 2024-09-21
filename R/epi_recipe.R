@@ -294,109 +294,18 @@ kill_levels <- function(x, keys) {
 
 #' @export
 print.epi_recipe <- function(x, form_width = 30, ...) {
-  cli::cli_div(theme = list(.pkg = list("vec-trunc" = Inf, "vec-last" = ", ")))
+  o <- cli::cli_fmt(NextMethod())
+  # Fix up the recipe name
+  rr <- unlist(strsplit(o[2], "Recipe"))
+  len <- nchar(rr[2])
+  h1_tail <- paste0(substr(rr[2], 1, len / 2 - 10), substr(rr[2], len / 2, len))
+  o[2] <- paste0(rr[1], "Epi Recipe", h1_tail)
 
-  cli::cli_h1("Epi Recipe")
-  cli::cli_h3("Inputs")
-
-  tab <- table(x$var_info$role, useNA = "ifany")
-  tab <- stats::setNames(tab, names(tab))
-  names(tab)[is.na(names(tab))] <- "undeclared role"
-
-  roles <- c("outcome", "predictor", "case_weights", "undeclared role")
-
-  tab <- c(
-    tab[names(tab) == roles[1]],
-    tab[names(tab) == roles[2]],
-    tab[names(tab) == roles[3]],
-    sort(tab[!names(tab) %in% roles], TRUE),
-    tab[names(tab) == roles[4]]
-  )
-
-  cli::cli_text("Number of variables by role")
-
-  spaces_needed <- max(nchar(names(tab))) - nchar(names(tab)) +
-    max(nchar(tab)) - nchar(tab)
-
-  cli::cli_verbatim(
-    glue::glue("{names(tab)}: {strrep('\ua0', spaces_needed)}{tab}")
-  )
-
-  if ("tr_info" %in% names(x)) {
-    cli::cli_h3("Training information")
-    nmiss <- x$tr_info$nrows - x$tr_info$ncomplete
-    nrows <- x$tr_info$nrows
-
-    cli::cli_text(
-      "Training data contained {nrows} data points and {cli::no(nmiss)} \\
-       incomplete row{?s}."
-    )
-  }
-
-  if (!is.null(x$steps)) {
-    cli::cli_h3("Operations")
-  }
-
-  fmt <- cli::cli_fmt({
-    for (step in x$steps) {
-      print(step, form_width = form_width)
-    }
-  })
-  cli::cli_ol(fmt)
-  cli::cli_end()
-
+  # Number the operations
+  ops <- seq(grep(" Operations ", o, fixed = TRUE) + 1, length(o))
+  rep_ops <- sub("\033[36m•\033[39m ", "", o[ops], fixed = TRUE) # kills the •
+  o[ops] <- paste0(ops - ops[1] + 1, ". ", rep_ops)
+  cli::cli_bullets(o)
   invisible(x)
 }
 
-# Currently only used in the workflow printing
-print_preprocessor_recipe <- function(x, ...) {
-  recipe <- workflows::extract_preprocessor(x)
-  steps <- recipe$steps
-  n_steps <- length(steps)
-  cli::cli_text("{n_steps} Recipe step{?s}.")
-
-  if (n_steps == 0L) {
-    return(invisible(x))
-  }
-
-  step_names <- map_chr(steps, workflows:::pull_step_name)
-
-  if (n_steps <= 10L) {
-    cli::cli_ol(step_names)
-    return(invisible(x))
-  }
-
-  extra_steps <- n_steps - 10L
-  step_names <- step_names[1:10]
-
-  cli::cli_ol(step_names)
-  cli::cli_bullets("... and {extra_steps} more step{?s}.")
-  invisible(x)
-}
-
-print_preprocessor <- function(x) {
-  has_preprocessor_formula <- workflows:::has_preprocessor_formula(x)
-  has_preprocessor_recipe <- workflows:::has_preprocessor_recipe(x)
-  has_preprocessor_variables <- workflows:::has_preprocessor_variables(x)
-
-  no_preprocessor <- !has_preprocessor_formula && !has_preprocessor_recipe &&
-    !has_preprocessor_variables
-
-  if (no_preprocessor) {
-    return(invisible(x))
-  }
-
-  cli::cli_rule("Preprocessor")
-  cli::cli_text("")
-
-  if (has_preprocessor_formula) {
-    workflows:::print_preprocessor_formula(x)
-  }
-  if (has_preprocessor_recipe) {
-    print_preprocessor_recipe(x)
-  }
-  if (has_preprocessor_variables) {
-    workflows:::print_preprocessor_variables(x)
-  }
-  invisible(x)
-}
