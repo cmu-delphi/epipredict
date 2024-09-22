@@ -32,13 +32,15 @@
 #'
 #' wf
 epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL) {
-  out <- workflows::workflow(preprocessor = preprocessor, spec = spec)
-
+  out <- workflows::workflow(preprocessor, spec = spec)
+  if (is_epi_recipe(preprocessor)) {
+    out <- workflows::remove_recipe(out)
+    out <- add_epi_recipe(out, preprocessor)
+  }
+  class(out) <- c("epi_workflow", class(out))
   if (!is_null(postprocessor)) {
     out <- add_postprocessor(out, postprocessor)
   }
-
-  class(out) <- c("epi_workflow", class(out))
   out
 }
 
@@ -196,18 +198,6 @@ augment.epi_workflow <- function(x, new_data, ...) {
     ))
   }
   full_join(predictions, new_data, by = join_by)
-}
-
-new_epi_workflow <- function(
-    pre = workflows:::new_stage_pre(),
-    fit = workflows:::new_stage_fit(),
-    post = workflows:::new_stage_post(),
-    trained = FALSE) {
-  out <- workflows:::new_workflow(
-    pre = pre, fit = fit, post = post, trained = trained
-  )
-  class(out) <- c("epi_workflow", class(out))
-  out
 }
 
 

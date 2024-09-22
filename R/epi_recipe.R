@@ -95,9 +95,9 @@ add_epi_recipe <- function(
 #' @rdname add_epi_recipe
 #' @export
 remove_epi_recipe <- function(x) {
-  wf <- workflows::remove_recipe(x)
-  class(wf) <- c("epi_workflow", class(wf))
-  wf
+  x <- workflows::remove_recipe(x)
+  class(x) <- c("epi_workflow", class(x))
+  x
 }
 
 
