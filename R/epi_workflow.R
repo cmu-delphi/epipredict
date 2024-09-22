@@ -32,18 +32,13 @@
 #'
 #' wf
 epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL) {
-  out <- workflows::workflow(spec = spec)
-  class(out) <- c("epi_workflow", class(out))
+  out <- workflows::workflow(preprocessor = preprocessor, spec = spec)
 
-  if (is_epi_recipe(preprocessor)) {
-    out <- add_epi_recipe(out, preprocessor)
-  } else if (!is_null(preprocessor)) {
-    out <- workflows:::add_preprocessor(out, preprocessor)
-  }
   if (!is_null(postprocessor)) {
     out <- add_postprocessor(out, postprocessor)
   }
 
+  class(out) <- c("epi_workflow", class(out))
   out
 }
 
@@ -101,7 +96,6 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
     as_of = attributes(data)$metadata$as_of
   )
   object$original_data <- data
-
   NextMethod()
 }
 
@@ -162,11 +156,14 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
   }
   components <- list()
   components$mold <- workflows::extract_mold(object)
-  components$forged <- hardhat::forge(new_data,
+  components$forged <- hardhat::forge(
+    new_data,
     blueprint = components$mold$blueprint
   )
   components$keys <- grab_forged_keys(components$forged, object, new_data)
-  components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
+  components <- apply_frosting(
+    object, components, new_data, type = type, opts = opts, ...
+  )
   components$predictions
 }
 
@@ -216,10 +213,7 @@ new_epi_workflow <- function(
 
 #' @export
 print.epi_workflow <- function(x, ...) {
-  print_header(x)
-  print_preprocessor(x)
-  # workflows:::print_case_weights(x)
-  print_model(x)
+  NextMethod()
   print_postprocessor(x)
   invisible(x)
 }

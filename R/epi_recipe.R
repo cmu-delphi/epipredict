@@ -95,22 +95,11 @@ add_epi_recipe <- function(
 #' @rdname add_epi_recipe
 #' @export
 remove_epi_recipe <- function(x) {
-  workflows:::validate_is_workflow(x)
-
-  if (!workflows:::has_preprocessor_recipe(x)) {
-    rlang::warn("The workflow has no recipe preprocessor to remove.")
-  }
-
-  actions <- x$pre$actions
-  actions[["recipe"]] <- NULL
-
-  new_epi_workflow(
-    pre = workflows:::new_stage_pre(actions = actions),
-    fit = x$fit,
-    post = x$post,
-    trained = FALSE
-  )
+  wf <- workflows::remove_recipe(x)
+  class(wf) <- c("epi_workflow", class(wf))
+  wf
 }
+
 
 #' @rdname add_epi_recipe
 #' @export
@@ -180,15 +169,21 @@ adjust_epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_workflow <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
-  recipe <- adjust_epi_recipe(workflows::extract_preprocessor(x), which_step, ...)
+adjust_epi_recipe.epi_workflow <- function(
+    x, which_step, ..., blueprint = default_epi_recipe_blueprint()
+) {
 
-  update_epi_recipe(x, recipe, blueprint = blueprint)
+  rec <- adjust_epi_recipe(
+    workflows::extract_preprocessor(x), which_step, ...
+  )
+  update_epi_recipe(x, rec, blueprint = blueprint)
 }
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+adjust_epi_recipe.epi_recipe <- function(
+    x, which_step, ..., blueprint = default_epi_recipe_blueprint()
+) {
   if (!(is.numeric(which_step) || is.character(which_step))) {
     cli::cli_abort(
       c("`which_step` must be a number or a character.",
@@ -229,6 +224,7 @@ prep.epi_recipe <- function(
   if (!strings_as_factors) {
     return(NextMethod("prep"))
   }
+  browser()
   # workaround to avoid converting strings2factors with recipes::prep.recipe()
   # We do the conversion here, then set it to FALSE
   training <- recipes:::check_training_set(training, x, fresh)
@@ -312,4 +308,3 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
   cli::cli_bullets(o)
   invisible(x)
 }
-
