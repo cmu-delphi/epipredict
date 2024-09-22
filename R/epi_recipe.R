@@ -224,7 +224,6 @@ prep.epi_recipe <- function(
   if (!strings_as_factors) {
     return(NextMethod("prep"))
   }
-  browser()
   # workaround to avoid converting strings2factors with recipes::prep.recipe()
   # We do the conversion here, then set it to FALSE
   training <- recipes:::check_training_set(training, x, fresh)
