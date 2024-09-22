@@ -298,9 +298,13 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
   o[2] <- paste0(rr[1], "Epi Recipe", h1_tail)
 
   # Number the operations
-  ops <- seq(grep(" Operations ", o, fixed = TRUE) + 1, length(o))
-  rep_ops <- sub("\033[36m•\033[39m ", "", o[ops], fixed = TRUE) # kills the •
-  o[ops] <- paste0(ops - ops[1] + 1, ". ", rep_ops)
+  has_operations <- any(grepl(" Operations ", o, fixed = TRUE))
+  if (has_operations) {
+    ops <- seq(grep(" Operations ", o, fixed = TRUE) + 1, length(o))
+    # kills the \bullet
+    rep_ops <- sub("^\\033\\[36m.\\033\\[39m ", "", o[ops], perl = TRUE)
+    o[ops] <- paste0(ops - ops[1] + 1, ". ", rep_ops)
+  }
   cli::cli_bullets(o)
   invisible(x)
 }
