@@ -59,6 +59,7 @@ test_that("model can be added/updated/removed from epi_workflow", {
   expect_equal(class(model_spec2), c("linear_reg", "model_spec"))
 
   wf <- remove_model(wf)
+  expect_equal(class(wf), c("epi_workflow", "workflow"))
   expect_error(extract_spec_parsnip(wf))
   expect_equal(wf$fit$actions$model$spec, NULL)
 })

@@ -98,7 +98,6 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
     as_of = attributes(data)$metadata$as_of
   )
   object$original_data <- data
-
   NextMethod()
 }
 
@@ -204,10 +203,7 @@ augment.epi_workflow <- function(x, new_data, ...) {
 
 #' @export
 print.epi_workflow <- function(x, ...) {
-  print_header(x)
-  print_preprocessor(x)
-  # workflows:::print_case_weights(x)
-  print_model(x)
+  NextMethod()
   print_postprocessor(x)
   invisible(x)
 }

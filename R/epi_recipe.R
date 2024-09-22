@@ -100,6 +100,7 @@ remove_epi_recipe <- function(x) {
   x
 }
 
+
 #' @rdname add_epi_recipe
 #' @export
 update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blueprint()) {
@@ -168,15 +169,21 @@ adjust_epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_workflow <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
-  recipe <- adjust_epi_recipe(workflows::extract_preprocessor(x), which_step, ...)
+adjust_epi_recipe.epi_workflow <- function(
+    x, which_step, ..., blueprint = default_epi_recipe_blueprint()
+) {
 
-  update_epi_recipe(x, recipe, blueprint = blueprint)
+  rec <- adjust_epi_recipe(
+    workflows::extract_preprocessor(x), which_step, ...
+  )
+  update_epi_recipe(x, rec, blueprint = blueprint)
 }
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+adjust_epi_recipe.epi_recipe <- function(
+    x, which_step, ..., blueprint = default_epi_recipe_blueprint()
+) {
   if (!(is.numeric(which_step) || is.character(which_step))) {
     cli::cli_abort(
       c("`which_step` must be a number or a character.",
@@ -300,4 +307,3 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
   cli::cli_bullets(o)
   invisible(x)
 }
-
