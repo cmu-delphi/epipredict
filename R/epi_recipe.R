@@ -95,21 +95,9 @@ add_epi_recipe <- function(
 #' @rdname add_epi_recipe
 #' @export
 remove_epi_recipe <- function(x) {
-  workflows:::validate_is_workflow(x)
-
-  if (!workflows:::has_preprocessor_recipe(x)) {
-    rlang::warn("The workflow has no recipe preprocessor to remove.")
-  }
-
-  actions <- x$pre$actions
-  actions[["recipe"]] <- NULL
-
-  new_epi_workflow(
-    pre = workflows:::new_stage_pre(actions = actions),
-    fit = x$fit,
-    post = x$post,
-    trained = FALSE
-  )
+  x <- workflows::remove_recipe(x)
+  class(x) <- c("epi_workflow", class(x))
+  x
 }
 
 #' @rdname add_epi_recipe

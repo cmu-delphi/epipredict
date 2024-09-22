@@ -80,18 +80,9 @@ Add_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
 #' @rdname Add_model
 #' @export
 Remove_model.epi_workflow <- function(x) {
-  workflows:::validate_is_workflow(x)
-
-  if (!workflows:::has_spec(x)) {
-    rlang::warn("The workflow has no model to remove.")
-  }
-
-  new_epi_workflow(
-    pre = x$pre,
-    fit = workflows:::new_stage_fit(),
-    post = x$post,
-    trained = FALSE
-  )
+  x <- workflows::remove_model(x)
+  class(x) <- c("epi_workflow", class(x))
+  x
 }
 
 #' @rdname Add_model

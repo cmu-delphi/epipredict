@@ -201,18 +201,6 @@ augment.epi_workflow <- function(x, new_data, ...) {
   full_join(predictions, new_data, by = join_by)
 }
 
-new_epi_workflow <- function(
-    pre = workflows:::new_stage_pre(),
-    fit = workflows:::new_stage_fit(),
-    post = workflows:::new_stage_post(),
-    trained = FALSE) {
-  out <- workflows:::new_workflow(
-    pre = pre, fit = fit, post = post, trained = trained
-  )
-  class(out) <- c("epi_workflow", class(out))
-  out
-}
-
 
 #' @export
 print.epi_workflow <- function(x, ...) {
