@@ -203,7 +203,11 @@ augment.epi_workflow <- function(x, new_data, ...) {
 
 #' @export
 print.epi_workflow <- function(x, ...) {
-  NextMethod()
+  trained <- ifelse(workflows::is_trained_workflow(x), " [trained]", "")
+  header <- glue::glue("Epi Workflow{trained}")
+  txt <- utils::capture.output(NextMethod())
+  txt[1] <- cli::rule(header, line = 2)
+  cli::cat_line(txt)
   print_postprocessor(x)
   invisible(x)
 }
