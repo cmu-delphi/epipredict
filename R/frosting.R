@@ -1,6 +1,6 @@
-#' Add frosting to a workflow
+#' Add frosting to an epi_workflow
 #'
-#' @param x A workflow
+#' @param x An epi_workflow
 #' @param frosting A frosting object created using `frosting()`.
 #' @param ... Not used.
 #'
@@ -38,37 +38,68 @@
 #' p3 <- predict(wf3, latest)
 #' p3
 #'
+#'
 add_frosting <- function(x, frosting, ...) {
-  rlang::check_dots_empty()
-  action <- workflows:::new_action_post(frosting = frosting)
-  epi_add_action(x, action, "frosting", ...)
+  UseMethod("add_frosting")
 }
 
+#' @export
+add_frosting.default <- function(x, frosting, ..., arg = caller_arg(x)) {
+  cli_abort("{x} must be a {.cls workflow}, not a {.cls {class(x)[1]}}.")
+}
+
+#' @export
+add_frosting.epi_workflow <- function(x, frosting, ...) {
+  rlang::check_dots_empty()
+  action <- structure(
+    list(frosting = frosting),
+    class = c("action_post", "action")
+  )
+  if ("frosting" %in% names(x$post$actions)) {
+    cli_abort("A `frosting` action has already been added to this workflow.")
+  }
+  add_frosting_postprocessor(x, action)
+}
+
+add_frosting_postprocessor <- function(wf, action) {
+  actions <- c(wf$post$actions, list(frosting = action))
+  order <- intersect("frosting", names(actions))
+  actions <- actions[order]
+  wf$post$actions <- actions
+  wf
+}
 
 # Hacks around workflows `order_stage_post <- charcter(0)` ----------------
-epi_add_action <- function(x, action, name, ..., call = caller_env()) {
-  workflows:::validate_is_workflow(x, call = call)
-  add_action_frosting(x, action, name, ..., call = call)
-}
-add_action_frosting <- function(x, action, name, ..., call = caller_env()) {
-  workflows:::check_singleton(x$post$actions, name, call = call)
-  x$post <- workflows:::add_action_to_stage(x$post, action, name, order_stage_frosting())
-  x
-}
-order_stage_frosting <- function() "frosting"
+# epi_add_action <- function(x, action, name, ..., call = caller_env()) {
+#   workflows:::validate_is_workflow(x, call = call)
+#   add_action_frosting(x, action, name, ..., call = call)
+# }
+# add_action_frosting <- function(x, action, name, ..., call = caller_env()) {
+#   workflows:::check_singleton(x$post$actions, name, call = call)
+#   x$post <- workflows:::add_action_to_stage(x$post, action, name, order_stage_frosting())
+#   x
+# }
+# order_stage_frosting <- function() "frosting"
 # End hacks. See cmu-delphi/epipredict#75
 
 
 #' @rdname add_frosting
 #' @export
-remove_frosting <- function(x) {
-  workflows:::validate_is_workflow(x)
+remove_frosting <- function(x, ...) {
+  UseMethod("remove_frosting")
+}
 
+#' @export
+remove_frosting.default <- function(x, ..., arg = caller_arg(x)) {
+  cli_abort("{arg} must be an {.cls epi_workflow}, not a {.cls {class(x)[1]}}.")
+}
+
+#' @export
+remove_frosting.epi_workflow <- function(x, ..., arg = caller_arg(x)) {
   if (!has_postprocessor_frosting(x)) {
-    rlang::warn("The workflow has no frosting postprocessor to remove.")
+    cli_warn("The epi_workflow {arg} has no frosting postprocessor to remove.")
     return(x)
   }
-
   x$post$actions[["frosting"]] <- NULL
   x
 }
@@ -85,11 +116,10 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
   rlang::check_dots_empty()
   has_postprocessor <- has_postprocessor_frosting(x)
   if (!has_postprocessor) {
-    message <- c(
+    cli_abort(c(
       "The workflow must have a frosting postprocessor.",
       i = "Provide one with `add_frosting()`."
-    )
-    rlang::abort(message, call = call)
+    ), call = call)
   }
   invisible(x)
 }
@@ -97,6 +127,16 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
 #' @rdname add_frosting
 #' @export
 update_frosting <- function(x, frosting, ...) {
+  UseMethod("update_frosting")
+}
+
+#' @export
+update_frosting.default <- function(x, frosting, ..., arg = caller_arg(x)) {
+  cli_abort("{arg} must be an {.cls epi_workflow}, not a {.cls {class(x)[1]}}.")
+}
+
+#' @export
+update_frosting.epi_workflow <- function(x, frosting, ...) {
   rlang::check_dots_empty()
   x <- remove_frosting(x)
   add_frosting(x, frosting)
@@ -225,8 +265,8 @@ is_frosting <- function(x) {
   inherits(x, "frosting")
 }
 
-#' @importFrom rlang caller_env
-validate_frosting <- function(x, ..., arg = "`x`", call = caller_env()) {
+#' @importFrom rlang caller_env caller_arg
+validate_frosting <- function(x, ..., arg = caller_arg(x), call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_frosting(x)) {
     cli_abort(
@@ -235,16 +275,6 @@ validate_frosting <- function(x, ..., arg = "`x`", call = caller_env()) {
     )
   }
   invisible(x)
-}
-
-new_frosting <- function() {
-  structure(
-    list(
-      layers = NULL,
-      requirements = NULL
-    ),
-    class = "frosting"
-  )
 }
 
 
@@ -289,11 +319,11 @@ new_frosting <- function() {
 #' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
-    cli::cli_abort(
+    cli_abort(
       "Currently, no arguments to `frosting()` are allowed to be non-null."
     )
   }
-  out <- new_frosting()
+  structure(list(layers = NULL, requirements = NULL), class = "frosting")
 }
 
 
