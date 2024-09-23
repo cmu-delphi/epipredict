@@ -74,13 +74,26 @@ layer <- function(subclass, ..., .prefix = "layer_") {
 #' p1
 #' @export
 update.layer <- function(object, ...) {
-  changes <- list(...)
+  changes <- enlist(...)
 
   # Replace the appropriate values in object with the changes
-  object <- recipes:::update_fields(object, changes)
+  object <- update_layers(object, changes)
 
   # Call layer() to construct a new layer to ensure all new changes are validated
   reconstruct_layer(object)
+}
+
+update_layers <- function(object, changes) {
+  new_nms <- names(changes)
+  old_nms <- names(object)
+  layer_type <- class(object)[1]
+  for (nm in new_nms) {
+    if (!(nm %in% old_nms)) {
+      cli::cli_abort("The layer you are trying to update, {.fn {layer_type}}, \\\n        does not have the {.field {nm}} field.")
+    }
+    object[[nm]] <- changes[[nm]]
+  }
+  object
 }
 
 reconstruct_layer <- function(x) {
