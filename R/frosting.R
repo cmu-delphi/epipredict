@@ -69,20 +69,6 @@ add_frosting_postprocessor <- function(wf, action) {
   wf
 }
 
-# Hacks around workflows `order_stage_post <- charcter(0)` ----------------
-# epi_add_action <- function(x, action, name, ..., call = caller_env()) {
-#   workflows:::validate_is_workflow(x, call = call)
-#   add_action_frosting(x, action, name, ..., call = call)
-# }
-# add_action_frosting <- function(x, action, name, ..., call = caller_env()) {
-#   workflows:::check_singleton(x$post$actions, name, call = call)
-#   x$post <- workflows:::add_action_to_stage(x$post, action, name, order_stage_frosting())
-#   x
-# }
-# order_stage_frosting <- function() "frosting"
-# End hacks. See cmu-delphi/epipredict#75
-
-
 #' @rdname add_frosting
 #' @export
 remove_frosting <- function(x, ...) {

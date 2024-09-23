@@ -5,17 +5,16 @@ print_header <- function(x) {
   cli::cli_rule("Epi Workflow{trained}")
   cli::cli_end(d)
 
-  preprocessor_msg <- cli::style_italic("Preprocessor:")
   preprocessor <- dplyr::case_when(
-    workflows:::has_preprocessor_formula(x) ~ "Formula",
-    workflows:::has_preprocessor_recipe(x) ~ "Recipe",
-    workflows:::has_preprocessor_variables(x) ~ "Variables",
+    "formula" %in% names(x$pre$actions) ~ "Formula",
+    "recipe" %in% names(x$pre$actions) ~ "Recipe",
+    "variables" %in% names(x$pre$actions) ~ "Variables",
     TRUE ~ "None"
   )
   cli::cli_text("{.emph Preprocessor:} {preprocessor}")
 
 
-  if (workflows:::has_spec(x)) {
+  if ("model" %in% names(x$fit$actions)) {
     spec <- class(workflows::extract_spec_parsnip(x))[[1]]
     spec <- glue::glue("{spec}()")
   } else {
@@ -31,9 +30,9 @@ print_header <- function(x) {
 
 
 print_preprocessor <- function(x) {
-  has_preprocessor_formula <- workflows:::has_preprocessor_formula(x)
-  has_preprocessor_recipe <- workflows:::has_preprocessor_recipe(x)
-  has_preprocessor_variables <- workflows:::has_preprocessor_variables(x)
+  has_preprocessor_formula <- "formula" %in% names(x$pre$actions)
+  has_preprocessor_recipe <- "recipe" %in% names(x$pre$actions)
+  has_preprocessor_variables <- "variables" %in% names(x$pre$actions)
 
   no_preprocessor <- !has_preprocessor_formula && !has_preprocessor_recipe &&
     !has_preprocessor_variables
@@ -60,12 +59,12 @@ print_preprocessor <- function(x) {
 
 # revision of workflows:::print_model()
 print_model <- function(x) {
-  has_spec <- workflows:::has_spec(x)
+  has_spec <- "model" %in% names(x$fit$actions)
   if (!has_spec) {
     cli::cli_text("")
     return(invisible(x))
   }
-  has_fit <- workflows:::has_fit(x)
+  has_fit <- !is.null(x$fit$fit)
   cli::cli_rule("Model")
 
   if (has_fit) {
@@ -128,7 +127,7 @@ print_preprocessor_recipe <- function(x, ...) {
     return(invisible(x))
   }
 
-  step_names <- map_chr(steps, workflows:::pull_step_name)
+  step_names <- map_chr(steps, ~ glue::glue("{class(.x)[[1]]}()"))
 
   if (n_steps <= 10L) {
     cli::cli_ol(step_names)
