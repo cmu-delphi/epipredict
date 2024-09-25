@@ -23,7 +23,8 @@ URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends:
-    epiprocess (>= 0.7.5),
+    epiprocess (>= 0.8.0),
+    epiprocess (< 0.9.0),
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
 Imports:
