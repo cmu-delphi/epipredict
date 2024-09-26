@@ -8,8 +8,8 @@ step_epi_slide(
   recipe,
   ...,
   .f,
-  before = 0L,
-  after = 0L,
+  .window_size = NULL,
+  .align = c("right", "center", "left"),
   role = "predictor",
   prefix = "epi_slide_",
   f_name = clean_f_name(.f),
@@ -41,19 +41,25 @@ argument must be named \code{.x}. A common, though very difficult to debug
 error is using something like \code{function(x) mean}. This will not work
 because it returns the function mean, rather than \code{mean(x)}}
 
-\item{before, after}{the size of the sliding window on the left and the right
-of the center. Usually non-negative integers for data indexed by date, but
-more restrictive in other cases (see \code{\link[epiprocess:epi_slide]{epiprocess::epi_slide()}} for details).}
+\item{.window_size}{the size of the sliding window, required. Usually a
+non-negative integer will suffice (e.g. for data indexed by date, but more
+restrictive in other time_type cases (see \code{\link[epiprocess:epi_slide]{epiprocess::epi_slide()}} for
+details). For example, set to 7 for a 7-day window.}
+
+\item{.align}{a character string indicating how the window should be aligned.
+By default, this is "right", meaning the slide_window will be anchored with
+its right end point on the reference date. (see \code{\link[epiprocess:epi_slide]{epiprocess::epi_slide()}}
+for details).}
 
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
 \item{prefix}{A character string that will be prefixed to the new column.}
 
-\item{f_name}{a character string of at most 20 characters that describes
-the function. This will be combined with \code{prefix} and the columns in \code{...}
-to name the result using \verb{\{prefix\}\{f_name\}_\{column\}}. By default it will be determined
-automatically using \code{clean_f_name()}.}
+\item{f_name}{a character string of at most 20 characters that describes the
+function. This will be combined with \code{prefix} and the columns in \code{...} to
+name the result using \verb{\{prefix\}\{f_name\}_\{column\}}. By default it will be
+determined automatically using \code{clean_f_name()}.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
@@ -80,7 +86,7 @@ jhu <- case_death_rate_subset \%>\%
 rec <- epi_recipe(jhu) \%>\%
   step_epi_slide(case_rate, death_rate,
     .f = \(x) mean(x, na.rm = TRUE),
-    before = 6L
+    .window_size = 7L
   )
 bake(prep(rec, jhu), new_data = NULL)
 }

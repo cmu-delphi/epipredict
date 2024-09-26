@@ -50,10 +50,7 @@ jhu <- case_death_rate_subset %>%
     geo_value %in% c("ca", "fl", "tx", "ny", "nj")
   )
 
-out <- arx_classifier(jhu,
-  outcome = "case_rate",
-  predictors = "case_rate"
-)
+out <- arx_classifier(jhu, outcome = "case_rate", predictors = "case_rate")
 
 out$predictions
 ```
@@ -93,7 +90,8 @@ relying on the default of 0.25. We can do this by passing 0.5 to the `breaks`
 argument in `arx_class_args_list()` as follows:
 
 ```{r}
-out_break_0.5 <- arx_classifier(jhu,
+out_break_0.5 <- arx_classifier(
+  jhu,
   outcome = "case_rate",
   predictors = "case_rate",
   args_list = arx_class_args_list(
@@ -142,8 +140,8 @@ the present?
 To answer this question, we can create a predictive model for upswings and
 downswings of case rates rather than the raw case rates themselves. For this
 situation, our target is to predict whether there is an increase in case rates
-or not. Following 
-[McDonald, Bien, Green, Hu, et al.(2021)](https://www.pnas.org/doi/full/10.1073/pnas.2111453118), 
+or not. Following
+[McDonald, Bien, Green, Hu, et al.(2021)](https://www.pnas.org/doi/full/10.1073/pnas.2111453118),
 we look at the
 relative change between $Y_{l,t}$ and $Y_{l, t+a}$, where the former is the case
 rate at location $l$ at time $t$ and the latter is the rate for that location at
@@ -152,7 +150,7 @@ with two classes
 
 $$\begin{align}
 Z_{l,t} = \left\{\begin{matrix}
-\text{up,} & \text{if } Y_{l,t}^\Delta > 0.25\\ 
+\text{up,} & \text{if } Y_{l,t}^\Delta > 0.25\\
 \text{not up,} & \text{otherwise}
 \end{matrix}\right.
 \end{align}$$
@@ -166,7 +164,7 @@ $$\begin{align}
 \pi_{\text{up}}(x) &= Pr(Z_{l, t} = \text{up}|x) = \frac{e^{g_{\text{up}}(x)}}{1 + e^{g_{\text{up}}(x)}}, \\
 \pi_{\text{not up}}(x)&= Pr(Z_{l, t} = \text{not up}|x) = 1 - Pr(Z_{l, t} = \text{up}|x)  = \frac{1}{1 + e^{g_{\text{up}}(x)}}
 \end{align}$$
-where 
+where
 
 $$
 g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} + \beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta + \beta_{13}Y_{l,t-14}^\Delta.
@@ -223,7 +221,7 @@ require access to the training data.
 
 The other optional arguments for controlling the growth rate calculation (that
 can be inputted as `additional_gr_args`) can be found in the documentation for
-`epiprocess::growth_rate()` and the related 
+`epiprocess::growth_rate()` and the related
 `vignette("growth_rate", package = "epiprocess")`.
 
 ### Visualizing the results
@@ -280,4 +278,4 @@ to start with using the built-in classifier for ostensibly simple projects and
 begin to implement your own when the modelling project takes a complicated turn.
 To get some practice on coding up a classifier by hand, consider translating
 this binary classification model example to an `epi_workflow`, akin to that in
-`vignette("preprocessing-and-models")`. 
+`vignette("preprocessing-and-models")`.
