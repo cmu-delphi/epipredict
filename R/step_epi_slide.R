@@ -55,8 +55,12 @@ step_epi_slide <-
       cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
     .f <- validate_slide_fun(.f)
-    epiprocess:::validate_slide_window_arg(before, attributes(recipe$template)$metadata$time_type)
-    epiprocess:::validate_slide_window_arg(after, attributes(recipe$template)$metadata$time_type)
+    if (!is.null(before)) {
+      epiprocess:::validate_slide_window_arg(before, attributes(recipe$template)$metadata$time_type)
+    }
+    if (!is.null(after)) {
+      epiprocess:::validate_slide_window_arg(after, attributes(recipe$template)$metadata$time_type)
+    }
     arg_is_chr_scalar(role, prefix, id)
     arg_is_lgl_scalar(skip)
 

@@ -8,6 +8,14 @@ edf <- data.frame(
 ) %>%
   as_epi_df()
 
+tt_week <- seq(as.Date("2022-01-01"), by = "1 week", length.out = 20)
+edf_weekly <- data.frame(
+  time_value = c(tt_week, tt_week),
+  geo_value = rep(c("ca", "ny"), each = 20L),
+  value = c(2:21, 3:22)
+) %>%
+  as_epi_df()
+
 r <- epi_recipe(edf)
 rolled_before <- edf %>%
   group_by(geo_value) %>%
@@ -72,4 +80,15 @@ test_that("epi_slide handles different function specs", {
   # expect_equal(lfun[[4]], rolled_before)
   expect_equal(blfun[[4]], rolled_before)
   expect_equal(nblfun[[4]], rolled_before)
+})
+
+test_that("epi_slide works on weekly data with one of before/ahead set", {
+  expect_no_error(
+    baked <- epi_recipe(edf_weekly) %>%
+      step_epi_slide(value, .f = "mean", before = as.difftime(3, units = "weeks")) %>%
+      prep(edf_weekly) %>%
+      bake(new_data = NULL)
+  )
+  attributes(baked)$metadata$as_of <- as.Date("1999-09-09")
+  expect_snapshot(baked)
 })
