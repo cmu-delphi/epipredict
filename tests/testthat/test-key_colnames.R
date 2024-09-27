@@ -30,12 +30,12 @@ test_that("key_colnames extracts additional keys when they are present", {
     value = 1:length(geo_value) + 0.01 * rnorm(length(geo_value))
   ) %>%
     as_epi_df(
-      additional_metadata = list(other_keys = c("state", "pol"))
+      other_keys = c("state", "pol")
     )
 
   expect_identical(
     key_colnames(my_data),
-    c("geo_value", "time_value", "state", "pol")
+    c("geo_value", "state", "pol", "time_value")
   )
 
   my_recipe <- epi_recipe(my_data) %>%
@@ -43,16 +43,10 @@ test_that("key_colnames extracts additional keys when they are present", {
     step_epi_naomit()
 
   # order of the additional keys may be different
-  expect_setequal(
-    key_colnames(my_recipe),
-    c("geo_value", "time_value", "state", "pol")
-  )
+  expect_equal(key_colnames(my_recipe), c("geo_value", "state", "pol", "time_value"))
 
   my_workflow <- epi_workflow(my_recipe, linear_reg()) %>% fit(my_data)
 
   # order of the additional keys may be different
-  expect_setequal(
-    key_colnames(my_workflow),
-    c("geo_value", "time_value", "state", "pol")
-  )
+  expect_equal(key_colnames(my_workflow), c("geo_value", "state", "pol", "time_value"))
 })

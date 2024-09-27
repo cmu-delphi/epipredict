@@ -20,3 +20,4 @@
 ^doc$
 ^Meta$
 ^.lintr$
+^.venv$
