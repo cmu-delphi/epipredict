@@ -141,3 +141,21 @@ delayedAssign("case_death_rate_archive", epidatasets::case_death_rate_archive)
 #' data(archive_cases_dv_subset_all_states, package = "epipredict")
 #' @export
 delayedAssign("archive_cases_dv_subset_all_states", epidatasets::archive_cases_dv_subset_all_states)
+
+#' @inherit epidatasets::can_prov_cases description source references title
+#' @inheritSection epidatasets::can_prov_cases Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::can_prov_cases
+#'
+#' # works
+#' library(epipredict)
+#' can_prov_cases
+#'
+#' # fails
+#' data(can_prov_cases, package = "epipredict")
+#' @export
+delayedAssign("can_prov_cases", epidatasets::can_prov_cases)

@@ -47,7 +47,6 @@ are also valid candidates for `epipredict` functionality, as long as they are
 in `epi_df` format.
 
 ```{r employ-stats, include=F}
-data("grad_employ_subset")
 year_start <- min(grad_employ_subset$time_value)
 year_end <- max(grad_employ_subset$time_value)
 ```
