@@ -94,7 +94,7 @@ test_that("forecast date works for daily", {
     as.data.frame() %>%
     mutate(time_value = as.POSIXlt(time_value)$year + 1900L) %>%
     group_by(geo_value, time_value) %>%
-    summarize(case_rate = mean(case_rate), death_rate = mean(death_rate), .groups="drop") %>%
+    summarize(case_rate = mean(case_rate), death_rate = mean(death_rate), .groups = "drop") %>%
     as_epi_df()
   expect_error(predict(wf1, latest_yearly))
 
