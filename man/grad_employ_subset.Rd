@@ -22,7 +22,7 @@ The data is licensed under the terms of the
 Modifications:
 \itemize{
 \item Only provincial and territorial regions are kept
-\item Only age group, field of study, and educational qualification are kept as
+\item Only age group and educational qualification are kept as
 covariates. For the remaining covariates, we keep aggregated values and
 drop the level-specific rows.
 \item No modifications were made to the time range of the data
@@ -47,7 +47,6 @@ The data has columns:
 row of measurements.}
 \item{time_value}{The time value, a year integer in YYYY format}
 \item{edu_qual}{The education qualification}
-\item{fos}{The field of study}
 \item{age_group}{The age group; either 15 to 34 or 35 to 64}
 \item{num_graduates}{The number of graduates for the given row of characteristics}
 \item{med_income_2y}{The median employment income two years after graduation}

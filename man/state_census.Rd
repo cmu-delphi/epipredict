@@ -8,11 +8,13 @@
 An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 57 rows and 4 columns.
 }
 \source{
-United States Census Bureau, Population Division, at
+This object is derived from several datasets from the United States
+Census Bureau, Population Division, at
 \url{https://www2.census.gov/programs-surveys/popest/datasets/2010-2019/counties/totals/co-est2019-alldata.pdf},
 \url{https://www.census.gov/data/tables/time-series/demo/popest/2010s-total-puerto-rico-municipios.html},
-and \url{https://www.census.gov/data/tables/2010/dec/2010-island-areas.html}
-This data is public domain.
+and \url{https://www.census.gov/data/tables/2010/dec/2010-island-areas.html}.
+It is made available through the \code{covidcast} package. This data is
+public domain.
 }
 \usage{
 state_census

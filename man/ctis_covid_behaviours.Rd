@@ -5,24 +5,26 @@
 \alias{ctis_covid_behaviours}
 \title{Subset of CTIS COVID-19-related behaviours from 5 states}
 \format{
-An object of class \code{tbl_df} (inherits from \code{tbl}, \code{data.frame}) with 1055 rows and 4 columns.
+An object of class \code{epi_df} (inherits from \code{tbl_df}, \code{tbl}, \code{data.frame}) with 1055 rows and 4 columns.
 }
 \source{
-Data from Delphi COVIDcast. Obtained via the Delphi Epidata API.
-\url{https://cmu-delphi.github.io/delphi-epidata/api/covidcast.html}. This
-object contains a modified part of the
+This object contains a modified part of the
 \href{https://cmu-delphi.github.io/delphi-epidata/symptom-survey/#covid-19-trends-and-impact-survey}{data
 aggregations in the API} that are prepared from the
 \href{https://www.pnas.org/doi/full/10.1073/pnas.2111454118}{COVID-19
 Trends and Impact Survey}; see the first link for more information on
-citing in publications. These aggregations are licensed under the terms of
+citing in publications.
+The data is made available via the
+\href{https://cmu-delphi.github.io/delphi-epidata/}{Delphi Epidata API}.
+
+These aggregations are licensed under the terms of
 the \href{https://creativecommons.org/licenses/by/4.0/}{Creative Commons
 Attribution license}.
 
 Modifications:
 \itemize{
-\item Selected a small subset of the available data.
-\item Changed to wide format.
+\item The data has been limited to a very small number of rows, the
+signal names slightly altered, and formatted into an \code{epi_df}.
 }
 }
 \usage{
