@@ -140,7 +140,6 @@ prep.step_epi_slide <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_slide <- function(object, new_data, ...) {
-  recipes::check_new_data(names(object$columns), object, new_data)
   col_names <- object$columns
   name_prefix <- paste0(object$prefix, object$f_name, "_")
   newnames <- glue::glue("{name_prefix}{col_names}")
@@ -156,6 +155,10 @@ bake.step_epi_slide <- function(object, new_data, ...) {
       call = caller_env(),
       class = "epipredict__step__name_collision_error"
     )
+  }
+  # make sure that new_data is actually an epi_df
+  if (!inherits(new_data, "epi_df")) {
+    new_data <- new_data %>% as_epi_df()
   }
   # TODO: Uncomment this whenever we make the optimized versions available.
   # if (any(vapply(c(mean, sum), \(x) identical(x, object$.f), logical(1L)))) {
