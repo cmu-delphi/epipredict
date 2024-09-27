@@ -190,10 +190,10 @@ arx_class_epi_workflow <- function(
         )
     }
   }
+  # regex that will match any amount of adjustment for the ahead
   ahead_out_name <- glue::glue("ahead_[0-9]*_{pre_out_name}")
   method_adjust_latency <- args_list$adjust_latency
   if (method_adjust_latency != "none") {
-    # only extend_ahead is supported atm
     r <- r %>% step_adjust_latency(!!pre_out_name,
       fixed_forecast_date = forecast_date,
       method = method_adjust_latency
@@ -328,9 +328,9 @@ arx_class_args_list <- function(
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
       cli_warn(
-        c(
-          "`forecast_date` + `ahead` must equal `target_date`.",
-          i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+        paste0(
+          "`forecast_date`  {.val {forecast_date}} +",
+          " `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}."
         ),
         class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
       )

@@ -94,7 +94,7 @@ epi_recipe.epi_df <-
     ## Check and add roles when available
     if (!is.null(roles)) {
       if (length(roles) != length(vars)) {
-        cli_abort(paste(
+        cli_abort(paste0(
           "The number of roles should be the same as the number of ",
           "variables."
         ))
