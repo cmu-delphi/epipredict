@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -340,8 +340,7 @@ the residuals of the predictive model (possibly symmetrized). Here, we
 used 23 quantiles, but one can grab a particular quantile,</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        40%        40%        40%        40%        40%        40% </span></span>
-<span><span class="co">#&gt; 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span></code></pre></div>
 <p>or extract the entire distribution into a “long” <code>epi_df</code>
 with <code>quantile_levels</code> being the probability and
 <code>values</code> being the value associated to that quantile.</p>
@@ -576,7 +575,7 @@ walk through some of these customizations.</p>
 <code class="sourceCode R"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">case_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span>, skip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">update_role</a></span><span class="op">(</span><span class="va">case_rate</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">add_role</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="fu"><a href="../reference/epi_keys.html">epi_keys</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span><span class="op">)</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/roles.html" class="external-link">add_role</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/all_of.html" class="external-link">all_of</a></span><span class="op">(</span><span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/key_colnames.html" class="external-link">key_colnames</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span><span class="op">)</span>, new_role <span class="op">=</span> <span class="st">"predictor"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -627,7 +626,7 @@ procedure.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

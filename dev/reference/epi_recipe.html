@@ -13,7 +13,7 @@ columns present in an epi_df"><meta name="robots" content="noindex"></head><body
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -129,17 +129,19 @@ the recipe is trained.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-08-01"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-08-01"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/arrange.html" class="external-link">arrange</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu">epi_recipe</span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">death_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">death_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">case_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/step_naomit.html" class="external-link">step_naomit</a></span><span class="op">(</span><span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_predictors</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_naomit.html" class="external-link">step_naomit</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_predictors</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="co"># below, `skip` means we don't do this at predict time</span></span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/step_naomit.html" class="external-link">step_naomit</a></span><span class="op">(</span><span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_outcomes</a></span><span class="op">(</span><span class="op">)</span>, skip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/step_naomit.html" class="external-link">step_naomit</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">all_outcomes</a></span><span class="op">(</span><span class="op">)</span>, skip <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
@@ -155,8 +157,8 @@ the recipe is trained.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1. Lagging: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">0, 7, 14</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 3. Lagging: <span style="color: #0000BB;">case_rate</span> by <span style="color: #0000BB;">0, 7, 14</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 4. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">recipes::all_predictors()</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">recipes::all_outcomes()</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 4. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -168,7 +170,7 @@ the recipe is trained.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

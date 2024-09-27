@@ -19,7 +19,7 @@ argument."><meta name="robots" content="noindex"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -71,10 +71,8 @@ argument.</p>
 <span>  <span class="va">...</span>,</span>
 <span>  <span class="va">lag</span>,</span>
 <span>  role <span class="op">=</span> <span class="st">"predictor"</span>,</span>
-<span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"lag_"</span>,</span>
 <span>  default <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  skip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  id <span class="op">=</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"epi_lag"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
@@ -84,10 +82,8 @@ argument.</p>
 <span>  <span class="va">...</span>,</span>
 <span>  <span class="va">ahead</span>,</span>
 <span>  role <span class="op">=</span> <span class="st">"outcome"</span>,</span>
-<span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"ahead_"</span>,</span>
 <span>  default <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  columns <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  skip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  id <span class="op">=</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"epi_ahead"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -118,23 +114,13 @@ nonnegative, while ahead integers must be positive.</p></dd>
 they be assigned? <code>lag</code> is default a predictor while <code>ahead</code> is an outcome.</p></dd>
 
 
-<dt id="arg-trained">trained<a class="anchor" aria-label="anchor" href="#arg-trained"></a></dt>
-<dd><p>A logical to indicate if the quantities for
-preprocessing have been estimated.</p></dd>
-
-
 <dt id="arg-prefix">prefix<a class="anchor" aria-label="anchor" href="#arg-prefix"></a></dt>
-<dd><p>A prefix to indicate what type of variable this is</p></dd>
+<dd><p>A character string that will be prefixed to the new column.</p></dd>
 
 
 <dt id="arg-default">default<a class="anchor" aria-label="anchor" href="#arg-default"></a></dt>
 <dd><p>Determines what fills empty rows
 left by leading/lagging (defaults to NA).</p></dd>
-
-
-<dt id="arg-columns">columns<a class="anchor" aria-label="anchor" href="#arg-columns"></a></dt>
-<dd><p>A character string of variable names that will
-be populated (eventually) by the <code>terms</code> argument.</p></dd>
 
 
 <dt id="arg-skip">skip<a class="anchor" aria-label="anchor" href="#arg-skip"></a></dt>
@@ -203,7 +189,7 @@ are always set to <code>"ahead_"</code> and <code>"epi_ahead"</code> respectivel
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

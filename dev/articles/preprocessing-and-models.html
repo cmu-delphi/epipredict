@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -246,7 +246,7 @@ dataset.</p>
 <span><span class="co">#&gt; An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2024-08-13 23:02:49.501159</span></span>
+<span><span class="co">#&gt; * as_of     = 2024-09-27 16:38:29.293213</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   geo_value time_value .pred</span></span>
@@ -481,7 +481,7 @@ correct units, in this case <code>deaths</code> rather than deaths per
 the coefficients:</p>
 <pre><code><span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; quantreg::rq(formula = ..y ~ ., tau = ~c(0.05, 0.5, 0.95), data = data, </span></span>
-<span><span class="co">#&gt;     na.action = stats::na.omit, method = "br", model = FALSE)</span></span>
+<span><span class="co">#&gt;     na.action = stats::na.omit, method = ~"br", model = FALSE)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;                        tau= 0.05     tau= 0.50    tau= 0.95</span></span>
@@ -600,7 +600,7 @@ use a subset of death rate and case rate data from our built-in dataset
 <p>We will fit the multinomial regression and examine the
 predictions:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/multinom_reg.html" class="external-link">multinom_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="https://parsnip.tidymodels.org/reference/multinom_reg.html" class="external-link">multinom_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">.pred_class</span><span class="op">)</span><span class="op">)</span></span>
@@ -833,7 +833,7 @@ Copyright Johns Hopkins University 2020.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>

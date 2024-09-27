@@ -1,5 +1,5 @@
 pandoc: 3.1.11
-pkgdown: 2.1.0
+pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   arx-classifier: arx-classifier.html
@@ -10,7 +10,7 @@ articles:
   articles/smooth-qr: smooth-qr.html
   articles/symptom-surveys: symptom-surveys.html
   update: update.html
-last_built: 2024-08-13T23:00Z
+last_built: 2024-09-27T16:36Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles

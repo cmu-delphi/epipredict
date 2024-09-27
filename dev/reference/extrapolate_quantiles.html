@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,7 +38,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Summarize a distribution with a set of quantiles</h1>
-      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/R/dist_quantiles.R" class="external-link"><code>R/dist_quantiles.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/R/extrapolate_quantiles.R" class="external-link"><code>R/extrapolate_quantiles.R</code></a></small>
       <div class="d-none name"><code>extrapolate_quantiles.Rd</code></div>
     </div>
 
@@ -48,7 +48,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extrapolate_quantiles</span><span class="op">(</span><span class="va">x</span>, <span class="va">probs</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">extrapolate_quantiles</span><span class="op">(</span><span class="va">x</span>, <span class="va">probs</span>, replace_na <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -63,13 +63,21 @@
 <dd><p>a vector of probabilities at which to calculate quantiles</p></dd>
 
 
+<dt id="arg-replace-na">replace_na<a class="anchor" aria-label="anchor" href="#arg-replace-na"></a></dt>
+<dd><p>logical. If <code>x</code> contains <code>NA</code>'s, these are imputed if
+possible (if <code>TRUE</code>) or retained (if <code>FALSE</code>). This only effects
+elements of class <code>dist_quantiles</code>.</p></dd>
+
+
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>additional arguments passed on to the <code>quantile</code> method</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>a <code>distribution</code> vector containing <code>dist_quantiles</code></p>
+    <p>a <code>distribution</code> vector containing <code>dist_quantiles</code>. Any elements
+of <code>x</code> which were originally <code>dist_quantiles</code> will now have a superset
+of the original <code>quantile_values</code> (the union of those and <code>probs</code>).</p>
     </div>
 
     <div class="section level2">
@@ -105,7 +113,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

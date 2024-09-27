@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,17 +56,34 @@
 
 
 <dl><dt id="arg-values">values<a class="anchor" aria-label="anchor" href="#arg-values"></a></dt>
-<dd><p>A vector of values</p></dd>
+<dd><p>A vector (or list of vectors) of values.</p></dd>
 
 
 <dt id="arg-quantile-levels">quantile_levels<a class="anchor" aria-label="anchor" href="#arg-quantile-levels"></a></dt>
-<dd><p>A vector of probabilities corresponding to <code>values</code></p></dd>
+<dd><p>A vector (or list of vectors) of probabilities
+corresponding to <code>values</code>.</p>
+<p>When creating multiple sets of <code>values</code>/<code>quantile_levels</code> resulting in
+different distributions, the sizes must match. See the examples below.</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A vector of class <code>"distribution"</code>.</p>
+    </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dstn</span> <span class="op">&lt;-</span> <span class="fu">dist_quantiles</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">:</span><span class="fl">11</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.2</span>, <span class="fl">.4</span>, <span class="fl">.6</span>, <span class="fl">.8</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">dist_quantiles</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;distribution[1]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] quantiles(2.5)[4]</span>
+<span class="r-in"><span><span class="fu">dist_quantiles</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span> <span class="op">/</span> <span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;distribution[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] quantiles(2)[3]   quantiles(2.5)[4]</span>
+<span class="r-in"><span><span class="va">dstn</span> <span class="op">&lt;-</span> <span class="fu">dist_quantiles</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">8</span><span class="op">:</span><span class="fl">11</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.2</span>, <span class="fl">.4</span>, <span class="fl">.6</span>, <span class="fl">.8</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dstn</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;distribution[2]&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] quantiles(2.5)[4] quantiles(9.5)[4]</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">dstn</span>, p <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.9</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.2952896 1.2500000 2.5000000 4.8267802</span>
@@ -90,9 +107,6 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>      3             0.6</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span>      4             0.8</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">dist_quantiles</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span> <span class="op">/</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;distribution[1]&gt;</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] quantiles(2.5)[4]</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -104,7 +118,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

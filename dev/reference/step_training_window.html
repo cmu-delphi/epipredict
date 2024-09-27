@@ -13,7 +13,7 @@ based on the remaining epi_keys."><meta name="robots" content="noindex"></head><
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,6 @@ based on the remaining <code>epi_keys</code>.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">step_training_window</span><span class="op">(</span></span>
 <span>  <span class="va">recipe</span>,</span>
 <span>  role <span class="op">=</span> <span class="cn">NA</span>,</span>
-<span>  trained <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  n_recent <span class="op">=</span> <span class="fl">50</span>,</span>
 <span>  epi_keys <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  id <span class="op">=</span> <span class="fu"><a href="https://recipes.tidymodels.org/reference/rand_id.html" class="external-link">rand_id</a></span><span class="op">(</span><span class="st">"training_window"</span><span class="op">)</span></span>
@@ -77,12 +76,8 @@ sequence of operations for this recipe.</p></dd>
 
 
 <dt id="arg-role">role<a class="anchor" aria-label="anchor" href="#arg-role"></a></dt>
-<dd><p>Not used by this step since no new variables are created.</p></dd>
-
-
-<dt id="arg-trained">trained<a class="anchor" aria-label="anchor" href="#arg-trained"></a></dt>
-<dd><p>A logical to indicate if the quantities for
-preprocessing have been estimated.</p></dd>
+<dd><p>For model terms created by this step, what analysis role should
+they be assigned? <code>lag</code> is default a predictor while <code>ahead</code> is an outcome.</p></dd>
 
 
 <dt id="arg-n-recent">n_recent<a class="anchor" aria-label="anchor" href="#arg-n-recent"></a></dt>
@@ -98,7 +93,7 @@ limited.</p></dd>
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
-<dd><p>A character string that is unique to this step to identify it.</p></dd>
+<dd><p>A unique identifier for the step</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -114,13 +109,10 @@ after any filtering step.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tib</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">tib</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  x <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span></span>
 <span class="r-in"><span>  y <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,</span></span>
-<span class="r-in"><span>  time_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-01-01"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    by <span class="op">=</span> <span class="fl">1</span>,</span></span>
-<span class="r-in"><span>    length.out <span class="op">=</span> <span class="fl">5</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span>, times <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  time_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-01-01"</span><span class="op">)</span>, by <span class="op">=</span> <span class="fl">1</span>, length.out <span class="op">=</span> <span class="fl">5</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  geo_value <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"hi"</span><span class="op">)</span>, each <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_df.html" class="external-link">as_epi_df</a></span><span class="op">(</span><span class="op">)</span></span></span>
@@ -132,7 +124,7 @@ after any filtering step.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 6 x 4 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2024-08-13 23:02:00.717949</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2024-09-27 16:37:44.431471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   geo_value time_value     x     y</span>
@@ -145,14 +137,14 @@ after any filtering step.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> hi        2020-01-05    10    10</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">y</span> <span class="op">~</span> <span class="va">x</span>, data <span class="op">=</span> <span class="va">tib</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/step_naomit.html" class="external-link">step_naomit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="step_epi_naomit.html">step_epi_naomit</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">step_training_window</span><span class="op">(</span>n_recent <span class="op">=</span> <span class="fl">3</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">tib</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span>new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 6 x 4 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2024-08-13 23:02:00.717949</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2024-09-27 16:37:44.431471</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 6 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   geo_value time_value     x     y</span>
@@ -174,7 +166,7 @@ after any filtering step.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

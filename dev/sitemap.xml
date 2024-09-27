@@ -36,7 +36,6 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/check_pname.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/clean_f_name.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/dist_quantiles.html</loc></url>
-<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_keys.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_recipe.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_shift.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_slide_wrapper.html</loc></url>
@@ -52,8 +51,8 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/forecast.epi_workflow.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/frosting.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/get_test_data.html</loc></url>
-<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/grab_names.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/grad_employ_subset.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/grf_quantiles.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/index.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/is_epi_recipe.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/is_epi_workflow.html</loc></url>
@@ -91,5 +90,6 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_training_window.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/tidy.frosting.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/update.layer.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/weighted_interval_score.html</loc></url>
 </urlset>
 

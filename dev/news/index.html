@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.18</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,8 +99,14 @@
 </li>
 <li>
 <code>bake.epi_recipe()</code> will now re-infer the geo and time type in case baking the steps has changed the appropriate values</li>
+<li>produce length 0 <code><a href="../reference/dist_quantiles.html">dist_quantiles()</a></code>
+</li>
+<li>add functionality to calculate weighted interval scores for <code><a href="../reference/dist_quantiles.html">dist_quantiles()</a></code>
+</li>
 <li>Add <code>step_epi_slide</code> to produce generic sliding computations over an <code>epi_df</code>
 </li>
+<li>Add quantile random forests (via <a href="https://github.com/grf-labs/grf" class="external-link">grf</a>) as a parsnip engine</li>
+<li>Replace <code>epi_keys()</code> with <code><a href="https://cmu-delphi.github.io/epiprocess/reference/key_colnames.html" class="external-link">epiprocess::key_colnames()</a></code>, <a href="https://github.com/cmu-delphi/epipredict/issues352" class="external-link">#352</a></li>
 </ul></div>
   </main></div>
 
@@ -110,7 +116,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>
