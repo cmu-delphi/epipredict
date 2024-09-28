@@ -11,7 +11,7 @@ a computation along existing data.'><meta name="robots" content="noindex"></head
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.21</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,8 +58,8 @@ a computation along existing data.</p>
 <span>  <span class="va">recipe</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  <span class="va">.f</span>,</span>
-<span>  before <span class="op">=</span> <span class="fl">0L</span>,</span>
-<span>  after <span class="op">=</span> <span class="fl">0L</span>,</span>
+<span>  .window_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .align <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"right"</span>, <span class="st">"center"</span>, <span class="st">"left"</span><span class="op">)</span>,</span>
 <span>  role <span class="op">=</span> <span class="st">"predictor"</span>,</span>
 <span>  prefix <span class="op">=</span> <span class="st">"epi_slide_"</span>,</span>
 <span>  f_name <span class="op">=</span> <span class="fu"><a href="clean_f_name.html">clean_f_name</a></span><span class="op">(</span><span class="va">.f</span><span class="op">)</span>,</span>
@@ -97,10 +97,18 @@ error is using something like <code>function(x) mean</code>. This will not work
 because it returns the function mean, rather than <code>mean(x)</code></p></dd>
 
 
-<dt id="arg-before-after">before, after<a class="anchor" aria-label="anchor" href="#arg-before-after"></a></dt>
-<dd><p>the size of the sliding window on the left and the right
-of the center. Usually non-negative integers for data indexed by date, but
-more restrictive in other cases (see <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epiprocess::epi_slide()</a></code> for details).</p></dd>
+<dt id="arg--window-size">.window_size<a class="anchor" aria-label="anchor" href="#arg--window-size"></a></dt>
+<dd><p>the size of the sliding window, required. Usually a
+non-negative integer will suffice (e.g. for data indexed by date, but more
+restrictive in other time_type cases (see <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epiprocess::epi_slide()</a></code> for
+details). For example, set to 7 for a 7-day window.</p></dd>
+
+
+<dt id="arg--align">.align<a class="anchor" aria-label="anchor" href="#arg--align"></a></dt>
+<dd><p>a character string indicating how the window should be aligned.
+By default, this is "right", meaning the slide_window will be anchored with
+its right end point on the reference date. (see <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide.html" class="external-link">epiprocess::epi_slide()</a></code>
+for details).</p></dd>
 
 
 <dt id="arg-role">role<a class="anchor" aria-label="anchor" href="#arg-role"></a></dt>
@@ -113,10 +121,10 @@ they be assigned? <code>lag</code> is default a predictor while <code>ahead</cod
 
 
 <dt id="arg-f-name">f_name<a class="anchor" aria-label="anchor" href="#arg-f-name"></a></dt>
-<dd><p>a character string of at most 20 characters that describes
-the function. This will be combined with <code>prefix</code> and the columns in <code>...</code>
-to name the result using <code>{prefix}{f_name}_{column}</code>. By default it will be determined
-automatically using <code><a href="clean_f_name.html">clean_f_name()</a></code>.</p></dd>
+<dd><p>a character string of at most 20 characters that describes the
+function. This will be combined with <code>prefix</code> and the columns in <code>...</code> to
+name the result using <code>{prefix}{f_name}_{column}</code>. By default it will be
+determined automatically using <code><a href="clean_f_name.html">clean_f_name()</a></code>.</p></dd>
 
 
 <dt id="arg-skip">skip<a class="anchor" aria-label="anchor" href="#arg-skip"></a></dt>
@@ -146,7 +154,7 @@ sequence of any existing operations.</p>
 <span class="r-in"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">step_epi_slide</span><span class="op">(</span><span class="va">case_rate</span>, <span class="va">death_rate</span>,</span></span>
 <span class="r-in"><span>    .f <span class="op">=</span> \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    before <span class="op">=</span> <span class="fl">6L</span></span></span>
+<span class="r-in"><span>    .window_size <span class="op">=</span> <span class="fl">7L</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://recipes.tidymodels.org/reference/bake.html" class="external-link">bake</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">jhu</span><span class="op">)</span>, new_data <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 730 x 6 with metadata:</span>

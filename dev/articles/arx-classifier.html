@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.20</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.21</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,10 +103,7 @@ day case rates:</p>
 <span>    <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"fl"</span>, <span class="st">"tx"</span>, <span class="st">"ny"</span>, <span class="st">"nj"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span><span class="va">jhu</span>,</span>
-<span>  outcome <span class="op">=</span> <span class="st">"case_rate"</span>,</span>
-<span>  predictors <span class="op">=</span> <span class="st">"case_rate"</span></span>
-<span><span class="op">)</span></span>
+<span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span><span class="va">jhu</span>, outcome <span class="op">=</span> <span class="st">"case_rate"</span>, predictors <span class="op">=</span> <span class="st">"case_rate"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">out</span><span class="op">$</span><span class="va">predictions</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
@@ -153,7 +150,8 @@ let’s set a break of 0.5 instead of relying on the default of 0.25. We
 can do this by passing 0.5 to the <code>breaks</code> argument in
 <code><a href="../reference/arx_class_args_list.html">arx_class_args_list()</a></code> as follows:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">out_break_0.5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span><span class="va">jhu</span>,</span>
+<code class="sourceCode R"><span><span class="va">out_break_0.5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span></span>
+<span>  <span class="va">jhu</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"case_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="st">"case_rate"</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="../reference/arx_class_args_list.html">arx_class_args_list</a></span><span class="op">(</span></span>
@@ -231,7 +229,7 @@ Using these variables, we define a categorical response variable with
 two classes</p>
 <p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>Z</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">up,</mtext></mtd><mtd columnalign="center" style="text-align: center"><mrow><mtext mathvariant="normal">if </mtext><mspace width="0.333em"></mspace></mrow><msubsup><mi>Y</mi><mrow><mi>l</mi><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><mo>&gt;</mo><mn>0.25</mn></mtd></mtr><mtr><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">not up,</mtext></mtd><mtd columnalign="center" style="text-align: center"><mtext mathvariant="normal">otherwise</mtext></mtd></mtr></mtable></mrow></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{align}
 Z_{l,t} = \left\{\begin{matrix}
-\text{up,} &amp; \text{if } Y_{l,t}^\Delta &gt; 0.25\\ 
+\text{up,} &amp; \text{if } Y_{l,t}^\Delta &gt; 0.25\\
 \text{not up,} &amp; \text{otherwise}
 \end{matrix}\right.
 \end{align}</annotation></semantics></math> where
