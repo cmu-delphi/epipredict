@@ -25,27 +25,21 @@ library(purrr)
 
 # Demonstrations of sliding AR and ARX forecasters
 
-A key function from the epiprocess package is `epi_slide()`, which allows the
-user to apply a function or formula-based computation over variables in an
-`epi_df` over a running window of `n` time steps (see the following `epiprocess`
-vignette to go over the basics of the function: ["Slide a computation over
-signal values"](https://cmu-delphi.github.io/epiprocess/articles/slide.html)).
-The equivalent sliding method for an `epi_archive` object can be called by using
-the wrapper function `epix_slide()` (refer to the following vignette for the
-basics of the function: ["Work with archive objects and data
-revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html)). The
-key difference from `epi_slide()` is that it performs version-aware
-computations. That is, the function only uses data that would have been
-available as of time t for that reference time.
+A key function from the epiprocess package is `epix_slide()` (refer to the
+following vignette for the basics of the function: ["Work with archive objects
+and data
+revisions"](https://cmu-delphi.github.io/epiprocess/articles/archive.html))
+which allows performing version-aware computations. That is, the function only
+uses data that would have been available as of time t for that reference time.
 
-In this vignette, we use `epi_slide()` and `epix_slide()` for backtesting our
-`arx_forecaster` on historical COVID-19 case data from the US and from Canada.
-More precisely, we first demonstrate using `epi_slide()` to slide ARX
-forecasters over an `epi_df` object and compare the results obtained from using
-different forecasting engines. We then compare the results from version-aware
-and unaware forecasting, where the former is obtained from applying
-`epix_slide()` to the `epi_archive` object, while the latter is obtained from
-applying `epi_slide()` to the latest snapshot of the data.
+In this vignette, we use `epix_slide()` for backtesting our `arx_forecaster` on
+historical COVID-19 case data from the US and from Canada. We first examine the
+results from a version-unaware forecaster, comparing two different fitting
+engines and then we contrast this with version-aware forecasting. The former
+will proceed by constructing an `epi_archive` that erases its version
+information and then use `epix_slide()` to forecast the future. The latter will
+keep the versioned data and proceed similarly by using `epix_slide()` to
+forecast the future.
 
 ## Comparing different forecasting engines
 
@@ -60,16 +54,16 @@ claims and the number of new confirmed COVID-19 cases per 100,000 population
 
 <summary>Load a data archive</summary>
 
-We process as before, with the
-modification that we use `sync = locf` in `epix_merge()` so that the last
-version of each observation can be carried forward to extrapolate unavailable
-versions for the less up-to-date input archive.
+We process as before, with the modification that we use `sync = locf` in
+`epix_merge()` so that the last version of each observation can be carried
+forward to extrapolate unavailable versions for the less up-to-date input
+archive.
 
 ```{r grab-epi-data}
 theme_set(theme_bw())
 
-y <- readRDS("all_states_covidcast_signals.rds")
-y <- purrr::map(y, ~ select(.x, geo_value, time_value, version = issue, value))
+y <- readRDS("all_states_covidcast_signals.rds") %>%
+  purrr::map(~ select(.x, geo_value, time_value, version = issue, value))
 
 x <- epix_merge(
   y[[1]] %>% rename(percent_cli = value) %>% as_epi_archive(compactify = FALSE),
@@ -82,34 +76,36 @@ rm(y)
 
 </details>
 
-After obtaining the latest snapshot of the data, we produce forecasts on that
-data using the default engine of simple linear regression and compare to a
-random forest.
-
-Note that all of the warnings about the forecast date being less than the most
-recent update date of the data have been suppressed to avoid cluttering the
-output.
+We then obtaining the latest snapshot of the data and proceed to fake the
+version information by setting `version = time_value`. This has the effect of
+obtaining data that arrives exactly at the day of the time_value.
 
 ```{r arx-kweek-preliminaries, warning = FALSE}
 # Latest snapshot of data, and forecast dates
-x_latest <- epix_as_of(x, version = max(x$versions_end))
-fc_time_values <- seq(from = as.Date("2021-11-01"), to = as.Date("2021-11-01"), by = "1 month")
+x_latest <- epix_as_of(x, version = max(x$versions_end)) %>%
+  mutate(version = time_value) %>%
+  as_epi_archive()
+fc_time_values <- seq(
+  from = as.Date("2020-08-01"),
+  to = as.Date("2021-11-01"),
+  by = "1 month"
+)
 aheads <- c(7, 14, 21, 28)
 
-forecast_k_week_ahead <- function(epi_df, outcome, predictors, ahead = 7, engine) {
-  epi_slide(
-    epi_df,
-    ~ arx_forecaster(
-      .x, outcome, predictors, engine,
-      args_list = arx_args_list(ahead = ahead)
-    )$predictions %>%
-      select(-geo_value),
-    .window_size = 120,
-    .ref_time_values = fc_time_values,
-    .new_col_name = "fc"
-  ) %>%
-    select(geo_value, time_value, starts_with("fc")) %>%
-    mutate(engine_type = engine$engine)
+forecast_k_week_ahead <- function(epi_archive, outcome, predictors, ahead = 7, engine) {
+  epi_archive %>%
+    epix_slide(
+      .f = function(x, gk, rtv) {
+        arx_forecaster(
+          x, outcome, predictors, engine,
+          args_list = arx_args_list(ahead = ahead)
+        )$predictions %>%
+          mutate(engine_type = engine$engine) %>%
+          pivot_quantiles_wider(.pred_distn)
+      },
+      .before = 120,
+      .versions = fc_time_values
+    )
 }
 ```
 
@@ -131,7 +127,6 @@ fc <- bind_rows(
     engine = rand_forest(mode = "regression")
   ))
 )
-pivot_quantiles_wider(fc_.pred_distn)
 ```
 
 Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the
@@ -148,18 +143,22 @@ sense of the model performance while keeping the graphic simple.
 
 <summary>Code for plotting</summary>
 ```{r plot-arx, message = FALSE, warning = FALSE}
-fc_cafl <- fc %>% filter(geo_value %in% c("ca", "fl"))
-x_latest_cafl <- x_latest %>% filter(geo_value %in% c("ca", "fl"))
+fc_cafl <- fc %>%
+  tibble() %>%
+  filter(geo_value %in% c("ca", "fl"))
+x_latest_cafl <- x_latest$DT %>%
+  tibble() %>%
+  filter(geo_value %in% c("ca", "fl"))
 
-p1 <- ggplot(fc_cafl, aes(fc_target_date, group = time_value, fill = engine_type)) +
+p1 <- ggplot(fc_cafl, aes(target_date, group = forecast_date, fill = engine_type)) +
   geom_line(
     data = x_latest_cafl, aes(x = time_value, y = case_rate),
     inherit.aes = FALSE, color = "gray50"
   ) +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`), alpha = 0.4) +
-  geom_line(aes(y = fc_.pred)) +
-  geom_point(aes(y = fc_.pred), size = 0.5) +
-  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_line(aes(y = .pred)) +
+  geom_point(aes(y = .pred), size = 0.5) +
+  geom_vline(aes(xintercept = forecast_date), linetype = 2, alpha = 0.5) +
   facet_grid(vars(geo_value), vars(engine_type), scales = "free") +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   scale_fill_brewer(palette = "Set1") +
@@ -216,31 +215,30 @@ linear regression with those from using boosted regression trees.
 can <- readRDS(system.file(
   "extdata", "can_prov_cases.rds",
   package = "epipredict", mustWork = TRUE
-))
-
-can <- can %>%
+)) %>%
   group_by(version, geo_value) %>%
   arrange(time_value) %>%
   mutate(cr_7dav = RcppRoll::roll_meanr(case_rate, n = 7L)) %>%
   as_epi_archive(compactify = TRUE)
 
-can_latest <- epix_as_of(can, max_version = max(can$DT$version))
+can_latest <- epix_as_of(can, version = max(can$DT$version)) %>%
+  mutate(version = time_value) %>%
+  as_epi_archive()
 
 # Generate the forecasts, and bind them together
 can_fc <- bind_rows(
   map(
     aheads,
     ~ forecast_k_week_ahead(can_latest, "cr_7dav", "cr_7dav", .x, linear_reg())
-  ) %>% list_rbind(),
+  ),
   map(
     aheads,
     ~ forecast_k_week_ahead(
       can_latest, "cr_7dav", "cr_7dav", .x,
       boost_tree(mode = "regression", trees = 20)
     )
-  ) %>% list_rbind()
-) %>%
-  pivot_quantiles_wider(fc_.pred_distn)
+  )
+)
 ```
 
 The figures below shows the results for all of the provinces.
@@ -248,19 +246,19 @@ The figures below shows the results for all of the provinces.
 ```{r plot-can-fc-lr, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
 ggplot(
   can_fc %>% filter(engine_type == "lm"),
-  aes(x = fc_target_date, group = time_value)
+  aes(x = target_date, group = forecast_date)
 ) +
   coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
   geom_line(
-    data = can_latest, aes(x = time_value, y = cr_7dav),
+    data = can_latest$DT %>% tibble(), aes(x = time_value, y = cr_7dav),
     inherit.aes = FALSE, color = "gray50"
   ) +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = geo_value),
     alpha = 0.4
   ) +
-  geom_line(aes(y = fc_.pred)) +
-  geom_point(aes(y = fc_.pred), size = 0.5) +
-  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_line(aes(y = .pred)) +
+  geom_point(aes(y = .pred), size = 0.5) +
+  geom_vline(aes(xintercept = forecast_date), linetype = 2, alpha = 0.5) +
   facet_wrap(~geo_value, scales = "free_y", ncol = 3) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   labs(
@@ -273,19 +271,19 @@ ggplot(
 ```{r plot-can-fc-boost, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
 ggplot(
   can_fc %>% filter(engine_type == "xgboost"),
-  aes(x = fc_target_date, group = time_value)
+  aes(x = target_date, group = forecast_date)
 ) +
   coord_cartesian(xlim = lubridate::ymd(c("2020-12-01", NA))) +
   geom_line(
-    data = can_latest, aes(x = time_value, y = cr_7dav),
+    data = can_latest$DT %>% tibble(), aes(x = time_value, y = cr_7dav),
     inherit.aes = FALSE, color = "gray50"
   ) +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = geo_value),
     alpha = 0.4
   ) +
-  geom_line(aes(y = fc_.pred)) +
-  geom_point(aes(y = fc_.pred), size = 0.5) +
-  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_line(aes(y = .pred)) +
+  geom_point(aes(y = .pred), size = 0.5) +
+  geom_vline(aes(xintercept = forecast_date), linetype = 2, alpha = 0.5) +
   facet_wrap(~geo_value, scales = "free_y", ncol = 3) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   labs(
@@ -313,9 +311,7 @@ have been available in real-time) to forecast the 7 day average of future
 COVID-19 case rates from current and past COVID-19 case rates and death rates
 for all states. That is, we can make forecasts on the archive, `x`, and compare
 those to forecasts on the latest data, `x_latest` using the same general set-up
-as above. For version-aware forecasting, note that `x` is fed into
-`epix_slide()`, while for version-unaware forecasting, `x_latest` is fed into
-`epi_slide()`. Note that in this example, we use a geo-pooled approach (using
+as above. Note that in this example, we use a geo-pooled approach (using
 combined data from all US states and territories) to train our model.
 
 <details>
@@ -352,21 +348,19 @@ deaths_incidence_prop <- pub_covidcast(
   as_epi_archive(compactify = FALSE)
 
 
-x <- epix_merge(confirmed_incidence_prop, deaths_incidence_prop,
-  sync = "locf"
-)
+x <- epix_merge(confirmed_incidence_prop, deaths_incidence_prop, sync = "locf")
 
 x <- x %>%
   epix_slide(
-    before = 365000L, ref_time_values = fc_time_values,
+    .versions = fc_time_values,
     function(x, gk, rtv) {
       x %>%
         group_by(geo_value) %>%
-        epi_slide_mean(case_rate, before = 6L) %>%
+        epi_slide_mean(case_rate, .window_size = 7L) %>%
         rename(case_rate_7d_av = slide_value_case_rate) %>%
-        epi_slide_mean(death_rate, before = 6L) %>%
-        ungroup() %>%
-        rename(death_rate_7d_av = slide_value_death_rate)
+        epi_slide_mean(death_rate, ..window_size = 7L) %>%
+        rename(death_rate_7d_av = slide_value_death_rate) %>%
+        ungroup()
     }
   ) %>%
   rename(version = time_value) %>%
@@ -419,14 +413,14 @@ epi archive and store it as `x_latest`.
 
 ```{r running-arx-forecaster}
 arx_preds <- x %>%
-  epix_slide(~ forecaster(.x),
-    before = 120, ref_time_values = fc_time_values,
-    names_sep = NULL
+  epix_slide(
+    ~ forecaster(.x),
+    .before = 120, .versions = fc_time_values
   ) %>%
   mutate(engine_type = quantile_reg()$engine) %>%
   mutate(ahead_val = target_date - forecast_date)
 
-x_latest <- epix_as_of(x, max_version = max(x$versions_end))
+x_latest <- epix_as_of(x, version = max(x$versions_end))
 ```
 
 Now we plot both the actual and predicted 7 day average of the death rate for
@@ -443,7 +437,7 @@ fc_states <- arx_preds %>%
 
 x_latest_states <- x_latest %>% filter(geo_value %in% states_to_show)
 
-p2 <- ggplot(fc_states, aes(target_date, group = time_value)) +
+p2 <- ggplot(fc_states, aes(target_date, group = forecast_date)) +
   geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = geo_value), alpha = 0.4) +
   geom_line(
     data = x_latest_states, aes(x = time_value, y = death_rate_7d_av),
@@ -451,7 +445,7 @@ p2 <- ggplot(fc_states, aes(target_date, group = time_value)) +
   ) +
   geom_line(aes(y = .pred, color = geo_value)) +
   geom_point(aes(y = .pred, color = geo_value), size = 0.5) +
-  geom_vline(aes(xintercept = time_value), linetype = 2, alpha = 0.5) +
+  geom_vline(aes(xintercept = forecast_date), linetype = 2, alpha = 0.5) +
   facet_wrap(~geo_value, scales = "free_y", ncol = 1L) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
   scale_fill_brewer(palette = "Set1") +
