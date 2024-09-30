@@ -60,9 +60,14 @@ add_shifted_columns <- function(new_data, object) {
   processed <- new_data %>%
     full_join(shifted, by = ok) %>%
     group_by(across(all_of(kill_time_value(ok)))) %>%
-    arrange(time_value) %>%
-    ungroup() %>%
-    as_epi_df()
-  attributes(processed)$metadata <- attributes(new_data)$metadata
+    arrange(time_value)
+  if (inherits(new_data, "epi_df")) {
+    processed <- processed %>%
+      ungroup() %>%
+      as_epi_df(
+        as_of = attributes(new_data)$metadata$as_of,
+        other_keys = attributes(new_data)$metadata$other_keys
+      )
+  }
   return(processed)
 }

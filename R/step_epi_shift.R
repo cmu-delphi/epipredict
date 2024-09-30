@@ -248,8 +248,6 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  names(object)
-  object$shift_grid
   add_shifted_columns(new_data, object)
 }
 
