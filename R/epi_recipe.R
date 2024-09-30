@@ -63,6 +63,7 @@ epi_recipe.default <- function(x, ...) {
 #' r
 epi_recipe.epi_df <-
   function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
+    attr(x, "decay_to_tibble") <- FALSE
     if (!is.null(formula)) {
       if (!is.null(vars)) {
         rlang::abort(
@@ -160,6 +161,7 @@ epi_recipe.formula <- function(formula, data, ...) {
     return(recipes::recipe(formula, data, ...))
   }
 
+  attr(data, "decay_to_tibble") <- FALSE
   f_funcs <- recipes:::fun_calls(formula, data)
   if (any(f_funcs == "-")) {
     abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
