@@ -1,7 +1,6 @@
 location_to_abbr <- function(location) {
   dictionary <-
     state_census %>%
-    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -12,7 +11,6 @@ location_to_abbr <- function(location) {
 abbr_to_location <- function(abbr) {
   dictionary <-
     state_census %>%
-    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
