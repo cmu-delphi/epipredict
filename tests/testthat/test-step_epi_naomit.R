@@ -1,6 +1,6 @@
-library(dplyr)
-library(parsnip)
-library(workflows)
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(parsnip))
+suppressPackageStartupMessages(library(workflows))
 
 # Random generated dataset
 x <- tibble(

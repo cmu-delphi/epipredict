@@ -75,3 +75,14 @@ is_classification <- function(trainer) {
 is_regression <- function(trainer) {
   get_parsnip_mode(trainer) %in% c("regression", "unknown")
 }
+
+
+enlist <- function(...) {
+  # converted to thin wrapper around
+  rlang::dots_list(
+    ...,
+    .homonyms = "error",
+    .named = TRUE,
+    .check_assign = TRUE
+  )
+}

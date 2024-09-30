@@ -1,4 +1,4 @@
-library(dplyr)
+suppressPackageStartupMessages(library(dplyr))
 test_that("return expected number of rows and returned dataset is ungrouped", {
   r <- epi_recipe(case_death_rate_subset) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%

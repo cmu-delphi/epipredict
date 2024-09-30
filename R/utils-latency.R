@@ -183,12 +183,11 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
   }
   itval <- epiprocess:::guess_period(c(x$time_value, end_date), "time_value")
   # get the time values we need to fill in
-  completed_time_values <-
-    x %>%
+  completed_time_values <- x %>%
     group_by(across(all_of(groups))) %>%
     summarise(
       time_value = list2(
-        time_value = seq_null_swap(from = max(time_value) + itval, to = end_date, by = itval)
+        time_value = seq_forward(from = max(time_value) + itval, to = end_date, by = itval)
       )
     ) %>%
     unnest("time_value") %>%
@@ -197,6 +196,7 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
   grouped_and_arranged <- x %>%
     arrange(across(all_of(c("time_value", groups)))) %>%
     group_by(across(all_of(groups)))
+
   values_to_fill <- grouped_and_arranged %>%
     slice(min(across(all_of(columns_to_complete), count_single_column)):n())
   filled_values <- values_to_fill %>%
@@ -222,7 +222,7 @@ count_single_column <- function(col) {
 
 #' seq, but returns null if from is larger
 #' @keywords internal
-seq_null_swap <- function(from, to, by) {
+seq_forward <- function(from, to, by) {
   if (from > to) {
     return(NULL)
   }
