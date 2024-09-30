@@ -103,7 +103,9 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
   )
   object$original_data <- data
 
-  NextMethod()
+  res <- NextMethod()
+  class(res) <- c("epi_workflow", class(res))
+  res
 }
 
 #' Predict from an epi_workflow
