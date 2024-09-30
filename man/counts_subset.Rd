@@ -61,6 +61,8 @@ library(epipredict)
 counts_subset
 
 # fails
-data(counts_subset, package = "epipredict")
+\dontrun{
+  data(counts_subset, package = "epipredict")
+}
 }
 \keyword{datasets}

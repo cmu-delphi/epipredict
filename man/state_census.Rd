@@ -52,6 +52,8 @@ library(epipredict)
 state_census
 
 # fails
-data(state_census, package = "epipredict")
+\dontrun{
+  data(state_census, package = "epipredict")
+}
 }
 \keyword{datasets}

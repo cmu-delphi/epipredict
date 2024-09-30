@@ -63,6 +63,8 @@ library(epipredict)
 ctis_covid_behaviours
 
 # fails
-data(ctis_covid_behaviours, package = "epipredict")
+\dontrun{
+  data(ctis_covid_behaviours, package = "epipredict")
+}
 }
 \keyword{datasets}

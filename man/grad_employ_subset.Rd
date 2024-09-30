@@ -67,6 +67,8 @@ library(epipredict)
 grad_employ_subset
 
 # fails
-data(grad_employ_subset, package = "epipredict")
+\dontrun{
+  data(grad_employ_subset, package = "epipredict")
+}
 }
 \keyword{datasets}

@@ -66,6 +66,8 @@ library(epipredict)
 covid_case_death_rates
 
 # fails
-data(covid_case_death_rates, package = "epipredict")
+\dontrun{
+  data(covid_case_death_rates, package = "epipredict")
+}
 }
 \keyword{datasets}
