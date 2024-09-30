@@ -1,6 +1,10 @@
 # fit method does not silently drop the class
 
-    epi_recipe has been called with a non-epi_df object, returning a regular recipe. Various step_epi_* functions will not work.
+    Code
+      epi_recipe(y ~ x, data = tbl)
+    Condition
+      Error in `epi_recipe()`:
+      ! `epi_recipe()` has been called with a non-<epi_df> object. Use `recipe()` instead.
 
 ---
 

@@ -16,15 +16,10 @@ epi_recipe <- function(x, ...) {
 #' @rdname epi_recipe
 #' @export
 epi_recipe.default <- function(x, ...) {
-  ## if not a formula or an epi_df, we just pass to recipes::recipe
-  if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x)) {
-    x <- x[1, , drop = FALSE]
-  }
-  cli_warn(
-    "epi_recipe has been called with a non-epi_df object, returning a regular recipe. Various
-    step_epi_* functions will not work."
-  )
-  recipes::recipe(x, ...)
+  cli_abort(paste(
+    "`x` must be an {.cls epi_df} or a {.cls formula},",
+    "not a {.cls {class(x)[[1]]}}."
+  ))
 }
 
 #' @rdname epi_recipe
@@ -153,16 +148,15 @@ epi_recipe.formula <- function(formula, data, ...) {
   data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
-    cli_warn(
-      "epi_recipe has been called with a non-epi_df object, returning a regular recipe. Various
-    step_epi_* functions will not work."
-    )
-    return(recipes::recipe(formula, data, ...))
+    cli_abort(paste(
+      "`epi_recipe()` has been called with a non-{.cls epi_df} object.",
+      "Use `recipe()` instead."
+    ))
   }
 
   f_funcs <- recipes:::fun_calls(formula, data)
   if (any(f_funcs == "-")) {
-    abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
+    cli_abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
   }
 
   # Check for other in-line functions

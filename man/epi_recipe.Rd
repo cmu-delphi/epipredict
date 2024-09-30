@@ -9,7 +9,7 @@
 \usage{
 epi_recipe(x, ...)
 
-\method{epi_recipe}{default}(x, ...)
+\method{epi_recipe}{default}(x, ..., arg = caller_arg(x))
 
 \method{epi_recipe}{epi_df}(x, formula = NULL, ..., vars = NULL, roles = NULL)
 

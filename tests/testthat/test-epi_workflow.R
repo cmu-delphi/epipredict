@@ -120,7 +120,7 @@ test_that("fit method does not silently drop the class", {
 
   rec_tbl <- recipe(y ~ x, data = tbl)
   rec_edf <- recipe(y ~ x, data = edf)
-  expect_snapshot_warning(erec_tbl <- epi_recipe(y ~ x, data = tbl))
+  expect_snapshot(error = TRUE, epi_recipe(y ~ x, data = tbl))
   erec_edf <- epi_recipe(y ~ x, data = edf)
 
   ewf_rec_tbl <- epi_workflow(rec_tbl, linear_reg())
