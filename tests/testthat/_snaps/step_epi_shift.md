@@ -30,7 +30,7 @@
     Code
       slm_fit(r4)
     Condition
-      Error in `bake()`:
+      Error in `add_shifted_columns()`:
       ! Name collision occured in <step_epi_lag>
       The following variable name already exists: "lag_7_death_rate".
 
