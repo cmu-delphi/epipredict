@@ -162,4 +162,24 @@ test_that("arx_classifier snapshots", {
     args_list = arx_class_args_list(adjust_latency = "extend_ahead", forecast_date = max_date + 2)
   )
   expect_snapshot_tibble(arc2$predictions)
+  expect_error(
+    arc3 <- arx_classifier(
+      case_death_rate_subset %>%
+        dplyr::filter(time_value >= as.Date("2021-11-01")),
+      "death_rate",
+      c("case_rate", "death_rate"),
+      args_list = arx_class_args_list(adjust_latency = "extend_lags", forecast_date = max_date + 2)
+    ),
+    class = "epipredict__arx_classifier__adjust_latency_unsupported_method"
+  )
+  expect_error(
+    arc4 <- arx_classifier(
+      case_death_rate_subset %>%
+        dplyr::filter(time_value >= as.Date("2021-11-01")),
+      "death_rate",
+      c("case_rate", "death_rate"),
+      args_list = arx_class_args_list(adjust_latency = "locf", forecast_date = max_date + 2)
+    ),
+    class = "epipredict__arx_classifier__adjust_latency_unsupported_method"
+  )
 })

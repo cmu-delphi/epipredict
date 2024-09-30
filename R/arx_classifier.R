@@ -191,9 +191,14 @@ arx_class_epi_workflow <- function(
     }
   }
   # regex that will match any amount of adjustment for the ahead
-  ahead_out_name <- glue::glue("ahead_[0-9]*_{pre_out_name}")
+  ahead_out_name_regex <- glue::glue("ahead_[0-9]*_{pre_out_name}")
   method_adjust_latency <- args_list$adjust_latency
   if (method_adjust_latency != "none") {
+    if (method_adjust_latency != "extend_ahead") {
+      cli_abort("only extend_ahead is currently supported",
+        class = "epipredict__arx_classifier__adjust_latency_unsupported_method"
+      )
+    }
     r <- r %>% step_adjust_latency(!!pre_out_name,
       fixed_forecast_date = forecast_date,
       method = method_adjust_latency
@@ -204,7 +209,7 @@ arx_class_epi_workflow <- function(
   r <- r %>%
     step_mutate(
       across(
-        matches(ahead_out_name),
+        matches(ahead_out_name_regex),
         ~ cut(.x, breaks = args_list$breaks),
         .names = "outcome_class",
         .unpack = TRUE
