@@ -98,7 +98,8 @@ is_epi_workflow <- function(x) {
 fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
   object$fit$meta <- list(
     max_time_value = max(data$time_value),
-    as_of = attributes(data)$metadata$as_of
+    as_of = attr(data, "metadata")$as_of,
+    other_keys = attr(data, "metadata")$other_keys
   )
   object$original_data <- data
 
