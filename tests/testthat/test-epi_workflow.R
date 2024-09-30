@@ -59,7 +59,7 @@ test_that("model can be added/updated/removed from epi_workflow", {
   expect_equal(class(model_spec2), c("linear_reg", "model_spec"))
 
   wf <- remove_model(wf)
-  expect_error(extract_spec_parsnip(wf))
+  expect_snapshot(error = TRUE, extract_spec_parsnip(wf))
   expect_equal(wf$fit$actions$model$spec, NULL)
 })
 
@@ -103,7 +103,7 @@ test_that("forecast method errors when workflow not fit", {
     step_epi_naomit()
   wf <- epi_workflow(r, parsnip::linear_reg())
 
-  expect_error(forecast(wf))
+  expect_snapshot(error = TRUE, forecast(wf))
 })
 
 test_that("fit method does not silently drop the class", {

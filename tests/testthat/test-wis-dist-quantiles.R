@@ -26,7 +26,7 @@ test_that("wis dispatches and produces the correct values", {
   )
 
   # errors for non distributions
-  expect_error(weighted_interval_score(1:10, 10))
+  expect_snapshot(error = TRUE, weighted_interval_score(1:10, 10))
   expect_warning(w <- weighted_interval_score(dist_normal(1), 10))
   expect_true(all(is.na(w)))
   expect_warning(w <- weighted_interval_score(
@@ -36,7 +36,7 @@ test_that("wis dispatches and produces the correct values", {
   expect_equal(w, c(NA, wis_one_pred(1:5, 1:5 / 6, 10)))
 
   # errors if sizes don't match
-  expect_error(weighted_interval_score(
+  expect_snapshot(error = TRUE, weighted_interval_score(
     dist_quantiles(list(1:4, 8:11), 1:4 / 5), # length 2
     1:3
   ))

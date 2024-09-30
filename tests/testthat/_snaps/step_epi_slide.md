@@ -118,6 +118,22 @@
       Error in `validate_slide_fun()`:
       ! In, `step_epi_slide()`, `.f` must be a function.
 
+---
+
+    Code
+      r %>% step_epi_slide(value)
+    Condition
+      Error in `step_epi_slide()`:
+      ! argument ".f" is missing, with no default
+
+---
+
+    Code
+      r %>% step_epi_slide(value, .f = 1)
+    Condition
+      Error in `validate_slide_fun()`:
+      ! In, `step_epi_slide()`, `.f` must be a function.
+
 # epi_slide handles different function specs
 
     Code
