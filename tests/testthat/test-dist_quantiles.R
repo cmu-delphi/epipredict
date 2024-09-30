@@ -1,36 +1,31 @@
-suppressPackageStartupMessages(library(distributional))
-
-test_that("constructor returns reasonable quantiles", {
-  expect_snapshot(error = TRUE, new_quantiles(rnorm(5), c(-2, -1, 0, 1, 2)))
-  expect_silent(new_quantiles(sort(rnorm(5)), sort(runif(5))))
-  expect_snapshot(error = TRUE, new_quantiles(sort(rnorm(5)), sort(runif(2))))
-  expect_silent(new_quantiles(1:5, 1:5 / 10))
-  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .1, .2, .5, .8)))
-  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .15, .2, .5, .8)))
-  expect_snapshot(error = TRUE, new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
-})
-
-
-test_that("single dist_quantiles works, quantiles are accessible", {
-  z <- new_quantiles(values = 1:5, quantile_levels = c(.2, .4, .5, .6, .8))
-  expect_s3_class(z, "dist_quantiles")
+test_that("single quantile_pred works, quantiles are accessible", {
+  z <- hardhat::quantile_pred(
+    values = matrix(1:5, nrow = 1),
+    quantile_levels = c(.2, .4, .5, .6, .8)
+  )
   expect_equal(median(z), 3)
-  expect_equal(quantile(z, c(.2, .4, .5, .6, .8)), 1:5)
-  expect_equal(quantile(z, c(.3, .7), middle = "linear"), c(1.5, 4.5))
+  expect_equal(
+    quantile(z, c(.2, .4, .5, .6, .8)),
+    hardhat::quantile_pred(matrix(1:5, nrow = 1), c(.2, .4, .5, .6, .8))
+  )
+  expect_equal(
+    quantile(z, c(.3, .7), middle = "linear"),
+    hardhat::quantile_pred(matrix(c(1.5, 4.5), nrow = 1), c(.3, .7))
+  )
 
   Q <- stats::splinefun(c(.2, .4, .5, .6, .8), 1:5, method = "hyman")
   expect_equal(quantile(z, c(.3, .7), middle = "cubic"), Q(c(.3, .7)))
   expect_identical(
     extrapolate_quantiles(z, c(.3, .7), middle = "linear"),
-    new_quantiles(values = c(1, 1.5, 2, 3, 4, 4.5, 5), quantile_levels = 2:8 / 10)
+    hardhat::quantile_pred(c(1, 1.5, 2, 3, 4, 4.5, 5), 2:8 / 10)
   )
   # empty values slot results in a length zero distribution
   # see issue #361
-  expect_length(dist_quantiles(list(), c(.1, .9)), 0L)
-  expect_identical(
-    dist_quantiles(list(), c(.1, .9)),
-    distributional::dist_degenerate(double())
-  )
+  # expect_length(dist_quantiles(list(), c(.1, .9)), 0L)
+  # expect_identical(
+  #   dist_quantiles(list(), c(.1, .9)),
+  #   distributional::dist_degenerate(double())
+  # )
 })
 
 
