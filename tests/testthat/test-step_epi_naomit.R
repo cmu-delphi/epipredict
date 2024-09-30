@@ -17,7 +17,7 @@ r <- epi_recipe(x) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 
 test_that("Argument must be a recipe", {
-  expect_error(step_epi_naomit(x))
+  expect_snapshot(error = TRUE, step_epi_naomit(x))
 })
 
 z1 <- step_epi_naomit(r)

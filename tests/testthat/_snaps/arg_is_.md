@@ -374,3 +374,11 @@
       Error in `arg_to_date()`:
       ! `x` must be a scalar.
 
+# simple surface step test
+
+    Code
+      epi_recipe(jhu_csse_daily_subset) %>% step_epi_lag(death_rate, lag = "hello")
+    Condition
+      Error in `step_epi_lag()`:
+      ! `lag` must be a non-negative integer.
+

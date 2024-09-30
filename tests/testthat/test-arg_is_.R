@@ -15,6 +15,7 @@ dd <- Sys.Date() - 5
 v <- 1:5
 l <- TRUE
 ll <- c(TRUE, FALSE)
+z <- character(0)
 
 test_that("logical", {
   expect_silent(arg_is_lgl(l))
@@ -125,7 +126,6 @@ test_that("chr", {
   expect_snapshot(error = TRUE, arg_is_chr(d))
   expect_snapshot(error = TRUE, arg_is_chr(v))
   expect_snapshot(error = TRUE, arg_is_chr(ll))
-  z <- character(0)
   expect_snapshot(error = TRUE, arg_is_chr(z))
   expect_silent(arg_is_chr(z, allow_empty = TRUE))
 })
@@ -144,4 +144,11 @@ test_that("coerce scalar to date", {
   expect_s3_class(arg_to_date(12345), "Date")
   expect_s3_class(arg_to_date("2020-01-01"), "Date")
   expect_snapshot(error = TRUE, arg_to_date(c("12345", "12345")))
+})
+
+test_that("simple surface step test", {
+  expect_snapshot(
+    error = TRUE,
+    epi_recipe(jhu_csse_daily_subset) %>% step_epi_lag(death_rate, lag = "hello")
+  )
 })
