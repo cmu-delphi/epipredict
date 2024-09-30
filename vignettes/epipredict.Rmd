@@ -110,8 +110,6 @@ the *same set* of `geo_value`'s and `time_value`'s could actually be different.
 For more details, see
 [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/articles/epiprocess.html).
 
-
-
 ## Why doesn't this package already exist?
 
 As described above:
@@ -121,7 +119,7 @@ preprocessing, training, and prediction, bound together, through a package calle
 `{workflows}`. We built `{epipredict}` on top of that setup. In this way, you CAN
 use almost everything they provide.
 
-* However, `{workflows}` doesn't do postprocessing. And nothing in the -verse 
+* However, `{workflows}` doesn't do postprocessing. And nothing in the -verse
 handles _panel data_.
 
 * The tidy-team doesn't have plans to do either of these things. (We checked).
@@ -131,7 +129,7 @@ handles _panel data_.
 etc.[^2] Our group has not prioritized these sorts of models for epidemic
 forecasting, but one could also integrate these methods into our framework.
 
-[^2]: These are [`{timetk}`](https://business-science.github.io/timetk/index.html) 
+[^2]: These are [`{timetk}`](https://business-science.github.io/timetk/index.html)
 and [`{modeltime}`](https://business-science.github.io/timetk/index.html). There
 are *lots* of useful methods there than can be used to do fairly complex machine
 learning methodology, though not directly for panel data and not for direct
@@ -327,6 +325,7 @@ the `time_value`, `geo_value`, and any additional keys so that these are availab
 when necessary.
 
 The `epi_recipe` from `out_gb` can be extracted from the result:
+
 ```{r}
 extract_recipe(out_gb$epi_workflow)
 ```
@@ -441,7 +440,7 @@ But ideally, a user could create their own forecasters by building up the
 components we provide. In other vignettes, we try to walk through some of these
 customizations.
 
-To illustrate everything above, here is (roughly) the code for the 
+To illustrate everything above, here is (roughly) the code for the
 `flatline_forecaster()` applied to the `case_rate`.
 
 ```{r}

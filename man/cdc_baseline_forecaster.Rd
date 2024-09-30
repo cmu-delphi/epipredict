@@ -44,11 +44,11 @@ weekly_deaths <- case_death_rate_subset \%>\%
   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) \%>\%
   select(-pop, -death_rate) \%>\%
   group_by(geo_value) \%>\%
-  epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") \%>\%
+  epi_slide(~ sum(.$deaths), .window_size = 7, .new_col_name = "deaths_7dsum") \%>\%
   ungroup() \%>\%
   filter(weekdays(time_value) == "Saturday")
 
-cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_7dsum")
 preds <- pivot_quantiles_wider(cdc$predictions, .pred_distn)
 
 if (require(ggplot2)) {
@@ -62,7 +62,7 @@ if (require(ggplot2)) {
     geom_line(aes(y = .pred), color = "orange") +
     geom_line(
       data = weekly_deaths \%>\% filter(geo_value \%in\% four_states),
-      aes(x = time_value, y = deaths)
+      aes(x = time_value, y = deaths_7dsum)
     ) +
     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
     labs(x = "Date", y = "Weekly deaths") +

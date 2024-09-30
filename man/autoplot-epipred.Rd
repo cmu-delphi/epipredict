@@ -121,4 +121,6 @@ arx <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(ahead = 14L)
 )
 autoplot(arx, .max_facets = 6)
+NULL
+
 }

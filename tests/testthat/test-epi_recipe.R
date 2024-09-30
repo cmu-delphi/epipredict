@@ -44,7 +44,7 @@ test_that("epi_recipe formula works", {
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
     geo_value = "ca",
     z = "dummy_key"
-  ) %>% epiprocess::as_epi_df(additional_metadata = list(other_keys = "z"))
+  ) %>% epiprocess::as_epi_df(other_keys = "z")
 
   # with an additional key
   r <- epi_recipe(y ~ x + geo_value, tib)

@@ -6,8 +6,8 @@
 \usage{
 epi_slide_wrapper(
   new_data,
-  before,
-  after,
+  .window_size,
+  .align,
   columns,
   fns,
   fn_names,

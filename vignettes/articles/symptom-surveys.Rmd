@@ -48,7 +48,7 @@ most recent versions of the datasets).
 Now, we will delve into the forecasting problem set-up and code followed by a
 discussion of the results.
 
-## Problem Setup 
+## Problem Setup
 
 Our goal is to predict county-level COVID-19 case incidence rates for 1 and 2
 weeks ahead. For this, we restrict our attention to the 442 counties that had at
@@ -437,7 +437,7 @@ knitr::kable(
   format = "html", table.attr = "style='width:70%;'"
 )
 ```
-$$\\[0.01in]$$ 
+$$\\[0.01in]$$
 Are these differences in median scaled errors significant? Some basic hypothesis
 testing suggests that some probably are: Below we conduct a sign test for
 whether the difference in the "Cases" model’s scaled error and each other
@@ -662,7 +662,7 @@ knitr::kable(
   format = "html", table.attr = "style='width:70%;'", digits = 3
 )
 ```
-$$\\[0.01in]$$ 
+$$\\[0.01in]$$
 
 Thanks to the extended length of the test period, we can also plot the
 trajectories of the median scaled errors over time, as we do below, with the
@@ -731,7 +731,7 @@ knitr::kable(
   format = "html", table.attr = "style='width:50%;'"
 )
 ```
-$$\\[0.01in]$$ 
+$$\\[0.01in]$$
 
 If we stratify and recompute p-values by forecast date, the bulk of p-values are
 quite small.
@@ -788,7 +788,7 @@ res <- case_fb_mods(dates, leads)
 We obtain and plot the median scaled errors for the "Cases" and "Cases +
 Facebook" models for different number of days ahead for the forecast target.
 This is done over May 20 through August 27 for the forecast dates that are
-common to the two models. 
+common to the two models.
 
 ```{r}
 err_by_lead <- res %>%
@@ -884,4 +884,4 @@ gets pulled "as of" the forecast date (this requires specifying the parameter
 Hopefully these preliminary findings have gotten you excited about the possible
 uses of this symptom survey data. For further practice, try your hand at
 implementing the suggested improvements or develop your own novel analytic
-approach to extract insights from this data. 
+approach to extract insights from this data.

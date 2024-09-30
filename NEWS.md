@@ -58,3 +58,4 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Add quantile random forests (via `{grf}`) as a parsnip engine
 - Replace `epi_keys()` with `epiprocess::key_colnames()`, #352
 - Fix bug where `fit()` drops the `epi_workflow` class, #363
+- Try to retain the `epi_df` class during baking to the extent possible, #376
