@@ -95,7 +95,7 @@ epi_recipe.epi_df <-
     keys <- key_colnames(x) # we know x is an epi_df
 
     var_info <- tibble(variable = vars)
-    key_roles <- c("geo_value", "time_value", rep("key", length(keys) - 2))
+    key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
 
     ## Check and add roles when available
     if (!is.null(roles)) {
@@ -499,8 +499,11 @@ prep.epi_recipe <- function(
       if (!is_epi_df(training)) {
         # tidymodels killed our class
         # for now, we only allow step_epi_* to alter the metadata
-        training <- dplyr::dplyr_reconstruct(
-          as_epi_df(training), before_template
+        metadata <- attr(before_template, "metadata")
+        training <- as_epi_df(
+          training,
+          as_of = metadata$as_of,
+          other_keys = metadata$other_keys %||% character()
         )
       }
       training <- dplyr::relocate(training, all_of(key_colnames(training)))
@@ -579,8 +582,7 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     new_data <- as_epi_df(
       new_data,
       as_of = meta$as_of,
-      # avoid NULL if meta is from saved older epi_df:
-      additional_metadata = meta$additional_metadata %||% list()
+      other_keys = meta$other_keys %||% character()
     )
   }
   new_data
