@@ -1,13 +1,13 @@
 library(distributional)
 
 test_that("constructor returns reasonable quantiles", {
-  expect_error(new_quantiles(rnorm(5), rnorm(5)))
+  expect_snapshot(error = TRUE, new_quantiles(rnorm(5), rnorm(5)))
   expect_silent(new_quantiles(sort(rnorm(5)), sort(runif(5))))
-  expect_error(new_quantiles(sort(rnorm(5)), sort(runif(2))))
+  expect_snapshot(error = TRUE, new_quantiles(sort(rnorm(5)), sort(runif(2))))
   expect_silent(new_quantiles(1:5, 1:5 / 10))
-  expect_error(new_quantiles(c(2, 1, 3, 4, 5), c(.1, .1, .2, .5, .8)))
-  expect_error(new_quantiles(c(2, 1, 3, 4, 5), c(.1, .15, .2, .5, .8)))
-  expect_error(new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
+  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .1, .2, .5, .8)))
+  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .15, .2, .5, .8)))
+  expect_snapshot(error = TRUE, new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
 })
 
 
@@ -106,6 +106,6 @@ test_that("arithmetic works on quantiles", {
   expect_identical(dstn / 4, dstn2)
   expect_identical((1 / 4) * dstn, dstn2)
 
-  expect_error(sum(dstn))
-  expect_error(suppressWarnings(dstn + distributional::dist_normal()))
+  expect_snapshot(error = TRUE, sum(dstn))
+  expect_snapshot(error = TRUE, suppressWarnings(dstn + distributional::dist_normal()))
 })
