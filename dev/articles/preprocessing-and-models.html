@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.22</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -246,7 +246,7 @@ dataset.</p>
 <span><span class="co">#&gt; An `epi_df` object, 5 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2024-09-30 20:15:47.878865</span></span>
+<span><span class="co">#&gt; * as_of     = 2024-09-30 21:49:03.312267</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
 <span><span class="co">#&gt;   geo_value time_value .pred</span></span>
@@ -655,13 +655,16 @@ model fitting.</p>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/Add_model.html">add_model</a></span><span class="op">(</span><span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/multinom_reg.html" class="external-link">multinom_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">b</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ══ Workflow [trained] ══════════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Formula</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> multinom_reg()</span></span>
+<span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; response ~ geo_value + time_value + lag_0_gr_7_rel_change_case_rate + </span></span>
-<span><span class="co">#&gt;     lag_7_gr_7_rel_change_case_rate + lag_14_gr_7_rel_change_case_rate</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; response ~ geo_value + time_value + lag_0_gr_7_rel_change_case_rate +</span></span>
+<span><span class="co">#&gt; lag_7_gr_7_rel_change_case_rate + lag_14_gr_7_rel_change_case_rate</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Call:</span></span>
@@ -679,7 +682,8 @@ model fitting.</p>
 <span><span class="co">#&gt; up                           4.668915</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Residual Deviance: 1157.919 </span></span>
-<span><span class="co">#&gt; AIC: 1193.919</span></span></code></pre></div>
+<span><span class="co">#&gt; AIC: 1193.919</span></span>
+<span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="benefits-of-lagging-and-leading-in-epipredict">Benefits of Lagging and Leading in <code>epipredict</code><a class="anchor" aria-label="anchor" href="#benefits-of-lagging-and-leading-in-epipredict"></a>

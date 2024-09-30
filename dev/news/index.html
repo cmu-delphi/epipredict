@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.22</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.0.24</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -107,6 +107,8 @@
 </li>
 <li>Add quantile random forests (via <a href="https://github.com/grf-labs/grf" class="external-link">grf</a>) as a parsnip engine</li>
 <li>Replace <code>epi_keys()</code> with <code><a href="https://cmu-delphi.github.io/epiprocess/reference/key_colnames.html" class="external-link">epiprocess::key_colnames()</a></code>, <a href="https://github.com/cmu-delphi/epipredict/issues352" class="external-link">#352</a></li>
+<li>More descriptive error messages from <code>arg_is_*()</code>, <a href="https://github.com/cmu-delphi/epipredict/issues287" class="external-link">#287</a></li>
+<li>Fix bug where <code><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit()</a></code> drops the <code>epi_workflow</code> class (also error if non-<code>epi_df</code> data is given to <code><a href="../reference/epi_recipe.html">epi_recipe()</a></code>), <a href="https://github.com/cmu-delphi/epipredict/issues363" class="external-link">#363</a></li>
 <li>Try to retain the <code>epi_df</code> class during baking to the extent possible, <a href="https://github.com/cmu-delphi/epipredict/issues376" class="external-link">#376</a></li>
 </ul></div>
   </main></div>
