@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.0</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -252,7 +252,7 @@ predictions.</p>
 <span></span>
 <span>  <span class="va">the_fit</span> <span class="op">&lt;-</span> <span class="va">ewf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">x</span>, fill_locf <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">the_fit</span>, new_data <span class="op">=</span> <span class="va">latest</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>forecast_date <span class="op">=</span> <span class="va">fd</span>, target_date <span class="op">=</span> <span class="va">fd</span> <span class="op">+</span> <span class="va">ahead</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>

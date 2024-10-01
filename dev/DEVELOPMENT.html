@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.0</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,8 +67,10 @@
 <code class="sourceCode R"><span><span class="fu">pkgdown</span><span class="fu">::</span><span class="fu"><a href="https://pkgdown.r-lib.org/reference/build_site.html" class="external-link">build_site</a></span><span class="op">(</span>preview<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>The <code>main</code> version is available at <code>file:///&lt;local path&gt;/epidatr/epipredict/index.html</code> and <code>dev</code> at <code>file:///&lt;local path&gt;/epipredict/docs/dev/index.html</code>.</p>
 <p>You can also build the docs manually and launch the site with python. From the terminal, this looks like</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">R</span> <span class="at">-e</span> <span class="st">'devtools::document()'</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> http.server <span class="at">-d</span> docs</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="ex">R</span> <span class="at">-e</span> <span class="st">'pkgdown::clean_site()'</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="ex">R</span> <span class="at">-e</span> <span class="st">'devtools::document()'</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="ex">R</span> <span class="at">-e</span> <span class="st">'pkgdown::build_site()'</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> http.server <span class="at">-d</span> docs</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="versioning">Versioning<a class="anchor" aria-label="anchor" href="#versioning"></a></h2>

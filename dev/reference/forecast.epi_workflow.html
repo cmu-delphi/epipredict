@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.0</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -49,7 +49,7 @@
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="co"># S3 method for class 'epi_workflow'</span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span>, fill_locf <span class="op">=</span> <span class="cn">FALSE</span>, n_recent <span class="op">=</span> <span class="cn">NULL</span>, forecast_date <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span>, n_recent <span class="op">=</span> <span class="cn">NULL</span>, forecast_date <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,10 +62,6 @@
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Not used.</p></dd>
-
-
-<dt id="arg-fill-locf">fill_locf<a class="anchor" aria-label="anchor" href="#arg-fill-locf"></a></dt>
-<dd><p>Logical. Should we use locf to fill in missing data?</p></dd>
 
 
 <dt id="arg-n-recent">n_recent<a class="anchor" aria-label="anchor" href="#arg-n-recent"></a></dt>

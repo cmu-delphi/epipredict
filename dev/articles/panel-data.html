@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.0</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -335,7 +335,7 @@ columns.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 14</span></span></span>
 <span><span class="co">#&gt;   geo_value        age_group     edu_qual time_value num_graduates med_income_2y</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Ontario          35 to 64 yea… Master'…       <span style="text-decoration: underline;">2</span>012            40        <span style="text-decoration: underline;">109</span>300</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> British Columbia 15 to 34 yea… Undergr…       <span style="text-decoration: underline;">2</span>014         <span style="text-decoration: underline;">11</span>520         <span style="text-decoration: underline;">51</span>100</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alberta          35 to 64 yea… Career,…       <span style="text-decoration: underline;">2</span>013          <span style="text-decoration: underline;">1</span>270         <span style="text-decoration: underline;">47</span>400</span></span>
@@ -434,13 +434,13 @@ graduates using the last 2 years of our dataset.</p>
 <span><span class="co">#&gt; * as_of     = 2022-07-19</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
-<span><span class="co">#&gt;   geo_value        age_group      edu_qual                      time_value .pred</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> British Columbia 35 to 64 years Professional degree                 <span style="text-decoration: underline;">2</span>017 0.136</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Quebec           35 to 64 years Career, technical or profess…       <span style="text-decoration: underline;">2</span>017 0.141</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> British Columbia 35 to 64 years Career, technical or profess…       <span style="text-decoration: underline;">2</span>017 0.135</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> New Brunswick    35 to 64 years Undergraduate degree                <span style="text-decoration: underline;">2</span>017 0.128</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Alberta          35 to 64 years Career, technical or profess…       <span style="text-decoration: underline;">2</span>017 0.138</span></span></code></pre></div>
+<span><span class="co">#&gt;   geo_value                 age_group      edu_qual             time_value .pred</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> New Brunswick             15 to 34 years Professional degree        <span style="text-decoration: underline;">2</span>017 0.141</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> British Columbia          15 to 34 years Career, technical o…       <span style="text-decoration: underline;">2</span>017 0.134</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Nova Scotia               15 to 34 years Master's degree            <span style="text-decoration: underline;">2</span>017 0.133</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Ontario                   15 to 34 years Undergraduate certi…       <span style="text-decoration: underline;">2</span>017 0.161</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Newfoundland and Labrador 15 to 34 years Master's degree            <span style="text-decoration: underline;">2</span>017 0.139</span></span></code></pre></div>
 <p>We can do this using the <code>augment</code> function too. Note that
 <code>predict</code> and <code>augment</code> both still return an
 <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_df.html" class="external-link">epiprocess::epi_df</a></code> with all of the keys that were present
@@ -455,12 +455,12 @@ in the original dataset.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 11</span></span></span>
 <span><span class="co">#&gt;   geo_value     age_group edu_qual time_value  .pred num_graduates med_income_2y</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Saskatchewan  15 to 34… Undergr…       <span style="text-decoration: underline;">2</span>017  0.136          <span style="text-decoration: underline;">2</span>690         <span style="text-decoration: underline;">64</span>900</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Ontario       15 to 34… Post-ba…       <span style="text-decoration: underline;">2</span>015 <span style="color: #BB0000;">NA</span>                30         <span style="text-decoration: underline;">48</span>400</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Nova Scotia   15 to 34… Post ca…       <span style="text-decoration: underline;">2</span>016 <span style="color: #BB0000;">NA</span>                80         <span style="text-decoration: underline;">50</span>000</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Prince Edwar… 15 to 34… Undergr…       <span style="text-decoration: underline;">2</span>017  0.134           340         <span style="text-decoration: underline;">50</span>000</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Nova Scotia   15 to 34… Undergr…       <span style="text-decoration: underline;">2</span>016 <span style="color: #BB0000;">NA</span>                90         <span style="text-decoration: underline;">53</span>000</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> British Colu… 35 to 64… Post-ba…       <span style="text-decoration: underline;">2</span>017  0.143           240         <span style="text-decoration: underline;">65</span>000</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Saskatchewan  15 to 34… Career,…       <span style="text-decoration: underline;">2</span>015 <span style="color: #BB0000;">NA</span>              <span style="text-decoration: underline;">1</span>120         <span style="text-decoration: underline;">39</span>500</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Manitoba      15 to 34… Career,…       <span style="text-decoration: underline;">2</span>016 <span style="color: #BB0000;">NA</span>              <span style="text-decoration: underline;">1</span>010         <span style="text-decoration: underline;">45</span>100</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Saskatchewan  35 to 64… Doctora…       <span style="text-decoration: underline;">2</span>017  0.135            60         <span style="text-decoration: underline;">74</span>800</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Manitoba      35 to 64… Other c…       <span style="text-decoration: underline;">2</span>016 <span style="color: #BB0000;">NA</span>               110         <span style="text-decoration: underline;">48</span>900</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: med_income_5y &lt;dbl&gt;, num_graduates_prop &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   med_income_2y_prop &lt;dbl&gt;, med_income_5y_prop &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
@@ -550,7 +550,7 @@ pre-processing steps.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 18</span></span></span>
 <span><span class="co">#&gt;   geo_value            age_group edu_qual time_value num_graduates med_income_2y</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Prince Edward Island 35 to 64… Undergr…       <span style="text-decoration: underline;">2</span>017            10         <span style="text-decoration: underline;">69</span>700</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> British Columbia     35 to 64… Post-ba…       <span style="text-decoration: underline;">2</span>014           180         <span style="text-decoration: underline;">74</span>700</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alberta              35 to 64… Career,…       <span style="text-decoration: underline;">2</span>016          <span style="text-decoration: underline;">1</span>250         <span style="text-decoration: underline;">46</span>000</span></span>
@@ -648,14 +648,14 @@ intervals.</p>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/pivot_quantiles_wider.html">pivot_quantiles_wider</a></span><span class="op">(</span><span class="va">.pred_distn_scaled</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   geo_value time_value edu_qual             age_group .pred_scaled  `0.1`  `0.9`</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Alberta         <span style="text-decoration: underline;">2</span>017 Career, technical o… 15 to 34…       <span style="text-decoration: underline;">46</span>467. <span style="text-decoration: underline;">42</span>479. 5.12<span style="color: #949494;">e</span>4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Alberta         <span style="text-decoration: underline;">2</span>017 Career, technical o… 15 to 34…       <span style="text-decoration: underline;">57</span>276. <span style="text-decoration: underline;">52</span>474. 6.29<span style="color: #949494;">e</span>4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Alberta         <span style="text-decoration: underline;">2</span>017 Post career, techni… 15 to 34…       <span style="text-decoration: underline;">75</span>507. <span style="text-decoration: underline;">69</span>424. 8.27<span style="color: #949494;">e</span>4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Alberta         <span style="text-decoration: underline;">2</span>017 Undergraduate degree 15 to 34…       <span style="text-decoration: underline;">72</span>974. <span style="text-decoration: underline;">66</span>815. 8.02<span style="color: #949494;">e</span>4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Alberta         <span style="text-decoration: underline;">2</span>017 Master's degree      15 to 34…       <span style="text-decoration: underline;">88</span>015. <span style="text-decoration: underline;">80</span>610. 9.68<span style="color: #949494;">e</span>4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Alberta         <span style="text-decoration: underline;">2</span>017 Doctoral degree      15 to 34…       <span style="text-decoration: underline;">91</span>589. <span style="text-decoration: underline;">83</span>825. 1.01<span style="color: #949494;">e</span>5</span></span></code></pre></div>
+<span><span class="co">#&gt;   geo_value             time_value edu_qual age_group .pred_scaled  `0.1`  `0.9`</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Newfoundland and Lab…       <span style="text-decoration: underline;">2</span>017 Career,… 15 to 34…       <span style="text-decoration: underline;">45</span>724. <span style="text-decoration: underline;">41</span>734. <span style="text-decoration: underline;">50</span>431.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> Newfoundland and Lab…       <span style="text-decoration: underline;">2</span>017 Career,… 35 to 64…       <span style="text-decoration: underline;">37</span>614. <span style="text-decoration: underline;">34</span>441. <span style="text-decoration: underline;">41</span>359.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> Newfoundland and Lab…       <span style="text-decoration: underline;">2</span>017 Career,… 15 to 34…       <span style="text-decoration: underline;">56</span>992. <span style="text-decoration: underline;">52</span>334. <span style="text-decoration: underline;">62</span>489.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Newfoundland and Lab…       <span style="text-decoration: underline;">2</span>017 Career,… 35 to 64…       <span style="text-decoration: underline;">47</span>802. <span style="text-decoration: underline;">43</span>858. <span style="text-decoration: underline;">52</span>455.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Newfoundland and Lab…       <span style="text-decoration: underline;">2</span>017 Post ca… 15 to 34…       <span style="text-decoration: underline;">61</span>127. <span style="text-decoration: underline;">56</span>661. <span style="text-decoration: underline;">66</span>396.</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Newfoundland and Lab…       <span style="text-decoration: underline;">2</span>017 Undergr… 15 to 34…       <span style="text-decoration: underline;">72</span>713. <span style="text-decoration: underline;">66</span>726. <span style="text-decoration: underline;">79</span>777.</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -695,20 +695,21 @@ is the 2-year median income (proportion) at time
 <span><span class="va">out_fl</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type flatline ═════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-10-01 21:02:01</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-10-01 22:34:05</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
 <span><span class="co">#&gt; • Other keys: <span style="color: #00BB00;">age_group</span> and <span style="color: #00BB00;">edu_qual</span>,</span></span>
 <span><span class="co">#&gt; • Time type: <span style="color: #00BB00;">integer</span>,</span></span>
 <span><span class="co">#&gt; • Using data up-to-date as of: <span style="color: #00BB00;">2022-07-19</span>.</span></span>
+<span><span class="co">#&gt; • With the last data available on <span style="color: #00BB00;">2017</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Predictions ─────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; A total of <span style="color: #0000BB;">169</span> predictions are available for</span></span>
+<span><span class="co">#&gt; A total of <span style="color: #0000BB;">167</span> predictions are available for</span></span>
 <span><span class="co">#&gt; • <span style="color: #0000BB;">11</span> unique geographic regions,</span></span>
 <span><span class="co">#&gt; • At forecast dates: <span style="color: #0000BB;">2017</span>,</span></span>
-<span><span class="co">#&gt; • For target dates: <span style="color: #0000BB;">2018</span>.</span></span>
+<span><span class="co">#&gt; • For target dates: <span style="color: #0000BB;">2018</span>,</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -734,20 +735,21 @@ article, but where all inputs have the same number of lags.</p>
 <span><span class="va">out_arx_lr</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-10-01 21:02:02</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-10-01 22:34:06</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
 <span><span class="co">#&gt; • Other keys: <span style="color: #00BB00;">age_group</span> and <span style="color: #00BB00;">edu_qual</span>,</span></span>
 <span><span class="co">#&gt; • Time type: <span style="color: #00BB00;">integer</span>,</span></span>
 <span><span class="co">#&gt; • Using data up-to-date as of: <span style="color: #00BB00;">2022-07-19</span>.</span></span>
+<span><span class="co">#&gt; • With the last data available on <span style="color: #00BB00;">2017</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Predictions ─────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; A total of <span style="color: #0000BB;">168</span> predictions are available for</span></span>
+<span><span class="co">#&gt; A total of <span style="color: #0000BB;">166</span> predictions are available for</span></span>
 <span><span class="co">#&gt; • <span style="color: #0000BB;">11</span> unique geographic regions,</span></span>
 <span><span class="co">#&gt; • At forecast dates: <span style="color: #0000BB;">2017</span>,</span></span>
-<span><span class="co">#&gt; • For target dates: <span style="color: #0000BB;">2018</span>.</span></span>
+<span><span class="co">#&gt; • For target dates: <span style="color: #0000BB;">2018</span>,</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>Other changes to the direct AR forecaster, like changing the engine,
 also work as expected. Below we use a boosted tree model instead of a
@@ -763,20 +765,21 @@ linear regression.</p>
 <span><span class="va">out_arx_rf</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-10-01 21:02:02</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2024-10-01 22:34:06</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
 <span><span class="co">#&gt; • Other keys: <span style="color: #00BB00;">age_group</span> and <span style="color: #00BB00;">edu_qual</span>,</span></span>
 <span><span class="co">#&gt; • Time type: <span style="color: #00BB00;">integer</span>,</span></span>
 <span><span class="co">#&gt; • Using data up-to-date as of: <span style="color: #00BB00;">2022-07-19</span>.</span></span>
+<span><span class="co">#&gt; • With the last data available on <span style="color: #00BB00;">2017</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Predictions ─────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; A total of <span style="color: #0000BB;">168</span> predictions are available for</span></span>
+<span><span class="co">#&gt; A total of <span style="color: #0000BB;">166</span> predictions are available for</span></span>
 <span><span class="co">#&gt; • <span style="color: #0000BB;">11</span> unique geographic regions,</span></span>
 <span><span class="co">#&gt; • At forecast dates: <span style="color: #0000BB;">2017</span>,</span></span>
-<span><span class="co">#&gt; • For target dates: <span style="color: #0000BB;">2018</span>.</span></span>
+<span><span class="co">#&gt; • For target dates: <span style="color: #0000BB;">2018</span>,</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 </div>
 </div>
