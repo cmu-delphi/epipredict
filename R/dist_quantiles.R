@@ -277,7 +277,8 @@ Ops.dist_quantiles <- function(e1, e2) {
       q1 <- e1
     }
   }
-  q <- vctrs::vec_arith(.Generic, q1, q2)
+  q <- vctrs::vec_arith(.Generic, q1, q2) %>% sort()
+  tau <- sort(tau)
   new_quantiles(values = q, quantile_levels = tau)
 }
 
@@ -293,3 +294,4 @@ is.na.dist_quantiles <- function(x) {
   q <- field(x, "values")
   all(is.na(q))
 }
+
