@@ -131,7 +131,7 @@ autoplot.epi_workflow <- function(
   if (length(extra_keys) == 0L) extra_keys <- NULL
   edf <- as_epi_df(edf,
     as_of = object$fit$meta$as_of,
-    additional_metadata = list(other_keys = extra_keys)
+    other_keys = extra_keys %||% character()
   )
   if (is.null(predictions)) {
     return(autoplot(

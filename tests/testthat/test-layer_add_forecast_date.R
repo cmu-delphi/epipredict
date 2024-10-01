@@ -11,9 +11,9 @@ latest <- jhu %>%
 
 test_that("layer validation works", {
   f <- frosting()
-  expect_error(layer_add_forecast_date(f, c("2022-05-31", "2022-05-31"))) # multiple forecast_dates
-  expect_error(layer_add_forecast_date(f, "2022-05-31", id = 2)) # id is not a character
-  expect_error(layer_add_forecast_date(f, "2022-05-31", id = c("a", "b"))) # multiple ids
+  expect_snapshot(error = TRUE, layer_add_forecast_date(f, c("2022-05-31", "2022-05-31"))) # multiple forecast_dates
+  expect_snapshot(error = TRUE, layer_add_forecast_date(f, "2022-05-31", id = 2)) # id is not a character
+  expect_snapshot(error = TRUE, layer_add_forecast_date(f, "2022-05-31", id = c("a", "b"))) # multiple ids
   expect_silent(layer_add_forecast_date(f, "2022-05-31"))
   expect_silent(layer_add_forecast_date(f))
   expect_silent(layer_add_forecast_date(f, as.Date("2022-05-31")))
@@ -93,8 +93,10 @@ test_that("forecast date works for daily", {
     unclass() %>%
     as.data.frame() %>%
     mutate(time_value = as.POSIXlt(time_value)$year + 1900L) %>%
+    group_by(geo_value, time_value) %>%
+    summarize(case_rate = mean(case_rate), death_rate = mean(death_rate), .groups = "drop") %>%
     as_epi_df()
-  expect_error(predict(wf1, latest_yearly))
+  expect_snapshot(error = TRUE, predict(wf1, latest_yearly))
 
   # forecast_date is a string, gets correctly converted to date
   wf2 <- add_frosting(
@@ -108,5 +110,5 @@ test_that("forecast date works for daily", {
     wf,
     adjust_frosting(f, "layer_add_forecast_date", forecast_date = 2022L)
   )
-  expect_error(predict(wf3, latest))
+  expect_snapshot(error = TRUE, predict(wf3, latest))
 })

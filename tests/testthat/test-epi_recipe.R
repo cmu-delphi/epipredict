@@ -53,7 +53,7 @@ test_that("recipe formula works", {
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
     geo_value = "ca",
     z = "dummy_key"
-  ) %>% epiprocess::as_epi_df(additional_metadata = list(other_keys = "z"))
+  ) %>% epiprocess::as_epi_df(other_keys = "z")
 
   # with an additional key
   r <- recipe(y ~ x + geo_value, tib)
@@ -165,6 +165,6 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
 
   wf <- remove_epi_recipe(wf)
-  expect_error(workflows::extract_preprocessor(wf)$steps)
+  expect_snapshot(error = TRUE, workflows::extract_preprocessor(wf)$steps)
   expect_equal(wf$pre$actions$recipe$recipe, NULL)
 })

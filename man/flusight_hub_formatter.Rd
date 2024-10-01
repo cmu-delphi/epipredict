@@ -52,11 +52,11 @@ weekly_deaths <- case_death_rate_subset \%>\%
   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) \%>\%
   select(-pop, -death_rate) \%>\%
   group_by(geo_value) \%>\%
-  epi_slide(~ sum(.$deaths), .window_size = 7, .new_col_name = "deaths_sum") \%>\%
+  epi_slide(~ sum(.$deaths), .window_size = 7, .new_col_name = "deaths_7dsum") \%>\%
   ungroup() \%>\%
   filter(weekdays(time_value) == "Saturday")
 
-cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_sum")
+cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_7dsum")
 flusight_hub_formatter(cdc)
 flusight_hub_formatter(cdc, target = "wk inc covid deaths")
 flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
