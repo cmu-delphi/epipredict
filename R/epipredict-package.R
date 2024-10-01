@@ -4,6 +4,9 @@
 #' @importFrom checkmate assert_logical assert_numeric assert_number
 #' @importFrom checkmate assert_integer assert_integerish
 #' @importFrom checkmate assert_date assert_function assert_class
+#' @importFrom checkmate test_scalar test_logical test_numeric
+#' @importFrom checkmate test_integerish test_date
+#' @importFrom checkmate test_character test_function
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom dplyr arrange across all_of any_of bind_cols bind_rows group_by
 #' @importFrom dplyr summarize filter mutate select left_join rename ungroup
