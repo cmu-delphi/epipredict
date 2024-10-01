@@ -1,7 +1,7 @@
 library(distributional)
 
 test_that("constructor returns reasonable quantiles", {
-  expect_snapshot(error = TRUE, new_quantiles(rnorm(5), rnorm(5)))
+  expect_snapshot(error = TRUE, new_quantiles(rnorm(5), c(-2, -1, 0, 1, 2)))
   expect_silent(new_quantiles(sort(rnorm(5)), sort(runif(5))))
   expect_snapshot(error = TRUE, new_quantiles(sort(rnorm(5)), sort(runif(2))))
   expect_silent(new_quantiles(1:5, 1:5 / 10))
