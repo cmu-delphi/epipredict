@@ -123,15 +123,17 @@ slather.layer_residual_quantiles <-
       }
     }
 
-    r <- r %>%
-      summarize(
-        dstn = list(quantile(
-          c(.resid, s * .resid),
-          probs = object$quantile_levels, na.rm = TRUE
-        ))
+    r <- summarize(
+      r,
+      dstn = quantile_pred(
+        matrix(quantile(
+          c(.resid, s * .resid), probs = object$quantile_levels, na.rm = TRUE
+        ), nrow = 1),
+        quantile_levels = object$quantile_levels
       )
+    )
     # Check for NA
-    if (any(sapply(r$dstn, is.na))) {
+    if (any(is.na(as.matrix(r$dstn)))) {
       cli::cli_abort(c(
         "Residual quantiles could not be calculated due to missing residuals.",
         i = "This may be due to `n_train` < `ahead` in your {.cls epi_recipe}."
@@ -139,9 +141,7 @@ slather.layer_residual_quantiles <-
     }
 
     estimate <- components$predictions$.pred
-    res <- tibble(
-      .pred_distn = dist_quantiles(map2(estimate, r$dstn, "+"), object$quantile_levels)
-    )
+    res <- tibble(.pred_distn = r$dstn + estimate)
     res <- check_pname(res, components$predictions, object)
     components$predictions <- mutate(components$predictions, !!!res)
     components

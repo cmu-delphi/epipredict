@@ -67,11 +67,11 @@ abbr_to_location <- function(abbr) {
 #'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
 #'   select(-pop, -death_rate) %>%
 #'   group_by(geo_value) %>%
-#'   epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
+#'   epi_slide(~ sum(.$deaths), .window_size = 7, .new_col_name = "deaths_sum") %>%
 #'   ungroup() %>%
 #'   filter(weekdays(time_value) == "Saturday")
 #'
-#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_sum")
 #' flusight_hub_formatter(cdc)
 #' flusight_hub_formatter(cdc, target = "wk inc covid deaths")
 #' flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))
@@ -105,12 +105,11 @@ flusight_hub_formatter.data.frame <- function(
 
   object <- object %>%
     # combine the predictions and the distribution
-    mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-    tidyr::unnest(.pred_distn) %>%
+    pivot_quantiles_longer(.pred_distn) %>%
     # now we create the correct column names
     rename(
-      value = values,
-      output_type_id = quantile_levels,
+      value = .pred_distn_value,
+      output_type_id = .pred_distn_quantile_level,
       reference_date = forecast_date
     ) %>%
     # convert to fips codes, and add any constant cols passed in ...
