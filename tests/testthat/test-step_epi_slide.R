@@ -31,6 +31,8 @@ test_that("epi_slide errors when needed", {
   # function problems
   expect_snapshot(error = TRUE, r %>% step_epi_slide(value))
   expect_snapshot(error = TRUE, r %>% step_epi_slide(value, .f = 1))
+  expect_snapshot(error = TRUE, r %>% step_epi_slide(value))
+  expect_snapshot(error = TRUE, r %>% step_epi_slide(value, .f = 1))
 })
 
 

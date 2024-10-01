@@ -7,7 +7,7 @@ test_that("training set validation works", {
   expect_silent(validate_meta_match(template, template, "time_type", "blah"))
   attr(t1, "metadata")$geo_type <- "county"
   expect_warning(validate_meta_match(t1, template, "geo_type"), "county")
-  expect_error(validate_meta_match(t1, template, "geo_type", "abort"), "county")
+  expect_snapshot(error = TRUE, validate_meta_match(t1, template, "geo_type", "abort"))
 
 
   expect_identical(template, epi_check_training_set(template, rec))
@@ -25,5 +25,5 @@ test_that("training set validation works", {
   expect_warning(t4 <- epi_check_training_set(t3, rec))
   expect_identical(rec$template, t4)
   attr(rec$template, "metadata")$other_keys <- "missing_col"
-  expect_error(epi_check_training_set(t4, rec), "missing_col")
+  expect_snapshot(error = TRUE, epi_check_training_set(t4, rec))
 })

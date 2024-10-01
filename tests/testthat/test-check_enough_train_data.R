@@ -23,15 +23,16 @@ test_that("check_enough_train_data works on pooled data", {
       bake(new_data = NULL)
   )
   # Check both column don't have enough data
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n + 1, drop_na = FALSE) %>%
       prep(toy_epi_df) %>%
-      bake(new_data = NULL),
-    regexp = "The following columns don't have enough data"
+      bake(new_data = NULL)
   )
   # Check drop_na works
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 1, drop_na = TRUE) %>%
       prep(toy_epi_df) %>%
@@ -48,15 +49,16 @@ test_that("check_enough_train_data works on unpooled data", {
       bake(new_data = NULL)
   )
   # Check one column don't have enough data
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n + 1, epi_keys = "geo_value", drop_na = FALSE) %>%
       prep(toy_epi_df) %>%
-      bake(new_data = NULL),
-    regexp = "The following columns don't have enough data"
+      bake(new_data = NULL)
   )
   # Check drop_na works
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 3, epi_keys = "geo_value", drop_na = TRUE) %>%
       prep(toy_epi_df) %>%
@@ -114,7 +116,8 @@ test_that("check_enough_train_data works with all_predictors() downstream of con
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
   )
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
       check_enough_train_data(all_predictors(), y, n = 2 * n - 5) %>%

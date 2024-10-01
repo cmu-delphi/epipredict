@@ -155,6 +155,6 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
 
   wf <- remove_epi_recipe(wf)
-  expect_error(workflows::extract_preprocessor(wf)$steps)
+  expect_snapshot(error = TRUE, workflows::extract_preprocessor(wf)$steps)
   expect_equal(wf$pre$actions$recipe$recipe, NULL)
 })
