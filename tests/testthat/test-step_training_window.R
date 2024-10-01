@@ -11,13 +11,13 @@ toy_epi_df <- tibble::tibble(
 test_that("step_training_window works with default n_recent", {
   p <- epi_recipe(y ~ x, data = toy_epi_df) %>%
     step_training_window() %>%
-    recipes::prep(toy_epi_df) %>%
-    recipes::bake(new_data = NULL)
+    prep(toy_epi_df) %>%
+    bake(new_data = NULL)
 
   expect_equal(nrow(p), 100L)
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
-  expect_named(p, c("time_value", "geo_value", "x", "y"))
+  expect_named(p, c("geo_value", "time_value", "x", "y")) # order in epiprocess::new_epi_df
   expect_equal(
     p$time_value,
     rep(seq(as.Date("2020-02-20"), as.Date("2020-04-09"), by = 1), times = 2)
@@ -28,13 +28,13 @@ test_that("step_training_window works with default n_recent", {
 test_that("step_training_window works with specified n_recent", {
   p2 <- epi_recipe(y ~ x, data = toy_epi_df) %>%
     step_training_window(n_recent = 5) %>%
-    recipes::prep(toy_epi_df) %>%
-    recipes::bake(new_data = NULL)
+    prep(toy_epi_df) %>%
+    bake(new_data = NULL)
 
   expect_equal(nrow(p2), 10L)
   expect_equal(ncol(p2), 4L)
   expect_s3_class(p2, "epi_df")
-  expect_named(p2, c("time_value", "geo_value", "x", "y"))
+  expect_named(p2, c("geo_value", "time_value", "x", "y")) # order in epiprocess::new_epi_df
   expect_equal(
     p2$time_value,
     rep(seq(as.Date("2020-04-05"), as.Date("2020-04-09"), by = 1), times = 2)
@@ -48,14 +48,14 @@ test_that("step_training_window does not proceed with specified new_data", {
   # testing data.
   p3 <- epi_recipe(y ~ x, data = toy_epi_df) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(toy_epi_df) %>%
-    recipes::bake(new_data = toy_epi_df[1:10, ])
+    prep(toy_epi_df) %>%
+    bake(new_data = toy_epi_df[1:10, ])
 
   expect_equal(nrow(p3), 10L)
   expect_equal(ncol(p3), 4L)
   expect_s3_class(p3, "epi_df")
   # cols will be predictors, outcomes, time_value, geo_value
-  expect_named(p3, c("x", "y", "time_value", "geo_value"))
+  expect_named(p3, c("geo_value", "time_value", "x", "y")) # order in epiprocess::new_epi_df
   expect_equal(
     p3$time_value,
     rep(seq(as.Date("2020-01-01"), as.Date("2020-01-10"), by = 1), times = 1)
@@ -78,13 +78,13 @@ test_that("step_training_window works with multiple keys", {
 
   p4 <- epi_recipe(y ~ x, data = toy_epi_df2) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(toy_epi_df2) %>%
-    recipes::bake(new_data = NULL)
+    prep(toy_epi_df2) %>%
+    bake(new_data = NULL)
 
   expect_equal(nrow(p4), 12L)
   expect_equal(ncol(p4), 5L)
   expect_s3_class(p4, "epi_df")
-  expect_named(p4, c("time_value", "geo_value", "additional_key", "x", "y"))
+  expect_named(p4, c("geo_value", "additional_key", "time_value", "x", "y"))
   expect_equal(
     p4$time_value,
     rep(c(
@@ -112,20 +112,20 @@ test_that("step_training_window and step_naomit interact", {
 
   e1 <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL)
+    prep(tib) %>%
+    bake(new_data = NULL)
 
   e2 <- epi_recipe(y ~ x, data = tib) %>%
-    recipes::step_naomit() %>%
+    step_naomit() %>%
     step_training_window(n_recent = 3) %>%
-    recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL)
+    prep(tib) %>%
+    bake(new_data = NULL)
 
   e3 <- epi_recipe(y ~ x, data = tib) %>%
     step_training_window(n_recent = 3) %>%
-    recipes::step_naomit() %>%
-    recipes::prep(tib) %>%
-    recipes::bake(new_data = NULL)
+    step_naomit() %>%
+    prep(tib) %>%
+    bake(new_data = NULL)
 
   expect_identical(e1, e2)
   expect_identical(e2, e3)

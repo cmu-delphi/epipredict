@@ -15,16 +15,12 @@
 #'  for this step. See [recipes::selections()] for more details.
 #' @param role For model terms created by this step, what analysis role should
 #'  they be assigned? `lag` is default a predictor while `ahead` is an outcome.
-#' @param trained A logical to indicate if the quantities for
-#'  preprocessing have been estimated.
 #' @param lag,ahead A vector of integers. Each specified column will
 #'  be the lag or lead for each value in the vector. Lag integers must be
 #'  nonnegative, while ahead integers must be positive.
-#' @param prefix A prefix to indicate what type of variable this is
+#' @param prefix A character string that will be prefixed to the new column.
 #' @param default Determines what fills empty rows
 #'   left by leading/lagging (defaults to NA).
-#' @param columns A character string of variable names that will
-#'  be populated (eventually) by the `terms` argument.
 #' @param skip A logical. Should the step be skipped when the
 #'  recipe is baked by [bake()]? While all operations are baked
 #'  when [prep()] is run, some operations may not be able to be
@@ -53,43 +49,36 @@
 step_epi_lag <-
   function(recipe,
            ...,
-           role = "predictor",
-           trained = FALSE,
            lag,
+           role = "predictor",
            prefix = "lag_",
            default = NA,
-           columns = NULL,
            skip = FALSE,
            id = rand_id("epi_lag")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli_abort("This step can only operate on an `epi_recipe`.")
     }
 
     if (missing(lag)) {
-      rlang::abort(
-        c("The `lag` argument must not be empty.",
-          i = "Did you perhaps pass an integer in `...` accidentally?"
-        )
-      )
+      cli_abort(c(
+        "The `lag` argument must not be empty.",
+        i = "Did you perhaps pass an integer in `...` accidentally?"
+      ))
     }
     arg_is_nonneg_int(lag)
     arg_is_chr_scalar(prefix, id)
-    if (!is.null(columns)) {
-      rlang::abort(c("The `columns` argument must be `NULL.",
-        i = "Use `tidyselect` methods to choose columns to lag."
-      ))
-    }
-    add_step(
+
+    recipes::add_step(
       recipe,
       step_epi_lag_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
-        trained = trained,
-        lag = lag,
+        trained = FALSE,
+        lag = as.integer(lag),
         prefix = prefix,
         default = default,
-        keys = epi_keys(recipe),
-        columns = columns,
+        keys = key_colnames(recipe),
+        columns = NULL,
         skip = skip,
         id = id
       )
@@ -104,43 +93,36 @@ step_epi_lag <-
 step_epi_ahead <-
   function(recipe,
            ...,
-           role = "outcome",
-           trained = FALSE,
            ahead,
+           role = "outcome",
            prefix = "ahead_",
            default = NA,
-           columns = NULL,
            skip = FALSE,
            id = rand_id("epi_ahead")) {
     if (!is_epi_recipe(recipe)) {
-      rlang::abort("This recipe step can only operate on an `epi_recipe`.")
+      cli_abort("This step can only operate on an `epi_recipe`.")
     }
 
     if (missing(ahead)) {
-      rlang::abort(
-        c("The `ahead` argument must not be empty.",
-          i = "Did you perhaps pass an integer in `...` accidentally?"
-        )
-      )
+      cli_abort(c(
+        "The `ahead` argument must not be empty.",
+        i = "Did you perhaps pass an integer in `...` accidentally?"
+      ))
     }
     arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id)
-    if (!is.null(columns)) {
-      rlang::abort(c("The `columns` argument must be `NULL.",
-        i = "Use `tidyselect` methods to choose columns to lead."
-      ))
-    }
-    add_step(
+
+    recipes::add_step(
       recipe,
       step_epi_ahead_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         role = role,
-        trained = trained,
-        ahead = ahead,
+        trained = FALSE,
+        ahead = as.integer(ahead),
         prefix = prefix,
         default = default,
-        keys = epi_keys(recipe),
-        columns = columns,
+        keys = key_colnames(recipe),
+        columns = NULL,
         skip = skip,
         id = id
       )
@@ -151,7 +133,7 @@ step_epi_ahead <-
 step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
            columns, skip, id) {
-    step(
+    recipes::step(
       subclass = "epi_lag",
       terms = terms,
       role = role,
@@ -169,7 +151,7 @@ step_epi_lag_new <-
 step_epi_ahead_new <-
   function(terms, role, trained, ahead, prefix, default, keys,
            columns, skip, id) {
-    step(
+    recipes::step(
       subclass = "epi_ahead",
       terms = terms,
       role = role,
@@ -196,7 +178,7 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    columns = recipes_eval_select(x$terms, training, info),
+    columns = recipes::recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
   )
@@ -212,7 +194,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    columns = recipes_eval_select(x$terms, training, info),
+    columns = recipes::recipes_eval_select(x$terms, training, info),
     skip = x$skip,
     id = x$id
   )
@@ -223,7 +205,7 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
   grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
-    dplyr::mutate(
+    mutate(
       newname = glue::glue("{object$prefix}{lag}_{col}"),
       shift_val = lag,
       lag = NULL
@@ -233,32 +215,28 @@ bake.step_epi_lag <- function(object, new_data, ...) {
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
   if (any(intersection)) {
-    rlang::abort(
-      paste0(
-        "Name collision occured in `", class(object)[1],
-        "`. The following variable names already exists: ",
-        paste0(new_data_names[intersection], collapse = ", "),
-        "."
-      )
-    )
+    cli_abort(c(
+      "Name collision occured in {.cls {class(object)[1]}}",
+      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
+    ))
   }
   ok <- object$keys
   shifted <- reduce(
     pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    dplyr::full_join,
+    full_join,
     by = ok
   )
 
-  dplyr::full_join(new_data, shifted, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup()
+  full_join(new_data, shifted, by = ok) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
+    arrange(time_value) %>%
+    ungroup()
 }
 
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
   grid <- tidyr::expand_grid(col = object$columns, ahead = object$ahead) %>%
-    dplyr::mutate(
+    mutate(
       newname = glue::glue("{object$prefix}{ahead}_{col}"),
       shift_val = -ahead,
       ahead = NULL
@@ -268,26 +246,22 @@ bake.step_epi_ahead <- function(object, new_data, ...) {
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
   if (any(intersection)) {
-    rlang::abort(
-      paste0(
-        "Name collision occured in `", class(object)[1],
-        "`. The following variable names already exists: ",
-        paste0(new_data_names[intersection], collapse = ", "),
-        "."
-      )
-    )
+    cli_abort(c(
+      "Name collision occured in {.cls {class(object)[1]}}",
+      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
+    ))
   }
   ok <- object$keys
   shifted <- reduce(
     pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    dplyr::full_join,
+    full_join,
     by = ok
   )
 
-  dplyr::full_join(new_data, shifted, by = ok) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(ok[-1]))) %>%
-    dplyr::arrange(time_value) %>%
-    dplyr::ungroup()
+  full_join(new_data, shifted, by = ok) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
+    arrange(time_value) %>%
+    ungroup()
 }
 
 

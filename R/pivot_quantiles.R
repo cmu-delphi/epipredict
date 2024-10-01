@@ -6,16 +6,18 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
+#' library(tidyr)
 #' edf <- case_death_rate_subset[1:3, ]
 #' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
 #'
-#' edf_nested <- edf %>% dplyr::mutate(q = nested_quantiles(q))
-#' edf_nested %>% tidyr::unnest(q)
+#' edf_nested <- edf %>% mutate(q = nested_quantiles(q))
+#' edf_nested %>% unnest(q)
 nested_quantiles <- function(x) {
   stopifnot(is_dist_quantiles(x))
   distributional:::dist_apply(x, .f = function(z) {
-    tibble::as_tibble(vec_data(z)) %>%
-      dplyr::mutate(dplyr::across(tidyselect::everything(), as.double)) %>%
+    as_tibble(vec_data(z)) %>%
+      mutate(across(everything(), as.double)) %>%
       vctrs::list_of()
   })
 }
@@ -47,31 +49,26 @@ nested_quantiles <- function(x) {
 #' @examples
 #' d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))
 #' d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
-#' tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
+#' tib <- tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 #'
 #' pivot_quantiles_longer(tib, "d1")
-#' pivot_quantiles_longer(tib, tidyselect::ends_with("1"))
+#' pivot_quantiles_longer(tib, dplyr::ends_with("1"))
 #' pivot_quantiles_longer(tib, d1, d2)
 pivot_quantiles_longer <- function(.data, ..., .ignore_length_check = FALSE) {
   cols <- validate_pivot_quantiles(.data, ...)
-  .data <- .data %>%
-    dplyr::mutate(dplyr::across(tidyselect::all_of(cols), nested_quantiles))
+  .data <- .data %>% mutate(across(all_of(cols), nested_quantiles))
   if (length(cols) > 1L) {
     lengths_check <- .data %>%
-      dplyr::transmute(dplyr::across(
-        tidyselect::all_of(cols),
-        ~ map_int(.x, vctrs::vec_size)
-      )) %>%
+      dplyr::transmute(across(all_of(cols), ~ map_int(.x, vctrs::vec_size))) %>%
       as.matrix() %>%
       apply(1, function(x) dplyr::n_distinct(x) == 1L) %>%
       all()
     if (lengths_check) {
-      .data <- tidyr::unnest(.data, tidyselect::all_of(cols), names_sep = "_")
+      .data <- tidyr::unnest(.data, all_of(cols), names_sep = "_")
     } else {
       if (.ignore_length_check) {
         for (col in cols) {
-          .data <- .data %>%
-            tidyr::unnest(tidyselect::all_of(col), names_sep = "_")
+          .data <- .data %>% tidyr::unnest(all_of(col), names_sep = "_")
         }
       } else {
         cli::cli_abort(c(
@@ -82,7 +79,7 @@ pivot_quantiles_longer <- function(.data, ..., .ignore_length_check = FALSE) {
       }
     }
   } else {
-    .data <- .data %>% tidyr::unnest(tidyselect::all_of(cols))
+    .data <- .data %>% tidyr::unnest(all_of(cols))
   }
   .data
 }
@@ -110,25 +107,29 @@ pivot_quantiles_longer <- function(.data, ..., .ignore_length_check = FALSE) {
 #' tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 #'
 #' pivot_quantiles_wider(tib, c("d1", "d2"))
-#' pivot_quantiles_wider(tib, tidyselect::starts_with("d"))
+#' pivot_quantiles_wider(tib, dplyr::starts_with("d"))
 #' pivot_quantiles_wider(tib, d2)
 pivot_quantiles_wider <- function(.data, ...) {
   cols <- validate_pivot_quantiles(.data, ...)
-  .data <- .data %>%
-    dplyr::mutate(dplyr::across(tidyselect::all_of(cols), nested_quantiles))
+  .data <- .data %>% mutate(across(all_of(cols), nested_quantiles))
   checks <- map_lgl(cols, ~ diff(range(vctrs::list_sizes(.data[[.x]]))) == 0L)
   if (!all(checks)) {
     nms <- cols[!checks]
-    cli::cli_abort(
-      c("Quantiles must be the same length and have the same set of taus.",
-        i = "Check failed for variables(s) {.var {nms}}."
-      )
-    )
+    cli::cli_abort(c(
+      "Quantiles must be the same length and have the same set of taus.",
+      i = "Check failed for variables(s) {.var {nms}}."
+    ))
   }
+
+  # tidyr::pivot_wider can crash if there are duplicates, this generally won't
+  # happen in our context. To avoid, silently add an index column and remove it
+  # later
+  .hidden_index <- seq_len(nrow(.data))
+  .data <- tibble::add_column(.data, .hidden_index = .hidden_index)
   if (length(cols) > 1L) {
     for (col in cols) {
       .data <- .data %>%
-        tidyr::unnest(tidyselect::all_of(col)) %>%
+        tidyr::unnest(all_of(col)) %>%
         tidyr::pivot_wider(
           names_from = "quantile_levels", values_from = "values",
           names_prefix = paste0(col, "_")
@@ -136,14 +137,18 @@ pivot_quantiles_wider <- function(.data, ...) {
     }
   } else {
     .data <- .data %>%
-      tidyr::unnest(tidyselect::all_of(cols)) %>%
+      tidyr::unnest(all_of(cols)) %>%
       tidyr::pivot_wider(names_from = "quantile_levels", values_from = "values")
   }
-  .data
+  select(.data, -.hidden_index)
 }
 
 pivot_quantiles <- function(.data, ...) {
-  lifecycle::deprecate_stop("0.0.6", "pivot_quantiles()", "pivot_quantiles_wider()")
+  msg <- c(
+    "{.fn pivot_quantiles} was deprecated in {.pkg epipredict} 0.0.6",
+    i = "Please use {.fn pivot_quantiles_wider} instead."
+  )
+  lifecycle::deprecate_stop(msg)
 }
 
 validate_pivot_quantiles <- function(.data, ...) {

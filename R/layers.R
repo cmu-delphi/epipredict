@@ -41,15 +41,15 @@ layer <- function(subclass, ..., .prefix = "layer_") {
 #' in the layer, and the values are the new values to update the layer with.
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
+#' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #'
 #' # Specify a `forecast_date` that is greater than or equal to `as_of` date
 #' f <- frosting() %>%
@@ -144,11 +144,12 @@ pull_layer_name <- function(x) {
 
 #' @export
 #' @rdname layer-processors
-validate_layer <- function(x, ..., arg = "`x`", call = caller_env()) {
+validate_layer <- function(x, ..., arg = rlang::caller_arg(x),
+                           call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_layer(x)) {
-    glubort(
-      "{arg} must be a frosting layer, not a {class(x)[[1]]}.",
+    cli::cli_abort(
+      "{arg} must be a frosting layer, not a {.cls {class(x)[[1]]}}.",
       .call = call
     )
   }

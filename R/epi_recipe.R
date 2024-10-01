@@ -16,11 +16,10 @@ epi_recipe <- function(x, ...) {
 #' @rdname epi_recipe
 #' @export
 epi_recipe.default <- function(x, ...) {
-  ## if not a formula or an epi_df, we just pass to recipes::recipe
-  if (is.matrix(x) || is.data.frame(x) || tibble::is_tibble(x)) {
-    x <- x[1, , drop = FALSE]
-  }
-  recipes::recipe(x, ...)
+  cli_abort(paste(
+    "`x` must be an {.cls epi_df} or a {.cls formula},",
+    "not a {.cls {class(x)[[1]]}}."
+  ))
 }
 
 #' @rdname epi_recipe
@@ -42,21 +41,24 @@ epi_recipe.default <- function(x, ...) {
 #'
 #' @export
 #' @examples
+#' library(dplyr)
+#' library(recipes)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-08-01") %>%
-#'   dplyr::arrange(geo_value, time_value)
+#'   filter(time_value > "2021-08-01") %>%
+#'   arrange(geo_value, time_value)
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   recipes::step_naomit(recipes::all_predictors()) %>%
+#'   step_naomit(all_predictors()) %>%
 #'   # below, `skip` means we don't do this at predict time
-#'   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+#'   step_naomit(all_outcomes(), skip = TRUE)
 #'
 #' r
 epi_recipe.epi_df <-
   function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
+    attr(x, "decay_to_tibble") <- FALSE
     if (!is.null(formula)) {
       if (!is.null(vars)) {
         rlang::abort(
@@ -86,10 +88,10 @@ epi_recipe.epi_df <-
       rlang::abort("1 or more elements of `vars` are not in the data")
     }
 
-    keys <- epi_keys(x) # we know x is an epi_df
+    keys <- key_colnames(x) # we know x is an epi_df
 
     var_info <- tibble(variable = vars)
-    key_roles <- c("time_value", "geo_value", rep("key", length(keys) - 2))
+    key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
 
     ## Check and add roles when available
     if (!is.null(roles)) {
@@ -147,12 +149,16 @@ epi_recipe.formula <- function(formula, data, ...) {
   data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
-    return(recipes::recipe(formula, data, ...))
+    cli_abort(paste(
+      "`epi_recipe()` has been called with a non-{.cls epi_df} object.",
+      "Use `recipe()` instead."
+    ))
   }
 
-  f_funcs <- recipes:::fun_calls(formula)
+  attr(data, "decay_to_tibble") <- FALSE
+  f_funcs <- recipes:::fun_calls(formula, data)
   if (any(f_funcs == "-")) {
-    abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
+    cli_abort("`-` is not allowed in a recipe formula. Use `step_rm()` instead.")
   }
 
   # Check for other in-line functions
@@ -173,12 +179,12 @@ epi_form2args <- function(formula, data, ...) {
   if (!rlang::is_formula(formula)) formula <- as.formula(formula)
 
   ## check for in-line formulas
-  recipes:::inline_check(formula)
+  recipes:::inline_check(formula, data)
 
   ## use rlang to get both sides of the formula
   outcomes <- recipes:::get_lhs_vars(formula, data)
   predictors <- recipes:::get_rhs_vars(formula, data, no_lhs = TRUE)
-  keys <- epi_keys(data)
+  keys <- key_colnames(data)
 
   ## if . was used on the rhs, subtract out the outcomes
   predictors <- predictors[!(predictors %in% outcomes)]
@@ -237,7 +243,7 @@ is_epi_recipe <- function(x) {
 #' @details
 #' `add_epi_recipe` has the same behaviour as
 #' [workflows::add_recipe()] but sets a different
-#' default blueprint to automatically handle [epiprocess::epi_df] data.
+#' default blueprint to automatically handle [epiprocess::epi_df][epiprocess::as_epi_df] data.
 #'
 #' @param x A `workflow` or `epi_workflow`
 #'
@@ -333,15 +339,11 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #' illustrations of the different types of updates.
 #'
 #' @param x A `epi_workflow` or `epi_recipe` object
-#'
 #' @param which_step the number or name of the step to adjust
-#'
 #' @param ... Used to input a parameter adjustment
-#'
 #' @param blueprint A hardhat blueprint used for fine tuning the preprocessing.
 #'
-#' @return
-#' `x`, updated with the adjustment to the specified `epi_recipe` step.
+#' @return `x`, updated with the adjustment to the specified `epi_recipe` step.
 #'
 #' @export
 #' @examples
@@ -383,8 +385,7 @@ adjust_epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_workflow <- function(
-    x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+adjust_epi_recipe.epi_workflow <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
   recipe <- adjust_epi_recipe(workflows::extract_preprocessor(x), which_step, ...)
 
   update_epi_recipe(x, recipe, blueprint = blueprint)
@@ -392,8 +393,7 @@ adjust_epi_recipe.epi_workflow <- function(
 
 #' @rdname adjust_epi_recipe
 #' @export
-adjust_epi_recipe.epi_recipe <- function(
-    x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
+adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
   if (!(is.numeric(which_step) || is.character(which_step))) {
     cli::cli_abort(
       c("`which_step` must be a number or a character.",
@@ -442,9 +442,9 @@ prep.epi_recipe <- function(
   }
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
-  training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
+  training <- dplyr::relocate(training, dplyr::all_of(key_colnames(training)))
   tr_data <- recipes:::train_info(training)
-  keys <- epi_keys(x)
+  keys <- key_colnames(x)
 
   orig_lvls <- lapply(training, recipes:::get_levels)
   orig_lvls <- kill_levels(orig_lvls, keys)
@@ -495,11 +495,14 @@ prep.epi_recipe <- function(
       if (!is_epi_df(training)) {
         # tidymodels killed our class
         # for now, we only allow step_epi_* to alter the metadata
-        training <- dplyr::dplyr_reconstruct(
-          epiprocess::as_epi_df(training), before_template
+        metadata <- attr(before_template, "metadata")
+        training <- as_epi_df(
+          training,
+          as_of = metadata$as_of,
+          other_keys = metadata$other_keys %||% character()
         )
       }
-      training <- dplyr::relocate(training, tidyselect::all_of(epi_keys(training)))
+      training <- dplyr::relocate(training, all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
       if (!is.na(x$steps[[i]]$role)) {
         new_vars <- setdiff(x$term_info$variable, running_info$variable)
@@ -556,6 +559,31 @@ prep.epi_recipe <- function(
     )
   x
 }
+
+#' @export
+bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
+  meta <- NULL
+  if (composition == "epi_df") {
+    if (is_epi_df(new_data)) {
+      meta <- attr(new_data, "metadata")
+    } else if (is_epi_df(object$template)) {
+      meta <- attr(object$template, "metadata")
+    }
+    composition <- "tibble"
+  }
+  new_data <- NextMethod("bake")
+  if (!is.null(meta)) {
+    # Baking should have dropped epi_df-ness and metadata. Re-infer some
+    # metadata and assume others remain the same as the object/template:
+    new_data <- as_epi_df(
+      new_data,
+      as_of = meta$as_of,
+      other_keys = meta$other_keys %||% character()
+    )
+  }
+  new_data
+}
+
 
 kill_levels <- function(x, keys) {
   for (i in which(names(x) %in% keys)) x[[i]] <- list(values = NA, ordered = NA)

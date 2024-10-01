@@ -8,33 +8,25 @@ step_population_scaling(
   recipe,
   ...,
   role = "raw",
-  trained = FALSE,
   df,
   by = NULL,
   df_pop_col,
   rate_rescaling = 1,
   create_new = TRUE,
   suffix = "_scaled",
-  columns = NULL,
   skip = FALSE,
   id = rand_id("population_scaling")
 )
 }
 \arguments{
-\item{recipe}{A recipe object. The step will be added to the sequence of
-operations for this recipe. The recipe should contain information about the
-\code{epi_df} such as column names.}
+\item{recipe}{A recipe object. The step will be added to the
+sequence of operations for this recipe.}
 
-\item{...}{One or more selector functions to scale variables
+\item{...}{One or more selector functions to choose variables
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
-they be assigned? By default, the new columns created by this step from the
-original variables will be used as predictors in a model. Other options can
-be ard are not limited to "outcome".}
-
-\item{trained}{A logical to indicate if the quantities for preprocessing
-have been estimated.}
+they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
 \item{df}{a data frame that contains the population data to be used for
 inverting the existing scaling.}
@@ -68,10 +60,7 @@ scale is "per 100K", then set \code{rate_rescaling = 1e5} to get rates.}
 in the \code{epi_df}}
 
 \item{suffix}{a character. The suffix added to the column name if
-\code{crete_new = TRUE}. Default to "_scaled".}
-
-\item{columns}{A character string of variable names that will
-be populated (eventually) by the \code{terms} argument.}
+\code{create_new = TRUE}. Default to "_scaled".}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
@@ -98,11 +87,10 @@ passed will \emph{divide} the selected variables while the \code{rate_rescaling}
 argument is a common \emph{multiplier} of the selected variables.
 }
 \examples{
-library(epiprocess)
-library(epipredict)
-jhu <- epiprocess::jhu_csse_daily_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
-  dplyr::select(geo_value, time_value, cases)
+library(dplyr)
+jhu <- jhu_csse_daily_subset \%>\%
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
+  select(geo_value, time_value, cases)
 
 pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 
@@ -127,20 +115,9 @@ f <- frosting() \%>\%
     df_pop_col = "value"
   )
 
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
+wf <- epi_workflow(r, linear_reg()) \%>\%
   fit(jhu) \%>\%
   add_frosting(f)
 
-latest <- get_test_data(
-  recipe = r,
-  epiprocess::jhu_csse_daily_subset \%>\%
-    dplyr::filter(
-      time_value > "2021-11-01",
-      geo_value \%in\% c("ca", "ny")
-    ) \%>\%
-    dplyr::select(geo_value, time_value, cases)
-)
-
-
-predict(wf, latest)
+forecast(wf)
 }

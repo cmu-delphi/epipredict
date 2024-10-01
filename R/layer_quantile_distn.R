@@ -1,9 +1,14 @@
 #' Returns predictive quantiles
 #'
 #' This function calculates quantiles when the prediction was _distributional_.
-#' Currently, the only distributional engine is `quantile_reg()`.
-#' If this engine is used, then this layer will grab out estimated (or extrapolated)
-#' quantiles at the requested quantile values.
+#'
+#' Currently, the only distributional modes/engines are
+#' * `quantile_reg()`
+#' * `smooth_quantile_reg()`
+#' * `rand_forest(mode = "regression") %>% set_engine("grf_quantiles")`
+#'
+#' If these engines were used, then this layer will grab out estimated
+#' (or extrapolated) quantiles at the requested quantile values.
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
@@ -17,8 +22,9 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -28,15 +34,13 @@
 #' wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) %>%
 #'   fit(jhu)
 #'
-#' latest <- get_test_data(recipe = r, x = jhu)
-#'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_quantile_distn() %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 layer_quantile_distn <- function(frosting,
                                  ...,
@@ -81,6 +85,8 @@ slather.layer_quantile_distn <-
         "These are of class {.cls {class(dstn)}}."
       ))
     }
+    rlang::check_dots_empty()
+
     dstn <- dist_quantiles(
       quantile(dstn, object$quantile_levels),
       object$quantile_levels
@@ -90,9 +96,9 @@ slather.layer_quantile_distn <-
     if (!all(is.infinite(truncate))) {
       dstn <- snap(dstn, truncate[1], truncate[2])
     }
-    dstn <- tibble::tibble(dstn = dstn)
+    dstn <- tibble(dstn = dstn)
     dstn <- check_pname(dstn, components$predictions, object)
-    components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
+    components$predictions <- mutate(components$predictions, !!!dstn)
     components
   }
 

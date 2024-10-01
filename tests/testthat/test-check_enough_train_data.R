@@ -19,23 +19,24 @@ test_that("check_enough_train_data works on pooled data", {
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n, drop_na = FALSE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
   # Check both column don't have enough data
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n + 1, drop_na = FALSE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL),
-    regexp = "The following columns don't have enough data"
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
   # Check drop_na works
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 1, drop_na = TRUE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
 })
 
@@ -44,23 +45,24 @@ test_that("check_enough_train_data works on unpooled data", {
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n, epi_keys = "geo_value", drop_na = FALSE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
   # Check one column don't have enough data
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n + 1, epi_keys = "geo_value", drop_na = FALSE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL),
-    regexp = "The following columns don't have enough data"
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
   # Check drop_na works
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 3, epi_keys = "geo_value", drop_na = TRUE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
 })
 
@@ -68,14 +70,14 @@ test_that("check_enough_train_data outputs the correct recipe values", {
   expect_no_error(
     p <- epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = 2 * n - 2) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
 
   expect_equal(nrow(p), 2 * n)
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
-  expect_named(p, c("time_value", "geo_value", "x", "y"))
+  expect_named(p, c("geo_value", "time_value", "x", "y")) # order in epiprocess::new_epi_df
   expect_equal(
     p$time_value,
     rep(seq(as.Date("2020-01-01"), by = 1, length.out = n), times = 2)
@@ -93,15 +95,15 @@ test_that("check_enough_train_data only checks train data", {
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(x, y, n = n - 2, epi_keys = "geo_value") %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = toy_test_data)
+      prep(toy_epi_df) %>%
+      bake(new_data = toy_test_data)
   )
   # Same thing, but skip = FALSE
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
       check_enough_train_data(y, n = n - 2, epi_keys = "geo_value", skip = FALSE) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = toy_test_data)
+      prep(toy_epi_df) %>%
+      bake(new_data = toy_test_data)
   )
 })
 
@@ -111,14 +113,15 @@ test_that("check_enough_train_data works with all_predictors() downstream of con
     epi_recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
       check_enough_train_data(all_predictors(), y, n = 2 * n - 6) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     epi_recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
       check_enough_train_data(all_predictors(), y, n = 2 * n - 5) %>%
-      recipes::prep(toy_epi_df) %>%
-      recipes::bake(new_data = NULL)
+      prep(toy_epi_df) %>%
+      bake(new_data = NULL)
   )
 })

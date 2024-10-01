@@ -1,14 +1,14 @@
 test_that("quantile pivotting wider behaves", {
   tib <- tibble::tibble(a = 1:5, b = 6:10)
-  expect_error(pivot_quantiles_wider(tib, a))
+  expect_snapshot(error = TRUE, pivot_quantiles_wider(tib, a))
   tib$c <- rep(dist_normal(), 5)
-  expect_error(pivot_quantiles_wider(tib, c))
+  expect_snapshot(error = TRUE, pivot_quantiles_wider(tib, c))
 
   d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:5, 1:4 / 5))
   # different quantiles
   tib <- tib[1:2, ]
   tib$d1 <- d1
-  expect_error(pivot_quantiles_wider(tib, d1))
+  expect_snapshot(error = TRUE, pivot_quantiles_wider(tib, d1))
 
   d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 2:4 / 4))
   tib$d1 <- d1
@@ -25,12 +25,20 @@ test_that("quantile pivotting wider behaves", {
   expect_length(pivot_quantiles_wider(tib, d2), 5L)
 })
 
+test_that("pivotting wider still works if there are duplicates", {
+  # previously this would produce a warning if pivotted because the
+  # two rows of the result are identical
+  tb <- tibble(.pred = dist_quantiles(list(1:3, 1:3), list(c(.1, .5, .9))))
+  res <- tibble(`0.1` = c(1, 1), `0.5` = c(2, 2), `0.9` = c(3, 3))
+  expect_identical(tb %>% pivot_quantiles_wider(.pred), res)
+})
+
 
 test_that("quantile pivotting longer behaves", {
   tib <- tibble::tibble(a = 1:5, b = 6:10)
-  expect_error(pivot_quantiles_longer(tib, a))
+  expect_snapshot(error = TRUE, pivot_quantiles_longer(tib, a))
   tib$c <- rep(dist_normal(), 5)
-  expect_error(pivot_quantiles_longer(tib, c))
+  expect_snapshot(error = TRUE, pivot_quantiles_longer(tib, c))
 
   d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:5, 1:4 / 5))
   # different quantiles
@@ -56,7 +64,7 @@ test_that("quantile pivotting longer behaves", {
 
   tib$d3 <- c(dist_quantiles(2:5, 2:5 / 6), dist_quantiles(3:6, 2:5 / 6))
   # now the cols have different numbers of quantiles
-  expect_error(pivot_quantiles_longer(tib, d1, d3))
+  expect_snapshot(error = TRUE, pivot_quantiles_longer(tib, d1, d3))
   expect_length(
     pivot_quantiles_longer(tib, d1, d3, .ignore_length_check = TRUE),
     6L

@@ -3,6 +3,7 @@
 ^epipredict\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^DEVELOPMENT\.md$
 ^drafts$
 ^\.Rprofile$
 ^man-roxygen$
@@ -15,5 +16,8 @@
 ^data-raw$
 ^vignettes/articles$
 ^.git-blame-ignore-revs$
+^DEVELOPMENT\.md$
 ^doc$
 ^Meta$
+^.lintr$
+^.venv$

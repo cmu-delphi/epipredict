@@ -5,18 +5,25 @@ test_that("Column names can be passed with and without the tidy way", {
     value = c(1000, 2000, 3000, 4000, 5000, 6000)
   )
 
-  newdata <- case_death_rate_subset %>% filter(geo_value %in% c("ak", "al", "ar", "as", "az", "ca"))
+  pop_data2 <- pop_data %>% dplyr::rename(geo_value = states)
+
+  newdata <- case_death_rate_subset %>%
+    filter(geo_value %in% c("ak", "al", "ar", "as", "az", "ca"))
 
   r1 <- epi_recipe(newdata) %>%
-    step_population_scaling(c("case_rate", "death_rate"),
+    step_population_scaling(
+      case_rate, death_rate,
       df = pop_data,
-      df_pop_col = "value", by = c("geo_value" = "states")
+      df_pop_col = "value",
+      by = c("geo_value" = "states")
     )
 
   r2 <- epi_recipe(newdata) %>%
-    step_population_scaling(case_rate, death_rate,
-      df = pop_data,
-      df_pop_col = "value", by = c("geo_value" = "states")
+    step_population_scaling(
+      case_rate, death_rate,
+      df = pop_data2,
+      df_pop_col = "value",
+      by = "geo_value"
     )
 
   prep1 <- prep(r1, newdata)
@@ -56,9 +63,9 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
       suffix = "_rate"
     )
 
-  prep <- prep(r, newdata)
+  p <- prep(r, newdata)
 
-  expect_silent(b <- bake(prep, newdata))
+  b <- bake(p, newdata)
   expect_equal(ncol(b), 7L)
   expect_true("case_rate" %in% colnames(b))
   expect_true("death_rate" %in% colnames(b))
@@ -75,15 +82,15 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
       create_new = FALSE
     )
 
-  expect_warning(prep <- prep(r, newdata))
+  expect_warning(p <- prep(r, newdata))
 
-  expect_warning(b <- bake(prep, newdata))
+  expect_warning(b <- bake(p, newdata))
   expect_equal(ncol(b), 5L)
 })
 
 ## Postprocessing
 test_that("Postprocessing workflow works and values correct", {
-  jhu <- epiprocess::jhu_csse_daily_subset %>%
+  jhu <- jhu_csse_daily_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, cases)
 
@@ -119,17 +126,7 @@ test_that("Postprocessing workflow works and values correct", {
     fit(jhu) %>%
     add_frosting(f)
 
-  latest <- get_test_data(
-    recipe = r,
-    x = epiprocess::jhu_csse_daily_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, cases)
-  )
-
-  suppressWarnings(p <- predict(wf, latest))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(20000, 30000))
@@ -146,7 +143,7 @@ test_that("Postprocessing workflow works and values correct", {
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
-  suppressWarnings(p <- predict(wf, latest))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
@@ -188,18 +185,7 @@ test_that("Postprocessing to get cases from case rate", {
     fit(jhu) %>%
     add_frosting(f)
 
-  latest <- get_test_data(
-    recipe = r,
-    x = case_death_rate_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, case_rate)
-  )
-
-
-  suppressWarnings(p <- predict(wf, latest))
+  p <- forecast(wf)
   expect_equal(nrow(p), 2L)
   expect_equal(ncol(p), 4L)
   expect_equal(p$.pred_scaled, p$.pred * c(1 / 20000, 1 / 30000))
@@ -207,7 +193,6 @@ test_that("Postprocessing to get cases from case rate", {
 
 
 test_that("test joining by default columns", {
-  skip()
   jhu <- case_death_rate_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
@@ -229,9 +214,18 @@ test_that("test joining by default columns", {
     recipes::step_naomit(recipes::all_predictors()) %>%
     recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
-  suppressMessages(prep <- prep(r, jhu))
+  p <- prep(r, jhu)
+  b <- bake(p, new_data = NULL)
+  expect_named(
+    b,
+    c(
+      "geo_value", "time_value", "case_rate", "case_rate_scaled",
+      paste0("lag_", c(0, 7, 14), "_case_rate_scaled"),
+      "ahead_7_case_rate_scaled"
+    )
+  )
 
-  suppressMessages(b <- bake(prep, jhu))
+
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -243,25 +237,14 @@ test_that("test joining by default columns", {
       df_pop_col = "values"
     )
 
-  suppressMessages(
-    wf <- epi_workflow(r, parsnip::linear_reg()) %>%
-      fit(jhu) %>%
-      add_frosting(f)
-  )
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+    fit(jhu) %>%
+    add_frosting(f)
 
-  latest <- get_test_data(
-    recipe = r,
-    x = case_death_rate_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, case_rate)
-  )
-
-  suppressMessages(p <- predict(wf, latest))
+  fc <- forecast(wf)
+  expect_named(fc, c("geo_value", "time_value", ".pred", ".pred_scaled"))
+  expect_equal(fc$.pred_scaled, fc$.pred * c(1 / 20000, 1 / 30000))
 })
-
 
 
 test_that("expect error if `by` selector does not match", {
@@ -296,7 +279,8 @@ test_that("expect error if `by` selector does not match", {
       df_pop_col = "values"
     )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     wf <- epi_workflow(r, parsnip::linear_reg()) %>%
       fit(jhu) %>%
       add_frosting(f)
@@ -324,22 +308,11 @@ test_that("expect error if `by` selector does not match", {
       df_pop_col = "values"
     )
 
-
-  latest <- get_test_data(
-    recipe = r,
-    x = case_death_rate_subset %>%
-      dplyr::filter(
-        time_value > "2021-11-01",
-        geo_value %in% c("ca", "ny")
-      ) %>%
-      dplyr::select(geo_value, time_value, case_rate)
-  )
-
   wf <- epi_workflow(r, parsnip::linear_reg()) %>%
     fit(jhu) %>%
     add_frosting(f)
 
-  expect_error(predict(wf, latest))
+  expect_snapshot(error = TRUE, forecast(wf))
 })
 
 
@@ -407,12 +380,10 @@ test_that("Rate rescaling behaves as expected", {
     fit(x) %>%
     add_frosting(f)
 
-  latest <- get_test_data(recipe = r, x = x)
-
   # suppress warning: prediction from a rank-deficient fit may be misleading
   suppressWarnings(expect_equal(
-    unique(predict(wf, latest)$.pred) * (1 / 1000) / 100,
-    unique(predict(wf, latest)$.pred_scaled)
+    unique(forecast(wf)$.pred) * (1 / 1000) / 100,
+    unique(forecast(wf)$.pred_scaled)
   ))
 })
 
@@ -459,7 +430,6 @@ test_that("Extra Columns are ignored", {
   wf <- epi_workflow(recip, parsnip::linear_reg()) %>%
     fit(x) %>%
     add_frosting(frost)
-  latest <- get_test_data(recipe = recip, x = x)
   # suppress warning: prediction from a rank-deficient fit may be misleading
-  suppressWarnings(expect_equal(ncol(predict(wf, latest)), 4))
+  suppressWarnings(expect_equal(ncol(forecast(wf)), 4))
 })

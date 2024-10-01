@@ -1,7 +1,7 @@
 #' Predict the future with the most recent value
 #'
 #' This is a simple forecasting model for
-#' [epiprocess::epi_df] data. It uses the most recent observation as the
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It uses the most recent observation as the
 #' forecast for any future date, and produces intervals by shuffling the quantiles
 #' of the residuals of such a "flatline" forecast and incrementing these
 #' forward over all available training data.
@@ -12,7 +12,7 @@
 #' This forecaster is meant to produce exactly the CDC Baseline used for
 #' [COVID19ForecastHub](https://covid19forecasthub.org)
 #'
-#' @param epi_data An [`epiprocess::epi_df`]
+#' @param epi_data An [`epiprocess::epi_df`][epiprocess::as_epi_df]
 #' @param outcome A scalar character for the column name we wish to predict.
 #' @param args_list A list of additional arguments as created by the
 #'   [cdc_baseline_args_list()] constructor function.
@@ -29,11 +29,11 @@
 #'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
 #'   select(-pop, -death_rate) %>%
 #'   group_by(geo_value) %>%
-#'   epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
+#'   epi_slide(~ sum(.$deaths), .window_size = 7, .new_col_name = "deaths_7dsum") %>%
 #'   ungroup() %>%
 #'   filter(weekdays(time_value) == "Saturday")
 #'
-#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_7dsum")
 #' preds <- pivot_quantiles_wider(cdc$predictions, .pred_distn)
 #'
 #' if (require(ggplot2)) {
@@ -47,7 +47,7 @@
 #'     geom_line(aes(y = .pred), color = "orange") +
 #'     geom_line(
 #'       data = weekly_deaths %>% filter(geo_value %in% four_states),
-#'       aes(x = time_value, y = deaths)
+#'       aes(x = time_value, y = deaths_7dsum)
 #'     ) +
 #'     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
 #'     labs(x = "Date", y = "Weekly deaths") +
@@ -61,9 +61,9 @@ cdc_baseline_forecaster <- function(
     args_list = cdc_baseline_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("cdc_flat_fcast", "alist"))) {
-    cli_stop("args_list was not created using `cdc_baseline_args_list().")
+    cli_abort("`args_list` was not created using `cdc_baseline_args_list().")
   }
-  keys <- epi_keys(epi_data)
+  keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
 
@@ -75,7 +75,7 @@ cdc_baseline_forecaster <- function(
     step_training_window(n_recent = args_list$n_training)
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  # target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  # target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
 
   latest <- get_test_data(
@@ -98,14 +98,14 @@ cdc_baseline_forecaster <- function(
   # layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, ".pred")
 
-  eng <- parsnip::linear_reg() %>% parsnip::set_engine("flatline")
+  eng <- linear_reg(engine = "flatline")
 
   wf <- epi_workflow(r, eng, f)
-  wf <- generics::fit(wf, epi_data)
+  wf <- fit(wf, epi_data)
   preds <- suppressWarnings(predict(wf, new_data = latest)) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value) %>%
-    dplyr::mutate(target_date = forecast_date + ahead * args_list$data_frequency)
+    as_tibble() %>%
+    select(-time_value) %>%
+    mutate(target_date = forecast_date + ahead * args_list$data_frequency)
 
   structure(
     list(
@@ -218,11 +218,11 @@ parse_period <- function(x) {
       mult <- switch(mult,
         day = 1L,
         wee = 7L,
-        cli::cli_abort("incompatible timespan in `aheads`.")
+        cli_abort("incompatible timespan in `aheads`.")
       )
       x <- as.numeric(x[1]) * mult
     }
-    if (length(x) > 2L) cli::cli_abort("incompatible timespan in `aheads`.")
+    if (length(x) > 2L) cli_abort("incompatible timespan in `aheads`.")
   }
   stopifnot(rlang::is_integerish(x))
   as.integer(x)

@@ -8,13 +8,11 @@ step_growth_rate(
   recipe,
   ...,
   role = "predictor",
-  trained = FALSE,
   horizon = 7,
-  method = c("rel_change", "linear_reg", "smooth_spline", "trend_filter"),
+  method = c("rel_change", "linear_reg"),
   log_scale = FALSE,
   replace_Inf = NA,
   prefix = "gr_",
-  columns = NULL,
   skip = FALSE,
   id = rand_id("growth_rate"),
   additional_gr_args_list = list()
@@ -30,20 +28,15 @@ for this step. See \code{\link[recipes:selections]{recipes::selections()}} for m
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
-
 \item{horizon}{Bandwidth for the sliding window, when \code{method} is
 "rel_change" or "linear_reg". See \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} for more
 details.}
 
-\item{method}{Either "rel_change", "linear_reg", "smooth_spline", or
-"trend_filter", indicating the method to use for the growth rate
-calculation. The first two are local methods: they are run in a sliding
+\item{method}{Either "rel_change" or "linear_reg",
+indicating the method to use for the growth rate
+calculation. These are local methods: they are run in a sliding
 fashion over the sequence (in order to estimate derivatives and hence
-growth rates); the latter two are global methods: they are run once over
-the entire sequence. See \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} for more
-details.}
+growth rates). See \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} for more details.}
 
 \item{log_scale}{Should growth rates be estimated using the parameterization
 on the log scale? See details for an explanation. Default is \code{FALSE}.}
@@ -56,10 +49,7 @@ being removed from the data. Alternatively, you could specify arbitrary
 large values, or perhaps zero. Setting this argument to \code{NULL} will result
 in no replacement.}
 
-\item{prefix}{A prefix to indicate what type of variable this is}
-
-\item{columns}{A character string of variable names that will
-be populated (eventually) by the \code{terms} argument.}
+\item{prefix}{A character string that will be prefixed to the new column.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
@@ -88,8 +78,8 @@ r <- epi_recipe(case_death_rate_subset) \%>\%
 r
 
 r \%>\%
-  recipes::prep() \%>\%
-  recipes::bake(case_death_rate_subset)
+  prep(case_death_rate_subset) \%>\%
+  bake(case_death_rate_subset)
 }
 \seealso{
 Other row operation steps: 

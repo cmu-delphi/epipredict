@@ -59,107 +59,6 @@ is_epi_workflow <- function(x) {
 }
 
 
-#' Add a model to an `epi_workflow`
-#'
-#' @seealso [workflows::add_model()]
-#' - `add_model()` adds a parsnip model to the `epi_workflow`.
-#'
-#' - `remove_model()` removes the model specification as well as any fitted
-#'   model object. Any extra formulas are also removed.
-#'
-#' - `update_model()` first removes the model then adds the new
-#' specification to the workflow.
-#'
-#' @details
-#' Has the same behaviour as [workflows::add_model()] but also ensures
-#' that the returned object is an `epi_workflow`.
-#'
-#' @inheritParams workflows::add_model
-#'
-#' @param x An `epi_workflow`.
-#'
-#' @param spec A parsnip model specification.
-#'
-#' @param ... Not used.
-#'
-#' @return
-#' `x`, updated with a new, updated, or removed model.
-#'
-#' @export
-#' @examples
-#' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(
-#'     time_value > "2021-11-01",
-#'     geo_value %in% c("ak", "ca", "ny")
-#'   )
-#'
-#' r <- epi_recipe(jhu) %>%
-#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-#'   step_epi_ahead(death_rate, ahead = 7)
-#'
-#' rf_model <- rand_forest(mode = "regression")
-#'
-#' wf <- epi_workflow(r)
-#'
-#' wf <- wf %>% add_model(rf_model)
-#' wf
-#'
-#' lm_model <- parsnip::linear_reg()
-#'
-#' wf <- update_model(wf, lm_model)
-#' wf
-#'
-#' wf <- remove_model(wf)
-#' wf
-#' @export
-add_model <- function(x, spec, ..., formula = NULL) {
-  UseMethod("add_model")
-}
-
-#' @rdname add_model
-#' @export
-remove_model <- function(x) {
-  UseMethod("remove_model")
-}
-
-#' @rdname add_model
-#' @export
-update_model <- function(x, spec, ..., formula = NULL) {
-  UseMethod("update_model")
-}
-
-#' @rdname add_model
-#' @export
-add_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
-  workflows::add_model(x, spec, ..., formula = formula)
-}
-
-#' @rdname add_model
-#' @export
-remove_model.epi_workflow <- function(x) {
-  workflows:::validate_is_workflow(x)
-
-  if (!workflows:::has_spec(x)) {
-    rlang::warn("The workflow has no model to remove.")
-  }
-
-  new_epi_workflow(
-    pre = x$pre,
-    fit = workflows:::new_stage_fit(),
-    post = x$post,
-    trained = FALSE
-  )
-}
-
-#' @rdname add_model
-#' @export
-update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
-  rlang::check_dots_empty()
-  x <- remove_model(x)
-  workflows::add_model(x, spec, ..., formula = formula)
-}
-
-
 #' Fit an `epi_workflow` object
 #'
 #' @description
@@ -197,9 +96,16 @@ update_model.epi_workflow <- function(x, spec, ..., formula = NULL) {
 #'
 #' @export
 fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
-  object$fit$meta <- list(max_time_value = max(data$time_value), as_of = attributes(data)$metadata$as_of)
+  object$fit$meta <- list(
+    max_time_value = max(data$time_value),
+    as_of = attr(data, "metadata")$as_of,
+    other_keys = attr(data, "metadata")$other_keys
+  )
+  object$original_data <- data
 
-  NextMethod()
+  res <- NextMethod()
+  class(res) <- c("epi_workflow", class(res))
+  res
 }
 
 #' Predict from an epi_workflow
@@ -216,17 +122,17 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' - Call [parsnip::predict.model_fit()] for you using the underlying fit
 #'   parsnip model.
 #'
-#' - Ensure that the returned object is an [epiprocess::epi_df] where
+#' - Ensure that the returned object is an [epiprocess::epi_df][epiprocess::as_epi_df] where
 #'   possible. Specifically, the output will have `time_value` and
 #'   `geo_value` columns as well as the prediction.
-#'
-#' @inheritParams parsnip::predict.model_fit
 #'
 #' @param object An epi_workflow that has been fit by
 #'   [workflows::fit.workflow()]
 #'
 #' @param new_data A data frame containing the new predictors to preprocess
 #'   and predict on
+#'
+#' @inheritParams parsnip::predict.model_fit
 #'
 #' @return
 #' A data frame of model predictions, with as many rows as `new_data` has.
@@ -249,24 +155,20 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' preds <- predict(wf, latest)
 #' preds
-predict.epi_workflow <- function(object, new_data, ...) {
+predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), ...) {
   if (!workflows::is_trained_workflow(object)) {
-    rlang::abort(
-      c("Can't predict on an untrained epi_workflow.",
-        i = "Do you need to call `fit()`?"
-      )
-    )
+    cli::cli_abort(c(
+      "Can't predict on an untrained epi_workflow.",
+      i = "Do you need to call `fit()`?"
+    ))
   }
   components <- list()
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
     blueprint = components$mold$blueprint
   )
-  components$keys <- grab_forged_keys(
-    components$forged,
-    components$mold, new_data
-  )
-  components <- apply_frosting(object, components, new_data, ...)
+  components$keys <- grab_forged_keys(components$forged, object, new_data)
+  components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
   components$predictions
 }
 
@@ -282,27 +184,23 @@ predict.epi_workflow <- function(object, new_data, ...) {
 #' @export
 augment.epi_workflow <- function(x, new_data, ...) {
   predictions <- predict(x, new_data, ...)
-  if (epiprocess::is_epi_df(predictions)) {
-    join_by <- epi_keys(predictions)
+  if (is_epi_df(predictions)) {
+    join_by <- key_colnames(predictions)
   } else {
-    rlang::abort(
-      c(
-        "Cannot determine how to join new_data with the predictions.",
-        "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
-      )
-    )
+    cli_abort(c(
+      "Cannot determine how to join new_data with the predictions.",
+      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
+    ))
   }
   complete_overlap <- intersect(names(new_data), join_by)
   if (length(complete_overlap) < length(join_by)) {
-    rlang::warn(
-      glue::glue(
-        "Your original training data had keys {join_by}, but",
-        "`new_data` only has {complete_overlap}. The output",
-        "may be strange."
-      )
-    )
+    rlang::warn(glue::glue(
+      "Your original training data had keys {join_by}, but",
+      "`new_data` only has {complete_overlap}. The output",
+      "may be strange."
+    ))
   }
-  dplyr::full_join(predictions, new_data, by = join_by)
+  full_join(predictions, new_data, by = join_by)
 }
 
 new_epi_workflow <- function(
@@ -326,4 +224,55 @@ print.epi_workflow <- function(x, ...) {
   print_model(x)
   print_postprocessor(x)
   invisible(x)
+}
+
+
+#' Produce a forecast from an epi workflow
+#'
+#' @param object An epi workflow.
+#' @param ... Not used.
+#' @param fill_locf Logical. Should we use locf to fill in missing data?
+#' @param n_recent Integer or NULL. If filling missing data with locf = TRUE,
+#' how far back are we willing to tolerate missing data? Larger values allow
+#' more filling. The default NULL will determine this from the the recipe. For
+#' example, suppose n_recent = 3, then if the 3 most recent observations in any
+#' geo_value are all NA’s, we won’t be able to fill anything, and an error
+#' message will be thrown. (See details.)
+#' @param forecast_date By default, this is set to the maximum time_value in x.
+#' But if there is data latency such that recent NA's should be filled, this may
+#' be after the last available time_value.
+#'
+#' @return A forecast tibble.
+#'
+#' @export
+forecast.epi_workflow <- function(object, ..., fill_locf = FALSE, n_recent = NULL, forecast_date = NULL) {
+  rlang::check_dots_empty()
+
+  if (!object$trained) {
+    cli_abort(c(
+      "You cannot `forecast()` a {.cls workflow} that has not been trained.",
+      i = "Please use `fit()` before forecasting."
+    ))
+  }
+
+  frosting_fd <- NULL
+  if (has_postprocessor(object) && detect_layer(object, "layer_add_forecast_date")) {
+    frosting_fd <- extract_argument(object, "layer_add_forecast_date", "forecast_date")
+    if (!is.null(frosting_fd) && class(frosting_fd) != class(object$original_data$time_value)) {
+      cli_abort(c(
+        "Error with layer_add_forecast_date():",
+        i = "The type of `forecast_date` must match the type of the `time_value` column in the data."
+      ))
+    }
+  }
+
+  test_data <- get_test_data(
+    hardhat::extract_preprocessor(object),
+    object$original_data,
+    fill_locf = fill_locf,
+    n_recent = n_recent %||% Inf,
+    forecast_date = forecast_date %||% frosting_fd %||% max(object$original_data$time_value)
+  )
+
+  predict(object, new_data = test_data)
 }

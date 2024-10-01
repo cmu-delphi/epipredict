@@ -7,7 +7,6 @@ r <- epi_recipe(jhu) %>%
   step_epi_naomit()
 
 wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-latest <- get_test_data(recipe = r, x = jhu)
 
 
 test_that("Returns expected number or rows and columns", {
@@ -18,7 +17,7 @@ test_that("Returns expected number or rows and columns", {
 
   wf1 <- wf %>% add_frosting(f)
 
-  expect_silent(p <- predict(wf1, latest))
+  expect_silent(p <- forecast(wf1))
   expect_equal(ncol(p), 4L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
@@ -47,5 +46,61 @@ test_that("Errors when used with a classifier", {
     layer_predict() %>%
     layer_residual_quantiles()
   wf <- wf %>% add_frosting(f)
-  expect_error(predict(wf, tib))
+  expect_snapshot(error = TRUE, forecast(wf))
+})
+
+
+test_that("Grouping by keys is supported", {
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles()
+  wf1 <- wf %>% add_frosting(f)
+  expect_silent(p1 <- forecast(wf1))
+  f2 <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(by_key = "geo_value")
+  wf2 <- wf %>% add_frosting(f2)
+  expect_warning(p2 <- forecast(wf2))
+
+  pivot1 <- pivot_quantiles_wider(p1, .pred_distn) %>%
+    mutate(width = `0.95` - `0.05`)
+  pivot2 <- pivot_quantiles_wider(p2, .pred_distn) %>%
+    mutate(width = `0.95` - `0.05`)
+  expect_equal(pivot1$width, rep(pivot1$width[1], nrow(pivot1)))
+  expect_false(all(pivot2$width == pivot2$width[1]))
+})
+
+test_that("Canned forecasters work with / without", {
+  meta <- attr(jhu, "metadata")
+  meta$as_of <- max(jhu$time_value)
+  attr(jhu, "metadata") <- meta
+
+  expect_silent(
+    flatline_forecaster(jhu, "death_rate")
+  )
+  expect_silent(
+    flatline_forecaster(
+      jhu, "death_rate",
+      args_list = flatline_args_list(quantile_by_key = "geo_value")
+    )
+  )
+
+  expect_silent(
+    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"))
+  )
+  expect_silent(
+    flatline_forecaster(
+      jhu, "death_rate",
+      args_list = flatline_args_list(quantile_by_key = "geo_value")
+    )
+  )
+})
+
+test_that("flatline_forecaster correctly errors when n_training < ahead", {
+  expect_snapshot(
+    error = TRUE,
+    flatline_forecaster(jhu, "death_rate", args_list = flatline_args_list(ahead = 10, n_training = 9))
+  )
 })

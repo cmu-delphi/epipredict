@@ -8,7 +8,7 @@ arx_classifier(
   epi_data,
   outcome,
   predictors,
-  trainer = parsnip::logistic_reg(),
+  trainer = logistic_reg(),
   args_list = arx_class_args_list()
 )
 }
@@ -22,8 +22,11 @@ internally based on the \code{breaks} argument to \code{\link[=arx_class_args_li
 If discrete classes are already in the \code{epi_df}, it is recommended to
 code up a classifier from scratch using \code{\link[=epi_recipe]{epi_recipe()}}.}
 
-\item{predictors}{A character vector giving column(s) of predictor
-variables.}
+\item{predictors}{A character vector giving column(s) of predictor variables.
+This defaults to the \code{outcome}. However, if manually specified, only those variables
+specifically mentioned will be used. (The \code{outcome} will not be added.)
+By default, equals the outcome. If manually specified, does not add the
+outcome variable, so make sure to specify it.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation.
 For now, we enforce \code{mode = "classification"}. Typical values are
@@ -45,8 +48,9 @@ This is an autoregressive classification model for
 that it estimates a class at a particular target horizon.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value >= as.Date("2021-11-01"))
+  filter(time_value >= as.Date("2021-11-01"))
 
 out <- arx_classifier(jhu, "death_rate", c("case_rate", "death_rate"))
 

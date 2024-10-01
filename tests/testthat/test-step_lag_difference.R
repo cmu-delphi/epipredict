@@ -1,22 +1,20 @@
 test_that("step_lag_difference validates arguments", {
   df <- data.frame(time_value = 1:5, geo_value = rep("a", 5), value = 6:10)
   r <- recipes::recipe(df)
-  expect_error(step_lag_difference(r))
+  expect_snapshot(error = TRUE, step_lag_difference(r))
 
   edf <- as_epi_df(df)
   r <- epi_recipe(edf)
 
-  expect_error(step_lag_difference(r, value, role = 1))
-  expect_error(step_lag_difference(r, value, horizon = 0))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, role = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, horizon = 0))
   expect_silent(step_lag_difference(r, value, horizon = c(1, 2)))
-  expect_error(step_lag_difference(r, value, prefix = letters[1:2]))
-  expect_error(step_lag_difference(r, value, id = letters[1:2]))
-  expect_error(step_lag_difference(r, value, prefix = letters[1:2]))
-  expect_error(step_lag_difference(r, value, prefix = 1))
-  expect_error(step_lag_difference(r, value, id = 1))
-  expect_error(step_lag_difference(r, value, trained = 1))
-  expect_error(step_lag_difference(r, value, skip = 1))
-  expect_error(step_lag_difference(r, value, columns = letters[1:5]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, prefix = letters[1:2]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, id = letters[1:2]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, prefix = letters[1:2]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, prefix = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, id = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, skip = 1))
 })
 
 
@@ -27,13 +25,13 @@ test_that("step_lag_difference works for a single signal", {
 
   res <- r %>%
     step_lag_difference(value, horizon = 1) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$lag_diff_1_value, c(NA, rep(1, 4)))
 
   res <- r %>%
     step_lag_difference(value, horizon = 1:2) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$lag_diff_1_value, c(NA, rep(1, 4)))
   expect_equal(res$lag_diff_2_value, c(NA, NA, rep(2, 3)))
@@ -48,7 +46,7 @@ test_that("step_lag_difference works for a single signal", {
   r <- epi_recipe(edf)
   res <- r %>%
     step_lag_difference(value, horizon = 1) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$lag_diff_1_value, c(NA, NA, rep(1, 8)))
 })
@@ -65,7 +63,7 @@ test_that("step_lag_difference works for a two signals", {
 
   res <- r %>%
     step_lag_difference(v1, v2, horizon = 1:2) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$lag_diff_1_v1, c(NA, rep(1, 4)))
   expect_equal(res$lag_diff_2_v1, c(NA, NA, rep(2, 3)))
@@ -80,7 +78,7 @@ test_that("step_lag_difference works for a two signals", {
   r <- epi_recipe(edf)
   res <- r %>%
     step_lag_difference(v1, v2, horizon = 1:2) %>%
-    prep() %>%
+    prep(edf) %>%
     bake(edf)
   expect_equal(res$lag_diff_1_v1, rep(c(NA, rep(1, 4)), each = 2))
   expect_equal(res$lag_diff_2_v1, rep(c(NA, NA, rep(2, 3)), each = 2))

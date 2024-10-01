@@ -17,9 +17,9 @@ epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
   if (!is.data.frame(x)) x <- data.frame(x)
   if (is.null(keys)) keys <- rep("empty", nrow(x))
   p_in <- ncol(x)
-  out_list <- tibble::tibble(i = 1:p_in, shift = shifts) %>%
+  out_list <- tibble(i = 1:p_in, shift = shifts) %>%
     tidyr::unchop(shift) %>% # what is chop
-    dplyr::mutate(name = paste0(out_name, 1:nrow(.))) %>%
+    mutate(name = paste0(out_name, 1:nrow(.))) %>%
     # One list element for each shifted feature
     pmap(function(i, shift, name) {
       tibble(keys,
@@ -38,7 +38,7 @@ epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
 
 epi_shift_single <- function(x, col, shift_val, newname, key_cols) {
   x %>%
-    dplyr::select(tidyselect::all_of(c(key_cols, col))) %>%
-    dplyr::mutate(time_value = time_value + shift_val) %>%
-    dplyr::rename(!!newname := {{ col }})
+    select(all_of(c(key_cols, col))) %>%
+    mutate(time_value = time_value + shift_val) %>%
+    rename(!!newname := {{ col }})
 }

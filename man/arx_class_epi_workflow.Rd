@@ -8,7 +8,7 @@ arx_class_epi_workflow(
   epi_data,
   outcome,
   predictors,
-  trainer = NULL,
+  trainer = parsnip::logistic_reg(),
   args_list = arx_class_args_list()
 )
 }
@@ -22,14 +22,17 @@ internally based on the \code{breaks} argument to \code{\link[=arx_class_args_li
 If discrete classes are already in the \code{epi_df}, it is recommended to
 code up a classifier from scratch using \code{\link[=epi_recipe]{epi_recipe()}}.}
 
-\item{predictors}{A character vector giving column(s) of predictor
-variables.}
+\item{predictors}{A character vector giving column(s) of predictor variables.
+This defaults to the \code{outcome}. However, if manually specified, only those variables
+specifically mentioned will be used. (The \code{outcome} will not be added.)
+By default, equals the outcome. If manually specified, does not add the
+outcome variable, so make sure to specify it.}
 
-\item{trainer}{A \code{{parsnip}} model describing the type of estimation.
-For now, we enforce \code{mode = "classification"}. Typical values are
+\item{trainer}{A \code{{parsnip}} model describing the type of estimation. For
+now, we enforce \code{mode = "classification"}. Typical values are
 \code{\link[parsnip:logistic_reg]{parsnip::logistic_reg()}} or \code{\link[parsnip:multinom_reg]{parsnip::multinom_reg()}}. More complicated
-trainers like \code{\link[parsnip:naive_Bayes]{parsnip::naive_Bayes()}} or \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}} can
-also be used. May be \code{NULL} (the default).}
+trainers like \code{\link[parsnip:naive_Bayes]{parsnip::naive_Bayes()}} or \code{\link[parsnip:rand_forest]{parsnip::rand_forest()}} can also
+be used. May be \code{NULL} if you'd like to decide later.}
 
 \item{args_list}{A list of customization arguments to determine
 the type of forecasting model. See \code{\link[=arx_class_args_list]{arx_class_args_list()}}.}
@@ -44,9 +47,9 @@ before fitting and predicting. Supplying a trainer to the function
 may alter the returned \code{epi_workflow} object but can be omitted.
 }
 \examples{
-
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value >= as.Date("2021-11-01"))
+  filter(time_value >= as.Date("2021-11-01"))
 
 arx_class_epi_workflow(jhu, "death_rate", c("case_rate", "death_rate"))
 
@@ -54,7 +57,7 @@ arx_class_epi_workflow(
   jhu,
   "death_rate",
   c("case_rate", "death_rate"),
-  trainer = parsnip::multinom_reg(),
+  trainer = multinom_reg(),
   args_list = arx_class_args_list(
     breaks = c(-.05, .1), ahead = 14,
     horizon = 14, method = "linear_reg"

@@ -8,12 +8,10 @@
 step_epi_lag(
   recipe,
   ...,
-  role = "predictor",
-  trained = FALSE,
   lag,
+  role = "predictor",
   prefix = "lag_",
   default = NA,
-  columns = NULL,
   skip = FALSE,
   id = rand_id("epi_lag")
 )
@@ -21,12 +19,10 @@ step_epi_lag(
 step_epi_ahead(
   recipe,
   ...,
-  role = "outcome",
-  trained = FALSE,
   ahead,
+  role = "outcome",
   prefix = "ahead_",
   default = NA,
-  columns = NULL,
   skip = FALSE,
   id = rand_id("epi_ahead")
 )
@@ -38,23 +34,17 @@ sequence of operations for this recipe.}
 \item{...}{One or more selector functions to choose variables
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
-\item{role}{For model terms created by this step, what analysis role should
-they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
-
-\item{trained}{A logical to indicate if the quantities for
-preprocessing have been estimated.}
-
 \item{lag, ahead}{A vector of integers. Each specified column will
 be the lag or lead for each value in the vector. Lag integers must be
 nonnegative, while ahead integers must be positive.}
 
-\item{prefix}{A prefix to indicate what type of variable this is}
+\item{role}{For model terms created by this step, what analysis role should
+they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
+
+\item{prefix}{A character string that will be prefixed to the new column.}
 
 \item{default}{Determines what fills empty rows
 left by leading/lagging (defaults to NA).}
-
-\item{columns}{A character string of variable names that will
-be populated (eventually) by the \code{terms} argument.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked

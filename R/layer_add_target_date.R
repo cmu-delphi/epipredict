@@ -20,25 +20,25 @@
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#' latest <- get_test_data(r, jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' # Use ahead + forecast date
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_add_forecast_date(forecast_date = "2022-05-31") %>%
+#'   layer_add_forecast_date(forecast_date = as.Date("2022-05-31")) %>%
 #'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 #'
 #' # Use ahead + max time value from pre, fit, post
@@ -49,7 +49,7 @@
 #'   layer_naomit(.pred)
 #' wf2 <- wf %>% add_frosting(f2)
 #'
-#' p2 <- predict(wf2, latest)
+#' p2 <- forecast(wf2)
 #' p2
 #'
 #' # Specify own target date
@@ -59,12 +59,13 @@
 #'   layer_naomit(.pred)
 #' wf3 <- wf %>% add_frosting(f3)
 #'
-#' p3 <- predict(wf3, latest)
+#' p3 <- forecast(wf3)
 #' p3
 layer_add_target_date <-
   function(frosting, target_date = NULL, id = rand_id("add_target_date")) {
-    target_date <- arg_to_date(target_date, allow_null = TRUE)
     arg_is_chr_scalar(id)
+    arg_is_scalar(target_date, allow_null = TRUE)
+    # can't validate the type of target_date until we know the time_type
     add_layer(
       frosting,
       layer_add_target_date_new(
@@ -79,41 +80,50 @@ layer_add_target_date_new <- function(id = id, target_date = target_date) {
 }
 
 #' @export
-slather.layer_add_target_date <- function(object, components, workflow, new_data, ...) {
+slather.layer_add_target_date <- function(object, components, workflow,
+                                          new_data, ...) {
   rlang::check_dots_empty()
   the_recipe <- workflows::extract_recipe(workflow)
   the_frosting <- extract_frosting(workflow)
 
+  expected_time_type <- attr(
+    workflows::extract_preprocessor(workflow)$template, "metadata"
+  )$time_type
+  if (expected_time_type == "week") expected_time_type <- "day"
+  if (expected_time_type == "integer") expected_time_type <- "year"
+
   if (!is.null(object$target_date)) {
-    target_date <- as.Date(object$target_date)
-  } else { # null target date case
-    if (detect_layer(the_frosting, "layer_add_forecast_date") &&
-      !is.null(extract_argument(
-        the_frosting,
-        "layer_add_forecast_date", "forecast_date"
+    target_date <- object$target_date
+    validate_date(
+      target_date, expected_time_type,
+      call = expr(layer_add_target_date())
+    )
+    target_date <- coerce_time_type(target_date, expected_time_type)
+  } else if (
+    detect_layer(the_frosting, "layer_add_forecast_date") &&
+      !is.null(forecast_date <- extract_argument(
+        the_frosting, "layer_add_forecast_date", "forecast_date"
       ))) {
-      forecast_date <- extract_argument(
-        the_frosting,
-        "layer_add_forecast_date", "forecast_date"
-      )
-
-      ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
-
-      target_date <- forecast_date + ahead
-    } else {
-      max_time_value <- max(
-        workflows::extract_preprocessor(workflow)$max_time_value,
-        workflow$fit$meta$max_time_value,
-        max(new_data$time_value)
-      )
-
-      ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
-
-      target_date <- max_time_value + ahead
-    }
+    validate_date(
+      forecast_date, expected_time_type,
+      call = rlang::expr(layer_add_forecast_date())
+    )
+    forecast_date <- coerce_time_type(forecast_date, expected_time_type)
+    ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
+    target_date <- forecast_date + ahead
+  } else {
+    max_time_value <- as.Date(max(
+      workflows::extract_preprocessor(workflow)$max_time_value,
+      workflow$fit$meta$max_time_value,
+      max(new_data$time_value)
+    ))
+    ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
+    target_date <- max_time_value + ahead
   }
 
-  components$predictions <- dplyr::bind_cols(components$predictions,
+  object$target_date <- target_date
+  components$predictions <- bind_cols(
+    components$predictions,
     target_date = target_date
   )
   components

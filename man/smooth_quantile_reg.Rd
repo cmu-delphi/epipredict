@@ -36,6 +36,7 @@ the \href{https://www.tidymodels.org/}{tidymodels} framework. Currently, the
 only supported engine is \code{\link[smoothqr:smooth_qr]{smoothqr::smooth_qr()}}.
 }
 \examples{
+library(smoothqr)
 tib <- data.frame(
   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),
@@ -75,17 +76,16 @@ lines(pl$x, pl$`0.2`, col = "blue")
 lines(pl$x, pl$`0.8`, col = "blue")
 lines(pl$x, pl$`0.5`, col = "red")
 
-if (require("ggplot2")) {
-  ggplot(data.frame(x = x, y = y), aes(x)) +
-    geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
-    geom_point(aes(y = y), colour = "grey") + # observed data
-    geom_function(fun = sin, colour = "black") + # truth
-    geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
-    geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
-    theme_bw() +
-    coord_cartesian(xlim = c(0, NA)) +
-    ylab("y")
-}
+library(ggplot2)
+ggplot(data.frame(x = x, y = y), aes(x)) +
+  geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
+  geom_point(aes(y = y), colour = "grey") + # observed data
+  geom_function(fun = sin, colour = "black") + # truth
+  geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
+  geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
+  theme_bw() +
+  coord_cartesian(xlim = c(0, NA)) +
+  ylab("y")
 }
 \seealso{
 \code{\link[=fit.model_spec]{fit.model_spec()}}, \code{\link[=set_engine]{set_engine()}}

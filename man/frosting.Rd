@@ -22,14 +22,14 @@ to hold steps for postprocessing predictions.
 The arguments are currently placeholders and must be NULL
 }
 \examples{
-
+library(dplyr)
 # Toy example to show that frosting can be created and added for postprocessing
 f <- frosting()
 wf <- epi_workflow() \%>\% add_frosting(f)
 
 # A more realistic example
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
@@ -37,7 +37,6 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_naomit()
 
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
-latest <- get_test_data(recipe = r, x = jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
@@ -45,6 +44,6 @@ f <- frosting() \%>\%
 
 wf1 <- wf \%>\% add_frosting(f)
 
-p <- predict(wf1, latest)
+p <- forecast(wf1)
 p
 }

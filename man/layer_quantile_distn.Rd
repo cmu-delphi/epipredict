@@ -32,13 +32,22 @@ quantiles will be added to the predictions.
 }
 \description{
 This function calculates quantiles when the prediction was \emph{distributional}.
-Currently, the only distributional engine is \code{quantile_reg()}.
-If this engine is used, then this layer will grab out estimated (or extrapolated)
-quantiles at the requested quantile values.
+}
+\details{
+Currently, the only distributional modes/engines are
+\itemize{
+\item \code{quantile_reg()}
+\item \code{smooth_quantile_reg()}
+\item \code{rand_forest(mode = "regression") \%>\% set_engine("grf_quantiles")}
+}
+
+If these engines were used, then this layer will grab out estimated
+(or extrapolated) quantiles at the requested quantile values.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
@@ -48,14 +57,12 @@ r <- epi_recipe(jhu) \%>\%
 wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.25, .5, .75))) \%>\%
   fit(jhu)
 
-latest <- get_test_data(recipe = r, x = jhu)
-
 f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_quantile_distn() \%>\%
   layer_naomit(.pred)
 wf1 <- wf \%>\% add_frosting(f)
 
-p <- predict(wf1, latest)
+p <- forecast(wf1)
 p
 }

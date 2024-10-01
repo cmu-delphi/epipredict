@@ -19,15 +19,16 @@
 #'
 #' @export
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>%
-#'   dplyr::filter(time_value >= max(time_value) - 14)
+#'   filter(time_value >= max(time_value) - 14)
 #'
 #' # Don't specify `forecast_date` (by default, this should be last date in latest)
 #' f <- frosting() %>%
@@ -68,6 +69,9 @@
 #' p3
 layer_add_forecast_date <-
   function(frosting, forecast_date = NULL, id = rand_id("add_forecast_date")) {
+    arg_is_chr_scalar(id)
+    arg_is_scalar(forecast_date, allow_null = TRUE)
+    # can't validate the type of forecast_date until we know the time_type
     add_layer(
       frosting,
       layer_add_forecast_date_new(
@@ -78,39 +82,40 @@ layer_add_forecast_date <-
   }
 
 layer_add_forecast_date_new <- function(forecast_date, id) {
-  forecast_date <- arg_to_date(forecast_date, allow_null = TRUE)
-  arg_is_chr_scalar(id)
   layer("add_forecast_date", forecast_date = forecast_date, id = id)
 }
 
 #' @export
-slather.layer_add_forecast_date <- function(object, components, workflow, new_data, ...) {
+slather.layer_add_forecast_date <- function(object, components, workflow,
+                                            new_data, ...) {
+  rlang::check_dots_empty()
   if (is.null(object$forecast_date)) {
-    max_time_value <- max(
+    max_time_value <- as.Date(max(
       workflows::extract_preprocessor(workflow)$max_time_value,
       workflow$fit$meta$max_time_value,
       max(new_data$time_value)
-    )
-    object$forecast_date <- max_time_value
+    ))
+    forecast_date <- max_time_value
+  } else {
+    forecast_date <- object$forecast_date
   }
-  as_of_pre <- attributes(workflows::extract_preprocessor(workflow)$template)$metadata$as_of
-  as_of_fit <- workflow$fit$meta$as_of
-  as_of_post <- attributes(new_data)$metadata$as_of
 
-  as_of_date <- as.Date(max(as_of_pre, as_of_fit, as_of_post))
-
-  if (object$forecast_date < as_of_date) {
-    cli_warn(
-      c("The forecast_date is less than the most ",
-        "recent update date of the data: ",
-        i = "forecast_date = {object$forecast_date} while data is from {as_of_date}."
-      )
-    )
-  }
-  components$predictions <- dplyr::bind_cols(
-    components$predictions,
-    forecast_date = as.Date(object$forecast_date)
+  expected_time_type <- attr(
+    workflows::extract_preprocessor(workflow)$template, "metadata"
+  )$time_type
+  if (expected_time_type == "week") expected_time_type <- "day"
+  if (expected_time_type == "integer") expected_time_type <- "year"
+  validate_date(
+    forecast_date, expected_time_type,
+    call = rlang::expr(layer_add_forecast_date())
   )
+  forecast_date <- coerce_time_type(forecast_date, expected_time_type)
+  object$forecast_date <- forecast_date
+  components$predictions <- bind_cols(
+    components$predictions,
+    forecast_date = forecast_date
+  )
+
   components
 }
 

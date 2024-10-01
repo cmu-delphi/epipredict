@@ -43,26 +43,26 @@ flatline <- function(formula, data) {
   observed <- rhs[n] # DANGER!!
   ek <- rhs[-n]
   if (length(response) > 1) {
-    cli_stop("flatline forecaster can accept only 1 observed time series.")
+    cli_abort("flatline forecaster can accept only 1 observed time series.")
   }
   keys <- kill_time_value(ek)
 
   preds <- data %>%
-    dplyr::mutate(
+    mutate(
       .pred = !!rlang::sym(observed),
       .resid = !!rlang::sym(response) - .pred
     )
   .pred <- preds %>%
-    dplyr::filter(!is.na(.pred)) %>%
-    dplyr::group_by(!!!rlang::syms(keys)) %>%
-    dplyr::arrange(time_value) %>%
+    filter(!is.na(.pred)) %>%
+    group_by(!!!rlang::syms(keys)) %>%
+    arrange(time_value) %>%
     dplyr::slice_tail(n = 1L) %>%
-    dplyr::ungroup() %>%
-    dplyr::select(tidyselect::all_of(c(keys, ".pred")))
+    ungroup() %>%
+    select(all_of(c(keys, ".pred")))
 
   structure(
     list(
-      residuals = dplyr::select(preds, dplyr::all_of(c(keys, ".resid"))),
+      residuals = select(preds, all_of(c(keys, ".resid"))),
       .pred = .pred
     ),
     class = "flatline"
@@ -80,14 +80,13 @@ predict.flatline <- function(object, newdata, ...) {
   metadata <- names(object)[names(object) != ".pred"]
   ek <- names(newdata)
   if (!all(metadata %in% ek)) {
-    cli_stop(
+    cli_abort(c(
       "`newdata` has different metadata than was used",
       "to fit the flatline forecaster"
-    )
+    ))
   }
 
-  dplyr::left_join(newdata, object, by = metadata) %>%
-    dplyr::pull(.pred)
+  left_join(newdata, object, by = metadata)$.pred
 }
 
 #' @export

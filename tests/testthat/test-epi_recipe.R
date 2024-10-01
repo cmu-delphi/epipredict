@@ -1,24 +1,12 @@
-test_that("epi_recipe produces default recipe", {
-  # these all call recipes::recipe(), but the template will always have 1 row
+test_that("epi_recipe produces error if not an epi_df", {
   tib <- tibble(
     x = 1:5, y = 1:5,
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5)
   )
-  rec <- recipes::recipe(tib)
-  rec$template <- rec$template[1, ]
-  expect_identical(rec, epi_recipe(tib))
-  expect_equal(nrow(rec$template), 1L)
-
-  rec <- recipes::recipe(y ~ x, tib)
-  rec$template <- rec$template[1, ]
-  expect_identical(rec, epi_recipe(y ~ x, tib))
-  expect_equal(nrow(rec$template), 1L)
-
+  expect_snapshot(error = TRUE, epi_recipe(tib))
+  expect_snapshot(error = TRUE, epi_recipe(y ~ x, tib))
   m <- as.matrix(tib)
-  rec <- recipes::recipe(m)
-  rec$template <- rec$template[1, ]
-  expect_identical(rec, epi_recipe(m))
-  expect_equal(nrow(rec$template), 1L)
+  expect_snapshot(error = TRUE, epi_recipe(m))
 })
 
 test_that("epi_recipe formula works", {
@@ -56,7 +44,7 @@ test_that("epi_recipe formula works", {
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
     geo_value = "ca",
     z = "dummy_key"
-  ) %>% epiprocess::as_epi_df(additional_metadata = list(other_keys = "z"))
+  ) %>% epiprocess::as_epi_df(other_keys = "z")
 
   # with an additional key
   r <- epi_recipe(y ~ x + geo_value, tib)
@@ -125,7 +113,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
   wf <- epi_workflow() %>%
     add_epi_recipe(r)
 
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 3)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 7, 14))
@@ -140,7 +128,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   wf <- update_epi_recipe(wf, r2)
 
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 1))
@@ -149,7 +137,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   # adjust_epi_recipe using step number
   wf <- adjust_epi_recipe(wf, which_step = 2, ahead = 7)
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 1))
@@ -158,7 +146,7 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
   # adjust_epi_recipe using step name
   wf <- adjust_epi_recipe(wf, which_step = "step_epi_ahead", ahead = 8)
-  steps <- extract_preprocessor(wf)$steps
+  steps <- workflows::extract_preprocessor(wf)$steps
   expect_equal(length(steps), 2)
   expect_equal(class(steps[[1]]), c("step_epi_lag", "step"))
   expect_equal(steps[[1]]$lag, c(0, 1))
@@ -167,6 +155,6 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
 
   wf <- remove_epi_recipe(wf)
-  expect_error(extract_preprocessor(wf)$steps)
+  expect_snapshot(error = TRUE, workflows::extract_preprocessor(wf)$steps)
   expect_equal(wf$pre$actions$recipe$recipe, NULL)
 })

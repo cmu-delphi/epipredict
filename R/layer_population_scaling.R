@@ -47,9 +47,10 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' jhu <- epiprocess::jhu_csse_daily_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
-#'   dplyr::select(geo_value, time_value, cases)
+#' library(dplyr)
+#' jhu <- jhu_csse_daily_subset %>%
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+#'   select(geo_value, time_value, cases)
 #'
 #' pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 #'
@@ -74,21 +75,11 @@
 #'     df_pop_col = "value"
 #'   )
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>%
+#' wf <- epi_workflow(r, linear_reg()) %>%
 #'   fit(jhu) %>%
 #'   add_frosting(f)
 #'
-#' latest <- get_test_data(
-#'   recipe = r,
-#'   x = epiprocess::jhu_csse_daily_subset %>%
-#'     dplyr::filter(
-#'       time_value > "2021-11-01",
-#'       geo_value %in% c("ca", "ny")
-#'     ) %>%
-#'     dplyr::select(geo_value, time_value, cases)
-#' )
-#'
-#' predict(wf, latest)
+#' forecast(wf)
 layer_population_scaling <- function(frosting,
                                      ...,
                                      df,
@@ -103,7 +94,7 @@ layer_population_scaling <- function(frosting,
   arg_is_chr(df_pop_col, suffix, id)
   arg_is_chr(by, allow_null = TRUE)
   if (rate_rescaling <= 0) {
-    cli_stop("`rate_rescaling` should be a positive number")
+    cli_abort("`rate_rescaling` must be a positive number.")
   }
 
   add_layer(
@@ -138,27 +129,22 @@ layer_population_scaling_new <-
 #' @export
 slather.layer_population_scaling <-
   function(object, components, workflow, new_data, ...) {
-    rlang::check_dots_empty()
     stopifnot(
       "Only one population column allowed for scaling" =
         length(object$df_pop_col) == 1
     )
+    rlang::check_dots_empty()
 
-    try_join <- try(
-      dplyr::left_join(components$predictions, object$df,
-        by = object$by
-      ),
-      silent = TRUE
+    object$by <- object$by %||% intersect(
+      epi_keys_only(components$predictions),
+      colnames(select(object$df, !object$df_pop_col))
     )
-    if (any(grepl("Join columns must be present in data", unlist(try_join)))) {
-      cli_stop(c(
-        "columns in `by` selectors of `layer_population_scaling` ",
-        "must be present in data and match"
-      ))
-    }
+    joinby <- list(x = names(object$by) %||% object$by, y = object$by)
+    hardhat::validate_column_names(components$predictions, joinby$x)
+    hardhat::validate_column_names(object$df, joinby$y)
 
-    object$df <- object$df %>%
-      dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
+    # object$df <- object$df %>%
+    #  dplyr::mutate(dplyr::across(tidyselect::where(is.character), tolower))
     pop_col <- rlang::sym(object$df_pop_col)
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
@@ -166,18 +152,18 @@ slather.layer_population_scaling <-
     suffix <- ifelse(object$create_new, object$suffix, "")
     col_to_remove <- setdiff(colnames(object$df), colnames(components$predictions))
 
-    components$predictions <- dplyr::left_join(
+    components$predictions <- left_join(
       components$predictions,
       object$df,
       by = object$by,
       suffix = c("", ".df")
     ) %>%
-      dplyr::mutate(dplyr::across(
-        dplyr::all_of(col_names),
+      mutate(across(
+        all_of(col_names),
         ~ .x * !!pop_col / object$rate_rescaling,
         .names = "{.col}{suffix}"
       )) %>%
-      dplyr::select(-dplyr::any_of(col_to_remove))
+      select(-any_of(col_to_remove))
     components
   }
 

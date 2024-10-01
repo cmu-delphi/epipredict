@@ -2,7 +2,7 @@
 title: "Using the add/update/remove and adjust functions"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using the update and adjust functions}
+  %\VignetteIndexEntry{Using the add/update/remove and adjust functions}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -39,8 +39,8 @@ add/remove/update an `epi_recipe` or a step in it. For this, we have
 `add_epi_recipe()`, `update_epi_recipe()`, and `remove_epi_recipe()` to
 add/update/remove an entire `epi_recipe` in an `epi_workflow` as well as
 `adjust_epi_recipe()` to adjust a particular step in an `epi_recipe` or
-`epi_workflow` by the step number or name. For a model, one may `add_model()`,
-`update_model()`, or `remove_model()` in an `epi_workflow`. For post-processing,
+`epi_workflow` by the step number or name. For a model, one may `Add_model()`,
+`Update_model()`, or `Remove_model()` in an `epi_workflow`.[^1] For post-processing,
 where the goal is to update a frosting object or a layer in it, we have
 `add_frosting()`, `remove_frosting()`, and `update_frosting()` to
 add/update/remove an entire `frosting` object in an `epi_workflow` as well as
@@ -51,8 +51,13 @@ processing step is shown by the following table:
 |                            | Add/update/remove functions                                | adjust functions    |
 |----------------------------|------------------------------------------------------------|---------------------|
 | Pre-processing  | `add_epi_recipe()`, `update_epi_recipe()`, `remove_epi_recipe()` | `adjust_epi_recipe()` |
-| Model specification        | `add_model()`, `update_model()` `remove_model()`                 |                     |
+| Model specification        | `Add_model()`, `Update_model()` `Remove_model()`                 |                     |
 | Post-processing | `add_frosting()`, `remove_frosting()`, `update_frosting()`       | `adjust_frosting()`   |
+
+[^1]: We capitalize these names to avoid possible clashes with the `{workflows}`
+versions of these functions. The lower-case versions are also available,
+however, if you load `{workflows}` after `{epipredict}`, these will be masked
+and may not work as expected.
 
 Since adding/removing/updating frosting as well as adjusting a layer in a
 `frosting` object proceeds in the same way as performing those tasks on an
@@ -162,16 +167,16 @@ point - Any operations performed using the old recipe are not updated
 automatically. So we should be careful to fit the model using the new recipe,
 `r2`. Similarly, if predictions were made using the old recipe, then they should
 be re-generated using the version `epi_workflow` that contains the updated
-recipe. We can use `update_model()` to replace the model used in `wf`, and then
+recipe. We can use `Update_model()` to replace the model used in `wf`, and then
 fit as before:
 
 ```{r}
 # fit linear model
-wf <- update_model(wf, parsnip::linear_reg()) %>% fit(jhu)
+wf <- Update_model(wf, parsnip::linear_reg()) %>% fit(jhu)
 wf
 ```
 
-Alternatively, we may use the `remove_model()` followed by `add_model()`
+Alternatively, we may use the `Remove_model()` followed by `Add_model()`
 combination for the same effect.
 
 ## Add/update/remove a `frosting` object in an `epi_workflow`
@@ -181,13 +186,11 @@ predictions. In our initial frosting object, `f`, we simply implement
 predictions on the fitted `epi_workflow`:
 
 ```{r}
-latest <- get_test_data(recipe = r2, x = jhu)
-
 f <- frosting() %>%
   layer_predict()
 
 wf1 <- wf %>% add_frosting(f)
-p1 <- predict(wf1, latest)
+p1 <- forecast(wf1)
 p1
 ```
 
@@ -207,7 +210,7 @@ f2 <- frosting() %>%
   layer_add_target_date()
 
 wf2 <- wf1 %>% update_frosting(f2)
-p2 <- predict(wf2, latest)
+p2 <- forecast(wf2)
 p2
 ```
 
@@ -223,7 +226,7 @@ remove the `frosting` object from the workflow and make predictions as follows:
 
 ```{r}
 wf3 <- wf2 %>% remove_frosting()
-p3 <- predict(wf3, latest)
+p3 <- forecast(wf3)
 p3
 ```
 
@@ -285,7 +288,7 @@ Note that when we adjust the `r2` object directly, we are not adjusting the
 recipe in the `epi_workflow`. That is, if we modify a step in `r2`, the change
 will not automatically transfer over to `wf`. We would need to modify the recipe
 in `wf` directly (`adjust_epi_recipe()` on `wf`) or update the recipe in `wf`
-with a new `epi_recipe` that has undergone the adjustment 
+with a new `epi_recipe` that has undergone the adjustment
 (using `update_epi_recipe()`):
 
 ```{r}

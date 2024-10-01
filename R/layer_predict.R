@@ -16,6 +16,7 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
@@ -24,7 +25,7 @@
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #'
 #' # Predict layer alone
@@ -45,12 +46,19 @@ layer_predict <-
            id = rand_id("predict_default")) {
     arg_is_chr_scalar(id)
     arg_is_chr_scalar(type, allow_null = TRUE)
+    assert_class(opts, "list")
+    dots_list <- rlang::dots_list(..., .homonyms = "error", .check_assign = TRUE)
+    if (any(rlang::names2(dots_list) == "")) {
+      cli_abort("All `...` arguments must be named.",
+        class = "epipredict__layer_predict__unnamed_dot"
+      )
+    }
     add_layer(
       frosting,
       layer_predict_new(
         type = type,
         opts = opts,
-        dots_list = rlang::list2(...), # can't figure how to use this
+        dots_list = dots_list,
         id = id
       )
     )
@@ -62,17 +70,28 @@ layer_predict_new <- function(type, opts, dots_list, id) {
 }
 
 #' @export
-slather.layer_predict <- function(object, components, workflow, new_data, ...) {
+slather.layer_predict <- function(object, components, workflow, new_data, type = NULL, opts = list(), ...) {
+  arg_is_chr_scalar(type, allow_null = TRUE)
+  if (!is.null(object$type) && !is.null(type) && !identical(object$type, type)) {
+    cli_abort("
+      Conflicting `type` settings were specified during frosting construction
+      (in call to `layer_predict()`) and while slathering (in call to
+      `slather()`/ `predict()`/etc.): {object$type} vs. {type}.  Please remove
+      one of these `type` settings.
+    ", class = "epipredict__layer_predict__conflicting_type_settings")
+  }
+  assert_class(opts, "list")
+
   the_fit <- workflows::extract_fit_parsnip(workflow)
 
-  components$predictions <- predict(
+  components$predictions <- rlang::inject(predict(
     the_fit,
     components$forged$predictors,
-    type = object$type, opts = object$opts
-  )
-  components$predictions <- dplyr::bind_cols(
-    components$keys, components$predictions
-  )
+    type = object$type %||% type,
+    opts = c(object$opts, opts),
+    !!!object$dots_list, ...
+  ))
+  components$predictions <- bind_cols(components$keys, components$predictions)
   components
 }
 

@@ -36,15 +36,16 @@ less than the maximum \code{as_of} value (from the data used pre-processing,
 model fitting, and postprocessing), an appropriate warning will be thrown.
 }
 \examples{
+library(dplyr)
 jhu <- case_death_rate_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_naomit()
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
+wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 latest <- jhu \%>\%
-  dplyr::filter(time_value >= max(time_value) - 14)
+  filter(time_value >= max(time_value) - 14)
 
 # Don't specify `forecast_date` (by default, this should be last date in latest)
 f <- frosting() \%>\%

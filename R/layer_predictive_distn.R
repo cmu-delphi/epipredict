@@ -20,17 +20,16 @@
 #' @export
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+#'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
 #'
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#'
-#' latest <- get_test_data(recipe = r, x = jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
@@ -38,7 +37,7 @@
 #'   layer_naomit(.pred)
 #' wf1 <- wf %>% add_frosting(f)
 #'
-#' p <- predict(wf1, latest)
+#' p <- forecast(wf1)
 #' p
 layer_predictive_distn <- function(frosting,
                                    ...,
@@ -75,6 +74,7 @@ layer_predictive_distn_new <- function(dist_type, truncate, name, id) {
 slather.layer_predictive_distn <-
   function(object, components, workflow, new_data, ...) {
     the_fit <- workflows::extract_fit_parsnip(workflow)
+    rlang::check_dots_empty()
 
     m <- components$predictions$.pred
     r <- grab_residuals(the_fit, components)
@@ -92,9 +92,9 @@ slather.layer_predictive_distn <-
     if (!all(is.infinite(truncate))) {
       dstn <- distributional::dist_truncated(dstn, truncate[1], truncate[2])
     }
-    dstn <- tibble::tibble(dstn = dstn)
+    dstn <- tibble(dstn = dstn)
     dstn <- check_pname(dstn, components$predictions, object)
-    components$predictions <- dplyr::mutate(components$predictions, !!!dstn)
+    components$predictions <- mutate(components$predictions, !!!dstn)
     components
   }
 

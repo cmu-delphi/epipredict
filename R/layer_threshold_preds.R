@@ -22,23 +22,20 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value < "2021-03-08",
-#'   geo_value %in% c("ak", "ca", "ar"))
+#'   filter(time_value < "2021-03-08", geo_value %in% c("ak", "ca", "ar"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_naomit()
-#' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#'
-#' latest <- get_test_data(r, jhu)
+#' wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_threshold(.pred, lower = 0.180, upper = 0.310)
 #' wf <- wf %>% add_frosting(f)
-#' p <- predict(wf, latest)
+#' p <- forecast(wf)
 #' p
 layer_threshold <-
   function(frosting, ..., lower = 0, upper = Inf, id = rand_id("threshold")) {
@@ -48,7 +45,7 @@ layer_threshold <-
     add_layer(
       frosting,
       layer_threshold_new(
-        terms = dplyr::enquos(...),
+        terms = enquos(...),
         lower = lower,
         upper = upper,
         id = id
@@ -100,16 +97,12 @@ snap.dist_quantiles <- function(x, lower, upper, ...) {
 #' @export
 slather.layer_threshold <-
   function(object, components, workflow, new_data, ...) {
+    rlang::check_dots_empty()
     exprs <- rlang::expr(c(!!!object$terms))
     pos <- tidyselect::eval_select(exprs, components$predictions)
     col_names <- names(pos)
     components$predictions <- components$predictions %>%
-      dplyr::mutate(
-        dplyr::across(
-          dplyr::all_of(col_names),
-          ~ snap(.x, object$lower, object$upper)
-        )
-      )
+      mutate(across(all_of(col_names), ~ snap(.x, object$lower, object$upper)))
     components
   }
 

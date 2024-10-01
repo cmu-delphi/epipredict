@@ -1,15 +1,18 @@
 #' Direct autoregressive forecaster with covariates
 #'
 #' This is an autoregressive forecasting model for
-#' [epiprocess::epi_df] data. It does "direct" forecasting, meaning
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It does "direct" forecasting, meaning
 #' that it estimates a model for a particular target horizon.
 #'
 #'
 #' @param epi_data An `epi_df` object
 #' @param outcome A character (scalar) specifying the outcome (in the
 #'   `epi_df`).
-#' @param predictors A character vector giving column(s) of predictor
-#'   variables.
+#' @param predictors A character vector giving column(s) of predictor variables.
+#'   This defaults to the `outcome`. However, if manually specified, only those variables
+#'   specifically mentioned will be used. (The `outcome` will not be added.)
+#'   By default, equals the outcome. If manually specified, does not add the
+#'   outcome variable, so make sure to specify it.
 #' @param trainer A `{parsnip}` model describing the type of estimation.
 #'   For now, we enforce `mode = "regression"`.
 #' @param args_list A list of customization arguments to determine
@@ -35,28 +38,27 @@
 #'   trainer = quantile_reg(),
 #'   args_list = arx_args_list(quantile_levels = 1:9 / 10)
 #' )
-arx_forecaster <- function(epi_data,
-                           outcome,
-                           predictors,
-                           trainer = parsnip::linear_reg(),
-                           args_list = arx_args_list()) {
+arx_forecaster <- function(
+    epi_data,
+    outcome,
+    predictors = outcome,
+    trainer = linear_reg(),
+    args_list = arx_args_list()) {
   if (!is_regression(trainer)) {
-    cli::cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
+    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
 
-  wf <- arx_fcast_epi_workflow(
-    epi_data, outcome, predictors, trainer, args_list
-  )
+  wf <- arx_fcast_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
+  wf <- fit(wf, epi_data)
 
-  latest <- get_test_data(
-    hardhat::extract_preprocessor(wf), epi_data, TRUE, args_list$nafill_buffer,
-    args_list$forecast_date %||% max(epi_data$time_value)
-  )
-
-  wf <- generics::fit(wf, epi_data)
-  preds <- predict(wf, new_data = latest) %>%
-    tibble::as_tibble() %>%
-    dplyr::select(-time_value)
+  preds <- forecast(
+    wf,
+    fill_locf = TRUE,
+    n_recent = args_list$nafill_buffer,
+    forecast_date = args_list$forecast_date %||% max(epi_data$time_value)
+  ) %>%
+    as_tibble() %>%
+    select(-time_value)
 
   structure(
     list(
@@ -80,16 +82,18 @@ arx_forecaster <- function(epi_data,
 #' use [quantile_reg()]) but can be omitted.
 #'
 #' @inheritParams arx_forecaster
-#' @param trainer A `{parsnip}` model describing the type of estimation.
-#'   For now, we enforce `mode = "regression"`. May be `NULL` (the default).
+#' @param trainer A `{parsnip}` model describing the type of estimation. For
+#'   now, we enforce `mode = "regression"`. May be `NULL` if you'd like to
+#'   decide later.
 #'
 #' @return An unfitted `epi_workflow`.
 #' @export
 #' @seealso [arx_forecaster()]
 #'
 #' @examples
+#' library(dplyr)
 #' jhu <- case_death_rate_subset %>%
-#'   dplyr::filter(time_value >= as.Date("2021-12-01"))
+#'   filter(time_value >= as.Date("2021-12-01"))
 #'
 #' arx_fcast_epi_workflow(
 #'   jhu, "death_rate",
@@ -104,16 +108,16 @@ arx_forecaster <- function(epi_data,
 arx_fcast_epi_workflow <- function(
     epi_data,
     outcome,
-    predictors,
-    trainer = NULL,
+    predictors = outcome,
+    trainer = linear_reg(),
     args_list = arx_args_list()) {
   # --- validation
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_fcast", "alist"))) {
-    cli::cli_abort("args_list was not created using `arx_args_list().")
+    cli_abort("`args_list` was not created using `arx_args_list()`.")
   }
   if (!(is.null(trainer) || is_regression(trainer))) {
-    cli::cli_abort("{trainer} must be a `{parsnip}` model of mode 'regression'.")
+    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
   lags <- arx_lags_validator(predictors, args_list$lags)
 
@@ -126,24 +130,22 @@ arx_fcast_epi_workflow <- function(
   r <- r %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead) %>%
     step_epi_naomit() %>%
-    step_training_window(n_recent = args_list$n_training) %>%
-    {
-      if (!is.null(args_list$check_enough_data_n)) {
-        check_enough_train_data(
-          .,
-          all_predictors(),
-          !!outcome,
-          n = args_list$check_enough_data_n,
-          epi_keys = args_list$check_enough_data_epi_keys,
-          drop_na = FALSE
-        )
-      } else {
-        .
-      }
-    }
+    step_training_window(n_recent = args_list$n_training)
+
+  if (!is.null(args_list$check_enough_data_n)) {
+    r <- check_enough_train_data(
+      r,
+      all_predictors(),
+      !!outcome,
+      n = args_list$check_enough_data_n,
+      epi_keys = args_list$check_enough_data_epi_keys,
+      drop_na = FALSE
+    )
+  }
+
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
-  target_date <- args_list$target_date %||% forecast_date + args_list$ahead
+  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
@@ -154,7 +156,7 @@ arx_fcast_epi_workflow <- function(
       rlang::eval_tidy(trainer$args$quantile_levels)
     ))
     args_list$quantile_levels <- quantile_levels
-    trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
+    trainer$args$quantile_levels <- enquo(quantile_levels)
     f <- layer_quantile_distn(f, quantile_levels = quantile_levels) %>%
       layer_point_from_distn()
   } else {
@@ -260,6 +262,15 @@ arx_args_list <- function(
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
+  if (!is.null(forecast_date) && !is.null(target_date)) {
+    if (forecast_date + ahead != target_date) {
+      cli_warn(c(
+        "`forecast_date` + `ahead` must equal `target_date`.",
+        i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
+      ))
+    }
+  }
+
   max_lags <- max(lags)
   structure(
     enlist(
@@ -289,8 +300,8 @@ print.arx_fcast <- function(x, ...) {
 }
 
 compare_quantile_args <- function(alist, tlist) {
-  default_alist <- eval(formals(arx_args_list)$quantile_level)
-  default_tlist <- eval(formals(quantile_reg)$quantile_level)
+  default_alist <- eval(formals(arx_args_list)$quantile_levels)
+  default_tlist <- eval(formals(quantile_reg)$quantile_levels)
   if (setequal(alist, default_alist)) {
     if (setequal(tlist, default_tlist)) {
       return(sort(unique(union(alist, tlist))))
@@ -304,7 +315,7 @@ compare_quantile_args <- function(alist, tlist) {
       if (setequal(alist, tlist)) {
         return(sort(unique(alist)))
       }
-      rlang::abort(c(
+      cli_abort(c(
         "You have specified different, non-default, quantiles in the trainier and `arx_args` options.",
         i = "Please only specify quantiles in one location."
       ))

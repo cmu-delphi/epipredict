@@ -74,9 +74,10 @@ passed will \emph{multiply} the selected variables while the \code{rate_rescalin
 argument is a common \emph{divisor} of the selected variables.
 }
 \examples{
-jhu <- epiprocess::jhu_csse_daily_subset \%>\%
-  dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
-  dplyr::select(geo_value, time_value, cases)
+library(dplyr)
+jhu <- jhu_csse_daily_subset \%>\%
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
+  select(geo_value, time_value, cases)
 
 pop_data <- data.frame(states = c("ca", "ny"), value = c(20000, 30000))
 
@@ -101,19 +102,9 @@ f <- frosting() \%>\%
     df_pop_col = "value"
   )
 
-wf <- epi_workflow(r, parsnip::linear_reg()) \%>\%
+wf <- epi_workflow(r, linear_reg()) \%>\%
   fit(jhu) \%>\%
   add_frosting(f)
 
-latest <- get_test_data(
-  recipe = r,
-  x = epiprocess::jhu_csse_daily_subset \%>\%
-    dplyr::filter(
-      time_value > "2021-11-01",
-      geo_value \%in\% c("ca", "ny")
-    ) \%>\%
-    dplyr::select(geo_value, time_value, cases)
-)
-
-predict(wf, latest)
+forecast(wf)
 }

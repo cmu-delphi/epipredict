@@ -7,7 +7,7 @@ test_that("frosting validators / constructors work", {
   expect_false(has_postprocessor_frosting(wf))
   expect_silent(wf %>% add_frosting(new_frosting()))
   expect_silent(wf %>% add_postprocessor(new_frosting()))
-  expect_error(wf %>% add_postprocessor(list()))
+  expect_snapshot(error = TRUE, wf %>% add_postprocessor(list()))
 
   wf <- wf %>% add_frosting(new_frosting())
   expect_true(has_postprocessor(wf))
@@ -16,7 +16,7 @@ test_that("frosting validators / constructors work", {
 
 test_that("frosting can be created/added/updated/adjusted/removed", {
   f <- frosting()
-  expect_error(frosting(layers = 1:5))
+  expect_snapshot(error = TRUE, frosting(layers = 1:5))
   wf <- epi_workflow() %>% add_frosting(f)
   expect_true(has_postprocessor_frosting(wf))
   wf1 <- update_frosting(wf, frosting() %>% layer_predict() %>% layer_threshold(.pred))
@@ -72,8 +72,6 @@ test_that("layer_predict is added by default if missing", {
 
   wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 
-  latest <- get_test_data(recipe = r, x = jhu)
-
   f1 <- frosting() %>%
     layer_naomit(.pred) %>%
     layer_residual_quantiles()
@@ -86,5 +84,62 @@ test_that("layer_predict is added by default if missing", {
   wf1 <- wf %>% add_frosting(f1)
   wf2 <- wf %>% add_frosting(f2)
 
-  expect_equal(predict(wf1, latest), predict(wf2, latest))
+  expect_equal(forecast(wf1), forecast(wf2))
+})
+
+
+test_that("parsnip settings can be passed through predict.epi_workflow", {
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+
+  r <- epi_recipe(jhu) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_epi_naomit()
+
+  wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+
+  latest <- get_test_data(r, jhu)
+
+  f1 <- frosting() %>% layer_predict()
+  f2 <- frosting() %>% layer_predict(type = "pred_int")
+  f3 <- frosting() %>% layer_predict(type = "pred_int", level = 0.6)
+
+  pred2 <- wf %>%
+    add_frosting(f2) %>%
+    predict(latest)
+  pred3 <- wf %>%
+    add_frosting(f3) %>%
+    predict(latest)
+
+  pred2_re <- wf %>%
+    add_frosting(f1) %>%
+    predict(latest, type = "pred_int")
+  pred3_re <- wf %>%
+    add_frosting(f1) %>%
+    predict(latest, type = "pred_int", level = 0.6)
+
+  expect_identical(pred2, pred2_re)
+  expect_identical(pred3, pred3_re)
+
+  expect_error(wf %>% add_frosting(f2) %>% predict(latest, type = "raw"),
+    class = "epipredict__layer_predict__conflicting_type_settings"
+  )
+
+  f4 <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred, lower = 0)
+
+  expect_error(wf %>% add_frosting(f4) %>% predict(latest, type = "pred_int"),
+    class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers"
+  )
+
+  # We also refuse to continue when just passing the level, which might not be ideal:
+  f5 <- frosting() %>%
+    layer_predict(type = "pred_int") %>%
+    layer_threshold(.pred_lower, .pred_upper, lower = 0)
+
+  expect_error(wf %>% add_frosting(f5) %>% predict(latest, level = 0.6),
+    class = "epipredict__apply_frosting__predict_settings_with_unsupported_layers"
+  )
 })

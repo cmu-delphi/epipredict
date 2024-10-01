@@ -58,7 +58,8 @@ and forecasts to characterize the state of an outbreak and its course. They use
 it to inform public health decision makers on potential consequences of
 deploying control measures.
 
-One of the outcomes that the CDC forecasts is [death counts from COVID-19](https://www.cdc.gov/coronavirus/2019-ncov/science/forecasting/forecasting-us.html).
+One of the outcomes that the CDC forecasts is 
+[death counts from COVID-19](https://www.cdc.gov/coronavirus/2019-ncov/science/forecasting/forecasting-us.html).
 Although there are many state-of-the-art models, we choose to use Poisson
 regression, the textbook example for modeling count data, as an illustration
 for using the `epipredict` package with other existing tidymodels packages.
@@ -99,7 +100,7 @@ intercept coefficients, we can allow for an intercept shift between states.
 The model takes the form
 \begin{aligned}
 \log\left( \mu_{t+7} \right) &= \beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ 
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\
 &\quad\beta_1 \text{deaths}_{t} +
 \beta_2 \text{deaths}_{t-7} + \beta_3 \text{cases}_{t} +
 \beta_4 \text{cases}_{t-7},
@@ -109,7 +110,8 @@ Poisson distribution with mean $\mu_{t+7}$; $s_{\text{state}}$ are dummy
 variables for each state and take values of either 0 or 1.
 
 Preprocessing steps will be performed to prepare the
-data for model fitting. But before diving into them, it will be helpful to understand what `roles` are in the `recipes` framework.
+data for model fitting. But before diving into them, it will be helpful to 
+understand what `roles` are in the `recipes` framework.
 
 ---
 
@@ -198,7 +200,7 @@ To model death rates, the Poisson regression would be expressed as:
 \begin{aligned}
 \log\left( \mu_{t+7} \right) &= \log(\text{population}) +
 \beta_0 + \delta_1 s_{\text{state}_1} +
-\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\ 
+\delta_2 s_{\text{state}_2} + \cdots + \nonumber \\
 &\quad\beta_1 \text{deaths}_{t} +
 \beta_2 \text{deaths}_{t-7} + \beta_3 \text{cases}_{t} +
 \beta_4 \text{cases}_{t-7}
@@ -235,9 +237,10 @@ using
 `layer_residual_quantiles()` should be used before population scaling or else
 the transformation will make the results uninterpretable.
 
-We wish, now, to predict the 7-day ahead death counts with lagged case rates and death
-rates, along with some extra behaviourial predictors. Namely, we will use survey data
-from [COVID-19 Trends and Impact Survey](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/fb-survey.html#behavior-indicators).
+We wish, now, to predict the 7-day ahead death counts with lagged case rates and
+death rates, along with some extra behaviourial predictors. Namely, we will use
+survey data from 
+[COVID-19 Trends and Impact Survey](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/fb-survey.html#behavior-indicators).
 
 The survey data provides the estimated percentage of people who wore a mask for
 most or all of the time while in public in the past 7 days and the estimated
@@ -361,8 +364,7 @@ wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.05, .5, .95))) %>%
   fit(jhu) %>%
   add_frosting(f)
 
-latest <- get_test_data(recipe = r, x = jhu)
-p <- predict(wf, latest)
+p <- forecast(wf)
 p
 ```
 
@@ -414,7 +416,8 @@ We say location $\ell$ is a hotspot at time $t$ when $Z_{\ell,t}$ is
 `up`, meaning the number of newly reported cases over the past 7 days has
 increased by at least 25% compared to the preceding week. When $Z_{\ell,t}$
 is categorized as `down`, it suggests that there has been at least a 20%
-decrease in newly reported cases over the past 7 days (a 20% decrease is the inverse of a 25% increase). Otherwise, we will
+decrease in newly reported cases over the past 7 days (a 20% decrease is the 
+inverse of a 25% increase). Otherwise, we will
 consider the trend to be `flat`.
 
 The expression of the multinomial regression we will use is as follows:
@@ -431,16 +434,17 @@ g_{\text{flat}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{flat}\mid x)}{Pr(Z_{\e
 \beta_{10} + \beta_{11} t + \delta_{10} s_{\text{state_1}} +
 \delta_{11} s_{\text{state_2}} + \cdots \nonumber \\
 &\quad + \beta_{12} Y^{\Delta}_{\ell, t} +
-\beta_{13} Y^{\Delta}_{\ell, t-7} \\
-g_{\text{flat}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{up}\mid x)}{Pr(Z_{\ell,t}=\text{down} \mid x)}\right) =
+\beta_{13} Y^{\Delta}_{\ell, t-7} + \beta_{14} Y^{\Delta}_{\ell, t-14}\\
+g_{\text{up}}(x) &= \log\left(\frac{Pr(Z_{\ell,t}=\text{up}\mid x)}{Pr(Z_{\ell,t}=\text{down} \mid x)}\right) =
 \beta_{20} + \beta_{21}t + \delta_{20} s_{\text{state_1}} +
 \delta_{21} s_{\text{state}\_2} + \cdots \nonumber \\
 &\quad + \beta_{22} Y^{\Delta}_{\ell, t} +
-\beta_{23} Y^{\Delta}\_{\ell, t-7}
+\beta_{23} Y^{\Delta}_{\ell, t-7} + \beta_{24} Y^{\Delta}_{\ell, t-14}
 \end{aligned}
 
 Preprocessing steps are similar to the previous models with an additional step
-of categorizing the response variables. Again, we will use a subset of death rate and case rate data from our built-in dataset
+of categorizing the response variables. Again, we will use a subset of death
+rate and case rate data from our built-in dataset
 `case_death_rate_subset`.
 
 ```{r}
@@ -474,11 +478,10 @@ r <- epi_recipe(jhu) %>%
 We will fit the multinomial regression and examine the predictions:
 
 ```{r, warning=FALSE}
-wf <- epi_workflow(r, parsnip::multinom_reg()) %>%
+wf <- epi_workflow(r, multinom_reg()) %>%
   fit(jhu)
 
-latest <- get_test_data(recipe = r, x = jhu)
-predict(wf, latest) %>% filter(!is.na(.pred_class))
+forecast(wf) %>% filter(!is.na(.pred_class))
 ```
 
 We can also look at the estimated coefficients and model summary information:
@@ -587,7 +590,12 @@ Sciences 118.51 (2021): e2111453118. [doi:10.1073/pnas.2111453118](https://doi.o
 
 ## Attribution
 
-This object contains a modified part of the [COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) as [republished in the COVIDcast Epidata API.](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html)
+This object contains a modified part of the 
+[COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) 
+as [republished in the COVIDcast Epidata API.](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html)
 
-This data set is licensed under the terms of the [Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) by the Johns Hopkins University
-on behalf of its Center for Systems Science in Engineering. Copyright Johns Hopkins University 2020.
+This data set is licensed under the terms of the 
+[Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) 
+by the Johns Hopkins
+University on behalf of its Center for Systems Science in Engineering. Copyright
+Johns Hopkins University 2020.

@@ -8,4 +8,5 @@
   make_flatline_reg()
   make_quantile_reg()
   make_smooth_quantile_reg()
+  make_grf_quantiles()
 }

@@ -1,0 +1,485 @@
+---
+title: "Using epipredict on non-epidemic panel data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using epipredict on non-epidemic panel data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=F}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  collapse = TRUE,
+  comment = "#>",
+  out.width = "90%",
+  fig.align = "center"
+)
+```
+
+```{r libraries, warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(parsnip)
+library(recipes)
+library(epiprocess)
+library(epipredict)
+library(ggplot2)
+theme_set(theme_bw())
+```
+
+[Panel data](https://en.wikipedia.org/wiki/Panel_data), or longitudinal data, 
+contain cross-sectional measurements of subjects over time. The `epipredict` 
+package is most suitable for running forecasters on epidemiological panel data. 
+A built-in example of this is the [`case_death_rate_subset`](
+  https://cmu-delphi.github.io/epipredict/reference/case_death_rate_subset.html) 
+dataset, which contains daily state-wise measures of `case_rate` and 
+`death_rate` for COVID-19 in 2021:
+
+```{r epi-panel-ex, include=T}
+head(case_death_rate_subset, 3)
+```
+
+`epipredict` functions work with data in 
+[`epi_df`](https://cmu-delphi.github.io/epiprocess/reference/epi_df.html) 
+format. Despite the stated goal and name of the package, other panel datasets 
+are also valid candidates for `epipredict` functionality, as long as they are 
+in `epi_df` format.
+
+```{r employ-stats, include=F}
+data("grad_employ_subset")
+year_start <- min(grad_employ_subset$time_value)
+year_end <- max(grad_employ_subset$time_value)
+```
+
+# Example panel data overview
+
+In this vignette, we will demonstrate using `epipredict` with employment panel
+data from Statistics Canada. We will be using 
+[
+  Table 37-10-0115-01: Characteristics and median employment income of 
+  longitudinal cohorts of postsecondary graduates two and five years after 
+  graduation, by educational qualification and field of study (primary 
+  groupings)
+](https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710011501). 
+
+The full dataset contains yearly median employment income two and five years 
+after graduation, and number of graduates. The data is stratified by 
+variables such as geographic region (Canadian province), education, and 
+age group. The year range of the dataset is `r year_start` to `r year_end`, 
+inclusive. The full dataset also contains metadata that describes the 
+quality of data collected. For demonstration purposes, we make the following 
+modifications to get a subset of the full dataset:
+
+* Only keep provincial-level geographic region (the full data also has 
+"Canada" as a region)
+* Only keep "good" or better quality data rows, as indicated by the [`STATUS`](
+  https://www.statcan.gc.ca/en/concepts/definitions/guide-symbol) column
+* Choose a subset of covariates and aggregate across the remaining ones. The 
+chosen covariates are age group, and educational qualification.
+
+To use this data with `epipredict`, we need to convert it into `epi_df` format 
+using `epiprocess::as_epi_df()`
+with additional keys. In our case, the additional keys are `age_group`,
+and `edu_qual`. Note that in the above modifications, we encoded `time_value` 
+as type `integer`. This lets us set `time_type = "year"`, and ensures that
+lag and ahead modifications later on are using the correct time units. See the
+`epiprocess::epi_df` for 
+a list of all the `time_type`s available.
+
+```{r data-dim, include=F}
+employ_rowcount <- format(nrow(grad_employ_subset), big.mark = ",")
+employ_colcount <- length(names(grad_employ_subset))
+```
+
+Now, we are ready to use `grad_employ_subset` with `epipredict`. 
+Our `epi_df` contains `r employ_rowcount` rows and `r employ_colcount` columns.
+Here is a quick summary of the columns in our `epi_df`:
+
+* `time_value` (time value): year in `date` format 
+* `geo_value` (geo value): province in Canada
+* `num_graduates` (raw, time series value): number of graduates 
+* `med_income_2y` (raw, time series value): median employment income 2 years 
+after graduation 
+* `med_income_5y` (raw, time series value): median employment income 5 years 
+after graduation  
+* `age_group` (key): one of two age groups, either 15 to 34 years, or 35 to 64 
+years 
+* `edu_qual` (key): one of 32 unique educational qualifications, e.g., 
+"Master's diploma"
+
+```{r preview-data, include=T}
+# Rename for simplicity
+employ <- grad_employ_subset
+sample_n(employ, 6)
+```
+
+In the following sections, we will go over pre-processing the data in the 
+`epi_recipe` framework, and fitting a model and making predictions within the 
+`epipredict` framework and using the package's canned forecasters.
+
+# Autoregressive (AR) model to predict number of graduates in a year 
+
+## Pre-processing 
+
+As a simple example, let's work with the `num_graduates` column for now. We will 
+first pre-process by standardizing each numeric column by the total within 
+each group of keys. We do this since those raw numeric values will vary greatly
+from province to province since there are large differences in population. 
+
+```{r employ-small, include=T}
+employ_small <- employ %>%
+  group_by(geo_value, age_group, edu_qual) %>%
+  # Select groups where there are complete time series values
+  filter(n() >= 6) %>%
+  mutate(
+    num_graduates_prop = num_graduates / sum(num_graduates),
+    med_income_2y_prop = med_income_2y / sum(med_income_2y),
+    med_income_5y_prop = med_income_5y / sum(med_income_5y)
+  ) %>%
+  ungroup()
+head(employ_small)
+```
+
+Below is a visualization for a sample of the small data for British Columbia and Ontario. 
+Note that some groups 
+do not have any time series information since we filtered out all time series 
+with incomplete dates.
+
+```{r employ-small-graph, include=T, eval=T, fig.width=9, fig.height=6}
+employ_small %>%
+  filter(geo_value %in% c("British Columbia", "Ontario")) %>%
+  filter(grepl("degree", edu_qual, fixed = T)) %>%
+  group_by(geo_value, time_value, edu_qual, age_group) %>%
+  summarise(num_graduates_prop = sum(num_graduates_prop), .groups = "drop") %>%
+  ggplot(aes(x = time_value, y = num_graduates_prop, color = geo_value)) +
+  geom_line() +
+  scale_colour_manual(values = c("Cornflowerblue", "Orange"), name = "") +
+  facet_grid(rows = vars(edu_qual), cols = vars(age_group)) +
+  xlab("Year") +
+  ylab("Percentage of gratuates") +
+  theme(legend.position = "bottom")
+```
+
+We will predict the standardized number of graduates (a proportion) in the 
+next year (time $t+1$) using an autoregressive model with three lags (i.e., an 
+AR(3) model). Such a model is represented algebraically like this: 
+
+\[
+  y_{t+1,ijk} = 
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk} + \epsilon_{tijk}
+\]
+
+where $y_{tij}$ is the proportion of graduates at time $t$ in location $i$ and
+age group $j$ with education quality $k$.
+
+In the pre-processing step, we need to create additional columns in `employ` for 
+each of $y_{t+1,ijk}$, $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$. 
+We do this via an 
+`epi_recipe`. Note that creating an `epi_recipe` alone doesn't add these 
+outcome and predictor columns; the recipe just stores the instructions for 
+adding them. 
+
+Our `epi_recipe` should add one `ahead` column representing $y_{t+1,ijk}$ and 
+3 `lag` columns representing $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$
+(it's more accurate to think of the  0th "lag" as the "current" value with 2 lags,
+but that's not quite how the processing works). 
+Also note that 
+since we specified our `time_type` to be `year`, our `lag` and `lead`
+values are both in years. 
+
+```{r make-recipe, include=T, eval=T}
+r <- epi_recipe(employ_small) %>%
+  step_epi_ahead(num_graduates_prop, ahead = 1) %>%
+  step_epi_lag(num_graduates_prop, lag = 0:2) %>%
+  step_epi_naomit()
+r
+```
+
+Let's apply this recipe using `prep` and `bake` to generate and view the `lag` 
+and `ahead` columns.
+
+```{r view-preprocessed, include=T}
+# Display a sample of the pre-processed data
+bake_and_show_sample <- function(recipe, data, n = 5) {
+  recipe %>%
+    prep(data) %>%
+    bake(new_data = data) %>%
+    sample_n(n)
+}
+
+r %>% bake_and_show_sample(employ_small)
+```
+
+We can see that the `prep` and `bake` steps created new columns according to 
+our `epi_recipe`:
+
+- `ahead_1_num_graduates_prop` corresponds to $y_{t+1,ijk}$
+- `lag_0_num_graduates_prop`, `lag_1_num_graduates_prop`, and 
+`lag_2_num_graduates_prop` correspond to $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$ 
+respectively.
+
+## Model fitting and prediction
+
+Since our goal for now is to fit a simple autoregressive model, we can use
+[`parsnip::linear_reg()`](
+  https://parsnip.tidymodels.org/reference/linear_reg.html) with the default 
+engine `lm`, which fits a linear regression using ordinary least squares. 
+
+We will use `epi_workflow` with the `epi_recipe` we defined in the 
+pre-processing section along with the `parsnip::linear_reg()` model. Note 
+that `epi_workflow` is a container and doesn't actually do the fitting. We have 
+to pass the workflow into `fit()` to get our estimated model coefficients 
+$\widehat{\alpha}_i,\ i=0,...,3$.
+
+```{r linearreg-wf, include=T}
+wf_linreg <- epi_workflow(r, linear_reg()) %>%
+  fit(employ_small)
+summary(extract_fit_engine(wf_linreg))
+```
+
+This output tells us the coefficients of the fitted model; for instance, 
+the estimated intercept is $\widehat{\alpha}_0 =$ 
+`r round(coef(extract_fit_engine(wf_linreg))[1], 3)` and the coefficient for 
+$y_{tijk}$ is 
+$\widehat\alpha_1 =$ `r round(coef(extract_fit_engine(wf_linreg))[2], 3)`.
+The summary also tells us that all estimated coefficients are significantly 
+different from zero. Extracting the 95% confidence intervals for the 
+coefficients also leads us to
+the same conclusion: all the coefficient estimates are significantly different
+from 0. 
+
+```{r}
+confint(extract_fit_engine(wf_linreg))
+```
+
+Now that we have our workflow, we can generate predictions from a subset of our 
+data. For this demo, we will predict the number of graduates using the last 2 
+years of our dataset.
+
+```{r linearreg-predict, include=T}
+latest <- get_test_data(recipe = r, x = employ_small)
+preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
+# Display a sample of the prediction values, excluding NAs
+preds %>% sample_n(5)
+```
+
+We can do this using the `augment` function too. Note that `predict` and 
+`augment` both still return an `epiprocess::epi_df` with all of the keys that 
+were present in the original dataset.
+
+```{r linearreg-augment}
+augment(wf_linreg, latest) %>% sample_n(5)
+```
+
+## Model diagnostics 
+
+First, we'll plot the residuals (that is, $y_{tijk} - \widehat{y}_{tijk}$) 
+against the fitted values ($\widehat{y}_{tijk}$).
+
+```{r lienarreg-resid-plot, include=T, fig.height = 5, fig.width = 5}
+par(mfrow = c(2, 2), mar = c(5, 3, 1.2, 0))
+plot(extract_fit_engine(wf_linreg))
+```
+
+The fitted values vs. residuals plot shows us that the residuals are mostly 
+clustered around zero, but do not form an even band around the zero line, 
+indicating that the variance of the residuals is not constant. Additionally,
+the fitted values vs. square root of standardized residuals makes this more 
+obvious - the spread of the square root of standardized residuals varies with 
+the fitted values. 
+
+The Q-Q plot shows us that the residuals have heavier tails than a Normal 
+distribution. So the normality of residuals assumption doesn't hold either.
+
+Finally, the residuals vs. leverage plot shows us that we have a few influential
+points based on the Cook's distance (those outside the red dotted line). 
+
+Since we appear to be violating the linear model assumptions, we might consider 
+transforming our data differently, or considering a non-linear model, or 
+something else.
+
+# AR model with exogenous inputs
+
+Now suppose we want to model the 1-step-ahead 5-year employment income using 
+current and two previous values, while 
+also incorporating information from the other two time-series in our dataset: 
+the 2-year employment income and the number of graduates in the previous 2 
+years. We would do this using an autoregressive model with exogenous inputs,
+defined as follows:
+
+\[
+\begin{aligned}
+  y_{t+1,ijk} &= 
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk}\\
+  &\quad + \beta_1 x_{tijk} + \beta_2 x_{t-1,ijk}\\
+  &\quad + \gamma_2 z_{tijk} + \gamma_2 z_{t-1,ijk} + \epsilon_{tijk}
+\end{aligned}
+\]
+
+where $y_{tijk}$ is the 5-year median income (proportion) at time $t$ (in
+location $i$, age group $j$ with education quality $k$), 
+$x_{tijk}$ is the 2-year median income (proportion) at time $t$, and 
+$z_{tijk}$ is the number of graduates (proportion) at time $t$. 
+
+## Pre-processing 
+
+Again, we construct an `epi_recipe` detailing the pre-processing steps.
+
+```{r custom-arx, include=T}
+rx <- epi_recipe(employ_small) %>%
+  step_epi_ahead(med_income_5y_prop, ahead = 1) %>%
+  # 5-year median income has current, and two lags c(0, 1, 2)
+  step_epi_lag(med_income_5y_prop, lag = 0:2) %>%
+  # But the two exogenous variables have current values, and 1 lag c(0, 1)
+  step_epi_lag(med_income_2y_prop, lag = c(0, 1)) %>%
+  step_epi_lag(num_graduates_prop, lag = c(0, 1)) %>%
+  step_epi_naomit()
+
+bake_and_show_sample(rx, employ_small)
+```
+
+## Model fitting & post-processing
+
+Before fitting our model and making predictions, let's add some post-processing
+steps using a few [`frosting`](
+  https://cmu-delphi.github.io/epipredict/reference/frosting.html) layers to do 
+a few things:
+
+1. Threshold our predictions to 0. We are predicting proportions, which can't 
+be negative. And the transformed values back to dollars and people can't be 
+negative either.
+1. Generate prediction intervals based on residual quantiles, allowing us to 
+quantify the uncertainty associated with future predicted values.
+1. Convert our predictions back to income values and number of graduates, 
+rather than standardized proportions. We do this via the frosting layer 
+`layer_population_scaling()`. 
+
+
+```{r custom-arx-post, include=T}
+# Create dataframe of the sums we used for standardizing
+# Only have to include med_income_5y since that is our outcome
+totals <- employ_small %>%
+  group_by(geo_value, age_group, edu_qual) %>%
+  summarise(med_income_5y_tot = sum(med_income_5y), .groups = "drop")
+
+# Define post-processing steps
+f <- frosting() %>%
+  layer_predict() %>%
+  layer_naomit(.pred) %>%
+  layer_threshold(.pred, lower = 0) %>%
+  # 90% prediction interval
+  layer_residual_quantiles(
+    quantile_levels = c(0.1, 0.9),
+    symmetrize = FALSE
+  ) %>%
+  layer_population_scaling(
+    .pred, .pred_distn,
+    df = totals, df_pop_col = "med_income_5y_tot"
+  )
+
+wfx_linreg <- epi_workflow(rx, parsnip::linear_reg()) %>%
+  fit(employ_small) %>%
+  add_frosting(f)
+
+summary(extract_fit_engine(wfx_linreg))
+```
+
+Based on the summary output for this model, we can examine confidence intervals
+and perform hypothesis tests as usual.
+
+Let's take a look at the predictions along with their 90% prediction intervals.
+
+```{r}
+latest <- get_test_data(recipe = rx, x = employ_small)
+predsx <- predict(wfx_linreg, latest)
+
+# Display predictions along with prediction intervals
+predsx %>%
+  select(
+    geo_value, time_value, edu_qual, age_group,
+    .pred_scaled, .pred_distn_scaled
+  ) %>%
+  head() %>%
+  pivot_quantiles_wider(.pred_distn_scaled)
+```
+
+# Using canned forecasters
+
+We've seen what we can do with non-epidemiological panel data using the 
+recipes frame, with `epi_recipe` for pre-processing, `epi_workflow` for model 
+fitting, and `frosting` for post-processing. 
+
+`epipredict` also comes with canned forecasters that do all of those steps 
+behind the scenes for some simple models. Even though we aren't working with 
+epidemiological data, canned forecasters still work as expected, out of the box.
+We will demonstrate this with the simple
+[`flatline_forecaster`](
+  https://cmu-delphi.github.io/epipredict/reference/flatline_forecaster.html) 
+and the direct autoregressive (AR) forecaster 
+[`arx_forecaster`](
+  https://cmu-delphi.github.io/epipredict/reference/arx_forecaster.html).
+
+For both illustrations, we will continue to use the `employ_small` dataset 
+with the transformed numeric columns that are proportions within each group 
+by the keys in our `epi_df`.
+
+## Flatline forecaster 
+
+In this first example, we'll use `flatline_forecaster` to make a simple
+prediction of the 2-year median income for the next year, based on one previous 
+time point. This model is representated algebraically as:
+\[y_{t+1,ijk} = y_{tijk} + \epsilon_{tijk}\]
+where $y_{tijk}$ is the 2-year median income (proportion) at time $t$.
+
+```{r flatline, include=T, warning=F}
+out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
+  args_list = flatline_args_list(ahead = 1)
+)
+
+out_fl
+```
+
+## Autoregressive forecaster with exogenous inputs
+
+In this second example, we'll use `arx_forecaster` to make a prediction of the 
+5-year median income based using two lags, _and_ using two lags on two exogenous
+variables: 2-year median income and number of graduates. 
+
+The canned forecaster gives us a simple way of making this forecast since it 
+defines the recipe, workflow, and post-processing steps behind the scenes. This 
+is very similar to the model we introduced in the "Autoregressive Linear Model 
+with Exogenous Inputs" section of this article, but where all inputs have the 
+same number of lags.
+
+```{r arx-lr, include=T, warning=F}
+arx_args <- arx_args_list(lags = c(0L, 1L), ahead = 1L)
+
+out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
+  c("med_income_5y_prop", "med_income_2y_prop", "num_graduates_prop"),
+  args_list = arx_args
+)
+
+out_arx_lr
+```
+
+Other changes to the direct AR forecaster, like changing the engine, also work 
+as expected. Below we use a boosted tree model instead of a linear regression.
+
+```{r arx-rf, include=T, warning=F}
+out_arx_rf <- arx_forecaster(
+  employ_small, "med_income_5y_prop",
+  c("med_income_5y_prop", "med_income_2y_prop", "num_graduates_prop"),
+  trainer = parsnip::boost_tree(mode = "regression", trees = 20),
+  args_list = arx_args
+)
+
+out_arx_rf
+```
+
+# Conclusion
+
+While the purpose of `{epipredict}` is to allow `{tidymodels}` to operate on 
+epidemiology data, it can be easily adapted (both the workflows and the canned
+forecasters) to work for generic panel data modelling.
+
