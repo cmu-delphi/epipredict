@@ -96,7 +96,7 @@ tidy.frosting <- function(x, number = NA, id = NA, ...) {
 
 #' @export
 tidy.layer <- function(x, ...) {
-  cli::cli_abort(
+  cli_abort(
     "No `tidy()` method exists for a layer with class: {.cls {class(x)}}."
   )
 }

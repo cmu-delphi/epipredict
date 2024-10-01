@@ -102,7 +102,7 @@ slather.layer_residual_quantiles <-
       common <- intersect(object$by_key, names(key_cols))
       excess <- setdiff(object$by_key, names(key_cols))
       if (length(excess) > 0L) {
-        cli::cli_warn(c(
+        cli_warn(paste(
           "Requested residual grouping key(s) {.val {excess}} are unavailable ",
           "in the original data. Grouping by the remainder: {.val {common}}."
         ))
@@ -113,7 +113,7 @@ slather.layer_residual_quantiles <-
         if (length(common_in_r) == length(common)) {
           r <- left_join(key_cols, r, by = common_in_r)
         } else {
-          cli::cli_warn(c(
+          cli_warn(paste(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
@@ -124,7 +124,7 @@ slather.layer_residual_quantiles <-
     }
 
     r <- r %>%
-      summarize(
+      summarise(
         dstn = list(quantile(
           c(.resid, s * .resid),
           probs = object$quantile_levels, na.rm = TRUE
@@ -132,7 +132,7 @@ slather.layer_residual_quantiles <-
       )
     # Check for NA
     if (any(sapply(r$dstn, is.na))) {
-      cli::cli_abort(c(
+      cli_abort(c(
         "Residual quantiles could not be calculated due to missing residuals.",
         i = "This may be due to `n_train` < `ahead` in your {.cls epi_recipe}."
       ))
@@ -149,7 +149,7 @@ slather.layer_residual_quantiles <-
 
 grab_residuals <- function(the_fit, components) {
   if (the_fit$spec$mode != "regression") {
-    cli::cli_abort("For meaningful residuals, the predictor should be a regression model.")
+    cli_abort("For meaningful residuals, the predictor should be a regression model.")
   }
   r <- stats::residuals(the_fit$fit)
   if (!is.null(r)) { # Got something from the method
@@ -157,7 +157,7 @@ grab_residuals <- function(the_fit, components) {
       if (".resid" %in% names(r)) { # success
         return(r)
       } else { # failure
-        cli::cli_warn(c(
+        cli_warn(c(
           "The `residuals()` method for objects of class {.cls {cl}} results in",
           "a data frame without a column named `.resid`.",
           i = "Residual quantiles will be calculated directly from the",
@@ -168,7 +168,7 @@ grab_residuals <- function(the_fit, components) {
     } else if (is.vector(drop(r))) { # also success
       return(tibble(.resid = drop(r)))
     } else { # failure
-      cli::cli_warn(c(
+      cli_warn(paste(
         "The `residuals()` method for objects of class {.cls {cl}} results in an",
         "object that is neither a data frame with a column named `.resid`,",
         "nor something coercible to a vector.",

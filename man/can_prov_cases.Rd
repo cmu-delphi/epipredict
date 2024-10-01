@@ -27,7 +27,7 @@ signal names slightly altered, some province names replaced with abbreviations, 
 formatted into an \code{epi_archive}.
 }
 
-The populatin data used (but not included in the dataset itself) is from the
+The population data used (but not included in the dataset itself) is from the
 \href{https://github.com/mountainMath/BCCovidSnippets/}{mountainMath/BCCovidSnippets GitHub repository}.
 }
 \usage{

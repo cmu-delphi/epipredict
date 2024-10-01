@@ -46,7 +46,7 @@ The data has columns:
 of measurements.}
 \item{time_value}{the time value associated with each row of measurements.}
 \item{masking}{Estimated percentage of people who wore a mask for most or all of the time while in public in the past 7 days; those not in public in the past 7 days are not counted.}
-\item{distancting}{Estimated percentage of respondents who reported that all or most people they enountered in public in the past 7 days maintained a distance of at least 6 feet. Respondents who said that they have not been in public for the past 7 days are excluded.}
+\item{distancing}{Estimated percentage of respondents who reported that all or most people they encountered in public in the past 7 days maintained a distance of at least 6 feet. Respondents who said that they have not been in public for the past 7 days are excluded.}
 }
 
 }

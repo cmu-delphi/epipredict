@@ -23,7 +23,7 @@ new_quantiles <- function(values = double(1), quantile_levels = double(1)) {
     quantile_levels <- quantile_levels[o]
   }
   if (is.unsorted(values, na.rm = TRUE)) {
-    cli::cli_abort("`values[order(quantile_levels)]` produces unsorted quantiles.")
+    cli_abort("`values[order(quantile_levels)]` produces unsorted quantiles.")
   }
 
   new_rcrd(list(values = values, quantile_levels = quantile_levels),
@@ -102,14 +102,14 @@ validate_dist_quantiles <- function(values, quantile_levels) {
   )
   length_diff <- vctrs::list_sizes(values) != vctrs::list_sizes(quantile_levels)
   if (any(length_diff)) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "`values` and `quantile_levels` must have common length.",
       i = "Mismatches found at position(s): {.val {which(length_diff)}}."
     ))
   }
   level_duplication <- map_lgl(quantile_levels, vctrs::vec_duplicate_any)
   if (any(level_duplication)) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "`quantile_levels` must not be duplicated.",
       i = "Duplicates found at position(s): {.val {which(level_duplication)}}."
     ))
@@ -171,7 +171,7 @@ quantile_extrapolate <- function(x, tau_out, middle) {
     return(qvals[match(tau_out, tau)])
   }
   if (length(tau) < 2) {
-    cli::cli_abort(
+    cli_abort(
       "Quantile extrapolation is not possible with fewer than 2 quantiles."
     )
     return(qvals_out)
@@ -209,7 +209,7 @@ quantile_extrapolate <- function(x, tau_out, middle) {
       v = c(qvals, qvals_out[indm])
     ) %>%
       dplyr::distinct(q, .keep_all = TRUE) %>%
-      dplyr::arrange(q)
+      arrange(q)
   }
   if (any(indl)) {
     qvals_out[indl] <- tail_extrapolate(tau_out[indl], utils::head(qv, 2))
@@ -267,7 +267,7 @@ Ops.dist_quantiles <- function(e1, e2) {
   }
   tau <- union(tau1, tau2)
   if (all(is_dist)) {
-    cli::cli_abort(
+    cli_abort(
       "You can't perform arithmetic between two distributions like this."
     )
   } else {

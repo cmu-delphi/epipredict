@@ -4,14 +4,12 @@
 \alias{forecast.epi_workflow}
 \title{Produce a forecast from an epi workflow}
 \usage{
-\method{forecast}{epi_workflow}(object, ..., fill_locf = FALSE, n_recent = NULL, forecast_date = NULL)
+\method{forecast}{epi_workflow}(object, ..., n_recent = NULL, forecast_date = NULL)
 }
 \arguments{
 \item{object}{An epi workflow.}
 
 \item{...}{Not used.}
-
-\item{fill_locf}{Logical. Should we use locf to fill in missing data?}
 
 \item{n_recent}{Integer or NULL. If filling missing data with locf = TRUE,
 how far back are we willing to tolerate missing data? Larger values allow

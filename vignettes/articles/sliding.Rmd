@@ -363,7 +363,7 @@ confirmed_incidence_prop <- pub_covidcast(
   geo_type = "state",
   time_values = epirange(20200301, 20211231),
   geo_values = states,
-  issues = epirange(20000101, 20211231)
+  issues = epirange(20000101, 20221231)
 ) %>%
   select(geo_value, time_value, version = issue, case_rate = value) %>%
   arrange(geo_value, time_value) %>%
@@ -376,7 +376,7 @@ deaths_incidence_prop <- pub_covidcast(
   geo_type = "state",
   time_values = epirange(20200301, 20211231),
   geo_values = states,
-  issues = epirange(20000101, 20211231)
+  issues = epirange(20000101, 20221231)
 ) %>%
   select(geo_value, time_value, version = issue, death_rate = value) %>%
   arrange(geo_value, time_value) %>%

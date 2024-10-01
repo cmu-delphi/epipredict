@@ -195,7 +195,7 @@ smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd) {
 
   the_fit <- ewf %>% fit(x)
 
-  latest <- get_test_data(rec, x, fill_locf = TRUE)
+  latest <- get_test_data(rec, x)
 
   preds <- predict(the_fit, new_data = latest) %>%
     mutate(forecast_date = fd, target_date = fd + ahead) %>%

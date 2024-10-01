@@ -78,10 +78,7 @@ cdc_baseline_forecaster <- function(
   # target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
 
-  latest <- get_test_data(
-    epi_recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
-    forecast_date
-  )
+  latest <- get_test_data(epi_recipe(epi_data), epi_data)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -169,7 +166,6 @@ cdc_baseline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = "geo_value",
-    nafill_buffer = Inf,
     ...) {
   rlang::check_dots_empty()
   arg_is_scalar(n_training, nsims, data_frequency)
@@ -183,7 +179,6 @@ cdc_baseline_args_list <- function(
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   structure(
     enlist(
@@ -195,8 +190,7 @@ cdc_baseline_args_list <- function(
       nsims,
       symmetrize,
       nonneg,
-      quantile_by_key,
-      nafill_buffer
+      quantile_by_key
     ),
     class = c("cdc_baseline_fcast", "alist")
   )

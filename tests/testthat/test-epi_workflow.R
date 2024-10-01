@@ -79,17 +79,11 @@ test_that("forecast method works", {
     ))
   )
 
-  args <- list(
-    fill_locf = TRUE,
-    n_recent = 360 * 3,
-    forecast_date = as.Date("2024-01-01")
-  )
   expect_equal(
-    forecast(wf, !!!args),
+    forecast(wf),
     predict(wf, new_data = get_test_data(
       hardhat::extract_preprocessor(wf),
-      jhu,
-      !!!args
+      jhu
     ))
   )
 })

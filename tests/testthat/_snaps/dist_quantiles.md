@@ -1,7 +1,7 @@
 # constructor returns reasonable quantiles
 
     Code
-      new_quantiles(rnorm(5), rnorm(5))
+      new_quantiles(rnorm(5), c(-2, -1, 0, 1, 2))
     Condition
       Error in `new_quantiles()`:
       ! `quantile_levels` must lie in [0, 1].

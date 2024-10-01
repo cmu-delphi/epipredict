@@ -13,19 +13,18 @@ Statistics Canada, \href{https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3
 Table 37-10-0115-01 Characteristics and median employment income of
 longitudinal cohorts of postsecondary graduates two and five years after
 graduation, by educational qualification and field of study
-(primary groupings)
-}. This does not constitute an endorsement by Statistics Canada of this product.
+(primary groupings)}. This does not constitute an endorsement by Statistics Canada of this product.
 
 The data is licensed under the terms of the
 \href{https://www.statcan.gc.ca/en/reference/licence}{Statistics Canada Open License}.
 
 Modifications:
 \itemize{
-\item Only provincial and territorial regions are kept
-\item Only age group and educational qualification are kept as
+\item Only provincial and territorial regions are kept.
+\item Only age group, field of study, and educational qualification are kept as
 covariates. For the remaining covariates, we keep aggregated values and
 drop the level-specific rows.
-\item No modifications were made to the time range of the data
+\item No modifications were made to the time range of the data.
 }
 }
 \usage{
