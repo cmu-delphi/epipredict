@@ -1,20 +1,20 @@
 test_that("step_lag_difference validates arguments", {
   df <- data.frame(time_value = 1:5, geo_value = rep("a", 5), value = 6:10)
   r <- recipes::recipe(df)
-  expect_error(step_lag_difference(r))
+  expect_snapshot(error = TRUE, step_lag_difference(r))
 
   edf <- as_epi_df(df)
   r <- epi_recipe(edf)
 
-  expect_error(step_lag_difference(r, value, role = 1))
-  expect_error(step_lag_difference(r, value, horizon = 0))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, role = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, horizon = 0))
   expect_silent(step_lag_difference(r, value, horizon = c(1, 2)))
-  expect_error(step_lag_difference(r, value, prefix = letters[1:2]))
-  expect_error(step_lag_difference(r, value, id = letters[1:2]))
-  expect_error(step_lag_difference(r, value, prefix = letters[1:2]))
-  expect_error(step_lag_difference(r, value, prefix = 1))
-  expect_error(step_lag_difference(r, value, id = 1))
-  expect_error(step_lag_difference(r, value, skip = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, prefix = letters[1:2]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, id = letters[1:2]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, prefix = letters[1:2]))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, prefix = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, id = 1))
+  expect_snapshot(error = TRUE, step_lag_difference(r, value, skip = 1))
 })
 
 
