@@ -41,6 +41,8 @@ get_test_data <- function(recipe, x) {
   min_lags <- min(map_dbl(recipe$steps, ~ min(.x$lag %||% Inf)), Inf)
   max_lags <- max(map_dbl(recipe$steps, ~ max(.x$lag %||% 0)), 0)
   max_horizon <- max(map_dbl(recipe$steps, ~ max(.x$horizon %||% 0)), 0)
+  max_slide <- max(map_dbl(recipe$steps, ~ max(.x$before %||% 0)), 0)
+  min_required <- max_lags + max_horizon + max_slide
   keep <- max_lags + max_horizon
 
   # CHECK: Error out if insufficient training data

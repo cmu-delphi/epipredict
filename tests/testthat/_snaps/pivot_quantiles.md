@@ -45,7 +45,5 @@
       pivot_quantiles_longer(tib, d1, d3)
     Condition
       Error in `pivot_quantiles_longer()`:
-      ! Some selected columns contain different numbers of quantiles.
-      The result would be a very long <tibble>.
-      To do this anyway, rerun with `.ignore_length_check = TRUE`.
+      ! Some selected columns contain different numbers of quantiles. The result would be a very long <tibble>. To do this anyway, rerun with `.ignore_length_check = TRUE`.
 
