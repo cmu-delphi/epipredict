@@ -1031,6 +1031,129 @@
     18993, 18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
+---
+
+    structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
+    ), .pred = c(0.303244704017743, 0.531332853311082, 0.588827944685979, 
+    0.988690249216229, 0.794801997001639, 0.306895457225321), .pred_distn = structure(list(
+        structure(list(values = c(0.136509784083987, 0.469979623951498
+        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c(0.364597933377326, 0.698067773244837), quantile_levels = c(0.05, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
+        0.755562864619735), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c(0.821955329282474, 1.15542516914998), quantile_levels = c(0.05, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr")), structure(list(values = c(0.628067077067883, 
+        0.961536916935394), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c(0.140160537291566, 0.473630377159077), quantile_levels = c(0.05, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
+    "list")), forecast_date = structure(c(18997, 18997, 18997, 18997, 
+    18997, 18997), class = "Date"), target_date = structure(c(18998, 
+    18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
+    -6L), class = c("tbl_df", "tbl", "data.frame"))
+
+---
+
+    structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
+    ), .pred = c(0.303244704017743, 0.531332853311082, 0.588827944685979, 
+    0.988690249216229, 0.794801997001639, 0.306895457225321), .pred_distn = structure(list(
+        structure(list(values = c(0.136509784083987, 0.469979623951498
+        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c(0.364597933377326, 0.698067773244837), quantile_levels = c(0.05, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
+        0.755562864619735), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c(0.821955329282474, 1.15542516914998), quantile_levels = c(0.05, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr")), structure(list(values = c(0.628067077067883, 
+        0.961536916935394), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+            values = c(0.140160537291566, 0.473630377159077), quantile_levels = c(0.05, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
+    "list")), forecast_date = structure(c(18997, 18997, 18997, 18997, 
+    18997, 18997), class = "Date"), target_date = structure(c(18998, 
+    18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
+    -6L), class = c("tbl_df", "tbl", "data.frame"))
+
+# arx_forecaster output format snapshots
+
+    Code
+      out1
+    Message
+      == A basic forecaster of type ARX Forecaster ===================================
+      
+      This forecaster was fit on 999-01-01.
+      
+      Training data was an <epi_df> with:
+      * Geography: state,
+      * Time type: day,
+      * Using data up-to-date as of: 2022-05-31.
+      * With the last data available on 2021-12-31
+      
+      -- Predictions -----------------------------------------------------------------
+      
+      A total of 56 predictions are available for
+      * 56 unique geographic regions,
+      * At forecast date: 2021-12-31,
+      * For target date: 2022-01-07,
+      
+
+---
+
+    Code
+      out2
+    Message
+      == A basic forecaster of type ARX Forecaster ===================================
+      
+      This forecaster was fit on 999-01-01.
+      
+      Training data was an <epi_df> with:
+      * Geography: state,
+      * Time type: day,
+      * Using data up-to-date as of: 2022-05-31.
+      * With the last data available on 2021-12-31
+      
+      -- Predictions -----------------------------------------------------------------
+      
+      A total of 56 predictions are available for
+      * 56 unique geographic regions,
+      * At forecast date: 2022-01-03,
+      * For target date: 2022-01-10,
+      * Lags adjusted per column: case_rate=3, death_rate=3
+      
+
+---
+
+    Code
+      out3
+    Message
+      == A basic forecaster of type ARX Forecaster ===================================
+      
+      This forecaster was fit on 999-01-01.
+      
+      Training data was an <epi_df> with:
+      * Geography: state,
+      * Time type: day,
+      * Using data up-to-date as of: 2022-05-31.
+      * With the last data available on 2021-12-31
+      
+      -- Predictions -----------------------------------------------------------------
+      
+      A total of 56 predictions are available for
+      * 56 unique geographic regions,
+      * At forecast date: 2022-01-03,
+      * For target date: 2022-01-10,
+      * Aheads adjusted for death_rate=3
+      
+
 # arx_classifier snapshots
 
     structure(list(geo_value = c("ak", "al", "ar", "az", "ca", "co", 
@@ -1056,5 +1179,32 @@
         18999, 18999, 18999, 18999, 18999, 18999, 18999, 18999, 18999, 
         18999, 18999, 18999, 18999, 18999, 18999, 18999, 18999, 18999, 
         18999, 18999, 18999, 18999, 18999, 18999, 18999), class = "Date")), row.names = c(NA, 
+    -53L), class = c("tbl_df", "tbl", "data.frame"))
+
+---
+
+    structure(list(geo_value = c("ak", "al", "ar", "az", "ca", "co", 
+    "ct", "dc", "de", "fl", "ga", "gu", "hi", "ia", "id", "il", "in", 
+    "ks", "ky", "la", "ma", "me", "mi", "mn", "mo", "mp", "ms", "mt", 
+    "nc", "nd", "ne", "nh", "nj", "nm", "nv", "ny", "oh", "ok", "or", 
+    "pa", "pr", "ri", "sc", "sd", "tn", "tx", "ut", "va", "vt", "wa", 
+    "wi", "wv", "wy"), .pred_class = structure(c(1L, 1L, 1L, 1L, 
+    1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+    1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+    1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+    1L), levels = c("(-Inf,0.25]", "(0.25, Inf]"), class = "factor"), 
+        forecast_date = structure(c(18994, 18994, 18994, 18994, 18994, 
+        18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 
+        18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 
+        18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 
+        18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 
+        18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 18994, 
+        18994, 18994, 18994), class = "Date"), target_date = structure(c(19001, 
+        19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 
+        19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 
+        19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 
+        19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 
+        19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 19001, 
+        19001, 19001, 19001, 19001, 19001, 19001, 19001), class = "Date")), row.names = c(NA, 
     -53L), class = c("tbl_df", "tbl", "data.frame"))
 

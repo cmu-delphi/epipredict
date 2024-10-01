@@ -214,6 +214,63 @@ test_that("test joining by default columns", {
     recipes::step_naomit(recipes::all_predictors()) %>%
     recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
+  prep <- prep(r, jhu)
+
+  b <- bake(prep, jhu)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred,
+      df = reverse_pop_data,
+      by = NULL,
+      df_pop_col = "values"
+    )
+
+  wf <- epi_workflow(
+    r,
+    parsnip::linear_reg()
+  ) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(
+    recipe = r,
+    x = case_death_rate_subset %>%
+      dplyr::filter(
+        time_value > "2021-11-01",
+        geo_value %in% c("ca", "ny")
+      ) %>%
+      dplyr::select(geo_value, time_value, case_rate)
+  )
+
+
+  p <- predict(wf, latest)
+
+
+
+  jhu <- case_death_rate_subset %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+    dplyr::select(geo_value, time_value, case_rate)
+
+  reverse_pop_data <- data.frame(
+    geo_value = c("ca", "ny"),
+    values = c(1 / 20000, 1 / 30000)
+  )
+
+  r <- epi_recipe(jhu) %>%
+    step_population_scaling(case_rate,
+      df = reverse_pop_data,
+      df_pop_col = "values",
+      by = NULL,
+      suffix = "_scaled"
+    ) %>%
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
+    step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+
   p <- prep(r, jhu)
   b <- bake(p, new_data = NULL)
   expect_named(

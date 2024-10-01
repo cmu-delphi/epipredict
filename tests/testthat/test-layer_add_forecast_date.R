@@ -1,5 +1,7 @@
 jhu <- case_death_rate_subset %>%
   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
+attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+
 r <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
@@ -62,11 +64,6 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
     layer_naomit(.pred)
   wf3 <- wf %>% add_frosting(f3)
 
-  # this warning has been removed
-  # expect_warning(
-  #   p3 <- predict(wf3, latest),
-  #   "forecast_date is less than the most recent update date of the data."
-  # )
   expect_silent(p3 <- predict(wf3, latest))
   expect_equal(ncol(p3), 4L)
   expect_s3_class(p3, "epi_df")
@@ -75,6 +72,34 @@ test_that("Do not specify a forecast_date in `layer_add_forecast_date()`", {
   expect_named(p3, c("geo_value", "time_value", ".pred", "forecast_date"))
 })
 
+test_that("`layer_add_forecast_date()` infers correct date when using `adjust_latency`", {
+  jhu_reasonable_date <- jhu
+  attributes(jhu_reasonable_date)$metadata$as_of <- as.Date("2022-01-03")
+  r_latent <- epi_recipe(jhu_reasonable_date) %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_adjust_latency(method = "extend_ahead") %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+  frost_latent <- frosting() %>%
+    layer_predict() %>%
+    layer_add_forecast_date() %>%
+    layer_naomit(.pred)
+  wf_latent <- epi_workflow(r_latent, parsnip::linear_reg()) %>%
+    fit(jhu_reasonable_date) %>%
+    add_frosting(frost_latent)
+  reasonable_date <- jhu %>%
+    dplyr::filter(time_value >= max(time_value) - 14)
+  p_latent <- predict(wf_latent, reasonable_date)
+  expect_equal(
+    p_latent$forecast_date,
+    rep(as.Date("2022-01-03"), times = 3)
+  )
+  expect_equal(
+    p_latent$forecast_date - p_latent$time_value,
+    as.difftime(rep(3, times = 3), units = "days")
+  )
+})
 
 test_that("forecast date works for daily", {
   f <- frosting() %>%

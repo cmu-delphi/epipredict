@@ -7,7 +7,7 @@ test_that("replace_inf works", {
     v1 = 1:5, v2 = c(1, 2, Inf, -Inf, NA)
   )
 
-  library(dplyr)
+  suppressPackageStartupMessages(library(dplyr))
   ok <- c("geo_value", "time_value")
   df2 <- df %>% mutate(across(!all_of(ok), ~ vec_replace_inf(.x, NA)))
   expect_identical(df[, 1:3], df2[, 1:3])

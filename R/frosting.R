@@ -89,7 +89,7 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
       "The workflow must have a frosting postprocessor.",
       i = "Provide one with `add_frosting()`."
     )
-    rlang::abort(message, call = call)
+    cli_abort(message, call = call)
   }
   invisible(x)
 }
@@ -288,7 +288,7 @@ new_frosting <- function() {
 #' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
-    cli::cli_abort(
+    cli_abort(
       "Currently, no arguments to `frosting()` are allowed to be non-null."
     )
   }
@@ -356,7 +356,6 @@ apply_frosting.default <- function(workflow, components, ...) {
 
 #' @rdname apply_frosting
 #' @importFrom rlang is_null
-#' @importFrom rlang abort
 #' @param type,opts forwarded (along with `...`) to [`predict.model_fit()`] and
 #'   [`slather()`] for supported layers
 #' @export
@@ -368,21 +367,21 @@ apply_frosting.epi_workflow <-
       components$predictions <- predict(
         the_fit, components$forged$predictors, ...
       )
-      components$predictions <- dplyr::bind_cols(
+      components$predictions <- bind_cols(
         components$keys, components$predictions
       )
       return(components)
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      cli_warn(c(
+      cli_warn(paste(
         "Only postprocessors of class {.cls frosting} are allowed.",
         "Returning unpostprocessed predictions."
       ))
       components$predictions <- predict(
         the_fit, components$forged$predictors, type, opts, ...
       )
-      components$predictions <- dplyr::bind_cols(
+      components$predictions <- bind_cols(
         components$keys, components$predictions
       )
       return(components)

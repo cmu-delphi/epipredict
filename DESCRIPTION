@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -40,6 +40,7 @@ Imports:
     magrittr,
     recipes (>= 1.0.4),
     rlang (>= 1.1.0),
+    purrr,
     stats,
     tibble,
     tidyr,

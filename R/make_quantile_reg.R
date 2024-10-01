@@ -37,7 +37,7 @@ quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0
   if (any(quantile_levels > 1)) cli_abort("All `quantile_levels` must be less than 1.")
   if (any(quantile_levels < 0)) cli_abort("All `quantile_levels` must be greater than 0.")
   if (is.unsorted(quantile_levels)) {
-    cli::cli_warn("Sorting `quantile_levels` to increasing order.")
+    cli_warn("Sorting `quantile_levels` to increasing order.")
     quantile_levels <- sort(quantile_levels)
   }
   args <- list(quantile_levels = rlang::enquo(quantile_levels), method = rlang::enquo(method))

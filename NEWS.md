@@ -2,6 +2,13 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2
+
+## features
+- Add `step_adjust_latency`, which give several methods to adjust the forecast if the `forecast_date` is after the last day of data.
+
+## bugfixes
+
 # epipredict 0.1
 
 - simplify `layer_residual_quantiles()` to avoid timesuck in `utils::methods()`
