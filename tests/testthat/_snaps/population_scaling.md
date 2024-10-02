@@ -3,7 +3,8 @@
     Code
       wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu) %>% add_frosting(f)
     Condition
-      Error in `hardhat::validate_column_names()`:
+      Error in `step_population_scaling()`:
+      Caused by error in `hardhat::validate_column_names()`:
       ! The following required columns are missing: 'a'.
 
 ---

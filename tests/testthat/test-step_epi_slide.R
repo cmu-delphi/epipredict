@@ -7,12 +7,12 @@ edf <- data.frame(
   value = c(2:21, 3:22)
 ) %>%
   as_epi_df()
-r <- epi_recipe(edf)
+r <- recipe(edf)
 
 
 test_that("epi_slide errors when needed", {
   # not an epi_recipe
-  expect_snapshot(error = TRUE, recipe(edf) %>% step_epi_slide(value, .f = mean, .window_size = 7L))
+  expect_snapshot(recipe(edf) %>% step_epi_slide(value, .f = mean, .window_size = 7L))
 
   # non-scalar args
   expect_snapshot(error = TRUE, r %>% step_epi_slide(value, .f = mean, .window_size = c(3L, 6L)))

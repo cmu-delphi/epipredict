@@ -120,8 +120,7 @@ test_that("fit method does not silently drop the class", {
 
   rec_tbl <- recipe(y ~ x, data = tbl)
   rec_edf <- recipe(y ~ x, data = edf)
-  expect_snapshot(error = TRUE, epi_recipe(y ~ x, data = tbl))
-  erec_edf <- epi_recipe(y ~ x, data = edf)
+  erec_edf <- recipe(y ~ x, data = edf)
 
   ewf_rec_tbl <- epi_workflow(rec_tbl, linear_reg())
   ewf_rec_edf <- epi_workflow(rec_edf, linear_reg())
@@ -137,8 +136,8 @@ test_that("fit method does not silently drop the class", {
 
   expect_s3_class(ewf_rec_tbl %>% fit(tbl), "epi_workflow")
   expect_s3_class(ewf_rec_tbl %>% fit(edf), "epi_workflow")
-  expect_s3_class(ewf_rec_edf %>% fit(tbl), "epi_workflow")
+  expect_warning(ewf_rec_edf %>% fit(tbl))
   expect_s3_class(ewf_rec_edf %>% fit(edf), "epi_workflow")
-  expect_snapshot(ewf_erec_edf %>% fit(tbl), error = TRUE)
+  expect_warning(ewf_erec_edf %>% fit(tbl))
   expect_s3_class(ewf_erec_edf %>% fit(edf), "epi_workflow")
 })

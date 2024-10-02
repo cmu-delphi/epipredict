@@ -51,7 +51,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
     case = 1:10,
     death = 1:10
   ) %>%
-    epiprocess::as_epi_df(additional_metadata = list(other_keys = "county"))
+    epiprocess::as_epi_df(other_keys = "county")
 
   r <- recipe(newdata) %>%
     step_population_scaling(c("case", "death"),

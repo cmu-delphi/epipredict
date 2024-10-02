@@ -46,7 +46,7 @@ test_that("key_colnames extracts additional keys when they are present", {
     c("geo_value", "state", "pol", "time_value")
   )
 
-  my_recipe <- epi_recipe(my_data) %>%
+  my_recipe <- recipe(my_data) %>%
     step_epi_ahead(value, ahead = 7) %>%
     step_epi_naomit()
 

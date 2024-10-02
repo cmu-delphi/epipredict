@@ -2,9 +2,18 @@
 
     Code
       recipe(edf) %>% step_epi_slide(value, .f = mean, .window_size = 7L)
-    Condition
-      Error in `step_epi_slide()`:
-      ! This recipe step can only operate on an <epi_recipe>.
+    Message
+      
+      -- Epi Recipe ------------------------------------------------------------------
+      
+      -- Inputs 
+      Number of variables by role
+      geo_value:       1
+      time_value:      1
+      undeclared role: 1
+      
+      -- Operations 
+      1. Calculating epi_slide for: value with .f
 
 ---
 

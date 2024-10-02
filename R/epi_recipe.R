@@ -1,7 +1,11 @@
 #' @import recipes
 #' @export
 epi_recipe <- function(x, ...) {
-  deprecate_soft("This function is being deprecated. Use `recipe()` instead.")
+  lifecycle::deprecate_soft(
+    when = "0.2.0",
+    what = "epi_recipe()",
+    with = "recipe()"
+  )
   UseMethod("epi_recipe")
 }
 
@@ -280,7 +284,7 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
       new_data,
       as_of = meta$as_of,
       # avoid NULL if meta is from saved older epi_df:
-      additional_metadata = meta$additional_metadata %||% list()
+      other_keys = meta$other_keys %||% character(0L)
     )
   }
   new_data
