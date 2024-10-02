@@ -229,14 +229,13 @@ quantile,
 head(quantile(out_q$predictions$.pred_distn, p = .4))
 ```
 
-or extract the entire distribution into a "long" `epi_df` with `quantile_levels`
-being the probability and `values` being the value associated to that quantile.
+or extract the entire distribution into a "long" `epi_df` with `quantile_level`
+being the probability and `value` being the value associated to that quantile
+(each prefixed with the original column name `.pred_distn`).
 
 ```{r q2}
 out_q$predictions %>%
-  # first create a "nested" list-column
-  mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-  unnest(.pred_distn) # then unnest it
+  pivot_quantiles_longer(.pred_distn)
 ```
 
 Additional simple adjustments to the basic forecaster can be made using the

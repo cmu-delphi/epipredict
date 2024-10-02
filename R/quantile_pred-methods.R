@@ -1,6 +1,9 @@
+#' @importFrom hardhat quantile_pred
+#' @export
+hardhat::quantile_pred
+
 
 # placeholder to avoid errors, but not ideal
-#' @importFrom hardhat quantile_pred
 #' @export
 mean.quantile_pred <- function(x, na.rm = FALSE, ...) {
   median(x, ...)

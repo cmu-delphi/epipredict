@@ -27,6 +27,11 @@ recipes::rand_id
 #' @export
 tibble::tibble
 
+#' @importFrom tibble as_tibble
+#' @export
+tibble::as_tibble
+
+
 #' @importFrom generics tidy
 #' @export
 generics::tidy
