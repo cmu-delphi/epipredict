@@ -19,13 +19,18 @@
 #'  argument must be named `.x`. A common, though very difficult to debug
 #'  error is using something like `function(x) mean`. This will not work
 #'  because it returns the function mean, rather than `mean(x)`
-#' @param before,after the size of the sliding window on the left and the right
-#'  of the center. Usually non-negative integers for data indexed by date, but
-#'  more restrictive in other cases (see [epiprocess::epi_slide()] for details).
-#' @param f_name a character string of at most 20 characters that describes
-#'   the function. This will be combined with `prefix` and the columns in `...`
-#'   to name the result using `{prefix}{f_name}_{column}`. By default it will be determined
-#'   automatically using `clean_f_name()`.
+#' @param .window_size the size of the sliding window, required. Usually a
+#'  non-negative integer will suffice (e.g. for data indexed by date, but more
+#'  restrictive in other time_type cases (see [epiprocess::epi_slide()] for
+#'  details). For example, set to 7 for a 7-day window.
+#' @param .align a character string indicating how the window should be aligned.
+#'  By default, this is "right", meaning the slide_window will be anchored with
+#'  its right end point on the reference date. (see [epiprocess::epi_slide()]
+#'  for details).
+#' @param f_name a character string of at most 20 characters that describes the
+#'   function. This will be combined with `prefix` and the columns in `...` to
+#'   name the result using `{prefix}{f_name}_{column}`. By default it will be
+#'   determined automatically using `clean_f_name()`.
 #'
 #' @template step-return
 #'
@@ -36,54 +41,56 @@
 #'   filter(time_value >= as.Date("2021-01-01"), geo_value %in% c("ca", "ny"))
 #' rec <- recipe(jhu) %>%
 #'   step_epi_slide(case_rate, death_rate,
-#'     .f = function(x) mean(x, na.rm = TRUE),
-#'     before = 6L
+#'     .f = \(x) mean(x, na.rm = TRUE),
+#'     .window_size = 7L
 #'   )
 #' bake(prep(rec, jhu), new_data = NULL)
-step_epi_slide <-
-  function(recipe,
-           ...,
-           .f,
-           before = 0L,
-           after = 0L,
-           role = "predictor",
-           prefix = "epi_slide_",
-           f_name = clean_f_name(.f),
-           skip = FALSE,
-           id = rand_id("epi_slide")) {
-    if (!is_epi_recipe(recipe)) {
-      cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
-    }
-    .f <- validate_slide_fun(.f)
-    epiprocess:::validate_slide_window_arg(before, attributes(recipe$template)$metadata$time_type)
-    epiprocess:::validate_slide_window_arg(after, attributes(recipe$template)$metadata$time_type)
-    arg_is_chr_scalar(role, prefix, id)
-    arg_is_lgl_scalar(skip)
-
-    recipes::add_step(
-      recipe,
-      step_epi_slide_new(
-        terms = enquos(...),
-        before = before,
-        after = after,
-        .f = .f,
-        f_name = f_name,
-        role = role,
-        trained = FALSE,
-        prefix = prefix,
-        keys = key_colnames(recipe),
-        columns = NULL,
-        skip = skip,
-        id = id
-      )
-    )
+step_epi_slide <- function(recipe,
+                           ...,
+                           .f,
+                           .window_size = NULL,
+                           .align = c("right", "center", "left"),
+                           role = "predictor",
+                           prefix = "epi_slide_",
+                           f_name = clean_f_name(.f),
+                           skip = FALSE,
+                           id = rand_id("epi_slide")) {
+  if (!is_epi_recipe(recipe)) {
+    cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
   }
+  .f <- validate_slide_fun(.f)
+  if (is.null(.window_size)) {
+    cli_abort("step_epi_slide: `.window_size` must be specified.")
+  }
+  epiprocess:::validate_slide_window_arg(.window_size, attributes(recipe$template)$metadata$time_type)
+  .align <- rlang::arg_match(.align)
+  arg_is_chr_scalar(role, prefix, id)
+  arg_is_lgl_scalar(skip)
+
+  recipes::add_step(
+    recipe,
+    step_epi_slide_new(
+      terms = enquos(...),
+      .window_size = .window_size,
+      .align = .align,
+      .f = .f,
+      f_name = f_name,
+      role = role,
+      trained = FALSE,
+      prefix = prefix,
+      keys = key_colnames(recipe),
+      columns = NULL,
+      skip = skip,
+      id = id
+    )
+  )
+}
 
 
 step_epi_slide_new <-
   function(terms,
-           before,
-           after,
+           .window_size,
+           .align,
            .f,
            f_name,
            role,
@@ -96,8 +103,8 @@ step_epi_slide_new <-
     recipes::step(
       subclass = "epi_slide",
       terms = terms,
-      before = before,
-      after = after,
+      .window_size = .window_size,
+      .align = .align,
       .f = .f,
       f_name = f_name,
       role = role,
@@ -119,8 +126,8 @@ prep.step_epi_slide <- function(x, training, info = NULL, ...) {
 
   step_epi_slide_new(
     terms = x$terms,
-    before = x$before,
-    after = x$after,
+    .window_size = x$.window_size,
+    .align = x$.align,
     .f = x$.f,
     f_name = x$f_name,
     role = x$role,
@@ -165,8 +172,8 @@ bake.step_epi_slide <- function(object, new_data, ...) {
   # }
   epi_slide_wrapper(
     new_data,
-    object$before,
-    object$after,
+    object$.window_size,
+    object$.align,
     object$columns,
     c(object$.f),
     object$f_name,
@@ -190,7 +197,7 @@ bake.step_epi_slide <- function(object, new_data, ...) {
 #' @importFrom dplyr bind_cols group_by ungroup
 #' @importFrom epiprocess epi_slide
 #' @keywords internal
-epi_slide_wrapper <- function(new_data, before, after, columns, fns, fn_names, group_keys, name_prefix) {
+epi_slide_wrapper <- function(new_data, .window_size, .align, columns, fns, fn_names, group_keys, name_prefix) {
   cols_fns <- tidyr::crossing(col_name = columns, fn_name = fn_names, fn = fns)
   # Iterate over the rows of cols_fns. For each row number, we will output a
   # transformed column. The first result returns all the original columns along
@@ -204,10 +211,10 @@ epi_slide_wrapper <- function(new_data, before, after, columns, fns, fn_names, g
       result <- new_data %>%
         group_by(across(all_of(group_keys))) %>%
         epi_slide(
-          before = before,
-          after = after,
-          new_col_name = result_name,
-          f = function(slice, geo_key, ref_time_value) {
+          .window_size = .window_size,
+          .align = .align,
+          .new_col_name = result_name,
+          .f = function(slice, geo_key, ref_time_value) {
             fn(slice[[col_name]])
           }
         ) %>%

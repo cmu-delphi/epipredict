@@ -1,8 +1,8 @@
 test_that("parse_period works", {
-  expect_error(parse_period(c(1, 2)))
-  expect_error(parse_period(c(1.3)))
-  expect_error(parse_period("1 year"))
-  expect_error(parse_period("2 weeks later"))
+  expect_snapshot(error = TRUE, parse_period(c(1, 2)))
+  expect_snapshot(error = TRUE, parse_period(c(1.3)))
+  expect_snapshot(error = TRUE, parse_period("1 year"))
+  expect_snapshot(error = TRUE, parse_period("2 weeks later"))
   expect_identical(parse_period(1), 1L)
   expect_identical(parse_period("1 day"), 1L)
   expect_identical(parse_period("1 days"), 1L)

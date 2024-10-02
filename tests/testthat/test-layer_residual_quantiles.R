@@ -23,11 +23,10 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(nrow(p), 3L)
   expect_named(p, c("geo_value", "time_value", ".pred", ".pred_distn"))
 
-  nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.pred_distn))
-  unnested <- nested %>% tidyr::unnest(.quantiles)
+  unnested <- p %>% pivot_quantiles_longer(.pred_distn)
 
   expect_equal(nrow(unnested), 9L)
-  expect_equal(unique(unnested$quantile_levels), c(.0275, .8, .95))
+  expect_equal(unique(unnested$.pred_distn_quantile_level), c(.0275, .8, .95))
 })
 
 
@@ -46,7 +45,7 @@ test_that("Errors when used with a classifier", {
     layer_predict() %>%
     layer_residual_quantiles()
   wf <- wf %>% add_frosting(f)
-  expect_error(forecast(wf))
+  expect_snapshot(error = TRUE, forecast(wf))
 })
 
 
@@ -99,8 +98,8 @@ test_that("Canned forecasters work with / without", {
 })
 
 test_that("flatline_forecaster correctly errors when n_training < ahead", {
-  expect_error(
-    flatline_forecaster(jhu, "death_rate", args_list = flatline_args_list(ahead = 10, n_training = 9)),
-    "This may be due to `n_train` < `ahead`"
+  expect_snapshot(
+    error = TRUE,
+    flatline_forecaster(jhu, "death_rate", args_list = flatline_args_list(ahead = 10, n_training = 9))
   )
 })

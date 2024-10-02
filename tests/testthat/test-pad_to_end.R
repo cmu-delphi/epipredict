@@ -32,6 +32,6 @@ test_that("test set padding works", {
   # make sure it maintains the epi_df
   dat <- dat %>%
     dplyr::rename(geo_value = gr1) %>%
-    as_epi_df()
+    as_epi_df(other_keys = "gr2")
   expect_s3_class(pad_to_end(dat, "geo_value", 2), "epi_df")
 })

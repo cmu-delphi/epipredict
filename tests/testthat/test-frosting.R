@@ -7,7 +7,7 @@ test_that("frosting validators / constructors work", {
   expect_false(has_postprocessor_frosting(wf))
   expect_silent(wf %>% add_frosting(new_frosting()))
   expect_silent(wf %>% add_postprocessor(new_frosting()))
-  expect_error(wf %>% add_postprocessor(list()))
+  expect_snapshot(error = TRUE, wf %>% add_postprocessor(list()))
 
   wf <- wf %>% add_frosting(new_frosting())
   expect_true(has_postprocessor(wf))
@@ -16,7 +16,7 @@ test_that("frosting validators / constructors work", {
 
 test_that("frosting can be created/added/updated/adjusted/removed", {
   f <- frosting()
-  expect_error(frosting(layers = 1:5))
+  expect_snapshot(error = TRUE, frosting(layers = 1:5))
   wf <- epi_workflow() %>% add_frosting(f)
   expect_true(has_postprocessor_frosting(wf))
   wf1 <- update_frosting(wf, frosting() %>% layer_predict() %>% layer_threshold(.pred))

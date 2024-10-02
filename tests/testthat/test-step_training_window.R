@@ -73,7 +73,7 @@ test_that("step_training_window works with multiple keys", {
     geo_value = rep(c("ca", "hi"), each = 100),
     additional_key = as.factor(rep(1:4, each = 50)),
   ) %>%
-    epiprocess::as_epi_df(additional_metadata = list(other_keys = "additional_key"))
+    epiprocess::as_epi_df(other_keys = "additional_key")
 
   p4 <- recipe(y ~ x, data = toy_epi_df2) %>%
     step_training_window(n_recent = 3) %>%
@@ -83,7 +83,7 @@ test_that("step_training_window works with multiple keys", {
   expect_equal(nrow(p4), 12L)
   expect_equal(ncol(p4), 5L)
   expect_s3_class(p4, "epi_df")
-  expect_named(p4, c("geo_value", "time_value", "x", "y", "additional_key"))
+  expect_named(p4, c("geo_value", "additional_key", "time_value", "x", "y"))
   expect_equal(
     p4$time_value,
     rep(c(

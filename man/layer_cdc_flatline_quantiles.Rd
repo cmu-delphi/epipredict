@@ -62,7 +62,7 @@ an updated \code{frosting} postprocessor. Calling \code{\link[=predict]{predict(
 in an additional \verb{<list-col>} named \code{.pred_distn_all} containing 2-column
 \code{\link[tibble:tibble]{tibble::tibble()}}'s. For each
 desired combination of \code{key}'s, the tibble will contain one row per ahead
-with the associated \code{\link[=dist_quantiles]{dist_quantiles()}}.
+with the associated \code{\link[=quantile_pred]{quantile_pred()}}.
 }
 \description{
 This layer creates quantile forecasts by taking a sample from the

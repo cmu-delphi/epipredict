@@ -51,7 +51,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
     case = 1:10,
     death = 1:10
   ) %>%
-    epiprocess::as_epi_df(additional_metadata = list(other_keys = "county"))
+    epiprocess::as_epi_df(other_keys = "county")
 
   r <- recipe(newdata) %>%
     step_population_scaling(c("case", "death"),
@@ -276,7 +276,8 @@ test_that("expect error if `by` selector does not match", {
       df_pop_col = "values"
     )
 
-  expect_error(
+  expect_snapshot(
+    error = TRUE,
     wf <- epi_workflow(r, parsnip::linear_reg()) %>%
       fit(jhu) %>%
       add_frosting(f)
@@ -308,7 +309,7 @@ test_that("expect error if `by` selector does not match", {
     fit(jhu) %>%
     add_frosting(f)
 
-  expect_error(forecast(wf))
+  expect_snapshot(error = TRUE, forecast(wf))
 })
 
 

@@ -25,5 +25,5 @@ test_that("bake method works in all cases", {
   expect_s3_class(bake(prep(r, edf), NULL, composition = "tibble"), "tbl_df")
   expect_s3_class(bake(prep(r, edf), NULL, composition = "data.frame"), "data.frame")
   # can't be a matrix because time_value/geo_value aren't numeric
-  expect_error(bake(prep(r, edf), NULL, composition = "matrix"))
+  expect_snapshot(error = TRUE, bake(prep(r, edf), NULL, composition = "matrix"))
 })
