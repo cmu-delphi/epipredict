@@ -82,7 +82,7 @@ extract_argument.epi_workflow <- function(x, name, arg, ...) {
   rlang::check_dots_empty()
   type <- sub("_.*", "", name)
   if (type %in% c("check", "step")) {
-    if (!workflows:::has_preprocessor_recipe(x)) {
+    if ("recipe" %nin% names(x$pre$actions)) {
       cli_abort("The workflow must have a recipe preprocessor.")
     }
     out <- extract_argument(x$pre$actions$recipe$recipe, name, arg)

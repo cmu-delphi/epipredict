@@ -1,3 +1,5 @@
+`%nin%` <- function(x, table) match(x, table, nomatch = 0) == 0
+
 #' Check that newly created variable names don't overlap
 #'
 #' `check_pname` is to be used in a slather method to ensure that

@@ -32,18 +32,15 @@
 #'
 #' wf
 epi_workflow <- function(preprocessor = NULL, spec = NULL, postprocessor = NULL) {
-  out <- workflows::workflow(spec = spec)
-  class(out) <- c("epi_workflow", class(out))
-
+  out <- workflows::workflow(preprocessor, spec = spec)
   if (is_epi_recipe(preprocessor)) {
+    out <- workflows::remove_recipe(out)
     out <- add_epi_recipe(out, preprocessor)
-  } else if (!is_null(preprocessor)) {
-    out <- workflows:::add_preprocessor(out, preprocessor)
   }
+  class(out) <- c("epi_workflow", class(out))
   if (!is_null(postprocessor)) {
     out <- add_postprocessor(out, postprocessor)
   }
-
   out
 }
 
@@ -101,7 +98,6 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
     as_of = attributes(data)$metadata$as_of
   )
   object$original_data <- data
-
   NextMethod()
 }
 
@@ -162,11 +158,14 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
   }
   components <- list()
   components$mold <- workflows::extract_mold(object)
-  components$forged <- hardhat::forge(new_data,
+  components$forged <- hardhat::forge(
+    new_data,
     blueprint = components$mold$blueprint
   )
   components$keys <- grab_forged_keys(components$forged, object, new_data)
-  components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
+  components <- apply_frosting(
+    object, components, new_data, type = type, opts = opts, ...
+  )
   components$predictions
 }
 
@@ -201,25 +200,14 @@ augment.epi_workflow <- function(x, new_data, ...) {
   full_join(predictions, new_data, by = join_by)
 }
 
-new_epi_workflow <- function(
-    pre = workflows:::new_stage_pre(),
-    fit = workflows:::new_stage_fit(),
-    post = workflows:::new_stage_post(),
-    trained = FALSE) {
-  out <- workflows:::new_workflow(
-    pre = pre, fit = fit, post = post, trained = trained
-  )
-  class(out) <- c("epi_workflow", class(out))
-  out
-}
-
 
 #' @export
 print.epi_workflow <- function(x, ...) {
-  print_header(x)
-  print_preprocessor(x)
-  # workflows:::print_case_weights(x)
-  print_model(x)
+  trained <- ifelse(workflows::is_trained_workflow(x), " [trained]", "")
+  header <- glue::glue("Epi Workflow{trained}")
+  txt <- utils::capture.output(NextMethod())
+  txt[1] <- cli::rule(header, line = 2)
+  cli::cat_line(txt)
   print_postprocessor(x)
   invisible(x)
 }

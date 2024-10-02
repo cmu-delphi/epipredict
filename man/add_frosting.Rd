@@ -4,16 +4,16 @@
 \alias{add_frosting}
 \alias{remove_frosting}
 \alias{update_frosting}
-\title{Add frosting to a workflow}
+\title{Add frosting to an epi_workflow}
 \usage{
 add_frosting(x, frosting, ...)
 
-remove_frosting(x)
+remove_frosting(x, ...)
 
 update_frosting(x, frosting, ...)
 }
 \arguments{
-\item{x}{A workflow}
+\item{x}{An epi_workflow}
 
 \item{frosting}{A frosting object created using \code{frosting()}.}
 
@@ -23,7 +23,7 @@ update_frosting(x, frosting, ...)
 \code{x}, updated with a new frosting postprocessor
 }
 \description{
-Add frosting to a workflow
+Add frosting to an epi_workflow
 }
 \examples{
 library(dplyr)
@@ -55,5 +55,6 @@ p2
 wf3 <- wf2 \%>\% remove_frosting()
 p3 <- predict(wf3, latest)
 p3
+
 
 }
