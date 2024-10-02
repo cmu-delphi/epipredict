@@ -270,12 +270,12 @@ If you create columns that you then apply lags to (such as
 }
 
 \examples{
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   dplyr::filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 # setting the `as_of` to something realistic
 attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
 
-r <- epi_recipe(case_death_rate_subset) \%>\%
+r <- epi_recipe(covid_case_death_rates) \%>\%
   step_adjust_latency(method = "extend_ahead") \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14))

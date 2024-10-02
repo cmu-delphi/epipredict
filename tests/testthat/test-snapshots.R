@@ -110,7 +110,7 @@ test_that("arx_forecaster snapshots", {
 })
 
 test_that("arx_forecaster output format snapshots", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value >= as.Date("2021-12-01"))
   attributes(jhu)$metadata$as_of <- as.Date(attributes(jhu)$metadata$as_of)
   out1 <- arx_forecaster(
@@ -153,9 +153,9 @@ test_that("arx_classifier snapshots", {
     c("case_rate", "death_rate")
   )
   expect_snapshot_tibble(arc1$predictions)
-  max_date <- case_death_rate_subset$time_value %>% max()
+  max_date <- covid_case_death_rates$time_value %>% max()
   arc2 <- arx_classifier(
-    case_death_rate_subset %>%
+    covid_case_death_rates %>%
       dplyr::filter(time_value >= as.Date("2021-11-01")),
     "death_rate",
     c("case_rate", "death_rate"),
@@ -164,7 +164,7 @@ test_that("arx_classifier snapshots", {
   expect_snapshot_tibble(arc2$predictions)
   expect_error(
     arc3 <- arx_classifier(
-      case_death_rate_subset %>%
+      covid_case_death_rates %>%
         dplyr::filter(time_value >= as.Date("2021-11-01")),
       "death_rate",
       c("case_rate", "death_rate"),
@@ -174,7 +174,7 @@ test_that("arx_classifier snapshots", {
   )
   expect_error(
     arc4 <- arx_classifier(
-      case_death_rate_subset %>%
+      covid_case_death_rates %>%
         dplyr::filter(time_value >= as.Date("2021-11-01")),
       "death_rate",
       c("case_rate", "death_rate"),

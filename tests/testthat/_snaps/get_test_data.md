@@ -1,7 +1,7 @@
 # expect insufficient training data error
 
     Code
-      get_test_data(recipe = r, x = case_death_rate_subset)
+      get_test_data(recipe = r, x = covid_case_death_rates)
     Condition
       Error in `get_test_data()`:
       ! You supplied insufficient recent data for this recipe.

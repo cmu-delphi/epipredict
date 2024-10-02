@@ -512,12 +512,12 @@ test_that("printing step_adjust_latency results in expected output", {
     step_epi_ahead(death_rate, ahead = ahead)
   expect_snapshot(r5)
   expect_snapshot(prep(r5, real_x))
-  r6 <- epi_recipe(case_death_rate_subset) %>%
+  r6 <- epi_recipe(covid_case_death_rates) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_adjust_latency(method = "extend_ahead") %>%
     step_epi_ahead(death_rate, ahead = 7)
   expect_snapshot(r6)
-  expect_snapshot(prep(r6, case_death_rate_subset))
+  expect_snapshot(prep(r6, covid_case_death_rates))
 })
 
 test_that("locf works as intended", {
