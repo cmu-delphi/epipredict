@@ -60,6 +60,7 @@ Suggests:
     quantreg,
     ranger,
     RcppRoll,
+    readr,
     rmarkdown,
     smoothqr,
     testthat (>= 3.0.0),
