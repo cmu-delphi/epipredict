@@ -10,7 +10,7 @@ test_that("quantile_rand_forest defaults work", {
   expect_silent(out <- fit(spec, formula = y ~ x + z, data = tib))
   pars <- parsnip::extract_fit_engine(out)
   manual <- quantile_forest(as.matrix(tib[, 2:3]), tib$y, quantiles = c(0.1, 0.5, 0.9))
-  expect_identical(pars$quantiles.orig, manual$quantiles)
+  expect_identical(pars$quantiles.orig, manual$quantiles.orig)
   expect_identical(pars$`_num_trees`, manual$`_num_trees`)
 
   fseed <- 12345
