@@ -58,13 +58,16 @@ arx_classifier <- function(
   if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+      cli_warn(
+        "The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast
+        is occurring {forecast_date}."
+      )
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
   }
-  forecast_date <- args_list$forecast_date %||% forecast_date_default
-  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
+  args_list$forecast_date <- args_list$forecast_date %||% forecast_date_default
+  args_list$target_date <- args_list$target_date %||% (args_list$forecast_date + args_list$ahead)
   preds <- forecast(
     wf,
   ) %>%
@@ -136,7 +139,10 @@ arx_class_epi_workflow <- function(
   if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+      cli_warn(
+        "The specified forecast date {args_list$forecast_date} doesn't match the date from which the
+        forecast is occurring {forecast_date}."
+      )
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -209,7 +215,7 @@ arx_class_epi_workflow <- function(
   r <- r %>%
     step_mutate(
       across(
-        matches(ahead_out_name_regex),
+        tidyselect::matches(ahead_out_name_regex),
         ~ cut(.x, breaks = args_list$breaks),
         .names = "outcome_class",
         .unpack = TRUE
@@ -243,15 +249,16 @@ arx_class_epi_workflow <- function(
 #' Constructs a list of arguments for [arx_classifier()].
 #'
 #' @inheritParams arx_args_list
-#' @param outcome_transform Scalar character. Whether the outcome should
-#'   be created using growth rates (as the predictors are) or lagged
-#'   differences. The second case is closer to the requirements for the
-#'   [2022-23 CDC Flusight Hospitalization Experimental Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md).
+#' @param outcome_transform Scalar character. Whether the outcome should be
+#'   created using growth rates (as the predictors are) or lagged differences.
+#'   The second case is closer to the requirements for the [2022-23 CDC Flusight
+#'   Hospitalization Experimental
+#'   Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md). # nolint: line_length_linter
 #'   See the Classification Vignette for details of how to create a reasonable
 #'   baseline for this case. Selecting `"growth_rate"` (the default) uses
 #'   [epiprocess::growth_rate()] to create the outcome using some of the
-#'   additional arguments below. Choosing `"lag_difference"` instead simply
-#'   uses the change from the value at the selected `horizon`.
+#'   additional arguments below. Choosing `"lag_difference"` instead simply uses
+#'   the change from the value at the selected `horizon`.
 #' @param breaks Vector. A vector of breaks to turn real-valued growth rates
 #'   into discrete classes. The default gives binary upswing classification
 #'   as in [McDonald, Bien, Green, Hu, et al.](https://doi.org/10.1073/pnas.2111453118).

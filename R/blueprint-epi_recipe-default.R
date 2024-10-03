@@ -79,7 +79,6 @@ new_default_epi_recipe_blueprint <-
 #' @export
 run_mold.default_epi_recipe_blueprint <- function(blueprint, ..., data) {
   rlang::check_dots_empty0(...)
-  # blueprint <- hardhat:::patch_recipe_default_blueprint(blueprint)
   cleaned <- mold_epi_recipe_default_clean(blueprint = blueprint, data = data)
   blueprint <- cleaned$blueprint
   data <- cleaned$data
@@ -97,15 +96,3 @@ mold_epi_recipe_default_clean <- function(blueprint, data) {
 refresh_blueprint.default_epi_recipe_blueprint <- function(blueprint) {
   do.call(new_default_epi_recipe_blueprint, as.list(blueprint))
 }
-
-
-## removing this function?
-# er_check_is_data_like <- function(.x, .x_nm) {
-#   if (rlang::is_missing(.x_nm)) {
-#     .x_nm <- rlang::as_label(rlang::enexpr(.x))
-#   }
-#   if (!hardhat:::is_new_data_like(.x)) {
-#     hardhat:::glubort("`{.x_nm}` must be a data.frame or a matrix, not a {class1(.x)}.")
-#   }
-#   .x
-# }

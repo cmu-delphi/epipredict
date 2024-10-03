@@ -66,7 +66,7 @@ arg_is_pos <- function(..., allow_null = FALSE, call = caller_env()) {
       null.ok = allow_null, any.missing = FALSE
     )
     if (!ok) {
-      len <- length(value)
+      len <- length(value) # nolint: object_usage_linter
       cli_abort(
         "{.arg {name}} must be {cli::qty(len)} {?a/} strictly positive number{?s}.",
         call = call
@@ -79,7 +79,7 @@ arg_is_nonneg <- function(..., allow_null = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
     ok <- test_numeric(value, lower = 0, null.ok = allow_null, any.missing = FALSE)
     if (!ok) {
-      len <- length(value)
+      len <- length(value) # nolint: object_usage_linter
       cli_abort(
         "{.arg {name}} must be {cli::qty(len)} {?a/} non-negative number{?s}.",
         call = call
@@ -92,7 +92,7 @@ arg_is_int <- function(..., allow_null = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
     ok <- test_integerish(value, null.ok = allow_null)
     if (!ok) {
-      len <- length(value)
+      len <- length(value) # nolint: object_usage_linter
       cli_abort(
         "{.arg {name}} must be {cli::qty(len)} {?a/} integer{?s}.",
         call = call
@@ -105,7 +105,7 @@ arg_is_pos_int <- function(..., allow_null = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
     ok <- test_integerish(value, null.ok = allow_null, lower = 1, any.missing = FALSE)
     if (!ok) {
-      len <- length(value)
+      len <- length(value) # nolint: object_usage_linter
       cli_abort(
         "{.arg {name}} must be {cli::qty(len)} {?a/} positive integer{?s}.",
         call = call
@@ -118,7 +118,7 @@ arg_is_nonneg_int <- function(..., allow_null = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
     ok <- test_integerish(value, null.ok = allow_null, lower = 0, any.missing = FALSE)
     if (!ok) {
-      len <- length(value)
+      len <- length(value) # nolint: object_usage_linter
       cli_abort(
         "{.arg {name}} must be {cli::qty(len)} {?a/} non-negative integer{?s}.",
         call = call
@@ -131,7 +131,7 @@ arg_is_date <- function(..., allow_null = FALSE, call = caller_env()) {
   handle_arg_list(..., .tests = function(name, value) {
     ok <- test_date(value, null.ok = allow_null)
     if (!ok) {
-      len <- length(value)
+      len <- length(value) # nolint: object_usage_linter
       cli_abort(
         "{.arg {name}} must be {cli::qty(len)} {?a/} date{?s}.",
         call = call
