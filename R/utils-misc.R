@@ -33,28 +33,26 @@ check_pname <- function(res, preds, object, newname = NULL) {
 
 
 grab_forged_keys <- function(forged, workflow, new_data) {
-  keys <- c("geo_value", "time_value", "key")
   forged_roles <- names(forged$extras$roles)
-  extras <- dplyr::bind_cols(forged$extras$roles[forged_roles %in% keys])
+  extras <- bind_cols(forged$extras$roles[forged_roles %in% c("geo_value", "time_value", "key")])
   # 1. these are the keys in the test data after prep/bake
   new_keys <- names(extras)
   # 2. these are the keys in the training data
   old_keys <- key_colnames(workflow)
   # 3. these are the keys in the test data as input
-  new_df_keys <- key_colnames(new_data, extra_keys = setdiff(new_keys, keys[1:2]))
+  new_df_keys <- key_colnames(new_data, extra_keys = setdiff(new_keys, c("geo_value", "time_value")))
   if (!(setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
-    cli::cli_warn(c(
+    cli_warn(paste(
       "Not all epi keys that were present in the training data are available",
       "in `new_data`. Predictions will have only the available keys."
     ))
   }
   if (is_epi_df(new_data)) {
-    extras <- as_epi_df(extras)
-    attr(extras, "metadata") <- attr(new_data, "metadata")
-  } else if (all(keys[1:2] %in% new_keys)) {
-    l <- list()
-    if (length(new_keys) > 2) l <- list(other_keys = new_keys[-c(1:2)])
-    extras <- as_epi_df(extras, additional_metadata = l)
+    meta <- attr(new_data, "metadata")
+    extras <- as_epi_df(extras, as_of = meta$as_of, other_keys = meta$other_keys %||% character())
+  } else if (all(c("geo_value", "time_value") %in% new_keys)) {
+    if (length(new_keys) > 2) other_keys <- new_keys[!new_keys %in% c("geo_value", "time_value")]
+    extras <- as_epi_df(extras, other_keys = other_keys %||% character())
   }
   extras
 }
@@ -76,4 +74,15 @@ is_classification <- function(trainer) {
 
 is_regression <- function(trainer) {
   get_parsnip_mode(trainer) %in% c("regression", "unknown")
+}
+
+
+enlist <- function(...) {
+  # converted to thin wrapper around
+  rlang::dots_list(
+    ...,
+    .homonyms = "error",
+    .named = TRUE,
+    .check_assign = TRUE
+  )
 }

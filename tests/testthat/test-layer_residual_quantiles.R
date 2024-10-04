@@ -46,7 +46,7 @@ test_that("Errors when used with a classifier", {
     layer_predict() %>%
     layer_residual_quantiles()
   wf <- wf %>% add_frosting(f)
-  expect_error(forecast(wf))
+  expect_snapshot(error = TRUE, forecast(wf))
 })
 
 
@@ -99,8 +99,8 @@ test_that("Canned forecasters work with / without", {
 })
 
 test_that("flatline_forecaster correctly errors when n_training < ahead", {
-  expect_error(
-    flatline_forecaster(jhu, "death_rate", args_list = flatline_args_list(ahead = 10, n_training = 9)),
-    "This may be due to `n_train` < `ahead`"
+  expect_snapshot(
+    error = TRUE,
+    flatline_forecaster(jhu, "death_rate", args_list = flatline_args_list(ahead = 10, n_training = 9))
   )
 })

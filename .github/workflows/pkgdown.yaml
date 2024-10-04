@@ -1,7 +1,10 @@
 # Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
 # Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 #
-# Created with usethis + edited to run on PRs to dev, use API key.
+# Modifications:
+#   * workflow_dispatch added to allow manual triggering of the workflow
+#   * trigger branches changed
+#   * API key secrets.SECRET_EPIPREDICT_GHACTIONS_DELPHI_EPIDATA_KEY
 on:
   push:
     branches: [main, dev]
@@ -21,8 +24,9 @@ jobs:
       group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      DELPHI_EPIDATA_KEY: ${{ secrets.SECRET_EPIPREDICT_GHACTIONS_DELPHI_EPIDATA_KEY }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -32,19 +36,31 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          extra-packages: any::pkgdown, local::.
+          extra-packages: any::pkgdown, local::., any::cli
           needs: website
 
       - name: Build site
-        env:
-          DELPHI_EPIDATA_KEY: ${{ secrets.SECRET_EPIPROCESS_GHACTIONS_DELPHI_EPIDATA_KEY }}
+        # - target_ref gets the ref from a different variable, depending on the event
+        # - override allows us to set the pkgdown mode and version_label
+        #   - mode: release is the standard build mode, devel places the site in /dev
+        #   - version_label: 'light' and 'success' are CSS labels for Bootswatch: Cosmo
+        #                    https://bootswatch.com/cosmo/
+        # - we use pkgdown:::build_github_pages to build the site because of an issue in pkgdown
+        #   https://github.com/r-lib/pkgdown/issues/2257
         run: |
-          if (startsWith("${{ github.event_name }}", "pull_request")) {
-              mode <- ifelse("${{ github.base_ref }}" == "main", "release", "devel")
+          target_ref <- "${{ github.event_name == 'pull_request' && github.base_ref || github.ref }}"
+          override <- if (target_ref == "main" || target_ref == "refs/heads/main") {
+            list(development = list(mode = "release", version_label = "light"))
+          } else if (target_ref == "dev" || target_ref == "refs/heads/dev") {
+            list(development = list(mode = "devel", version_label = "success"))
           } else {
-              mode <- ifelse("${{ github.ref_name }}" == "main", "release", "devel")
+            stop("Unexpected target_ref: ", target_ref)
           }
-          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, override=list(PKGDOWN_DEV_MODE=mode))
+          pkg <- pkgdown::as_pkgdown(".", override = override)
+          cli::cli_rule("Cleaning files from old site...")
+          pkgdown::clean_site(pkg)
+          pkgdown::build_site(pkg, preview = FALSE, install = FALSE, new_process = FALSE)
+          pkgdown:::build_github_pages(pkg)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀

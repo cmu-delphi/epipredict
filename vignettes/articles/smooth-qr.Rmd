@@ -25,8 +25,8 @@ Whereas other time-series forecasting examples in this package have used
 epidemiological applications where decisions are based on the trend of a signal.
 
 The idea underlying smooth quantile regression is that set forecast targets can
-be approximated by a smooth curve. This novel approach from 
-[Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723) 
+be approximated by a smooth curve. This novel approach from
+[Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723)
 enforces smoothness across the
 horizons and can be applied to point estimation by regression or interval
 prediction by quantile regression. Our focus in this vignette is the latter.
@@ -62,9 +62,9 @@ The `degree` parameter indicates the degree of the polynomials used for
 smoothing of the response. It should be no more than the number of aheads. If
 the degree is precisely equal to the number of aheads, then there is no
 smoothing. To better understand this parameter and how it works, we should look
-to its origins and how it is used in the model.  
+to its origins and how it is used in the model.
 
-# Model form 
+# Model form
 
 Smooth quantile regression is linear auto-regressive, with the key feature being
 a transformation that forces the coefficients to satisfy a smoothing constraint.
@@ -77,8 +77,8 @@ be no greater than the number of responses. This is a tuning parameter, and so
 it can be chosen by performing a grid search with cross-validation. Intuitively,
 $d = 1$ corresponds to the constant model, $d = 2$ gives straight line
 forecasts, while $d = 3$ gives quadratic forecasts. Since a degree of 3 was
-found to work well in the tested applications (see Section 9 of 
-[Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723)), 
+found to work well in the tested applications (see Section 9 of
+[Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723)),
 it is the default value.
 
 # Demonstration of smooth quantile regression
@@ -169,7 +169,7 @@ regression, which has three main arguments - the quantiles, aheads, and degree.
 After creating our `epi_workflow` with these components, we get our test data
 based on longest lag period and make the predictions.
 
-We input our forecaster into a function for ease of use. 
+We input our forecaster into a function for ease of use.
 
 ```{r}
 smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd) {
@@ -195,7 +195,7 @@ smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd) {
 
   the_fit <- ewf %>% fit(x)
 
-  latest <- get_test_data(rec, x, fill_locf = TRUE)
+  latest <- get_test_data(rec, x)
 
   preds <- predict(the_fit, new_data = latest) %>%
     mutate(forecast_date = fd, target_date = fd + ahead) %>%
@@ -337,7 +337,8 @@ naturally related over time by a smooth curve.
 
 To get the basic quantile regression results we can utilize the forecaster that
 we've already built. We can simply set the degree to be the number of ahead
-values to re-run the code without smoothing. 
+values to re-run the code without smoothing.
+
 ```{r, warning = FALSE}
 baseline_preds <- smooth_fc(
   edf,
@@ -397,15 +398,15 @@ that the smooth quantile regression model and baseline models perform very
 similarly overall, with the smooth quantile regression model only slightly
 beating the baseline model in terms of overall average MAE.
 
-One other commonly used metric is the Weighted Interval Score 
-(WIS, [Bracher et al., 2021](https://arxiv.org/pdf/2005.12881.pdf)), 
+One other commonly used metric is the Weighted Interval Score
+(WIS, [Bracher et al., 2021](https://arxiv.org/pdf/2005.12881.pdf)),
 which a scoring rule that is based on the population quantiles. The point is to
 score the interval, whereas MAE only evaluates the accuracy of the point
 forecast.
 
 Let $F$ be a forecast composed of predicted quantiles $q_{\tau}$ for the set of
 quantile levels $\tau$. Then, in terms of the predicted quantiles, the WIS for
-target variable $Y$ is represented as follows 
+target variable $Y$ is represented as follows
 ([McDonald etal., 2021](https://www.pnas.org/doi/full/10.1073/pnas.2111453118)):
 
 $$
@@ -515,5 +516,5 @@ smooth curve.
 
 # Attribution
 
-The information presented on smooth quantile regression is from 
-[Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723). 
+The information presented on smooth quantile regression is from
+[Tuzhilina et al., 2022](https://arxiv.org/abs/2202.09723).

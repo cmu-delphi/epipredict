@@ -1,7 +1,7 @@
 location_to_abbr <- function(location) {
   dictionary <-
     state_census %>%
-    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
+    mutate(fips = sprintf("%02d", fips)) %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -12,7 +12,7 @@ location_to_abbr <- function(location) {
 abbr_to_location <- function(abbr) {
   dictionary <-
     state_census %>%
-    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
+    mutate(fips = sprintf("%02d", fips)) %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -67,11 +67,11 @@ abbr_to_location <- function(abbr) {
 #'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
 #'   select(-pop, -death_rate) %>%
 #'   group_by(geo_value) %>%
-#'   epi_slide(~ sum(.$deaths), before = 6, new_col_name = "deaths") %>%
+#'   epi_slide(~ sum(.$deaths), .window_size = 7, .new_col_name = "deaths_7dsum") %>%
 #'   ungroup() %>%
 #'   filter(weekdays(time_value) == "Saturday")
 #'
-#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths")
+#' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_7dsum")
 #' flusight_hub_formatter(cdc)
 #' flusight_hub_formatter(cdc, target = "wk inc covid deaths")
 #' flusight_hub_formatter(cdc, target = paste(horizon, "wk inc covid deaths"))

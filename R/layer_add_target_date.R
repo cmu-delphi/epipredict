@@ -1,22 +1,26 @@
 #' Postprocessing step to add the target date
 #'
 #' @param frosting a `frosting` postprocessor
-#' @param target_date The target date to add as a column to the
-#' `epi_df`. If there's a forecast date specified in a layer, then
-#' it is the forecast date plus `ahead` (from `step_epi_ahead` in
-#' the `epi_recipe`). Otherwise, it is the maximum `time_value`
-#' (from the data used in pre-processing, fitting the model, and
-#' postprocessing) plus `ahead`, where `ahead` has been specified in
-#'  preprocessing. The user may override these by specifying a
-#' target date of their own (of the form "yyyy-mm-dd").
+#' @param target_date The target date to add as a column to the `epi_df`. If
+#'   there's a forecast date specified upstream (either in a
+#'   `step_adjust_latency` or in a `layer_forecast_date`), then it is the
+#'   forecast date plus `ahead` (from `step_epi_ahead` in the `epi_recipe`).
+#'   Otherwise, it is the maximum `time_value` (from the data used in
+#'   pre-processing, fitting the model, and postprocessing) plus `ahead`, where
+#'   `ahead` has been specified in preprocessing. The user may override these by
+#'   specifying a target date of their own (of the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
 #' @details By default, this function assumes that a value for `ahead`
 #' has been specified in a preprocessing step (most likely in
-#' `step_epi_ahead`). Then, `ahead` is added to the maximum `time_value`
-#' in the test data to get the target date.
+#' `step_epi_ahead`). Then, `ahead` is added to the `forecast_date`
+#' in the test data to get the target date. `forecast_date` can be set in 3 ways:
+#' 1. `step_adjust_latency`, which typically uses the training `epi_df`'s `as_of`
+#' 2. `layer_add_forecast_date`, which inherits from 1 if not manually specifed
+#' 3. if none of those are the case, it is simply the maximum `time_value` over
+#'   every dataset used (prep, training, and prediction).
 #'
 #' @export
 #' @examples
@@ -41,8 +45,14 @@
 #' p <- forecast(wf1)
 #' p
 #'
-#' # Use ahead + max time value from pre, fit, post
-#' # which is the same if include `layer_add_forecast_date()`
+#' # Use ahead + forecast_date from adjust_latency
+#' # setting the `as_of` to something realistic
+#' attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+#' r <- epi_recipe(jhu) %>%
+#'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   step_adjust_latency(method = "extend_ahead") %>%
+#'   step_epi_naomit()
 #' f2 <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_add_target_date() %>%
@@ -52,15 +62,26 @@
 #' p2 <- forecast(wf2)
 #' p2
 #'
-#' # Specify own target date
+#' # Use ahead + max time value from pre, fit, post
+#' # which is the same if include `layer_add_forecast_date()`
 #' f3 <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_add_target_date(target_date = "2022-01-08") %>%
+#'   layer_add_target_date() %>%
 #'   layer_naomit(.pred)
 #' wf3 <- wf %>% add_frosting(f3)
 #'
-#' p3 <- forecast(wf3)
-#' p3
+#' p3 <- forecast(wf2)
+#' p2
+#'
+#' # Specify own target date
+#' f4 <- frosting() %>%
+#'   layer_predict() %>%
+#'   layer_add_target_date(target_date = "2022-01-08") %>%
+#'   layer_naomit(.pred)
+#' wf4 <- wf %>% add_frosting(f4)
+#'
+#' p4 <- forecast(wf4)
+#' p4
 layer_add_target_date <-
   function(frosting, target_date = NULL, id = rand_id("add_target_date")) {
     arg_is_chr_scalar(id)
@@ -90,6 +111,7 @@ slather.layer_add_target_date <- function(object, components, workflow,
     workflows::extract_preprocessor(workflow)$template, "metadata"
   )$time_type
   if (expected_time_type == "week") expected_time_type <- "day"
+  if (expected_time_type == "integer") expected_time_type <- "year"
 
   if (!is.null(object$target_date)) {
     target_date <- object$target_date
@@ -111,13 +133,13 @@ slather.layer_add_target_date <- function(object, components, workflow,
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
     target_date <- forecast_date + ahead
   } else {
-    max_time_value <- as.Date(max(
-      workflows::extract_preprocessor(workflow)$max_time_value,
+    forecast_date <- get_forecast_date_in_layer(
+      extract_preprocessor(workflow),
       workflow$fit$meta$max_time_value,
-      max(new_data$time_value)
-    ))
+      new_data
+    )
     ahead <- extract_argument(the_recipe, "step_epi_ahead", "ahead")
-    target_date <- max_time_value + ahead
+    target_date <- forecast_date + ahead
   }
 
   object$target_date <- target_date

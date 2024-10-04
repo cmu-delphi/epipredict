@@ -84,7 +84,7 @@ test_that("step_training_window works with multiple keys", {
   expect_equal(nrow(p4), 12L)
   expect_equal(ncol(p4), 5L)
   expect_s3_class(p4, "epi_df")
-  expect_named(p4, c("geo_value", "time_value", "additional_key", "x", "y"))
+  expect_named(p4, c("geo_value", "additional_key", "time_value", "x", "y"))
   expect_equal(
     p4$time_value,
     rep(c(

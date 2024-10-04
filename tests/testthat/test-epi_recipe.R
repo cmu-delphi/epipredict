@@ -1,27 +1,12 @@
-test_that("epi_recipe produces default recipe", {
-  # these all call recipes::recipe(), but the template will always have 1 row
+test_that("epi_recipe produces error if not an epi_df", {
   tib <- tibble(
     x = 1:5, y = 1:5,
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5)
   )
-  expected_rec <- recipes::recipe(tib)
-  expected_rec$template <- expected_rec$template[1, ]
-  expect_warning(rec <- epi_recipe(tib), regexp = "epi_recipe has been called with a non-epi_df object")
-  expect_identical(expected_rec, rec)
-  expect_equal(nrow(rec$template), 1L)
-
-  expected_rec <- recipes::recipe(y ~ x, tib)
-  expected_rec$template <- expected_rec$template[1, ]
-  expect_warning(rec <- epi_recipe(y ~ x, tib), regexp = "epi_recipe has been called with a non-epi_df object")
-  expect_identical(expected_rec, rec)
-  expect_equal(nrow(rec$template), 1L)
-
+  expect_snapshot(error = TRUE, epi_recipe(tib))
+  expect_snapshot(error = TRUE, epi_recipe(y ~ x, tib))
   m <- as.matrix(tib)
-  expected_rec <- recipes::recipe(m)
-  expected_rec$template <- expected_rec$template[1, ]
-  expect_warning(rec <- epi_recipe(m), regexp = "epi_recipe has been called with a non-epi_df object")
-  expect_identical(expected_rec, rec)
-  expect_equal(nrow(rec$template), 1L)
+  expect_snapshot(error = TRUE, epi_recipe(m))
 })
 
 test_that("epi_recipe formula works", {
@@ -59,7 +44,7 @@ test_that("epi_recipe formula works", {
     time_value = seq(as.Date("2020-01-01"), by = 1, length.out = 5),
     geo_value = "ca",
     z = "dummy_key"
-  ) %>% epiprocess::as_epi_df(additional_metadata = list(other_keys = "z"))
+  ) %>% epiprocess::as_epi_df(other_keys = "z")
 
   # with an additional key
   r <- epi_recipe(y ~ x + geo_value, tib)
@@ -170,6 +155,6 @@ test_that("add/update/adjust/remove epi_recipe works as intended", {
 
 
   wf <- remove_epi_recipe(wf)
-  expect_error(workflows::extract_preprocessor(wf)$steps)
+  expect_snapshot(error = TRUE, workflows::extract_preprocessor(wf)$steps)
   expect_equal(wf$pre$actions$recipe$recipe, NULL)
 })

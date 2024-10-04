@@ -1,36 +1,39 @@
 test_that("arx_args checks inputs", {
   expect_s3_class(arx_args_list(), c("arx_fcast", "alist"))
-  expect_error(arx_args_list(ahead = c(0, 4)))
-  expect_error(arx_args_list(n_training = c(28, 65)))
+  expect_snapshot(error = TRUE, arx_args_list(ahead = c(0, 4)))
+  expect_snapshot(error = TRUE, arx_args_list(n_training = c(28, 65)))
 
-  expect_error(arx_args_list(ahead = -1))
-  expect_error(arx_args_list(ahead = 1.5))
-  expect_error(arx_args_list(n_training = -1))
-  expect_error(arx_args_list(n_training = 1.5))
-  expect_error(arx_args_list(lags = c(-1, 0)))
-  expect_error(arx_args_list(lags = list(c(1:5, 6.5), 2:8)))
+  expect_snapshot(error = TRUE, arx_args_list(ahead = -1))
+  expect_snapshot(error = TRUE, arx_args_list(ahead = 1.5))
+  expect_snapshot(error = TRUE, arx_args_list(n_training = -1))
+  expect_snapshot(error = TRUE, arx_args_list(n_training = 1.5))
+  expect_snapshot(error = TRUE, arx_args_list(lags = c(-1, 0)))
+  expect_snapshot(error = TRUE, arx_args_list(lags = list(c(1:5, 6.5), 2:8)))
 
-  expect_error(arx_args_list(symmetrize = 4))
-  expect_error(arx_args_list(nonneg = 4))
+  expect_snapshot(error = TRUE, arx_args_list(symmetrize = 4))
+  expect_snapshot(error = TRUE, arx_args_list(nonneg = 4))
 
-  expect_error(arx_args_list(quantile_levels = -.1))
-  expect_error(arx_args_list(quantile_levels = 1.1))
+  expect_snapshot(error = TRUE, arx_args_list(quantile_levels = -.1))
+  expect_snapshot(error = TRUE, arx_args_list(quantile_levels = 1.1))
   expect_type(arx_args_list(quantile_levels = NULL), "list")
 
-  expect_error(arx_args_list(target_date = "2022-01-01"))
+  expect_snapshot(error = TRUE, arx_args_list(target_date = "2022-01-01"))
   expect_identical(
     arx_args_list(target_date = as.Date("2022-01-01"))$target_date,
     as.Date("2022-01-01")
   )
 
-  expect_error(arx_args_list(n_training_min = "de"))
-  expect_error(arx_args_list(epi_keys = 1))
+  expect_snapshot(error = TRUE, arx_args_list(n_training_min = "de"))
+  expect_snapshot(error = TRUE, arx_args_list(epi_keys = 1))
 
-  expect_warning(arx_args_list(
-    forecast_date = as.Date("2022-01-01"),
-    target_date = as.Date("2022-01-03"),
-    ahead = 1L
-  ))
+  expect_error(
+    arx_args_list(
+      forecast_date = as.Date("2022-01-01"),
+      target_date = as.Date("2022-01-04"),
+      ahead = 1L
+    ),
+    class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
+  )
 })
 
 test_that("arx forecaster disambiguates quantiles", {
@@ -58,7 +61,7 @@ test_that("arx forecaster disambiguates quantiles", {
     sort(unique(tlist))
   )
   alist <- c(.1, .3, .5, .7, .9) # neither default, and different,
-  expect_error(compare_quantile_args(alist, tlist))
+  expect_snapshot(error = TRUE, compare_quantile_args(alist, tlist))
 })
 
 test_that("arx_lags_validator handles named & unnamed lists as expected", {
@@ -94,7 +97,7 @@ test_that("arx_lags_validator handles named & unnamed lists as expected", {
   )
 
   # More lags than predictors - Error
-  expect_error(arx_lags_validator(pred_vec, lags_finit_fn_switch2))
+  expect_snapshot(error = TRUE, arx_lags_validator(pred_vec, lags_finit_fn_switch2))
 
   # Unnamed list of lags
   lags_init_un <- list(c(0, 7, 14), c(0, 1, 2, 3, 7, 14))
@@ -115,5 +118,5 @@ test_that("arx_lags_validator handles named & unnamed lists as expected", {
   # Try use a name not in predictors - Error
   lags_init_other_name <- list(death_rate = c(0, 7, 14), test_var = c(0, 1, 2, 3, 7, 14))
 
-  expect_error(arx_lags_validator(pred_vec, lags_init_other_name))
+  expect_snapshot(error = TRUE, arx_lags_validator(pred_vec, lags_init_other_name))
 })

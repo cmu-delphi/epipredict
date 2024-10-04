@@ -98,11 +98,14 @@ is_epi_workflow <- function(x) {
 fit.epi_workflow <- function(object, data, ..., control = workflows::control_workflow()) {
   object$fit$meta <- list(
     max_time_value = max(data$time_value),
-    as_of = attributes(data)$metadata$as_of
+    as_of = attr(data, "metadata")$as_of,
+    other_keys = attr(data, "metadata")$other_keys
   )
   object$original_data <- data
 
-  NextMethod()
+  res <- NextMethod()
+  class(res) <- c("epi_workflow", class(res))
+  res
 }
 
 #' Predict from an epi_workflow
@@ -154,7 +157,7 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' preds
 predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), ...) {
   if (!workflows::is_trained_workflow(object)) {
-    cli::cli_abort(c(
+    cli_abort(c(
       "Can't predict on an untrained epi_workflow.",
       i = "Do you need to call `fit()`?"
     ))
@@ -185,8 +188,8 @@ augment.epi_workflow <- function(x, new_data, ...) {
     join_by <- key_colnames(predictions)
   } else {
     cli_abort(c(
-      "Cannot determine how to join new_data with the predictions.",
-      "Try converting new_data to an epi_df with `as_epi_df(new_data)`."
+      "Cannot determine how to join `new_data` with the `predictions`.",
+      "Try converting `new_data` to an {.cls epi_df} with `as_epi_df(new_data)`."
     ))
   }
   complete_overlap <- intersect(names(new_data), join_by)
@@ -228,7 +231,6 @@ print.epi_workflow <- function(x, ...) {
 #'
 #' @param object An epi workflow.
 #' @param ... Not used.
-#' @param fill_locf Logical. Should we use locf to fill in missing data?
 #' @param n_recent Integer or NULL. If filling missing data with locf = TRUE,
 #' how far back are we willing to tolerate missing data? Larger values allow
 #' more filling. The default NULL will determine this from the the recipe. For
@@ -242,7 +244,7 @@ print.epi_workflow <- function(x, ...) {
 #' @return A forecast tibble.
 #'
 #' @export
-forecast.epi_workflow <- function(object, ..., fill_locf = FALSE, n_recent = NULL, forecast_date = NULL) {
+forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = NULL) {
   rlang::check_dots_empty()
 
   if (!object$trained) {
@@ -265,10 +267,7 @@ forecast.epi_workflow <- function(object, ..., fill_locf = FALSE, n_recent = NUL
 
   test_data <- get_test_data(
     hardhat::extract_preprocessor(object),
-    object$original_data,
-    fill_locf = fill_locf,
-    n_recent = n_recent %||% Inf,
-    forecast_date = forecast_date %||% frosting_fd %||% max(object$original_data$time_value)
+    object$original_data
   )
 
   predict(object, new_data = test_data)

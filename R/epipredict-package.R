@@ -1,15 +1,17 @@
 ## usethis namespace: start
-#' @importFrom tibble as_tibble
-#' @importFrom rlang := !! %||% as_function global_env set_names !!!
-#'             is_logical is_true inject enquo enquos expr sym arg_match
-#' @importFrom stats poly predict lm residuals quantile
-#' @importFrom dplyr arrange across all_of any_of bind_cols bind_rows group_by
-#'             summarize filter mutate select left_join rename ungroup full_join
-#'             relocate summarise everything
-#' @importFrom cli cli_abort cli_warn
-#' @importFrom checkmate assert assert_character assert_int assert_scalar
-#'             assert_logical assert_numeric assert_number assert_integer
-#'             assert_integerish assert_date assert_function assert_class
 #' @import epiprocess parsnip
+#' @importFrom checkmate assert_class assert_numeric
+#' @importFrom checkmate test_character test_date test_function
+#' @importFrom checkmate test_integerish test_logical
+#' @importFrom checkmate test_numeric test_scalar
+#' @importFrom cli cli_abort cli_warn
+#' @importFrom dplyr arrange across all_of any_of bind_cols bind_rows group_by
+#' @importFrom dplyr full_join relocate summarise everything
+#' @importFrom dplyr summarize filter mutate select left_join rename ungroup
+#' @importFrom rlang := !! %||% as_function global_env set_names !!! caller_arg
+#' @importFrom rlang is_logical is_true inject enquo enquos expr sym arg_match
+#' @importFrom stats poly predict lm residuals quantile
+#' @importFrom tibble as_tibble
+na_chr <- NA_character_
 ## usethis namespace: end
 NULL

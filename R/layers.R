@@ -148,9 +148,9 @@ validate_layer <- function(x, ..., arg = rlang::caller_arg(x),
                            call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_layer(x)) {
-    cli::cli_abort(
+    cli_abort(
       "{arg} must be a frosting layer, not a {.cls {class(x)[[1]]}}.",
-      .call = call
+      call = call
     )
   }
   invisible(x)

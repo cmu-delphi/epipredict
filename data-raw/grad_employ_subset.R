@@ -101,6 +101,6 @@ ncol(gemploy)
 grad_employ_subset <- gemploy %>%
   as_epi_df(
     as_of = "2022-07-19",
-    additional_metadata = list(other_keys = c("age_group", "edu_qual"))
+    other_keys = c("age_group", "edu_qual")
   )
 usethis::use_data(grad_employ_subset, overwrite = TRUE)

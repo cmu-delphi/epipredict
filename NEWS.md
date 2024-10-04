@@ -2,6 +2,13 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2
+
+## features
+- Add `step_adjust_latency`, which give several methods to adjust the forecast if the `forecast_date` is after the last day of data.
+
+## bugfixes
+
 # epipredict 0.1
 
 - simplify `layer_residual_quantiles()` to avoid timesuck in `utils::methods()`
@@ -57,3 +64,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Add `step_epi_slide` to produce generic sliding computations over an `epi_df`
 - Add quantile random forests (via `{grf}`) as a parsnip engine
 - Replace `epi_keys()` with `epiprocess::key_colnames()`, #352
+- More descriptive error messages from `arg_is_*()`, #287
+- Fix bug where `fit()` drops the `epi_workflow` class (also error if
+  non-`epi_df` data is given to `epi_recipe()`), #363
+- Try to retain the `epi_df` class during baking to the extent possible, #376

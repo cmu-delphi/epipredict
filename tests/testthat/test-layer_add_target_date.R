@@ -6,6 +6,7 @@ r <- epi_recipe(jhu) %>%
   step_naomit(all_predictors()) %>%
   step_naomit(all_outcomes(), skip = TRUE)
 wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
 latest <- jhu %>%
   dplyr::filter(time_value >= max(time_value) - 14)
 
@@ -38,6 +39,27 @@ test_that("Use ahead + max time value from pre, fit, post", {
   expect_equal(nrow(p2), 3L)
   expect_equal(p2$target_date, rep(as.Date("2022-01-07"), times = 3))
   expect_named(p2, c("geo_value", "time_value", ".pred", "forecast_date", "target_date"))
+})
+test_that("latency adjust doesn't interfere with correct target date", {
+  r_latent <- epi_recipe(jhu) %>%
+    step_adjust_latency(method = "extend_ahead") %>%
+    step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
+    step_epi_ahead(death_rate, ahead = 7) %>%
+    step_naomit(all_predictors()) %>%
+    step_naomit(all_outcomes(), skip = TRUE)
+  wf_latent <- epi_workflow(r_latent, parsnip::linear_reg()) %>% fit(jhu)
+  f_latent <- frosting() %>%
+    layer_predict() %>%
+    layer_add_target_date() %>%
+    layer_naomit(.pred)
+  wf_latent <- wf_latent %>% add_frosting(f_latent)
+
+  expect_silent(p_latent <- predict(wf_latent, latest))
+  expect_equal(ncol(p_latent), 4L)
+  expect_s3_class(p_latent, "epi_df")
+  expect_equal(nrow(p_latent), 3L)
+  expect_equal(p_latent$target_date, rep(as.Date("2022-01-10"), times = 3))
+  expect_named(p_latent, c("geo_value", "time_value", ".pred", "target_date"))
 })
 
 test_that("Use ahead + specified forecast date", {
@@ -104,8 +126,10 @@ test_that("target date works for daily and yearly", {
     unclass() %>%
     as.data.frame() %>%
     mutate(time_value = as.POSIXlt(time_value)$year + 1900L) %>%
+    group_by(geo_value, time_value) %>%
+    summarize(case_rate = mean(case_rate), death_rate = mean(death_rate), .groups = "drop") %>%
     as_epi_df()
-  expect_error(predict(wf1, latest_bad))
+  expect_snapshot(error = TRUE, predict(wf1, latest_bad))
 
   # target_date is a string (gets correctly converted to Date)
   wf1 <- add_frosting(
