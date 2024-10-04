@@ -73,13 +73,15 @@ step_pivot_wider_new <- function(
 
 #' @export
 prep.step_pivot_wider <- function(x, training, info = NULL, ...) {
-  checkmate::assert_subset(x$edf_id_cols, key_colnames(training))
+  user_id_cols <- recipes_eval_select(x$user_id_cols, training, info)
+  all_id_cols <- union(user_id_cols, key_colnames(training))
+  hardhat::validate_column_names(training, all_id_cols)
   step_pivot_wider_new(
     terms = x$terms,
     role = x$role,
     trained = TRUE,
-    user_id_cols = recipes_eval_select(x$user_id_cols, training, info),
-    edf_id_cols = key_colnames(training),
+    user_id_cols = user_id_cols,
+    edf_id_cols = all_id_cols,
     id_expand = x$id_expand,
     names_from = recipes_eval_select(x$names_from, training, info),
     values_fill = x$values_fill,
@@ -92,9 +94,9 @@ prep.step_pivot_wider <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_pivot_wider <- function(object, new_data, ...) {
-  hardhat::validate_column_names(new_data, object$edf_id_cols)
-  id_cols <- union(object$user_id_cols, object$edf_id_cols)
-  id_cols <- union(id_cols, key_colnames(new_data))
+  hardhat::validate_column_names(new_data, object$all_id_cols)
+  id_cols <- union(object$all_id_cols, key_colnames(new_data))
+  object$edf_id_cols <- id_cols
   if (length(id_cols) == 0L) {
     pivotted <- tidyr::pivot_wider(
       new_data,
@@ -131,3 +133,14 @@ bake.step_pivot_wider <- function(object, new_data, ...) {
   }
   new_data
 }
+
+#' @export
+print.step_pivot_wider <- function(x, width = max(20, options()$width - 30), ...) {
+  print_epi_step(x$values_from, x$terms, x$trained,
+                 title = "Pivotting variables",
+                 conjunction = "by",
+                 extra_text = x$names_from
+  )
+  invisible(x)
+}
+
