@@ -7,9 +7,9 @@
 step_pivot_wider(
   recipe,
   ...,
+  names_from = "geo_value",
   role = "predictor",
-  names_from,
-  id_cols = NULL,
+  id_cols = "time_value",
   id_expand = FALSE,
   values_fill = NA,
   values_fn = NULL,
@@ -21,22 +21,22 @@ step_pivot_wider(
 \item{recipe}{A recipe object. The step will be added to the
 sequence of operations for this recipe.}
 
-\item{...}{One or more selector functions to choose variables
+\item{...}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> One or more selector
+functions to choose variables
 values to pivot. These are the \code{values_from} argument for \code{\link[tidyr:pivot_wider]{tidyr::pivot_wider()}}.
 See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
+
+\item{names_from}{A selector function to choose which column (or columns) to
+get the name of the output columns from. This is typically \code{geo_value}
+(the default), and possibly any additional keys in the training data.}
 
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
 
-\item{id_cols}{<\code{\link[tidyr:tidyr_tidy_select]{tidy-select}}> A set of columns that
-uniquely identify each observation. Typically used when you have
-redundant variables, i.e. variables whose values are perfectly correlated
-with existing variables.
-
-Defaults to all columns in \code{data} except for the columns specified through
-\code{names_from} and \code{values_from}. If a tidyselect expression is supplied, it
-will be evaluated on \code{data} after removing the columns specified through
-\code{names_from} and \code{values_from}.}
+\item{id_cols}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A selector function
+providing a set of columns that uniquely identifies each observation.
+The typical use is for this to be \code{time_value} and any additional keys
+not selected by \code{names_from} (this is the default behaviour).}
 
 \item{id_expand}{Should the values in the \code{id_cols} columns be expanded by
 \code{\link[tidyr:expand]{expand()}} before pivoting? This results in more rows, the output will
@@ -76,5 +76,13 @@ sequence of any existing operations.
 Create new variables by pivotting data
 }
 \examples{
-1+1
+jhu <- case_death_rate_subset \%>\%
+  filter(geo_value \%in\% c("ca", "ny", "pa"), time_value > "2021-12-01")
+r <- epi_recipe(jhu)
+
+r1 <- r \%>\% step_pivot_wider("death_rate")
+bake(prep(r1, jhu), new_data = NULL)
+
+r2 <- r \%>\% step_pivot_wider(dplyr::ends_with("rate"))
+bake(prep(r2, jhu), new_data = NULL)
 }
