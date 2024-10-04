@@ -22,11 +22,11 @@ new_quantiles <- function(values = double(1), quantile_levels = double(1)) {
     values <- values[o]
     quantile_levels <- quantile_levels[o]
   }
-  if (is.unsorted(values, na.rm = TRUE)) {
-    cli_abort("`values[order(quantile_levels)]` produces unsorted quantiles.")
-  }
+  # if (is.unsorted(values, na.rm = TRUE)) {
+  #   cli_abort("`values[order(quantile_levels)]` produces unsorted quantiles.")
+  # }
 
-  new_rcrd(list(values = values, quantile_levels = quantile_levels),
+  new_rcrd(list(values = values[order(quantile_levels)], quantile_levels = quantile_levels),
     class = c("dist_quantiles", "dist_default")
   )
 }
