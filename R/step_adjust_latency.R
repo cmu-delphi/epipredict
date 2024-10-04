@@ -152,6 +152,12 @@
 #'
 #'   Note that this is a separate concern from different latencies across
 #'   different *data columns*, which is only handled by the choice of `method`.
+#' @param keys_to_ignore a list of character vectors. Set this to avoid using
+#'   specific key values in the `epi_keys_checked` to set latency. For example,
+#'   say you have two locations `pr` and `gu` which have useful training data,
+#'   but have stopped providing up-to-date information, and so are no longer
+#'   part of the test set. Setting `keys_to_ignore = list(geo_value = c("pr",
+#'   "gu"))` will exclude them from the latency calculation.
 #' @param fixed_latency either a positive integer, or a labeled positive integer
 #'   vector. Cannot be set at the same time as `fixed_forecast_date`. If
 #'   non-`NULL`, the amount to offset the ahead or lag by. If a single integer,
@@ -203,6 +209,7 @@ step_adjust_latency <-
              "extend_lags"
            ),
            epi_keys_checked = NULL,
+           keys_to_ignore = c(),
            fixed_latency = NULL,
            fixed_forecast_date = NULL,
            check_latency_length = TRUE,
@@ -228,6 +235,7 @@ step_adjust_latency <-
         metadata = NULL,
         method = method,
         epi_keys_checked = epi_keys_checked,
+        keys_to_ignore = keys_to_ignore,
         check_latency_length = check_latency_length,
         columns = NULL,
         skip = FALSE,
@@ -239,7 +247,7 @@ step_adjust_latency <-
 step_adjust_latency_new <-
   function(terms, role, trained, fixed_forecast_date, forecast_date, latency,
            latency_table, latency_sign, metadata, method, epi_keys_checked,
-           check_latency_length, columns, skip, id) {
+           keys_to_ignore, check_latency_length, columns, skip, id) {
     step(
       subclass = "adjust_latency",
       terms = terms,
@@ -271,7 +279,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 
   latency_table <- get_latency_table(
     training, NULL, forecast_date, latency,
-    get_sign(x), x$epi_keys_checked, info, x$terms
+    get_sign(x), x$epi_keys_checked, x$keys_to_ignore, info, x$terms
   )
   # get the columns used, even if it's all of them
   terms_used <- x$terms

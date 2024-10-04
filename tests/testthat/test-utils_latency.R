@@ -87,6 +87,27 @@ test_that("get_latency works", {
   expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "b", -1, "geo_value"), -3)
 })
 
+test_that("get_latency ignores keys it's supposed to", {
+  keys_to_ignore <- list(geo_value = c("na"), source = c("old", "older"))
+  expected_df <- tribble(
+    ~geo_value, ~source, ~time_value, ~a, ~b,
+    "ma", "old", as.Date("2013-01-01"), 19, 4,
+    "ma", "old", as.Date("2013-01-02"), 20, 2,
+    "ca", "old", as.Date("2013-01-03"), 28, 11,
+    "na", "new", as.Date("2013-01-05"), 28, 11,
+    "ma", "older", as.Date("2010-01-05"), 28, 11,
+  )
+  expect_equal(
+    toy_df_src %>% drop_ignored_keys(keys_to_ignore) %>% as_tibble(),
+    expected_df
+  )
+
+  expect_equal(
+    get_latency_table(toy_df_src, c("a", "b"), as.Date("2015-01-14"), NULL, -1, c("geo_value", "source"), keys_to_ignore),
+    tibble(col_name = c("a", "b"), latency = c(-2, -3))
+  )
+})
+
 test_that("get_latency infers max_time to be the minimum `max time` across grouping the specified keys", {
   # place 2 is already 1 day less latent than place 1, so decreasing it's
   # latency it should have no effect

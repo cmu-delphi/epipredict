@@ -290,7 +290,8 @@ check_interminable_latency <- function(dataset, latency_table, target_columns, f
 #' @keywords internal
 #' @importFrom dplyr rowwise
 get_latency_table <- function(training, columns, forecast_date, latency,
-                              sign_shift, epi_keys_checked, info, terms) {
+                              sign_shift, epi_keys_checked, keys_to_ignore,
+                              info, terms) {
   if (is.null(columns)) {
     columns <- recipes_eval_select(terms, training, info)
   }
@@ -305,7 +306,11 @@ get_latency_table <- function(training, columns, forecast_date, latency,
     latency_table <- latency_table %>%
       rowwise() %>%
       mutate(latency = get_latency(
-        training, forecast_date, col_name, sign_shift, epi_keys_checked
+        training %>% drop_ignored_keys(keys_to_ignore),
+        forecast_date,
+        col_name,
+        sign_shift,
+        epi_keys_checked
       ))
   } else if (length(latency) > 1) {
     # if latency has a length, it must also have named elements.
@@ -319,13 +324,24 @@ get_latency_table <- function(training, columns, forecast_date, latency,
     latency_table <- latency_table %>%
       rowwise() %>%
       mutate(latency = get_latency(
-        training, forecast_date, col_name, sign_shift, epi_keys_checked
+        training %>% drop_ignored_keys(keys_to_ignore), forecast_date, col_name, sign_shift, epi_keys_checked
       ))
     if (latency) {
       latency_table <- latency_table %>% mutate(latency = latency)
     }
   }
   return(latency_table %>% ungroup())
+}
+
+#' given a list named by key columns, remove any matching key values
+drop_ignored_keys <- function(training, keys_to_ignore) {
+  # note that the extra parenthesis black magic is described here: https://github.com/tidyverse/dplyr/issues/6194
+  # and is needed to bypass an incomplete port of `across` functions to `if_any`
+  training %>%
+    filter((if_all(
+      names(keys_to_ignore),
+      ~ . %nin% keys_to_ignore[[cur_column()]]
+    )))
 }
 
 
