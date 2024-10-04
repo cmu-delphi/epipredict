@@ -8,7 +8,7 @@
 #'   of data loss.
 #' @export
 #' @examples
-#' case_death_rate_subset %>%
+#' covid_case_death_rates %>%
 #'   epi_recipe() %>%
 #'   step_epi_naomit()
 step_epi_naomit <- function(recipe) {

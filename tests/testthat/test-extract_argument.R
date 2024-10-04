@@ -28,7 +28,7 @@ test_that("layer argument extractor works", {
 })
 
 test_that("recipe argument extractor works", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-08-01") %>%
     dplyr::arrange(geo_value, time_value)
 

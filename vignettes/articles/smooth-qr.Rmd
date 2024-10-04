@@ -97,7 +97,7 @@ state cases and deaths. This sample data ranges from Dec. 31, 2020 to
 Dec. 31, 2021.
 
 ```{r}
-edf <- case_death_rate_subset
+edf <- covid_case_death_rates
 ```
 
 We will set the forecast date to be November 30, 2021 so that we can produce

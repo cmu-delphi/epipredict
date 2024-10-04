@@ -71,7 +71,7 @@ can simply call \code{autoplot()} on the original \code{epi_df}).
 }
 \examples{
 library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 
 r <- epi_recipe(jhu) \%>\%
@@ -112,7 +112,7 @@ autoplot(wf, p, .max_facets = 4)
 
 # ------- Plotting canned forecaster output
 
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 flat <- flatline_forecaster(jhu, "death_rate")
 autoplot(flat, .max_facets = 4)

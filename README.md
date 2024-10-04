@@ -75,7 +75,7 @@ processed using
 
 ``` r
 library(epipredict)
-case_death_rate_subset
+covid_case_death_rates
 #> An `epi_df` object, 20,496 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
@@ -103,7 +103,7 @@ cases, we could use the following function.
 
 ``` r
 two_week_ahead <- arx_forecaster(
-  case_death_rate_subset,
+  covid_case_death_rates,
   outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(

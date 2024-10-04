@@ -4,10 +4,19 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 # epipredict 0.2
 
-## features
+## Breaking changes
+
+- Moved example datasets from being hosted in the package to being reexported
+  from the `epidatasets` package. The datasets can no longer be loaded with
+  `data()` but can be accessed with `epipredict::` or, after loading the package,
+  the name of the dataset alone (#382).
+
+## Improvements
+
 - Add `step_adjust_latency`, which give several methods to adjust the forecast if the `forecast_date` is after the last day of data.
 
-## bugfixes
+## Bug fixes
+
 
 # epipredict 0.1
 

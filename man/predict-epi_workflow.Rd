@@ -66,7 +66,7 @@ possible. Specifically, the output will have \code{time_value} and
 }
 }
 \examples{
-jhu <- case_death_rate_subset
+jhu <- covid_case_death_rates
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
