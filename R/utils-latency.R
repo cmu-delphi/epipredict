@@ -57,8 +57,8 @@ get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns
     select(all_of(columns)) %>%
     drop_na()
   # null and "" don't work in `group_by`
-  if (!is.null(epi_keys_checked) && (epi_keys_checked != "")) {
-    max_time <- max_time %>% group_by(get(epi_keys_checked))
+  if (!is.null(epi_keys_checked) && all(epi_keys_checked != "")) {
+    max_time <- max_time %>% group_by(across(all_of(epi_keys_checked)))
   }
   max_time <- max_time %>%
     summarise(time_value = max(time_value)) %>%
@@ -115,8 +115,8 @@ get_latency <- function(new_data, forecast_date, column, sign_shift, epi_keys_ch
   shift_max_date <- new_data %>%
     drop_na(all_of(column))
   # null and "" don't work in `group_by`
-  if (!is.null(epi_keys_checked) && epi_keys_checked != "") {
-    shift_max_date <- shift_max_date %>% group_by(get(epi_keys_checked))
+  if (!is.null(epi_keys_checked) && all(epi_keys_checked != "")) {
+    shift_max_date <- shift_max_date %>% group_by(across(all_of(epi_keys_checked)))
   }
   shift_max_date <- shift_max_date %>%
     summarise(time_value = max(time_value)) %>%
