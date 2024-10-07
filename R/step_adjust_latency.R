@@ -261,6 +261,7 @@ step_adjust_latency_new <-
       metadata = metadata,
       method = method,
       epi_keys_checked = epi_keys_checked,
+      keys_to_ignore = keys_to_ignore,
       check_latency_length = check_latency_length,
       columns = columns,
       skip = skip,
@@ -301,6 +302,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     metadata = attributes(training)$metadata,
     method = x$method,
     epi_keys_checked = x$epi_keys_checked,
+    keys_to_ignore = x$keys_to_ignore,
     check_latency_length = x$check_latency_length,
     columns = recipes_eval_select(latency_table$col_name, training, info),
     skip = x$skip,
@@ -313,7 +315,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_adjust_latency <- function(object, new_data, ...) {
   if (!inherits(new_data, "epi_df") || is.null(attributes(new_data)$metadata$as_of)) {
-    new_data <- as_epi_df(new_data, as_of = object$forecast_date, other_keys = object$metadata$other_keys)
+    new_data <- as_epi_df(new_data, as_of = object$forecast_date, other_keys = object$metadata$other_keys %||% character())
     attributes(new_data)$metadata <- object$metadata
     attributes(new_data)$metadata$as_of <- object$forecast_date
   } else {
@@ -411,3 +413,4 @@ print.step_adjust_latency <-
     cli::cli_end(theme_div_id)
     invisible(x)
   }
+

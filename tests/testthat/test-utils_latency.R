@@ -90,12 +90,12 @@ test_that("get_latency works", {
 test_that("get_latency ignores keys it's supposed to", {
   keys_to_ignore <- list(geo_value = c("na"), source = c("old", "older"))
   expected_df <- tribble(
-    ~geo_value, ~source, ~time_value, ~a, ~b,
-    "ma", "old", as.Date("2013-01-01"), 19, 4,
-    "ma", "old", as.Date("2013-01-02"), 20, 2,
-    "ca", "old", as.Date("2013-01-03"), 28, 11,
-    "na", "new", as.Date("2013-01-05"), 28, 11,
-    "ma", "older", as.Date("2010-01-05"), 28, 11,
+  ~geo_value, ~source, ~time_value, ~a, ~b,
+  "ma", "new", as.Date("2015-01-11"), 20, 6,
+  "ma", "new", as.Date("2015-01-12"), 23, NA,
+  "ma", "new", as.Date("2015-01-13"), 25, NA,
+  "ca", "new", as.Date("2015-01-11"), 100, 5,
+  "ca", "new", as.Date("2015-01-12"), 103, 10,
   )
   expect_equal(
     toy_df_src %>% drop_ignored_keys(keys_to_ignore) %>% as_tibble(),
@@ -142,7 +142,6 @@ test_that("get_forecast_date works for multiple key columns", {
     "b", "numeric", "raw", "original",
   )
   expect_equal(get_forecast_date(toy_df_src, info, c("geo_value", "source"), NULL), attributes(toy_df_src)$metadata$as_of)
-
 })
 
 test_that("pad_to_end works correctly", {

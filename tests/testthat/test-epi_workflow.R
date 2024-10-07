@@ -103,7 +103,7 @@ test_that("forecast method errors when workflow not fit", {
 test_that("fit method does not silently drop the class", {
   # This is issue #363
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   tbl <- tibble::tibble(
     geo_value = 1,
     time_value = 1:100,

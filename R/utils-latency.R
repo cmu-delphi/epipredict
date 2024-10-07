@@ -301,12 +301,13 @@ get_latency_table <- function(training, columns, forecast_date, latency,
   if (length(columns) > 0) {
     latency_table <- latency_table %>% filter(col_name %in% columns)
   }
-
+  training_dropped <- training %>%
+    drop_ignored_keys(keys_to_ignore)
   if (is.null(latency)) {
     latency_table <- latency_table %>%
       rowwise() %>%
       mutate(latency = get_latency(
-        training %>% drop_ignored_keys(keys_to_ignore),
+        training_dropped,
         forecast_date,
         col_name,
         sign_shift,
@@ -410,7 +411,7 @@ compare_bake_prep_latencies <- function(object, new_data, call = caller_env()) {
     )
   local_latency_table <- get_latency_table(
     new_data, object$columns, current_forecast_date, latency,
-    get_sign(object), object$epi_keys_checked, NULL, NULL
+    get_sign(object), object$epi_keys_checked, object$keys_to_ignore, NULL, NULL
   )
   comparison_table <- local_latency_table %>%
     ungroup() %>%
@@ -478,3 +479,4 @@ create_shift_grid <- function(prefix, amount, target_sign, columns, latency_tabl
     )
   return(list(shift_grid, latency_adjusted))
 }
+
