@@ -335,6 +335,8 @@ get_latency_table <- function(training, columns, forecast_date, latency,
 }
 
 #' given a list named by key columns, remove any matching key values
+#' keys_to_ignore should have the form list(col_name = c("value_to_ignore", "other_value_to_ignore"))
+#' @keywords internal
 drop_ignored_keys <- function(training, keys_to_ignore) {
   # note that the extra parenthesis black magic is described here: https://github.com/tidyverse/dplyr/issues/6194
   # and is needed to bypass an incomplete port of `across` functions to `if_any`
