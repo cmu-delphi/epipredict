@@ -413,4 +413,3 @@ print.step_adjust_latency <-
     cli::cli_end(theme_div_id)
     invisible(x)
   }
-

@@ -90,12 +90,12 @@ test_that("get_latency works", {
 test_that("get_latency ignores keys it's supposed to", {
   keys_to_ignore <- list(geo_value = c("na"), source = c("old", "older"))
   expected_df <- tribble(
-  ~geo_value, ~source, ~time_value, ~a, ~b,
-  "ma", "new", as.Date("2015-01-11"), 20, 6,
-  "ma", "new", as.Date("2015-01-12"), 23, NA,
-  "ma", "new", as.Date("2015-01-13"), 25, NA,
-  "ca", "new", as.Date("2015-01-11"), 100, 5,
-  "ca", "new", as.Date("2015-01-12"), 103, 10,
+    ~geo_value, ~source, ~time_value, ~a, ~b,
+    "ma", "new", as.Date("2015-01-11"), 20, 6,
+    "ma", "new", as.Date("2015-01-12"), 23, NA,
+    "ma", "new", as.Date("2015-01-13"), 25, NA,
+    "ca", "new", as.Date("2015-01-11"), 100, 5,
+    "ca", "new", as.Date("2015-01-12"), 103, 10,
   )
   expect_equal(
     toy_df_src %>% drop_ignored_keys(keys_to_ignore) %>% as_tibble(),

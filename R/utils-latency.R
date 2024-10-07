@@ -479,4 +479,3 @@ create_shift_grid <- function(prefix, amount, target_sign, columns, latency_tabl
     )
   return(list(shift_grid, latency_adjusted))
 }
-

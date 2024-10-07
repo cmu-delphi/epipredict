@@ -137,4 +137,3 @@ test_that("forecast date works for daily", {
   )
   expect_snapshot(error = TRUE, predict(wf3, latest))
 })
-
