@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.1</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -46,10 +46,14 @@
 <div class="section level3">
 <h3 id="features-0-2">features<a class="anchor" aria-label="anchor" href="#features-0-2"></a></h3>
 <ul><li>Add <code>step_adjust_latency</code>, which give several methods to adjust the forecast if the <code>forecast_date</code> is after the last day of data.</li>
+<li>(temporary) ahead negative is allowed for <code>step_epi_ahead</code> until we have <code>step_epi_shift</code>
+</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bugfixes-0-2">bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-0-2"></a></h3>
-</div>
+<ul><li>shifting no columns results in no error for either <code>step_epi_ahead</code> and <code>step_epi_lag</code>
+</li>
+</ul></div>
 </div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1" id="epipredict-01">epipredict 0.1<a class="anchor" aria-label="anchor" href="#epipredict-01"></a></h2>
