@@ -50,27 +50,18 @@ get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns
       )
     }
   }
+  max_time <- get_max_time(new_data, epi_keys_checked, columns)
   # the source data determines the actual time_values
-  # these are the non-na time_values;
-  # get the minimum value across the checked epi_keys' maximum time values
-  max_time <- new_data %>%
-    select(all_of(columns)) %>%
-    drop_na()
-  # null and "" don't work in `group_by`
-  if (!is.null(epi_keys_checked) && all(epi_keys_checked != "")) {
-    max_time <- max_time %>% group_by(across(all_of(epi_keys_checked)))
-  }
-  max_time <- max_time %>%
-    summarise(time_value = max(time_value)) %>%
-    pull(time_value) %>%
-    min()
   if (is.null(latency)) {
     forecast_date <- attributes(new_data)$metadata$as_of
   } else {
+    if (is.null(max_time)) {
+      cli_abort("max_time is null. This likely means there is one of {columns} that is all `NA`")
+    }
     forecast_date <- max_time + latency
   }
   # make sure the as_of is sane
-  if (!inherits(forecast_date, class(max_time)) & !inherits(forecast_date, "POSIXt")) {
+  if (!inherits(forecast_date, class(new_data$time_value)) & !inherits(forecast_date, "POSIXt")) {
     cli_abort(
       paste(
         "the data matrix `forecast_date` value is {forecast_date}, ",
@@ -84,13 +75,13 @@ get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns
   if (is.null(forecast_date) || is.na(forecast_date)) {
     cli_warn(
       paste(
-        "epi_data's `forecast_date` was {forecast_date}, setting to ",
-        "the latest time value, {max_time}."
+        "epi_data's `forecast_date` was `NA`, setting to ",
+        "the latest non-`NA` time value for these columns, {max_time}."
       ),
       class = "epipredict__get_forecast_date__max_time_warning"
     )
     forecast_date <- max_time
-  } else if (forecast_date < max_time) {
+  } else if (!is.null(max_time) && (forecast_date < max_time)) {
     cli_abort(
       paste(
         "`forecast_date` ({(forecast_date)}) is before the most ",
@@ -101,11 +92,33 @@ get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns
     )
   }
   # TODO cover the rest of the possible types for as_of and max_time...
-  if (inherits(max_time, "Date")) {
+  if (inherits(new_data$time_value, "Date")) {
     forecast_date <- as.Date(forecast_date)
   }
   return(forecast_date)
 }
+
+get_max_time <- function(new_data, epi_keys_checked, columns) {
+  # these are the non-na time_values;
+  # get the minimum value across the checked epi_keys' maximum time values
+  max_time <- new_data %>%
+    select(all_of(columns)) %>%
+    drop_na()
+  if (nrow(max_time) == 0) {
+    return(NULL)
+  }
+  # null and "" don't work in `group_by`
+  if (!is.null(epi_keys_checked) && all(epi_keys_checked != "")) {
+    max_time <- max_time %>% group_by(across(all_of(epi_keys_checked)))
+  }
+  max_time <- max_time %>%
+    summarise(time_value = max(time_value)) %>%
+    pull(time_value) %>%
+    min()
+  return(max_time)
+}
+
+
 
 #' the latency is also the amount the shift is off by
 #' @param sign_shift integer. 1 if lag and -1 if ahead. These represent how you
@@ -114,6 +127,11 @@ get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns
 get_latency <- function(new_data, forecast_date, column, sign_shift, epi_keys_checked) {
   shift_max_date <- new_data %>%
     drop_na(all_of(column))
+  if (nrow(shift_max_date) == 0) {
+    # if everything is an NA, there's infinite latency, but shifting by that is
+    # untenable. May as well not shift at all
+    return(0)
+  }
   # null and "" don't work in `group_by`
   if (!is.null(epi_keys_checked) && all(epi_keys_checked != "")) {
     shift_max_date <- shift_max_date %>% group_by(across(all_of(epi_keys_checked)))

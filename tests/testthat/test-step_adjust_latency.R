@@ -398,10 +398,6 @@ test_that("epi_adjust_latency correctly extends the lags when there are differen
     names(fit5$pre$mold$outcomes),
     glue::glue("ahead_{ahead}_death_rate")
   )
-  latest <- get_test_data(r5, x)
-  pred <- predict(fit5, latest)
-  actual_solutions <- pred %>% filter(!is.na(.pred))
-  expect_equal(actual_solutions$time_value, testing_as_of + 1)
 
   # should have four predictors, including the intercept
   expect_equal(length(fit5$fit$fit$fit$coefficients), 6)

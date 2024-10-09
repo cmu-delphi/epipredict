@@ -66,3 +66,8 @@ test_that("Check that epi_lag shifts applies the shift", {
   # Should have four predictors, including the intercept
   expect_equal(length(fit5$fit$fit$fit$coefficients), 4)
 })
+
+test_that("Shifting nothing is a no-op", {
+  expect_no_error(noop <- epi_recipe(x) %>% step_epi_ahead(ahead = 3) %>% prep(x) %>% bake(x))
+  expect_equal(noop, x)
+})

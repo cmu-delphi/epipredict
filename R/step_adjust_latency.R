@@ -317,8 +317,6 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
   if (!inherits(new_data, "epi_df") || is.null(attributes(new_data)$metadata$as_of)) {
     new_data <- as_epi_df(new_data, as_of = object$forecast_date, other_keys = object$metadata$other_keys %||% character())
     attributes(new_data)$metadata <- object$metadata
-    attributes(new_data)$metadata$as_of <- object$forecast_date
-  } else {
     compare_bake_prep_latencies(object, new_data)
   }
   if (object$method == "locf") {

@@ -42,6 +42,10 @@ get_sign <- function(object) {
 add_shifted_columns <- function(new_data, object) {
   grid <- object$shift_grid
 
+  if (nrow(object$shift_grid) == 0) {
+    # we're not shifting any rows, so this is a no-op
+    return(new_data)
+  }
   ## ensure no name clashes
   new_data_names <- colnames(new_data)
   intersection <- new_data_names %in% grid$newname
