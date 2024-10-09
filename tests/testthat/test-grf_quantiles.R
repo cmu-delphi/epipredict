@@ -1,5 +1,5 @@
 set.seed(12345)
-library(grf)
+suppressPackageStartupMessages(library(grf))
 tib <- tibble(
   y = rnorm(100), x = rnorm(100), z = rnorm(100),
   f = factor(sample(letters[1:3], 100, replace = TRUE))

@@ -59,6 +59,20 @@ toy_df <- tribble(
   "ca", as.Date("2015-01-12"), 103, 10,
 ) %>%
   as_epi_df(as_of = as.Date("2015-01-14"))
+toy_df_src <- tribble(
+  ~geo_value, ~source, ~time_value, ~a, ~b,
+  "ma", "new", as.Date("2015-01-11"), 20, 6,
+  "ma", "new", as.Date("2015-01-12"), 23, NA,
+  "ma", "new", as.Date("2015-01-13"), 25, NA,
+  "ca", "new", as.Date("2015-01-11"), 100, 5,
+  "ca", "new", as.Date("2015-01-12"), 103, 10,
+  "ma", "old", as.Date("2013-01-01"), 19, 4,
+  "ma", "old", as.Date("2013-01-02"), 20, 2,
+  "ca", "old", as.Date("2013-01-03"), 28, 11,
+  "na", "new", as.Date("2013-01-05"), 28, 11,
+  "ma", "older", as.Date("2010-01-05"), 28, 11,
+) %>%
+  as_epi_df(as_of = as.Date("2015-01-14"), other_keys = "source")
 
 test_that("get_latency works", {
   expect_equal(get_latency(modified_data, as_of, "case_rate", 1, "geo_value"), 5)
@@ -71,6 +85,27 @@ test_that("get_latency works", {
   expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "a", -1, "geo_value"), -2)
   expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "b", 1, "geo_value"), 3)
   expect_equal(get_latency(toy_df, as.Date("2015-01-14"), "b", -1, "geo_value"), -3)
+})
+
+test_that("get_latency ignores keys it's supposed to", {
+  keys_to_ignore <- list(geo_value = c("na"), source = c("old", "older"))
+  expected_df <- tribble(
+    ~geo_value, ~source, ~time_value, ~a, ~b,
+    "ma", "new", as.Date("2015-01-11"), 20, 6,
+    "ma", "new", as.Date("2015-01-12"), 23, NA,
+    "ma", "new", as.Date("2015-01-13"), 25, NA,
+    "ca", "new", as.Date("2015-01-11"), 100, 5,
+    "ca", "new", as.Date("2015-01-12"), 103, 10,
+  )
+  expect_equal(
+    toy_df_src %>% drop_ignored_keys(keys_to_ignore) %>% as_tibble(),
+    expected_df
+  )
+
+  expect_equal(
+    get_latency_table(toy_df_src, c("a", "b"), as.Date("2015-01-14"), NULL, -1, c("geo_value", "source"), keys_to_ignore),
+    tibble(col_name = c("a", "b"), latency = c(-2, -3))
+  )
 })
 
 test_that("get_latency infers max_time to be the minimum `max time` across grouping the specified keys", {
@@ -96,6 +131,17 @@ test_that("get_forecast_date works", {
   expect_equal(get_forecast_date(modified_data, info, "geo_value", NULL), as_of)
   expect_equal(get_forecast_date(modified_data, info, "", NULL), as_of)
   expect_equal(get_forecast_date(modified_data, info, NULL, NULL), as_of)
+})
+test_that("get_forecast_date works for multiple key columns", {
+  info <- tribble(
+    ~variable, ~type, ~role, ~source,
+    "time_value", "date", "time_value", "original",
+    "geo_value", "nominal", "geo_value", "original",
+    "source", "nominal", "other_key", "original",
+    "a", "numeric", "raw", "original",
+    "b", "numeric", "raw", "original",
+  )
+  expect_equal(get_forecast_date(toy_df_src, info, c("geo_value", "source"), NULL), attributes(toy_df_src)$metadata$as_of)
 })
 
 test_that("pad_to_end works correctly", {
