@@ -26,8 +26,9 @@
 
     Code
       new_quantiles(c(2, 1, 3, 4, 5), c(0.1, 0.15, 0.2, 0.5, 0.8))
-    Output
-      quantiles(4)[5]
+    Condition
+      Error in `new_quantiles()`:
+      ! `values[order(quantile_levels)]` produces unsorted quantiles.
 
 ---
 

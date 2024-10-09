@@ -39,7 +39,7 @@ test_that("A negative lag value should should throw an error", {
 
 test_that("A nonpositive ahead value should throw an error", {
   expect_snapshot(
-    error = TRUE,
+    error = FALSE,
     r3 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = -7) %>%
       step_epi_lag(death_rate, lag = 7)

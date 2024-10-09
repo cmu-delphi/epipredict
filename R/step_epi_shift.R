@@ -192,10 +192,14 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
   } else {
     shift_grid <- x$shift_grid
   }
-  if (nrow(shift_grid)==0) {
-    cli_warn(c("prepping no columns!",
-               "{x$terms} returns no columns for this dataset."),
-             class = "epipredict__step_epi_lag__no_columns_shifted")
+  if (nrow(shift_grid) == 0) {
+    cli_warn(
+      c(
+        "prepping no columns!",
+        "{x$terms} returns no columns for this dataset."
+      ),
+      class = "epipredict__step_epi_lag__no_columns_shifted"
+    )
   }
 
   step_epi_lag_new(
@@ -231,10 +235,14 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
   } else {
     shift_grid <- x$shift_grid
   }
-  if (nrow(shift_grid)==0) {
-    cli_warn(c("prepping no columns!",
-               "{x$terms} returns no columns for this dataset."),
-             class = "epipredict__step_epi_ahead__no_columns_shifted")
+  if (nrow(shift_grid) == 0) {
+    cli_warn(
+      c(
+        "prepping no columns!",
+        "{x$terms} returns no columns for this dataset."
+      ),
+      class = "epipredict__step_epi_ahead__no_columns_shifted"
+    )
   }
 
   step_epi_ahead_new(

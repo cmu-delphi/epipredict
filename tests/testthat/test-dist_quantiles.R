@@ -6,7 +6,7 @@ test_that("constructor returns reasonable quantiles", {
   expect_snapshot(error = TRUE, new_quantiles(sort(rnorm(5)), sort(runif(2))))
   expect_silent(new_quantiles(1:5, 1:5 / 10))
   expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .1, .2, .5, .8)))
-  expect_snapshot(error = FALSE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .15, .2, .5, .8)))
+  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .15, .2, .5, .8)))
   expect_snapshot(error = TRUE, new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
 })
 
