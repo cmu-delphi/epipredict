@@ -64,7 +64,7 @@ ctis_covid_behaviours
 
 # fails
 \dontrun{
-  data(ctis_covid_behaviours, package = "epipredict")
+data(ctis_covid_behaviours, package = "epipredict")
 }
 }
 \keyword{datasets}

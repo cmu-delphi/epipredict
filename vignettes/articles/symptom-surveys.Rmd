@@ -228,7 +228,7 @@ jhu_7dav_incid <- pub_covidcast(
   select(geo_value, time_value, value) %>%
   rename(case = value)
 
-# Find "complete" counties, present in all three data signals, and also 
+# Find "complete" counties, present in all three data signals, and also
 # present in the `geo_values_initial` object.
 geo_values_complete <- intersect(
   intersect(goog_sm_cli$geo_value, fb_survey$geo_value),

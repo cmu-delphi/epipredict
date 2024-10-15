@@ -67,7 +67,7 @@ covid_case_death_rates
 
 # fails
 \dontrun{
-  data(covid_case_death_rates, package = "epipredict")
+data(covid_case_death_rates, package = "epipredict")
 }
 }
 \keyword{datasets}

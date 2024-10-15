@@ -67,7 +67,7 @@ grad_employ_subset
 
 # fails
 \dontrun{
-  data(grad_employ_subset, package = "epipredict")
+data(grad_employ_subset, package = "epipredict")
 }
 }
 \keyword{datasets}

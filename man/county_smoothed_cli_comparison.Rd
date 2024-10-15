@@ -103,7 +103,7 @@ county_smoothed_cli_comparison
 
 # fails
 \dontrun{
-  data(county_smoothed_cli_comparison, package = "epipredict")
+data(county_smoothed_cli_comparison, package = "epipredict")
 }
 }
 \keyword{datasets}

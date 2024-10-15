@@ -62,7 +62,7 @@ counts_subset
 
 # fails
 \dontrun{
-  data(counts_subset, package = "epipredict")
+data(counts_subset, package = "epipredict")
 }
 }
 \keyword{datasets}

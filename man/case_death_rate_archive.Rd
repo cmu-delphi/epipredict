@@ -62,7 +62,7 @@ case_death_rate_archive
 
 # fails
 \dontrun{
-  data(case_death_rate_archive, package = "epipredict")
+data(case_death_rate_archive, package = "epipredict")
 }
 }
 \keyword{datasets}

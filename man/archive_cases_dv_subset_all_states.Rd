@@ -61,7 +61,7 @@ archive_cases_dv_subset_all_states
 
 # fails
 \dontrun{
-  data(archive_cases_dv_subset_all_states, package = "epipredict")
+data(archive_cases_dv_subset_all_states, package = "epipredict")
 }
 }
 \keyword{datasets}

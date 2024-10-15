@@ -70,7 +70,7 @@ can_prov_cases
 
 # fails
 \dontrun{
-  data(can_prov_cases, package = "epipredict")
+data(can_prov_cases, package = "epipredict")
 }
 }
 \keyword{datasets}

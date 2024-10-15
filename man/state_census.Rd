@@ -53,7 +53,7 @@ state_census
 
 # fails
 \dontrun{
-  data(state_census, package = "epipredict")
+data(state_census, package = "epipredict")
 }
 }
 \keyword{datasets}

@@ -96,10 +96,11 @@ case_rate_subset <- pub_covidcast(
   filter(!(geo_value %in% c("as", "gu", "dc", "mp", "pr", "vi"))) %>%
   as_epi_archive(compactify = FALSE)
 
-archive_cases_dv_subset_all_states_dt = epix_merge(
+archive_cases_dv_subset_all_states_dt <- epix_merge(
   dv_subset, case_rate_subset,
   sync = "locf",
-  compactify = TRUE)
+  compactify = TRUE
+)
 ```
 
 </details>

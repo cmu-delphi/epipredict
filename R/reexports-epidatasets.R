@@ -13,7 +13,7 @@
 #'
 #' # fails
 #' \dontrun{
-#'   data(grad_employ_subset, package = "epipredict")
+#' data(grad_employ_subset, package = "epipredict")
 #' }
 #' @export
 delayedAssign("grad_employ_subset", epidatasets::grad_employ_subset)
@@ -33,7 +33,7 @@ delayedAssign("grad_employ_subset", epidatasets::grad_employ_subset)
 #'
 #' # fails
 #' \dontrun{
-#'   data(covid_case_death_rates, package = "epipredict")
+#' data(covid_case_death_rates, package = "epipredict")
 #' }
 #' @export
 delayedAssign("covid_case_death_rates", epidatasets::covid_case_death_rates)
@@ -53,7 +53,7 @@ delayedAssign("covid_case_death_rates", epidatasets::covid_case_death_rates)
 #'
 #' # fails
 #' \dontrun{
-#'   data(state_census, package = "epipredict")
+#' data(state_census, package = "epipredict")
 #' }
 #' @export
 delayedAssign("state_census", epidatasets::state_census)
@@ -73,7 +73,7 @@ delayedAssign("state_census", epidatasets::state_census)
 #'
 #' # fails
 #' \dontrun{
-#'   data(counts_subset, package = "epipredict")
+#' data(counts_subset, package = "epipredict")
 #' }
 #' @export
 delayedAssign("counts_subset", epidatasets::counts_subset)
@@ -93,7 +93,7 @@ delayedAssign("counts_subset", epidatasets::counts_subset)
 #'
 #' # fails
 #' \dontrun{
-#'   data(ctis_covid_behaviours, package = "epipredict")
+#' data(ctis_covid_behaviours, package = "epipredict")
 #' }
 #' @export
 delayedAssign("ctis_covid_behaviours", epidatasets::ctis_covid_behaviours)
@@ -113,7 +113,7 @@ delayedAssign("ctis_covid_behaviours", epidatasets::ctis_covid_behaviours)
 #'
 #' # fails
 #' \dontrun{
-#'   data(county_smoothed_cli_comparison, package = "epipredict")
+#' data(county_smoothed_cli_comparison, package = "epipredict")
 #' }
 #' @export
 delayedAssign("county_smoothed_cli_comparison", epidatasets::county_smoothed_cli_comparison)
@@ -133,7 +133,7 @@ delayedAssign("county_smoothed_cli_comparison", epidatasets::county_smoothed_cli
 #'
 #' # fails
 #' \dontrun{
-#'   data(cases_deaths_subset, package = "epipredict")
+#' data(cases_deaths_subset, package = "epipredict")
 #' }
 #' @export
 delayedAssign("cases_deaths_subset", epidatasets::cases_deaths_subset)
@@ -153,7 +153,7 @@ delayedAssign("cases_deaths_subset", epidatasets::cases_deaths_subset)
 #'
 #' # fails
 #' \dontrun{
-#'   data(case_death_rate_archive, package = "epipredict")
+#' data(case_death_rate_archive, package = "epipredict")
 #' }
 #' @export
 delayedAssign("case_death_rate_archive", epidatasets::case_death_rate_archive)
@@ -173,7 +173,7 @@ delayedAssign("case_death_rate_archive", epidatasets::case_death_rate_archive)
 #'
 #' # fails
 #' \dontrun{
-#'   data(archive_cases_dv_subset_all_states, package = "epipredict")
+#' data(archive_cases_dv_subset_all_states, package = "epipredict")
 #' }
 #' @export
 delayedAssign("archive_cases_dv_subset_all_states", epidatasets::archive_cases_dv_subset_all_states)
@@ -193,7 +193,7 @@ delayedAssign("archive_cases_dv_subset_all_states", epidatasets::archive_cases_d
 #'
 #' # fails
 #' \dontrun{
-#'   data(can_prov_cases, package = "epipredict")
+#' data(can_prov_cases, package = "epipredict")
 #' }
 #' @export
 delayedAssign("can_prov_cases", epidatasets::can_prov_cases)

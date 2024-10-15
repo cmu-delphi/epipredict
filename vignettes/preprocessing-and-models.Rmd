@@ -284,7 +284,7 @@ behav_ind_mask <- pub_covidcast(
   time_values = epirange(20210604, 20211231),
   geo_values = "ca,fl,tx,ny,nj",
   as_of = d
-)  %>%
+) %>%
   select(geo_value, time_value, masking = value)
 
 behav_ind_distancing <- pub_covidcast(
@@ -295,7 +295,7 @@ behav_ind_distancing <- pub_covidcast(
   time_values = epirange(20210604, 20211231),
   geo_values = "ca,fl,tx,ny,nj",
   as_of = d
-)  %>%
+) %>%
   select(geo_value, time_value, distancing = value)
 
 behav_ind <- behav_ind_mask %>%
