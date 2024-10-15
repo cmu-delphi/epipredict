@@ -34,7 +34,7 @@ covid_case_death_rates
 This data source of confirmed COVID-19 cases and deaths is based on reports
 made available by the Center for Systems Science and Engineering at Johns
 Hopkins University, as downloaded from the CMU Delphi COVIDcast Epidata
-API. This example data is a snapshot as of March 20, 2024, and
+API. This example data is a snapshot as of May 31, 2022, and
 ranges from December 31, 2020 to December 31, 2021. It
 includes all states.
 }

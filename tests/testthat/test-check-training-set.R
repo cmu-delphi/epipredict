@@ -1,5 +1,5 @@
 test_that("training set validation works", {
-  template <- jhu_csse_daily_subset[1, ]
+  template <- cases_deaths_subset[1, ]
   rec <- list(template = template)
   t1 <- template
 

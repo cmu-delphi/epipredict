@@ -1,4 +1,4 @@
-train_data <- jhu_csse_daily_subset
+train_data <- cases_deaths_subset
 test_that("arx_forecaster warns if forecast date beyond the implicit one", {
   bad_date <- max(train_data$time_value) + 300
   expect_warning(

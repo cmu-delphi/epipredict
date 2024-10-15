@@ -118,6 +118,26 @@ delayedAssign("ctis_covid_behaviours", epidatasets::ctis_covid_behaviours)
 #' @export
 delayedAssign("county_smoothed_cli_comparison", epidatasets::county_smoothed_cli_comparison)
 
+#' @inherit epidatasets::cases_deaths_subset description source references title
+#' @inheritSection epidatasets::cases_deaths_subset Data dictionary
+#' @examples
+#' # Since this is a re-exported dataset, it cannot be loaded using
+#' # the `data()` function. `data()` looks for a file of the same name
+#' # in the `data/` directory, which doesn't exist in this package.
+#' # works
+#' epipredict::cases_deaths_subset
+#'
+#' # works
+#' library(epipredict)
+#' cases_deaths_subset
+#'
+#' # fails
+#' \dontrun{
+#'   data(cases_deaths_subset, package = "epipredict")
+#' }
+#' @export
+delayedAssign("cases_deaths_subset", epidatasets::cases_deaths_subset)
+
 #' @inherit epidatasets::case_death_rate_archive description source references title
 #' @inheritSection epidatasets::case_death_rate_archive Data dictionary
 #' @examples
