@@ -8,7 +8,10 @@ old_data <- tibble(
   tmp_death_rate = atan(0.1 * 1:200) + cos(5 * 1:200) + 1
 ) %>%
   # place2 is slightly more recent than place1
-  mutate(time_value = as.Date(ifelse(geo_value == "place2", time_value + 1, time_value))) %>%
+  mutate(time_value = case_when(
+    geo_value == "place2" ~ time_value + 1,
+    TRUE ~ time_value
+  )) %>%
   as_epi_df(as_of = as_of)
 old_data
 keys <- c("time_value", "geo_value")
