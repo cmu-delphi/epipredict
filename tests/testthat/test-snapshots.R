@@ -117,7 +117,7 @@ test_that("arx_forecaster output format snapshots", {
     jhu, "death_rate",
     c("case_rate", "death_rate")
   )
-  expect_equal(as.Date(out1$metadata$forecast_created), Sys.Date())
+  expect_equal(as.Date(format(out1$metadata$forecast_created, "%Y-%m-%d")), Sys.Date())
   out1$metadata$forecast_created <- as.Date("0999-01-01")
   expect_snapshot(out1)
   out2 <- arx_forecaster(jhu, "case_rate",
@@ -129,7 +129,7 @@ test_that("arx_forecaster output format snapshots", {
       forecast_date = as.Date("2022-01-03")
     )
   )
-  expect_equal(as.Date(out2$metadata$forecast_created), Sys.Date())
+  expect_equal(as.Date(format(out2$metadata$forecast_created, "%Y-%m-%d")), Sys.Date())
   out2$metadata$forecast_created <- as.Date("0999-01-01")
   expect_snapshot(out2)
   out3 <- arx_forecaster(jhu, "death_rate",
@@ -140,7 +140,7 @@ test_that("arx_forecaster output format snapshots", {
       forecast_date = as.Date("2022-01-03")
     )
   )
-  expect_equal(as.Date(out3$metadata$forecast_created), Sys.Date())
+  expect_equal(as.Date(format(out3$metadata$forecast_created, "%Y-%m-%d")), Sys.Date())
   out3$metadata$forecast_created <- as.Date("0999-01-01")
   expect_snapshot(out3)
 })

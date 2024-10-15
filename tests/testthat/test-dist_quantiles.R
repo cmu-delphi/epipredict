@@ -1,4 +1,4 @@
-library(distributional)
+suppressPackageStartupMessages(library(distributional))
 
 test_that("constructor returns reasonable quantiles", {
   expect_snapshot(error = TRUE, new_quantiles(rnorm(5), c(-2, -1, 0, 1, 2)))

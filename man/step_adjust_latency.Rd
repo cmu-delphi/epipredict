@@ -9,6 +9,7 @@ step_adjust_latency(
   ...,
   method = c("extend_ahead", "locf", "extend_lags"),
   epi_keys_checked = NULL,
+  keys_to_ignore = c(),
   fixed_latency = NULL,
   fixed_forecast_date = NULL,
   check_latency_length = TRUE,
@@ -49,6 +50,12 @@ it will take the maximum across all values, irrespective of any keys.
 
 Note that this is a separate concern from different latencies across
 different \emph{data columns}, which is only handled by the choice of \code{method}.}
+
+\item{keys_to_ignore}{a list of character vectors. Set this to avoid using
+specific key values in the \code{epi_keys_checked} to set latency. For example,
+say you have two locations \code{pr} and \code{gu} which have useful training data,
+but have stopped providing up-to-date information, and so are no longer
+part of the test set. Setting \code{keys_to_ignore = list(geo_value = c("pr", "gu"))} will exclude them from the latency calculation.}
 
 \item{fixed_latency}{either a positive integer, or a labeled positive integer
 vector. Cannot be set at the same time as \code{fixed_forecast_date}. If

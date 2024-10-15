@@ -12,6 +12,7 @@ get_latency_table(
   latency,
   sign_shift,
   epi_keys_checked,
+  keys_to_ignore,
   info,
   terms
 )

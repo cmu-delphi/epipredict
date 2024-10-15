@@ -111,7 +111,6 @@ step_epi_ahead <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id)
 
     recipes::add_step(

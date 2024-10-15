@@ -14,9 +14,10 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 ## Improvements
 
 - Add `step_adjust_latency`, which give several methods to adjust the forecast if the `forecast_date` is after the last day of data.
+- (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
 
 ## Bug fixes
-
+- Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
 
 # epipredict 0.1
 
