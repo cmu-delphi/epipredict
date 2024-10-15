@@ -1,0 +1,319 @@
+---
+title: "Implementing a quantile tracker for calibration"
+author: DJM
+---
+
+## Background
+
+The quantile tracker is (TL;DR):
+
+1. Calculate historical forecast errors per quantile.
+2. Shrink these errors slightly toward zero.
+3. Add them to the current quantile predictions.
+
+### The specifics
+
+Input a forecast for time $t$ $\{f_t^1,\ldots,f_t^M\}$ corresponding to 
+quantile levels $\{\tau_1,\ldots,\tau_M\}$ and the observation for time $t$ $y_t$.
+Then:
+
+1. Produce a forecast for time $t+1$ $\{f_{t+1}^1,\ldots,f_{t+1}^M\}$
+1. Define $s_t^m = y_t - f_t^m$ for each m.
+1. Define $\hat{B}_t^m$ by taking the maximum absolute value of $s_{t-i}^m$ over
+all $0\leq i \leq w$. Do this for each $m$ separately (hence per quantile level).
+1. Calculate $e_t^m = I(y_t \leq f_t^m + q_t^m)$ for each $m$.
+1. Update $q_{t+1}^m = q_t + z \hat{B}_t^m (e_t^m - \tau_m)$ for $z$ the learning rate.
+1. Define the adjusted forecasts $\tilde{f}_{t+1}^m = f_{t+1}^m + q_{t+1}^m$
+for each $m$.
+1. Sort $\{\tilde{f}_{t+1}^m : m=1,\ldots,M\}$ to define 
+$\{\hat{f}_{t+1}^m : m=1,\ldots,M\}$ .
+
+**Notes:** 
+
+1. This is simplified a bit because (1) we have multiple target horizons 
+(rather than $a=1$ as above) and (2) we don't see $y_t$ until $t+a+l$ for
+latency $l$.
+2. Off-line (as we're doing), the calculation of $s$ can be done with a 
+`mutate()`.
+3. The update of $\hat{B}$ has to be done with a slide over a window.
+4. $q_t$ also requires a slide, but it depends on the results of previous values.
+So not sure if you can use `epi[x]_slide()`. Furthermore, it isn't initialized
+in the same way as it is updated. The initial value should just be the 
+$\tau_m$ quantile of the score $s^m$.
+
+
+## Example implementation
+
+Below, we assume that $l = 0$ so that we can use data that is easily available.
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  cache = TRUE
+)
+```
+
+
+```{r packages}
+library(tidyverse)
+library(epipredict)
+theme_set(theme_bw())
+```
+
+First we get some forecasts. These are the actual COVIDHub Hosp submissions.
+
+```{r eval = FALSE}
+# grab and save covid hosp forecasts
+# source("scorecaster-data.R")
+```
+
+
+```{r forecast-output, echo=TRUE}
+# load the saved forecasts
+cmu <- read_rds("training.rds")
+# baseline <- read_rds("covidhosp-baseline.rds")
+```
+
+Now, we need some scoring functions that operate on the `dist_quantiles` preds.
+
+Note that we only "see" the actual at time $t+a+l$, so for $l=0$ the 
+`target_end_date` is when we can calculate the 0-1 loss and the score for the 
+forecast produced at $t-a$.
+
+## Necessary functions
+
+```{r score-fcasts, echo=TRUE}
+alpha <- c(.01, .025, 1:19 / 20, .975, .99)
+cmu <- mutate(cmu, .pred_distn = map(nested_quantiles(.pred_distn), 1)) |>
+  filter(geo_value != "vi")
+
+# Need the scores to estimate B, and to initialize q
+conformal_score <- function(.preds, actual) {
+  # should this be tilted?, Seemingly not: https://arxiv.org/pdf/1905.03222 Eq (9)
+  purrr::map2(actual, .preds, \(x, y) x - y)
+}
+
+# Need the 0-1 mistakes to perform the gradient update
+zero_one_error <- function(.preds, qt, actual) {
+  purrr::pmap(list(.preds, qt, actual), \(x, y, z) as.numeric(z >= x + y))
+}
+
+# calculates the maximum over a vector of scores by quantile level
+calculate_Bhat <- function(score, window_size = Inf) {
+  n <- length(score)
+  score <- tail(score, window_size)
+  score <- do.call(rbind, score)
+  list(drop(apply(abs(score), 2, max, na.rm = TRUE)))
+}
+
+init_qt <- function(score, window_size = Inf) {
+  n <- length(score)
+  score <- tail(score, window_size)
+  score <- do.call(cbind, score)
+  score <- lapply(vctrs::vec_chop(score), drop)
+  list(purrr::map2_dbl(score, alpha, ~ quantile(.x, probs = .y, na.rm = TRUE)))
+}
+qt_update <- function(qt, Bhat, e, learning_rate = 0.1) {
+  purrr::pmap(list(qt = qt, Bhat = Bhat, e = e), function(qt, Bhat, e) {
+    if (length(e) == 0L || length(Bhat) == 0L) return(qt)
+    pmax(qt + learning_rate * Bhat * (e - alpha), 0)
+  })
+}
+```
+
+We'll use a 1-year window for computing `B` and `qhat` and take our first 
+forecast date as `2023-10-02`. This means anything with 
+`target_end_date < "2023-10-02"` can be part of the initialization.
+
+## Initialization
+
+```{r init-quantile-tracker, echo=TRUE}
+score_buffer <- cmu |>
+  filter(target_end_date < ymd("2023-10-02")) |>
+  mutate(score = conformal_score(.pred_distn, actual)) |>
+  group_by(geo_value, ahead) |>
+  arrange(target_end_date) |>
+  slice_tail(n = 50L) |>
+  select(ahead, geo_value, target_end_date, score)
+
+init <- score_buffer |>
+  summarise(
+    Bhat = calculate_Bhat(score),
+    qt = init_qt(score),
+    .groups = "keep"
+  )
+```
+
+## Context
+
+
+The number of forecasts varied significantly. 
+
+```{r}
+cmu |>
+  group_by(ahead, forecast_date) |>
+  summarise(n = n(), .groups = "drop") |>
+  ggplot(aes(forecast_date, factor(ahead), fill = n)) +
+  geom_raster() +
+  scale_fill_viridis_c()
+```
+
+## The iteration
+
+Now, we try iterating this over the 2023--24 season. I suspect we may be
+able to do this with a grouped `epi(x)_slide()`, but I couldn't figure it 
+out.
+
+We'll use a 50 week window for computing `B` and take our first forecast date
+as `2023-10-02`.
+
+```{r}
+# loop over dates we see the scores (these are t+a)
+target_end_dates <- cmu$target_end_date |> unique() |> sort()
+target_end_dates <- target_end_dates[target_end_dates >= "2023-10-02"]
+window_size <- 50L
+learning_rate <- 0.2
+
+res <- list()
+
+for (ii in seq_along(target_end_dates)) {
+  # new actuals for these target dates
+  working_df <- cmu |>
+    filter(target_end_date == target_end_dates[ii]) |>
+    mutate(score = conformal_score(.pred_distn, actual))
+  
+  current_qt <- init |>
+    select(geo_value, ahead, qt)
+  
+  # we need this to iterate on for the window, this require sequential updates
+  score_buffer <- bind_rows(
+    score_buffer, 
+    working_df |> select(ahead, geo_value, target_end_date, score)
+  )
+
+  # step 3
+  Bhats <- score_buffer |>
+    group_by(geo_value, ahead) |>
+    arrange(target_end_date) |>
+    slice_tail(n = window_size) |>
+    summarise(Bhat = calculate_Bhat(score), .groups = "drop")
+  
+  # update for time t (uses previous qt)
+  val_update <- full_join(Bhats, current_qt, by = join_by(ahead, geo_value))
+  working_df <- val_update |>
+    left_join(working_df, by = join_by(ahead, geo_value)) |>
+    mutate(
+      et = zero_one_error(.pred_distn, qt, actual), # step 4
+      qt_new = qt_update(qt, Bhat, et, learning_rate) # step 5
+    ) |>
+    select(ahead, geo_value, target_end_date, score, Bhat, qt, et, qt_new)
+  
+  # save stuff off
+  res[[ii]] <- working_df
+  init <- working_df |> 
+    select(geo_value, ahead, Bhat, qt = qt_new)
+}
+```
+
+## Forecast adjustment
+
+Now the computations are done. We just need to adjust all our forecasts.
+
+```{r}
+# adjustments
+res <- list_rbind(res) |>
+  select(ahead:target_end_date, qt = qt_new)
+cmu_new <- cmu |>
+  filter(forecast_date >= "2023-10-09") |>
+  left_join(
+    res, 
+    by = join_by(ahead, geo_value, closest(forecast_date >= target_end_date))
+  ) |>
+  arrange(geo_value, forecast_date, ahead) |>
+  rename(target_end_date = target_end_date.x, ted_qt = target_end_date.y)
+
+qt_to_distn <- function(orig, qt) {
+  values <- purrr::map2(orig, qt, ~ .x + .y)
+  values <- purrr::map(values, ~ pmax(sort(.x), 0))
+  dist_quantiles(values, alpha)
+}
+
+cmu_new_dist <- cmu_new |>
+  mutate(
+    qt = qt_to_distn(.pred_distn, qt), 
+    .pred_distn = dist_quantiles(.pred_distn, alpha)
+  )
+```
+
+## Scoring and visualization
+
+First, we compare WIS (geometric mean, over geos)
+
+```{r global-scores, echo=FALSE}
+cmu_scored <- cmu_new_dist |>
+  mutate(old_wis = weighted_interval_score(.pred_distn, actual),
+         new_wis = weighted_interval_score(qt, actual)) |>
+  select(ahead, geo_value, forecast_date, old_wis, new_wis)
+
+cmu_scored |>
+  group_by(ahead, forecast_date) |>
+  summarise(
+    old_wis = exp(mean(log(old_wis))), 
+    new_wis = exp(mean(log(new_wis)))
+  ) |>
+  pivot_longer(ends_with("wis")) |>
+  ggplot(aes(forecast_date, value, color = name)) +
+  geom_line() +
+  facet_wrap(~ ahead) +
+  scale_color_brewer(palette = "Set1")
+
+```
+
+Look at a few locations
+
+```{r show-locations, echo=FALSE}
+cmu_fan <- cmu_new_dist |>
+  mutate(
+    .pred_distn = map(nested_quantiles(.pred_distn), 1), 
+    qt = map(nested_quantiles(qt), 1)
+  ) |>
+  mutate(
+    .pred_distn = map(.pred_distn, ~ .x[c(4, 12, 20)]),
+    qt = map(qt, ~ .x[c(4, 12, 20)])
+  )
+  
+fds <- cmu_fan$forecast_date |> unique() |> sort()
+cmu_fan_subset <- cmu_fan |>
+  filter(
+    geo_value %in% c("ca", "pa", "ga", "ne"), 
+    forecast_date %in% fds[seq(2, length(fds), by = 4)]
+  ) |>
+  select(ahead:actual, original = .pred_distn, calibrated = qt) |>
+  pivot_longer(original:calibrated) |>
+  unnest_wider(value, names_sep = "_")
+
+actuals <- cmu |> select(geo_value, target_end_date, actual) |>
+  filter(geo_value %in% c("ca", "pa", "ga", "ne"), target_end_date > "2023-09-01") |>
+  distinct()
+
+avail_errs <- cmu |> select(geo_value, forecast_date, ahead, target_end_date) |>
+  filter(geo_value %in% c("ca", "pa", "ga", "ne"), target_end_date > "2023-09-01") |>
+  select(-target_end_date) |>
+  group_by(geo_value, forecast_date) |>
+  summarise(n = n())
+
+cmu_fan_subset |> mutate(fd = as.factor(forecast_date)) |>
+  ggplot(aes(x = target_end_date)) +
+  geom_ribbon(aes(ymin = value_1, ymax = value_3, group = interaction(fd, name), fill = name), alpha = .5) +
+  geom_line(aes(group = interaction(fd, name), color = name, y = value_2)) +
+  # geom_point(aes(group = interaction(fd, name), color = name, y = value_2)) +
+  geom_line(data = actuals, aes(y = actual)) +
+  facet_wrap(~geo_value, scales = "free_y") +
+  scale_color_brewer(palette = "Set1") +
+  scale_fill_brewer(palette = "Set1") +
+  theme(legend.position = "bottom") +
+  labs(y = "Covid hosp", x = "Date")
+```
