@@ -1094,6 +1094,7 @@
       
       Training data was an <epi_df> with:
       * Geography: state,
+      * Other keys: ,
       * Time type: day,
       * Using data up-to-date as of: 2022-05-31.
       * With the last data available on 2021-12-31
@@ -1117,6 +1118,7 @@
       
       Training data was an <epi_df> with:
       * Geography: state,
+      * Other keys: ,
       * Time type: day,
       * Using data up-to-date as of: 2022-05-31.
       * With the last data available on 2021-12-31
@@ -1141,6 +1143,7 @@
       
       Training data was an <epi_df> with:
       * Geography: state,
+      * Other keys: ,
       * Time type: day,
       * Using data up-to-date as of: 2022-05-31.
       * With the last data available on 2021-12-31
