@@ -49,7 +49,6 @@ Imports:
     vctrs,
     workflows (>= 1.0.0)
 Suggests:
-    covidcast,
     data.table,
     epidatr (>= 1.0.0),
     fs,
@@ -61,6 +60,7 @@ Suggests:
     quantreg,
     ranger,
     RcppRoll,
+    readr,
     rmarkdown,
     smoothqr,
     testthat (>= 3.0.0),
