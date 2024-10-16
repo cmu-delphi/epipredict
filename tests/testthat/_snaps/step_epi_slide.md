@@ -107,7 +107,7 @@
     Code
       r %>% step_epi_slide(value)
     Condition
-      Error in `rlang::is_formula()`:
+      Error in `step_epi_slide()`:
       ! argument ".f" is missing, with no default
 
 ---
@@ -123,7 +123,7 @@
     Code
       r %>% step_epi_slide(value)
     Condition
-      Error in `rlang::is_formula()`:
+      Error in `step_epi_slide()`:
       ! argument ".f" is missing, with no default
 
 ---
