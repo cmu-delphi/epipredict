@@ -1,5 +1,5 @@
 ## usethis namespace: start
-#' @import epiprocess parsnip
+#' @import epiprocess parsnip epidatasets
 #' @importFrom checkmate assert_class assert_numeric
 #' @importFrom checkmate test_character test_date test_function
 #' @importFrom checkmate test_integerish test_logical

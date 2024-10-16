@@ -8,7 +8,7 @@
 #' @examples
 #' library(dplyr)
 #' library(tidyr)
-#' edf <- case_death_rate_subset[1:3, ]
+#' edf <- covid_case_death_rates[1:3, ]
 #' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
 #'
 #' edf_nested <- edf %>% mutate(q = nested_quantiles(q))

@@ -41,7 +41,7 @@ This is an autoregressive forecasting model for
 that it estimates a model for a particular target horizon.
 }
 \examples{
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   dplyr::filter(time_value >= as.Date("2021-12-01"))
 
 out <- arx_forecaster(

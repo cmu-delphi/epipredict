@@ -24,7 +24,7 @@
 #' @export
 #'
 #' @examples
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
 #' out <- flatline_forecaster(jhu, "death_rate")

@@ -42,7 +42,7 @@
 #' @rdname step_epi_shift
 #' @export
 #' @examples
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' r <- epi_recipe(covid_case_death_rates) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r

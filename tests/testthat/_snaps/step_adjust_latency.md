@@ -63,7 +63,7 @@
 ---
 
     Code
-      prep(r6, case_death_rate_subset)
+      prep(r6, covid_case_death_rates)
     Message
       
       -- Epi Recipe ------------------------------------------------------------------
