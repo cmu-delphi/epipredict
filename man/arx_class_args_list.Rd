@@ -64,15 +64,14 @@ data was 3 days ago, the lags become \code{c(3,10,17)}.
 \item{warn_latency}{by default, \code{step_adjust_latency} warns the user if the
 latency is large. If this is \code{FALSE}, that warning is turned off.}
 
-\item{outcome_transform}{Scalar character. Whether the outcome should
-be created using growth rates (as the predictors are) or lagged
-differences. The second case is closer to the requirements for the
-\href{https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md}{2022-23 CDC Flusight Hospitalization Experimental Target}.
+\item{outcome_transform}{Scalar character. Whether the outcome should be
+created using growth rates (as the predictors are) or lagged differences.
+The second case is closer to the requirements for the \href{https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md}{2022-23 CDC Flusight Hospitalization Experimental Target}. # nolint: line_length_linter
 See the Classification Vignette for details of how to create a reasonable
 baseline for this case. Selecting \code{"growth_rate"} (the default) uses
 \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} to create the outcome using some of the
-additional arguments below. Choosing \code{"lag_difference"} instead simply
-uses the change from the value at the selected \code{horizon}.}
+additional arguments below. Choosing \code{"lag_difference"} instead simply uses
+the change from the value at the selected \code{horizon}.}
 
 \item{breaks}{Vector. A vector of breaks to turn real-valued growth rates
 into discrete classes. The default gives binary upswing classification
