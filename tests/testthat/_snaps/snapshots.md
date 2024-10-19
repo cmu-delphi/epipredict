@@ -1034,8 +1034,8 @@
 ---
 
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
-    ), .pred = c(0.303244704017743, 0.531332853311082, 0.588827944685979, 
-    0.988690249216229, 0.794801997001639, 0.306895457225321), .pred_distn = structure(list(
+    ), .pred = c(0.303244704017742, 0.531332853311081, 0.58882794468598, 
+    0.98869024921623, 0.79480199700164, 0.306895457225321), .pred_distn = structure(list(
         structure(list(values = c(0.136509784083987, 0.469979623951498
         ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
@@ -1044,10 +1044,10 @@
         "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
         0.755562864619735), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.821955329282474, 1.15542516914998), quantile_levels = c(0.05, 
+            values = c(0.821955329282475, 1.15542516914999), quantile_levels = c(0.05, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.628067077067883, 
-        0.961536916935394), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "vctrs_vctr")), structure(list(values = c(0.628067077067884, 
+        0.961536916935395), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
             values = c(0.140160537291566, 0.473630377159077), quantile_levels = c(0.05, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
@@ -1060,8 +1060,8 @@
 ---
 
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
-    ), .pred = c(0.303244704017743, 0.531332853311082, 0.588827944685979, 
-    0.988690249216229, 0.794801997001639, 0.306895457225321), .pred_distn = structure(list(
+    ), .pred = c(0.303244704017742, 0.531332853311081, 0.58882794468598, 
+    0.98869024921623, 0.79480199700164, 0.306895457225321), .pred_distn = structure(list(
         structure(list(values = c(0.136509784083987, 0.469979623951498
         ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
@@ -1070,10 +1070,10 @@
         "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
         0.755562864619735), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.821955329282474, 1.15542516914998), quantile_levels = c(0.05, 
+            values = c(0.821955329282475, 1.15542516914999), quantile_levels = c(0.05, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.628067077067883, 
-        0.961536916935394), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "vctrs_vctr")), structure(list(values = c(0.628067077067884, 
+        0.961536916935395), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
             values = c(0.140160537291566, 0.473630377159077), quantile_levels = c(0.05, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
@@ -1090,7 +1090,7 @@
     Message
       == A basic forecaster of type ARX Forecaster ===================================
       
-      This forecaster was fit on 999-01-01.
+      This forecaster was fit on 0999-01-01.
       
       Training data was an <epi_df> with:
       * Geography: state,
@@ -1113,7 +1113,7 @@
     Message
       == A basic forecaster of type ARX Forecaster ===================================
       
-      This forecaster was fit on 999-01-01.
+      This forecaster was fit on 0999-01-01.
       
       Training data was an <epi_df> with:
       * Geography: state,
@@ -1137,7 +1137,7 @@
     Message
       == A basic forecaster of type ARX Forecaster ===================================
       
-      This forecaster was fit on 999-01-01.
+      This forecaster was fit on 0999-01-01.
       
       Training data was an <epi_df> with:
       * Geography: state,

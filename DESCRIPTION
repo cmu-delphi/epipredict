@@ -40,7 +40,6 @@ Imports:
     magrittr,
     recipes (>= 1.0.4),
     rlang (>= 1.1.0),
-    purrr,
     stats,
     tibble,
     tidyr,

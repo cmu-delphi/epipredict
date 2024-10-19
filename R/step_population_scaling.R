@@ -45,7 +45,7 @@
 #' @export
 #' @examples
 #' library(dplyr)
-#' jhu <- jhu_csse_daily_subset %>%
+#' jhu <- cases_deaths_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   select(geo_value, time_value, cases)
 #'
