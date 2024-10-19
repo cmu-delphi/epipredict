@@ -1090,7 +1090,7 @@
     Message
       == A basic forecaster of type ARX Forecaster ===================================
       
-      This forecaster was fit on 0999-01-01.
+      This forecaster was fit on 1999-01-01.
       
       Training data was an <epi_df> with:
       * Geography: state,
@@ -1113,7 +1113,7 @@
     Message
       == A basic forecaster of type ARX Forecaster ===================================
       
-      This forecaster was fit on 0999-01-01.
+      This forecaster was fit on 1999-01-01.
       
       Training data was an <epi_df> with:
       * Geography: state,
@@ -1137,7 +1137,7 @@
     Message
       == A basic forecaster of type ARX Forecaster ===================================
       
-      This forecaster was fit on 0999-01-01.
+      This forecaster was fit on 1999-01-01.
       
       Training data was an <epi_df> with:
       * Geography: state,
