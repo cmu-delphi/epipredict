@@ -21,21 +21,25 @@ devtools::check(vignettes = FALSE) # check package without vignettes
 
 ## Developing the documentation site
 
-Our CI builds two version of the documentation:
+Our CI builds two versions of the documentation:
 
 - https://cmu-delphi.github.io/epipredict/ from the `main` branch and
 - https://cmu-delphi.github.io/epipredict/dev from the `dev` branch.
 
-We include the script `pkgdown-watch.R` that will automatically rebuild the
-documentation locally and preview it. It can be used with:
+Commands for developing the documentation site:
 
 ```sh
-# Make sure you have servr installed
-R -e 'renv::install("servr")'
-# Will start a local server
-Rscript pkgdown-watch.R
-# You may need to first build the site with
+# Basic build and preview
+R -e 'pkgdown::clean_site()'
+R -e 'devtools::document()'
+R -e 'pkgdown::build_site()'
+
+# A smart rebuild workflow for non-RStudio users.
+# You may need to first build the site.
 R -e 'pkgdown::build_site(".", examples = FALSE, devel = TRUE, preview = FALSE)'
+R -e 'renv::install("servr")'
+# Will start a local docs server and monitor for changes.
+Rscript inst/pkgdown-watch.R
 ```
 
 ## Versioning

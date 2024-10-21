@@ -7,8 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
-source(here::here("vignettes", "_common.R"))
+```{r, include = FALSE}
+source("_common.R")
 ```
 
 ```{r pkgs, include=FALSE, echo=TRUE}
@@ -132,6 +132,8 @@ Let's use the `epix_as_of()` method to generate a snapshot of the archive at the
 last date, and then run the forecaster.
 
 ```{r}
+# Let's forecast 14 days prior to the last date in the archive, to compare.
+forecast_date <- archive_cases_dv_subset$versions_end - 14
 # The .versions argument selects only the last version in the archive and
 # produces a forecast only on that date.
 forecasts <- archive_cases_dv_subset %>%
@@ -139,9 +141,11 @@ forecasts <- archive_cases_dv_subset %>%
     ~ arx_forecaster(
       .x,
       outcome = "percent_cli",
-      predictors = c("case_rate_7d_av", "percent_cli")
-    )$predictions,
-    .versions = archive_cases_dv_subset$versions_end
+      predictors = c("case_rate_7d_av", "percent_cli"),
+      args_list = arx_args_list()
+    )$predictions %>%
+      pivot_quantiles_wider(.pred_distn),
+    .versions = forecast_date
   )
 # Join the forecasts with with the latest data at the time of the forecast to
 # compare. Since `percent_cli` data has a few days of lag, we use `tidyr::fill` to
@@ -152,9 +156,9 @@ forecasts %>%
       epix_as_of(archive_cases_dv_subset$versions_end) %>%
       group_by(geo_value) %>%
       tidyr::fill(percent_cli),
-    by = c("geo_value", "forecast_date" = "time_value")
+    by = c("geo_value", "target_date" = "time_value")
   ) %>%
-  select(geo_value, forecast_date, .pred, .pred_distn, percent_cli)
+  select(geo_value, forecast_date, .pred, `0.05`, `0.95`, percent_cli)
 ```
 
 The resulting epi_df now contains two new columns: `.pred` and `.pred_distn`,

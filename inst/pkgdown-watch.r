@@ -6,6 +6,9 @@
 #
 # Note that the `pattern` regex is case sensitive, so make sure your Rmd files
 # end in `.Rmd` and not `.rmd`.
+#
+# Also I had issues with `pkgdown::build_reference()` not working, so I just run
+# it manually when I need to.
 
 rlang::check_installed(c("pkgdown", "servr", "devtools", "here", "cli", "fs"))
 
@@ -32,7 +35,7 @@ servr::httw(
 
     refs <- grep("man.+R(m?d)?$", files, value = TRUE)
     if (length(refs)) {
-      # TODO: This does not work for me, so I just run it manually.
+      # Doesn't work for me, so I run it manually.
       # pkgdown::build_reference(pkg, preview = FALSE, examples = FALSE, lazy = FALSE)
     }
 

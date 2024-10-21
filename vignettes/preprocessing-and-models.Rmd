@@ -7,13 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  collapse = TRUE,
-  comment = "#>",
-  out.width = "100%"
-)
+```{r, include = FALSE}
+source("_common.R")
 ```
 
 ## Introduction
@@ -58,7 +53,7 @@ and forecasts to characterize the state of an outbreak and its course. They use
 it to inform public health decision makers on potential consequences of
 deploying control measures.
 
-One of the outcomes that the CDC forecasts is 
+One of the outcomes that the CDC forecasts is
 [death counts from COVID-19](https://www.cdc.gov/coronavirus/2019-ncov/science/forecasting/forecasting-us.html).
 Although there are many state-of-the-art models, we choose to use Poisson
 regression, the textbook example for modeling count data, as an illustration
@@ -110,7 +105,7 @@ Poisson distribution with mean $\mu_{t+7}$; $s_{\text{state}}$ are dummy
 variables for each state and take values of either 0 or 1.
 
 Preprocessing steps will be performed to prepare the
-data for model fitting. But before diving into them, it will be helpful to 
+data for model fitting. But before diving into them, it will be helpful to
 understand what `roles` are in the `recipes` framework.
 
 ---
@@ -239,7 +234,7 @@ the transformation will make the results uninterpretable.
 
 We wish, now, to predict the 7-day ahead death counts with lagged case rates and
 death rates, along with some extra behaviourial predictors. Namely, we will use
-survey data from 
+survey data from
 [COVID-19 Trends and Impact Survey](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/fb-survey.html#behavior-indicators).
 
 The survey data provides the estimated percentage of people who wore a mask for
@@ -416,7 +411,7 @@ We say location $\ell$ is a hotspot at time $t$ when $Z_{\ell,t}$ is
 `up`, meaning the number of newly reported cases over the past 7 days has
 increased by at least 25% compared to the preceding week. When $Z_{\ell,t}$
 is categorized as `down`, it suggests that there has been at least a 20%
-decrease in newly reported cases over the past 7 days (a 20% decrease is the 
+decrease in newly reported cases over the past 7 days (a 20% decrease is the
 inverse of a 25% increase). Otherwise, we will
 consider the trend to be `flat`.
 
@@ -590,12 +585,12 @@ Sciences 118.51 (2021): e2111453118. [doi:10.1073/pnas.2111453118](https://doi.o
 
 ## Attribution
 
-This object contains a modified part of the 
-[COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19) 
+This object contains a modified part of the
+[COVID-19 Data Repository by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University](https://github.com/CSSEGISandData/COVID-19)
 as [republished in the COVIDcast Epidata API.](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html)
 
-This data set is licensed under the terms of the 
-[Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/) 
+This data set is licensed under the terms of the
+[Creative Commons Attribution 4.0 International license](https://creativecommons.org/licenses/by/4.0/)
 by the Johns Hopkins
 University on behalf of its Center for Systems Science in Engineering. Copyright
 Johns Hopkins University 2020.
