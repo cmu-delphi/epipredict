@@ -11,7 +11,7 @@ vignette: >
 source(here::here("vignettes", "_common.R"))
 ```
 
-```{r pkgs}
+```{r pkgs, include=FALSE, echo=TRUE}
 library(epipredict)
 library(epidatr)
 library(data.table)
