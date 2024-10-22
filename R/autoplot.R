@@ -127,11 +127,10 @@ autoplot.epi_workflow <- function(
   if (!is.null(shift)) {
     edf <- mutate(edf, time_value = time_value + shift)
   }
-  extra_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
-  if (length(extra_keys) == 0L) extra_keys <- NULL
+  other_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
   edf <- as_epi_df(edf,
     as_of = object$fit$meta$as_of,
-    other_keys = extra_keys %||% character()
+    other_keys = other_keys
   )
   if (is.null(predictions)) {
     return(autoplot(
