@@ -40,7 +40,7 @@ grab_forged_keys <- function(forged, workflow, new_data) {
   # 2. these are the keys in the training data
   old_keys <- key_colnames(workflow)
   # 3. these are the keys in the test data as input
-  new_df_keys <- key_colnames(new_data, extra_keys = setdiff(new_keys, c("geo_value", "time_value")))
+  new_df_keys <- key_colnames(new_data, other_keys = setdiff(new_keys, c("geo_value", "time_value")))
   if (!(setequal(old_keys, new_df_keys) && setequal(new_keys, new_df_keys))) {
     cli_warn(paste(
       "Not all epi keys that were present in the training data are available",
