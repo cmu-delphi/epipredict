@@ -49,10 +49,10 @@ grab_forged_keys <- function(forged, workflow, new_data) {
   }
   if (is_epi_df(new_data)) {
     meta <- attr(new_data, "metadata")
-    extras <- as_epi_df(extras, as_of = meta$as_of, other_keys = meta$other_keys %||% character())
+    extras <- as_epi_df(extras, as_of = meta$as_of, other_keys = meta$other_keys)
   } else if (all(c("geo_value", "time_value") %in% new_keys)) {
-    if (length(new_keys) > 2) other_keys <- new_keys[!new_keys %in% c("geo_value", "time_value")]
-    extras <- as_epi_df(extras, other_keys = other_keys %||% character())
+    other_keys <- new_keys[!new_keys %in% c("geo_value", "time_value")]
+    extras <- as_epi_df(extras, other_keys = other_keys)
   }
   extras
 }
