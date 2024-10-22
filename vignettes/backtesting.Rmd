@@ -37,7 +37,11 @@ affect the accuracy of the forecast.
 For this reason, it is important to use version-aware forecasting, where the
 model is trained on data that would have been available at the time of the
 forecast. This ensures that the model is tested on data that is as close as
-possible to what would have been available in real-time.
+possible to what would have been available in real-time; training and making
+predictions on finalized data can lead to an overly optimistic sense of accuracy
+(see, for example, [McDonald et al.
+(2021)](https://www.pnas.org/content/118/51/e2111453118/) and the references
+therein).
 
 In the `{epiprocess}` package, we provide `epix_slide()`, a function that allows
 a convenient way to perform version-aware forecasting by only using the data as
@@ -86,8 +90,26 @@ doctor_visits <- pub_covidcast(
 
 ## Backtesting a simple autoregressive forecaster
 
-To start, let's use a simple autoregressive forecaster to predict the percentage of
-doctor's visits with CLI (`percent_cli`) in the future.
+One of the most common use cases of `epiprocess::epi_archive()` object
+is for accurate model backtesting.
+
+In this section we will:
+
+- develop a simple autoregressive forecaster that predicts the next value of the
+signal based on the current and past values of the signal itself, and
+- demonstrate how to slide this forecaster over the `epi_archive` object to
+produce forecasts at a few dates date, using version-unaware and -aware
+computations,
+- compare the two approaches.
+
+To start, let's use a simple autoregressive forecaster to predict the percentage
+of doctor's hospital visits with CLI (COVID-like illness) (`percent_cli`) in the
+future (we choose this target because of the dataset's pattern of substantial
+revisions; forecasting doctor's visits is an unusual forecasting target
+otherwise). While some AR models output single point forecasts, we will use
+quantile regression to produce a point prediction along with an 90\% uncertainty
+band, represented by a predictive quantiles at the 5\% and 95\% levels (lower
+and upper endpoints of the uncertainty band).
 
 The `arx_forecaster()` function wraps the autoregressive forecaster we need and
 comes with sensible defaults:
@@ -107,15 +129,15 @@ arx_args_list()
 These can be modified as needed, by sending your desired arguments into
 `arx_forecaster(args_list = arx_args_list())`. For now we will use the defaults.
 
-__Note__: Unlike in the previous vignette, we will not train and forecast each
-geo location indivudally. Instead, we will use a __geo-pooled approach__, where
-we train the model on data from all states and territories combined. This is
-because the data is quite similar across states, and pooling the data can help
-improve the accuracy of the forecasts, while also reducing the susceptibility of
-the model to noise. In the interest of computational speed, we only use the 6
-state dataset here, but the full archive can be used in the same way and has
-performed well in the past. Implementation-wise, geo-pooling is achieved by
-simply dropping the `group_by(geo_value)` prior to `epix_slide()`.
+__Note__: We will use a __geo-pooled approach__, where we train the model on
+data from all states and territories combined. This is because the data is quite
+similar across states, and pooling the data can help improve the accuracy of the
+forecasts, while also reducing the susceptibility of the model to noise. In the
+interest of computational speed, we only use the 6 state dataset here, but the
+full archive can be used in the same way and has performed well in the past.
+Implementation-wise, geo-pooling is achieved by not using `group_by(geo_value)`
+prior to `epix_slide()`. In other cases, grouping may be preferrable, so we
+leave it to the user to decide, but flag this modeling decision here.
 
 Let's use the `epix_as_of()` method to generate a snapshot of the archive at the
 last date, and then run the forecaster.
