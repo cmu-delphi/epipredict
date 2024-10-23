@@ -156,10 +156,25 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_population_scaling <- function(object, new_data, ...) {
-  object$by <- object$by %||% intersect(
-    epi_keys_only(new_data),
-    colnames(select(object$df, !object$df_pop_col))
-  )
+  if (is.null(object$by)) {
+    rhs_potential_keys <- colnames(select(object$df, !object$df_pop_col))
+    if (is_epi_df(new_data)) {
+      lhs_potential_keys <- key_colnames(new_data)
+      object$by <- intersect(lhs_potential_keys, rhs_potential_keys)
+      suggested_min_keys <- kill_time_value(lhs_potential_keys)
+      if (!all(suggested_min_keys %in% object$by)) {
+        cli_warn(c(
+          "Couldn't find {setdiff(suggested_min_keys, object$by)} in population `df`",
+          "i" = "Defaulting to join by {object$by}",
+          ">" = "Double-check whether column names on the population `df` match those for your time series",
+          ">" = "Consider using population data with breakdowns by {suggested_min_keys}",
+          ">" = "Manually specify `by =` to silence",
+        ), class = "epipredict__step_population_scaling__default_by_missing_suggested_keys")
+      }
+    } else {
+      object$by <- intersect(names(new_data), rhs_potential_keys)
+    }
+  }
   joinby <- list(x = names(object$by) %||% object$by, y = object$by)
   hardhat::validate_column_names(new_data, joinby$x)
   hardhat::validate_column_names(object$df, joinby$y)
@@ -177,7 +192,8 @@ bake.step_population_scaling <- function(object, new_data, ...) {
   suffix <- ifelse(object$create_new, object$suffix, "")
   col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
-  left_join(new_data, object$df, by = object$by, suffix = c("", ".df")) %>%
+  inner_join(new_data, object$df, by = object$by, suffix = c("", ".df"),
+             relationship = "many-to-one", unmatched = c("error", "drop")) %>%
     mutate(
       across(
         all_of(object$columns),

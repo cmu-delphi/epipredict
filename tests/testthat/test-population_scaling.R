@@ -197,36 +197,93 @@ test_that("test joining by default columns", {
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
+  ## edf <- tibble::tibble(geo_value = 1, age_group = 1:5, time_value = 1, value = 1) %>%
+  ##   as_epi_df(other_keys = "age_group")
+  edf <- jhu %>%
+    as_tibble() %>%
+    mutate(age_group = geo_value, geo_value = 1) %>%
+    as_epi_df(as_of = attr(jhu, "metadata")$as_of, other_keys = "age_group")
+
   reverse_pop_data <- data.frame(
     geo_value = c("ca", "ny"),
     values = c(1 / 20000, 1 / 30000)
   )
 
+  ## reverse_pop_data2 <- data.frame(
+  ##   geo_value = 1,
+  ##   age_group = 1:5,
+  ##   values = 1 / (1:5)
+  ## )
+  reverse_pop_data2 <- reverse_pop_data %>%
+    mutate(age_group = geo_value, geo_value = 1)
+
   r <- epi_recipe(jhu) %>%
     step_population_scaling(case_rate,
-      df = reverse_pop_data,
-      df_pop_col = "values",
-      by = NULL,
-      suffix = "_scaled"
-    ) %>%
+                            df = reverse_pop_data,
+                            df_pop_col = "values",
+                            by = NULL,
+                            suffix = "_scaled"
+                            ) %>%
     step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
     step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
     recipes::step_naomit(recipes::all_predictors()) %>%
     recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
 
+  ## r2 <- epi_recipe(edf) %>%
+  ##   step_population_scaling(value,
+  ##     df = reverse_pop_data2,
+  ##     df_pop_col = "values",
+  ##     by = NULL,
+  ##     suffix = "_scaled"
+  ##   ) %>%
+  ##   step_epi_lag(value_scaled, lag = c(0, 7, 14)) %>% # cases
+  ##   step_epi_ahead(value_scaled, ahead = 7, role = "outcome") %>% # cases
+  ##   recipes::step_naomit(recipes::all_predictors()) %>%
+  ##   recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+
+  r2 <- epi_recipe(edf) %>%
+    step_population_scaling(case_rate,
+                            df = reverse_pop_data2,
+                            df_pop_col = "values",
+                            by = NULL,
+                            ## by = c("geo_value", "age_group"),
+                            suffix = "_scaled"
+                            ) %>%
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
+    step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+
+
   prep <- prep(r, jhu)
 
+  prep2 <- prep(r2, edf)
+
   b <- bake(prep, jhu)
+
+  b2 <- bake(prep2, edf)
 
   f <- frosting() %>%
     layer_predict() %>%
     layer_threshold(.pred) %>%
     layer_naomit(.pred) %>%
     layer_population_scaling(.pred,
-      df = reverse_pop_data,
-      by = NULL,
-      df_pop_col = "values"
-    )
+                             df = reverse_pop_data,
+                             by = NULL,
+                             df_pop_col = "values"
+                             )
+
+  f2 <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred,
+                             df = reverse_pop_data2,
+                             by = NULL,
+                             ## by = c("geo_value", "age_group"),
+                             df_pop_col = "values"
+                             )
+
 
   wf <- epi_workflow(
     r,
@@ -234,6 +291,14 @@ test_that("test joining by default columns", {
   ) %>%
     fit(jhu) %>%
     add_frosting(f)
+
+  wf2 <- epi_workflow(
+    r2,
+    parsnip::linear_reg()
+  ) %>%
+    fit(edf) %>%
+    add_frosting(f2)
+
 
   latest <- get_test_data(
     recipe = r,
@@ -245,8 +310,23 @@ test_that("test joining by default columns", {
       dplyr::select(geo_value, time_value, case_rate)
   )
 
+  latest2 <- get_test_data(
+    recipe = r2,
+    x = case_death_rate_subset %>%
+      dplyr::filter(
+        time_value > "2021-11-01",
+        geo_value %in% c("ca", "ny")
+      ) %>%
+      mutate(age_group = geo_value, geo_value = 1) %>%
+      dplyr::select(geo_value, age_group, time_value, case_rate) %>%
+      as_tibble() %>%
+      as_epi_df(as_of = attr(case_death_rate_subset, "metadata")$as_of,
+                other_keys = "age_group")
+  )
 
   p <- predict(wf, latest)
+
+  p2 <- predict(wf2, latest2)
 
 
 
