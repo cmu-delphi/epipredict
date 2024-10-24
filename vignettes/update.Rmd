@@ -8,12 +8,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  collapse = TRUE,
-  comment = "#>",
-  out.width = "100%"
-)
+source("_common.R")
 ```
 
 ```{r setup, message=FALSE}
