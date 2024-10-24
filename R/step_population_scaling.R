@@ -192,8 +192,9 @@ bake.step_population_scaling <- function(object, new_data, ...) {
   suffix <- ifelse(object$create_new, object$suffix, "")
   col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
-  inner_join(new_data, object$df, by = object$by, suffix = c("", ".df"),
-             relationship = "many-to-one", unmatched = c("error", "drop")) %>%
+  inner_join(new_data, object$df,
+             by = object$by, relationship = "many-to-one", unmatched = c("error", "drop"),
+             suffix = c("", ".df")) %>%
     mutate(
       across(
         all_of(object$columns),

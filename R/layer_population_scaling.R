@@ -171,10 +171,12 @@ slather.layer_population_scaling <-
     suffix <- ifelse(object$create_new, object$suffix, "")
     col_to_remove <- setdiff(colnames(object$df), colnames(components$predictions))
 
-    components$predictions <- left_join(
+    components$predictions <- inner_join(
       components$predictions,
       object$df,
       by = object$by,
+      relationship = "many-to-one",
+      unmatched = c("error", "drop"),
       suffix = c("", ".df")
     ) %>%
       mutate(across(
