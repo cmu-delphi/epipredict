@@ -1,4 +1,4 @@
-train_data <- epidatasets::cases_deaths_subset
+train_data <- cases_deaths_subset
 expect_snapshot_tibble <- function(x) {
   expect_snapshot_value(x, style = "deparse", cran = FALSE)
 }

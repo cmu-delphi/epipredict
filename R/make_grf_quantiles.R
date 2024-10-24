@@ -165,7 +165,7 @@ make_grf_quantiles <- function() {
 
   # turn the predictions into a tibble with a dist_quantiles column
   process_qrf_preds <- function(x, object) {
-    quantile_levels <- parsnip::extract_fit_engine(object)$quantiles.orig %>% sort()
+    quantile_levels <- parsnip::extract_fit_engine(object)$quantiles.orig
     x <- x$predictions
     out <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
     out <- dist_quantiles(out, list(quantile_levels))

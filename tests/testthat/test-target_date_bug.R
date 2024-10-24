@@ -2,7 +2,7 @@
 # https://github.com/cmu-delphi/epipredict/issues/290
 
 library(dplyr)
-train <- epidatasets::cases_deaths_subset |>
+train <- cases_deaths_subset |>
   filter(time_value >= as.Date("2021-10-01")) |>
   select(geo_value, time_value, cr = case_rate_7d_av, dr = death_rate_7d_av)
 ngeos <- n_distinct(train$geo_value)
