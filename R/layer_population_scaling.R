@@ -149,7 +149,7 @@ slather.layer_population_scaling <-
           "i" = "Defaulting to join by {object$by}",
           ">" = "Double-check whether column names on the population `df` match those expected in your predictions",
           ">" = "Consider using population data with breakdowns by {suggested_min_keys}",
-          ">" = "Manually specify `by =` to silence",
+          ">" = "Manually specify `by =` to silence"
         ), class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys")
       }
     }

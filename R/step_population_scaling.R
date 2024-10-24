@@ -168,7 +168,7 @@ bake.step_population_scaling <- function(object, new_data, ...) {
           "i" = "Defaulting to join by {object$by}",
           ">" = "Double-check whether column names on the population `df` match those for your time series",
           ">" = "Consider using population data with breakdowns by {suggested_min_keys}",
-          ">" = "Manually specify `by =` to silence",
+          ">" = "Manually specify `by =` to silence"
         ), class = "epipredict__step_population_scaling__default_by_missing_suggested_keys")
       }
     } else {
