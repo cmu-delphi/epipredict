@@ -12,7 +12,7 @@
       r %>% step_epi_slide(value, .f = mean, .window_size = c(3L, 6L))
     Condition
       Error in `epiprocess:::validate_slide_window_arg()`:
-      ! Slide function expected `.window_size` to be a non-null, scalar integer >= 1.
+      ! Slide function expected `.window_size` to be a length-1 difftime with units in days or non-negative integer or Inf.
 
 ---
 
@@ -60,7 +60,7 @@
       r %>% step_epi_slide(value, .f = mean, .window_size = 1.5)
     Condition
       Error in `epiprocess:::validate_slide_window_arg()`:
-      ! Slide function expected `.window_size` to be a difftime with units in days or non-negative integer or Inf.
+      ! Slide function expected `.window_size` to be a length-1 difftime with units in days or non-negative integer or Inf.
 
 ---
 

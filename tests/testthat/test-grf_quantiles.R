@@ -57,6 +57,6 @@ test_that("quantile_rand_forest predicts reasonable quantiles", {
   expect_silent(out <- fit(spec, formula = y ~ x + z, data = tib))
   # swapping around the probabilities, because somehow this happens in practice,
   # but I'm not sure how to reproduce
-  out$fit$quantiles.orig <- c(0.5,0.9, 0.1)
+  out$fit$quantiles.orig <- c(0.5, 0.9, 0.1)
   expect_no_error(predict(out, tib))
 })
