@@ -135,6 +135,25 @@ slather.layer_population_scaling <-
     )
     rlang::check_dots_empty()
 
+    if (is.null(object$by)) {
+      # Assume `layer_predict` has calculated the prediction keys and other layers
+      # don't change the prediction key colnames:
+      prediction_key_colnames <- names(components$keys)
+      lhs_potential_keys <- prediction_key_colnames
+      rhs_potential_keys <- colnames(select(object$df, !object$df_pop_col))
+      object$by <- intersect(lhs_potential_keys, rhs_potential_keys)
+      suggested_min_keys <- kill_time_value(lhs_potential_keys)
+      if (!all(suggested_min_keys %in% object$by)) {
+        cli_warn(c(
+          "Couldn't find {setdiff(suggested_min_keys, object$by)} in population `df`",
+          "i" = "Defaulting to join by {object$by}",
+          ">" = "Double-check whether column names on the population `df` match those expected in your predictions",
+          ">" = "Consider using population data with breakdowns by {suggested_min_keys}",
+          ">" = "Manually specify `by =` to silence"
+        ), class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys")
+      }
+    }
+
     object$by <- object$by %||% intersect(
       epi_keys_only(components$predictions),
       colnames(select(object$df, !object$df_pop_col))
@@ -152,10 +171,12 @@ slather.layer_population_scaling <-
     suffix <- ifelse(object$create_new, object$suffix, "")
     col_to_remove <- setdiff(colnames(object$df), colnames(components$predictions))
 
-    components$predictions <- left_join(
+    components$predictions <- inner_join(
       components$predictions,
       object$df,
       by = object$by,
+      relationship = "many-to-one",
+      unmatched = c("error", "drop"),
       suffix = c("", ".df")
     ) %>%
       mutate(across(

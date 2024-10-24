@@ -112,7 +112,7 @@ make_quantile_reg <- function() {
 
     # can't make a method because object is second
     out <- switch(type,
-      rq = dist_quantiles(unname(as.list(x)), object$quantile_levels), # one quantile
+      rq = dist_quantiles(unname(as.list(x)), object$tau), # one quantile
       rqs = {
         x <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
         dist_quantiles(x, list(object$tau))

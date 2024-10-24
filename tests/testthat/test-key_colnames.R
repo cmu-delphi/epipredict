@@ -17,6 +17,9 @@ test_that("key_colnames extracts time_value and geo_value, but not raw", {
     fit(data = covid_case_death_rates)
 
   expect_identical(key_colnames(my_workflow), c("geo_value", "time_value"))
+
+  # `exclude =` works:
+  expect_identical(key_colnames(my_workflow, exclude = "geo_value"), c("time_value"))
 })
 
 test_that("key_colnames extracts additional keys when they are present", {
@@ -49,4 +52,7 @@ test_that("key_colnames extracts additional keys when they are present", {
 
   # order of the additional keys may be different
   expect_equal(key_colnames(my_workflow), c("geo_value", "state", "pol", "time_value"))
+
+  # `exclude =` works:
+  expect_equal(key_colnames(my_workflow, exclude = c("time_value", "pol")), c("geo_value", "state"))
 })
