@@ -136,8 +136,8 @@ slather.layer_population_scaling <-
     rlang::check_dots_empty()
 
     if (is.null(object$by)) {
-      # Assume `layer_predict` has calculated the prediction keys and other layers
-      # don't change the prediction key colnames:
+      # Assume `layer_predict` has calculated the prediction keys and other
+      # layers don't change the prediction key colnames:
       prediction_key_colnames <- names(components$keys)
       lhs_potential_keys <- prediction_key_colnames
       rhs_potential_keys <- colnames(select(object$df, !object$df_pop_col))

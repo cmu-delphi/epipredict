@@ -7,7 +7,9 @@
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom dplyr arrange across all_of any_of bind_cols bind_rows group_by
 #' @importFrom dplyr full_join relocate summarise everything
+#' @importFrom dplyr inner_join
 #' @importFrom dplyr summarize filter mutate select left_join rename ungroup
+#' @importFrom magrittr extract2
 #' @importFrom rlang := !! %||% as_function global_env set_names !!! caller_arg
 #' @importFrom rlang is_logical is_true inject enquo enquos expr sym arg_match
 #' @importFrom stats poly predict lm residuals quantile
