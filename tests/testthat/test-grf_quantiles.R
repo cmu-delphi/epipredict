@@ -70,10 +70,9 @@ test_that("quantile_rand_forest operates with arx_forecaster", {
     rlang::eval_tidy(spec2$eng_args$quantiles),
     c(.05, .1, .5, .9, .95) # merged with arx_args default
   )
-  df <- case_death_rate_subset %>%
-    filter(time_value >= "2021-10-01", geo_value %in% c("ca", "ny"))
+  df <- epidatasets::counts_subset %>% filter(time_value >= "2021-10-01")
 
-  z <- arx_forecaster(df, "case_rate", "case_rate", spec2)
+  z <- arx_forecaster(df, "cases", "cases", spec2)
   expect_identical(
     nested_quantiles(z$predictions$.pred_distn[1])[[1]]$quantile_levels,
     c(.05, .1, .5, .9, .95)
