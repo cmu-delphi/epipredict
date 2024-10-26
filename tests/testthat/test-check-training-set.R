@@ -1,5 +1,5 @@
 test_that("training set validation works", {
-  template <- cases_deaths_subset[1, ]
+  template <- epidatasets::cases_deaths_subset[1, ]
   rec <- list(template = template)
   t1 <- template
 
