@@ -194,7 +194,7 @@ arx_fcast_epi_workflow <- function(
       quantile_levels <- sort(compare_quantile_args(
         args_list$quantile_levels,
         rlang::eval_tidy(trainer$args$quantile_levels),
-        train_type
+        "qr"
       ))
       trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
     } else {
@@ -357,10 +357,11 @@ print.arx_fcast <- function(x, ...) {
   NextMethod(name = name, ...)
 }
 
-compare_quantile_args <- function(alist, tlist, trainer = "qr") {
+compare_quantile_args <- function(alist, tlist, train_method = c("qr", "grf")) {
+  train_method <- rlang::arg_match(train_method)
   default_alist <- eval(formals(arx_args_list)$quantile_levels)
   default_tlist <- switch(
-    trainer,
+    train_method,
     "qr" = eval(formals(quantile_reg)$quantile_levels),
     "grf" = c(.1, .5, .9)
   )

@@ -125,6 +125,15 @@
 # arx forecaster disambiguates quantiles
 
     Code
+      compare_quantile_args(alist / 10, 1:9 / 10, "grf")
+    Condition
+      Error in `compare_quantile_args()`:
+      ! You have specified different, non-default, quantiles in the trainier and `arx_args` options.
+      i Please only specify quantiles in one location.
+
+---
+
+    Code
       compare_quantile_args(alist, tlist)
     Condition
       Error in `compare_quantile_args()`:
