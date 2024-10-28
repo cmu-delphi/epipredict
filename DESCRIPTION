@@ -6,19 +6,13 @@ Authors@R: c(
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
     person("Dmitry", "Shemetov", email = "dshemeto@andrew.cmu.edu", role = "aut"),
     person("David", "Weber", email = "davidweb@andrew.cmu.edu", role = "aut"),
-    person("CMU's Delphi Research Group", role = c("cph", "fnd", "dtc"),
-        comment = "Owner of masking, social-distancing, and CLI data from the COVID-19 Trends and Impacts Survey. Owner of claims-based CLI data from the Delphi Epidata API"),
+    person("CMU's Delphi Research Group", role = c("cph", "fnd")),
     person("Logan", "Brooks", role = "aut"),
     person("Rachel", "Lobay", role = "aut"),
     person("Maggie", "Liu", role = "ctb"),
     person("Ken", "Mawer", role = "ctb"),
     person("Chloe", "You", role = "ctb"),
-    person("Jacob", "Bien", role = "ctb"),
-    person("Johns Hopkins University Center for Systems Science and Engineering", role = "dtc", comment = "Owner of COVID-19 cases and deaths data from the COVID-19 Data Repository"),
-    person("Johns Hopkins University", role = "cph", comment = "Copyright holder of COVID-19 cases and deaths data from the COVID-19 Data Repository"),
-    person("The COVID-19 Canada Open Data Working Group", role = "dtc", comment = "Owner of Canadian COVID-19 cases rates from the Covid19Canada data repository"),
-    person("Statistics Canada", role = "dtc", comment = "Owner of Canadian graduate employment income data from the Statistics Canada website"),
-    person("Google", role = "dtc", comment = "Collaborator on CLI data from the Google symptom surveys")
+    person("Jacob", "Bien", role = "ctb")
   )
 Description: A forecasting "framework" for creating epidemiological
     forecasts from versioned data. The framework is designed to be modular
