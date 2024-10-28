@@ -6,9 +6,9 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 ## Breaking changes
 
-- Moved example datasets from being hosted in the package to being reexported
+- Moved example datasets from being hosted in the package to being loaded
   from the `epidatasets` package. The datasets can no longer be loaded with
-  `data()` but can be accessed with `epipredict::` or, after loading the package,
+  `data()`, but can be accessed with `epidatasets::` or, after loading the package,
   the name of the dataset alone (#382).
 
 ## Improvements
@@ -18,6 +18,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 ## Bug fixes
 - Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
+- Quantiles produced by `grf` were sometimes out of order.
 
 # epipredict 0.1
 

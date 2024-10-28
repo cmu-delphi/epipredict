@@ -149,6 +149,7 @@ test_that("coerce scalar to date", {
 test_that("simple surface step test", {
   expect_snapshot(
     error = TRUE,
-    epi_recipe(cases_deaths_subset) %>% step_epi_lag(death_rate, lag = "hello")
+    epi_recipe(cases_deaths_subset) %>%
+      step_epi_lag(death_rate, lag = "hello")
   )
 })

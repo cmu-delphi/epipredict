@@ -90,7 +90,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
 
 ## Postprocessing
 test_that("Postprocessing workflow works and values correct", {
-  jhu <- cases_deaths_subset %>%
+  jhu <- epidatasets::cases_deaths_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, cases)
 
