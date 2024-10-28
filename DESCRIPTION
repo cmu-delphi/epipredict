@@ -33,7 +33,6 @@ Imports:
     cli,
     distributional,
     dplyr,
-    epidatasets,
     generics,
     ggplot2,
     glue,
@@ -51,7 +50,6 @@ Imports:
     workflows (>= 1.0.0)
 Suggests:
     data.table,
-    epidatasets,
     epidatr (>= 1.0.0),
     fs,
     grf,

@@ -58,13 +58,12 @@ Although there are many state-of-the-art models, we choose to use Poisson
 regression, the textbook example for modeling count data, as an illustration
 for using the `epipredict` package with other existing tidymodels packages.
 
-The `counts_subset` dataset is included in this package (via the
-[`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+The `counts_subset` dataset is available in the [`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
 and contains the number of confirmed cases and deaths from June 4, 2021 to Dec
 31, 2021 in some U.S. states. It can be loaded with:
 
 ```{r poisson-reg-data}
-x <- counts_subset
+x <- epidatasets::counts_subset
 ```
 
 The data can also be fetched from the Delphi API with the following query:
@@ -256,13 +255,12 @@ in public in the past 7 days maintained a distance of at least 6 feet.
 State-wise population data from the 2019 U.S. Census will be used in 
 `layer_population_scaling()`.
 
-Both datasets are included in this package (via the
-[`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+Both datasets are available in the [`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
 and can be loaded with:
 
 ```{r}
-behav_ind <- ctis_covid_behaviours
-pop_dat <- state_census %>% select(abbr, pop)
+behav_ind <- epidatasets::ctis_covid_behaviours
+pop_dat <- epidatasets::state_census %>% select(abbr, pop)
 ```
 
 The data can also be fetched from the Delphi API with the following query:

@@ -18,6 +18,7 @@ library(parsnip)
 library(recipes)
 library(epiprocess)
 library(epipredict)
+library(epidatasets)
 library(ggplot2)
 theme_set(theme_bw())
 ```

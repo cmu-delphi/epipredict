@@ -146,8 +146,7 @@ re-scale and transform the signals to our `epi_recipe`. This would make the code
 more succinct and self-contained.
 
 We will compare two CLI-in-community indicators from
-different sources. The data are included in this package (via the
-[`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+different sources. The data are available in the [`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
 and can be loaded with:
 
 ```{r, message = FALSE, warning = FALSE}
@@ -156,7 +155,7 @@ library(purrr)
 library(epipredict)
 library(recipes)
 
-z <- county_smoothed_cli_comparison
+z <- epidatasets::county_smoothed_cli_comparison
 ```
 
 The data can also be constructed from data the Delphi API with the following code:
