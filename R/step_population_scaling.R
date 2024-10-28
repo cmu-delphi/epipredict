@@ -89,13 +89,25 @@ step_population_scaling <-
            suffix = "_scaled",
            skip = FALSE,
            id = rand_id("population_scaling")) {
-    arg_is_scalar(role, df_pop_col, rate_rescaling, create_new, suffix, id)
-    arg_is_lgl(create_new, skip)
-    arg_is_chr(df_pop_col, suffix, id)
+    if (rlang::dots_n(...) == 0L) {
+      cli_abort(c(
+        "`...` must not be empty.",
+        ">" = "Please provide one or more tidyselect expressions in `...`
+               specifying the columns to which scaling should be applied.",
+        ">" = "If you really want to list `step_population_scaling` in your
+               recipe but not have it do anything, you can use a tidyselection
+               that selects zero variables, such as `c()`."
+      ))
+    }
+    arg_is_scalar(role, df_pop_col, rate_rescaling, create_new, suffix, skip, id)
+    arg_is_chr(role, df_pop_col, suffix, id)
+    hardhat::validate_column_names(df, df_pop_col)
     arg_is_chr(by, allow_null = TRUE)
+    arg_is_numeric(rate_rescaling)
     if (rate_rescaling <= 0) {
       cli_abort("`rate_rescaling` must be a positive number.")
     }
+    arg_is_lgl(create_new, skip)
 
     recipes::add_step(
       recipe,
@@ -138,7 +150,6 @@ step_population_scaling_new <-
 
 #' @export
 prep.step_population_scaling <- function(x, training, info = NULL, ...) {
-  hardhat::validate_column_names(x$df, x$df_pop_col)
   if (is.null(x$by)) {
     rhs_potential_keys <- setdiff(colnames(x$df), x$df_pop_col)
     lhs_potential_keys <- info %>%
