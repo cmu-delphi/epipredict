@@ -386,43 +386,82 @@ test_that("test joining by default columns with less common keys/classes", {
     class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
   )
 
-  # Same thing but with time series in tibble:
-  dat1bb <- dat1 %>%
+  # Same thing but with time series in tibble, but with role hints:
+  dat1b2 <- dat1 %>%
     as_tibble() %>%
     mutate(age_group = geo_value, geo_value = 1)
-  pop1bb <- pop1b
-  ewf1bb <- epi_workflow(
+  pop1b2 <- pop1b
+  ewf1b2 <- epi_workflow(
     # Can't use epi_recipe or step_epi_ahead; adjust.
-    recipe(dat1bb) %>%
-    update_role("geo_value", new_role = "geo_value") %>%
-    update_role("age_group", new_role = "key") %>%
-    update_role("time_value", new_role = "time_value") %>%
-    step_population_scaling(y, df = pop1bb, df_pop_col = "population", role = "outcome") %>%
-      # XXX key_colnames inference differs at fit vs. predict time, so we also
-      # need to manually provide some key role settings to not have trouble at
-      # predict time.
-   {.},
+    recipe(dat1b2) %>%
+      update_role("geo_value", new_role = "geo_value") %>%
+      update_role("age_group", new_role = "key") %>%
+      update_role("time_value", new_role = "time_value") %>%
+      step_population_scaling(y, df = pop1b2, df_pop_col = "population", role = "outcome") %>%
+      {.},
     model_spec,
     frosting() %>%
       layer_predict() %>%
-      layer_population_scaling(.pred, df = pop1bb, df_pop_col = "population", create_new = FALSE)
+      layer_population_scaling(.pred, df = pop1b2, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_warning(
+    expect_equal(
+      extract_recipe(ewf1b2, estimated = FALSE) %>%
+        prep(dat1b2) %>%
+        bake(new_data = NULL),
+      dat1b2 %>%
+        # geo 1 scaling used for both:
+        mutate(y_scaled = c(3e-6, 7 * 11 / 5e6))
+    ),
+    class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+  )
+  expect_warning(
+    expect_warning(
+      expect_equal(
+        predict(fit(ewf1b2, dat1b2), dat1b2) %>%
+          pivot_quantiles_wider(.pred),
+        dat1b2 %>%
+          select(!"y") %>%
+          as_tibble() %>%
+          # geo 1 scaling used for both:
+          mutate(`0.5` = c(2 * 5, 2 * 5)) %>%
+          select(geo_value, age_group, time_value, `0.5`)
+      ),
+      class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+    ),
+    class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
+  )
+
+  # Same thing but with time series in tibble, but no role hints -> different inference&messaging:
+  dat1b3 <- dat1b2
+  pop1b3 <- pop1b2
+  ewf1b3 <- epi_workflow(
+    # Can't use epi_recipe or step_epi_ahead; adjust.
+    recipe(dat1b3) %>%
+      step_population_scaling(y, df = pop1b3, df_pop_col = "population", role = "outcome") %>%
+      {.},
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1b3, df_pop_col = "population", create_new = FALSE)
   )
   expect_equal(
-    extract_recipe(ewf1bb, estimated = FALSE) %>%
-      prep(dat1bb) %>%
+    extract_recipe(ewf1b3, estimated = FALSE) %>%
+      prep(dat1b3) %>%
       bake(new_data = NULL),
-    dat1bb %>%
+    dat1b3 %>%
       # geo 1 scaling used for both:
       mutate(y_scaled = c(3e-6, 7 * 11 / 5e6))
   )
   expect_equal(
-    predict(fit(ewf1bb, dat1bb), dat1bb) %>%
+    predict(fit(ewf1b3, dat1b3), dat1b3) %>%
       pivot_quantiles_wider(.pred),
-    dat1bb %>%
+    dat1b3 %>%
       select(!"y") %>%
       as_tibble() %>%
       # geo 1 scaling used for both:
-      mutate(`0.5` = c(2 * 5, 2 * 5))
+      mutate(`0.5` = c(2 * 5, 2 * 5)) %>%
+      select(geo_value, age_group, time_value, `0.5`)
   )
 
   # With geo x age_group breakdown on both:
