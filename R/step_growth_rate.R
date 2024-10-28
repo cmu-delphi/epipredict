@@ -38,7 +38,7 @@
 #'
 #' r %>%
 #'   prep(covid_case_death_rates) %>%
-#'   bake(covid_case_death_rates)
+#'   bake(new_data = NULL)
 step_growth_rate <-
   function(recipe,
            ...,
