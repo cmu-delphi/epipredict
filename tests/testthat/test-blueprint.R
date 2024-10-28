@@ -4,7 +4,7 @@ test_that("epi_recipe blueprint keeps the class, mold works", {
   expect_s3_class(bp, "default_epi_recipe_blueprint")
   expect_s3_class(refresh_blueprint(bp), "default_epi_recipe_blueprint")
 
-  jhu <- case_death_rate_subset
+  jhu <- covid_case_death_rates
   # expect_s3_class(er_check_is_data_like(jhu), "epi_df")
 
   r <- epi_recipe(jhu) %>%

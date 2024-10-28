@@ -121,8 +121,3 @@ reference:
   - title: Other utilities
     contents:
       - clean_f_name
-  - title: Included datasets
-    contents:
-      - case_death_rate_subset
-      - state_census
-      - grad_employ_subset

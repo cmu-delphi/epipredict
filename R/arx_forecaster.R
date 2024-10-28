@@ -25,7 +25,7 @@
 #' @seealso [arx_fcast_epi_workflow()], [arx_args_list()]
 #'
 #' @examples
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
 #' out <- arx_forecaster(
@@ -96,7 +96,7 @@ arx_forecaster <- function(
 #'
 #' @examples
 #' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-12-01"))
 #'
 #' arx_fcast_epi_workflow(

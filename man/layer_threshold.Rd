@@ -41,7 +41,7 @@ to the threshold values.
 }
 \examples{
 library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value < "2021-03-08", geo_value \%in\% c("ak", "ca", "ar"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%

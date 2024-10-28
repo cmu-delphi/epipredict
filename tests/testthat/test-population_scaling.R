@@ -7,7 +7,7 @@ test_that("Column names can be passed with and without the tidy way", {
 
   pop_data2 <- pop_data %>% dplyr::rename(geo_value = states)
 
-  newdata <- case_death_rate_subset %>%
+  newdata <- covid_case_death_rates %>%
     filter(geo_value %in% c("ak", "al", "ar", "as", "az", "ca"))
 
   r1 <- epi_recipe(newdata) %>%
@@ -150,7 +150,7 @@ test_that("Postprocessing workflow works and values correct", {
 })
 
 test_that("Postprocessing to get cases from case rate", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -193,7 +193,7 @@ test_that("Postprocessing to get cases from case rate", {
 
 
 test_that("test joining by default columns", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -237,7 +237,7 @@ test_that("test joining by default columns", {
 
   latest <- get_test_data(
     recipe = r,
-    x = case_death_rate_subset %>%
+    x = covid_case_death_rates %>%
       dplyr::filter(
         time_value > "2021-11-01",
         geo_value %in% c("ca", "ny")
@@ -250,7 +250,7 @@ test_that("test joining by default columns", {
 
 
 
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -305,7 +305,7 @@ test_that("test joining by default columns", {
 
 
 test_that("expect error if `by` selector does not match", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 

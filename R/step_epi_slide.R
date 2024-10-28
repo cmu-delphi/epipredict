@@ -37,7 +37,7 @@
 #' @export
 #' @examples
 #' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-01-01"), geo_value %in% c("ca", "ny"))
 #' rec <- epi_recipe(jhu) %>%
 #'   step_epi_slide(case_rate, death_rate,

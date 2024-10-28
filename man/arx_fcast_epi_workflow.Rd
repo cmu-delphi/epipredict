@@ -43,7 +43,7 @@ use \code{\link[=quantile_reg]{quantile_reg()}}) but can be omitted.
 }
 \examples{
 library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-12-01"))
 
 arx_fcast_epi_workflow(

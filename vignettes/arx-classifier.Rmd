@@ -29,14 +29,14 @@ or ahead value.
 
 To get a sense of how the `arx_classifier()` works, let's consider a simple
 example with minimal inputs. For this, we will use the built-in
-`case_death_rate_subset` that contains confirmed COVID-19 cases and deaths from
+`covid_case_death_rates` that contains confirmed COVID-19 cases and deaths from
 JHU CSSE for all states over Dec 31, 2020 to Dec 31, 2021. From this, we'll take
 a subset of data for five states over June 4, 2021 to December 31, 2021. Our
 objective is to predict whether the case rates are increasing when considering
 the 0, 7 and 14 day case rates:
 
 ```{r}
-jhu <- case_death_rate_subset %>%
+jhu <- covid_case_death_rates %>%
   filter(
     time_value >= "2021-06-04",
     time_value <= "2021-12-31",
@@ -163,7 +163,7 @@ $$
 g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} + \beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta + \beta_{13}Y_{l,t-14}^\Delta.
 $$
 
-Now then, we will operate on the same subset of the `case_death_rate_subset`
+Now then, we will operate on the same subset of the `covid_case_death_rates`
 that we used in our above example. This time, we will use it to investigate
 whether the number of newly reported cases over the past 7 days has increased by
 at least 25% compared to the preceding week for our sample of states.

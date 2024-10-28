@@ -80,13 +80,13 @@ weighted_interval_score(dist_quantiles(1:4, 1:4 / 5), 2.5, 1:9 / 10,
 
 # Using some actual forecasts --------
 library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= "2021-10-01", time_value <= "2021-12-01")
 preds <- flatline_forecaster(
   jhu, "death_rate",
   flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
 )$predictions
-actuals <- case_death_rate_subset \%>\%
+actuals <- covid_case_death_rates \%>\%
   filter(time_value == as.Date("2021-12-01") + 7) \%>\%
   select(geo_value, time_value, actual = death_rate)
 preds <- left_join(preds, actuals,

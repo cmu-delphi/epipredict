@@ -12,7 +12,7 @@
 #' @export
 #' @examples
 #' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%

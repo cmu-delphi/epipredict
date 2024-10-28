@@ -31,9 +31,9 @@ calculated internally.
 }
 \examples{
 # create recipe
-rec <- epi_recipe(case_death_rate_subset) \%>\%
+rec <- epi_recipe(covid_case_death_rates) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14))
-get_test_data(recipe = rec, x = case_death_rate_subset)
+get_test_data(recipe = rec, x = covid_case_death_rates)
 }

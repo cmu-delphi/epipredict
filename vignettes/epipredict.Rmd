@@ -85,7 +85,7 @@ package. There is much more to see there, but for the moment, it's enough to
 look at a simple one:
 
 ```{r epidf}
-jhu <- case_death_rate_subset
+jhu <- covid_case_death_rates
 jhu
 ```
 
