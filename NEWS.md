@@ -8,8 +8,9 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 - Moved example datasets from being hosted in the package to being loaded
   from the `epidatasets` package. The datasets can no longer be loaded with
-  `data()`, but can be accessed with `epidatasets::` or, after loading the package,
-  the name of the dataset alone (#382).
+  `data(<dataset name>)`, but can be accessed with 
+  `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>` 
+  or, after loading the package, the name of the dataset alone (#382).
 
 ## Improvements
 
