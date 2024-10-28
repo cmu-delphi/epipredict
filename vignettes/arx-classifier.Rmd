@@ -7,15 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  collapse = FALSE,
-  comment = "#>",
-  warning = FALSE,
-  message = FALSE,
-  out.width = "100%"
-)
+```{r, include = FALSE}
+source("_common.R")
 ```
 
 ## Load required packages
