@@ -54,7 +54,7 @@ r
 
 r \%>\%
   prep(covid_case_death_rates) \%>\%
-  bake(covid_case_death_rates)
+  bake(new_data = NULL)
 }
 \seealso{
 Other row operation steps: 
