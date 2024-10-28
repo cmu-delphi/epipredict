@@ -22,20 +22,20 @@ navbar:
   type: light
 
 articles:
-- title: Get started
-  navbar: ~
-  contents:
-  - epipredict
-  - preprocessing-and-models
-  - arx-classifier
-  - update
+  - title: Get started
+    navbar: ~
+    contents:
+      - epipredict
+      - preprocessing-and-models
+      - backtesting
+      - arx-classifier
+      - update
 
-- title: Advanced methods
-  contents:
-  - articles/sliding
-  - articles/smooth-qr
-  - articles/symptom-surveys
-  - panel-data
+  - title: Advanced methods
+    contents:
+      - articles/smooth-qr
+      - articles/symptom-surveys
+      - panel-data
 
 repo:
   url:
@@ -79,15 +79,15 @@ reference:
       - grf_quantiles
   - title: Custom panel data forecasting workflows
     contents:
-    - epi_recipe
-    - epi_workflow
-    - add_epi_recipe
-    - adjust_epi_recipe
-    - Add_model
-    - predict.epi_workflow
-    - fit.epi_workflow
-    - augment.epi_workflow
-    - forecast.epi_workflow
+      - epi_recipe
+      - epi_workflow
+      - add_epi_recipe
+      - adjust_epi_recipe
+      - Add_model
+      - predict.epi_workflow
+      - fit.epi_workflow
+      - augment.epi_workflow
+      - forecast.epi_workflow
 
   - title: Epi recipe preprocessing steps
     contents:
@@ -121,8 +121,3 @@ reference:
   - title: Other utilities
     contents:
       - clean_f_name
-  - title: Included datasets
-    contents:
-      - case_death_rate_subset
-      - state_census
-      - grad_employ_subset

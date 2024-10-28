@@ -377,7 +377,7 @@
 # simple surface step test
 
     Code
-      epi_recipe(case_death_rate_subset) %>% step_epi_lag(death_rate, lag = "hello")
+      epi_recipe(cases_deaths_subset) %>% step_epi_lag(death_rate, lag = "hello")
     Condition
       Error in `step_epi_lag()`:
       ! `lag` must be a non-negative integer.

@@ -32,13 +32,13 @@
 #' @importFrom epiprocess growth_rate
 #' @export
 #' @examples
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' r <- epi_recipe(covid_case_death_rates) %>%
 #'   step_growth_rate(case_rate, death_rate)
 #' r
 #'
 #' r %>%
-#'   prep(case_death_rate_subset) %>%
-#'   bake(case_death_rate_subset)
+#'   prep(covid_case_death_rates) %>%
+#'   bake(new_data = NULL)
 step_growth_rate <-
   function(recipe,
            ...,

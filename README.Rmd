@@ -81,14 +81,14 @@ interfaces directly to Delphi's
 
 ```{r epidf, message=FALSE}
 library(epipredict)
-case_death_rate_subset
+covid_case_death_rates
 ```
 
 To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.
 
 ```{r make-forecasts, warning=FALSE}
 two_week_ahead <- arx_forecaster(
-  case_death_rate_subset,
+  covid_case_death_rates,
   outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(

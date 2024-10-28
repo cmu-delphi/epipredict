@@ -4,12 +4,21 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 # epipredict 0.2
 
-## features
+## Breaking changes
+
+- Moved example datasets from being hosted in the package to being loaded
+  from the `epidatasets` package. The datasets can no longer be loaded with
+  `data(<dataset name>)`, but can be accessed with 
+  `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>` 
+  or, after loading the package, the name of the dataset alone (#382).
+
+## Improvements
+
 - Add `step_adjust_latency`, which give several methods to adjust the forecast if the `forecast_date` is after the last day of data.
 - (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
 
-## bugfixes
-- shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
+## Bug fixes
+- Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
 - Quantiles produced by `grf` were sometimes out of order.
 
 # epipredict 0.1
