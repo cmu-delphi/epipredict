@@ -16,12 +16,17 @@
 #'   inverting the existing scaling.
 #' @param by A (possibly named) character vector of variables to join by.
 #'
-#' If `NULL`, the default, the function will perform a natural join, using all
-#' variables in common across the `epi_df` produced by the `predict()` call
-#' and the user-provided dataset.
-#' If columns in that `epi_df` and `df` have the same name (and aren't
-#' included in `by`), `.df` is added to the one from the user-provided data
-#' to disambiguate.
+#' If `NULL`, the default, the function will try to infer a reasonable set of
+#' columns. First, it will try to join by all variables in the training/test
+#' data with roles `"geo_value"`, `"key"`, or `"time_value"` that also appear in
+#' `df`; these roles are automatically set if you are using an `epi_df`, or you
+#' can use, e.g., `update_role`. If no such roles are set, it will try to
+#' perform a natural join, using variables in common between the training/test
+#' data and population data.
+#'
+#' If columns in the training/testing data and `df` have the same name (and
+#' aren't included in `by`), a `.df` suffix is added to the one from the
+#' user-provided data to disambiguate.
 #'
 #' To join by different variables on the `epi_df` and `df`, use a named vector.
 #' For example, `by = c("geo_value" = "states")` will match `epi_df$geo_value`
@@ -29,7 +34,7 @@
 #' For example, `by = c("geo_value" = "states", "county" = "county")` will match
 #' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
-#' See [dplyr::left_join()] for more details.
+#' See [dplyr::inner_join()] for more details.
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and will be used for scaling.
 #' This should be one column.
