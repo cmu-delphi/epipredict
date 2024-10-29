@@ -138,6 +138,42 @@ step_population_scaling_new <-
 
 #' @export
 prep.step_population_scaling <- function(x, training, info = NULL, ...) {
+  hardhat::validate_column_names(x$df, x$df_pop_col)
+  if (is.null(x$by)) {
+    rhs_potential_keys <- setdiff(colnames(x$df), x$df_pop_col)
+    lhs_potential_keys <- info %>%
+      filter(role %in% c("geo_value", "key", "time_value")) %>%
+      extract2("variable") %>%
+      unique() # in case of weird var with multiple of above roles
+    if (length(lhs_potential_keys) == 0L) {
+      # We're working with a recipe and tibble, and *_role hasn't set up any of
+      # the above roles. Let's say any column could actually act as a key, and
+      # lean on `intersect` below to make this something reasonable.
+      lhs_potential_keys <- names(training)
+    }
+    suggested_min_keys <- info %>%
+      filter(role %in% c("geo_value", "key")) %>%
+      extract2("variable") %>%
+      unique()
+    # (0 suggested keys if we weren't given any epikeytime var info.)
+    x$by <- intersect(lhs_potential_keys, rhs_potential_keys)
+    if (length(x$by) == 0L) {
+      cli_stop(c(
+        "Couldn't guess a default for `by`",
+        ">" = "Please rename columns in your population data to match those in your training data,
+               or manually specify `by =` in `step_population_scaling()`."
+      ), class = "epipredict__step_population_scaling__default_by_no_intersection")
+    }
+    if (!all(suggested_min_keys %in% x$by)) {
+      cli_warn(c(
+        "Couldn't find {setdiff(suggested_min_keys, x$by)} in population `df`.",
+        "i" = "Defaulting to join by {x$by}.",
+        ">" = "Double-check whether column names on the population `df` match those for your time series.",
+        ">" = "Consider using population data with breakdowns by {suggested_min_keys}.",
+        ">" = "Manually specify `by =` to silence."
+      ), class = "epipredict__step_population_scaling__default_by_missing_suggested_keys")
+    }
+  }
   step_population_scaling_new(
     terms = x$terms,
     role = x$role,
@@ -157,23 +193,12 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_population_scaling <- function(object, new_data, ...) {
   if (is.null(object$by)) {
-    rhs_potential_keys <- colnames(select(object$df, !object$df_pop_col))
-    if (is_epi_df(new_data)) {
-      lhs_potential_keys <- key_colnames(new_data)
-      object$by <- intersect(lhs_potential_keys, rhs_potential_keys)
-      suggested_min_keys <- kill_time_value(lhs_potential_keys)
-      if (!all(suggested_min_keys %in% object$by)) {
-        cli_warn(c(
-          "Couldn't find {setdiff(suggested_min_keys, object$by)} in population `df`",
-          "i" = "Defaulting to join by {object$by}",
-          ">" = "Double-check whether column names on the population `df` match those for your time series",
-          ">" = "Consider using population data with breakdowns by {suggested_min_keys}",
-          ">" = "Manually specify `by =` to silence"
-        ), class = "epipredict__step_population_scaling__default_by_missing_suggested_keys")
-      }
-    } else {
-      object$by <- intersect(names(new_data), rhs_potential_keys)
-    }
+    cli::cli_abort(c(
+      "`by` was not set and no default was filled in",
+      ">" = "If this was a fit recipe generated from an older version
+             of epipredict that you loaded in from a file,
+             please regenerate with the current version of epipredict."
+    ))
   }
   joinby <- list(x = names(object$by) %||% object$by, y = object$by)
   hardhat::validate_column_names(new_data, joinby$x)
