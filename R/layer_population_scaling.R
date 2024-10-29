@@ -145,7 +145,8 @@ slather.layer_population_scaling <-
       suggested_min_keys <- kill_time_value(lhs_potential_keys)
       if (!all(suggested_min_keys %in% object$by)) {
         cli_warn(c(
-          "Couldn't find {setdiff(suggested_min_keys, object$by)} in population `df`",
+          "{setdiff(suggested_min_keys, object$by)} {?was an/were} epikey column{?s} in the predictions,
+           but {?wasn't/weren't} found in the population `df`.",
           "i" = "Defaulting to join by {object$by}",
           ">" = "Double-check whether column names on the population `df` match those expected in your predictions",
           ">" = "Consider using population data with breakdowns by {suggested_min_keys}",

@@ -177,9 +177,10 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
     }
     if (!all(suggested_min_keys %in% x$by)) {
       cli_warn(c(
-        "Couldn't find {setdiff(suggested_min_keys, x$by)} in population `df`.",
+        "{setdiff(suggested_min_keys, x$by)} {?was an/were} epikey column{?s} in the training data,
+         but {?wasn't/weren't} found in the population `df`.",
         "i" = "Defaulting to join by {x$by}.",
-        ">" = "Double-check whether column names on the population `df` match those for your time series.",
+        ">" = "Double-check whether column names on the population `df` match those for your training data.",
         ">" = "Consider using population data with breakdowns by {suggested_min_keys}.",
         ">" = "Manually specify `by =` to silence."
       ), class = "epipredict__step_population_scaling__default_by_missing_suggested_keys")
@@ -229,8 +230,9 @@ bake.step_population_scaling <- function(object, new_data, ...) {
   col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
   inner_join(new_data, object$df,
-             by = object$by, relationship = "many-to-one", unmatched = c("error", "drop"),
-             suffix = c("", ".df")) %>%
+    by = object$by, relationship = "many-to-one", unmatched = c("error", "drop"),
+    suffix = c("", ".df")
+  ) %>%
     mutate(
       across(
         all_of(object$columns),

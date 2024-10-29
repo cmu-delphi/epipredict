@@ -398,7 +398,9 @@ test_that("test joining by default columns with less common keys/classes", {
       update_role("age_group", new_role = "key") %>%
       update_role("time_value", new_role = "time_value") %>%
       step_population_scaling(y, df = pop1b2, df_pop_col = "population", role = "outcome") %>%
-      {.},
+      {
+        .
+      },
     model_spec,
     frosting() %>%
       layer_predict() %>%
@@ -432,14 +434,16 @@ test_that("test joining by default columns with less common keys/classes", {
     class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
   )
 
-  # Same thing but with time series in tibble, but no role hints -> different inference&messaging:
+  # Same thing but with time series in tibble, but no role hints -> different behavior:
   dat1b3 <- dat1b2
   pop1b3 <- pop1b2
   ewf1b3 <- epi_workflow(
     # Can't use epi_recipe or step_epi_ahead; adjust.
     recipe(dat1b3) %>%
       step_population_scaling(y, df = pop1b3, df_pop_col = "population", role = "outcome") %>%
-      {.},
+      {
+        .
+      },
     model_spec,
     frosting() %>%
       layer_predict() %>%
@@ -453,15 +457,10 @@ test_that("test joining by default columns with less common keys/classes", {
       # geo 1 scaling used for both:
       mutate(y_scaled = c(3e-6, 7 * 11 / 5e6))
   )
-  expect_equal(
+  expect_error(
     predict(fit(ewf1b3, dat1b3), dat1b3) %>%
       pivot_quantiles_wider(.pred),
-    dat1b3 %>%
-      select(!"y") %>%
-      as_tibble() %>%
-      # geo 1 scaling used for both:
-      mutate(`0.5` = c(2 * 5, 2 * 5)) %>%
-      select(geo_value, age_group, time_value, `0.5`)
+    class = "epipredict__grab_forged_keys__nonunique_key"
   )
 
   # With geo x age_group breakdown on both:
@@ -571,7 +570,6 @@ test_that("test joining by default columns with less common keys/classes", {
   # TODO non-`epi_df` scaling?
 
   # TODO multikey scaling?
-
 })
 
 

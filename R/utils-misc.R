@@ -54,40 +54,53 @@ format_varnames <- function(x, empty = "*none*") {
 grab_forged_keys <- function(forged, workflow, new_data) {
   # 1. keys in the training data post-prep, based on roles:
   old_keys <- key_colnames(workflow)
-  # 3. keys in the test data post-bake, based on roles:
-  forged_roles <- names(forged$extras$roles)
-  extras <- bind_cols(forged$extras$roles[forged_roles %in% c("geo_value", "time_value", "key")])
-  new_keys <- names(extras)
+  # 2. keys in the test data post-bake, based on roles & structure:
+  forged_roles <- forged$extras$roles
+  new_key_tbl <- bind_cols(forged_roles$geo_value, forged_roles$key, forged_roles$time_value)
+  new_keys <- names(new_key_tbl)
   if (length(new_keys) == 0L) {
     # No epikeytime role assignment; infer from all columns:
-    potential_keys <- c("geo_value", "time_value")
-    new_keys <- potential_keys[potential_keys %in% names(bind_cols(forged$extras$roles))]
+    potential_new_keys <- c("geo_value", "time_value")
+    forged_tbl <- bind_cols(forged$extras$roles)
+    new_keys <- potential_new_keys[potential_new_keys %in% names(forged_tbl)]
+    new_key_tbl <- forged_tbl[new_keys]
   }
-  # 2. keys in the test data pre-bake based on data structure + post-bake roles:
-  new_df_keys <- key_colnames(new_data, other_keys = setdiff(new_keys, c("geo_value", "time_value")))
-  # Softly validate, assuming that no steps change epikeytime role assignments:
-  if (!(setequal(old_keys, new_df_keys) && setequal(new_df_keys, new_keys))) {
+  # Softly validate:
+  if (!(setequal(old_keys, new_keys))) {
     cli_warn(c(
-      "Inconsistent epikeytime identifier columns specified/inferred.",
+      "Inconsistent epikeytime identifier columns specified/inferred in training vs. in testing data.",
       "i" = "training epikeytime columns, based on roles post-mold/prep: {format_varnames(old_keys)}",
-      "i" = " testing epikeytime columns, based on data structure pre-bake and roles post-forge/bake: {format_varnames(new_df_keys)}",
-      "i" = " testing epikeytime columns, based on roles post-forge/bake: {format_varnames(new_keys)}",
-      "*" = "Keys will be set giving preference to test-time `epi_df` metadata followed by test-time
-             post-bake role settings.",
+      "i" = "testing epikeytime columns, based on roles post-forge/bake: {format_varnames(new_keys)}",
+      "*" = "",
       ">" = 'Some mismatches can be addressed by using `epi_df`s instead of tibbles, or by using `update_role`
              to assign pre-`prep` columns the "geo_value", "key", and "time_value" roles.'
     ))
   }
-  if (is_epi_df(new_data)) {
-    # Inference based on test data pre-bake data structure "wins":
-    meta <- attr(new_data, "metadata")
-    extras <- as_epi_df(extras, as_of = meta$as_of, other_keys = meta$other_keys)
-  } else if (all(c("geo_value", "time_value") %in% new_keys)) {
-    # Inference based on test data post-bake roles "wins":
-    other_keys <- new_keys[!new_keys %in% c("geo_value", "time_value")]
-    extras <- as_epi_df(extras, other_keys = other_keys)
+  # Convert `new_key_tbl` to `epi_df` if not renaming columns nor violating
+  # `epi_df` invariants.  Require that our key is a unique key in any case.
+  if (all(c("geo_value", "time_value") %in% new_keys)) {
+    maybe_as_of <- attr(new_data, "metadata")$as_of # NULL if wasn't epi_df
+    try(return(as_epi_df(new_key_tbl, other_keys = new_keys, as_of = maybe_as_of)),
+      silent = TRUE
+    )
   }
-  extras
+  if (anyDuplicated(new_key_tbl)) {
+    duplicate_key_tbl <- new_key_tbl %>% filter(.by = everything(), dplyr::n() > 1L)
+    error_part1 <- cli::format_error(
+      c(
+        "Specified/inferred key columns had repeated combinations in the forged/baked test data.",
+        "i" = "Key columns: {format_varnames(new_keys)}",
+        "Duplicated keys:"
+      )
+    )
+    error_part2 <- capture.output(print(duplicate_key_tbl))
+    rlang::abort(
+      paste(collapse = "\n", c(error_part1, error_part2)),
+      class = "epipredict__grab_forged_keys__nonunique_key"
+    )
+  } else {
+    return(new_key_tbl)
+  }
 }
 
 get_parsnip_mode <- function(trainer) {
