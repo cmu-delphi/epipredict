@@ -397,10 +397,7 @@ test_that("test joining by default columns with less common keys/classes", {
       update_role("geo_value", new_role = "geo_value") %>%
       update_role("age_group", new_role = "key") %>%
       update_role("time_value", new_role = "time_value") %>%
-      step_population_scaling(y, df = pop1b2, df_pop_col = "population", role = "outcome") %>%
-      {
-        .
-      },
+      step_population_scaling(y, df = pop1b2, df_pop_col = "population", role = "outcome"),
     model_spec,
     frosting() %>%
       layer_predict() %>%
@@ -420,6 +417,7 @@ test_that("test joining by default columns with less common keys/classes", {
   expect_warning(
     expect_warning(
       expect_equal(
+        # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
         predict(fit(ewf1b2, dat1b2), dat1b2) %>%
           pivot_quantiles_wider(.pred),
         dat1b2 %>%
@@ -434,16 +432,15 @@ test_that("test joining by default columns with less common keys/classes", {
     class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
   )
 
-  # Same thing but with time series in tibble, but no role hints -> different behavior:
+  # Same thing but with time series in tibble, but no role hints -> incorrect
+  # key guess -> we prep without warning, but error when we realize we don't
+  # actually have a unique key for our predictions:
   dat1b3 <- dat1b2
   pop1b3 <- pop1b2
   ewf1b3 <- epi_workflow(
     # Can't use epi_recipe or step_epi_ahead; adjust.
     recipe(dat1b3) %>%
-      step_population_scaling(y, df = pop1b3, df_pop_col = "population", role = "outcome") %>%
-      {
-        .
-      },
+      step_population_scaling(y, df = pop1b3, df_pop_col = "population", role = "outcome"),
     model_spec,
     frosting() %>%
       layer_predict() %>%
@@ -567,9 +564,33 @@ test_that("test joining by default columns with less common keys/classes", {
       mutate(`0.5` = 2 * 11)
   )
 
-  # TODO non-`epi_df` scaling?
-
-  # TODO multikey scaling?
+  # With alternative geo naming... we're able to successfully prep (and we're
+  # not missing a warning as in 1b3 since we're actually in a "correct" setup),
+  # but still like 1b3, we fail at prediction time as key roles have not been
+  # set up and inference fails:
+  dat4 <- dat1 %>% rename(geo = geo_value)
+  pop4 <- pop1 %>% rename(geo = geo_value)
+  ewf4 <- epi_workflow(
+    recipe(dat4) %>%
+      step_population_scaling(y, df = pop4, df_pop_col = "population", role = "outcome"),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_equal(
+    extract_recipe(ewf4, estimated = FALSE) %>%
+      prep(dat4) %>%
+      bake(new_data = NULL),
+    dat4 %>%
+      mutate(y_scaled = c(3e-6, 7e-6))
+  )
+  expect_error(
+    # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
+    predict(fit(ewf4, dat4), dat4) %>%
+      pivot_quantiles_wider(.pred),
+    class = "epipredict__grab_forged_keys__nonunique_key"
+  )
 })
 
 
