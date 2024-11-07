@@ -358,7 +358,7 @@ get_latency_table <- function(training, columns, forecast_date, latency,
 drop_ignored_keys <- function(training, keys_to_ignore) {
   # note that the extra parenthesis black magic is described here: https://github.com/tidyverse/dplyr/issues/6194
   # and is needed to bypass an incomplete port of `across` functions to `if_any`
-  training %>%
+  training %>% ungroup %>%
     filter((dplyr::if_all(
       names(keys_to_ignore),
       ~ . %nin% keys_to_ignore[[cur_column()]]
