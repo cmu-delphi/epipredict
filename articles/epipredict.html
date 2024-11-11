@@ -382,16 +382,16 @@ The default is linear regression, but we could instead use a random
 forest with the <a href="https://imbs-hl.github.io/ranger/" class="external-link">ranger</a> package:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">jhu</span>, </span>
-<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>, </span>
+<span>  <span class="va">jhu</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  trainer <span class="op">=</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Or boosted regression trees with <a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">jhu</span>, </span>
-<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>, </span>
+<span>  <span class="va">jhu</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  trainer <span class="op">=</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">boost_tree</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span>, trees <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -399,8 +399,8 @@ forest with the <a href="https://imbs-hl.github.io/ranger/" class="external-link
 <code><a href="../reference/quantile_reg.html">quantile_reg()</a></code>:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_qr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">jhu</span>, </span>
-<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>, </span>
+<span>  <span class="va">jhu</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  trainer <span class="op">=</span> <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>

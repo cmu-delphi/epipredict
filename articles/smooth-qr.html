@@ -353,10 +353,12 @@ not look remarkably accurate.</p>
 let’s try out all degrees from 1 to 7:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">smooth_preds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu">smooth_fc</span><span class="op">(</span><span class="va">edf</span>,</span>
-<span>            degree <span class="op">=</span> <span class="va">x</span>,</span>
-<span>            quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">.9</span><span class="op">)</span>,</span>
-<span>            fd <span class="op">=</span> <span class="va">fd</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu">smooth_fc</span><span class="op">(</span></span>
+<span>    <span class="va">edf</span>,</span>
+<span>    degree <span class="op">=</span> <span class="va">x</span>,</span>
+<span>    quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">.9</span><span class="op">)</span>,</span>
+<span>    fd <span class="op">=</span> <span class="va">fd</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>One way to quantify the impact of these on the forecasting is to look
