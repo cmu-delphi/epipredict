@@ -5,8 +5,7 @@ url: https://cmu-delphi.github.io/epipredict/
 # as it will default to `devel` mode. In practice, this should all be handled
 # dynamically by the CI/CD pipeline.
 development:
-  mode: devel
-  version_label: danger
+  mode: auto
 
 template:
   package: delphidocs
