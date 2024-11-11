@@ -37,7 +37,7 @@ home:
     - text: The epiprocess package
       href: https://cmu-delphi.github.io/epiprocess/
   sidebar:
-    structure: [links, license, community, citation, authors, related, dev]
+    structure: [links, license, community, citation, authors, dev, related]
     components:
       related:
         title: Delphi packages and resources

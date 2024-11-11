@@ -68,9 +68,9 @@ Suggests:
 VignetteBuilder:
     knitr
 Remotes:
+    cmu-delphi/delphidocs,
     cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
-    cmu-delphi/delphidocs
     dajmcdon/smoothqr
 Config/testthat/edition: 3
 Config/Needs/website: cmu-delphi/delphidocs
