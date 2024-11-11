@@ -155,6 +155,7 @@ library(purrr)
 library(epipredict)
 library(recipes)
 
+case_num <- 200
 z <- epidatasets::county_smoothed_cli_comparison
 ```
 
