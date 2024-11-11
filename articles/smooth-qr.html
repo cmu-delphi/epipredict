@@ -8,7 +8,9 @@
 <title>Smooth quantile regression • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Open_Sans-0.4.9/font.css" rel="stylesheet">
+<link href="../deps/Source_Serif_Pro-0.4.9/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Smooth quantile regression">
 </head>
@@ -16,7 +18,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
@@ -41,13 +43,13 @@
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 </div>
 
@@ -64,7 +66,7 @@
       <h1>Smooth quantile regression</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/articles/smooth-qr.Rmd" class="external-link"><code>vignettes/articles/smooth-qr.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/vignettes/articles/smooth-qr.Rmd" class="external-link"><code>vignettes/articles/smooth-qr.Rmd</code></a></small>
       <div class="d-none name"><code>smooth-qr.Rmd</code></div>
     </div>
 
@@ -268,7 +270,6 @@ this demonstration.</p>
 problem:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">smooth_preds</span> <span class="op">&lt;-</span> <span class="fu">smooth_fc</span><span class="op">(</span><span class="va">edf</span>, fd <span class="op">=</span> <span class="va">fd</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">smooth_preds</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,568 × 4</span></span></span>
 <span><span class="co">#&gt;    geo_value target_date ahead `0.5`</span></span>
@@ -291,7 +292,6 @@ addition to the median:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">several_quantiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">.9</span><span class="op">)</span></span>
 <span><span class="va">smooth_preds</span> <span class="op">&lt;-</span> <span class="fu">smooth_fc</span><span class="op">(</span><span class="va">edf</span>, quantiles <span class="op">=</span> <span class="va">several_quantiles</span>, fd <span class="op">=</span> <span class="va">fd</span><span class="op">)</span></span>
-<span></span>
 <span><span class="va">smooth_preds</span></span></code></pre></div>
 <pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,568 × 8</span></span></span>
 <span><span class="co">#&gt;    geo_value target_date ahead `0.1` `0.25` `0.5` `0.75` `0.9`</span></span>
@@ -340,7 +340,7 @@ over time, we bind the training and testing data together and input this
 into our plotting function as follows:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">plot_preds</span><span class="op">(</span><span class="va">smooth_preds</span>, <span class="va">geos</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">tedf</span>, <span class="va">edf</span><span class="op">)</span>, <span class="va">fd</span><span class="op">)</span></span></code></pre></div>
-<p><img src="smooth-qr_files/figure-html/unnamed-chunk-11-1.png" width="100%"></p>
+<p><img src="smooth-qr_files/figure-html/unnamed-chunk-13-1.png" width="100%"></p>
 <p>We can see that the predictions are smooth curves for each state, as
 expected when using smooth quantile regression. In addition while the
 curvature of the forecasts matches that of the truth, the forecasts do
@@ -352,12 +352,13 @@ not look remarkably accurate.</p>
 <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map()</a></code> function. Noting that this may take some time to run,
 let’s try out all degrees from 1 to 7:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">smooth_preds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, <span class="op">~</span> <span class="fu">smooth_fc</span><span class="op">(</span><span class="va">edf</span>,</span>
-<span>  degree <span class="op">=</span> <span class="va">.x</span>,</span>
-<span>  quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">.9</span><span class="op">)</span>,</span>
-<span>  fd <span class="op">=</span> <span class="va">fd</span></span>
-<span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="va">.x</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">smooth_preds_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">7</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">smooth_fc</span><span class="op">(</span><span class="va">edf</span>,</span>
+<span>            degree <span class="op">=</span> <span class="va">x</span>,</span>
+<span>            quantiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">.9</span><span class="op">)</span>,</span>
+<span>            fd <span class="op">=</span> <span class="va">fd</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>degree <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span><span class="op">}</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>One way to quantify the impact of these on the forecasting is to look
 at the mean absolute error (MAE) or mean squared error (MSE) over the
 degrees. We can select the degree that results in the lowest MAE.</p>
@@ -396,7 +397,7 @@ data:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Degrees of freedom"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Mean MAE"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="smooth-qr_files/figure-html/unnamed-chunk-15-1.png" width="100%"></p>
+<p><img src="smooth-qr_files/figure-html/unnamed-chunk-17-1.png" width="100%"></p>
 <p>We can see that the degree that results in the lowest MAE is 3.
 Hence, we could pick this degree for future forecasting work on this
 data.</p>
@@ -425,7 +426,7 @@ the number of ahead values to re-run the code without smoothing.</p>
 obtained under the baseline model:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">plot_preds</span><span class="op">(</span><span class="va">baseline_preds</span>, <span class="va">geos</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">tedf</span>, <span class="va">edf</span><span class="op">)</span>, <span class="va">fd</span><span class="op">)</span></span></code></pre></div>
-<p><img src="smooth-qr_files/figure-html/unnamed-chunk-17-1.png" width="100%"></p>
+<p><img src="smooth-qr_files/figure-html/unnamed-chunk-19-1.png" width="100%"></p>
 <p>Unlike for smooth quantile regression, the resulting forecasts are
 not smooth curves, but rather jagged and irregular in shape.</p>
 <p>For a more formal comparison between the two approaches, we could
@@ -453,8 +454,8 @@ calculated over over all times and locations for each ahead value</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Ahead"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Mean MAE"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#A69943"</span>, <span class="st">"#063970"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="smooth-qr_files/figure-html/unnamed-chunk-18-1.png" width="100%"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"darkred"</span>, <span class="st">"#063970"</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<p><img src="smooth-qr_files/figure-html/unnamed-chunk-20-1.png" width="100%"></p>
 <p>or over all aheads, times, and locations for a single numerical
 summary.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
@@ -563,8 +564,8 @@ plot as we chose for MAE:</p>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Ahead"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"Mean WIS"</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#A69943"</span>, <span class="st">"#063970"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="smooth-qr_files/figure-html/unnamed-chunk-21-1.png" width="100%"></p>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"darkred"</span>, <span class="st">"#063970"</span><span class="op">)</span>, name <span class="op">=</span> <span class="st">""</span><span class="op">)</span></span></code></pre></div>
+<p><img src="smooth-qr_files/figure-html/unnamed-chunk-23-1.png" width="100%"></p>
 <p>The results are consistent with what we saw for MAE: The forecasts
 for the near and distant future tend to be inaccurate for both models.
 The smooth quantile regression model only slightly outperforms the
@@ -606,11 +607,11 @@ be approximated well by a smooth curve.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Daniel J. McDonald, Ryan Tibshirani, Dmitry Shemetov, David Weber, CMU’s Delphi Research Group, Logan Brooks, Rachel Lobay.</p>
+  <p><a href="https://delphi.cmu.edu/about/" class="external-link">About Delphi</a> • <a href="https://delphi.cmu.edu/epidemic-signals/terms-of-use/" class="external-link">Terms of Use</a> • <a href="https://docs.google.com/forms/u/1/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform" class="external-link">Contact Us</a> • <a href="https://github.com/cmu-delphi/" class="external-link">Delphi GitHub</a> • <a href="https://cmu-delphi.github.io/delphi-epidata/" class="external-link">Epidata API</a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>epipredict</p>
 </div>
 
     </footer>
