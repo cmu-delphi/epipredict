@@ -1,9 +1,5 @@
 url: https://cmu-delphi.github.io/epipredict/
 
-# This is to give a default value to the `mode` parameter in the
-# `pkgdown::build_site()` function. This is useful when building the site locally,
-# as it will default to `devel` mode. In practice, this should all be handled
-# dynamically by the CI/CD pipeline.
 development:
   mode: auto
 
@@ -11,19 +7,19 @@ template:
   package: delphidocs
 
 articles:
-- title: Get started
-  navbar: ~
-  contents:
-  - epipredict
-  - preprocessing-and-models
-  - arx-classifier
-  - update
-
-- title: Advanced methods
-  contents:
-  - articles/sliding
-  - articles/smooth-qr
-  - panel-data
+  - title: Get started
+    navbar: ~
+    contents:
+      - epipredict
+      - preprocessing-and-models
+      - backtesting
+      - arx-classifier
+      - update
+  - title: Advanced methods
+    contents:
+      - articles/sliding
+      - articles/smooth-qr
+      - panel-data
 
 repo:
   url:
@@ -52,6 +48,7 @@ reference:
     contents:
       - contains("forecaster")
       - contains("classifier")
+
   - title: Forecaster modifications
     desc: Constructors to modify forecaster arguments and utilities to produce `epi_workflow` objects
     contents:
@@ -60,31 +57,35 @@ reference:
   - title: Helper functions for Hub submission
     contents:
       - flusight_hub_formatter
+
   - title: Parsnip engines
     desc: Prediction methods not available elsewhere
     contents:
       - quantile_reg
       - smooth_quantile_reg
       - grf_quantiles
+
   - title: Custom panel data forecasting workflows
     contents:
-    - epi_recipe
-    - epi_workflow
-    - add_epi_recipe
-    - adjust_epi_recipe
-    - Add_model
-    - predict.epi_workflow
-    - fit.epi_workflow
-    - augment.epi_workflow
-    - forecast.epi_workflow
+      - epi_recipe
+      - epi_workflow
+      - add_epi_recipe
+      - adjust_epi_recipe
+      - Add_model
+      - predict.epi_workflow
+      - fit.epi_workflow
+      - augment.epi_workflow
+      - forecast.epi_workflow
 
   - title: Epi recipe preprocessing steps
     contents:
       - starts_with("step_")
       - contains("bake")
+
   - title: Epi recipe verification checks
     contents:
       - check_enough_train_data
+
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:
@@ -92,14 +93,17 @@ reference:
       - ends_with("_frosting")
       - get_test_data
       - tidy.frosting
+
   - title: Frosting layers
     contents:
       - contains("layer")
       - contains("slather")
+
   - title: Automatic forecast visualization
     contents:
       - autoplot.epi_workflow
       - autoplot.canned_epipred
+
   - title: Utilities for quantile distribution processing
     contents:
       - dist_quantiles
@@ -107,11 +111,7 @@ reference:
       - nested_quantiles
       - weighted_interval_score
       - starts_with("pivot_quantiles")
+
   - title: Other utilities
     contents:
       - clean_f_name
-  - title: Included datasets
-    contents:
-      - case_death_rate_subset
-      - state_census
-      - grad_employ_subset

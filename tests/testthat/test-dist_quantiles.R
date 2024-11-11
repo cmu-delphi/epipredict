@@ -1,4 +1,4 @@
-library(distributional)
+suppressPackageStartupMessages(library(distributional))
 
 test_that("constructor returns reasonable quantiles", {
   expect_snapshot(error = TRUE, new_quantiles(rnorm(5), c(-2, -1, 0, 1, 2)))
@@ -40,6 +40,7 @@ test_that("quantile extrapolator works", {
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
   expect_length(parameters(qq[1])$quantile_levels[[1]], 3L)
+
 
   dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
   qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))

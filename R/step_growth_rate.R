@@ -32,13 +32,13 @@
 #' @importFrom epiprocess growth_rate
 #' @export
 #' @examples
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' r <- epi_recipe(covid_case_death_rates) %>%
 #'   step_growth_rate(case_rate, death_rate)
 #' r
 #'
 #' r %>%
-#'   prep(case_death_rate_subset) %>%
-#'   bake(case_death_rate_subset)
+#'   prep(covid_case_death_rates) %>%
+#'   bake(new_data = NULL)
 step_growth_rate <-
   function(recipe,
            ...,
@@ -58,7 +58,7 @@ step_growth_rate <-
     arg_is_pos_int(horizon)
     arg_is_scalar(horizon)
     if (!is.null(replace_Inf)) {
-      if (length(replace_Inf) != 1L) cli_abort("replace_Inf must be a scalar.")
+      if (length(replace_Inf) != 1L) cli_abort("`replace_Inf` must be a scalar.")
       if (!is.na(replace_Inf)) arg_is_numeric(replace_Inf)
     }
     arg_is_chr(role)

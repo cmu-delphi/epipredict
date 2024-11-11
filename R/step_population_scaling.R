@@ -45,7 +45,7 @@
 #' @export
 #' @examples
 #' library(dplyr)
-#' jhu <- cases_deaths_subset %>%
+#' jhu <- epidatasets::cases_deaths_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   select(geo_value, time_value, cases)
 #'
@@ -165,7 +165,7 @@ bake.step_population_scaling <- function(object, new_data, ...) {
   hardhat::validate_column_names(object$df, joinby$y)
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
-    cli::cli_warn(c(
+    cli_warn(c(
       "Custom `suffix` {.val {object$suffix}} was ignored in `step_population_scaling`.",
       i = "Perhaps `create_new` should be {.val {TRUE}}?"
     ))

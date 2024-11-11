@@ -61,7 +61,7 @@
 #' # -- a more complicated task
 #'
 #' library(dplyr)
-#' dat <- case_death_rate_subset %>%
+#' dat <- covid_case_death_rates %>%
 #'   filter(time_value > as.Date("2021-10-01"))
 #' rec <- epi_recipe(dat) %>%
 #'   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
@@ -165,7 +165,7 @@ make_grf_quantiles <- function() {
 
   # turn the predictions into a tibble with a dist_quantiles column
   process_qrf_preds <- function(x, object) {
-    quantile_levels <- parsnip::extract_fit_engine(object)$quantiles.orig
+    quantile_levels <- parsnip::extract_fit_engine(object)$quantiles.orig %>% sort()
     x <- x$predictions
     out <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
     out <- dist_quantiles(out, list(quantile_levels))

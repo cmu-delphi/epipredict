@@ -21,3 +21,4 @@
 ^Meta$
 ^.lintr$
 ^.venv$
+^inst/templates$

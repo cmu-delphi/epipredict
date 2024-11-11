@@ -56,14 +56,14 @@
 #'
 #' @examples
 #' library(dplyr)
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' r <- epi_recipe(covid_case_death_rates) %>%
 #'   # data is "daily", so we fit this to 1 ahead, the result will contain
 #'   # 1 day ahead residuals
 #'   step_epi_ahead(death_rate, ahead = 1L, skip = TRUE) %>%
 #'   recipes::update_role(death_rate, new_role = "predictor") %>%
 #'   recipes::add_role(time_value, geo_value, new_role = "predictor")
 #'
-#' forecast_date <- max(case_death_rate_subset$time_value)
+#' forecast_date <- max(covid_case_death_rates$time_value)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
@@ -71,7 +71,7 @@
 #'
 #' eng <- linear_reg(engine = "flatline")
 #'
-#' wf <- epi_workflow(r, eng, f) %>% fit(case_death_rate_subset)
+#' wf <- epi_workflow(r, eng, f) %>% fit(covid_case_death_rates)
 #' preds <- forecast(wf) %>%
 #'   select(-time_value) %>%
 #'   mutate(forecast_date = forecast_date)
@@ -91,7 +91,7 @@
 #'     geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
 #'     geom_line(aes(y = .pred), color = "orange") +
 #'     geom_line(
-#'       data = case_death_rate_subset %>% filter(geo_value %in% four_states),
+#'       data = covid_case_death_rates %>% filter(geo_value %in% four_states),
 #'       aes(x = time_value, y = death_rate)
 #'     ) +
 #'     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
@@ -163,7 +163,7 @@ slather.layer_cdc_flatline_quantiles <-
     }
     the_fit <- workflows::extract_fit_parsnip(workflow)
     if (!inherits(the_fit, "_flatline")) {
-      cli::cli_warn(c(
+      cli_warn(c(
         "Predictions for this workflow were not produced by the {.cls flatline}",
         "{.pkg parsnip} engine. Results may be unexpected. See {.fn epipredict::flatline}."
       ))
@@ -176,7 +176,7 @@ slather.layer_cdc_flatline_quantiles <-
     if (length(object$by_key) > 0L) {
       cols_in_preds <- hardhat::check_column_names(p, object$by_key)
       if (!cols_in_preds$ok) {
-        cli::cli_warn(c(
+        cli_warn(paste(
           "Predicted values are missing key columns: {.val {cols_in_preds$missing_names}}.",
           "Ignoring these."
         ))
@@ -184,7 +184,7 @@ slather.layer_cdc_flatline_quantiles <-
       if (inherits(the_fit, "_flatline")) {
         cols_in_resids <- hardhat::check_column_names(r, object$by_key)
         if (!cols_in_resids$ok) {
-          cli::cli_warn(c(
+          cli_warn(paste(
             "Existing residuals are missing key columns: {.val {cols_in_resids$missing_names}}.",
             "Ignoring these."
           ))
@@ -201,7 +201,7 @@ slather.layer_cdc_flatline_quantiles <-
         )
         cols_in_resids <- hardhat::check_column_names(key_cols, object$by_key)
         if (!cols_in_resids$ok) {
-          cli::cli_warn(c(
+          cli_warn(paste(
             "Requested residuals are missing key columns: {.val {cols_in_resids$missing_names}}.",
             "Ignoring these."
           ))

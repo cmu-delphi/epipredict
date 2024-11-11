@@ -14,10 +14,12 @@ layer_add_forecast_date(
 \item{frosting}{a \code{frosting} postprocessor}
 
 \item{forecast_date}{The forecast date to add as a column to the \code{epi_df}.
-For most cases, this should be specified in the form "yyyy-mm-dd". Note that
-when the forecast date is left unspecified, it is set to the maximum time
-value from the data used in pre-processing, fitting the model, and
-postprocessing.}
+For most cases, this should be specified in the form "yyyy-mm-dd". Note
+that when the forecast date is left unspecified, it is set to one of two
+values.  If there is a \code{step_adjust_latency} step present, it uses the
+\code{forecast_date} as set in that function. Otherwise, it uses the maximum
+\code{time_value} across the data used for pre-processing, fitting the model,
+and postprocessing.}
 
 \item{id}{a random id string}
 }
@@ -37,7 +39,7 @@ model fitting, and postprocessing), an appropriate warning will be thrown.
 }
 \examples{
 library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%

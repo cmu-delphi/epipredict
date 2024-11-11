@@ -1,5 +1,5 @@
 test_that("postprocesser was evaluated", {
-  r <- epi_recipe(case_death_rate_subset)
+  r <- epi_recipe(covid_case_death_rates)
   s <- parsnip::linear_reg()
   f <- frosting()
 
@@ -12,7 +12,7 @@ test_that("postprocesser was evaluated", {
 
 
 test_that("outcome of the two methods are the same", {
-  jhu <- case_death_rate_subset
+  jhu <- covid_case_death_rates
 
   r <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7)) %>%
@@ -33,7 +33,7 @@ test_that("outcome of the two methods are the same", {
 })
 
 test_that("model can be added/updated/removed from epi_workflow", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 
   r <- epi_recipe(jhu) %>%
@@ -64,7 +64,7 @@ test_that("model can be added/updated/removed from epi_workflow", {
 })
 
 test_that("forecast method works", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
   r <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -79,23 +79,17 @@ test_that("forecast method works", {
     ))
   )
 
-  args <- list(
-    fill_locf = TRUE,
-    n_recent = 360 * 3,
-    forecast_date = as.Date("2024-01-01")
-  )
   expect_equal(
-    forecast(wf, !!!args),
+    forecast(wf),
     predict(wf, new_data = get_test_data(
       hardhat::extract_preprocessor(wf),
-      jhu,
-      !!!args
+      jhu
     ))
   )
 })
 
 test_that("forecast method errors when workflow not fit", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
   r <- epi_recipe(jhu) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -109,7 +103,7 @@ test_that("forecast method errors when workflow not fit", {
 test_that("fit method does not silently drop the class", {
   # This is issue #363
 
-  library(recipes)
+  suppressPackageStartupMessages(library(recipes))
   tbl <- tibble::tibble(
     geo_value = 1,
     time_value = 1:100,

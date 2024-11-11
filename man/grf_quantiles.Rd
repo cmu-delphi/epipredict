@@ -85,7 +85,7 @@ predict(out, new_data = tib[1:5, ]) \%>\%
 # -- a more complicated task
 
 library(dplyr)
-dat <- case_death_rate_subset \%>\%
+dat <- covid_case_death_rates \%>\%
   filter(time_value > as.Date("2021-10-01"))
 rec <- epi_recipe(dat) \%>\%
   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) \%>\%

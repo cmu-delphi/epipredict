@@ -8,12 +8,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  collapse = TRUE,
-  comment = "#>",
-  out.width = "100%"
-)
+source("_common.R")
 ```
 
 ```{r setup, message=FALSE}
@@ -66,13 +61,13 @@ vignette and only briefly go through some examples for a `frosting` object.
 
 ## Add/update/remove an `epi_recipe` in an `epi_workflow`
 
-We start with the built-in `case_death_rate_subset` dataset that contains JHU
+We start with the built-in `covid_case_death_rates` dataset that contains JHU
 daily COVID-19 cases and deaths by state and take a subset of it from Nov. 1,
 2021 to Dec. 31, 2021 for the four states of Alaska, California, New York, and
 South Carolina.
 
 ```{r}
-jhu <- case_death_rate_subset %>%
+jhu <- covid_case_death_rates %>%
   dplyr::filter(time_value >= as.Date("2021-11-01"), geo_value %in% c("ak", "ca", "ny", "sc"))
 
 jhu

@@ -24,7 +24,7 @@
 #' @export
 #'
 #' @examples
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
 #' out <- flatline_forecaster(jhu, "death_rate")
@@ -63,14 +63,9 @@ flatline_forecaster <- function(
 
   eng <- linear_reg(engine = "flatline")
 
-  wf <- epi_workflow(r, eng, f)
-  wf <- fit(wf, epi_data)
-  preds <- suppressWarnings(forecast(
-    wf,
-    fill_locf = TRUE,
-    n_recent = args_list$nafill_buffer,
-    forecast_date = forecast_date
-  )) %>%
+  wf <- epi_workflow(r, eng, f) %>%
+    fit(epi_data)
+  preds <- suppressWarnings(forecast(wf)) %>%
     as_tibble() %>%
     select(-time_value)
 
@@ -117,7 +112,6 @@ flatline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
-    nafill_buffer = Inf,
     ...) {
   rlang::check_dots_empty()
   arg_is_scalar(ahead, n_training)
@@ -129,11 +123,10 @@ flatline_args_list <- function(
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
-      cli::cli_warn(c(
+      cli_warn(c(
         "`forecast_date` + `ahead` must equal `target_date`.",
         i = "{.val {forecast_date}} + {.val {ahead}} != {.val {target_date}}."
       ))
@@ -149,8 +142,7 @@ flatline_args_list <- function(
       quantile_levels,
       symmetrize,
       nonneg,
-      quantile_by_key,
-      nafill_buffer
+      quantile_by_key
     ),
     class = c("flat_fcast", "alist")
   )

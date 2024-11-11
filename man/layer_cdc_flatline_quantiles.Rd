@@ -85,14 +85,14 @@ adds them on to produce wider intervals as \code{ahead} increases.
 }
 \examples{
 library(dplyr)
-r <- epi_recipe(case_death_rate_subset) \%>\%
+r <- epi_recipe(covid_case_death_rates) \%>\%
   # data is "daily", so we fit this to 1 ahead, the result will contain
   # 1 day ahead residuals
   step_epi_ahead(death_rate, ahead = 1L, skip = TRUE) \%>\%
   recipes::update_role(death_rate, new_role = "predictor") \%>\%
   recipes::add_role(time_value, geo_value, new_role = "predictor")
 
-forecast_date <- max(case_death_rate_subset$time_value)
+forecast_date <- max(covid_case_death_rates$time_value)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
@@ -100,7 +100,7 @@ f <- frosting() \%>\%
 
 eng <- linear_reg(engine = "flatline")
 
-wf <- epi_workflow(r, eng, f) \%>\% fit(case_death_rate_subset)
+wf <- epi_workflow(r, eng, f) \%>\% fit(covid_case_death_rates)
 preds <- forecast(wf) \%>\%
   select(-time_value) \%>\%
   mutate(forecast_date = forecast_date)
@@ -120,7 +120,7 @@ if (require("ggplot2")) {
     geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
     geom_line(aes(y = .pred), color = "orange") +
     geom_line(
-      data = case_death_rate_subset \%>\% filter(geo_value \%in\% four_states),
+      data = covid_case_death_rates \%>\% filter(geo_value \%in\% four_states),
       aes(x = time_value, y = death_rate)
     ) +
     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +

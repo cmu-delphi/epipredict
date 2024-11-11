@@ -42,7 +42,7 @@ layer <- function(subclass, ..., .prefix = "layer_") {
 #'
 #' @examples
 #' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -148,9 +148,9 @@ validate_layer <- function(x, ..., arg = rlang::caller_arg(x),
                            call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_layer(x)) {
-    cli::cli_abort(
+    cli_abort(
       "{arg} must be a frosting layer, not a {.cls {class(x)[[1]]}}.",
-      .call = call
+      call = call
     )
   }
   invisible(x)

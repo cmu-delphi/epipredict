@@ -117,5 +117,5 @@
       step_growth_rate(r, value, replace_Inf = c(1, 2))
     Condition
       Error in `step_growth_rate()`:
-      ! replace_Inf must be a scalar.
+      ! `replace_Inf` must be a scalar.
 

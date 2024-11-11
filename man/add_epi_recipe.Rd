@@ -41,7 +41,7 @@ default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::e
 library(dplyr)
 library(recipes)
 
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-08-01") \%>\%
   arrange(geo_value, time_value)
 

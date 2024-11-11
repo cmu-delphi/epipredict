@@ -78,17 +78,19 @@ are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
 \code{step_epi_lag}, they are set to \code{"lag_"} and \verb{"epi_lag}, respectively.
 }
 \examples{
-r <- epi_recipe(case_death_rate_subset) \%>\%
+r <- epi_recipe(covid_case_death_rates) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 r
 }
 \seealso{
 Other row operation steps: 
+\code{\link{step_adjust_latency}()},
 \code{\link{step_growth_rate}()},
 \code{\link{step_lag_difference}()}
 
 Other row operation steps: 
+\code{\link{step_adjust_latency}()},
 \code{\link{step_growth_rate}()},
 \code{\link{step_lag_difference}()}
 }

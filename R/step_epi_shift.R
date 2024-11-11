@@ -42,7 +42,7 @@
 #' @rdname step_epi_shift
 #' @export
 #' @examples
-#' r <- epi_recipe(case_death_rate_subset) %>%
+#' r <- epi_recipe(covid_case_death_rates) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r
@@ -79,6 +79,8 @@ step_epi_lag <-
         default = default,
         keys = key_colnames(recipe),
         columns = NULL,
+        shift_grid = NULL,
+        latency_adjusted = FALSE,
         skip = skip,
         id = id
       )
@@ -109,7 +111,6 @@ step_epi_ahead <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    arg_is_nonneg_int(ahead)
     arg_is_chr_scalar(prefix, id)
 
     recipes::add_step(
@@ -123,6 +124,8 @@ step_epi_ahead <-
         default = default,
         keys = key_colnames(recipe),
         columns = NULL,
+        shift_grid = NULL,
+        latency_adjusted = FALSE,
         skip = skip,
         id = id
       )
@@ -132,7 +135,7 @@ step_epi_ahead <-
 
 step_epi_lag_new <-
   function(terms, role, trained, lag, prefix, default, keys,
-           columns, skip, id) {
+           columns, shift_grid, latency_adjusted, skip, id) {
     recipes::step(
       subclass = "epi_lag",
       terms = terms,
@@ -143,6 +146,8 @@ step_epi_lag_new <-
       default = default,
       keys = keys,
       columns = columns,
+      shift_grid = shift_grid,
+      latency_adjusted = latency_adjusted,
       skip = skip,
       id = id
     )
@@ -150,7 +155,7 @@ step_epi_lag_new <-
 
 step_epi_ahead_new <-
   function(terms, role, trained, ahead, prefix, default, keys,
-           columns, skip, id) {
+           columns, shift_grid, latency_adjusted, skip, id) {
     recipes::step(
       subclass = "epi_ahead",
       terms = terms,
@@ -161,6 +166,8 @@ step_epi_ahead_new <-
       default = default,
       keys = keys,
       columns = columns,
+      shift_grid = shift_grid,
+      latency_adjusted = latency_adjusted,
       skip = skip,
       id = id
     )
@@ -170,6 +177,22 @@ step_epi_ahead_new <-
 
 #' @export
 prep.step_epi_lag <- function(x, training, info = NULL, ...) {
+  columns <- recipes::recipes_eval_select(x$terms, training, info)
+  if (!x$latency_adjusted) {
+    tmp <- create_shift_grid(
+      x$prefix,
+      x$lag,
+      get_sign(x),
+      columns,
+      attributes(training)$metadata$latency_table,
+      attributes(training)$metadata$latency_sign
+    )
+    shift_grid <- tmp[[1]]
+    latency_adjusted <- tmp[[2]]
+  } else {
+    shift_grid <- x$shift_grid
+  }
+
   step_epi_lag_new(
     terms = x$terms,
     role = x$role,
@@ -178,7 +201,9 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    columns = recipes::recipes_eval_select(x$terms, training, info),
+    columns = columns,
+    shift_grid = shift_grid,
+    latency_adjusted = latency_adjusted,
     skip = x$skip,
     id = x$id
   )
@@ -186,6 +211,22 @@ prep.step_epi_lag <- function(x, training, info = NULL, ...) {
 
 #' @export
 prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
+  columns <- recipes::recipes_eval_select(x$terms, training, info)
+  if (!x$latency_adjusted) {
+    tmp <- create_shift_grid(
+      x$prefix,
+      x$ahead,
+      get_sign(x),
+      columns,
+      attributes(training)$metadata$latency_table,
+      attributes(training)$metadata$latency_sign
+    )
+    shift_grid <- tmp[[1]]
+    latency_adjusted <- tmp[[2]]
+  } else {
+    shift_grid <- x$shift_grid
+  }
+
   step_epi_ahead_new(
     terms = x$terms,
     role = x$role,
@@ -194,7 +235,9 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
     prefix = x$prefix,
     default = x$default,
     keys = x$keys,
-    columns = recipes::recipes_eval_select(x$terms, training, info),
+    columns = columns,
+    shift_grid = shift_grid,
+    latency_adjusted = latency_adjusted,
     skip = x$skip,
     id = x$id
   )
@@ -204,81 +247,41 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  grid <- tidyr::expand_grid(col = object$columns, lag = object$lag) %>%
-    mutate(
-      newname = glue::glue("{object$prefix}{lag}_{col}"),
-      shift_val = lag,
-      lag = NULL
-    )
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    cli_abort(c(
-      "Name collision occured in {.cls {class(object)[1]}}",
-      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
-    ))
-  }
-  ok <- object$keys
-  shifted <- reduce(
-    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    full_join,
-    by = ok
-  )
-
-  full_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(kill_time_value(ok)))) %>%
-    arrange(time_value) %>%
-    ungroup()
+  add_shifted_columns(new_data, object)
 }
 
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
-  grid <- tidyr::expand_grid(col = object$columns, ahead = object$ahead) %>%
-    mutate(
-      newname = glue::glue("{object$prefix}{ahead}_{col}"),
-      shift_val = -ahead,
-      ahead = NULL
-    )
-
-  ## ensure no name clashes
-  new_data_names <- colnames(new_data)
-  intersection <- new_data_names %in% grid$newname
-  if (any(intersection)) {
-    cli_abort(c(
-      "Name collision occured in {.cls {class(object)[1]}}",
-      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
-    ))
-  }
-  ok <- object$keys
-  shifted <- reduce(
-    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
-    full_join,
-    by = ok
-  )
-
-  full_join(new_data, shifted, by = ok) %>%
-    group_by(across(all_of(kill_time_value(ok)))) %>%
-    arrange(time_value) %>%
-    ungroup()
+  add_shifted_columns(new_data, object)
 }
-
 
 #' @export
 print.step_epi_lag <- function(x, width = max(20, options()$width - 30), ...) {
+  if (x$latency_adjusted && x$trained) {
+    lag <- x$shift_grid$shift_val
+    lag <- c(lag, "(lat adj)")
+  } else {
+    lag <- x$lag
+  }
   print_epi_step(x$columns, x$terms, x$trained, "Lagging",
     conjunction = "by",
-    extra_text = x$lag
+    extra_text = lag
   )
   invisible(x)
 }
 
+
 #' @export
 print.step_epi_ahead <- function(x, width = max(20, options()$width - 30), ...) {
+  if (x$latency_adjusted && x$trained) {
+    ahead <- x$shift_grid$shift_val
+    ahead <- c(ahead, "(lat adj)")
+  } else {
+    ahead <- x$ahead
+  }
   print_epi_step(x$columns, x$terms, x$trained, "Leading",
     conjunction = "by",
-    extra_text = x$ahead
+    extra_text = ahead
   )
   invisible(x)
 }

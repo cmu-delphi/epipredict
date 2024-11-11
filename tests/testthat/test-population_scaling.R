@@ -7,7 +7,7 @@ test_that("Column names can be passed with and without the tidy way", {
 
   pop_data2 <- pop_data %>% dplyr::rename(geo_value = states)
 
-  newdata <- case_death_rate_subset %>%
+  newdata <- covid_case_death_rates %>%
     filter(geo_value %in% c("ak", "al", "ar", "as", "az", "ca"))
 
   r1 <- epi_recipe(newdata) %>%
@@ -90,7 +90,7 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
 
 ## Postprocessing
 test_that("Postprocessing workflow works and values correct", {
-  jhu <- cases_deaths_subset %>%
+  jhu <- epidatasets::cases_deaths_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, cases)
 
@@ -150,7 +150,7 @@ test_that("Postprocessing workflow works and values correct", {
 })
 
 test_that("Postprocessing to get cases from case rate", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -193,7 +193,64 @@ test_that("Postprocessing to get cases from case rate", {
 
 
 test_that("test joining by default columns", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+    dplyr::select(geo_value, time_value, case_rate)
+
+  reverse_pop_data <- data.frame(
+    geo_value = c("ca", "ny"),
+    values = c(1 / 20000, 1 / 30000)
+  )
+
+  r <- epi_recipe(jhu) %>%
+    step_population_scaling(case_rate,
+      df = reverse_pop_data,
+      df_pop_col = "values",
+      by = NULL,
+      suffix = "_scaled"
+    ) %>%
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
+    step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+
+  prep <- prep(r, jhu)
+
+  b <- bake(prep, jhu)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred,
+      df = reverse_pop_data,
+      by = NULL,
+      df_pop_col = "values"
+    )
+
+  wf <- epi_workflow(
+    r,
+    parsnip::linear_reg()
+  ) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(
+    recipe = r,
+    x = covid_case_death_rates %>%
+      dplyr::filter(
+        time_value > "2021-11-01",
+        geo_value %in% c("ca", "ny")
+      ) %>%
+      dplyr::select(geo_value, time_value, case_rate)
+  )
+
+
+  p <- predict(wf, latest)
+
+
+
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -248,7 +305,7 @@ test_that("test joining by default columns", {
 
 
 test_that("expect error if `by` selector does not match", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
