@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.3</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,14 +90,14 @@ class for each case under consideration. It is a direct forecaster in
 that it estimates the classes at a specific horizon or ahead value.</p>
 <p>To get a sense of how the <code><a href="../reference/arx_classifier.html">arx_classifier()</a></code> works, let’s
 consider a simple example with minimal inputs. For this, we will use the
-built-in <code>case_death_rate_subset</code> that contains confirmed
+built-in <code>covid_case_death_rates</code> that contains confirmed
 COVID-19 cases and deaths from JHU CSSE for all states over Dec 31, 2020
 to Dec 31, 2021. From this, we’ll take a subset of data for five states
 over June 4, 2021 to December 31, 2021. Our objective is to predict
 whether the case rates are increasing when considering the 0, 7 and 14
 day case rates:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">covid_case_death_rates</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>    <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-06-04"</span>,</span>
 <span>    <span class="va">time_value</span> <span class="op">&lt;=</span> <span class="st">"2021-12-31"</span>,</span>
@@ -264,7 +264,7 @@ model presented in
 g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} + \beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta + \beta_{13}Y_{l,t-14}^\Delta.
 </annotation></semantics></math></p>
 <p>Now then, we will operate on the same subset of the
-<code>case_death_rate_subset</code> that we used in our above example.
+<code>covid_case_death_rates</code> that we used in our above example.
 This time, we will use it to investigate whether the number of newly
 reported cases over the past 7 days has increased by at least 25%
 compared to the preceding week for our sample of states.</p>

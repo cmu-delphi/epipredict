@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.3</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -156,7 +156,7 @@ for COVID-19 forecasting. The built-in dataset we will use is a subset
 of JHU daily data on state cases and deaths. This sample data ranges
 from Dec. 31, 2020 to Dec. 31, 2021.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">edf</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">edf</span> <span class="op">&lt;-</span> <span class="fu">epidatasets</span><span class="fu">::</span><span class="va"><a href="https://cmu-delphi.github.io/epidatasets/reference/covid_case_death_rates.html" class="external-link">covid_case_death_rates</a></span></span></code></pre></div>
 <p>We will set the forecast date to be November 30, 2021 so that we can
 produce forecasts for target dates of 1 to 28 days ahead. We construct
 our test data, <code>tedf</code> from the days beyond this.</p>
@@ -298,15 +298,15 @@ addition to the median:</p>
 <pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,568 × 8</span></span></span>
 <span><span class="co">#&gt;    geo_value target_date ahead `0.1` `0.25` `0.5` `0.75` `0.9`</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-12-01      1 0.286  0.315 0.323  0.350 0.434</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ak        2021-12-02      2 0.292  0.331 0.347  0.383 0.474</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ak        2021-12-03      3 0.298  0.345 0.369  0.414 0.511</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-12-01      1 0.286  0.315 0.323  0.349 0.434</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ak        2021-12-02      2 0.293  0.331 0.347  0.383 0.474</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ak        2021-12-03      3 0.298  0.345 0.369  0.413 0.511</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> ak        2021-12-04      4 0.303  0.358 0.389  0.442 0.544</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ak        2021-12-05      5 0.307  0.369 0.407  0.467 0.575</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ak        2021-12-06      6 0.310  0.378 0.422  0.490 0.603</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ak        2021-12-05      5 0.307  0.369 0.407  0.467 0.576</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ak        2021-12-06      6 0.310  0.379 0.422  0.490 0.604</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> ak        2021-12-07      7 0.313  0.387 0.436  0.511 0.629</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> ak        2021-12-08      8 0.314  0.393 0.448  0.529 0.651</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        2021-12-09      9 0.315  0.398 0.458  0.544 0.670</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        2021-12-09      9 0.315  0.398 0.458  0.544 0.671</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ak        2021-12-10     10 0.315  0.402 0.465  0.557 0.687</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,558 more rows</span></span></span></code></pre>
 <p>We can see that we have different columns for the different quantile
@@ -461,10 +461,10 @@ calculated over over all times and locations for each ahead value</p>
 summary.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">baseline_preds_mae_df</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt; [1] 0.2038163</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.203808</span></span></code></pre>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">smooth_preds_mae_df</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt; [1] 0.201258</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.2012486</span></span></code></pre>
 <p>The former shows that forecasts for the immediate future and for the
 distant future are more inaccurate for both models under consideration.
 The latter shows that the smooth quantile regression model and baseline
@@ -578,10 +578,10 @@ al., 2021</a>), we can also obtain a single numerical summary by
 averaging over the aheads, times, and locations:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">baseline_preds_wis_df</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt; [1] 0.1674422</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.1674557</span></span></code></pre>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">smooth_preds_wis_df</span><span class="op">$</span><span class="va">mean</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">#&gt; [1] 0.1644727</span></span></code></pre>
+<pre><code><span><span class="co">#&gt; [1] 0.164492</span></span></code></pre>
 <p>Overall, both perspectives agree that the smooth quantile regression
 model tends to perform only slightly better than the baseline model in
 terms of average WIS, illustrating the difficulty of this forecasting

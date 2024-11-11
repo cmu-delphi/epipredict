@@ -30,7 +30,6 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/augment.epi_workflow.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/autoplot-epipred.html</loc></url>
-<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/case_death_rate_subset.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/cdc_baseline_args_list.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/cdc_baseline_forecaster.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/check_enough_train_data.html</loc></url>
@@ -61,7 +60,6 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/get_latency_table.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/get_sign.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/get_test_data.html</loc></url>
-<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/grad_employ_subset.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/grf_quantiles.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/index.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/is_epi_recipe.html</loc></url>
@@ -92,7 +90,6 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/seq_forward.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/slather.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/smooth_quantile_reg.html</loc></url>
-<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/state_census.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_adjust_latency.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_adjust_latency_checks.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_naomit.html</loc></url>

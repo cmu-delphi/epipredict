@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.3</small>
+    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -45,14 +45,18 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2" id="epipredict-02">epipredict 0.2<a class="anchor" aria-label="anchor" href="#epipredict-02"></a></h2>
 <div class="section level3">
-<h3 id="features-0-2">features<a class="anchor" aria-label="anchor" href="#features-0-2"></a></h3>
+<h3 id="breaking-changes-0-2">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2"></a></h3>
+<ul><li>Moved example datasets from being hosted in the package to being loaded from the <code>epidatasets</code> package. The datasets can no longer be loaded with <code>data(&lt;dataset name&gt;)</code>, but can be accessed with <code>data(&lt;dataset name&gt;, package = "epidatasets")</code>, <code>epidatasets::&lt;dataset name&gt;</code> or, after loading the package, the name of the dataset alone (<a href="https://github.com/cmu-delphi/epipredict/issues382" class="external-link">#382</a>).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2"></a></h3>
 <ul><li>Add <code>step_adjust_latency</code>, which give several methods to adjust the forecast if the <code>forecast_date</code> is after the last day of data.</li>
 <li>(temporary) ahead negative is allowed for <code>step_epi_ahead</code> until we have <code>step_epi_shift</code>
 </li>
 </ul></div>
 <div class="section level3">
-<h3 id="bugfixes-0-2">bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-0-2"></a></h3>
-<ul><li>shifting no columns results in no error for either <code>step_epi_ahead</code> and <code>step_epi_lag</code>
+<h3 id="bug-fixes-0-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2"></a></h3>
+<ul><li>Shifting no columns results in no error for either <code>step_epi_ahead</code> and <code>step_epi_lag</code>
 </li>
 <li>Quantiles produced by <code>grf</code> were sometimes out of order.</li>
 </ul></div>
