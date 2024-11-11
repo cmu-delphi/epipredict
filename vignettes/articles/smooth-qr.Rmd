@@ -300,10 +300,12 @@ to 7:
 
 ```{r, eval = FALSE}
 smooth_preds_list <- map(1:7, function(x) {
-  smooth_fc(edf,
-            degree = x,
-            quantiles = c(.1, .25, .5, .75, .9),
-            fd = fd) %>%
+  smooth_fc(
+    edf,
+    degree = x,
+    quantiles = c(.1, .25, .5, .75, .9),
+    fd = fd
+  ) %>%
     mutate(degree = x)
 }) %>% list_rbind()
 ```

@@ -259,8 +259,8 @@ package:
 
 ```{r ranger, warning = FALSE}
 out_rf <- arx_forecaster(
-  jhu, 
-  outcome = "death_rate", 
+  jhu,
+  outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   trainer = rand_forest(mode = "regression")
 )
@@ -270,8 +270,8 @@ Or boosted regression trees with `{xgboost}`:
 
 ```{r xgboost, warning = FALSE}
 out_gb <- arx_forecaster(
-  jhu, 
-  outcome = "death_rate", 
+  jhu,
+  outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   trainer = boost_tree(mode = "regression", trees = 20)
 )
@@ -281,8 +281,8 @@ Or quantile regression, using our custom forecasting engine `quantile_reg()`:
 
 ```{r quantreg, warning = FALSE}
 out_qr <- arx_forecaster(
-  jhu, 
-  outcome = "death_rate", 
+  jhu,
+  outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   trainer = quantile_reg()
 )
