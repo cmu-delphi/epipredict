@@ -6,7 +6,7 @@ Authors@R: c(
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
     person("Dmitry", "Shemetov", email = "dshemeto@andrew.cmu.edu", role = "aut"),
     person("David", "Weber", email = "davidweb@andrew.cmu.edu", role = "aut"),
-    person("CMU's Delphi Research Group", role = c("cph", "fnd")),
+    person("Delphi Research Group", role = c("cph", "fnd")),
     person("Logan", "Brooks", role = "aut"),
     person("Rachel", "Lobay", role = "aut"),
     person("Maggie", "Liu", role = "ctb"),
@@ -70,8 +70,10 @@ VignetteBuilder:
 Remotes:
     cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
+    cmu-delphi/delphidocs
     dajmcdon/smoothqr
 Config/testthat/edition: 3
+Config/Needs/website: cmu-delphi/delphidocs
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)

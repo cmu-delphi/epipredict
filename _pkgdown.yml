@@ -6,20 +6,10 @@ url: https://cmu-delphi.github.io/epipredict/
 # dynamically by the CI/CD pipeline.
 development:
   mode: devel
-  version_label: success
+  version_label: danger
 
 template:
-  bootstrap: 5
-  bootswatch: cosmo
-  bslib:
-    font_scale: 1.0
-    primary: "#C41230"
-    success: "#B4D43C"
-    link-color: "#C41230"
-
-navbar:
-  bg: primary
-  type: light
+  package: delphidocs
 
 articles:
 - title: Get started
@@ -39,23 +29,24 @@ articles:
 
 repo:
   url:
-    home: https://github.com/cmu-delphi/epipredict/tree/main/
-    source: https://github.com/cmu-delphi/epipredict/blob/main/
+    home: https://github.com/cmu-delphi/epipredict/
+    source: https://github.com/cmu-delphi/epipredict/
     issue: https://github.com/cmu-delphi/epipredict/issues
-    user: https://github.com/
 
 home:
   links:
-    - text: Introduction to Delphi's Tooling Work
-      href: https://cmu-delphi.github.io/delphi-tooling-book/
-    - text: The epiprocess R package
+    - text: The epiprocess package
       href: https://cmu-delphi.github.io/epiprocess/
-    - text: The epidatr R package
-      href: https://github.com/cmu-delphi/epidatr/
-    - text: The epidatasets R package
-      href: https://cmu-delphi.github.io/epidatasets/
-    - text: The covidcast R package
-      href: https://cmu-delphi.github.io/covidcast/covidcastR/
+  sidebar:
+    structure: [links, license, community, citation, authors, related, dev]
+    components:
+      related:
+        title: Delphi packages and resources
+        text: |
+          * [The epidatr package](https://github.com/cmu-delphi/epidatr/)
+          * [The epiprocess package](https://cmu-delphi.github.io/epiprocess/)
+          * [The epidatasets package](https://cmu-delphi.github.io/epidatasets/)
+          * [Introduction to Delphi's Tooling Work](https://cmu-delphi.github.io/delphi-tooling-book/)
 
 reference:
   - title: Simple forecasters
