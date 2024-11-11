@@ -28,12 +28,17 @@ inverting the existing scaling.}
 
 \item{by}{A (possibly named) character vector of variables to join by.
 
-If \code{NULL}, the default, the function will perform a natural join, using all
-variables in common across the \code{epi_df} produced by the \code{predict()} call
-and the user-provided dataset.
-If columns in that \code{epi_df} and \code{df} have the same name (and aren't
-included in \code{by}), \code{.df} is added to the one from the user-provided data
-to disambiguate.
+If \code{NULL}, the default, the function will try to infer a reasonable set of
+columns. First, it will try to join by all variables in the test data with
+roles \code{"geo_value"}, \code{"key"}, or \code{"time_value"} that also appear in \code{df};
+these roles are automatically set if you are using an \code{epi_df}, or you can
+use, e.g., \code{update_role}. If no such roles are set, it will try to perform a
+natural join, using variables in common between the training/test data and
+population data.
+
+If columns in the training/testing data and \code{df} have the same name (and
+aren't included in \code{by}), a \code{.df} suffix is added to the one from the
+user-provided data to disambiguate.
 
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
 For example, \code{by = c("geo_value" = "states")} will match \code{epi_df$geo_value}
