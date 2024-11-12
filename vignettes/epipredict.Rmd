@@ -16,7 +16,6 @@ library(dplyr)
 library(parsnip)
 library(workflows)
 library(recipes)
-library(epiprocess)
 library(epipredict)
 ```
 
@@ -221,7 +220,7 @@ symmetrized). Here, we used 23 quantiles, but one can grab a particular
 quantile,
 
 ```{r q1}
-head(quantile(out_q$predictions$.pred_distn, p = .4))
+round(head(quantile(out_q$predictions$.pred_distn, p = .4)), 3)
 ```
 
 or extract the entire distribution into a "long" `epi_df` with `quantile_levels`
@@ -229,9 +228,7 @@ being the probability and `values` being the value associated to that quantile.
 
 ```{r q2}
 out_q$predictions %>%
-  # first create a "nested" list-column
-  mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-  unnest(.pred_distn) # then unnest it
+  pivot_quantiles_longer(.pred_distn)
 ```
 
 Additional simple adjustments to the basic forecaster can be made using the
@@ -257,8 +254,10 @@ package:
 
 ```{r ranger, warning = FALSE}
 out_rf <- arx_forecaster(
-  jhu, "death_rate", c("case_rate", "death_rate"),
-  rand_forest(mode = "regression")
+  jhu,
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  trainer = rand_forest(mode = "regression")
 )
 ```
 
@@ -266,8 +265,10 @@ Or boosted regression trees with `{xgboost}`:
 
 ```{r xgboost, warning = FALSE}
 out_gb <- arx_forecaster(
-  jhu, "death_rate", c("case_rate", "death_rate"),
-  boost_tree(mode = "regression", trees = 20)
+  jhu,
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  trainer = boost_tree(mode = "regression", trees = 20)
 )
 ```
 
@@ -275,8 +276,10 @@ Or quantile regression, using our custom forecasting engine `quantile_reg()`:
 
 ```{r quantreg, warning = FALSE}
 out_qr <- arx_forecaster(
-  jhu, "death_rate", c("case_rate", "death_rate"),
-  quantile_reg()
+  jhu,
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  trainer = quantile_reg()
 )
 ```
 

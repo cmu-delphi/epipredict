@@ -206,25 +206,45 @@ smooth_fc <- function(x, aheads = 1:28, degree = 3L, quantiles = 0.5, fd) {
 }
 ```
 
+```{r load-stored-preds, echo=FALSE}
+smooth_preds_list <- readRDS("smooth-qr_smooth_preds_list.rds")
+baseline_preds <- readRDS("smooth-qr_baseline_preds.rds")
+smooth_preds <- smooth_preds_list %>%
+  filter(degree == 3L) %>%
+  select(geo_value:ahead, `0.5`)
+```
+
 Notice that we allow the function user to specify the aheads, degree, and
 quantile as they may want to change these parameter values. We also allow for
 input of the forecast date as we fixed that at the onset of this demonstration.
 
 We now can produce smooth quantile regression predictions for our problem:
 
-```{r, warning = FALSE}
+```{r, eval = FALSE}
 smooth_preds <- smooth_fc(edf, fd = fd)
-
 smooth_preds
 ```
+
+```{r, echo=FALSE}
+smooth_preds
+smooth_preds <- smooth_preds_list %>%
+  filter(degree == 3L) %>%
+  select(-degree)
+```
+
+
 Most often, we're not going to want to limit ourselves to just predicting the
 median value as there is uncertainty about the predictions, so let's try to
 predict several different quantiles in addition to the median:
 
-```{r, warning = FALSE}
+```{r, eval = FALSE}
 several_quantiles <- c(.1, .25, .5, .75, .9)
 smooth_preds <- smooth_fc(edf, quantiles = several_quantiles, fd = fd)
+smooth_preds
+```
 
+```{r, echo = FALSE}
+several_quantiles <- c(.1, .25, .5, .75, .9)
 smooth_preds
 ```
 
@@ -278,13 +298,16 @@ We can test the impact of different degrees by using the `map()` function.
 Noting that this may take some time to run, let's try out all degrees from 1
 to 7:
 
-```{r, warning = FALSE}
-smooth_preds_list <- map(1:7, ~ smooth_fc(edf,
-  degree = .x,
-  quantiles = c(.1, .25, .5, .75, .9),
-  fd = fd
-) %>%
-  mutate(degree = .x)) %>% list_rbind()
+```{r, eval = FALSE}
+smooth_preds_list <- map(1:7, function(x) {
+  smooth_fc(
+    edf,
+    degree = x,
+    quantiles = c(.1, .25, .5, .75, .9),
+    fd = fd
+  ) %>%
+    mutate(degree = x)
+}) %>% list_rbind()
 ```
 
 One way to quantify the impact of these on the forecasting is to look at the
@@ -339,7 +362,7 @@ To get the basic quantile regression results we can utilize the forecaster that
 we've already built. We can simply set the degree to be the number of ahead
 values to re-run the code without smoothing.
 
-```{r, warning = FALSE}
+```{r, eval = FALSE}
 baseline_preds <- smooth_fc(
   edf,
   degree = 28L, quantiles = several_quantiles, fd = fd
@@ -360,6 +383,7 @@ For a more formal comparison between the two approaches, we could compare the
 test performance in terms of accuracy through calculating either the, MAE or
 MSE, where the performance measure of choice can be calculated over over all
 times and locations for each ahead value
+
 
 ```{r, message = FALSE}
 baseline_preds_mae_df <- baseline_preds %>%
@@ -382,7 +406,7 @@ ggplot(preds_mae_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean MAE") +
-  scale_color_manual(values = c("#A69943", "#063970"))
+  scale_color_manual(values = c("darkred", "#063970"), name = "")
 ```
 
 or over all aheads, times, and locations for a single numerical summary.
@@ -485,7 +509,7 @@ ggplot(preds_wis_df, aes(ahead, mean, color = type)) +
   geom_line() +
   xlab("Ahead") +
   ylab("Mean WIS") +
-  scale_color_manual(values = c("#A69943", "#063970"))
+  scale_color_manual(values = c("darkred", "#063970"), name = "")
 ```
 
 The results are consistent with what we saw for MAE: The forecasts for the near

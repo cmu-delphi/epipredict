@@ -38,25 +38,24 @@ You can view documentation for the `main` branch at
     You should be able to do a reasonably limited amount of
     customization on them. For the basic forecasters, we currently
     provide:
-      - Baseline flatline forecaster
-      - Autoregressive forecaster
-      - Autoregressive classifier
-      - CDC FluSight flatline forecaster
+    - Baseline flatline forecaster
+    - Autoregressive forecaster
+    - Autoregressive classifier
+    - CDC FluSight flatline forecaster
 2.  A framework for creating custom forecasters out of modular
     components. There are four types of components:
-      - Preprocessor: do things to the data before model training
-      - Trainer: train a model on data, resulting in a fitted model
-        object
-      - Predictor: make predictions, using a fitted model object
-      - Postprocessor: do things to the predictions before returning
+    - Preprocessor: do things to the data before model training
+    - Trainer: train a model on data, resulting in a fitted model object
+    - Predictor: make predictions, using a fitted model object
+    - Postprocessor: do things to the predictions before returning
 
 **Target audiences:**
 
-  - Basic. Has data, calls forecaster with default arguments.
-  - Intermediate. Wants to examine changes to the arguments, take
-    advantage of built in flexibility.
-  - Advanced. Wants to write their own forecasters. Maybe willing to
-    build up from some components.
+- Basic. Has data, calls forecaster with default arguments.
+- Intermediate. Wants to examine changes to the arguments, take
+  advantage of built in flexibility.
+- Advanced. Wants to write their own forecasters. Maybe willing to build
+  up from some components.
 
 The Advanced user should find their task to be relatively easy. Examples
 of these tasks are illustrated in the [vignettes and
@@ -71,7 +70,7 @@ The package comes with some built-in historical data for illustration,
 but up-to-date versions of this could be downloaded with the
 [`{epidatr}` package](https://cmu-delphi.github.io/epidatr/) and
 processed using
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).\[1\]
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
 
 ``` r
 library(epipredict)
@@ -114,7 +113,7 @@ two_week_ahead <- arx_forecaster(
 two_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════
 #> 
-#> This forecaster was fit on 2024-01-29 15:10:01.
+#> This forecaster was fit on 2024-11-11 11:38:31.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -207,7 +206,7 @@ through the end of 2021 for the 14th of January 2022. A prediction for
 the death rate per 100K inhabitants is available for every state
 (`geo_value`) along with a 90% predictive interval.
 
-1.  Other epidemiological signals for non-Covid related illnesses are
+[^1]: Other epidemiological signals for non-Covid related illnesses are
     also available with
     [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which
     interfaces directly to Delphi’s [Epidata

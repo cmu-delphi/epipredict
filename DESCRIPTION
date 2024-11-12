@@ -1,12 +1,12 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(
     person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
-    person("Dmitry", "Shemetov", email = "dshemeto@andrew.cmu.edu", role = "aut"),
-    person("David", "Weber", email = "davidweb@andrew.cmu.edu", role = "aut"),
-    person("CMU's Delphi Research Group", role = c("cph", "fnd")),
+    person("Dmitry", "Shemetov", , "dshemeto@andrew.cmu.edu", role = "aut"),
+    person("David", "Weber", , "davidweb@andrew.cmu.edu", role = "aut"),
+    person("Delphi Research Group", role = c("cph", "fnd")),
     person("Logan", "Brooks", role = "aut"),
     person("Rachel", "Lobay", role = "aut"),
     person("Maggie", "Liu", role = "ctb"),
@@ -24,8 +24,8 @@ URL: https://github.com/cmu-delphi/epipredict/,
     https://cmu-delphi.github.io/epipredict
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends:
-    epiprocess (>= 0.9.0),
     epidatasets,
+    epiprocess (>= 0.9.0),
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
 Imports:
@@ -69,11 +69,13 @@ Suggests:
 VignetteBuilder:
     knitr
 Remotes:
+    cmu-delphi/delphidocs,
     cmu-delphi/epidatasets,
     cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
     cmu-delphi/epidatasets,
     dajmcdon/smoothqr
+Config/Needs/website: cmu-delphi/delphidocs
 Config/testthat/edition: 3
 Encoding: UTF-8
 LazyData: true

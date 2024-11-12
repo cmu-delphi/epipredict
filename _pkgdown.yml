@@ -1,25 +1,10 @@
 url: https://cmu-delphi.github.io/epipredict/
 
-# This is to give a default value to the `mode` parameter in the
-# `pkgdown::build_site()` function. This is useful when building the site locally,
-# as it will default to `devel` mode. In practice, this should all be handled
-# dynamically by the CI/CD pipeline.
 development:
-  mode: devel
-  version_label: success
+  mode: auto
 
 template:
-  bootstrap: 5
-  bootswatch: cosmo
-  bslib:
-    font_scale: 1.0
-    primary: "#C41230"
-    success: "#B4D43C"
-    link-color: "#C41230"
-
-navbar:
-  bg: primary
-  type: light
+  package: delphidocs
 
 articles:
   - title: Get started
@@ -30,32 +15,32 @@ articles:
       - backtesting
       - arx-classifier
       - update
-
   - title: Advanced methods
     contents:
+      - articles/sliding
       - articles/smooth-qr
-      - articles/symptom-surveys
       - panel-data
 
 repo:
   url:
-    home: https://github.com/cmu-delphi/epipredict/tree/main/
-    source: https://github.com/cmu-delphi/epipredict/blob/main/
+    home: https://github.com/cmu-delphi/epipredict/
+    source: https://github.com/cmu-delphi/epipredict/
     issue: https://github.com/cmu-delphi/epipredict/issues
-    user: https://github.com/
 
 home:
   links:
-    - text: Introduction to Delphi's Tooling Work
-      href: https://cmu-delphi.github.io/delphi-tooling-book/
-    - text: The epiprocess R package
+    - text: The epiprocess package
       href: https://cmu-delphi.github.io/epiprocess/
-    - text: The epidatr R package
-      href: https://github.com/cmu-delphi/epidatr/
-    - text: The epidatasets R package
-      href: https://cmu-delphi.github.io/epidatasets/
-    - text: The covidcast R package
-      href: https://cmu-delphi.github.io/covidcast/covidcastR/
+  sidebar:
+    structure: [links, license, community, citation, authors, dev, related]
+    components:
+      related:
+        title: Delphi packages and resources
+        text: |
+          * [The epidatr package](https://github.com/cmu-delphi/epidatr/)
+          * [The epiprocess package](https://cmu-delphi.github.io/epiprocess/)
+          * [The epidatasets package](https://cmu-delphi.github.io/epidatasets/)
+          * [Introduction to Delphi's Tooling Work](https://cmu-delphi.github.io/delphi-tooling-book/)
 
 reference:
   - title: Simple forecasters
@@ -63,6 +48,7 @@ reference:
     contents:
       - contains("forecaster")
       - contains("classifier")
+
   - title: Forecaster modifications
     desc: Constructors to modify forecaster arguments and utilities to produce `epi_workflow` objects
     contents:
@@ -71,12 +57,14 @@ reference:
   - title: Helper functions for Hub submission
     contents:
       - flusight_hub_formatter
+
   - title: Parsnip engines
     desc: Prediction methods not available elsewhere
     contents:
       - quantile_reg
       - smooth_quantile_reg
       - grf_quantiles
+
   - title: Custom panel data forecasting workflows
     contents:
       - epi_recipe
@@ -93,9 +81,11 @@ reference:
     contents:
       - starts_with("step_")
       - contains("bake")
+
   - title: Epi recipe verification checks
     contents:
       - check_enough_train_data
+
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations
     contents:
@@ -103,14 +93,17 @@ reference:
       - ends_with("_frosting")
       - get_test_data
       - tidy.frosting
+
   - title: Frosting layers
     contents:
       - contains("layer")
       - contains("slather")
+
   - title: Automatic forecast visualization
     contents:
       - autoplot.epi_workflow
       - autoplot.canned_epipred
+
   - title: Utilities for quantile distribution processing
     contents:
       - dist_quantiles
@@ -118,6 +111,7 @@ reference:
       - nested_quantiles
       - weighted_interval_score
       - starts_with("pivot_quantiles")
+
   - title: Other utilities
     contents:
       - clean_f_name
