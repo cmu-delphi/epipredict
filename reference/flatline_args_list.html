@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -20,6 +20,7 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -57,7 +58,6 @@
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nonneg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
-<span>  nafill_buffer <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -82,13 +82,17 @@ key that are used for training
 
 
 <dt id="arg-forecast-date">forecast_date<a class="anchor" aria-label="anchor" href="#arg-forecast-date"></a></dt>
-<dd><p>Date. The date on which the forecast is created.
-The default <code>NULL</code> will attempt to determine this automatically.</p></dd>
+<dd><p>Date. The date from which the forecast is occurring.
+The default <code>NULL</code> will determine this automatically from either</p><ol><li><p>the maximum time value for which there's data if there is no latency
+adjustment (the default case), or</p></li>
+<li><p>the <code>as_of</code> date of <code>epi_data</code> if <code>adjust_latency</code> is
+non-<code>NULL</code>.</p></li>
+</ol></dd>
 
 
 <dt id="arg-target-date">target_date<a class="anchor" aria-label="anchor" href="#arg-target-date"></a></dt>
-<dd><p>Date. The date for which the forecast is intended.
-The default <code>NULL</code> will attempt to determine this automatically.</p></dd>
+<dd><p>Date. The date that is being forecast. The default <code>NULL</code>
+will determine this automatically as <code>forecast_date + ahead</code>.</p></dd>
 
 
 <dt id="arg-quantile-levels">quantile_levels<a class="anchor" aria-label="anchor" href="#arg-quantile-levels"></a></dt>
@@ -118,18 +122,6 @@ residual quantiles are used. It is not applicable with
 <code>trainer = quantile_reg()</code>, for example.</p></dd>
 
 
-<dt id="arg-nafill-buffer">nafill_buffer<a class="anchor" aria-label="anchor" href="#arg-nafill-buffer"></a></dt>
-<dd><p>At predict time, recent values of the training data
-are used to create a forecast. However, these can be <code>NA</code> due to, e.g.,
-data latency issues. By default, any missing values will get filled with
-less recent data. Setting this value to <code>NULL</code> will result in 1 extra
-recent row (beyond those required for lag creation) to be used. Note that
-we require at least <code>min(lags)</code> rows of recent data per <code>geo_value</code> to
-create a prediction. For this reason, setting <code>nafill_buffer &lt; min(lags)</code>
-will be treated as <em>additional</em> allowed recent data rather than the
-total amount of recent data to examine.</p></dd>
-
-
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Space to handle future expansions (unused).</p></dd>
 
@@ -150,7 +142,6 @@ total amount of recent data to examine.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nafill_buffer : <span style="color: #0000BB;">Inf</span></span>
 <span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>symmetrize <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
@@ -160,7 +151,6 @@ total amount of recent data to examine.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">FALSE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nafill_buffer : <span style="color: #0000BB;">Inf</span></span>
 <span class="r-in"><span><span class="fu">flatline_args_list</span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.1</span>, <span class="fl">.3</span>, <span class="fl">.7</span>, <span class="fl">.9</span><span class="op">)</span>, n_training <span class="op">=</span> <span class="fl">120</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">120</span></span>
@@ -170,7 +160,6 @@ total amount of recent data to examine.</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nafill_buffer : <span style="color: #0000BB;">Inf</span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

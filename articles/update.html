@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -160,34 +161,30 @@ go through some examples for a <code>frosting</code> object.</p>
 <h2 id="addupdateremove-an-epi_recipe-in-an-epi_workflow">Add/update/remove an <code>epi_recipe</code> in an
 <code>epi_workflow</code><a class="anchor" aria-label="anchor" href="#addupdateremove-an-epi_recipe-in-an-epi_workflow"></a>
 </h2>
-<p>We start with the built-in <code>case_death_rate_subset</code>
+<p>We start with the built-in <code>covid_case_death_rates</code>
 dataset that contains JHU daily COVID-19 cases and deaths by state and
 take a subset of it from Nov. 1, 2021 to Dec. 31, 2021 for the four
 states of Alaska, California, New York, and South Carolina.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">covid_case_death_rates</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2021-11-01"</span><span class="op">)</span>, <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ak"</span>, <span class="st">"ca"</span>, <span class="st">"ny"</span>, <span class="st">"sc"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">jhu</span></span>
 <span><span class="co">#&gt; An `epi_df` object, 244 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 244 × 4</span></span></span>
-<span><span class="co">#&gt;    geo_value time_value case_rate death_rate</span></span>
-<span><span class="co">#&gt;  <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> ak        2021-11-01      87.9      0.494</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> ca        2021-11-01      15.6      0.239</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> ny        2021-11-01      19.9      0.177</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> sc        2021-11-01      16.0      0.531</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> ak        2021-11-02      83.2      0.395</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> ca        2021-11-02      15.5      0.201</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> ny        2021-11-02      20.3      0.171</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> sc        2021-11-02      15.6      0.550</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> ak        2021-11-03      85.2      0.415</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> ca        2021-11-03      15.4      0.186</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 234 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-11-01      87.9      0.494</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-11-01      15.6      0.239</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-11-01      19.9      0.177</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-11-01      16.0      0.531</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ak        2021-11-02      83.2      0.395</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-11-02      15.5      0.201</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 238 more rows</span></span></span></code></pre></div>
 <p>Then, we construct a simple <code>epi_recipe</code> object named
 <code>r</code>, where we lag the death rates by 0, 7, and 14 days, lead
 the death rate by 14 days, omit NA values in all predictors and then in
@@ -208,12 +205,12 @@ function:</p>
 <span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; ══ Epi Workflow ═════════════════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> None</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 4 Recipe steps.</span></span>
 <span><span class="co">#&gt; 1. step_epi_lag()</span></span>
@@ -229,12 +226,12 @@ function:</p>
 <span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; ══ Epi Workflow [trained] ═══════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> linear_reg()</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 4 Recipe steps.</span></span>
 <span><span class="co">#&gt; 1. step_epi_lag()</span></span>
@@ -242,7 +239,7 @@ function:</p>
 <span><span class="co">#&gt; 3. step_naomit()</span></span>
 <span><span class="co">#&gt; 4. step_naomit()</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
@@ -268,12 +265,12 @@ follows:</p>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/add_epi_recipe.html">update_epi_recipe</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">r2</span><span class="op">)</span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; ══ Epi Workflow ═════════════════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> linear_reg()</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 5 Recipe steps.</span></span>
 <span><span class="co">#&gt; 1. step_epi_lag()</span></span>
@@ -282,7 +279,7 @@ follows:</p>
 <span><span class="co">#&gt; 4. step_naomit()</span></span>
 <span><span class="co">#&gt; 5. step_naomit()</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
@@ -326,12 +323,12 @@ store that change to <code>wf</code>. Hence, our
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; ══ Epi Workflow ═════════════════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> linear_reg()</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 5 Recipe steps.</span></span>
 <span><span class="co">#&gt; 1. step_epi_lag()</span></span>
@@ -340,7 +337,7 @@ store that change to <code>wf</code>. Hence, our
 <span><span class="co">#&gt; 4. step_naomit()</span></span>
 <span><span class="co">#&gt; 5. step_naomit()</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
@@ -363,12 +360,12 @@ the model used in <code>wf</code>, and then fit as before:</p>
 <span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; ══ Epi Workflow [trained] ═══════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> linear_reg()</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 5 Recipe steps.</span></span>
 <span><span class="co">#&gt; 1. step_epi_lag()</span></span>
@@ -377,7 +374,7 @@ the model used in <code>wf</code>, and then fit as before:</p>
 <span><span class="co">#&gt; 4. step_naomit()</span></span>
 <span><span class="co">#&gt; 5. step_naomit()</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
@@ -413,10 +410,11 @@ post-processing predictions. In our initial frosting object,
 <span><span class="co">#&gt; An `epi_df` object, 4 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
+<span><span class="co">#&gt; * other_keys = geo_value, time_value</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
-<span><span class="co">#&gt;   geo_value time_value   .pred</span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>   <span style="font-weight: bold;">.pred</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 -<span style="color: #BB0000;">0.206</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.098<span style="text-decoration: underline;">9</span></span></span>
@@ -442,10 +440,11 @@ the <code>epi_workflow</code> the same, we can use the
 <span><span class="co">#&gt; An `epi_df` object, 4 x 5 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
+<span><span class="co">#&gt; * other_keys = geo_value, time_value</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
-<span><span class="co">#&gt;   geo_value time_value  .pred forecast_date target_date</span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>  <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 0      2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31 0.098<span style="text-decoration: underline;">9</span> 2021-12-31    2022-01-07 </span></span>
@@ -461,7 +460,7 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55cff82c0150&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55f19373bce0&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
@@ -473,10 +472,11 @@ from the workflow and make predictions as follows:</p>
 <span><span class="co">#&gt; An `epi_df` object, 4 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 19:08:25.791826</span></span>
+<span><span class="co">#&gt; * other_keys = geo_value, time_value</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
-<span><span class="co">#&gt;   geo_value time_value   .pred</span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>   <span style="font-weight: bold;">.pred</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 -<span style="color: #BB0000;">0.206</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.098<span style="text-decoration: underline;">9</span></span></span>
@@ -505,7 +505,7 @@ number in the order of operations, which can be obtained by inspecting
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="co"># step_epi_ahead is the third step in r2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Inputs</span></span>
 <span><span class="co">#&gt; Number of variables by role</span></span>
@@ -521,7 +521,7 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
-<span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">number</span> <span style="font-weight: bold;">operation</span> <span style="font-weight: bold;">type</span>      <span style="font-weight: bold;">trained</span> <span style="font-weight: bold;">skip</span>  <span style="font-weight: bold;">id</span>             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 step      epi_lag   FALSE   FALSE epi_lag_9QeuR  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_8HfdV  </span></span>
@@ -536,12 +536,12 @@ name of the step, <code>step_epi_ahead</code>, in
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="st">"step_epi_ahead"</span>, ahead <span class="op">=</span> <span class="fl">14</span><span class="op">)</span> <span class="co"># not overwrite r2 because same result</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow ════════════════════════════════════════════════════════════════</span></span>
+<span><span class="co">#&gt; ══ Epi Workflow ═════════════════════════════════════════════════════════════</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> linear_reg()</span></span>
 <span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> None</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; 5 Recipe steps.</span></span>
 <span><span class="co">#&gt; 1. step_epi_lag()</span></span>
@@ -550,7 +550,7 @@ name of the step, <code>step_epi_ahead</code>, in
 <span><span class="co">#&gt; 4. step_naomit()</span></span>
 <span><span class="co">#&gt; 5. step_naomit()</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:</span></span>
 <span><span class="co">#&gt; stats::lm(formula = ..y ~ ., data = data)</span></span>
@@ -580,7 +580,7 @@ number of 2 in <code>which_step</code>.</p>
 <span></span>
 <span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Inputs</span></span>
 <span><span class="co">#&gt; Number of variables by role</span></span>
@@ -601,7 +601,7 @@ recipe in a workflow. The main difference is that we would not input
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span><span class="va">r2</span>, which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span> <span class="co"># should be same result as above</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Inputs</span></span>
 <span><span class="co">#&gt; Number of variables by role</span></span>
@@ -628,7 +628,7 @@ transfer over to <code>wf</code>. We would need to modify the recipe in
 <span></span>
 <span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Inputs</span></span>
 <span><span class="co">#&gt; Number of variables by role</span></span>
@@ -660,7 +660,7 @@ Recall frosting <code>f2</code> which has the following layers:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">─────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Layers</span></span>
 <span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span>
@@ -677,7 +677,7 @@ frosting object by setting <code>which_layer</code> to the layer number,
 <span></span>
 <span><span class="va">f2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">─────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Layers</span></span>
 <span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span>
@@ -690,7 +690,7 @@ the same result:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f2</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_frosting.html">adjust_frosting</a></span><span class="op">(</span>which_layer <span class="op">=</span> <span class="st">"layer_threshold"</span>, upper <span class="op">=</span> <span class="fl">10</span><span class="op">)</span> <span class="co"># not overwrite f2 because same result</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">─────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Layers</span></span>
 <span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span>
@@ -712,7 +712,7 @@ boolean value to indicate whether the step is applied when
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">r2</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
-<span><span class="co">#&gt;   number operation type      trained skip  id             </span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">number</span> <span style="font-weight: bold;">operation</span> <span style="font-weight: bold;">type</span>      <span style="font-weight: bold;">trained</span> <span style="font-weight: bold;">skip</span>  <span style="font-weight: bold;">id</span>             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 step      epi_lag   FALSE   FALSE epi_lag_9QeuR  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      2 step      epi_lag   FALSE   FALSE epi_lag_8HfdV  </span></span>
@@ -725,7 +725,7 @@ brief written summary of the operations:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Inputs</span></span>
 <span><span class="co">#&gt; Number of variables by role</span></span>
@@ -735,9 +735,9 @@ brief written summary of the operations:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Operations</span></span>
 <span><span class="co">#&gt; 1. Lagging: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">0, 1, 7, 14</span></span></span>
-<span><span class="co">#&gt; 2. Lagging: <span style="color: #0000BB;">case_rate</span> by <span style="color: #0000BB;">0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">16,</span></span></span>
-<span><span class="co">#&gt; 3. <span style="color: #0000BB;">17, 18, 19...</span></span></span>
+<span><span class="co">#&gt; 2. Lagging: <span style="color: #0000BB;">case_rate</span> by <span style="color: #0000BB;">0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">15,</span></span></span>
+<span><span class="co">#&gt; 3. <span style="color: #0000BB;">16, 17, 18,...</span></span></span>
 <span><span class="co">#&gt; 4. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span></span>
 <span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span></span>
 <span><span class="co">#&gt; 6. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span></code></pre></div>
@@ -750,14 +750,14 @@ those for an <code>epi_recipe</code>.</p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">f</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">────────────────────────────────────────────────────────────────────</span></span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Frosting</span> <span style="color: #00BBBB;">─────────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Layers</span></span>
 <span><span class="co">#&gt; 1. Creating predictions: <span style="color: #0000BB;">"&lt;calculated&gt;"</span></span></span>
 <span></span>
 <span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 4</span></span></span>
-<span><span class="co">#&gt;   number operation type    id                   </span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">number</span> <span style="font-weight: bold;">operation</span> <span style="font-weight: bold;">type</span>    <span style="font-weight: bold;">id</span>                   </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>      1 layer     predict predict_default_qZ3vE</span></span></code></pre></div>
 </div>

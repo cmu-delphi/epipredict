@@ -15,7 +15,7 @@ which will be used to create features necessary to produce forecasts."></head><b
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,6 +28,7 @@ which will be used to create features necessary to produce forecasts."></head><b
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -60,13 +61,7 @@ which will be used to create features necessary to produce forecasts.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_test_data</span><span class="op">(</span></span>
-<span>  <span class="va">recipe</span>,</span>
-<span>  <span class="va">x</span>,</span>
-<span>  fill_locf <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  n_recent <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  forecast_date <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">time_value</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_test_data</span><span class="op">(</span><span class="va">recipe</span>, <span class="va">x</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -81,25 +76,6 @@ which will be used to create features necessary to produce forecasts.</p>
 <dd><p>An epi_df. The typical usage is to
 pass the same data as that used for fitting the recipe.</p></dd>
 
-
-<dt id="arg-fill-locf">fill_locf<a class="anchor" aria-label="anchor" href="#arg-fill-locf"></a></dt>
-<dd><p>Logical. Should we use <code>locf</code> to fill in missing data?</p></dd>
-
-
-<dt id="arg-n-recent">n_recent<a class="anchor" aria-label="anchor" href="#arg-n-recent"></a></dt>
-<dd><p>Integer or NULL. If filling missing data with <code>locf = TRUE</code>,
-how far back are we willing to tolerate missing data? Larger values allow
-more filling. The default <code>NULL</code> will determine this from the
-the <code>recipe</code>. For example, suppose <code>n_recent = 3</code>, then if the
-3 most recent observations in any <code>geo_value</code> are all <code>NA</code>’s, we won’t be
-able to fill anything, and an error message will be thrown. (See details.)</p></dd>
-
-
-<dt id="arg-forecast-date">forecast_date<a class="anchor" aria-label="anchor" href="#arg-forecast-date"></a></dt>
-<dd><p>By default, this is set to the maximum
-<code>time_value</code> in <code>x</code>. But if there is data latency such that recent <code>NA</code>'s
-should be filled, this may be <em>after</em> the last available <code>time_value</code>.</p></dd>
-
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -112,25 +88,20 @@ keys, as well other variables in the original dataset.</p>
 the maximum lag requested (on any predictor) plus the longest horizon
 used if growth rate calculations are requested by the recipe. This is
 calculated internally.</p>
-<p>It also optionally fills missing values
-using the last-observation-carried-forward (LOCF) method. If this
-is not possible (say because there would be only <code>NA</code>'s in some location),
-it will produce an error suggesting alternative options to handle missing
-values with more advanced techniques.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># create recipe</span></span></span>
-<span class="r-in"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">case_death_rate_subset</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span><span class="va">rec</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">covid_case_death_rates</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">death_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">death_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">case_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="fu">get_test_data</span><span class="op">(</span>recipe <span class="op">=</span> <span class="va">rec</span>, x <span class="op">=</span> <span class="va">case_death_rate_subset</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">get_test_data</span><span class="op">(</span>recipe <span class="op">=</span> <span class="va">rec</span>, x <span class="op">=</span> <span class="va">covid_case_death_rates</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 840 x 4 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2022-05-31 19:08:25.791826</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2022-05-31</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 840 × 4</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    geo_value time_value case_rate death_rate</span>

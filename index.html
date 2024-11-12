@@ -24,7 +24,7 @@
 
     <a class="navbar-brand me-2" href="index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,6 +39,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -119,7 +120,7 @@
 <p>The package comes with some built-in historical data for illustration, but up-to-date versions of this could be downloaded with the <a href="https://cmu-delphi.github.io/epidatr/" class="external-link"><code>{epidatr}</code> package</a> and processed using <a href="https://cmu-delphi.github.io/epiprocess/" class="external-link"><code>{epiprocess}</code></a>.<a class="footnote-ref" tabindex="0" data-bs-toggle="popover" data-bs-content='&lt;p&gt;Other epidemiological signals for non-Covid related illnesses are also available with &lt;a href="https://github.com/cmu-delphi/epidatr" class="external-link"&gt;&lt;code&gt;{epidatr}&lt;/code&gt;&lt;/a&gt; which interfaces directly to Delphi’s &lt;a href="https://cmu-delphi.github.io/delphi-epidata/" class="external-link"&gt;Epidata API&lt;/a&gt;&lt;/p&gt;'><sup>1</sup></a></p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span></span>
-<span><span class="va">case_death_rate_subset</span></span>
+<span><span class="va">covid_case_death_rates</span></span>
 <span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
@@ -142,7 +143,7 @@
 <p>To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">two_week_ahead</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">case_death_rate_subset</span>,</span>
+<span>  <span class="va">covid_case_death_rates</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
 <span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>

@@ -25,7 +25,7 @@ argument is a common multiplier of the selected variables.'></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,7 @@ argument is a common multiplier of the selected variables.'></head><body>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -116,18 +117,22 @@ inverting the existing scaling.</p></dd>
 
 <dt id="arg-by">by<a class="anchor" aria-label="anchor" href="#arg-by"></a></dt>
 <dd><p>A (possibly named) character vector of variables to join by.</p>
-<p>If <code>NULL</code>, the default, the function will perform a natural join, using all
-variables in common across the <code>epi_df</code> produced by the <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> call
-and the user-provided dataset.
-If columns in that <code>epi_df</code> and <code>df</code> have the same name (and aren't
-included in <code>by</code>), <code>.df</code> is added to the one from the user-provided data
-to disambiguate.</p>
+<p>If <code>NULL</code>, the default, the function will try to infer a reasonable set of
+columns. First, it will try to join by all variables in the training/test
+data with roles <code>"geo_value"</code>, <code>"key"</code>, or <code>"time_value"</code> that also appear in
+<code>df</code>; these roles are automatically set if you are using an <code>epi_df</code>, or you
+can use, e.g., <code>update_role</code>. If no such roles are set, it will try to
+perform a natural join, using variables in common between the training/test
+data and population data.</p>
+<p>If columns in the training/testing data and <code>df</code> have the same name (and
+aren't included in <code>by</code>), a <code>.df</code> suffix is added to the one from the
+user-provided data to disambiguate.</p>
 <p>To join by different variables on the <code>epi_df</code> and <code>df</code>, use a named vector.
 For example, <code>by = c("geo_value" = "states")</code> will match <code>epi_df$geo_value</code>
 to <code>df$states</code>. To join by multiple variables, use a vector with length &gt; 1.
 For example, <code>by = c("geo_value" = "states", "county" = "county")</code> will match
 <code>epi_df$geo_value</code> to <code>df$states</code> and <code>epi_df$county</code> to <code>df$county</code>.</p>
-<p>See <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">dplyr::left_join()</a></code> for more details.</p></dd>
+<p>See <code><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">dplyr::inner_join()</a></code> for more details.</p></dd>
 
 
 <dt id="arg-df-pop-col">df_pop_col<a class="anchor" aria-label="anchor" href="#arg-df-pop-col"></a></dt>
@@ -173,7 +178,7 @@ the computations for subsequent operations.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">cases_deaths_subset</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="fu">epidatasets</span><span class="fu">::</span><span class="va"><a href="https://cmu-delphi.github.io/epidatasets/reference/cases_deaths_subset.html" class="external-link">cases_deaths_subset</a></span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-11-01"</span>, <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"ny"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, <span class="va">cases</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -208,6 +213,7 @@ the computations for subsequent operations.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> An `epi_df` object, 2 x 4 with metadata:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * other_keys = geo_value, time_value</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2024-03-20</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 4</span></span>

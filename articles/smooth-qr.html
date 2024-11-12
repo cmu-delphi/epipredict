@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,6 +37,7 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
+    <li><a class="dropdown-item" href="../articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -156,7 +157,7 @@ for COVID-19 forecasting. The built-in dataset we will use is a subset
 of JHU daily data on state cases and deaths. This sample data ranges
 from Dec. 31, 2020 to Dec. 31, 2021.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">edf</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">edf</span> <span class="op">&lt;-</span> <span class="fu">epidatasets</span><span class="fu">::</span><span class="va"><a href="https://cmu-delphi.github.io/epidatasets/reference/covid_case_death_rates.html" class="external-link">covid_case_death_rates</a></span></span></code></pre></div>
 <p>We will set the forecast date to be November 30, 2021 so that we can
 produce forecasts for target dates of 1 to 28 days ahead. We construct
 our test data, <code>tedf</code> from the days beyond this.</p>
@@ -253,7 +254,7 @@ predictions.</p>
 <span></span>
 <span>  <span class="va">the_fit</span> <span class="op">&lt;-</span> <span class="va">ewf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="va">latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">x</span>, fill_locf <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>  <span class="va">latest</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/get_test_data.html">get_test_data</a></span><span class="op">(</span><span class="va">rec</span>, <span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="va">preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">the_fit</span>, new_data <span class="op">=</span> <span class="va">latest</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>forecast_date <span class="op">=</span> <span class="va">fd</span>, target_date <span class="op">=</span> <span class="va">fd</span> <span class="op">+</span> <span class="va">ahead</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
