@@ -77,8 +77,9 @@ print.canned_epipred <- function(x, name, ...) {
   fn_meta <- function() {
     cli::cli_ul()
     cli::cli_li("Geography: {.field {x$metadata$training$geo_type}},")
-    if (!is.null(x$metadata$training$other_keys)) {
-      cli::cli_li("Other keys: {.field {x$metadata$training$other_keys}},")
+    other_keys <- x$metadata$training$other_keys
+    if (!is.null(other_keys) && length(other_keys) > 0L) {
+      cli::cli_li("Other keys: {.field {other_keys}},")
     }
     cli::cli_li("Time type: {.field {x$metadata$training$time_type}},")
     cli::cli_li("Using data up-to-date as of: {.field {format(x$metadata$training$as_of)}}.")

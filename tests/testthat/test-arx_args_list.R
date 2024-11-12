@@ -43,6 +43,11 @@ test_that("arx forecaster disambiguates quantiles", {
     compare_quantile_args(alist, tlist),
     sort(c(alist, tlist))
   )
+  expect_snapshot(
+    error = TRUE,
+    compare_quantile_args(alist / 10, 1:9 / 10, "grf")
+  )
+  expect_identical(compare_quantile_args(alist, 1:9 / 10, "grf"), 1:9 / 10)
   alist <- c(.5, alist)
   expect_identical( # tlist is default, should give alist
     compare_quantile_args(alist, tlist),

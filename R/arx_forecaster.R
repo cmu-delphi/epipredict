@@ -186,14 +186,26 @@ arx_fcast_epi_workflow <- function(
 
   # --- postprocessor
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
-  if (inherits(trainer, "quantile_reg")) {
+  is_quantile_reg <- inherits(trainer, "quantile_reg") |
+    (inherits(trainer, "rand_forest") & trainer$engine == "grf_quantiles")
+  if (is_quantile_reg) {
     # add all quantile_level to the forecaster and update postprocessor
-    quantile_levels <- sort(compare_quantile_args(
-      args_list$quantile_levels,
-      rlang::eval_tidy(trainer$args$quantile_levels)
-    ))
+    if (inherits(trainer, "quantile_reg")) {
+      quantile_levels <- sort(compare_quantile_args(
+        args_list$quantile_levels,
+        rlang::eval_tidy(trainer$args$quantile_levels),
+        "qr"
+      ))
+      trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
+    } else {
+      quantile_levels <- sort(compare_quantile_args(
+        args_list$quantile_levels,
+        rlang::eval_tidy(trainer$eng_args$quantiles) %||% c(.1, .5, .9),
+        "grf"
+      ))
+      trainer$eng_args$quantiles <- rlang::enquo(quantile_levels)
+    }
     args_list$quantile_levels <- quantile_levels
-    trainer$args$quantile_levels <- rlang::enquo(quantile_levels)
     f <- f %>%
       layer_quantile_distn(quantile_levels = quantile_levels) %>%
       layer_point_from_distn()
@@ -345,9 +357,13 @@ print.arx_fcast <- function(x, ...) {
   NextMethod(name = name, ...)
 }
 
-compare_quantile_args <- function(alist, tlist) {
+compare_quantile_args <- function(alist, tlist, train_method = c("qr", "grf")) {
+  train_method <- rlang::arg_match(train_method)
   default_alist <- eval(formals(arx_args_list)$quantile_levels)
-  default_tlist <- eval(formals(quantile_reg)$quantile_levels)
+  default_tlist <- switch(train_method,
+    "qr" = eval(formals(quantile_reg)$quantile_levels),
+    "grf" = c(.1, .5, .9)
+  )
   if (setequal(alist, default_alist)) {
     if (setequal(tlist, default_tlist)) {
       return(sort(unique(union(alist, tlist))))

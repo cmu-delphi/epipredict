@@ -51,12 +51,30 @@ test_that("quantile_rand_forest handles allows setting the trees and mtry", {
   expect_identical(pars$`_num_trees`, manual$`_num_trees`)
 })
 
-test_that("quantile_rand_forest predicts reasonable quantiles", {
+test_that("quantile_rand_forest operates with arx_forecaster", {
   spec <- rand_forest(mode = "regression") %>%
-    set_engine("grf_quantiles", quantiles = c(.2, .5, .8))
-  expect_silent(out <- fit(spec, formula = y ~ x + z, data = tib))
-  # swapping around the probabilities, because somehow this happens in practice,
-  # but I'm not sure how to reproduce
-  out$fit$quantiles.orig <- c(0.5, 0.9, 0.1)
-  expect_no_error(predict(out, tib))
+    set_engine("grf_quantiles", quantiles = c(.1, .2, .5, .8, .9)) # non-default
+  expect_identical(rlang::eval_tidy(spec$eng_args$quantiles), c(.1, .2, .5, .8, .9))
+  tib <- as_epi_df(tibble(time_value = 1:25, geo_value = "ca", value = rnorm(25)))
+  o <- arx_fcast_epi_workflow(tib, "value", trainer = spec)
+  spec2 <- parsnip::extract_spec_parsnip(o)
+  expect_identical(
+    rlang::eval_tidy(spec2$eng_args$quantiles),
+    rlang::eval_tidy(spec$eng_args$quantiles)
+  )
+  spec <- rand_forest(mode = "regression", "grf_quantiles")
+  expect_null(rlang::eval_tidy(spec$eng_args))
+  o <- arx_fcast_epi_workflow(tib, "value", trainer = spec)
+  spec2 <- parsnip::extract_spec_parsnip(o)
+  expect_identical(
+    rlang::eval_tidy(spec2$eng_args$quantiles),
+    c(.05, .1, .5, .9, .95) # merged with arx_args default
+  )
+  df <- epidatasets::counts_subset %>% filter(time_value >= "2021-10-01")
+
+  z <- arx_forecaster(df, "cases", "cases", spec2)
+  expect_identical(
+    nested_quantiles(z$predictions$.pred_distn[1])[[1]]$quantile_levels,
+    c(.05, .1, .5, .9, .95)
+  )
 })
