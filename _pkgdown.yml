@@ -1,7 +1,7 @@
 url: https://cmu-delphi.github.io/epipredict/
 
 development:
-  mode: auto
+  mode: devel
 
 template:
   package: delphidocs
