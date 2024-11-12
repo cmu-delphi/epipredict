@@ -8,9 +8,8 @@ articles:
   panel-data: panel-data.html
   preprocessing-and-models: preprocessing-and-models.html
   articles/smooth-qr: smooth-qr.html
-  articles/symptom-surveys: symptom-surveys.html
   update: update.html
-last_built: 2024-11-11T23:58Z
+last_built: 2024-11-12T19:14Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles

@@ -8,7 +8,9 @@
 <title>Get started with epipredict • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Open_Sans-0.4.9/font.css" rel="stylesheet">
+<link href="../deps/Source_Serif_Pro-0.4.9/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Get started with epipredict">
 <meta name="robots" content="noindex">
@@ -17,11 +19,11 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-success me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.4</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -43,13 +45,13 @@
     <li><a class="dropdown-item" href="../articles/index.html">More articles...</a></li>
   </ul>
 </li>
-<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
-<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/tree/main/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/cmu-delphi/epipredict/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 </div>
 
@@ -66,7 +68,7 @@
       <h1>Get started with epipredict</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/blob/main/vignettes/epipredict.Rmd" class="external-link"><code>vignettes/epipredict.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/cmu-delphi/epipredict/vignettes/epipredict.Rmd" class="external-link"><code>vignettes/epipredict.Rmd</code></a></small>
       <div class="d-none name"><code>epipredict.Rmd</code></div>
     </div>
 
@@ -77,7 +79,6 @@
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/workflows" class="external-link">workflows</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmu-delphi.github.io/epiprocess/" class="external-link">epiprocess</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="goals-for-the-package">Goals for the package<a class="anchor" aria-label="anchor" href="#goals-for-the-package"></a>
@@ -332,16 +333,14 @@ For this default forecaster, these are created using the quantiles of
 the residuals of the predictive model (possibly symmetrized). Here, we
 used 23 quantiles, but one can grab a particular quantile,</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.30277798 0.27213225 0.44345734 0.03120647 0.56121844 0.27492711</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.303 0.272 0.443 0.031 0.561 0.275</span></span></code></pre></div>
 <p>or extract the entire distribution into a “long” <code>epi_df</code>
 with <code>quantile_levels</code> being the probability and
 <code>values</code> being the value associated to that quantile.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="co"># first create a "nested" list-column</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>.pred_distn <span class="op">=</span> <span class="fu"><a href="../reference/nested_quantiles.html">nested_quantiles</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/unnest.html" class="external-link">unnest</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span> <span class="co"># then unnest it</span></span>
+<span>  <span class="fu"><a href="../reference/pivot_quantiles_longer.html">pivot_quantiles_longer</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,288 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">values</span> <span style="font-weight: bold;">quantile_levels</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
@@ -373,21 +372,27 @@ The default is linear regression, but we could instead use a random
 forest with the <a href="https://imbs-hl.github.io/ranger/" class="external-link">ranger</a> package:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_rf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span><span class="op">)</span></span>
+<span>  <span class="va">jhu</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
+<span>  trainer <span class="op">=</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Or boosted regression trees with <a href="https://github.com/dmlc/xgboost" class="external-link">xgboost</a>:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_gb</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">boost_tree</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span>, trees <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
+<span>  <span class="va">jhu</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
+<span>  trainer <span class="op">=</span> <span class="fu"><a href="https://parsnip.tidymodels.org/reference/boost_tree.html" class="external-link">boost_tree</a></span><span class="op">(</span>mode <span class="op">=</span> <span class="st">"regression"</span>, trees <span class="op">=</span> <span class="fl">20</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Or quantile regression, using our custom forecasting engine
 <code><a href="../reference/quantile_reg.html">quantile_reg()</a></code>:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_qr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span></span>
-<span>  <span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
-<span>  <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="va">jhu</span>,</span>
+<span>  outcome <span class="op">=</span> <span class="st">"death_rate"</span>,</span>
+<span>  predictors <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
+<span>  trainer <span class="op">=</span> <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>FWIW, this last case (using quantile regression), is not far from
 what the Delphi production forecast team used for its Covid forecasts
@@ -605,11 +610,11 @@ procedure.</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Daniel J. McDonald, Ryan Tibshirani, Dmitry Shemetov, David Weber, CMU’s Delphi Research Group, Logan Brooks, Rachel Lobay.</p>
+  <p><a href="https://delphi.cmu.edu/about/" class="external-link">About Delphi</a> • <a href="https://delphi.cmu.edu/epidemic-signals/terms-of-use/" class="external-link">Terms of Use</a> • <a href="https://docs.google.com/forms/u/1/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform" class="external-link">Contact Us</a> • <a href="https://github.com/cmu-delphi/" class="external-link">Delphi GitHub</a> • <a href="https://cmu-delphi.github.io/delphi-epidata/" class="external-link">Epidata API</a></p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>epipredict</p>
 </div>
 
     </footer>
