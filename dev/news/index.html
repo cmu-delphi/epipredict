@@ -51,6 +51,9 @@
 <div class="section level3">
 <h3 id="improvements-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2"></a></h3>
 <ul><li>Add <code>step_adjust_latency</code>, which give several methods to adjust the forecast if the <code>forecast_date</code> is after the last day of data.</li>
+<li>Fix <code>layer_population_scaling</code> default <code>by</code> with <code>other_keys</code>.</li>
+<li>Make key column inference more consistent within the package and with current <code>epiprocess</code>.</li>
+<li>Fix <code><a href="../reference/quantile_reg.html">quantile_reg()</a></code> producing error when asked to output just median-level predictions.</li>
 <li>(temporary) ahead negative is allowed for <code>step_epi_ahead</code> until we have <code>step_epi_shift</code>
 </li>
 </ul></div>
