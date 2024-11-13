@@ -40,7 +40,22 @@ jobs:
           needs: website
 
       - name: Build site
-        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)
+        # our versioning system+dev branch doesn't match the requirements for
+        # develop mode = auto
+        run: |
+           target_ref <- "${{ github.event_name == 'pull_request' && github.base_ref || github.ref }}"
+           override <- if (target_ref == "main" || target_ref == "refs/heads/main") {
+             list(development = list(mode = "release"))
+           } else if (target_ref == "dev" || target_ref == "refs/heads/dev") {
+             list(development = list(mode = "devel"))
+           } else {
+             stop("Unexpected target_ref: ", target_ref)
+           }
+           pkg <- pkgdown::as_pkgdown(".", override = override)
+           cli::cli_rule("Cleaning files from old site...")
+           pkgdown::clean_site(pkg)
+           pkgdown::build_site(pkg, preview = FALSE, install = FALSE, new_process = FALSE)
+           pkgdown:::build_github_pages(pkg)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
