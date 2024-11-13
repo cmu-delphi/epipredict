@@ -3,13 +3,13 @@ pkgdown: 2.1.1
 pkgdown_sha: ~
 articles:
   arx-classifier: arx-classifier.html
-  backtesting: backtesting.html
   epipredict: epipredict.html
   panel-data: panel-data.html
   preprocessing-and-models: preprocessing-and-models.html
+  articles/sliding: sliding.html
   articles/smooth-qr: smooth-qr.html
   update: update.html
-last_built: 2024-11-12T18:36Z
+last_built: 2024-11-13T16:01Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles

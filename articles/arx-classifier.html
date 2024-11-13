@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.5</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,7 +37,6 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
 <li><a class="dropdown-item" href="../articles/preprocessing-and-models.html">Examples of Preprocessing and Models</a></li>
-    <li><a class="dropdown-item" href="../articles/backtesting.html">Accurately backtesting forecasters</a></li>
     <li><a class="dropdown-item" href="../articles/arx-classifier.html">Auto-regressive classifier</a></li>
     <li><a class="dropdown-item" href="../articles/update.html">Using the add/update/remove and adjust functions</a></li>
     <li><hr class="dropdown-divider"></li>
@@ -91,14 +90,14 @@ class for each case under consideration. It is a direct forecaster in
 that it estimates the classes at a specific horizon or ahead value.</p>
 <p>To get a sense of how the <code><a href="../reference/arx_classifier.html">arx_classifier()</a></code> works, let’s
 consider a simple example with minimal inputs. For this, we will use the
-built-in <code>covid_case_death_rates</code> that contains confirmed
+built-in <code>case_death_rate_subset</code> that contains confirmed
 COVID-19 cases and deaths from JHU CSSE for all states over Dec 31, 2020
 to Dec 31, 2021. From this, we’ll take a subset of data for five states
 over June 4, 2021 to December 31, 2021. Our objective is to predict
 whether the case rates are increasing when considering the 0, 7 and 14
 day case rates:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">covid_case_death_rates</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">case_death_rate_subset</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
 <span>    <span class="va">time_value</span> <span class="op">&gt;=</span> <span class="st">"2021-06-04"</span>,</span>
 <span>    <span class="va">time_value</span> <span class="op">&lt;=</span> <span class="st">"2021-12-31"</span>,</span>
@@ -107,15 +106,15 @@ day case rates:</p>
 <span></span>
 <span><span class="va">out</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span><span class="va">jhu</span>, outcome <span class="op">=</span> <span class="st">"case_rate"</span>, predictors <span class="op">=</span> <span class="st">"case_rate"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">out</span><span class="op">$</span><span class="va">predictions</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred_class</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
+<span><span class="va">out</span><span class="op">$</span><span class="va">predictions</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
+<span><span class="co">#&gt;   geo_value .pred_class forecast_date target_date</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        (-Inf,0.25] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        (-Inf,0.25] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        (-Inf,0.25] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        (-Inf,0.25] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        (-Inf,0.25] 2021-12-31    2022-01-07</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        (-Inf,0.25] 2021-12-31    2022-01-07</span></span></code></pre>
 <p>The key takeaway from the predictions is that there are two
 prediction classes: (-Inf, 0.25] and (0.25, Inf). This is because for
 our goal of classification the classes must be discrete. The
@@ -134,11 +133,11 @@ the type of estimation such that <code>mode = "classification"</code> is
 enforced. The two typical trainers that are used are
 <code><a href="https://parsnip.tidymodels.org/reference/logistic_reg.html" class="external-link">parsnip::logistic_reg()</a></code> for two classes or
 <code><a href="https://parsnip.tidymodels.org/reference/multinom_reg.html" class="external-link">parsnip::multinom_reg()</a></code> for more than two classes.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_spec_parsnip</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Logistic Regression Model Specification (classification)</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_spec_parsnip</a></span><span class="op">(</span><span class="va">out</span><span class="op">$</span><span class="va">epi_workflow</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; Logistic Regression Model Specification (classification)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Computational engine: glm</span></span></code></pre></div>
+<span><span class="co">#&gt; Computational engine: glm</span></span></code></pre>
 <p>From the parsnip model specification, we can see that the trainer
 used is logistic regression, which is expected for our binary outcome.
 More complicated trainers like <code><a href="https://parsnip.tidymodels.org/reference/naive_Bayes.html" class="external-link">parsnip::naive_Bayes()</a></code> or
@@ -151,7 +150,7 @@ classification bins to properly dichotomize the outcome. For example,
 let’s set a break of 0.5 instead of relying on the default of 0.25. We
 can do this by passing 0.5 to the <code>breaks</code> argument in
 <code><a href="../reference/arx_class_args_list.html">arx_class_args_list()</a></code> as follows:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_break_0.5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span></span>
 <span>  <span class="va">jhu</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"case_rate"</span>,</span>
@@ -160,18 +159,16 @@ can do this by passing 0.5 to the <code>breaks</code> argument in
 <span>    breaks <span class="op">=</span> <span class="fl">0.5</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: glm.fit: algorithm did not converge</span></span>
-<span><span class="co">#&gt; Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</span></span>
 <span></span>
-<span><span class="va">out_break_0.5</span><span class="op">$</span><span class="va">predictions</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred_class</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
+<span><span class="va">out_break_0.5</span><span class="op">$</span><span class="va">predictions</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 4</span></span></span>
+<span><span class="co">#&gt;   geo_value .pred_class forecast_date target_date</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        (-Inf,0.5]  2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        (-Inf,0.5]  2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        (-Inf,0.5]  2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        (-Inf,0.5]  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        (-Inf,0.5]  2021-12-31    2022-01-07</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        (-Inf,0.5]  2021-12-31    2022-01-07</span></span></code></pre>
 <p>Indeed, we can observe that the two <code>.pred_class</code> are now
 (-Inf, 0.5] and (0.5, Inf). See <code><a href="../reference/arx_class_args_list.html">help(arx_class_args_list)</a></code>
 for other available modifications.</p>
@@ -265,7 +262,7 @@ model presented in
 g_{\text{up}}(x) = \log\left ( \frac{\Pr(Z_{l, t} = \text{up} \vert x)}{\Pr(Z_{l, t} = \text{not up} \vert x)} \right ) = \beta_{10} + \beta_{11}Y_{l,t}^\Delta + \beta_{12}Y_{l,t-7}^\Delta + \beta_{13}Y_{l,t-14}^\Delta.
 </annotation></semantics></math></p>
 <p>Now then, we will operate on the same subset of the
-<code>covid_case_death_rates</code> that we used in our above example.
+<code>case_death_rate_subset</code> that we used in our above example.
 This time, we will use it to investigate whether the number of newly
 reported cases over the past 7 days has increased by at least 25%
 compared to the preceding week for our sample of states.</p>
@@ -273,7 +270,7 @@ compared to the preceding week for our sample of states.</p>
 completely eliminated the need to manually categorize the response
 variable and implement pre-processing steps, which was necessary in
 <code><a href="../articles/preprocessing-and-models.html">vignette("preprocessing-and-models")</a></code>.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">log_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span></span>
 <span>  <span class="va">jhu</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"case_rate"</span>,</span>
@@ -283,26 +280,8 @@ variable and implement pre-processing steps, which was necessary in
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">log_res</span><span class="op">$</span><span class="va">epi_workflow</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ══ Epi Workflow [trained] ═══════════════════════════════════════════════════</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">Preprocessor:</span> Recipe</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">Model:</span> logistic_reg()</span></span>
-<span><span class="co">#&gt; <span style="font-style: italic;">Postprocessor:</span> Frosting</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Preprocessor ─────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; 7 Recipe steps.</span></span>
-<span><span class="co">#&gt; 1. step_growth_rate()</span></span>
-<span><span class="co">#&gt; 2. step_epi_lag()</span></span>
-<span><span class="co">#&gt; 3. step_epi_ahead()</span></span>
-<span><span class="co">#&gt; 4. step_mutate()</span></span>
-<span><span class="co">#&gt; 5. step_naomit()</span></span>
-<span><span class="co">#&gt; 6. step_naomit()</span></span>
-<span><span class="co">#&gt; 7. step_training_window()</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Model ────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; </span></span>
+<span><span class="va">log_res</span><span class="op">$</span><span class="va">epi_workflow</span></span></code></pre></div>
+<pre><code><span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Call:  stats::glm(formula = ..y ~ ., family = stats::binomial, data = data)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
@@ -313,15 +292,7 @@ variable and implement pre-processing steps, which was necessary in
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Degrees of Freedom: 914 Total (i.e. Null);  911 Residual</span></span>
 <span><span class="co">#&gt; Null Deviance:       1156 </span></span>
-<span><span class="co">#&gt; Residual Deviance: 813.8     AIC: 821.8</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── Postprocessor ────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; 3 Frosting layers.</span></span>
-<span><span class="co">#&gt; 1. layer_predict()</span></span>
-<span><span class="co">#&gt; 2. layer_add_forecast_date()</span></span>
-<span><span class="co">#&gt; 3. layer_add_target_date()</span></span>
-<span><span class="co">#&gt; </span></span></code></pre></div>
+<span><span class="co">#&gt; Residual Deviance: 813.8     AIC: 821.8</span></span></code></pre>
 <p>Comparing the pre-processing steps for this to those in the other
 vignette, we can see that they are not precisely the same, but they
 cover the same essentials of transforming <code>case_rate</code> to the
@@ -367,7 +338,7 @@ bar chart than a heatmap)… So instead of doing that, let’s get
 predictions for several aheads and plot a heatmap across the target
 dates. To get the predictions across several ahead values, we will use
 the map function in the same way that we did in other vignettes:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">multi_log_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">40</span>, <span class="op">~</span> <span class="fu"><a href="../reference/arx_classifier.html">arx_classifier</a></span><span class="op">(</span></span>
 <span>  <span class="va">jhu</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="st">"case_rate"</span>,</span>
@@ -376,18 +347,16 @@ the map function in the same way that we did in other vignettes:</p>
 <span>    breaks <span class="op">=</span> <span class="fl">0.25</span> <span class="op">/</span> <span class="fl">7</span>, <span class="co"># division by 7 gives weekly not daily</span></span>
 <span>    ahead <span class="op">=</span> <span class="va">.x</span></span>
 <span>  <span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</span></span>
-<span><span class="co">#&gt; Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred</span></span></code></pre></div>
+<span><span class="op">)</span><span class="op">$</span><span class="va">predictions</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/list_c.html" class="external-link">list_rbind</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>We can plot a the heatmap of the results over the aheads to see if
 there’s anything novel or interesting to take away:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">multi_log_res</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">target_date</span>, <span class="va">geo_value</span>, fill <span class="op">=</span> <span class="va">.pred_class</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_tile.html" class="external-link">geom_tile</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">ylab</a></span><span class="op">(</span><span class="st">"State"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">xlab</a></span><span class="op">(</span><span class="st">"Target date"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_brewer.html" class="external-link">scale_fill_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Set1"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="arx-classifier_files/figure-html/unnamed-chunk-8-1.png" width="90%" style="display: block; margin: auto;"></p>
+<p><img src="arx-classifier_files/figure-html/unnamed-chunk-7-1.png" width="100%"></p>
 <p>While there is a bit of variability near to the end, we can clearly
 see that there are upswings for all states starting from the beginning
 of January 2022, which we can recall was when there was a massive spike
