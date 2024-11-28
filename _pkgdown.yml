@@ -20,12 +20,6 @@ articles:
       - articles/smooth-qr
       - panel-data
 
-repo:
-  url:
-    home: https://github.com/cmu-delphi/epipredict/
-    source: https://github.com/cmu-delphi/epipredict/
-    issue: https://github.com/cmu-delphi/epipredict/issues
-
 home:
   links:
     - text: The epiprocess package
