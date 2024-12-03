@@ -114,7 +114,7 @@ there are two issues we will need to address:
 \item if we want to use \code{b} as an exogenous variable, for \code{"ma"} it is latent by 3 days instead of just 1.
 }
 
-Regardless of \code{method}, \code{epi_keys_checked="geo_value"} guarantees tha the
+Regardless of \code{method}, \code{epi_keys_checked="geo_value"} guarantees that the
 difference between \code{"ma"} and \code{"ca"} is accounted for by making  the
 latency adjustment at least 2. For some comparison, here's what the various
 methods will do:
@@ -130,7 +130,7 @@ doesn't matter which day we're trying to predict, since it just fills
 forward to the \code{forecast_date}:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{toy_recipe <- epi_recipe(toy_df) \%>\%
-  step_adjust_latency(method="locf")
+  step_adjust_latency(has_role("raw"), method="locf")
 
 toy_recipe \%>\%
   prep(toy_df) \%>\%
@@ -163,9 +163,9 @@ a per-column basis; if cases and deaths are reported at different
 latencies, the lags for each are adjusted separately. In the toy example:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{toy_recipe <- epi_recipe(toy_df) \%>\%
-  step_adjust_latency(method="extend_lags") \%>\%
-  step_epi_lag(a,lag=1) \%>\%
-  step_epi_lag(b,lag=1) \%>\%
+  step_adjust_latency(has_role("raw"), method = "extend_lags") \%>\%
+  step_epi_lag(a, lag=1) \%>\%
+  step_epi_lag(b, lag=1) \%>\%
   step_epi_ahead(a, ahead=1)
 
 toy_recipe \%>\%
@@ -212,8 +212,8 @@ different data sources have different latencies; it must use the latency of
 the most latent data to insure there is data available. In the toy example:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{toy_recipe <- epi_recipe(toy_df) \%>\%
-  step_adjust_latency(method="extend_ahead") \%>\%
-  step_epi_lag(a,lag=0) \%>\%
+  step_adjust_latency(has_role("raw"), method="extend_ahead") \%>\%
+  step_epi_lag(a, lag=0) \%>\%
   step_epi_ahead(a, ahead=1)
 
 toy_recipe \%>\%
@@ -283,7 +283,7 @@ jhu <- covid_case_death_rates \%>\%
 attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
 
 r <- epi_recipe(covid_case_death_rates) \%>\%
-  step_adjust_latency(method = "extend_ahead") \%>\%
+  step_adjust_latency(has_role("raw"), method = "extend_ahead") \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
 r

@@ -11,7 +11,7 @@ flatline_forecaster(epi_data, outcome, args_list = flatline_args_list())
 
 \item{outcome}{A scalar character for the column name we wish to predict.}
 
-\item{args_list}{A list of dditional arguments as created by the
+\item{args_list}{A list of additional arguments as created by the
 \code{\link[=flatline_args_list]{flatline_args_list()}} constructor function.}
 }
 \value{
