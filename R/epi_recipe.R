@@ -123,7 +123,11 @@ epi_recipe.epi_df <-
           unique(role)
         ) # anything else
       ))
-
+    tv_info <- var_info %>%
+      filter(role == "time_value") %>%
+      mutate(variable = ".target_time_value", role = ".target_time_value",
+             source = "derived")
+    var_info <- tibble::add_row(var_info, tv_info)
     ## Return final object of class `recipe`
     out <- list(
       var_info = var_info,
@@ -429,13 +433,19 @@ prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
   if (is.null(training)) {
-    cli_warn(c(
+    cli_abort(c(
       "!" = "No training data was supplied to {.fn prep}.",
       "!" = "Unlike a {.cls recipe}, an {.cls epi_recipe} does not ",
       "!" = "store the full template data in the object.",
       "!" = "Please supply the training data to the {.fn prep} function,",
       "!" = "to avoid addtional warning messages."
     ))
+  }
+  tr_names <- names(training)
+  if ("time_value" %in% tr_names && !(".target_time_value" %in% tr_names)) {
+    training$.target_time_value <- training$time_value
+  } else {
+    cli_abort("The training data does not contain a `time_value` column.")
   }
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
@@ -568,11 +578,16 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     }
     composition <- "tibble"
   }
-  new_data$.target_time_value <- new_data$time_value
+  tr_names <- names(new_data)
+  if ("time_value" %in% tr_names && !(".target_time_value" %in% tr_names)) {
+    new_data$.target_time_value <- new_data$time_value
+  } else {
+    cli_abort("The {.val new_data} does not contain a `time_value` column.")
+  }
 
   new_data <- NextMethod("bake")
 
-  new_data$.target_time_value <- NULL
+  new_data <- dplyr::select(new_data, -.target_time_value)
   if (!is.null(meta)) {
     # Baking should have dropped epi_df-ness and metadata. Re-infer some
     # metadata and assume others remain the same as the object/template:
@@ -599,6 +614,7 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
   cli::cli_h3("Inputs")
 
   tab <- table(x$var_info$role, useNA = "ifany")
+  tab <- tab[names(tab) != ".target_time_value"]
   tab <- stats::setNames(tab, names(tab))
   names(tab)[is.na(names(tab))] <- "undeclared role"
 
