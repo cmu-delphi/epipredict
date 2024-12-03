@@ -479,8 +479,7 @@ compare_bake_prep_latencies <- function(object, new_data, call = caller_env()) {
 
 #' @keywords internal
 create_shift_grid <- function(prefix, amount, target_sign, columns, latency_table, latency_sign) {
-  if (!is.null(latency_table) &&
-    latency_sign == target_sign) {
+  if (!is.null(latency_table) && latency_sign == target_sign) {
     # get the actually used latencies
     rel_latency <- latency_table %>% filter(col_name %in% columns)
     latency_adjusted <- TRUE
