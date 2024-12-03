@@ -568,8 +568,11 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     }
     composition <- "tibble"
   }
+  new_data$.target_time_value <- new_data$time_value
 
   new_data <- NextMethod("bake")
+
+  new_data$.target_time_value <- NULL
   if (!is.null(meta)) {
     # Baking should have dropped epi_df-ness and metadata. Re-infer some
     # metadata and assume others remain the same as the object/template:

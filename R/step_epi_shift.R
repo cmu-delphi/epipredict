@@ -66,7 +66,10 @@ step_epi_lag <-
       ))
     }
     arg_is_nonneg_int(lag)
-    arg_is_chr_scalar(prefix, id)
+    arg_is_chr_scalar(prefix, id, role)
+    if (role == "outcome" && length(lag) > 1L) {
+      cli_abort("Only one {.val outcome} may be created with this step.")
+    }
 
     recipes::add_step(
       recipe,
@@ -111,7 +114,11 @@ step_epi_ahead <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    arg_is_chr_scalar(prefix, id)
+    arg_is_chr_scalar(prefix, id, role)
+    arg_is_nonneg_int(ahead)
+    if (role == "outcome" && length(ahead) > 1L) {
+      cli_abort("Only one {.val outcome} may be created with this step.")
+    }
 
     recipes::add_step(
       recipe,
@@ -247,12 +254,24 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  add_shifted_columns(new_data, object)
+  new_data <- add_shifted_columns(new_data, object)
+  if (object$role == "outcome") {
+    shift_val <- object$shift_grid$shift_val[1]
+    new_data <- new_data %>%
+      mutate(.target_time_value = .target_time_value + shift_val)
+  }
+  new_data
 }
 
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
-  add_shifted_columns(new_data, object)
+  new_data <- add_shifted_columns(new_data, object)
+  if (object$role == "outcome") {
+    shift_val <- object$shift_grid$shift_val[1]
+    new_data <- new_data %>%
+      mutate(.target_time_value = .target_time_value + shift_val)
+  }
+  new_data
 }
 
 #' @export
