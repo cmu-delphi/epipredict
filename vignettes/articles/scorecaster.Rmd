@@ -1,0 +1,97 @@
+---
+title: "Implementing a scorecaster for quantile calibration"
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE,
+  cache = TRUE
+)
+```
+
+
+```{r packages}
+library(tidyverse)
+library(epipredict)
+```
+
+First we get some forecasts.
+
+```{r forecast-output}
+jhu <- case_death_rate_subset
+fc_time_values <- seq(as.Date("2021-03-09"), as.Date("2021-12-01"), by = "4 weeks")
+q_levels <- c(1, 2, 5, 8, 9) / 10
+forecaster <- function(x, aheads = 7) {
+  map(aheads, ~ arx_forecaster(
+    x, "death_rate", c("case_rate", "death_rate"),
+    quantile_reg(quantile_levels = q_levels),
+    arx_args_list(ahead = .x, quantile_levels = q_levels)
+  )$predictions |>
+    mutate(ahead = .x)
+  ) |> list_rbind()
+}
+
+out <- map(
+  .x = fc_time_values,
+  .f = ~forecaster(jhu %>% filter(time_value <= .x), c(7, 14, 21, 28)),
+  .progress = TRUE
+)
+
+out <- out %>% list_rbind()
+out <- left_join(
+  out,
+  jhu,
+  by = c("target_date" = "time_value", "geo_value")
+)
+```
+
+Now we set up the "quantile conformal score" and the tangent integrator.
+
+```{r necessary-funs}
+quantile_conformal_score <- function(x, actual) {
+  UseMethod("quantile_conformal_score")
+}
+quantile_conformal_score.distribution <- function(x, actual) {
+  l <- vctrs::vec_recycle_common(x = x, actual = actual)
+  map2(
+    .x = vctrs::vec_data(l$x),
+    .y = l$actual,
+    .f = quantile_conformal_score
+  )
+}
+quantile_conformal_score.dist_quantiles <- function(x, actual) {
+  values <- vctrs::field(x, "values")
+  quantile_levels <- vctrs::field(x, "quantile_levels")
+  errs <- (actual - values) * (quantile_levels > 0.5) +
+    (values - actual) * (quantile_levels < 0.5) +
+    abs(actual - values) * (quantile_levels == 0.5)
+  errs
+}
+
+tangent_integrator <- function(x, t, KI = 1000, Csat = 2) {
+  # defaults from https://github.com/aangelopoulos/conformal-time-series/blob/b729c3f5ff633bfc43f0f7ca08199b549c2573ac/tests/configs/ca-COVID-deaths-4wk.yaml#L41
+  x <- x * log(t + 1) / (Csat * (t + 1))
+  up <- x >= pi / 2
+  down <- x <= -pi / 2
+  x[up] <- Inf
+  x[down] <- -Inf
+  mid <- !up & !down
+  x[mid] <- KI * tan(x[mid])
+}
+```
+
+Score the forecasts.
+
+```{r score-fcasts}
+out <- out |>
+  mutate(qc_scores = quantile_conformal_score(.pred_distn, death_rate))
+```
+
+Now we would need a "scorecaster". The paper has code here: 
+https://github.com/aangelopoulos/conformal-time-series/blob/b729c3f5ff633bfc43f0f7ca08199b549c2573ac/tests/datasets/covid-ts-proc/statewide/death-forecasting-perstate-lasso-qr.ipynb
+
+Not quite sure what the model is. Note that `epipredict::quantile_reg()` may work
+(without the $\ell_1$ penalty).
