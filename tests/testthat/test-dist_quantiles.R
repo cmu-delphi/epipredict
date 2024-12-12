@@ -114,7 +114,7 @@ test_that("arithmetic works on quantiles", {
 test_that("quantile.dist_quantile works for NA vectors", {
   distn <- dist_quantiles(
     list(c(NA, NA)),
-    list(1:2/3)
+    list(1:2 / 3)
   )
   expect_true(is.na(quantile(distn, p = 0.5)))
   expect_true(is.na(median(distn)))
