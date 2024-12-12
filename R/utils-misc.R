@@ -80,9 +80,9 @@ grab_forged_keys <- function(forged, workflow, new_data) {
   # `epi_df` invariants.  Require that our key is a unique key in any case.
   if (all(c("geo_value", "time_value") %in% new_keys)) {
     maybe_as_of <- attr(new_data, "metadata")$as_of # NULL if wasn't epi_df
-    try(return(as_epi_df(new_key_tbl, other_keys = new_keys, as_of = maybe_as_of)),
-      silent = TRUE
-    )
+    new_other_keys <- new_keys[! new_keys %in% c("geo_value", "time_value")]
+    try(return(as_epi_df(new_key_tbl, other_keys = new_other_keys, as_of = maybe_as_of)),
+        silent = TRUE)
   }
   if (anyDuplicated(new_key_tbl)) {
     duplicate_key_tbl <- new_key_tbl %>% filter(.by = everything(), dplyr::n() > 1L)
