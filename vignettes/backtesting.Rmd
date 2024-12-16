@@ -385,8 +385,7 @@ canada_archive_faux <- epix_as_of(canada_archive, canada_archive$versions_end) %
 smooth_cases <- function(epi_df) {
   epi_df %>%
     group_by(geo_value) %>%
-    epi_slide_mean("case_rate", .window_size = 7, na.rm = TRUE) %>%
-    rename(cr_7dav = slide_value_case_rate)
+    epi_slide_mean("case_rate", .window_size = 7, na.rm = TRUE, .suffix = "_{.n}dav")
 }
 forecast_dates <- seq.Date(
   from = min(canada_archive$DT$version),
@@ -401,8 +400,8 @@ canada_forecasts <- bind_rows(
     ~ forecast_k_week_ahead(
       canada_archive_faux,
       ahead = .x,
-      outcome = "cr_7dav",
-      predictors = "cr_7dav",
+      outcome = "case_rate_7dav",
+      predictors = "case_rate_7dav",
       forecast_dates = forecast_dates,
       process_data = smooth_cases
     ) %>% mutate(version_aware = FALSE)
@@ -412,8 +411,8 @@ canada_forecasts <- bind_rows(
     ~ forecast_k_week_ahead(
       canada_archive,
       ahead = .x,
-      outcome = "cr_7dav",
-      predictors = "cr_7dav",
+      outcome = "case_rate_7dav",
+      predictors = "case_rate_7dav",
       forecast_dates = forecast_dates,
       process_data = smooth_cases
     ) %>% mutate(version_aware = TRUE)
@@ -435,7 +434,7 @@ case_rate_data <- bind_rows(
     ~ canada_archive %>%
       epix_as_of(.x) %>%
       smooth_cases() %>%
-      mutate(case_rate = cr_7dav, version = .x)
+      mutate(case_rate = case_rate_7dav, version = .x)
   ) %>%
     bind_rows() %>%
     mutate(version_aware = TRUE),
@@ -443,7 +442,7 @@ case_rate_data <- bind_rows(
   canada_archive %>%
     epix_as_of(doctor_visits$versions_end) %>%
     smooth_cases() %>%
-    mutate(case_rate = cr_7dav, version_aware = FALSE)
+    mutate(case_rate = case_rate_7dav, version_aware = FALSE)
 ) %>%
   filter(geo_value == geo_choose)
 
