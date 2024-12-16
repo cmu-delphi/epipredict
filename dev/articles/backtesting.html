@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.5</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -442,8 +442,7 @@ regression with those from using boosted regression trees.</p>
 <span><span class="va">smooth_cases</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">epi_df</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">epi_df</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">geo_value</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide_opt.html" class="external-link">epi_slide_mean</a></span><span class="op">(</span><span class="st">"case_rate"</span>, .window_size <span class="op">=</span> <span class="fl">7</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>cr_7dav <span class="op">=</span> <span class="va">slide_value_case_rate</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_slide_opt.html" class="external-link">epi_slide_mean</a></span><span class="op">(</span><span class="st">"case_rate"</span>, .window_size <span class="op">=</span> <span class="fl">7</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span>, .suffix <span class="op">=</span> <span class="st">"_{.n}dav"</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span><span class="va">forecast_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.Date.html" class="external-link">seq.Date</a></span><span class="op">(</span></span>
 <span>  from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">min</a></span><span class="op">(</span><span class="va">canada_archive</span><span class="op">$</span><span class="va">DT</span><span class="op">$</span><span class="va">version</span><span class="op">)</span>,</span>
@@ -458,8 +457,8 @@ regression with those from using boosted regression trees.</p>
 <span>    <span class="op">~</span> <span class="fu">forecast_k_week_ahead</span><span class="op">(</span></span>
 <span>      <span class="va">canada_archive_faux</span>,</span>
 <span>      ahead <span class="op">=</span> <span class="va">.x</span>,</span>
-<span>      outcome <span class="op">=</span> <span class="st">"cr_7dav"</span>,</span>
-<span>      predictors <span class="op">=</span> <span class="st">"cr_7dav"</span>,</span>
+<span>      outcome <span class="op">=</span> <span class="st">"case_rate_7dav"</span>,</span>
+<span>      predictors <span class="op">=</span> <span class="st">"case_rate_7dav"</span>,</span>
 <span>      forecast_dates <span class="op">=</span> <span class="va">forecast_dates</span>,</span>
 <span>      process_data <span class="op">=</span> <span class="va">smooth_cases</span></span>
 <span>    <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>version_aware <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -469,8 +468,8 @@ regression with those from using boosted regression trees.</p>
 <span>    <span class="op">~</span> <span class="fu">forecast_k_week_ahead</span><span class="op">(</span></span>
 <span>      <span class="va">canada_archive</span>,</span>
 <span>      ahead <span class="op">=</span> <span class="va">.x</span>,</span>
-<span>      outcome <span class="op">=</span> <span class="st">"cr_7dav"</span>,</span>
-<span>      predictors <span class="op">=</span> <span class="st">"cr_7dav"</span>,</span>
+<span>      outcome <span class="op">=</span> <span class="st">"case_rate_7dav"</span>,</span>
+<span>      predictors <span class="op">=</span> <span class="st">"case_rate_7dav"</span>,</span>
 <span>      forecast_dates <span class="op">=</span> <span class="va">forecast_dates</span>,</span>
 <span>      process_data <span class="op">=</span> <span class="va">smooth_cases</span></span>
 <span>    <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>version_aware <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -489,7 +488,7 @@ regression with those from using boosted regression trees.</p>
 <span>    <span class="op">~</span> <span class="va">canada_archive</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">.x</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu">smooth_cases</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>case_rate <span class="op">=</span> <span class="va">cr_7dav</span>, version <span class="op">=</span> <span class="va">.x</span><span class="op">)</span></span>
+<span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>case_rate <span class="op">=</span> <span class="va">case_rate_7dav</span>, version <span class="op">=</span> <span class="va">.x</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>version_aware <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span>
@@ -497,7 +496,7 @@ regression with those from using boosted regression trees.</p>
 <span>  <span class="va">canada_archive</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">doctor_visits</span><span class="op">$</span><span class="va">versions_end</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>    <span class="fu">smooth_cases</span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>case_rate <span class="op">=</span> <span class="va">cr_7dav</span>, version_aware <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>case_rate <span class="op">=</span> <span class="va">case_rate_7dav</span>, version_aware <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op">==</span> <span class="va">geo_choose</span><span class="op">)</span></span>
 <span></span>
