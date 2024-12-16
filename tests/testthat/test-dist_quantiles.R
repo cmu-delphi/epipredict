@@ -110,3 +110,14 @@ test_that("arithmetic works on quantiles", {
   expect_snapshot(error = TRUE, sum(dstn))
   expect_snapshot(error = TRUE, suppressWarnings(dstn + distributional::dist_normal()))
 })
+
+test_that("quantile.dist_quantile works for NA vectors", {
+  distn <- dist_quantiles(
+    list(c(NA, NA)),
+    list(1:2 / 3)
+  )
+  expect_true(is.na(quantile(distn, p = 0.5)))
+  expect_true(is.na(median(distn)))
+  expect_true(is.na(mean(distn)))
+  expect_equal(format(distn), "quantiles(NA)[2]")
+})

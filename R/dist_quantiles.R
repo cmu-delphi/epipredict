@@ -128,10 +128,12 @@ is_dist_quantiles <- function(x) {
 median.dist_quantiles <- function(x, na.rm = FALSE, ..., middle = c("cubic", "linear")) {
   quantile_levels <- field(x, "quantile_levels")
   values <- field(x, "values")
+  # we have exactly that quantile
   if (0.5 %in% quantile_levels) {
     return(values[match(0.5, quantile_levels)])
   }
-  if (length(quantile_levels) < 2 || min(quantile_levels) > 0.5 || max(quantile_levels) < 0.5) {
+  # if there's only 1 quantile_level (and it isn't 0.5), or the smallest quantile is larger than 0.5 or the largest smaller than 0.5, or if every value is NA, return NA
+  if (length(quantile_levels) < 2 || min(quantile_levels) > 0.5 || max(quantile_levels) < 0.5 || all(is.na(values))) {
     return(NA)
   }
   if (length(quantile_levels) < 3 || min(quantile_levels) > .25 || max(quantile_levels) < .75) {
@@ -161,6 +163,9 @@ quantile_extrapolate <- function(x, tau_out, middle) {
   tau <- field(x, "quantile_levels")
   qvals <- field(x, "values")
   nas <- is.na(qvals)
+  if (all(nas)) {
+    return(rep(NA, times = length(tau_out)))
+  }
   qvals_out <- rep(NA, length(tau_out))
   qvals <- qvals[!nas]
   tau <- tau[!nas]

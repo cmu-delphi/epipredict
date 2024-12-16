@@ -23,6 +23,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 ## Bug fixes
 - Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
 - Quantiles produced by `grf` were sometimes out of order.
+- dist_quantiles can have all `NA` values without causing unrelated errors
 
 # epipredict 0.1
 
