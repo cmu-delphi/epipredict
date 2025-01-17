@@ -43,9 +43,13 @@ step_climate <-
            epi_keys = NULL,
            prefix = "climate_",
            skip = FALSE,
-           id = rand_id("climate_predictor")) {
+           id = rand_id("climate")) {
     if (!is_epi_recipe(recipe)) {
       cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
+    }
+    n_outcomes <- sum(recipe$var_info$role == "outcome")
+    if (n_outcomes > 1L) {
+      cli_abort("Only one {.var outcome} role can be used with this step.")
     }
     time_type <- rlang::arg_match(time_type)
     center_method <- rlang::arg_match(center_method)

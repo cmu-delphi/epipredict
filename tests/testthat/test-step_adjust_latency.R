@@ -42,10 +42,10 @@ attributes(x_lagged)$metadata$as_of <- testing_as_of
 test_that("epi_adjust_latency correctly extends the lags", {
   expect_warning(epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
-    step_adjust_latency(method = "extend_lags"))
+    step_adjust_latency(death_rate, method = "extend_lags"))
 
   r1 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "extend_lags") %>%
+    step_adjust_latency(death_rate, case_rate, method = "extend_lags") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -130,7 +130,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
 
 test_that("epi_adjust_latency correctly extends the ahead", {
   r2 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "extend_ahead") %>%
+    step_adjust_latency(death_rate, method = "extend_ahead") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -175,7 +175,7 @@ test_that("epi_adjust_latency correctly extends the ahead", {
 
 test_that("epi_adjust_latency correctly locfs", {
   r1 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "locf") %>%
+    step_adjust_latency(has_role("raw"), method = "locf") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -228,7 +228,7 @@ test_that("epi_adjust_latency correctly locfs", {
 test_that("epi_adjust_latency extends multiple aheads", {
   aheads <- 1:3
   r3 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "extend_ahead") %>%
+    step_adjust_latency(death_rate, method = "extend_ahead") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = aheads)
@@ -285,7 +285,7 @@ test_that("epi_adjust_latency extends multiple aheads", {
 
 test_that("epi_adjust_latency fixed_forecast_date works", {
   r4 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "extend_lags", fixed_forecast_date = max_time + 14) %>%
+    step_adjust_latency(has_role("raw"), method = "extend_lags", fixed_forecast_date = max_time + 14) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -316,7 +316,7 @@ test_that("epi_adjust_latency fixed_forecast_date works", {
 
 test_that("epi_adjust_latency fixed_latency works", {
   r4.1 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "extend_lags", fixed_latency = 2) %>%
+    step_adjust_latency(has_role("raw"), method = "extend_lags", fixed_latency = 2) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -357,13 +357,13 @@ test_that("epi_adjust_latency warns there's steps before it", {
   expect_warning(
     r5 <- epi_recipe(x) %>%
       step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
-      step_adjust_latency(method = "extend_lags"),
+      step_adjust_latency(death_rate, method = "extend_lags"),
     regexp = "extend_lags"
   )
   expect_warning(
     r5 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = ahead) %>%
-      step_adjust_latency(method = "extend_ahead"),
+      step_adjust_latency(death_rate, method = "extend_ahead"),
     regexp = "extend_ahead"
   )
 })
@@ -375,7 +375,7 @@ test_that("epi_adjust_latency warns there's steps before it", {
 
 test_that("epi_adjust_latency correctly extends the lags when there are different delays per-geo", {
   r5 <- epi_recipe(x_lagged) %>%
-    step_adjust_latency(method = "extend_lags") %>%
+    step_adjust_latency(has_role("raw"), method = "extend_lags") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -417,7 +417,7 @@ test_that("epi_adjust_latency correctly extends the lags when there are differen
 
 test_that("epi_adjust_latency correctly extends the ahead when there are different delays per-geo", {
   r5 <- epi_recipe(x_lagged) %>%
-    step_adjust_latency(method = "extend_ahead") %>%
+    step_adjust_latency(death_rate, method = "extend_ahead") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -502,7 +502,7 @@ test_that("`step_adjust_latency` only uses the columns specified in the `...`", 
 
 test_that("printing step_adjust_latency results in expected output", {
   r5 <- epi_recipe(x) %>%
-    step_adjust_latency(case_rate, method = "extend_lags") %>%
+    step_adjust_latency(has_role("raw"), method = "extend_lags") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)
@@ -510,7 +510,7 @@ test_that("printing step_adjust_latency results in expected output", {
   expect_snapshot(prep(r5, real_x))
   r6 <- epi_recipe(covid_case_death_rates) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-    step_adjust_latency(method = "extend_ahead") %>%
+    step_adjust_latency(has_role("raw"), method = "extend_ahead") %>%
     step_epi_ahead(death_rate, ahead = 7)
   expect_snapshot(r6)
   expect_snapshot(prep(r6, covid_case_death_rates))
@@ -519,10 +519,10 @@ test_that("printing step_adjust_latency results in expected output", {
 test_that("locf works as intended", {
   expect_warning(epi_recipe(x) %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
-    step_adjust_latency(method = "locf"))
+    step_adjust_latency(death_rate, method = "locf"))
 
   r6 <- epi_recipe(x) %>%
-    step_adjust_latency(method = "locf") %>%
+    step_adjust_latency(has_role("raw"), method = "locf") %>%
     step_epi_lag(death_rate, lag = c(0, 6, 11)) %>%
     step_epi_lag(case_rate, lag = c(1, 5)) %>%
     step_epi_ahead(death_rate, ahead = ahead)

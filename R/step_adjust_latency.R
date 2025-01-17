@@ -345,19 +345,20 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
 print.step_adjust_latency <-
   function(x, width = max(20, options$width - 35), ...) {
     if (!is.null(x$forecast_date)) {
-      conj <- "with forecast date"
+      conj <- "w/ forecast date"
       extra_text <- x$forecast_date
     } else if (!is.null(x$latency_table)) {
       conj <- if (nrow(x$latency) == 1) {
-        "with latency"
+        "w/ latency"
       } else {
-        "with latencies"
+        "w/ latencies"
       }
       extra_text <- unique(x$latency_table$latency)
     } else {
-      conj <- "with latency"
-      extra_text <- "set at train time"
+      conj <- "latency"
+      extra_text <- "TBD at train time"
     }
-    print_epi_step(x$columns, x$terms, x$trained, "Adjusting",
+    title <- trimws(paste("Adj.", x$method))
+    print_epi_step(x$columns, x$terms, x$trained, title,
                    conjunction = conj, extra_text = extra_text)
   }

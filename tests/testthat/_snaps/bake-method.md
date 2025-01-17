@@ -5,5 +5,5 @@
     Condition
       Error in `hardhat::recompose()`:
       ! `data` must only contain numeric columns.
-      i These columns aren't numeric: "geo_value" and "time_value".
+      i These columns aren't numeric: "geo_value", "time_value", and ".target_time_value".
 

@@ -1,12 +1,3 @@
-test_that("weighted_median works", {
-  col <- c(1, 2, 3, 3.5, 4, 1, -2, 4, 1, 0)
-  w <- rep(1, 10)
-  expect_equal(weighted_median(col, w), median(col))
-
-  w <- c(1, 1, 2, 2, 1, 1, 1, 6, 2, 2)
-  expect_equal(weighted_median(col, w), median(rep(col, times = w)))
-})
-
 test_that("roll_modular_multivec works", {
   tib <- tibble(
     col = c(1, 2, 3, 3.5, 4, 1, -2, 4, 1, 0),

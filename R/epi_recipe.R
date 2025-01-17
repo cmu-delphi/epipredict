@@ -123,11 +123,7 @@ epi_recipe.epi_df <-
           unique(role)
         ) # anything else
       ))
-    tv_info <- var_info %>%
-      filter(role == "time_value") %>%
-      mutate(variable = ".target_time_value", role = ".target_time_value",
-             source = "derived")
-    var_info <- tibble::add_row(var_info, tv_info)
+
     ## Return final object of class `recipe`
     out <- list(
       var_info = var_info,
@@ -433,7 +429,7 @@ prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
   if (is.null(training)) {
-    cli_abort(c(
+    cli_warn(c(
       "!" = "No training data was supplied to {.fn prep}.",
       "!" = "Unlike a {.cls recipe}, an {.cls epi_recipe} does not ",
       "!" = "store the full template data in the object.",
@@ -441,12 +437,7 @@ prep.epi_recipe <- function(
       "!" = "to avoid addtional warning messages."
     ))
   }
-  tr_names <- names(training)
-  if ("time_value" %in% tr_names && !(".target_time_value" %in% tr_names)) {
-    training$.target_time_value <- training$time_value
-  } else {
-    cli_abort("The training data does not contain a `time_value` column.")
-  }
+
   training <- recipes:::check_training_set(training, x, fresh)
   training <- epi_check_training_set(training, x)
   training <- relocate(training, all_of(key_colnames(training)))

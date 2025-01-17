@@ -116,9 +116,6 @@ step_epi_ahead <-
     }
     arg_is_chr_scalar(prefix, id, role)
     arg_is_nonneg_int(ahead)
-    if (role == "outcome" && length(ahead) > 1L) {
-      cli_abort("Only one {.val outcome} may be created with this step.")
-    }
 
     recipes::add_step(
       recipe,

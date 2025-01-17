@@ -23,7 +23,8 @@ test_that("epi_recipe formula works", {
     "x", c("integer", "numeric"), "predictor", "original",
     "y", c("integer", "numeric"), "outcome", "original",
     "time_value", "date", "time_value", "original",
-    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original"
+    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original",
+    ".target_time_value", "date", ".target_time_value", "derived"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
@@ -52,7 +53,8 @@ test_that("epi_recipe formula works", {
     tibble::add_row(
       variable = "z", type = list(c("string", "unordered", "nominal")),
       role = "key",
-      source = "original"
+      source = "original",
+      .before = 6L
     )
 
   expect_identical(r$var_info, ref_var_info)
@@ -71,7 +73,8 @@ test_that("epi_recipe epi_df works", {
     "time_value", "date", "time_value", "original",
     "geo_value", c("string", "unordered", "nominal"), "geo_value", "original",
     "x", c("integer", "numeric"), "raw", "original",
-    "y", c("integer", "numeric"), "raw", "original"
+    "y", c("integer", "numeric"), "raw", "original",
+    ".target_time_value", "date", ".target_time_value", "derived"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
@@ -82,7 +85,8 @@ test_that("epi_recipe epi_df works", {
     "x", c("integer", "numeric"), "predictor", "original",
     "y", c("integer", "numeric"), "outcome", "original",
     "time_value", "date", "time_value", "original",
-    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original"
+    "geo_value", c("string", "unordered", "nominal"), "geo_value", "original",
+    ".target_time_value", "date", ".target_time_value", "derived"
   )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
@@ -95,7 +99,8 @@ test_that("epi_recipe epi_df works", {
   ref_var_info <- ref_var_info %>%
     tibble::add_row(
       variable = "time_value", type = list("date"), role = "funny_business",
-      source = "original"
+      source = "original",
+      .before = 5
     )
   expect_identical(r$var_info, ref_var_info)
   expect_equal(nrow(r$template), 1L)
