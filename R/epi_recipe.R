@@ -13,14 +13,6 @@ epi_recipe <- function(x, ...) {
 }
 
 
-#' @rdname epi_recipe
-#' @export
-epi_recipe.default <- function(x, ...) {
-  cli_abort(paste(
-    "`x` must be an {.cls epi_df} or a {.cls formula},",
-    "not a {.cls {class(x)[[1]]}}."
-  ))
-}
 
 #' @rdname epi_recipe
 #' @inheritParams recipes::recipe
