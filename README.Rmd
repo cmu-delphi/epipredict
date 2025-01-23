@@ -14,7 +14,35 @@ knitr::opts_chunk$set(
 )
 ```
 
-# epipredict
+```{r coloration, include=FALSE, echo=FALSE}
+base <- "#002676"
+primary <- "#941120"
+secondary <- "#f9c80e"
+tertiary <- "#177245"
+fourth_colour <- "#A393BF"
+fifth_colour <- "#2e8edd"
+colvec <- c(
+  base = base, primary = primary, secondary = secondary,
+  tertiary = tertiary, fourth_colour = fourth_colour,
+  fifth_colour = fifth_colour
+)
+library(epiprocess)
+suppressMessages(library(tidyverse))
+theme_update(legend.position = "bottom", legend.title = element_blank())
+delphi_pal <- function(n) {
+  if (n > 6L) warning("Not enough colors in this palette!")
+  unname(colvec)[1:n]
+}
+scale_fill_delphi <- function(..., aesthetics = "fill") {
+  discrete_scale(aesthetics = aesthetics, palette = delphi_pal, ...)
+}
+scale_color_delphi <- function(..., aesthetics = "color") {
+  discrete_scale(aesthetics = aesthetics, palette = delphi_pal, ...)
+}
+scale_colour_delphi <- scale_color_delphi
+```
+
+# Epipredict
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml)
@@ -51,7 +79,8 @@ cases <- pub_covidcast(
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20200601, 20220101),
-  geo_values = "*") |>
+  geo_values = "*"
+) |>
   select(geo_value, time_value, case_rate = value)
 
 deaths <- pub_covidcast(
@@ -60,7 +89,8 @@ deaths <- pub_covidcast(
   time_type = "day",
   geo_type = "state",
   time_values = epirange(20200601, 20220101),
-  geo_values = "*") |>
+  geo_values = "*"
+) |>
   select(geo_value, time_value, death_rate = value)
 cases_deaths <-
   full_join(cases, deaths, by = c("time_value", "geo_value")) |>
@@ -81,36 +111,39 @@ First, to eliminate some of the noise coming from daily reporting, we do 7 day a
 
 [^1]: This makes it so that any given day of the processed timeseries only depends on the previous week, which means that we avoid leaking future values when making a forecast.
 
-* Basic. Has data, calls forecaster with default arguments.
-* Intermediate. Wants to examine changes to the arguments, take advantage of
-built in flexibility.
-* Advanced. Wants to write their own forecasters. Maybe willing to build up
-from some components.
-
-The Advanced user should find their task to be relatively easy. Examples of
-these tasks are illustrated in the [vignettes and articles](https://cmu-delphi.github.io/epipredict).
-
-See also the (in progress) [Forecasting Book](https://cmu-delphi.github.io/delphi-tooling-book/).
-
-## Intermediate example
-
-The package comes with some built-in historical data for illustration, but
-up-to-date versions of this could be downloaded with the
-[`{epidatr}` package](https://cmu-delphi.github.io/epidatr/)
-and processed using
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
-
-[^1]: Other epidemiological signals for non-Covid related illnesses are also
-available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which
-interfaces directly to Delphi's
-[Epidata API](https://cmu-delphi.github.io/delphi-epidata/)
-
-```{r epidf, message=FALSE}
-library(epipredict)
-covid_case_death_rates
+```{r smooth}
+cases_deaths <-
+  cases_deaths |>
+  group_by(geo_value) |>
+  epi_slide(
+    cases_7dav = mean(case_rate, na.rm = TRUE),
+    death_rate_7dav = mean(death_rate, na.rm = TRUE),
+    .window_size = 7
+  ) |>
+  ungroup() |>
+  mutate(case_rate = NULL, death_rate = NULL) |>
+  rename(case_rate = cases_7dav, death_rate = death_rate_7dav)
 ```
 
-To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.
+Then trimming outliers, most especially negative values:
+```{r outlier}
+cases_deaths <-
+  cases_deaths |>
+  group_by(geo_value) |>
+  mutate(
+    outlr_death_rate = detect_outlr_rm(time_value, death_rate, detect_negatives = TRUE),
+    outlr_case_rate = detect_outlr_rm(time_value, case_rate, detect_negatives = TRUE)
+  ) |>
+  unnest(cols = starts_with("outlr"), names_sep = "_") |>
+  ungroup() |>
+  mutate(
+    death_rate = outlr_death_rate_replacement,
+    case_rate = outlr_case_rate_replacement
+  ) |>
+  select(geo_value, time_value, case_rate, death_rate)
+cases_deaths
+```
+</details>
 
 After having downloaded and cleaned the data in `cases_deaths`, we plot a subset
 of the states, noting the actual forecast date:
@@ -121,8 +154,8 @@ of the states, noting the actual forecast date:
 forecast_date_label <-
   tibble(
     geo_value = rep(plot_locations, 2),
-    source = c(rep("case_rate",4), rep("death_rate", 4)),
-    dates = rep(forecast_date - 7*2, 2 * length(plot_locations)),
+    source = c(rep("case_rate", 4), rep("death_rate", 4)),
+    dates = rep(forecast_date - 7 * 2, 2 * length(plot_locations)),
     heights = c(rep(150, 4), rep(1.0, 4))
   )
 processed_data_plot <-
@@ -134,7 +167,8 @@ processed_data_plot <-
   facet_grid(source ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label, aes(x=dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right") +
+    data = forecast_date_label, aes(x = dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right"
+  ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -185,7 +219,8 @@ narrow_data_plot <-
   facet_grid(source ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label, aes(x=dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right") +
+    data = forecast_date_label, aes(x = dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right"
+  ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -203,7 +238,8 @@ forecast_plot <-
   epipredict:::plot_bands(
     restricted_predictions,
     levels = 0.9,
-    fill = primary) +
+    fill = primary
+  ) +
   geom_point(data = restricted_predictions, aes(y = .data$value), color = secondary)
 ```
 
