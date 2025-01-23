@@ -35,6 +35,8 @@ R -e 'devtools::document()'
 R -e 'pkgdown::build_site()'
 ```
 
+Note that sometimes the caches from either `pkgdown` or `knitr` can cause difficulties. To clear those, run `make`, with either `clean_knitr`, `clean_site`, or `clean` (which does both).
+
 If you work without R Studio and want to iterate on documentation, you might
 find [this
 script](https://gist.github.com/gadenbuie/d22e149e65591b91419e41ea5b2e0621)
