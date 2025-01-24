@@ -57,9 +57,6 @@ servr::httw(
       devtools::build_readme()
       pkgdown::build_home()
       pkgdown::build_site(pkg, lazy = TRUE, examples = FALSE, devel = TRUE, preview = FALSE)
-
-      devtools::build_readme(".")
-      pkgdown::build_home(pkg)
     }
 
     cli::cli_alert("Site rebuild done!")
