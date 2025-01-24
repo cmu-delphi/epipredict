@@ -8,7 +8,7 @@
 #' @aliases epi_recipe epi_recipe.default epi_recipe.formula
 #' @import recipes
 #' @export
-epi_recipe <- function(x, ...) {
+epi_recipe <- function(x, forecast_date = NULL, ...) {
   UseMethod("epi_recipe")
 }
 
@@ -20,6 +20,14 @@ epi_recipe <- function(x, ...) {
 #'   describes a single role that the variable will take. This value could be
 #'   anything but common roles are `"outcome"`, `"predictor"`,
 #'   `"time_value"`, and `"geo_value"`
+#' @param forecast_date Either a date of the same class as the `time_value`
+#'   column in the `epi_df` or `NULL`. If a date, it gives the date on which the
+#'   forecast is created. This is often the same as the most recent date of
+#'   data availability, but when data is "latent" (reported after the date to
+#'   which it corresponds), the `forecast_date` may come later. Setting this
+#'   to a value BEFORE the most recent data is no longer a true "forecast"
+#'   because future data is being used to create the prediction. If `NULL`,
+#'   the `forecast_date` is
 #' @param ... Further arguments passed to or from other methods (not currently
 #'   used).
 #' @param formula A model formula. No in-line functions should be used here
@@ -27,8 +35,7 @@ epi_recipe <- function(x, ...) {
 #'  transformations should be enacted using `step` functions in this package.
 #'  Dots are allowed as are simple multivariate outcome terms (i.e. no need for
 #'  `cbind`; see Examples).
-#' @param x,data A data frame, tibble, or epi_df of the *template* data set
-#'   (see below). This is always coerced to the first row to avoid memory issues
+#' @param x,data An epi_df of the *template* data set (see below).
 #' @inherit recipes::recipe return
 #'
 #' @export

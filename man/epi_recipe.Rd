@@ -7,17 +7,23 @@
 \alias{epi_recipe.epi_df}
 \title{Create a epi_recipe for preprocessing data}
 \usage{
-epi_recipe(x, ...)
-
-\method{epi_recipe}{default}(x, ...)
+epi_recipe(x, forecast_date = NULL, ...)
 
 \method{epi_recipe}{epi_df}(x, formula = NULL, ..., vars = NULL, roles = NULL)
 
 \method{epi_recipe}{formula}(formula, data, ...)
 }
 \arguments{
-\item{x, data}{A data frame, tibble, or epi_df of the \emph{template} data set
-(see below). This is always coerced to the first row to avoid memory issues}
+\item{x, data}{An epi_df of the \emph{template} data set (see below).}
+
+\item{forecast_date}{Either a date of the same class as the \code{time_value}
+column in the \code{epi_df} or \code{NULL}. If a date, it gives the date on which the
+forecast is created. This is often the same as the most recent date of
+data availability, but when data is "latent" (reported after the date to
+which it corresponds), the \code{forecast_date} may come later. Setting this
+to a value BEFORE the most recent data is no longer a true "forecast"
+because future data is being used to create the prediction. If \code{NULL},
+the \code{forecast_date} is}
 
 \item{...}{Further arguments passed to or from other methods (not currently
 used).}
