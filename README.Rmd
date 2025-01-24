@@ -7,11 +7,40 @@ output: github_document
 ```{r, include = FALSE}
 options(width = 76)
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  digits = 3,
+  comment = "#>",
+  collapse = TRUE,
+  cache = TRUE,
+  dev.args = list(bg = "transparent"),
+  dpi = 300,
+  cache.lazy = FALSE,
+  out.width = "90%",
+  fig.align = "center",
+  fig.width = 9,
+  fig.height = 6
 )
+ggplot2::theme_set(ggplot2::theme_bw())
+options(
+  dplyr.print_min = 6,
+  dplyr.print_max = 6,
+  pillar.max_footer_lines = 2,
+  pillar.min_chars = 15,
+  stringr.view_n = 6,
+  pillar.bold = TRUE,
+  width = 77
+)
+```
+```{r pkgs, include=FALSE, echo=FALSE}
+library(epipredict)
+library(epidatr)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(magrittr)
+library(purrr)
+library(scales)
 ```
 
 ```{r coloration, include=FALSE, echo=FALSE}
@@ -48,11 +77,26 @@ scale_colour_delphi <- scale_color_delphi
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**Note:** This package is currently in development and may not work as expected. Please file bug reports as issues in this repo, and we will do our best to address them quickly.
+Epipredict is a framework for building transformation and forecasting pipelines
+for epidemiological and other panel time-series datasets. 
+In addition to tools for building forecasting pipelines, it contains a number of
+"canned" forecasters meant to run with little modification as an easy way to get
+started forecasting.
+
+It is designed to work well with
+[`epiprocess`](https://cmu-delphi.github.io/epiprocess/), a utility for handling
+various time series and geographic processing tools in an epidemiological
+context.
+Both of the packages are meant to work well with the panel data provided by
+[`epidatr`](https://cmu-delphi.github.io/epidatr/).
+
+If you are looking for more detail beyond the package documentation, see our
+[forecasting book](https://cmu-delphi.github.io/delphi-tooling-book/).
 
 ## Installation
 
-To install (unless you're making changes to the package, use the stable version):
+To install (unless you're planning on contributing to package development, we
+suggest using the stable version):
 
 ```r
 # Stable version
@@ -61,12 +105,16 @@ pak::pkg_install("cmu-delphi/epipredict@main")
 # Dev version
 pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
+The documentation for the stable version is at <https://cmu-delphi.github.io/epipredict>, while the development version is at <https://cmu-delphi.github.io/epipredict/dev>.
 
-## Documentation
 
-You can view documentation for the `main` branch at <https://cmu-delphi.github.io/epipredict>.
+## Motivating example
 
-## Goals for `epipredict`
+To demonstrate the kind of forecast epipredict can make, say we're predicting COVID deaths per 100k for each state on
+```{r fc_date}
+forecast_date <- as.Date("2021-08-01")
+```
+Below the fold, we construct this dataset as an `epiprocess::epi_df` from JHU data.
 
 <details>
 <summary> Creating the dataset using `{epidatr}` and `{epiprocess}` </summary>
@@ -182,16 +230,16 @@ To make a forecast, we will use a "canned" simple auto-regressive forecaster to 
 [^3]: lagged by 3 in this context meaning using the value from 3 days ago.
 
 ```{r make-forecasts, warning=FALSE}
-two_week_ahead <- arx_forecaster(
-  covid_case_death_rates,
+four_week_ahead <- arx_forecaster(
+  cases_deaths |> filter(time_value <= forecast_date),
   outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
-    ahead = 14
+    ahead = 4 * 7
   )
 )
-two_week_ahead
+four_week_ahead
 ```
 
 In this case, we have used 0-3 days, a week, and two week lags for the case
@@ -242,6 +290,7 @@ forecast_plot <-
   ) +
   geom_point(data = restricted_predictions, aes(y = .data$value), color = secondary)
 ```
+</details>
 
 ```{r show-single-forecast, warning=FALSE, echo=FALSE}
 forecast_plot
@@ -249,3 +298,17 @@ forecast_plot
 The yellow dot gives the median prediction, while the red interval gives the 5-95%  inter-quantile range.
 For this particular day and these locations, the forecasts are relatively accurate, with the true data being within the 25-75% interval.
 A couple of things to note:
+
+1. Our methods are primarily direct forecasters; this means we don't need to
+   predict 1, 2,..., 27 days ahead to then predict 28 days ahead
+2. All of our existing engines are geo-pooled, meaning the training data is
+   shared across geographies. This has the advantage of increasing the amount of
+   available training data, with the restriction that the data needs to be on
+   comparable scales, such as rates.
+
+## Getting Help
+If you encounter a bug or have a feature request, feel free to file an [issue on
+our github page](https://github.com/cmu-delphi/epipredict/issues).
+For other
+questions, feel free to contact [Daniel](daniel@stat.ubc.ca), [David](davidweb@andrew.cmu.edu), [Dmitry](dshemetov@cmu.edu), or
+[Logan](lcbrooks@andrew.cmu.edu), either via email or on the Insightnet slack.
