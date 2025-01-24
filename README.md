@@ -216,7 +216,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-01-24 14:47:38.
+#> This forecaster was fit on 2025-01-24 15:31:46.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -282,12 +282,12 @@ forecast_plot <-
   narrow_data_plot |>
   epipredict:::plot_bands(
     restricted_predictions,
-    levels = 0.9,
-    fill = primary
+    levels = 0.9
   ) +
-  geom_point(data = restricted_predictions,
-             aes(y = .data$value),
-             color = secondary)
+  geom_point(
+    data = restricted_predictions,
+    aes(y = .data$value)
+  )
 ```
 
 </details>

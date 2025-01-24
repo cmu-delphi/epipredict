@@ -321,12 +321,12 @@ forecast_plot <-
   narrow_data_plot |>
   epipredict:::plot_bands(
     restricted_predictions,
-    levels = 0.9,
-    fill = primary
+    levels = 0.9
   ) +
-  geom_point(data = restricted_predictions,
-             aes(y = .data$value),
-             color = secondary)
+  geom_point(
+    data = restricted_predictions,
+    aes(y = .data$value)
+  )
 ```
 </details>
 
