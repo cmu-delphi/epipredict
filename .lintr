@@ -5,5 +5,6 @@ linters: linters_with_defaults(
   )
 exclusions: list(
   "renv",
-  "venv"
+  "venv",
+  "instr/templates/"
   )
