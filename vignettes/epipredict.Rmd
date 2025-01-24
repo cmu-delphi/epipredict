@@ -11,13 +11,119 @@ vignette: >
 source("_common.R")
 ```
 
-```{r setup, message=FALSE}
+```{r setup, message=FALSE, include = FALSE}
 library(dplyr)
 library(parsnip)
 library(workflows)
 library(recipes)
 library(epipredict)
 ```
+
+At a high level, our goal with `{epipredict}` is to make running simple machine
+learning / statistical forecasters for epidemiology easy.
+To do this, we have extended several [tidymodels](https://www.tidymodels.org/)
+packages to handle the case of panel time-series data.
+Because of this, the package is extremely extensible.
+Our hope is that it is easy for users with epi training and some statistics to
+fit baseline models while still allowing those with more nuanced statistical
+understanding to create complicated specializations using the same framework.
+Towards that end, epipredict provides two main classes of tools:
+
+1. A set of basic, easy-to-use "canned" forecasters that work out of the box.
+   You should be able to do a reasonably limited amount of customization on them.
+   For the basic forecasters, we currently provide:
+    * Baseline flat forecaster: predicts a median that is the previous value
+      with increasingly wide quantiles
+    * Autoregressive forecaster: fits a model (typically linear regression) on
+      lagged data to predict quantiles for continuous values.
+    * Autoregressive classifier: fits a model (typically logistic regression) on
+      lagged data to predict probabilities for discrete values.
+    * CDC FluSight flatline forecaster: a variant of the flatline forecaster as
+      used by the CDC in FluSight.
+2. A framework for creating custom forecasters out of modular components.
+   There are three types of components:
+    * Preprocessor: do things to the data before model training, such as convert
+      counts to rates, create smoothed columns, or [any of the recipes
+      steps](https://recipes.tidymodels.org/reference/index.html)
+    * Trainer: train a model on data, resulting in a fitted model object.
+      Examples include linear regression, quantile regression, or [any parsnip
+      engine](https://parsnip.tidymodels.org/).
+    * Postprocessor: do things to the predictions after the model has been fit,
+      such as generate quantiles from purely point-prediction models, undo
+      operations done in the steps, such as convert back to counts from rates,
+      and generally adapt the format of the prediction to it's eventual use.
+
+The rest of this will focus on using and modifying the canned forecasters. 
+If you need a more complicated model, check out the [Guts
+vignette](preprocessing-and-models) for examples of using the forecaster
+framework.
+
+
+The Advanced user should find their task to be relatively easy. Examples of
+these tasks are illustrated in the [vignettes and articles](https://cmu-delphi.github.io/epipredict).
+
+See also the (in progress) [Forecasting Book](https://cmu-delphi.github.io/delphi-tooling-book/).
+
+# Panel forecasting basics
+## Example data
+
+## Intermediate example
+
+The package comes with some built-in historical data for illustration, but
+up-to-date versions of this could be downloaded with the
+[`{epidatr}` package](https://cmu-delphi.github.io/epidatr/)
+and processed using
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
+
+[^1]: Other epidemiological signals for non-Covid related illnesses are also
+available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which
+interfaces directly to Delphi's
+[Epidata API](https://cmu-delphi.github.io/delphi-epidata/)
+
+```{r init_stuff, message=FALSE}
+library(epipredict)
+covid_case_death_rates
+```
+
+To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.
+
+```{r make-forecasts, warning=FALSE}
+two_week_ahead <- arx_forecaster(
+  covid_case_death_rates,
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
+    ahead = 14
+  )
+)
+two_week_ahead
+```
+
+In this case, we have used a number of different lags for the case rate, while
+only using 3 weekly lags for the death rate (as predictors). The result is both
+a fitted model object which could be used any time in the future to create
+different forecasts, as well as a set of predicted values (and prediction
+intervals) for each location 14 days after the last available time value in the
+data.
+
+```{r print-model}
+two_week_ahead$epi_workflow
+```
+
+The fitted model here involved preprocessing the data to appropriately generate
+lagged predictors, estimating a linear model with `stats::lm()` and then
+postprocessing the results to be meaningful for epidemiological tasks. We can
+also examine the predictions.
+
+```{r show-preds}
+two_week_ahead$predictions
+```
+
+The results above show a distributional forecast produced using data through
+the end of 2021 for the 14th of January 2022. A prediction for the death rate
+per 100K inhabitants is available for every state (`geo_value`) along with a
+90% predictive interval.
 
 
 # Goals for the package
@@ -195,9 +301,9 @@ Here, we've used different lags on the `case_rate` and are now predicting 2
 weeks ahead. This example also illustrates a major difficulty with the
 "iterative" versions of AR models. This model doesn't produce forecasts for
 `case_rate`, and so, would not have data to "plug in" for the necessary
-lags.[^1]
+lags.[^3]
 
-[^1]: An obvious fix is to instead use a VAR and predict both, but this would
+[^3]: An obvious fix is to instead use a VAR and predict both, but this would
 likely increase the variance of the model, and therefore, may lead to less
 accurate forecasts for the variable of interest.
 
