@@ -12,18 +12,15 @@ jobs:
 
     runs-on: ubuntu-latest
     permissions:
+      # Needed to write a comment on the PR
       pull-requests: write
-      contents: write
+      # Needed to read the PR branch
+      contents: read
     steps:
-      - name: Get PR number
-        id: pr
-        run: |
-          PR_NUM=$(echo "${{ github.event.issue.number }}")
-          echo "number=$PR_NUM" >> $GITHUB_OUTPUT
-
       - uses: actions/checkout@v4
         with:
-          ref: refs/pull/${{ steps.pr.outputs.number }}/head
+          # Checkout the PR branch
+          ref: refs/pull/${{ github.event.issue.number }}/head
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -43,13 +40,26 @@ jobs:
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3.0
         with:
-          publish-dir: './docs'
-          production-deploy: false
+          # Standard config
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "Deploy from GitHub Actions"
+          # 'docs/' is the default directory for pkgdown::build_site()
+          # we add 'dev' because _pkgdown.yml has 'development: mode: devel'
+          publish-dir: './docs/dev'
+          # Development deploys only
+          production-deploy: false
+          # Enable pull request comment (default)
+          enable-pull-request-comment: true
+          # Overwrite the pull request comment with updated link (default)
+          overwrites-pull-request-comment: true
+          # Don't deploy to GitHub
           enable-github-deployment: false
+          # Don't update the status of the commit
           enable-commit-status: false
+          # Don't comment on the commit
+          enable-commit-comment: false
         env:
+          # Netlify credentials (currently from Dmitry's account)
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         timeout-minutes: 1
