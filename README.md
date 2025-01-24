@@ -1,21 +1,34 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# epipredict
+# Epipredict
 
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**Note:** This package is currently in development and may not work as
-expected. Please file bug reports as issues in this repo, and we will do
-our best to address them quickly.
+Epipredict is a framework for building transformation and forecasting
+pipelines for epidemiological and other panel time-series datasets. In
+addition to tools for building forecasting pipelines, it contains a
+number of “canned” forecasters meant to run with little modification as
+an easy way to get started forecasting.
+
+It is designed to work well with
+[`epiprocess`](https://cmu-delphi.github.io/epiprocess/), a utility for
+handling various time series and geographic processing tools in an
+epidemiological context. Both of the packages are meant to work well
+with the panel data provided by
+[`epidatr`](https://cmu-delphi.github.io/epidatr/).
+
+If you are looking for more detail beyond the package documentation, see
+our [forecasting
+book](https://cmu-delphi.github.io/delphi-tooling-book/).
 
 ## Installation
 
-To install (unless you’re making changes to the package, use the stable
-version):
+To install (unless you’re planning on contributing to package
+development, we suggest using the stable version):
 
 ``` r
 # Stable version
@@ -25,52 +38,14 @@ pak::pkg_install("cmu-delphi/epipredict@main")
 pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
 
-## Documentation
+The documentation for the stable version is at
+<https://cmu-delphi.github.io/epipredict>, while the development version
+is at <https://cmu-delphi.github.io/epipredict/dev>.
 
-You can view documentation for the `main` branch at
-<https://cmu-delphi.github.io/epipredict>.
+## Motivating example
 
-## Goals for `epipredict`
-
-**We hope to provide:**
-
-1.  A set of basic, easy-to-use forecasters that work out of the box.
-    You should be able to do a reasonably limited amount of
-    customization on them. For the basic forecasters, we currently
-    provide:
-    - Baseline flatline forecaster
-    - Autoregressive forecaster
-    - Autoregressive classifier
-    - CDC FluSight flatline forecaster
-2.  A framework for creating custom forecasters out of modular
-    components. There are four types of components:
-    - Preprocessor: do things to the data before model training
-    - Trainer: train a model on data, resulting in a fitted model object
-    - Predictor: make predictions, using a fitted model object
-    - Postprocessor: do things to the predictions before returning
-
-**Target audiences:**
-
-- Basic. Has data, calls forecaster with default arguments.
-- Intermediate. Wants to examine changes to the arguments, take
-  advantage of built in flexibility.
-- Advanced. Wants to write their own forecasters. Maybe willing to build
-  up from some components.
-
-The Advanced user should find their task to be relatively easy. Examples
-of these tasks are illustrated in the [vignettes and
-articles](https://cmu-delphi.github.io/epipredict).
-
-See also the (in progress) [Forecasting
-Book](https://cmu-delphi.github.io/delphi-tooling-book/).
-
-## Intermediate example
-
-The package comes with some built-in historical data for illustration,
-but up-to-date versions of this could be downloaded with the
-[`{epidatr}` package](https://cmu-delphi.github.io/epidatr/) and
-processed using
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
+To demonstrate the kind of forecast epipredict can make, say we’re
+predicting COVID deaths per 100k for each state on
 
 ``` r
 forecast_date <- as.Date("2021-08-01")
@@ -95,8 +70,9 @@ cases <- pub_covidcast(
   signals = "confirmed_incidence_prop",
   time_type = "day",
   geo_type = "state",
-  time_values = epirange(20200601, 20220101),
-  geo_values = "*") |>
+  time_values = epirange(20200601, 20211231),
+  geo_values = "*"
+) |>
   select(geo_value, time_value, case_rate = value)
 
 deaths <- pub_covidcast(
@@ -104,8 +80,9 @@ deaths <- pub_covidcast(
   signals = "deaths_incidence_prop",
   time_type = "day",
   geo_type = "state",
-  time_values = epirange(20200601, 20220101),
-  geo_values = "*") |>
+  time_values = epirange(20200601, 20211231),
+  geo_values = "*"
+) |>
   select(geo_value, time_value, death_rate = value)
 cases_deaths <-
   full_join(cases, deaths, by = c("time_value", "geo_value")) |>
@@ -123,6 +100,7 @@ cases_deaths |>
 ```
 
 <img src="man/figures/README-case_death-1.png" width="90%" style="display: block; margin: auto;" />
+
 As with basically any dataset, there is some cleaning that we will need
 to do to make it actually usable; we’ll use some utilities from
 [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.
@@ -131,7 +109,7 @@ First, to eliminate some of the noise coming from daily reporting, we do
 
 ``` r
 cases_deaths <-
-  cases_deaths |> 
+  cases_deaths |>
   group_by(geo_value) |>
   epi_slide(
     cases_7dav = mean(case_rate, na.rm = TRUE),
@@ -150,47 +128,54 @@ cases_deaths <-
   cases_deaths |>
   group_by(geo_value) |>
   mutate(
-    outlr_death_rate = detect_outlr_rm(time_value, death_rate, detect_negatives = TRUE),
-    outlr_case_rate = detect_outlr_rm(time_value, case_rate, detect_negatives = TRUE)
+    outlr_death_rate = detect_outlr_rm(
+      time_value, death_rate, detect_negatives = TRUE
+    ),
+    outlr_case_rate = detect_outlr_rm(
+      time_value, case_rate, detect_negatives = TRUE
+    )
   ) |>
   unnest(cols = starts_with("outlr"), names_sep = "_") |>
   ungroup() |>
   mutate(
     death_rate = outlr_death_rate_replacement,
-    case_rate = outlr_case_rate_replacement) |>
+    case_rate = outlr_case_rate_replacement
+  ) |>
   select(geo_value, time_value, case_rate, death_rate)
 cases_deaths
-#> An `epi_df` object, 32,480 x 4 with metadata:
+#> An `epi_df` object, 32,424 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
-#> * as_of     = 2023-03-10
+#> * as_of     = 2022-01-01
 #> 
-#> # A tibble: 20,496 × 4
-#>    geo_value time_value case_rate death_rate
-#>  * <chr>     <date>         <dbl>      <dbl>
-#>  1 ak        2020-12-31      35.9      0.158
-#>  2 al        2020-12-31      65.1      0.438
-#>  3 ar        2020-12-31      66.0      1.27 
-#>  4 as        2020-12-31       0        0    
-#>  5 az        2020-12-31      76.8      1.10 
-#>  6 ca        2020-12-31      95.9      0.755
-#>  7 co        2020-12-31      37.8      0.376
-#>  8 ct        2020-12-31      52.1      0.819
-#>  9 dc        2020-12-31      31.0      0.601
-#> 10 de        2020-12-31      64.3      0.912
-#> # ℹ 20,486 more rows
+#> # A tibble: 32,424 × 4
+#>   geo_value time_value case_rate death_rate
+#> * <chr>     <date>         <dbl>      <dbl>
+#> 1 ak        2020-06-01      2.31          0
+#> 2 ak        2020-06-02      1.94          0
+#> 3 ak        2020-06-03      2.63          0
+#> 4 ak        2020-06-04      2.59          0
+#> 5 ak        2020-06-05      2.43          0
+#> 6 ak        2020-06-06      2.35          0
+#> # ℹ 32,418 more rows
 ```
 
-To create and train a simple auto-regressive forecaster to predict the
-death rate two weeks into the future using past (lagged) deaths and
-cases, we could use the following function.
+</details>
+
+After having downloaded and cleaned the data in `cases_deaths`, we plot
+a subset of the states, noting the actual forecast date:
+
+<details>
+<summary>
+Plot
+</summary>
 
 ``` r
 forecast_date_label <-
   tibble(
     geo_value = rep(plot_locations, 2),
-    source = c(rep("case_rate",4), rep("death_rate", 4)),
-    dates = rep(forecast_date - 7*2, 2 * length(plot_locations)),
+    source = c(rep("case_rate", 4), rep("death_rate", 4)),
+    dates = rep(forecast_date - 7 * 2, 2 * length(plot_locations)),
     heights = c(rep(150, 4), rep(1.0, 4))
   )
 processed_data_plot <-
@@ -202,7 +187,10 @@ processed_data_plot <-
   facet_grid(source ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label, aes(x=dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right") +
+    data = forecast_date_label,
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
+  ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -222,26 +210,26 @@ four_week_ahead <- arx_forecaster(
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
-    ahead = 14
+    ahead = 4 * 7
   )
 )
-two_week_ahead
-#> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════
+four_week_ahead
+#> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-02-11 12:32:56.
+#> This forecaster was fit on 2025-01-24 14:47:38.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
 #> • Time type: day,
-#> • Using data up-to-date as of: 2023-03-10.
-#> • With the last data available on 2021-12-31
+#> • Using data up-to-date as of: 2022-01-01.
+#> • With the last data available on 2021-08-01
 #> 
-#> ── Predictions ─────────────────────────────────────────────────────────────
+#> ── Predictions ──────────────────────────────────────────────────────────────
 #> 
 #> A total of 56 predictions are available for
 #> • 56 unique geographic regions,
-#> • At forecast date: 2021-12-31,
-#> • For target date: 2022-01-14,
+#> • At forecast date: 2021-08-01,
+#> • For target date: 2021-08-29,
 #> 
 ```
 
@@ -272,15 +260,16 @@ narrow_data_plot <-
   facet_grid(source ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label, aes(x=dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right") +
+    data = forecast_date_label,
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
+  ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-The fitted model here involved preprocessing the data to appropriately
-generate lagged predictors, estimating a linear model with `stats::lm()`
-and then postprocessing the results to be meaningful for epidemiological
-tasks. We can also examine the predictions.
+Putting that together with a plot of the bands, and a plot of the median
+prediction.
 
 ``` r
 epiworkflow <- four_week_ahead$epi_workflow
@@ -294,16 +283,17 @@ forecast_plot <-
   epipredict:::plot_bands(
     restricted_predictions,
     levels = 0.9,
-    fill = primary) +
-  geom_point(data = restricted_predictions, aes(y = .data$value), color = secondary)
+    fill = primary
+  ) +
+  geom_point(data = restricted_predictions,
+             aes(y = .data$value),
+             color = secondary)
 ```
 
-The results above show a distributional forecast produced using data
-through the end of 2021 for the 14th of January 2022. A prediction for
-the death rate per 100K inhabitants is available for every state
-(`geo_value`) along with a 90% predictive interval.
+</details>
 
 <img src="man/figures/README-show-single-forecast-1.png" width="90%" style="display: block; margin: auto;" />
+
 The yellow dot gives the median prediction, while the red interval gives
 the 5-95% inter-quantile range. For this particular day and these
 locations, the forecasts are relatively accurate, with the true data
