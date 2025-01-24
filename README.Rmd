@@ -105,28 +105,40 @@ pak::pkg_install("cmu-delphi/epipredict@main")
 # Dev version
 pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
-The documentation for the stable version is at <https://cmu-delphi.github.io/epipredict>, while the development version is at <https://cmu-delphi.github.io/epipredict/dev>.
+
+The documentation for the stable version is at
+<https://cmu-delphi.github.io/epipredict>, while the development version is at
+<https://cmu-delphi.github.io/epipredict/dev>.
 
 
 ## Motivating example
 
-To demonstrate the kind of forecast epipredict can make, say we're predicting COVID deaths per 100k for each state on
+To demonstrate the kind of forecast epipredict can make, say we're predicting
+COVID deaths per 100k for each state on
+
 ```{r fc_date}
 forecast_date <- as.Date("2021-08-01")
 ```
-Below the fold, we construct this dataset as an `epiprocess::epi_df` from JHU data.
+
+Below the fold, we construct this dataset as an `epiprocess::epi_df` from JHU
+data.
 
 <details>
 <summary> Creating the dataset using `{epidatr}` and `{epiprocess}` </summary>
-This dataset can be found in the package as <TODO DOESN'T EXIST>; we demonstrate some of the typically ubiquitous cleaning operations needed to be able to forecast.
-First we pull both jhu-csse cases and deaths from [`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
-```{r case_death}
+
+This dataset can be found in the package as <TODO DOESN'T EXIST>; we demonstrate
+some of the typically ubiquitous cleaning operations needed to be able to
+forecast.
+First we pull both jhu-csse cases and deaths from
+[`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
+
+```{r case_death, warning = FALSE}
 cases <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_incidence_prop",
   time_type = "day",
   geo_type = "state",
-  time_values = epirange(20200601, 20220101),
+  time_values = epirange(20200601, 20211231),
   geo_values = "*"
 ) |>
   select(geo_value, time_value, case_rate = value)
@@ -136,7 +148,7 @@ deaths <- pub_covidcast(
   signals = "deaths_incidence_prop",
   time_type = "day",
   geo_type = "state",
-  time_values = epirange(20200601, 20220101),
+  time_values = epirange(20200601, 20211231),
   geo_values = "*"
 ) |>
   select(geo_value, time_value, death_rate = value)
@@ -154,10 +166,16 @@ cases_deaths |>
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
-As with basically any dataset, there is some cleaning that we will need to do to make it actually usable; we'll use some utilities from [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.
-First, to eliminate some of the noise coming from daily reporting, we do 7 day averaging over a trailing window[^1]:
 
-[^1]: This makes it so that any given day of the processed timeseries only depends on the previous week, which means that we avoid leaking future values when making a forecast.
+As with basically any dataset, there is some cleaning that we will need to do to
+make it actually usable; we'll use some utilities from
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.  First, to
+eliminate some of the noise coming from daily reporting, we do 7 day averaging
+over a trailing window[^1]:
+
+[^1]: This makes it so that any given day of the processed timeseries only
+    depends on the previous week, which means that we avoid leaking future
+    values when making a forecast.
 
 ```{r smooth}
 cases_deaths <-
@@ -174,13 +192,18 @@ cases_deaths <-
 ```
 
 Then trimming outliers, most especially negative values:
+
 ```{r outlier}
 cases_deaths <-
   cases_deaths |>
   group_by(geo_value) |>
   mutate(
-    outlr_death_rate = detect_outlr_rm(time_value, death_rate, detect_negatives = TRUE),
-    outlr_case_rate = detect_outlr_rm(time_value, case_rate, detect_negatives = TRUE)
+    outlr_death_rate = detect_outlr_rm(
+      time_value, death_rate, detect_negatives = TRUE
+    ),
+    outlr_case_rate = detect_outlr_rm(
+      time_value, case_rate, detect_negatives = TRUE
+    )
   ) |>
   unnest(cols = starts_with("outlr"), names_sep = "_") |>
   ungroup() |>
@@ -215,7 +238,9 @@ processed_data_plot <-
   facet_grid(source ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label, aes(x = dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right"
+    data = forecast_date_label,
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -225,7 +250,9 @@ processed_data_plot <-
 processed_data_plot
 ```
 
-To make a forecast, we will use a "canned" simple auto-regressive forecaster to predict the death rate four weeks into the future using lagged[^3] deaths and cases
+To make a forecast, we will use a "canned" simple auto-regressive forecaster to
+predict the death rate four weeks into the future using lagged[^3] deaths and
+cases
 
 [^3]: lagged by 3 in this context meaning using the value from 3 days ago.
 
@@ -251,11 +278,16 @@ predicted values (and prediction intervals) for each location 28 days after the
 forecast date.
 Plotting the prediction intervals on our subset above[^2]: 
 
-[^2]: Alternatively, you could call `auto_plot(four_week_ahead)` to get the full collection of forecasts. This is too busy for the space we have for plotting here.
+[^2]: Alternatively, you could call `auto_plot(four_week_ahead)` to get the full
+    collection of forecasts. This is too busy for the space we have for plotting
+    here.
 
 <details>
 <summary> Plot </summary>
-This is the same kind of plot as `processed_data_plot` above, but with the past data narrowed somewhat
+
+This is the same kind of plot as `processed_data_plot` above, but with the past
+data narrowed somewhat
+
 ```{r}
 narrow_data_plot <-
   cases_deaths |>
@@ -267,13 +299,17 @@ narrow_data_plot <-
   facet_grid(source ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label, aes(x = dates, label = "forecast\ndate", y = heights), size = 3, hjust = "right"
+    data = forecast_date_label,
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-Putting that together with a plot of the bands, and a plot of the median prediction.
+Putting that together with a plot of the bands, and a plot of the median
+prediction.
+
 ```{r plotting_forecast, warning=FALSE}
 epiworkflow <- four_week_ahead$epi_workflow
 restricted_predictions <-
@@ -288,15 +324,20 @@ forecast_plot <-
     levels = 0.9,
     fill = primary
   ) +
-  geom_point(data = restricted_predictions, aes(y = .data$value), color = secondary)
+  geom_point(data = restricted_predictions,
+             aes(y = .data$value),
+             color = secondary)
 ```
 </details>
 
 ```{r show-single-forecast, warning=FALSE, echo=FALSE}
 forecast_plot
 ```
-The yellow dot gives the median prediction, while the red interval gives the 5-95%  inter-quantile range.
-For this particular day and these locations, the forecasts are relatively accurate, with the true data being within the 25-75% interval.
+
+The yellow dot gives the median prediction, while the red interval gives the
+5-95%  inter-quantile range.
+For this particular day and these locations, the forecasts are relatively
+accurate, with the true data being within the 25-75% interval.
 A couple of things to note:
 
 1. Our methods are primarily direct forecasters; this means we don't need to
