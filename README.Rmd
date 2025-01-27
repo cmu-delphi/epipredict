@@ -240,10 +240,12 @@ forecast_date_label <-
   )
 processed_data_plot <-
   cases_deaths |>
-  pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
-  ggplot(aes(x = time_value, y = value)) +
-  geom_line() +
-  facet_grid(source ~ geo_value, scale = "free") +
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(.response_name ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label,
@@ -292,50 +294,23 @@ Plotting the prediction intervals on our subset above[^2]:
 
 <details>
 <summary> Plot </summary>
-
-This is the same kind of plot as `processed_data_plot` above, but with the past
-data narrowed somewhat
-
-```{r}
-narrow_data_plot <-
-  cases_deaths |>
-  filter(time_value > "2021-04-01") |>
-  autoplot(
-    case_rate,
-    death_rate,
-    .color_by = "none"
-  ) +
-  facet_grid(.response_name ~ geo_value, scale = "free") +
-  geom_vline(aes(xintercept = forecast_date)) +
-  geom_text(
-    data = forecast_date_label,
-    aes(x = dates, label = "forecast\ndate", y = heights),
-    size = 3, hjust = "right"
-  ) +
-  scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  ylim(0, NA)
-```
-
-Putting that together with a plot of the bands, and a plot of the median
-prediction.
-
 ```{r plotting_forecast, warning=FALSE}
 epiworkflow <- four_week_ahead$epi_workflow
-
 restricted_predictions <-
   four_week_ahead$predictions |>
   rename(time_value = target_date, value = .pred) |>
   mutate(.response_name = "death_rate")
 forecast_plot <-
-  narrow_data_plot |>
-  epipredict:::plot_bands(
-    restricted_predictions
+  four_week_ahead |>
+  autoplot(plot_data = cases_deaths) +
+  geom_vline(aes(xintercept = forecast_date)) +
+  geom_text(
+    data = forecast_date_label %>% filter(.response_name == "death_rate"),
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
   ) +
-  geom_point(
-    data = restricted_predictions,
-    aes(y = .data$value)
-  )
+  scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 </details>
 
@@ -343,10 +318,10 @@ forecast_plot <-
 forecast_plot
 ```
 
-The yellow dot gives the median prediction, while the red interval gives the
-5-95%  inter-quantile range.
+The black dot gives the median prediction, while the blue intervals give the
+25-75%, the 10-90%, and 2.5-97.5%  inter-quantile ranges.
 For this particular day and these locations, the forecasts are relatively
-accurate, with the true data being within the 25-75% interval.
+accurate, with the true data being at least within the 10-90% interval.
 A couple of things to note:
 
 1. Our methods are primarily direct forecasters; this means we don't need to
@@ -362,4 +337,4 @@ our github page](https://github.com/cmu-delphi/epipredict/issues).
 For other
 questions, feel free to reach out to the authors, either via this [contact
 form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
-email or the Insightnet slack.
+email, or the Insightnet slack.

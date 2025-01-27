@@ -59,7 +59,7 @@ from JHU data.
 Creating the dataset using `{epidatr}` and `{epiprocess}`
 </summary>
 
-This dataset can be found in the package as \<TODO DOESN’T EXIST\>; we
+This dataset can be found in the package as `covid_case_death_rates`; we
 demonstrate some of the typically ubiquitous cleaning operations needed
 to be able to forecast. First we pull both jhu-csse cases and deaths
 from [`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
@@ -84,26 +84,35 @@ deaths <- pub_covidcast(
   geo_values = "*"
 ) |>
   select(geo_value, time_value, death_rate = value)
+```
+
+Since visualizing the results on every geography is somewhat
+overwhelming, we’ll only train on a subset of 5.
+
+``` r
+used_locations <- c("ca", "ma", "ny", "tx")
 cases_deaths <-
   full_join(cases, deaths, by = c("time_value", "geo_value")) |>
+  filter(geo_value %in% used_locations) |>
   as_epi_df(as_of = as.Date("2022-01-01"))
-plot_locations <- c("ca", "ma", "ny", "tx")
 # plotting the data as it was downloaded
 cases_deaths |>
-  filter(geo_value %in% plot_locations) |>
-  pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
-  ggplot(aes(x = time_value, y = value)) +
-  geom_line() +
-  facet_grid(source ~ geo_value, scale = "free") +
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(.response_name ~ geo_value, scale = "free") +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-<img src="man/figures/README-case_death-1.png" width="90%" style="display: block; margin: auto;" />
+<img src="man/figures/README-date-1.png" width="90%" style="display: block; margin: auto;" />
 
 As with basically any dataset, there is some cleaning that we will need
 to do to make it actually usable; we’ll use some utilities from
 [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.
+
 First, to eliminate some of the noise coming from daily reporting, we do
 7 day averaging over a trailing window[^1]:
 
@@ -129,10 +138,12 @@ cases_deaths <-
   group_by(geo_value) |>
   mutate(
     outlr_death_rate = detect_outlr_rm(
-      time_value, death_rate, detect_negatives = TRUE
+      time_value, death_rate,
+      detect_negatives = TRUE
     ),
     outlr_case_rate = detect_outlr_rm(
-      time_value, case_rate, detect_negatives = TRUE
+      time_value, case_rate,
+      detect_negatives = TRUE
     )
   ) |>
   unnest(cols = starts_with("outlr"), names_sep = "_") |>
@@ -142,22 +153,6 @@ cases_deaths <-
     case_rate = outlr_case_rate_replacement
   ) |>
   select(geo_value, time_value, case_rate, death_rate)
-cases_deaths
-#> An `epi_df` object, 32,424 x 4 with metadata:
-#> * geo_type  = state
-#> * time_type = day
-#> * as_of     = 2022-01-01
-#> 
-#> # A tibble: 32,424 × 4
-#>   geo_value time_value case_rate death_rate
-#> * <chr>     <date>         <dbl>      <dbl>
-#> 1 ak        2020-06-01      2.31          0
-#> 2 ak        2020-06-02      1.94          0
-#> 3 ak        2020-06-03      2.63          0
-#> 4 ak        2020-06-04      2.59          0
-#> 5 ak        2020-06-05      2.43          0
-#> 6 ak        2020-06-06      2.35          0
-#> # ℹ 32,418 more rows
 ```
 
 </details>
@@ -173,18 +168,19 @@ Plot
 ``` r
 forecast_date_label <-
   tibble(
-    geo_value = rep(plot_locations, 2),
-    source = c(rep("case_rate", 4), rep("death_rate", 4)),
-    dates = rep(forecast_date - 7 * 2, 2 * length(plot_locations)),
+    geo_value = rep(used_locations, 2),
+    .response_name = c(rep("case_rate", 4), rep("death_rate", 4)),
+    dates = rep(forecast_date - 7 * 2, 2 * length(used_locations)),
     heights = c(rep(150, 4), rep(1.0, 4))
   )
 processed_data_plot <-
   cases_deaths |>
-  filter(geo_value %in% plot_locations) |>
-  pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
-  ggplot(aes(x = time_value, y = value)) +
-  geom_line() +
-  facet_grid(source ~ geo_value, scale = "free") +
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(.response_name ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label,
@@ -216,7 +212,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-01-24 15:31:46.
+#> This forecaster was fit on 2025-01-27 16:36:10.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -226,8 +222,8 @@ four_week_ahead
 #> 
 #> ── Predictions ──────────────────────────────────────────────────────────────
 #> 
-#> A total of 56 predictions are available for
-#> • 56 unique geographic regions,
+#> A total of 4 predictions are available for
+#> • 4 unique geographic regions,
 #> • At forecast date: 2021-08-01,
 #> • For target date: 2021-08-29,
 #> 
@@ -246,21 +242,18 @@ Plotting the prediction intervals on our subset above[^3]:
 Plot
 </summary>
 
-This is the same kind of plot as `processed_data_plot` above, but with
-the past data narrowed somewhat
-
 ``` r
-narrow_data_plot <-
-  cases_deaths |>
-  filter(time_value > "2021-04-01") |>
-  filter(geo_value %in% plot_locations) |>
-  pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
-  ggplot(aes(x = time_value, y = value)) +
-  geom_line() +
-  facet_grid(source ~ geo_value, scale = "free") +
+epiworkflow <- four_week_ahead$epi_workflow
+restricted_predictions <-
+  four_week_ahead$predictions |>
+  rename(time_value = target_date, value = .pred) |>
+  mutate(.response_name = "death_rate")
+forecast_plot <-
+  four_week_ahead |>
+  autoplot(plot_data = cases_deaths) +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
-    data = forecast_date_label,
+    data = forecast_date_label %>% filter(.response_name == "death_rate"),
     aes(x = dates, label = "forecast\ndate", y = heights),
     size = 3, hjust = "right"
   ) +
@@ -268,36 +261,15 @@ narrow_data_plot <-
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-Putting that together with a plot of the bands, and a plot of the median
-prediction.
-
-``` r
-epiworkflow <- four_week_ahead$epi_workflow
-restricted_predictions <-
-  four_week_ahead$predictions |>
-  filter(geo_value %in% plot_locations) |>
-  rename(time_value = target_date, value = .pred) |>
-  mutate(source = "death_rate")
-forecast_plot <-
-  narrow_data_plot |>
-  epipredict:::plot_bands(
-    restricted_predictions,
-    levels = 0.9
-  ) +
-  geom_point(
-    data = restricted_predictions,
-    aes(y = .data$value)
-  )
-```
-
 </details>
 
 <img src="man/figures/README-show-single-forecast-1.png" width="90%" style="display: block; margin: auto;" />
 
-The yellow dot gives the median prediction, while the red interval gives
-the 5-95% inter-quantile range. For this particular day and these
-locations, the forecasts are relatively accurate, with the true data
-being within the 25-75% interval. A couple of things to note:
+The black dot gives the median prediction, while the blue intervals give
+the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges. For this
+particular day and these locations, the forecasts are relatively
+accurate, with the true data being at least within the 10-90% interval.
+A couple of things to note:
 
 1.  Our methods are primarily direct forecasters; this means we don’t
     need to predict 1, 2,…, 27 days ahead to then predict 28 days ahead
@@ -312,10 +284,10 @@ being within the 25-75% interval. A couple of things to note:
 If you encounter a bug or have a feature request, feel free to file an
 [issue on our github
 page](https://github.com/cmu-delphi/epipredict/issues). For other
-questions, feel free to contact [Daniel](daniel@stat.ubc.ca),
-[David](davidweb@andrew.cmu.edu), [Dmitry](dshemetov@cmu.edu), or
-[Logan](lcbrooks@andrew.cmu.edu), either via email or on the Insightnet
-slack.
+questions, feel free to reach out to the authors, either via this
+[contact
+form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
+email, or the Insightnet slack.
 
 [^1]: This makes it so that any given day of the processed timeseries
     only depends on the previous week, which means that we avoid leaking
