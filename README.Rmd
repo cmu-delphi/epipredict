@@ -126,9 +126,9 @@ data.
 <details>
 <summary> Creating the dataset using `{epidatr}` and `{epiprocess}` </summary>
 
-This dataset can be found in the package as <TODO DOESN'T EXIST>; we demonstrate
-some of the typically ubiquitous cleaning operations needed to be able to
-forecast.
+This dataset can be found in the package as `covid_case_death_rates`; we
+demonstrate some of the typically ubiquitous cleaning operations needed to be
+able to forecast.
 First we pull both jhu-csse cases and deaths from
 [`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
 
@@ -152,26 +152,34 @@ deaths <- pub_covidcast(
   geo_values = "*"
 ) |>
   select(geo_value, time_value, death_rate = value)
+```
+
+Since visualizing the results on every geography is somewhat overwhelming,
+we'll only train on a subset of 5.
+```{r date, warning = FALSE}
+used_locations <- c("ca", "ma", "ny", "tx")
 cases_deaths <-
   full_join(cases, deaths, by = c("time_value", "geo_value")) |>
+  filter(geo_value %in% used_locations) |>
   as_epi_df(as_of = as.Date("2022-01-01"))
-plot_locations <- c("ca", "ma", "ny", "tx")
 # plotting the data as it was downloaded
 cases_deaths |>
-  filter(geo_value %in% plot_locations) |>
-  pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
-  ggplot(aes(x = time_value, y = value)) +
-  geom_line() +
-  facet_grid(source ~ geo_value, scale = "free") +
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(.response_name ~ geo_value, scale = "free") +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 As with basically any dataset, there is some cleaning that we will need to do to
 make it actually usable; we'll use some utilities from
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.  First, to
-eliminate some of the noise coming from daily reporting, we do 7 day averaging
-over a trailing window[^1]:
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.
+
+First, to eliminate some of the noise coming from daily reporting, we do 7 day
+averaging over a trailing window[^1]:
 
 [^1]: This makes it so that any given day of the processed timeseries only
     depends on the previous week, which means that we avoid leaking future
@@ -199,10 +207,12 @@ cases_deaths <-
   group_by(geo_value) |>
   mutate(
     outlr_death_rate = detect_outlr_rm(
-      time_value, death_rate, detect_negatives = TRUE
+      time_value, death_rate,
+      detect_negatives = TRUE
     ),
     outlr_case_rate = detect_outlr_rm(
-      time_value, case_rate, detect_negatives = TRUE
+      time_value, case_rate,
+      detect_negatives = TRUE
     )
   ) |>
   unnest(cols = starts_with("outlr"), names_sep = "_") |>
@@ -212,7 +222,6 @@ cases_deaths <-
     case_rate = outlr_case_rate_replacement
   ) |>
   select(geo_value, time_value, case_rate, death_rate)
-cases_deaths
 ```
 </details>
 
@@ -224,14 +233,13 @@ of the states, noting the actual forecast date:
 ```{r plot_locs}
 forecast_date_label <-
   tibble(
-    geo_value = rep(plot_locations, 2),
-    source = c(rep("case_rate", 4), rep("death_rate", 4)),
-    dates = rep(forecast_date - 7 * 2, 2 * length(plot_locations)),
+    geo_value = rep(used_locations, 2),
+    .response_name = c(rep("case_rate", 4), rep("death_rate", 4)),
+    dates = rep(forecast_date - 7 * 2, 2 * length(used_locations)),
     heights = c(rep(150, 4), rep(1.0, 4))
   )
 processed_data_plot <-
   cases_deaths |>
-  filter(geo_value %in% plot_locations) |>
   pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
   ggplot(aes(x = time_value, y = value)) +
   geom_line() +
@@ -292,11 +300,12 @@ data narrowed somewhat
 narrow_data_plot <-
   cases_deaths |>
   filter(time_value > "2021-04-01") |>
-  filter(geo_value %in% plot_locations) |>
-  pivot_longer(cols = c("case_rate", "death_rate"), names_to = "source") |>
-  ggplot(aes(x = time_value, y = value)) +
-  geom_line() +
-  facet_grid(source ~ geo_value, scale = "free") +
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(.response_name ~ geo_value, scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label,
@@ -304,7 +313,8 @@ narrow_data_plot <-
     size = 3, hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  ylim(0, NA)
 ```
 
 Putting that together with a plot of the bands, and a plot of the median
@@ -312,16 +322,15 @@ prediction.
 
 ```{r plotting_forecast, warning=FALSE}
 epiworkflow <- four_week_ahead$epi_workflow
+
 restricted_predictions <-
   four_week_ahead$predictions |>
-  filter(geo_value %in% plot_locations) |>
   rename(time_value = target_date, value = .pred) |>
-  mutate(source = "death_rate")
+  mutate(.response_name = "death_rate")
 forecast_plot <-
   narrow_data_plot |>
   epipredict:::plot_bands(
-    restricted_predictions,
-    levels = 0.9
+    restricted_predictions
   ) +
   geom_point(
     data = restricted_predictions,
@@ -351,5 +360,6 @@ A couple of things to note:
 If you encounter a bug or have a feature request, feel free to file an [issue on
 our github page](https://github.com/cmu-delphi/epipredict/issues).
 For other
-questions, feel free to contact [Daniel](daniel@stat.ubc.ca), [David](davidweb@andrew.cmu.edu), [Dmitry](dshemetov@cmu.edu), or
-[Logan](lcbrooks@andrew.cmu.edu), either via email or on the Insightnet slack.
+questions, feel free to reach out to the authors, either via this [contact
+form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
+email or the Insightnet slack.
