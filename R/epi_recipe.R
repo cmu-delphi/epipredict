@@ -66,88 +66,88 @@ epi_recipe.epi_df <- function(x,
                               ...,
                               vars = NULL,
                               roles = NULL) {
-    attr(x, "decay_to_tibble") <- FALSE
-    if (!is.null(formula)) {
-      if (!is.null(vars)) {
-        cli_abort(paste0(
-          "This `vars` specification will be ignored ",
-          "when a formula is used"
-        ))
-      }
-      if (!is.null(roles)) {
-        cli_abort(
-          paste0(
-            "This `roles` specification will be ignored ",
-            "when a formula is used"
-          )
-        )
-      }
-
-      obj <- epi_recipe.formula(formula, x, ...)
-      return(obj)
-    }
-    if (is.null(vars)) vars <- colnames(x)
-    if (any(table(vars) > 1)) {
-      cli_abort("`vars` should have unique members")
-    }
-    if (any(!(vars %in% colnames(x)))) {
-      cli_abort("1 or more elements of `vars` are not in the data")
-    }
-
-    keys <- key_colnames(x) # we know x is an epi_df
-
-    var_info <- tibble(variable = vars)
-    key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
-
-    ## Check and add roles when available
-    if (!is.null(roles)) {
-      if (length(roles) != length(vars)) {
-        cli_abort(paste0(
-          "The number of roles should be the same as the number of ",
-          "variables."
-        ))
-      }
-      var_info$role <- roles
-    } else {
-      var_info <- var_info %>% filter(!(variable %in% keys))
-      var_info$role <- "raw"
-    }
-    ## Now we add the keys when necessary
-    var_info <- dplyr::union(
-      var_info,
-      tibble::tibble(variable = keys, role = key_roles)
-    )
-
-    ## Add types
-    var_info <- full_join(recipes:::get_types(x), var_info, by = "variable")
-    var_info$source <- "original"
-
-    ## arrange to easy order
-    var_info <- var_info %>%
-      arrange(factor(
-        role,
-        levels = union(
-          c("predictor", "outcome", "time_value", "geo_value", "key"),
-          unique(role)
-        ) # anything else
+  attr(x, "decay_to_tibble") <- FALSE
+  if (!is.null(formula)) {
+    if (!is.null(vars)) {
+      cli_abort(paste0(
+        "This `vars` specification will be ignored ",
+        "when a formula is used"
       ))
+    }
+    if (!is.null(roles)) {
+      cli_abort(
+        paste0(
+          "This `roles` specification will be ignored ",
+          "when a formula is used"
+        )
+      )
+    }
 
-    ## Return final object of class `recipe`
-    max_time_value = max(x$time_value)
-    reference_date <- reference_date %||% attr(x, "metadata")$as_of
-    out <- list(
-      var_info = var_info,
-      term_info = var_info,
-      steps = NULL,
-      template = x[1, ],
-      max_time_value = max_time_value,
-      reference_date = reference_date,
-      levels = NULL,
-      retained = NA
-    )
-    class(out) <- c("epi_recipe", "recipe")
-    out
+    obj <- epi_recipe.formula(formula, x, ...)
+    return(obj)
   }
+  if (is.null(vars)) vars <- colnames(x)
+  if (any(table(vars) > 1)) {
+    cli_abort("`vars` should have unique members")
+  }
+  if (any(!(vars %in% colnames(x)))) {
+    cli_abort("1 or more elements of `vars` are not in the data")
+  }
+
+  keys <- key_colnames(x) # we know x is an epi_df
+
+  var_info <- tibble(variable = vars)
+  key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
+
+  ## Check and add roles when available
+  if (!is.null(roles)) {
+    if (length(roles) != length(vars)) {
+      cli_abort(paste0(
+        "The number of roles should be the same as the number of ",
+        "variables."
+      ))
+    }
+    var_info$role <- roles
+  } else {
+    var_info <- var_info %>% filter(!(variable %in% keys))
+    var_info$role <- "raw"
+  }
+  ## Now we add the keys when necessary
+  var_info <- dplyr::union(
+    var_info,
+    tibble::tibble(variable = keys, role = key_roles)
+  )
+
+  ## Add types
+  var_info <- full_join(recipes:::get_types(x), var_info, by = "variable")
+  var_info$source <- "original"
+
+  ## arrange to easy order
+  var_info <- var_info %>%
+    arrange(factor(
+      role,
+      levels = union(
+        c("predictor", "outcome", "time_value", "geo_value", "key"),
+        unique(role)
+      ) # anything else
+    ))
+
+  ## Return final object of class `recipe`
+  max_time_value <- max(x$time_value)
+  reference_date <- reference_date %||% attr(x, "metadata")$as_of
+  out <- list(
+    var_info = var_info,
+    term_info = var_info,
+    steps = NULL,
+    template = x[1, ],
+    max_time_value = max_time_value,
+    reference_date = reference_date,
+    levels = NULL,
+    retained = NA
+  )
+  class(out) <- c("epi_recipe", "recipe")
+  out
+}
 
 
 #' @rdname epi_recipe
