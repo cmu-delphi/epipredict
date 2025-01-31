@@ -169,7 +169,11 @@ cases_deaths |>
     death_rate,
     .color_by = "none"
   ) +
-  facet_grid(.response_name ~ geo_value, scale = "free") +
+  facet_grid(
+    rows = vars(.response_name),
+    cols = vars(geo_value),
+    scale = "free"
+  ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -181,7 +185,7 @@ make it actually usable; we'll use some utilities from
 First, to eliminate some of the noise coming from daily reporting, we do 7 day
 averaging over a trailing window[^1]:
 
-[^1]: This makes it so that any given day of the processed timeseries only
+[^1]: This makes it so that any given day of the processed time-series only
     depends on the previous week, which means that we avoid leaking future
     values when making a forecast.
 
@@ -236,16 +240,21 @@ forecast_date_label <-
     geo_value = rep(used_locations, 2),
     .response_name = c(rep("case_rate", 4), rep("death_rate", 4)),
     dates = rep(forecast_date - 7 * 2, 2 * length(used_locations)),
-    heights = c(rep(150, 4), rep(1.0, 4))
+    heights = c(rep(150, 4), rep(0.75, 4))
   )
 processed_data_plot <-
-  cases_deaths |>
+  covid_case_death_rates |>
+  filter(geo_value %in% used_locations) |>
   autoplot(
     case_rate,
     death_rate,
     .color_by = "none"
   ) +
-  facet_grid(.response_name ~ geo_value, scale = "free") +
+  facet_grid(
+    rows = vars(.response_name),
+    cols = vars(geo_value),
+    scale = "free"
+  ) +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label,
@@ -273,7 +282,8 @@ four_week_ahead <- arx_forecaster(
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
-    ahead = 4 * 7
+    ahead = 4 * 7,
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
   )
 )
 four_week_ahead
@@ -288,7 +298,7 @@ predicted values (and prediction intervals) for each location 28 days after the
 forecast date.
 Plotting the prediction intervals on our subset above[^2]: 
 
-[^2]: Alternatively, you could call `auto_plot(four_week_ahead)` to get the full
+[^2]: Alternatively, you could call `autoplot(four_week_ahead)` to get the full
     collection of forecasts. This is too busy for the space we have for plotting
     here.
 
@@ -318,8 +328,15 @@ forecast_plot <-
 forecast_plot
 ```
 
+And as a tibble of quantile level-value pairs:
+```{r pivot_wider}
+four_week_ahead$predictions |>
+  select(-.pred) |>
+  pivot_quantiles_longer(.pred_distn)
+```
+
 The black dot gives the median prediction, while the blue intervals give the
-25-75%, the 10-90%, and 2.5-97.5%  inter-quantile ranges.
+25-75%, the 10-90%, and 2.5-97.5%  inter-quantile ranges[^4].
 For this particular day and these locations, the forecasts are relatively
 accurate, with the true data being at least within the 10-90% interval.
 A couple of things to note:
@@ -334,7 +351,10 @@ A couple of things to note:
 ## Getting Help
 If you encounter a bug or have a feature request, feel free to file an [issue on
 our github page](https://github.com/cmu-delphi/epipredict/issues).
-For other
-questions, feel free to reach out to the authors, either via this [contact
+For other questions, feel free to reach out to the authors, either via this
+[contact
 form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
 email, or the Insightnet slack.
+
+[^4]: Note that these are not the same quantiles that we fit when creating
+    `four_week_ahead`. They are extrapolated from those quantiles using `extrapolate_quantiles()` (which assumes an exponential decay in the tails).

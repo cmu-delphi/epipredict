@@ -15,6 +15,7 @@ articles:
       - backtesting
       - arx-classifier
       - update
+      - guts
   - title: Advanced methods
     contents:
       - articles/smooth-qr
@@ -47,6 +48,7 @@ reference:
     contents:
       - contains("args_list")
       - contains("_epi_workflow")
+
   - title: Helper functions for Hub submission
     contents:
       - flusight_hub_formatter

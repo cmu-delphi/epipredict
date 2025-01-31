@@ -1,6 +1,6 @@
 library(dplyr)
 # Test ideas that were dropped:
-# - "epi_adjust_latency works correctly when there's gaps in the timeseries"
+# - "epi_adjust_latency works correctly when there's gaps in the time-series"
 # - "epi_adjust_latency extend_ahead uses the same adjustment when predicting on new data after being baked"
 # - "`step_adjust_latency` only allows one instance of itself"
 # - "data with epi_df shorn off works"

@@ -13,6 +13,7 @@
 rlang::check_installed(c("pkgdown", "servr", "devtools", "here", "cli", "fs"))
 library(pkgdown)
 pkg <- pkgdown::as_pkgdown(here::here())
+devtools::build_readme()
 pkgdown::build_articles(pkg)
 pkgdown::build_site(pkg, lazy = FALSE, examples = FALSE, devel = TRUE, preview = FALSE)
 
@@ -55,7 +56,6 @@ servr::httw(
     readme <- grep("README[.]rmd$", files, value = TRUE, ignore.case = TRUE)
     if (length(readme)) {
       devtools::build_readme()
-      pkgdown::build_home()
       pkgdown::build_site(pkg, lazy = TRUE, examples = FALSE, devel = TRUE, preview = FALSE)
     }
 

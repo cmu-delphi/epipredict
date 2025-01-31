@@ -102,7 +102,10 @@ cases_deaths |>
     death_rate,
     .color_by = "none"
   ) +
-  facet_grid(.response_name ~ geo_value, scale = "free") +
+  facet_grid(
+    rows = vars(.response_name),
+    cols = vars(geo_value),
+    scale = "free") +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -171,16 +174,19 @@ forecast_date_label <-
     geo_value = rep(used_locations, 2),
     .response_name = c(rep("case_rate", 4), rep("death_rate", 4)),
     dates = rep(forecast_date - 7 * 2, 2 * length(used_locations)),
-    heights = c(rep(150, 4), rep(1.0, 4))
+    heights = c(rep(150, 4), rep(0.75, 4))
   )
 processed_data_plot <-
-  cases_deaths |>
+  covid_case_death_rates |> filter(geo_value %in% used_locations) |>
   autoplot(
     case_rate,
     death_rate,
     .color_by = "none"
   ) +
-  facet_grid(.response_name ~ geo_value, scale = "free") +
+  facet_grid(
+    rows = vars(.response_name),
+    cols = vars(geo_value),
+    scale = "free") +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label,
@@ -206,13 +212,14 @@ four_week_ahead <- arx_forecaster(
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
-    ahead = 4 * 7
+    ahead = 4 * 7,
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
   )
 )
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-01-27 16:36:10.
+#> This forecaster was fit on 2025-01-31 10:46:32.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -265,9 +272,27 @@ forecast_plot <-
 
 <img src="man/figures/README-show-single-forecast-1.png" width="90%" style="display: block; margin: auto;" />
 
+And as a tibble of quantile level-value pairs:
+
+``` r
+four_week_ahead$predictions |>
+  select(-.pred) |>
+  pivot_quantiles_longer(.pred_distn)
+#> # A tibble: 20 × 5
+#>   geo_value values quantile_levels forecast_date target_date
+#>   <chr>      <dbl>           <dbl> <date>        <date>     
+#> 1 ca        0.199             0.1  2021-08-01    2021-08-29 
+#> 2 ca        0.285             0.25 2021-08-01    2021-08-29 
+#> 3 ca        0.345             0.5  2021-08-01    2021-08-29 
+#> 4 ca        0.405             0.75 2021-08-01    2021-08-29 
+#> 5 ca        0.491             0.9  2021-08-01    2021-08-29 
+#> 6 ma        0.0285            0.1  2021-08-01    2021-08-29 
+#> # ℹ 14 more rows
+```
+
 The black dot gives the median prediction, while the blue intervals give
-the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges. For this
-particular day and these locations, the forecasts are relatively
+the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges[^4]. For
+this particular day and these locations, the forecasts are relatively
 accurate, with the true data being at least within the 10-90% interval.
 A couple of things to note:
 
@@ -289,13 +314,18 @@ questions, feel free to reach out to the authors, either via this
 form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
 email, or the Insightnet slack.
 
-[^1]: This makes it so that any given day of the processed timeseries
+[^1]: This makes it so that any given day of the processed time-series
     only depends on the previous week, which means that we avoid leaking
     future values when making a forecast.
 
 [^2]: lagged by 3 in this context meaning using the value from 3 days
     ago.
 
-[^3]: Alternatively, you could call `auto_plot(four_week_ahead)` to get
+[^3]: Alternatively, you could call `autoplot(four_week_ahead)` to get
     the full collection of forecasts. This is too busy for the space we
     have for plotting here.
+
+[^4]: Note that these are not the same quantiles that we fit when
+    creating `four_week_ahead`. They are extrapolated from those
+    quantiles using `extrapolate_quantiles()` (which assumes an
+    exponential decay in the tails).
