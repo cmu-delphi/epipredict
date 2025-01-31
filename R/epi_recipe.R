@@ -8,7 +8,7 @@
 #' @aliases epi_recipe epi_recipe.default epi_recipe.formula
 #' @import recipes
 #' @export
-epi_recipe <- function(x, forecast_date = NULL, ...) {
+epi_recipe <- function(x, ...) {
   UseMethod("epi_recipe")
 }
 
@@ -20,14 +20,19 @@ epi_recipe <- function(x, forecast_date = NULL, ...) {
 #'   describes a single role that the variable will take. This value could be
 #'   anything but common roles are `"outcome"`, `"predictor"`,
 #'   `"time_value"`, and `"geo_value"`
-#' @param forecast_date Either a date of the same class as the `time_value`
-#'   column in the `epi_df` or `NULL`. If a date, it gives the date on which the
-#'   forecast is created. This is often the same as the most recent date of
+#' @param reference_date Either a date of the same class as the `time_value`
+#'   column in the `epi_df` or `NULL`. If a date, it gives the date to which all
+#'   operations are relative. Typically, in real-time tasks this is the date that
+#'   the model is created (and presumably trained). In forecasting, this is
+#'   often the same the most recent date of
 #'   data availability, but when data is "latent" (reported after the date to
-#'   which it corresponds), the `forecast_date` may come later. Setting this
-#'   to a value BEFORE the most recent data is no longer a true "forecast"
-#'   because future data is being used to create the prediction. If `NULL`,
-#'   the `forecast_date` is
+#'   which it corresponds), or if performing a nowcast, the `reference_date` may
+#'   be later than this. Setting `reference_date`
+#'   to a value BEFORE the most recent data is not a true "forecast",
+#'   because future data is being used to create the model But this may be
+#'   reasonable in model building, nowcasting (predicting finalized values from
+#'   preliminary data), or if producing a backcast. If `NULL`, it will be set
+#'   to the `as_of` date of the `epi_df`.
 #' @param ... Further arguments passed to or from other methods (not currently
 #'   used).
 #' @param formula A model formula. No in-line functions should be used here
@@ -55,8 +60,12 @@ epi_recipe <- function(x, forecast_date = NULL, ...) {
 #'   step_naomit(all_outcomes(), skip = TRUE)
 #'
 #' r
-epi_recipe.epi_df <-
-  function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
+epi_recipe.epi_df <- function(x,
+                              reference_date = NULL,
+                              formula = NULL,
+                              ...,
+                              vars = NULL,
+                              roles = NULL) {
     attr(x, "decay_to_tibble") <- FALSE
     if (!is.null(formula)) {
       if (!is.null(vars)) {
@@ -124,12 +133,15 @@ epi_recipe.epi_df <-
       ))
 
     ## Return final object of class `recipe`
+    max_time_value = max(x$time_value)
+    reference_date <- reference_date %||% attr(x, "metadata")$as_of
     out <- list(
       var_info = var_info,
       term_info = var_info,
       steps = NULL,
       template = x[1, ],
-      max_time_value = max(x$time_value),
+      max_time_value = max_time_value,
+      reference_date = reference_date,
       levels = NULL,
       retained = NA
     )
@@ -140,15 +152,15 @@ epi_recipe.epi_df <-
 
 #' @rdname epi_recipe
 #' @export
-epi_recipe.formula <- function(formula, data, ...) {
+epi_recipe.formula <- function(formula, data, reference_date = NULL, ...) {
   # we ensure that there's only 1 row in the template
   data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
-    cli_abort(paste(
-      "`epi_recipe()` has been called with a non-{.cls epi_df} object.",
-      "Use `recipe()` instead."
-    ))
+    cli_abort(
+      "`epi_recipe()` has been called with a non-{.cls epi_df} object.
+      Use `recipe()` instead."
+    )
   }
 
   attr(data, "decay_to_tibble") <- FALSE

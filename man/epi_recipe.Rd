@@ -7,26 +7,38 @@
 \alias{epi_recipe.epi_df}
 \title{Create a epi_recipe for preprocessing data}
 \usage{
-epi_recipe(x, forecast_date = NULL, ...)
+epi_recipe(x, ...)
 
-\method{epi_recipe}{epi_df}(x, formula = NULL, ..., vars = NULL, roles = NULL)
+\method{epi_recipe}{epi_df}(
+  x,
+  reference_date = NULL,
+  formula = NULL,
+  ...,
+  vars = NULL,
+  roles = NULL
+)
 
-\method{epi_recipe}{formula}(formula, data, ...)
+\method{epi_recipe}{formula}(formula, data, reference_date = NULL, ...)
 }
 \arguments{
 \item{x, data}{An epi_df of the \emph{template} data set (see below).}
 
-\item{forecast_date}{Either a date of the same class as the \code{time_value}
-column in the \code{epi_df} or \code{NULL}. If a date, it gives the date on which the
-forecast is created. This is often the same as the most recent date of
-data availability, but when data is "latent" (reported after the date to
-which it corresponds), the \code{forecast_date} may come later. Setting this
-to a value BEFORE the most recent data is no longer a true "forecast"
-because future data is being used to create the prediction. If \code{NULL},
-the \code{forecast_date} is}
-
 \item{...}{Further arguments passed to or from other methods (not currently
 used).}
+
+\item{reference_date}{Either a date of the same class as the \code{time_value}
+column in the \code{epi_df} or \code{NULL}. If a date, it gives the date to which all
+operations are relative. Typically, in real-time tasks this is the date that
+the model is created (and presumably trained). In forecasting, this is
+often the same the most recent date of
+data availability, but when data is "latent" (reported after the date to
+which it corresponds), or if performing a nowcast, the \code{reference_date} may
+be later than this. Setting \code{reference_date}
+to a value BEFORE the most recent data is not a true "forecast",
+because future data is being used to create the model But this may be
+reasonable in model building, nowcasting (predicting finalized values from
+preliminary data), or if producing a backcast. If \code{NULL}, it will be set
+to the \code{as_of} date of the \code{epi_df}.}
 
 \item{formula}{A model formula. No in-line functions should be used here
 (e.g. \code{log(x)}, \code{x:y}, etc.) and minus signs are not allowed. These types of

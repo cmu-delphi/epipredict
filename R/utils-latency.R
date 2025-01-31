@@ -34,6 +34,7 @@ construct_shift_tibble <- function(terms_used, recipe, rel_step_type, shift_name
 #' @importFrom tidyr drop_na
 #' @importFrom utils capture.output
 get_forecast_date <- function(new_data, info, epi_keys_checked, latency, columns = NULL) {
+
   if (is.null(columns)) {
     columns <- info %>%
       filter(source == "original") %>%
