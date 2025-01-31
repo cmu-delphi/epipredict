@@ -19,6 +19,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Make key column inference more consistent within the package and with current `epiprocess`.
 - Fix `quantile_reg()` producing error when asked to output just median-level predictions.
 - (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
+- Add `reference_date` as an argument to `epi_recipe()`
 
 ## Bug fixes
 - Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
