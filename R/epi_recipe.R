@@ -24,12 +24,12 @@ epi_recipe <- function(x, ...) {
 #'   column in the `epi_df` or `NULL`. If a date, it gives the date to which all
 #'   operations are relative. Typically, in real-time tasks this is the date that
 #'   the model is created (and presumably trained). In forecasting, this is
-#'   often the same the most recent date of
+#'   often the same as the most recent date of
 #'   data availability, but when data is "latent" (reported after the date to
 #'   which it corresponds), or if performing a nowcast, the `reference_date` may
 #'   be later than this. Setting `reference_date`
 #'   to a value BEFORE the most recent data is not a true "forecast",
-#'   because future data is being used to create the model But this may be
+#'   because future data is being used to create the model, but this may be
 #'   reasonable in model building, nowcasting (predicting finalized values from
 #'   preliminary data), or if producing a backcast. If `NULL`, it will be set
 #'   to the `as_of` date of the `epi_df`.
