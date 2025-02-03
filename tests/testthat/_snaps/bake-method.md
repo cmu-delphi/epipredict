@@ -3,7 +3,7 @@
     Code
       bake(prep(r, edf), NULL, composition = "matrix")
     Condition
-      Error in `hardhat::recompose()`:
+      Error in `juice()`:
       ! `data` must only contain numeric columns.
       i These columns aren't numeric: "geo_value" and "time_value".
 
