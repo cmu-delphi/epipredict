@@ -13,7 +13,7 @@ columns present in an epi_df"><meta name="robots" content="noindex"></head><body
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.6</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,14 +60,18 @@ columns present in an <code>epi_df</code></p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">epi_recipe</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Default S3 method</span></span>
-<span><span class="fu">epi_recipe</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
 <span><span class="co"># S3 method for class 'epi_df'</span></span>
-<span><span class="fu">epi_recipe</span><span class="op">(</span><span class="va">x</span>, formula <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span>, vars <span class="op">=</span> <span class="cn">NULL</span>, roles <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">epi_recipe</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  reference_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  formula <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  roles <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'formula'</span></span>
-<span><span class="fu">epi_recipe</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">epi_recipe</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, reference_date <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -75,13 +79,28 @@ columns present in an <code>epi_df</code></p>
 
 
 <dl><dt id="arg-x-data">x, data<a class="anchor" aria-label="anchor" href="#arg-x-data"></a></dt>
-<dd><p>A data frame, tibble, or epi_df of the <em>template</em> data set
-(see below). This is always coerced to the first row to avoid memory issues</p></dd>
+<dd><p>An epi_df of the <em>template</em> data set (see below).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Further arguments passed to or from other methods (not currently
 used).</p></dd>
+
+
+<dt id="arg-reference-date">reference_date<a class="anchor" aria-label="anchor" href="#arg-reference-date"></a></dt>
+<dd><p>Either a date of the same class as the <code>time_value</code>
+column in the <code>epi_df</code> or <code>NULL</code>. If a date, it gives the date to which all
+operations are relative. Typically, in real-time tasks this is the date that
+the model is created (and presumably trained). In forecasting, this is
+often the same as the most recent date of
+data availability, but when data is "latent" (reported after the date to
+which it corresponds), or if performing a nowcast, the <code>reference_date</code> may
+be later than this. Setting <code>reference_date</code>
+to a value BEFORE the most recent data is not a true "forecast",
+because future data is being used to create the model, but this may be
+reasonable in model building, nowcasting (predicting finalized values from
+preliminary data), or if producing a backcast. If <code>NULL</code>, it will be set
+to the <code>as_of</code> date of the <code>epi_df</code>.</p></dd>
 
 
 <dt id="arg-formula">formula<a class="anchor" aria-label="anchor" href="#arg-formula"></a></dt>

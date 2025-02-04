@@ -25,7 +25,7 @@
 
     <a class="navbar-brand me-2" href="index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.6</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,7 +125,7 @@
 <span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31 12:08:25.791826</span></span>
+<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; # A tibble: 20,496 × 4</span></span>
 <span><span class="co">#&gt;    geo_value time_value case_rate death_rate</span></span>
@@ -139,7 +139,7 @@
 <span><span class="co">#&gt;  7 co        2020-12-31      35.8      0.649</span></span>
 <span><span class="co">#&gt;  8 ct        2020-12-31      52.1      0.819</span></span>
 <span><span class="co">#&gt;  9 dc        2020-12-31      31.0      0.601</span></span>
-<span><span class="co">#&gt; 10 de        2020-12-31      65.2      0.807</span></span>
+<span><span class="co">#&gt; 10 de        2020-12-31      64.3      0.912</span></span>
 <span><span class="co">#&gt; # ℹ 20,486 more rows</span></span></code></pre></div>
 <p>To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -155,19 +155,20 @@
 <span><span class="va">two_week_ahead</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on 2024-11-11 11:38:31.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on 2025-01-23 14:01:04.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an &lt;epi_df&gt; with:</span></span>
 <span><span class="co">#&gt; • Geography: state,</span></span>
 <span><span class="co">#&gt; • Time type: day,</span></span>
-<span><span class="co">#&gt; • Using data up-to-date as of: 2022-05-31 12:08:25.</span></span>
+<span><span class="co">#&gt; • Using data up-to-date as of: 2022-05-31.</span></span>
+<span><span class="co">#&gt; • With the last data available on 2021-12-31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Predictions ─────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; A total of 56 predictions are available for</span></span>
 <span><span class="co">#&gt; • 56 unique geographic regions,</span></span>
 <span><span class="co">#&gt; • At forecast date: 2021-12-31,</span></span>
-<span><span class="co">#&gt; • For target date: 2022-01-14.</span></span>
+<span><span class="co">#&gt; • For target date: 2022-01-14,</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>In this case, we have used a number of different lags for the case rate, while only using 3 weekly lags for the death rate (as predictors). The result is both a fitted model object which could be used any time in the future to create different forecasts, as well as a set of predicted values (and prediction intervals) for each location 14 days after the last available time value in the data.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -195,11 +196,11 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  </span></span>
-<span><span class="co">#&gt;        -0.0073358          0.0030365          0.0012467          0.0009536  </span></span>
+<span><span class="co">#&gt;        -0.0072151          0.0030311          0.0012525          0.0009551  </span></span>
 <span><span class="co">#&gt;   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  </span></span>
-<span><span class="co">#&gt;         0.0011425          0.0012481          0.0003041          0.1351769  </span></span>
+<span><span class="co">#&gt;         0.0011488          0.0012238          0.0003301          0.1348459  </span></span>
 <span><span class="co">#&gt;  lag_7_death_rate  lag_14_death_rate  </span></span>
-<span><span class="co">#&gt;         0.1471127          0.1062473</span></span>
+<span><span class="co">#&gt;         0.1468325          0.1056316</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Postprocessor ───────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -216,11 +217,11 @@
 <span><span class="co">#&gt; # A tibble: 56 × 5</span></span>
 <span><span class="co">#&gt;    geo_value .pred        .pred_distn forecast_date target_date</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;     &lt;dbl&gt;             &lt;dist&gt; &lt;date&gt;        &lt;date&gt;     </span></span>
-<span><span class="co">#&gt;  1 ak        0.449 quantiles(0.45)[2] 2021-12-31    2022-01-14 </span></span>
+<span><span class="co">#&gt;  1 ak        0.448 quantiles(0.45)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt;  2 al        0.574 quantiles(0.57)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt;  3 ar        0.673 quantiles(0.67)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt;  4 as        0     quantiles(0.12)[2] 2021-12-31    2022-01-14 </span></span>
-<span><span class="co">#&gt;  5 az        0.679 quantiles(0.68)[2] 2021-12-31    2022-01-14 </span></span>
+<span><span class="co">#&gt;  5 az        0.678 quantiles(0.68)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt;  6 ca        0.575 quantiles(0.57)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt;  7 co        0.862 quantiles(0.86)[2] 2021-12-31    2022-01-14 </span></span>
 <span><span class="co">#&gt;  8 ct        1.07  quantiles(1.07)[2] 2021-12-31    2022-01-14 </span></span>

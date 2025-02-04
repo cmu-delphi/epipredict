@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.6</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -153,7 +153,7 @@ enough to look at a simple one:</p>
 <span><span class="co">#&gt; An `epi_df` object, 20,496 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20,496 × 4</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span></span></span>
@@ -163,7 +163,7 @@ enough to look at a simple one:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        2020-12-31      66.0      1.27 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2020-12-31       0        0    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        2020-12-31      76.8      1.10 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2020-12-31      96.0      0.751</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2020-12-31      95.9      0.755</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20,490 more rows</span></span></span></code></pre></div>
 <p>This data is built into the package and contains the measured
 variables <code>case_rate</code> and <code>death_rate</code> for
@@ -239,14 +239,14 @@ the forecast is being made).</li>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out</span><span class="op">$</span><span class="va">predictions</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 5</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span>  <span style="font-weight: bold;">.pred</span>        <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        0.355  quantiles(0.36)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        0.325  quantiles(0.32)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        0.496   quantiles(0.5)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        0.083<span style="text-decoration: underline;">6</span>  quantiles(0.2)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        0.614  quantiles(0.61)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        0.327  quantiles(0.33)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred</span>        <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        0.324 quantiles(0.32)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        0.264 quantiles(0.29)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        0.444 quantiles(0.44)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        0.103 quantiles(0.21)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        0.591 quantiles(0.59)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        0.289  quantiles(0.3)[2] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>A list object of class <code>epi_workflow</code>. This object
@@ -278,9 +278,9 @@ More details on this below.</li>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)    lag_0_case_rate    lag_7_case_rate   lag_14_case_rate  </span></span>
-<span><span class="co">#&gt;         0.0829475          0.0009830          0.0027035         -0.0005651  </span></span>
+<span><span class="co">#&gt;         0.1015759         -0.0003068          0.0047910         -0.0015547  </span></span>
 <span><span class="co">#&gt;  lag_0_death_rate   lag_7_death_rate  lag_14_death_rate  </span></span>
-<span><span class="co">#&gt;         0.2466110          0.1964921          0.0752998</span></span>
+<span><span class="co">#&gt;         0.2448844          0.1915621          0.0721446</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── Postprocessor ────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -334,7 +334,7 @@ the residuals of the predictive model (possibly symmetrized). Here, we
 used 23 quantiles, but one can grab a particular quantile,</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></span><span class="op">(</span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span><span class="op">$</span><span class="va">.pred_distn</span>, p <span class="op">=</span> <span class="fl">.4</span><span class="op">)</span><span class="op">)</span>, <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 0.303 0.272 0.443 0.031 0.561 0.275</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 0.275 0.215 0.395 0.054 0.542 0.240</span></span></code></pre></div>
 <p>or extract the entire distribution into a “long” <code>epi_df</code>
 with <code>quantile_levels</code> being the probability and
 <code>values</code> being the value associated to that quantile.</p>
@@ -342,14 +342,14 @@ with <code>quantile_levels</code> being the probability and
 <code class="sourceCode R"><span><span class="va">out_q</span><span class="op">$</span><span class="va">predictions</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/pivot_quantiles_longer.html">pivot_quantiles_longer</a></span><span class="op">(</span><span class="va">.pred_distn</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,288 × 6</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">values</span> <span style="font-weight: bold;">quantile_levels</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        0.355 0                0.01  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ak        0.355 0                0.025 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ak        0.355 0.037<span style="text-decoration: underline;">1</span>           0.05  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ak        0.355 0.123            0.1   2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ak        0.355 0.174            0.15  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ak        0.355 0.211            0.2   2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred</span>  <span style="font-weight: bold;">values</span> <span style="font-weight: bold;">quantile_levels</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        0.324 0                 0.01  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ak        0.324 0                 0.025 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ak        0.324 0.009<span style="text-decoration: underline;">69</span>           0.05  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ak        0.324 0.096<span style="text-decoration: underline;">9</span>            0.1   2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ak        0.324 0.141             0.15  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ak        0.324 0.177             0.2   2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1,282 more rows</span></span></span></code></pre></div>
 <p>Additional simple adjustments to the basic forecaster can be made
 using the function:</p>
@@ -530,17 +530,17 @@ to do this (inside the forecaster) is</p>
 <span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>  <span style="font-weight: bold;">.pred</span>         <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 0.355  quantiles(0.36)[23] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        2021-12-31 0.325  quantiles(0.32)[23] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        2021-12-31 0.496   quantiles(0.5)[23] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2021-12-31 0.083<span style="text-decoration: underline;">6</span> quantiles(0.08)[23] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        2021-12-31 0.614  quantiles(0.61)[23] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-12-31 0.327  quantiles(0.33)[23] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span>         <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 0.324 quantiles(0.32)[23] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        2021-12-31 0.264 quantiles(0.26)[23] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        2021-12-31 0.444 quantiles(0.44)[23] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2021-12-31 0.103  quantiles(0.1)[23] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        2021-12-31 0.591 quantiles(0.59)[23] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-12-31 0.289 quantiles(0.29)[23] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
 <p>The above <code><a href="../reference/get_test_data.html">get_test_data()</a></code> function examines the recipe
 and ensures that enough test data is available to create the necessary
@@ -586,17 +586,17 @@ procedure.</p>
 <span><span class="co">#&gt; An `epi_df` object, 56 x 6 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span>         <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31  36.4 quantiles(39.58)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31  36.4 quantiles(40.38)[2] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        2021-12-31  89.9 quantiles(89.92)[2] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        2021-12-31  82.6 quantiles(82.58)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2021-12-31   0   quantiles(21.39)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2021-12-31   0    quantiles(22.2)[2] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        2021-12-31  58.3 quantiles(58.28)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-12-31  84.4 quantiles(84.37)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-12-31  84.3 quantiles(84.34)[2] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
 </div>
 </div>

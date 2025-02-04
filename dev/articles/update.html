@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.6</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -174,17 +174,17 @@ states of Alaska, California, New York, and South Carolina.</p>
 <span><span class="co">#&gt; An `epi_df` object, 244 x 4 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 244 × 4</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-11-01      87.9      0.494</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-11-01      15.6      0.239</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-11-01      15.6      0.241</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-11-01      19.9      0.177</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-11-01      16.0      0.531</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> ak        2021-11-02      83.2      0.395</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-11-02      15.5      0.201</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-11-02      15.4      0.200</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 238 more rows</span></span></span></code></pre></div>
 <p>Then, we construct a simple <code>epi_recipe</code> object named
 <code>r</code>, where we lag the death rates by 0, 7, and 14 days, lead
@@ -247,7 +247,7 @@ function:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)   lag_0_death_rate   lag_7_death_rate  lag_14_death_rate  </span></span>
-<span><span class="co">#&gt;           0.43505           -0.75576            0.02826            0.08960</span></span>
+<span><span class="co">#&gt;           0.43314           -0.75303            0.02903            0.09068</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>At this stage, suppose we decide to overhaul our recipe so that we
 have a different set of pre-processing steps or we want to make multiple
@@ -287,7 +287,7 @@ follows:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)   lag_0_death_rate   lag_7_death_rate  lag_14_death_rate  </span></span>
-<span><span class="co">#&gt;           0.43505           -0.75576            0.02826            0.08960</span></span>
+<span><span class="co">#&gt;           0.43314           -0.75303            0.02903            0.09068</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>You can see that the output of <code>wf</code> depicts the sequence
 of steps in <code>r2</code> instead of <code>r</code>, which indicates
@@ -345,7 +345,7 @@ store that change to <code>wf</code>. Hence, our
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)   lag_0_death_rate   lag_7_death_rate  lag_14_death_rate  </span></span>
-<span><span class="co">#&gt;           0.43505           -0.75576            0.02826            0.08960</span></span>
+<span><span class="co">#&gt;           0.43314           -0.75303            0.02903            0.09068</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>One thing to notice about this workflow output is that is that the
 model fit remains the same as when we had <code>r</code> as the recipe.
@@ -382,13 +382,13 @@ the model used in <code>wf</code>, and then fit as before:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)   lag_0_death_rate   lag_1_death_rate   lag_7_death_rate  </span></span>
-<span><span class="co">#&gt;          0.293291          -0.158682           0.055165          -0.349197  </span></span>
+<span><span class="co">#&gt;          0.290875          -0.156658           0.054776          -0.348165  </span></span>
 <span><span class="co">#&gt; lag_14_death_rate    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  </span></span>
-<span><span class="co">#&gt;         -0.305136           0.009031          -0.009463          -0.005372  </span></span>
+<span><span class="co">#&gt;         -0.303906           0.009033          -0.009466          -0.005362  </span></span>
 <span><span class="co">#&gt;   lag_3_case_rate    lag_4_case_rate    lag_5_case_rate    lag_6_case_rate  </span></span>
-<span><span class="co">#&gt;         -0.006244           0.004840           0.005537          -0.013347  </span></span>
+<span><span class="co">#&gt;         -0.006236           0.004849           0.005536          -0.013340  </span></span>
 <span><span class="co">#&gt;   lag_7_case_rate   lag_14_case_rate  </span></span>
-<span><span class="co">#&gt;          0.011286           0.011721</span></span>
+<span><span class="co">#&gt;          0.011320           0.011674</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>Alternatively, we may use the <code><a href="../reference/Add_model.html">Remove_model()</a></code> followed by
 <code><a href="../reference/Add_model.html">Add_model()</a></code> combination for the same effect.</p>
@@ -411,15 +411,15 @@ post-processing predictions. In our initial frosting object,
 <span><span class="co">#&gt; An `epi_df` object, 4 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>   <span style="font-weight: bold;">.pred</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 -<span style="color: #BB0000;">0.206</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.098<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31  0.289 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31  0.352</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.099<span style="text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31  0.295 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31  0.351</span></span></code></pre></div>
 <p>Suppose we decide to augment our post-processing to include a
 threshold to enforce that the predictions are at least 0. As well, let’s
 include the forecast and target dates as separate columns.</p>
@@ -440,15 +440,15 @@ the <code>epi_workflow</code> the same, we can use the
 <span><span class="co">#&gt; An `epi_df` object, 4 x 5 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>  <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 0      2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31 0.098<span style="text-decoration: underline;">9</span> 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31 0.289  2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31 0.352  2021-12-31    2022-01-07</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31 0.099<span style="text-decoration: underline;">2</span> 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31 0.295  2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31 0.351  2021-12-31    2022-01-07</span></span></code></pre></div>
 <p>Internally, this works by removing the old frosting followed by
 adding the new frosting, just like when we update a recipe or model.</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
@@ -459,7 +459,7 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x5620185ea038&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x5591542229c8&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
@@ -471,15 +471,15 @@ from the workflow and make predictions as follows:</p>
 <span><span class="co">#&gt; An `epi_df` object, 4 x 3 with metadata:</span></span>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
-<span><span class="co">#&gt; * as_of     = 2022-05-31</span></span>
+<span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>   <span style="font-weight: bold;">.pred</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 -<span style="color: #BB0000;">0.206</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.098<span style="text-decoration: underline;">9</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31  0.289 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31  0.352</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.099<span style="text-decoration: underline;">2</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31  0.295 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> sc        2021-12-31  0.351</span></span></code></pre></div>
 <p>You can see that the above results from <code>p3</code> are the same
 as from <code>p1</code>, when we simply have a prediction layer in the
 <code>frosting</code> post-processing container.</p>
@@ -555,13 +555,13 @@ name of the step, <code>step_epi_ahead</code>, in
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
 <span><span class="co">#&gt;       (Intercept)   lag_0_death_rate   lag_1_death_rate   lag_7_death_rate  </span></span>
-<span><span class="co">#&gt;          0.293291          -0.158682           0.055165          -0.349197  </span></span>
+<span><span class="co">#&gt;          0.290875          -0.156658           0.054776          -0.348165  </span></span>
 <span><span class="co">#&gt; lag_14_death_rate    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  </span></span>
-<span><span class="co">#&gt;         -0.305136           0.009031          -0.009463          -0.005372  </span></span>
+<span><span class="co">#&gt;         -0.303906           0.009033          -0.009466          -0.005362  </span></span>
 <span><span class="co">#&gt;   lag_3_case_rate    lag_4_case_rate    lag_5_case_rate    lag_6_case_rate  </span></span>
-<span><span class="co">#&gt;         -0.006244           0.004840           0.005537          -0.013347  </span></span>
+<span><span class="co">#&gt;         -0.006236           0.004849           0.005536          -0.013340  </span></span>
 <span><span class="co">#&gt;   lag_7_case_rate   lag_14_case_rate  </span></span>
-<span><span class="co">#&gt;          0.011286           0.011721</span></span>
+<span><span class="co">#&gt;          0.011320           0.011674</span></span>
 <span><span class="co">#&gt; </span></span></code></pre></div>
 <p>If there are at least two steps in a recipe that share the same name,
 specifying the name in <code>which_step</code> will throw an error as
