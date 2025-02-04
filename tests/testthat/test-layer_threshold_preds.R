@@ -20,7 +20,7 @@ test_that("Default pred_lower and pred_upper work as intended", {
   expect_equal(ncol(p), 3L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_equal(round(p$.pred, digits = 3), c(0.180, 0, 0.764))
+  expect_equal(round(p$.pred, digits = 3), c(0.179, 0, 0.765))
   # expect_named(p, c("time_value", "geo_value", ".pred"))
   expect_named(p, c("geo_value", "time_value", ".pred"))
 })

@@ -3,8 +3,8 @@
     Code
       epi_recipe(tib)
     Condition
-      Error in `epi_recipe()`:
-      ! `x` must be an <epi_df> or a <formula>, not a <tbl_df>.
+      Error in `UseMethod()`:
+      ! no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 
 ---
 
@@ -19,8 +19,8 @@
     Code
       epi_recipe(m)
     Condition
-      Error in `epi_recipe()`:
-      ! `x` must be an <epi_df> or a <formula>, not a <matrix>.
+      Error in `UseMethod()`:
+      ! no applicable method for 'epi_recipe' applied to an object of class "c('matrix', 'array', 'character')"
 
 # add/update/adjust/remove epi_recipe works as intended
 

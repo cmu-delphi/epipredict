@@ -78,7 +78,7 @@ covid_case_death_rates
 #> An `epi_df` object, 20,496 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
-#> * as_of     = 2022-05-31 12:08:25.791826
+#> * as_of     = 2022-05-31
 #> 
 #> # A tibble: 20,496 × 4
 #>    geo_value time_value case_rate death_rate
@@ -92,7 +92,7 @@ covid_case_death_rates
 #>  7 co        2020-12-31      35.8      0.649
 #>  8 ct        2020-12-31      52.1      0.819
 #>  9 dc        2020-12-31      31.0      0.601
-#> 10 de        2020-12-31      65.2      0.807
+#> 10 de        2020-12-31      64.3      0.912
 #> # ℹ 20,486 more rows
 ```
 
@@ -113,19 +113,20 @@ two_week_ahead <- arx_forecaster(
 two_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════
 #> 
-#> This forecaster was fit on 2024-11-11 11:38:31.
+#> This forecaster was fit on 2025-01-23 14:01:04.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
 #> • Time type: day,
-#> • Using data up-to-date as of: 2022-05-31 12:08:25.
+#> • Using data up-to-date as of: 2022-05-31.
+#> • With the last data available on 2021-12-31
 #> 
 #> ── Predictions ─────────────────────────────────────────────────────────────
 #> 
 #> A total of 56 predictions are available for
 #> • 56 unique geographic regions,
 #> • At forecast date: 2021-12-31,
-#> • For target date: 2022-01-14.
+#> • For target date: 2022-01-14,
 #> 
 ```
 
@@ -161,11 +162,11 @@ two_week_ahead$epi_workflow
 #> 
 #> Coefficients:
 #>       (Intercept)    lag_0_case_rate    lag_1_case_rate    lag_2_case_rate  
-#>        -0.0073358          0.0030365          0.0012467          0.0009536  
+#>        -0.0072151          0.0030311          0.0012525          0.0009551  
 #>   lag_3_case_rate    lag_7_case_rate   lag_14_case_rate   lag_0_death_rate  
-#>         0.0011425          0.0012481          0.0003041          0.1351769  
+#>         0.0011488          0.0012238          0.0003301          0.1348459  
 #>  lag_7_death_rate  lag_14_death_rate  
-#>         0.1471127          0.1062473
+#>         0.1468325          0.1056316
 #> 
 #> ── Postprocessor ───────────────────────────────────────────────────────────
 #> 
@@ -188,11 +189,11 @@ two_week_ahead$predictions
 #> # A tibble: 56 × 5
 #>    geo_value .pred        .pred_distn forecast_date target_date
 #>    <chr>     <dbl>             <dist> <date>        <date>     
-#>  1 ak        0.449 quantiles(0.45)[2] 2021-12-31    2022-01-14 
+#>  1 ak        0.448 quantiles(0.45)[2] 2021-12-31    2022-01-14 
 #>  2 al        0.574 quantiles(0.57)[2] 2021-12-31    2022-01-14 
 #>  3 ar        0.673 quantiles(0.67)[2] 2021-12-31    2022-01-14 
 #>  4 as        0     quantiles(0.12)[2] 2021-12-31    2022-01-14 
-#>  5 az        0.679 quantiles(0.68)[2] 2021-12-31    2022-01-14 
+#>  5 az        0.678 quantiles(0.68)[2] 2021-12-31    2022-01-14 
 #>  6 ca        0.575 quantiles(0.57)[2] 2021-12-31    2022-01-14 
 #>  7 co        0.862 quantiles(0.86)[2] 2021-12-31    2022-01-14 
 #>  8 ct        1.07  quantiles(1.07)[2] 2021-12-31    2022-01-14 

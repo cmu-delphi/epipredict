@@ -13,14 +13,6 @@ epi_recipe <- function(x, ...) {
 }
 
 
-#' @rdname epi_recipe
-#' @export
-epi_recipe.default <- function(x, ...) {
-  cli_abort(paste(
-    "`x` must be an {.cls epi_df} or a {.cls formula},",
-    "not a {.cls {class(x)[[1]]}}."
-  ))
-}
 
 #' @rdname epi_recipe
 #' @inheritParams recipes::recipe
@@ -28,6 +20,19 @@ epi_recipe.default <- function(x, ...) {
 #'   describes a single role that the variable will take. This value could be
 #'   anything but common roles are `"outcome"`, `"predictor"`,
 #'   `"time_value"`, and `"geo_value"`
+#' @param reference_date Either a date of the same class as the `time_value`
+#'   column in the `epi_df` or `NULL`. If a date, it gives the date to which all
+#'   operations are relative. Typically, in real-time tasks this is the date that
+#'   the model is created (and presumably trained). In forecasting, this is
+#'   often the same as the most recent date of
+#'   data availability, but when data is "latent" (reported after the date to
+#'   which it corresponds), or if performing a nowcast, the `reference_date` may
+#'   be later than this. Setting `reference_date`
+#'   to a value BEFORE the most recent data is not a true "forecast",
+#'   because future data is being used to create the model, but this may be
+#'   reasonable in model building, nowcasting (predicting finalized values from
+#'   preliminary data), or if producing a backcast. If `NULL`, it will be set
+#'   to the `as_of` date of the `epi_df`.
 #' @param ... Further arguments passed to or from other methods (not currently
 #'   used).
 #' @param formula A model formula. No in-line functions should be used here
@@ -35,8 +40,7 @@ epi_recipe.default <- function(x, ...) {
 #'  transformations should be enacted using `step` functions in this package.
 #'  Dots are allowed as are simple multivariate outcome terms (i.e. no need for
 #'  `cbind`; see Examples).
-#' @param x,data A data frame, tibble, or epi_df of the *template* data set
-#'   (see below). This is always coerced to the first row to avoid memory issues
+#' @param x,data An epi_df of the *template* data set (see below).
 #' @inherit recipes::recipe return
 #'
 #' @export
@@ -56,100 +60,107 @@ epi_recipe.default <- function(x, ...) {
 #'   step_naomit(all_outcomes(), skip = TRUE)
 #'
 #' r
-epi_recipe.epi_df <-
-  function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
-    attr(x, "decay_to_tibble") <- FALSE
-    if (!is.null(formula)) {
-      if (!is.null(vars)) {
-        cli_abort(paste0(
-          "This `vars` specification will be ignored ",
-          "when a formula is used"
-        ))
-      }
-      if (!is.null(roles)) {
-        cli_abort(
-          paste0(
-            "This `roles` specification will be ignored ",
-            "when a formula is used"
-          )
-        )
-      }
-
-      obj <- epi_recipe.formula(formula, x, ...)
-      return(obj)
-    }
-    if (is.null(vars)) vars <- colnames(x)
-    if (any(table(vars) > 1)) {
-      cli_abort("`vars` should have unique members")
-    }
-    if (any(!(vars %in% colnames(x)))) {
-      cli_abort("1 or more elements of `vars` are not in the data")
-    }
-
-    keys <- key_colnames(x) # we know x is an epi_df
-
-    var_info <- tibble(variable = vars)
-    key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
-
-    ## Check and add roles when available
-    if (!is.null(roles)) {
-      if (length(roles) != length(vars)) {
-        cli_abort(paste0(
-          "The number of roles should be the same as the number of ",
-          "variables."
-        ))
-      }
-      var_info$role <- roles
-    } else {
-      var_info <- var_info %>% filter(!(variable %in% keys))
-      var_info$role <- "raw"
-    }
-    ## Now we add the keys when necessary
-    var_info <- dplyr::union(
-      var_info,
-      tibble::tibble(variable = keys, role = key_roles)
-    )
-
-    ## Add types
-    var_info <- full_join(recipes:::get_types(x), var_info, by = "variable")
-    var_info$source <- "original"
-
-    ## arrange to easy order
-    var_info <- var_info %>%
-      arrange(factor(
-        role,
-        levels = union(
-          c("predictor", "outcome", "time_value", "geo_value", "key"),
-          unique(role)
-        ) # anything else
+epi_recipe.epi_df <- function(x,
+                              reference_date = NULL,
+                              formula = NULL,
+                              ...,
+                              vars = NULL,
+                              roles = NULL) {
+  attr(x, "decay_to_tibble") <- FALSE
+  if (!is.null(formula)) {
+    if (!is.null(vars)) {
+      cli_abort(paste0(
+        "This `vars` specification will be ignored ",
+        "when a formula is used"
       ))
+    }
+    if (!is.null(roles)) {
+      cli_abort(
+        paste0(
+          "This `roles` specification will be ignored ",
+          "when a formula is used"
+        )
+      )
+    }
 
-    ## Return final object of class `recipe`
-    out <- list(
-      var_info = var_info,
-      term_info = var_info,
-      steps = NULL,
-      template = x[1, ],
-      max_time_value = max(x$time_value),
-      levels = NULL,
-      retained = NA
-    )
-    class(out) <- c("epi_recipe", "recipe")
-    out
+    obj <- epi_recipe.formula(formula, x, ...)
+    return(obj)
   }
+  if (is.null(vars)) vars <- colnames(x)
+  if (any(table(vars) > 1)) {
+    cli_abort("`vars` should have unique members")
+  }
+  if (any(!(vars %in% colnames(x)))) {
+    cli_abort("1 or more elements of `vars` are not in the data")
+  }
+
+  keys <- key_colnames(x) # we know x is an epi_df
+
+  var_info <- tibble(variable = vars)
+  key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
+
+  ## Check and add roles when available
+  if (!is.null(roles)) {
+    if (length(roles) != length(vars)) {
+      cli_abort(paste0(
+        "The number of roles should be the same as the number of ",
+        "variables."
+      ))
+    }
+    var_info$role <- roles
+  } else {
+    var_info <- var_info %>% filter(!(variable %in% keys))
+    var_info$role <- "raw"
+  }
+  ## Now we add the keys when necessary
+  var_info <- dplyr::union(
+    var_info,
+    tibble::tibble(variable = keys, role = key_roles)
+  )
+
+  ## Add types
+  var_info <- full_join(recipes:::get_types(x), var_info, by = "variable")
+  var_info$source <- "original"
+
+  ## arrange to easy order
+  var_info <- var_info %>%
+    arrange(factor(
+      role,
+      levels = union(
+        c("predictor", "outcome", "time_value", "geo_value", "key"),
+        unique(role)
+      ) # anything else
+    ))
+
+  ## Return final object of class `recipe`
+  max_time_value <- max(x$time_value)
+  reference_date <- reference_date %||% attr(x, "metadata")$as_of
+  out <- list(
+    var_info = var_info,
+    term_info = var_info,
+    steps = NULL,
+    template = x[1, ],
+    max_time_value = max_time_value,
+    reference_date = reference_date,
+    levels = NULL,
+    retained = NA
+  )
+  class(out) <- c("epi_recipe", "recipe")
+  out
+}
 
 
 #' @rdname epi_recipe
 #' @export
-epi_recipe.formula <- function(formula, data, ...) {
+epi_recipe.formula <- function(formula, data, reference_date = NULL, ...) {
   # we ensure that there's only 1 row in the template
   data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
-    cli_abort(paste(
-      "`epi_recipe()` has been called with a non-{.cls epi_df} object.",
-      "Use `recipe()` instead."
-    ))
+    cli_abort(
+      "`epi_recipe()` has been called with a non-{.cls epi_df} object.
+      Use `recipe()` instead."
+    )
   }
 
   attr(data, "decay_to_tibble") <- FALSE
