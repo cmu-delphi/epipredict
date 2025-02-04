@@ -4,7 +4,7 @@
       wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu) %>% add_frosting(f)
     Condition
       Error in `hardhat::validate_column_names()`:
-      ! The following required columns are missing: 'a'.
+      ! The required column "a" is missing.
 
 ---
 
@@ -12,5 +12,5 @@
       forecast(wf)
     Condition
       Error in `hardhat::validate_column_names()`:
-      ! The following required columns are missing: 'nothere'.
+      ! The required column "nothere" is missing.
 

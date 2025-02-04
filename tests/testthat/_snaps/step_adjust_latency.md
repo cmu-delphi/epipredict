@@ -80,6 +80,6 @@
       
       -- Operations 
       1. Lagging: death_rate by 0, 7, 14 | Trained
-      2. Adj. extend_ahead: case_rate, ... w/ forecast date 2022-05-31 | Trained
-      3. Leading: death_rate by -158, (lat adj) | Trained
+      2. Adj. extend_ahead: case_rate, ... w/ forecast date 2023-03-10 | Trained
+      3. Leading: death_rate by -441, (lat adj) | Trained
 
