@@ -51,3 +51,14 @@ test_that("roll_modular_multivec works", {
     expected_res
   )
 })
+
+test_that("bake step creates the correct training data", {
+  single_yr <- seq(as.Date("2021-01-01"), as.Date("2021-12-31"), by = "1 day")
+  x <- tibble(
+    time_value = rep(single_yr, times = 2L),
+    geo_value = rep(c("reg1", "reg2"), each = length(single_yr)),
+    y = rep(dnorm(seq(-3, 3, length = length(single_yr))) * 50 + 5, times = 2L)
+  ) %>%
+    as_epi_df()
+  r <- epi_recipe(x) %>% step_climate(y)
+})

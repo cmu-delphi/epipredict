@@ -315,12 +315,11 @@ get_latency_table <- function(training, columns, forecast_date, latency,
   }
   # construct the latency table
   latency_table <- tibble(col_name = names(training)) %>%
-    filter(col_name %nin% c(key_colnames(training))
+    filter(col_name %nin% key_colnames(training))
   if (length(columns) > 0) {
     latency_table <- latency_table %>% filter(col_name %in% columns)
   }
-  training_dropped <- training %>%
-    drop_ignored_keys(keys_to_ignore)
+  training_dropped <- training %>% drop_ignored_keys(keys_to_ignore)
   if (is.null(latency)) {
     latency_table <- latency_table %>%
       rowwise() %>%

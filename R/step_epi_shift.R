@@ -115,7 +115,6 @@ step_epi_ahead <-
       ))
     }
     arg_is_chr_scalar(prefix, id, role)
-    arg_is_nonneg_int(ahead)
 
     recipes::add_step(
       recipe,

@@ -11,6 +11,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   `data(<dataset name>)`, but can be accessed with 
   `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>` 
   or, after loading the package, the name of the dataset alone (#382).
+- `step_adjust_latency()` no longer allows empty column selection.
 
 ## Improvements
 

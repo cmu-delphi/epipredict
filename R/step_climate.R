@@ -127,23 +127,25 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
   recipes::check_type(training[, col_names], types = c("double", "integer"))
   wts <- recipes::get_case_weights(info, training)
-  were_weights_used <- recipes::are_weights_used(wts, unsupervised = TRUE)
-  if (isFALSE(were_weights_used)) {
-    wts <- rep(1, nrow(training))
-  }
+  wts_used <- !is.null(wts)
+  wts <- wts %||% rep(1, nrow(training))
 
   modulus <- switch(x$time_type, epiweek = 7L, week = 7L, month = 12L, day = 365L)
 
   result <- training %>%
     mutate(.idx = x$time_aggr(time_value), .weights = wts) %>%
     select(.idx, .weights, c(col_names, x$epi_keys)) %>%
-    summarize(across(
-      all_of(col_names),
-      ~ roll_modular_multivec(.x, .idx, .weights, x$center_method,
-                              x$window_size, modulus)),
-      .by = x$epi_keys
+    tidyr::pivot_longer(all_of(unname(col_names))) %>%
+    dplyr::reframe(
+      roll_modular_multivec(value, .idx, .weights, x$center_method,
+                              x$window_size, modulus),
+      .by = c("name", x$epi_keys)
     ) %>%
-    unnest(col_names)
+    tidyr::pivot_wider(
+      names_from = "name", values_from = "climate_pred",
+      names_prefix = x$prefix
+    ) %>%
+    rename(.idx = index)
 
   step_climate_new(
     terms = x$terms,
@@ -159,7 +161,7 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
     columns = col_names,
     skip = x$skip,
     id = x$id,
-    case_weights = were_weights_used
+    case_weights = wts_used
   )
 }
 
@@ -168,7 +170,7 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_climate <- function(object, new_data, ...) {
   new_data %>%
-    mutate(.idx = object$time_aggr(.target_time_value)) %>%
+    mutate(.idx = object$time_aggr(time_value)) %>%
     left_join(object$result, by = c(".idx", object$epi_keys)) %>%
     select(-.idx)
 }

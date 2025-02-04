@@ -14,7 +14,7 @@ step_climate(
   epi_keys = NULL,
   prefix = "climate_",
   skip = FALSE,
-  id = rand_id("climate_predictor")
+  id = rand_id("climate")
 )
 }
 \arguments{
