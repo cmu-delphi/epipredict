@@ -569,16 +569,9 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     }
     composition <- "tibble"
   }
-  tr_names <- names(new_data)
-  if ("time_value" %in% tr_names && !(".target_time_value" %in% tr_names)) {
-    new_data$.target_time_value <- new_data$time_value
-  } else {
-    cli_abort("The {.val new_data} does not contain a `time_value` column.")
-  }
 
   new_data <- NextMethod("bake")
 
-  new_data <- dplyr::select(new_data, -.target_time_value)
   if (!is.null(meta)) {
     # Baking should have dropped epi_df-ness and metadata. Re-infer some
     # metadata and assume others remain the same as the object/template:
@@ -605,7 +598,6 @@ print.epi_recipe <- function(x, form_width = 30, ...) {
   cli::cli_h3("Inputs")
 
   tab <- table(x$var_info$role, useNA = "ifany")
-  tab <- tab[names(tab) != ".target_time_value"]
   tab <- stats::setNames(tab, names(tab))
   names(tab)[is.na(names(tab))] <- "undeclared role"
 

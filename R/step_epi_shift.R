@@ -251,24 +251,12 @@ prep.step_epi_ahead <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_epi_lag <- function(object, new_data, ...) {
-  new_data <- add_shifted_columns(new_data, object)
-  if (object$role == "outcome") {
-    shift_val <- object$shift_grid$shift_val[1]
-    new_data <- new_data %>%
-      mutate(.target_time_value = .target_time_value + shift_val)
-  }
-  new_data
+  add_shifted_columns(new_data, object)
 }
 
 #' @export
 bake.step_epi_ahead <- function(object, new_data, ...) {
-  new_data <- add_shifted_columns(new_data, object)
-  if (object$role == "outcome") {
-    shift_val <- object$shift_grid$shift_val[1]
-    new_data <- new_data %>%
-      mutate(.target_time_value = .target_time_value + shift_val)
-  }
-  new_data
+  add_shifted_columns(new_data, object)
 }
 
 #' @export
