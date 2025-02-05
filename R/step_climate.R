@@ -142,10 +142,8 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
       .by = c("name", x$epi_keys)
     ) %>%
     tidyr::pivot_wider(
-      names_from = "name", values_from = "climate_pred",
-      names_prefix = x$prefix
-    ) %>%
-    rename(.idx = index)
+      names_from = "name", values_from = "climate_pred", names_prefix = x$prefix
+    )
 
   step_climate_new(
     terms = x$terms,
@@ -187,16 +185,16 @@ print.step_climate <- function(x, width = max(20, options()$width - 30), ...) {
   invisible(x)
 }
 
-roll_modular_multivec <- function(col, index, weights, center_method,
+roll_modular_multivec <- function(col, .idx, weights, center_method,
                                   window_size, modulus) {
   if (center_method == "mean") {
     aggr <- function(x, w) weighted.mean(x, w, na.rm = TRUE)
   } else {
     aggr <- function(x, w) median(x, na.rm = TRUE)
   }
-  tib <- tibble(col = col, weights = weights, index = index) |>
-    arrange(index) |>
-    tidyr::nest(data = c(col, weights), .by = index)
+  tib <- tibble(col = col, weights = weights, .idx = .idx) |>
+    arrange(.idx) |>
+    tidyr::nest(data = c(col, weights), .by = .idx)
   out <- double(nrow(tib))
   for (iter in seq_along(out)) {
     entries <- (iter - window_size):(iter + window_size) %% modulus
@@ -206,7 +204,7 @@ roll_modular_multivec <- function(col, index, weights, center_method,
       aggr(col, weights)
     )
   }
-  tibble(index = unique(tib$index), climate_pred = out)
+  tibble(.idx = unique(tib$.idx), climate_pred = out)
 }
 
 
