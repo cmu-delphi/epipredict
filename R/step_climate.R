@@ -36,6 +36,7 @@
 step_climate <-
   function(recipe,
            ...,
+           forecast_ahead = "detect",
            role = "predictor",
            time_type = c("epiweek", "week", "month", "day"),
            center_method = c("median", "mean"),
@@ -47,11 +48,48 @@ step_climate <-
     if (!is_epi_recipe(recipe)) {
       cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
+
+    ## Handle ahead autodetection, single outcome, time type
     n_outcomes <- sum(recipe$var_info$role == "outcome")
+    time_type <- rlang::arg_match(time_type)
+    edf_time_type <- attr(recipe$template, "metadata")$time_type
+    if (edf_time_type == "custom") {
+      cli_abort("This step only works with daily, weekly, or yearmonth data.")
+    }
     if (n_outcomes > 1L) {
       cli_abort("Only one {.var outcome} role can be used with this step.")
     }
-    time_type <- rlang::arg_match(time_type)
+    if (is.character(forecast_ahead)) {
+      forecast_ahead <- rlang::arg_match(forecast_ahead)
+      if (detect_step(recipe, "epi_ahead")) {
+        outcomes <- extract_argument(recipe, "step_epi_ahead", "role") == "outcome"
+        forecast_ahead <- extract_argument(recipe, "step_epi_ahead", "ahead")[outcomes]
+        if (length(forecast_ahead) != 1L) {
+          cli_abort(c(
+            "To detect the `forecast_ahead` automatically, `step_epi_ahead()`
+            with role = 'outcome' must be specified.",
+            i = "Check your recipe, or specify this argument directly in `step_climate()`."
+          ))
+        }
+        ttype_ord <- match(time_type, c("day", "epiweek", "week", "month"))
+        ttype_ord <- ttype_ord - as.integer(ttype_ord > 2)
+        edf_ttype_ord <- match(edf_time_type, c("day", "week", "yearmonth"))
+        if (ttype_ord != edf_ttype_ord) {
+          cli_abort(c("Automatic detection of the `forecast_ahead` is only
+            supported if the original data and the time type for aggregation
+            are in the same units.",
+            i = "Here, the data is in {.val {edf_time_type}} while
+            `time_type` is {.val {time_type}}.",
+            i = "This is resolved most easily by specifying `forecast_ahead`."
+          ))
+        }
+      } else {
+        forecast_ahead <- 0L
+      }
+    }
+    arg_is_int(forecast_ahead)
+
+    # check other args
     center_method <- rlang::arg_match(center_method)
     arg_is_chr(role)
     arg_is_chr(epi_keys, allow_null = TRUE)
@@ -70,12 +108,14 @@ step_climate <-
         terms = enquos(...),
         role = role,
         trained = FALSE,
+        forecast_ahead = forecast_ahead,
         time_type = time_type,
         time_aggr = time_aggr,
+        modulus = NULL,
         center_method = center_method,
         window_size = window_size,
         epi_keys = epi_keys,
-        result = NULL,
+        climate_table = NULL,
         prefix = prefix,
         columns = NULL,
         skip = skip,
@@ -90,12 +130,14 @@ step_climate_new <-
   function(terms,
            role,
            trained,
+           forecast_ahead,
            time_type,
            time_aggr,
+           modulus,
            center_method,
            window_size,
            epi_keys,
-           result,
+           climate_table,
            prefix,
            columns,
            skip,
@@ -106,12 +148,14 @@ step_climate_new <-
       terms = terms,
       role = role,
       trained = trained,
+      forecast_ahead = forecast_ahead,
       time_type = time_type,
       time_aggr = time_aggr,
+      modulus = modulus,
       center_method = center_method,
       window_size = window_size,
       epi_keys = epi_keys,
-      result = result,
+      climate_table = climate_table,
       prefix = prefix,
       columns = columns,
       skip = skip,
@@ -130,9 +174,9 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
   wts_used <- !is.null(wts)
   wts <- wts %||% rep(1, nrow(training))
 
-  modulus <- switch(x$time_type, epiweek = 7L, week = 7L, month = 12L, day = 365L)
+  modulus <- switch(x$time_type, epiweek = 53L, week = 53L, month = 12L, day = 365L)
 
-  result <- training %>%
+  climate_table <- training %>%
     mutate(.idx = x$time_aggr(time_value), .weights = wts) %>%
     select(.idx, .weights, c(col_names, x$epi_keys)) %>%
     tidyr::pivot_longer(all_of(unname(col_names))) %>%
@@ -149,12 +193,14 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
     terms = x$terms,
     role = x$role,
     trained = TRUE,
+    forecast_ahead = x$forecast_ahead,
     time_type = x$time_type,
     time_aggr = x$time_aggr,
+    modulus = modulus,
     center_method = x$center_method,
     window_size = x$window_size,
     epi_keys = x$epi_keys,
-    result = result,
+    climate_table = climate_table,
     prefix = x$prefix,
     columns = col_names,
     skip = x$skip,
@@ -167,9 +213,14 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_climate <- function(object, new_data, ...) {
+  climate_table <- object$climate_table %>%
+    mutate(
+      .idx = (.idx - object$forecast_ahead) %% object$modulus,
+      .idx = dplyr::case_when(.idx == 0 ~ object$modulus, TRUE ~ .idx)
+    )
   new_data %>%
     mutate(.idx = object$time_aggr(time_value)) %>%
-    left_join(object$result, by = c(".idx", object$epi_keys)) %>%
+    left_join(climate_table, by = c(".idx", object$epi_keys)) %>%
     select(-.idx)
 }
 
@@ -206,5 +257,3 @@ roll_modular_multivec <- function(col, .idx, weights, center_method,
   }
   tibble(.idx = unique(tib$.idx), climate_pred = out)
 }
-
-
