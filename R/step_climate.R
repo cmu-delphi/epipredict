@@ -1,12 +1,64 @@
 #' Calculate a climatological variable based on the history
 #'
 #' `step_climate()` creates a *specification* of a recipe step
-#'   that will generate one or more new columns of derived data. Using this as
-#'   a predictor is most useful when predicting strongly seasonal data. The
-#'   climate timing will automatically be aligned to the outcome at bake time.
+#' that will generate one or more new columns of derived data. This step
+#' examines all available seasons in the training data and calculates the
+#' a measure of center for the "typical" season. Think of this like with
+#' the weather: to predict the temperature in January in Pittsburgh, PA,
+#' I might look at all previous January's on record, average their temperatures,
+#' and include that in my model. So it is important to _align_ the forecast
+#' horizon with the climate. See the details for more information.
+#'
+#' @details
+#' Construction of a climate predictor can be helpful with strongly seasonal
+#' data. But its utility is greatest when the estimated "climate" is aligned
+#' to the forecast horizon.
+#' For example, if today is December 1, and we want
+#' to make a prediction for December 15, we want to know the climate for the
+#' week of December 15 to use in our model. But we also want to align the rest
+#' of our training data with the climate _2 weeks after_ those dates.
+#'
+#' To accomplish
+#' this, if we have daily data, we could use `time_type = "week"` and
+#' `forecast_ahead = 2`. The climate predictor would be created by taking
+#' averages over each week (with a window of a few weeks before and after, as
+#' determined by `window_size`), and then aligning these with the appropriate dates
+#' in the training data so that each `time_value` will "see" the typical climate 2
+#' weeks in the future.
+#'
+#' Alternatively, in the same scenario, we could use `time_type = "day"` and
+#' `forecast_ahead = 14`. The climate predictor would be created by taking
+#' averages over a small window around each _day_, and then aligning these with
+#' the appropriate dates in the training data so that each `time_value` will
+#' "see" the climate 14 days in the future.
+#'
+#' The only differences between these options is the type of averaging performed
+#' over the historical data. In the first case, days in the same week will get
+#' the same value of the climate predictor (because we're looking at weekly
+#' windows), while in the second case, every day in the data will have the
+#' average climate for the _day_ that happens 14 days in the future.
+#'
+#' Autodetecting the forecast horizon can only be guaranteed to work correctly
+#' when the time types are the same: for example using daily data for training
+#' and daily climate calculations. However, using weekly data, predicting 4
+#' weeks ahead, and setting `time_type = "month"` is perfectly reasonable. It's
+#' just that the climate is calculated over _months_ (January, February, March,
+#' etc.) so how to properly align this when producing a forecast for the 5th week
+#' in the year is challenging. For scenarios like these, it may be best to
+#' approximately match the times with `forecast_ahead = 1`, for example.
 #'
 #'
 #' @inheritParams step_growth_rate
+#' @param forecast_ahead The forecast horizon. By default, this step will try to
+#'   detect whether a forecast horizon has already been specified with
+#'   [step_epi_ahead()]. Alternatively, one can specify an explicit
+#'   horizon with a scalar integer. Auto-detection is only possible
+#'   when the time type of the `epi_df` used to create the `epi_recipe` is the
+#'   same as the aggregation
+#'   `time_type` specified in this step (say, both daily or both weekly). If,
+#'   for example, daily data is used with monthly time aggregation, then
+#'   auto-detection is not possible (and may in fact lead to strange behaviour
+#'   even if `forecast_ahead` is specified with an integer). See details below.
 #' @param time_type The duration over which time aggregation should be performed.
 #' @param center_method The measure of center to be calculated over the time
 #'   window.
@@ -20,6 +72,8 @@
 #'   state-level data, a national climate would be calculated if `NULL`, but
 #'   passing `epi_keys = "geo_value"` would calculate the climate separately
 #'   by state.
+#' @param role What role should be assigned for any variables created by this
+#'   step? "predictor" is the most likely choice.
 #' @template step-return
 #'
 #'
