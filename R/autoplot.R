@@ -85,7 +85,7 @@ NULL
 #' @rdname autoplot-epipred
 autoplot.epi_workflow <- function(
     object, predictions = NULL,
-    .levels = c(.5, .8, .95), ...,
+    .levels = c(.5, .8, .9), ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "dodgerblue4",
@@ -231,7 +231,7 @@ starts_with_impl <- function(x, vars) {
 
 plot_bands <- function(
     base_plot, predictions,
-    levels = c(.5, .8, .95),
+    levels = c(.5, .8, .9),
     fill = "blue4",
     alpha = 0.6,
     linewidth = 0.05) {
