@@ -253,8 +253,8 @@ arx_fcast_epi_workflow <- function(
 #'   the last day of data. For example, if the last day of data was 3 days ago,
 #'   the ahead becomes `ahead+3`.
 #'   - `"extend_lags"`: increase the lags so they're relative to the actual
-#'   forecast date. For example, if the lags are `c(0,7,14)` and the last day of
-#'   data was 3 days ago, the lags become `c(3,10,17)`.
+#'   forecast date. For example, if the lags are `c(0, 7, 14)` and the last day of
+#'   data was 3 days ago, the lags become `c(3, 10, 17)`.
 #' @param warn_latency by default, `step_adjust_latency` warns the user if the
 #'   latency is large. If this is `FALSE`, that warning is turned off.
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
@@ -295,7 +295,7 @@ arx_args_list <- function(
     target_date = NULL,
     adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
     warn_latency = TRUE,
-    quantile_levels = c(0.05, 0.5, 0.95),
+    quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
@@ -362,7 +362,7 @@ compare_quantile_args <- function(alist, tlist, train_method = c("qr", "grf")) {
   default_alist <- eval(formals(arx_args_list)$quantile_levels)
   default_tlist <- switch(train_method,
     "qr" = eval(formals(quantile_reg)$quantile_levels),
-    "grf" = c(.1, .5, .9)
+    "grf" = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
   )
   if (setequal(alist, default_alist)) {
     if (setequal(tlist, default_tlist)) {

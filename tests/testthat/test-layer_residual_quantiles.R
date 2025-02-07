@@ -65,9 +65,9 @@ test_that("Grouping by keys is supported", {
   expect_warning(p2 <- forecast(wf2))
 
   pivot1 <- pivot_quantiles_wider(p1, .pred_distn) %>%
-    mutate(width = `0.9` - `0.1`)
+    mutate(width = `0.95` - `0.05`)
   pivot2 <- pivot_quantiles_wider(p2, .pred_distn) %>%
-    mutate(width = `0.9` - `0.1`)
+    mutate(width = `0.95` - `0.05`)
   expect_equal(pivot1$width, rep(pivot1$width[1], nrow(pivot1)))
   expect_false(all(pivot2$width == pivot2$width[1]))
 })
