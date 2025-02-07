@@ -7,7 +7,7 @@
 quantile_reg(
   mode = "regression",
   engine = "rq",
-  quantile_levels = 0.5,
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
   method = "br"
 )
 }
@@ -19,7 +19,7 @@ The only possible value for this model is "regression".}
 "rq" and "grf" are supported.}
 
 \item{quantile_levels}{A scalar or vector of values in (0, 1) to determine which
-quantiles to estimate (default is 0.5).}
+quantiles to estimate (default is the set 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95).}
 
 \item{method}{A fitting method used by \code{\link[quantreg:rq]{quantreg::rq()}}. See the
 documentation for a list of options.}

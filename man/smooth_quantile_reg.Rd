@@ -8,7 +8,7 @@ smooth_quantile_reg(
   mode = "regression",
   engine = "smoothqr",
   outcome_locations = NULL,
-  quantile_levels = 0.5,
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
   degree = 3L
 )
 }
@@ -17,7 +17,7 @@ smooth_quantile_reg(
 The only possible value for this model is "regression".}
 
 \item{engine}{Character string naming the fitting function. Currently, only
-"smooth_qr" is supported.}
+"rq" and "grf" are supported.}
 
 \item{outcome_locations}{Defaults to the vector \code{1:ncol(y)} but if the
 responses are observed at a different spacing (or appear in a different
@@ -25,7 +25,7 @@ order), that information should be used here. This
 argument will be mapped to the \code{ahead} argument of \code{\link[smoothqr:smooth_qr]{smoothqr::smooth_qr()}}.}
 
 \item{quantile_levels}{A scalar or vector of values in (0, 1) to determine which
-quantiles to estimate (default is 0.5).}
+quantiles to estimate (default is the set 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95).}
 
 \item{degree}{the number of polynomials used for response smoothing. Must
 be no more than the number of responses.}

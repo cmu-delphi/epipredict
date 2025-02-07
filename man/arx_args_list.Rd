@@ -12,7 +12,7 @@ arx_args_list(
   target_date = NULL,
   adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
   warn_latency = TRUE,
-  quantile_levels = c(0.05, 0.5, 0.95),
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
@@ -55,8 +55,8 @@ to shift the model to account for this difference. The options are:
 the last day of data. For example, if the last day of data was 3 days ago,
 the ahead becomes \code{ahead+3}.
 \item \code{"extend_lags"}: increase the lags so they're relative to the actual
-forecast date. For example, if the lags are \code{c(0,7,14)} and the last day of
-data was 3 days ago, the lags become \code{c(3,10,17)}.
+forecast date. For example, if the lags are \code{c(0, 7, 14)} and the last day of
+data was 3 days ago, the lags become \code{c(3, 10, 17)}.
 }}
 
 \item{warn_latency}{by default, \code{step_adjust_latency} warns the user if the

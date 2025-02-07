@@ -81,9 +81,7 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_naomit()
 
 f <- frosting() \%>\%
-  layer_residual_quantiles(
-    quantile_levels = c(.025, .1, .25, .75, .9, .975)
-  ) \%>\%
+  layer_residual_quantiles() \%>\%
   layer_threshold(starts_with(".pred")) \%>\%
   layer_add_target_date()
 
