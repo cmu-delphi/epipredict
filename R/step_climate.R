@@ -244,7 +244,7 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 
   climate_table <- training %>%
     mutate(.idx = x$time_aggr(time_value), .weights = wts) %>%
-    select(.idx, .weights, c(col_names, x$epi_keys)) %>%
+    select(.idx, .weights, all_of(c(col_names, x$epi_keys))) %>%
     tidyr::pivot_longer(all_of(unname(col_names))) %>%
     dplyr::reframe(
       roll_modular_multivec(value, .idx, .weights, x$center_method,
