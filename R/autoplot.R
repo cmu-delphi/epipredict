@@ -183,7 +183,7 @@ autoplot.epi_workflow <- function(
   }
 
   if (".pred" %in% names(predictions)) {
-    ntarget_dates <- n_distinct(predictions$time_value)
+    ntarget_dates <- dplyr::n_distinct(predictions$time_value)
     if (ntarget_dates > 1L) {
       bp <- bp +
         geom_line(

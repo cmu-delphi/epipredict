@@ -9,7 +9,7 @@
 \method{autoplot}{epi_workflow}(
   object,
   predictions = NULL,
-  .levels = c(0.5, 0.8, 0.95),
+  .levels = c(0.5, 0.8, 0.9),
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
