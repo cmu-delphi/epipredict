@@ -44,7 +44,7 @@
 #' p
 layer_quantile_distn <- function(frosting,
                                  ...,
-                                 quantile_levels = c(.25, .75),
+                                 quantile_levels = c(0.25, 0.5, 0.75),
                                  truncate = c(-Inf, Inf),
                                  name = ".pred_distn",
                                  id = rand_id("quantile_distn")) {

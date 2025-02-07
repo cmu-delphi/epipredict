@@ -295,7 +295,7 @@ arx_args_list <- function(
     target_date = NULL,
     adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
     warn_latency = TRUE,
-    quantile_levels = c(0.05, 0.95),
+    quantile_levels = c(0.05, 0.5, 0.95),
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = character(0L),

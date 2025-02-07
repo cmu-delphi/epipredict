@@ -48,7 +48,7 @@
 #' p2 <- forecast(wf2)
 layer_residual_quantiles <- function(
     frosting, ...,
-    quantile_levels = c(0.05, 0.95),
+    quantile_levels = c(0.05, 0.5, 0.95),
     symmetrize = TRUE,
     by_key = character(0L),
     name = ".pred_distn",

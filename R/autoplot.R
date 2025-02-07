@@ -236,19 +236,20 @@ plot_bands <- function(
     alpha = 0.6,
     linewidth = 0.05) {
   innames <- names(predictions)
-  n <- length(levels)
-  alpha <- alpha / (n - 1)
-  l <- (1 - levels) / 2
-  l <- c(rev(l), 1 - l)
+  na_levels <- length(levels)
+  alpha <- alpha / (n_levels - 1)
+  # generate the corresponding level that is 1 - level
+  levels <- (1 - levels) / 2
+  levels <- c(rev(levels), 1 - levels)
 
   ntarget_dates <- dplyr::n_distinct(predictions$time_value)
 
   predictions <- predictions %>%
-    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, l), l)) %>%
+    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, levels), levels)) %>%
     pivot_quantiles_wider(.pred_distn)
   qnames <- setdiff(names(predictions), innames)
 
-  for (i in 1:n) {
+  for (i in 1:n_levels) {
     bottom <- qnames[i]
     top <- rev(qnames)[i]
     if (i == 1) {

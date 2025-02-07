@@ -9,7 +9,7 @@ flatline_args_list(
   n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
-  quantile_levels = c(0.05, 0.95),
+  quantile_levels = c(0.05, 0.5, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
