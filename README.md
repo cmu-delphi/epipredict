@@ -105,7 +105,8 @@ cases_deaths |>
   facet_grid(
     rows = vars(.response_name),
     cols = vars(geo_value),
-    scale = "free") +
+    scale = "free"
+  ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
@@ -177,7 +178,8 @@ forecast_date_label <-
     heights = c(rep(150, 4), rep(0.75, 4))
   )
 processed_data_plot <-
-  covid_case_death_rates |> filter(geo_value %in% used_locations) |>
+  covid_case_death_rates |>
+  filter(geo_value %in% used_locations) |>
   autoplot(
     case_rate,
     death_rate,
@@ -186,7 +188,8 @@ processed_data_plot <-
   facet_grid(
     rows = vars(.response_name),
     cols = vars(geo_value),
-    scale = "free") +
+    scale = "free"
+  ) +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label,
@@ -219,7 +222,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-01-31 10:46:32.
+#> This forecaster was fit on 2025-02-05 17:01:43.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,

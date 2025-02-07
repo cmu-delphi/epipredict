@@ -11,6 +11,7 @@ articles:
     navbar: ~
     contents:
       - epipredict
+      - custom_epiworkflows
       - preprocessing-and-models
       - backtesting
       - arx-classifier

@@ -33,6 +33,12 @@
 #' @details The step assumes that the data are already _in the proper sequential
 #'  order_ for shifting.
 #'
+#'  While `{recipes}` provides a function `step_lag()`, it assumes that the data
+#'  have no breaks in the sequence of `time_values`, and has no ability to group by
+#'  `geo_value` or other keys. Our `lag/ahead` functions also appropriately adjust
+#'  the amount of data to avoid accidentally dropping recent predictors from the
+#'  test data.
+#'
 #' The `prefix` and `id` arguments are unchangeable to ensure that the code runs
 #' properly and to avoid inconsistency with naming. For `step_epi_ahead`, they
 #' are always set to `"ahead_"` and `"epi_ahead"` respectively, while for

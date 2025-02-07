@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-source("_common.R")
+source(here::here("vignettes/_common.R"))
 ```
 
 ```{r setup, message=FALSE, include = FALSE}
@@ -227,13 +227,17 @@ all_flatlines <- lapply(
       covid_case_death_rates |>
         filter(time_value <= forecast_date, geo_value %in% used_locations),
       outcome = "death_rate",
-      args_list = flatline_args_list(ahead = days_ahead)
+      args_list = flatline_args_list(
+        ahead = days_ahead,
+        quantile_levels = c(0.05, 0.95)
+      )
     )
   }
 )
 # same plotting code as in the arx multi-ahead case
 workflow <- all_flatlines[[1]]$epi_workflow
 results <- purrr::map_df(all_flatlines, ~ `$`(., "predictions"))
+results %>% filter(target_date == max(target_date))
 autoplot(
   object = workflow,
   predictions = results,
@@ -371,7 +375,7 @@ An `epi_workflow()` consists of 3 parts:
       modelling. They come from this package or [any of the recipes
       steps](https://recipes.tidymodels.org/reference/index.html);
       `four_week_ahead` has 5 of these, and you can inspect them more closely by
-      running `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.
+      running `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.[^6]
 - `Model`: the actual model that does the fitting, given by a
   `parsnip::model_spec`; `four_week_ahead` has the default of
   `parsnip::linear_reg()`, which is a wrapper from `{parsnip}` for
@@ -425,3 +429,6 @@ without `NA` values is a training point to fit the coefficients $a_0,\ldots, a_6
 [^5]: in the case of `arx_forecaster`, this is any model with
     `mode="regression"` from [this
     list](https://www.tidymodels.org/find/parsnip/).
+
+[^6]: alternatively, for an unfit version of the preprocessor, you can call
+    `hardhat::extract_preprocessor(four_week_ahead$epi_workflow)`

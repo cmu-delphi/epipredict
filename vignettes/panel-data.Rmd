@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-source("_common.R")
+source(here::here("vignettes/_common.R"))
 ```
 
 ```{r libraries, warning=FALSE, message=FALSE}
