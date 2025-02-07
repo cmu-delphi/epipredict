@@ -236,7 +236,7 @@ plot_bands <- function(
     alpha = 0.6,
     linewidth = 0.05) {
   innames <- names(predictions)
-  na_levels <- length(levels)
+  n_levels <- length(levels)
   alpha <- alpha / (n_levels - 1)
   # generate the corresponding level that is 1 - level
   levels <- (1 - levels) / 2
