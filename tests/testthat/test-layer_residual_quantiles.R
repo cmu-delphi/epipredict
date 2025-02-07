@@ -26,8 +26,8 @@ test_that("Returns expected number or rows and columns", {
   nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.pred_distn))
   unnested <- nested %>% tidyr::unnest(.quantiles)
 
-  expect_equal(nrow(unnested), 9L)
-  expect_equal(unique(unnested$quantile_levels), c(.0275, .8, .95))
+  expect_equal(nrow(unnested), 12L)
+  expect_equal(unique(unnested$quantile_levels), c(.0275, .5, .8, .95))
 })
 
 
@@ -65,9 +65,9 @@ test_that("Grouping by keys is supported", {
   expect_warning(p2 <- forecast(wf2))
 
   pivot1 <- pivot_quantiles_wider(p1, .pred_distn) %>%
-    mutate(width = `0.95` - `0.05`)
+    mutate(width = `0.9` - `0.1`)
   pivot2 <- pivot_quantiles_wider(p2, .pred_distn) %>%
-    mutate(width = `0.95` - `0.05`)
+    mutate(width = `0.9` - `0.1`)
   expect_equal(pivot1$width, rep(pivot1$width[1], nrow(pivot1)))
   expect_false(all(pivot2$width == pivot2$width[1]))
 })
