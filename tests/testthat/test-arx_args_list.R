@@ -41,7 +41,7 @@ test_that("arx forecaster disambiguates quantiles", {
   tlist <- eval(formals(quantile_reg)$quantile_levels)
   expect_identical( # both default
     compare_quantile_args(alist, tlist),
-    c(0.05, 0.5, 0.95)
+    c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
   )
   expect_snapshot(
     error = TRUE,

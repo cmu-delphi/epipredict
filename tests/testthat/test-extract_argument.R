@@ -8,20 +8,20 @@ test_that("layer argument extractor works", {
   expect_snapshot(error = TRUE, extract_argument(f$layers[[1]], "layer_predict", "bubble"))
   expect_identical(
     extract_argument(f$layers[[2]], "layer_residual_quantiles", "quantile_levels"),
-    c(0.0275, 0.9750)
+    c(0.0275, 0.5, 0.9750)
   )
 
   expect_snapshot(error = TRUE, extract_argument(f, "layer_thresh", "quantile_levels"))
   expect_identical(
     extract_argument(f, "layer_residual_quantiles", "quantile_levels"),
-    c(0.0275, 0.9750)
+    c(0.0275, 0.5, 0.9750)
   )
 
   wf <- epi_workflow(postprocessor = f)
   expect_snapshot(error = TRUE, extract_argument(epi_workflow(), "layer_residual_quantiles", "quantile_levels"))
   expect_identical(
     extract_argument(wf, "layer_residual_quantiles", "quantile_levels"),
-    c(0.0275, 0.9750)
+    c(0.0275, 0.5, 0.9750)
   )
 
   expect_snapshot(error = TRUE, extract_argument(wf, "layer_predict", c("type", "opts")))

@@ -200,7 +200,8 @@ arx_fcast_epi_workflow <- function(
     } else {
       quantile_levels <- sort(compare_quantile_args(
         args_list$quantile_levels,
-        rlang::eval_tidy(trainer$eng_args$quantiles) %||% c(.1, .5, .9),
+        rlang::eval_tidy(trainer$eng_args$quantiles) %||%
+          c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
         "grf"
       ))
       trainer$eng_args$quantiles <- rlang::enquo(quantile_levels)
