@@ -16,7 +16,6 @@ articles:
       - backtesting
       - arx-classifier
       - update
-      - guts
   - title: Advanced methods
     contents:
       - articles/smooth-qr

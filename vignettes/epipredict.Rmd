@@ -229,7 +229,7 @@ all_flatlines <- lapply(
       outcome = "death_rate",
       args_list = flatline_args_list(
         ahead = days_ahead,
-        quantile_levels = c(0.05, 0.95)
+        quantile_levels = c(0.05, 0.5, 0.95)
       )
     )
   }
@@ -244,7 +244,6 @@ autoplot(
   plot_data = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
-_**the problem is only occurring in the plot, not the underlying prediction**_
 
 Note that the `cdc_baseline_forecaster` is a slight modification of this method
 for use in [the CDC COVID19 Forecasting Hub](https://covid19forecasthub.org/).
