@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,7 +57,7 @@
 <span>  target_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  adjust_latency <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"none"</span>, <span class="st">"extend_ahead"</span>, <span class="st">"extend_lags"</span>, <span class="st">"locf"</span><span class="op">)</span>,</span>
 <span>  warn_latency <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nonneg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
@@ -111,8 +111,8 @@ to shift the model to account for this difference. The options are:</p><ul><li><
 the last day of data. For example, if the last day of data was 3 days ago,
 the ahead becomes <code>ahead+3</code>.</p></li>
 <li><p><code>"extend_lags"</code>: increase the lags so they're relative to the actual
-forecast date. For example, if the lags are <code>c(0,7,14)</code> and the last day of
-data was 3 days ago, the lags become <code>c(3,10,17)</code>.</p></li>
+forecast date. For example, if the lags are <code>c(0, 7, 14)</code> and the last day of
+data was 3 days ago, the lags become <code>c(3, 10, 17)</code>.</p></li>
 </ul></dd>
 
 
@@ -174,7 +174,7 @@ group. Useful if training per group (for example, per geo_value).</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> lags : <span style="color: #0000BB;">0</span>, <span style="color: #0000BB;">7</span>, and <span style="color: #0000BB;">14</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span> and <span style="color: #0000BB;">0.95</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span>, <span style="color: #0000BB;">0.1</span>, <span style="color: #0000BB;">0.25</span>, <span style="color: #0000BB;">0.5</span>, <span style="color: #0000BB;">0.75</span>, <span style="color: #0000BB;">0.9</span>, and <span style="color: #0000BB;">0.95</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> adjust_latency : <span style="color: #0000BB;">"none"</span></span>
@@ -189,7 +189,7 @@ group. Useful if training per group (for example, per geo_value).</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> lags : <span style="color: #0000BB;">0</span>, <span style="color: #0000BB;">7</span>, and <span style="color: #0000BB;">14</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span> and <span style="color: #0000BB;">0.95</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span>, <span style="color: #0000BB;">0.1</span>, <span style="color: #0000BB;">0.25</span>, <span style="color: #0000BB;">0.5</span>, <span style="color: #0000BB;">0.75</span>, <span style="color: #0000BB;">0.9</span>, and <span style="color: #0000BB;">0.95</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> adjust_latency : <span style="color: #0000BB;">"none"</span></span>

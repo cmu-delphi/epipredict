@@ -15,7 +15,7 @@ with the grf engine. See grf_quantiles.'><meta name="robots" content="noindex"><
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@ with the <code>grf</code> engine. See <a href="grf_quantiles.html">grf_quantiles
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">quantile_reg</span><span class="op">(</span></span>
 <span>  mode <span class="op">=</span> <span class="st">"regression"</span>,</span>
 <span>  engine <span class="op">=</span> <span class="st">"rq"</span>,</span>
-<span>  quantile_levels <span class="op">=</span> <span class="fl">0.5</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  method <span class="op">=</span> <span class="st">"br"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -85,7 +85,7 @@ The only possible value for this model is "regression".</p></dd>
 
 <dt id="arg-quantile-levels">quantile_levels<a class="anchor" aria-label="anchor" href="#arg-quantile-levels"></a></dt>
 <dd><p>A scalar or vector of values in (0, 1) to determine which
-quantiles to estimate (default is 0.5).</p></dd>
+quantiles to estimate (default is the set 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95).</p></dd>
 
 
 <dt id="arg-method">method<a class="anchor" aria-label="anchor" href="#arg-method"></a></dt>

@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -463,7 +463,7 @@ rather than ordinary least squares to create median predictions and a
 <span>    df_pop_col <span class="op">=</span> <span class="st">"pop"</span></span>
 <span>  <span class="op">)</span></span>
 <span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span>quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">.5</span>, <span class="fl">.95</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="../reference/quantile_reg.html">quantile_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/add_frosting.html">add_frosting</a></span><span class="op">(</span><span class="va">f</span><span class="op">)</span></span>
 <span></span>
@@ -477,11 +477,11 @@ rather than ordinary least squares to create median predictions and a
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 7</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>              <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">target_date</span>        <span style="font-weight: bold;">.pred_distn</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2021-12-31 quantiles(0.18)[3] 2022-01-07  quantiles(0.18)[2]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2021-12-31 quantiles(0.35)[3] 2022-01-07  quantiles(0.36)[2]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2021-12-31 quantiles(0.65)[3] 2022-01-07  quantiles(0.64)[2]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2021-12-31  quantiles(0.7)[3] 2022-01-07  quantiles(0.69)[2]</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2021-12-31  quantiles(0.3)[3] 2022-01-07   quantiles(0.3)[2]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2021-12-31 quantiles(0.16)[7] 2022-01-07  quantiles(0.16)[7]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2021-12-31 quantiles(0.29)[7] 2022-01-07  quantiles(0.29)[7]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2021-12-31 quantiles(0.59)[7] 2022-01-07  quantiles(0.59)[7]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2021-12-31 quantiles(0.64)[7] 2022-01-07  quantiles(0.64)[7]</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2021-12-31  quantiles(0.3)[7] 2022-01-07   quantiles(0.3)[7]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: </span><span style="color: #949494; font-weight: bold;">.pred_scaled</span><span style="color: #949494;"> &lt;dist&gt;, </span><span style="color: #949494; font-weight: bold;">.pred_distn_scaled</span><span style="color: #949494;"> &lt;dist&gt;</span></span></span></code></pre></div>
 <p>The columns marked <code>*_scaled</code> have been rescaled to the
 correct units, in this case <code>deaths</code> rather than deaths per
@@ -491,33 +491,47 @@ correct units, in this case <code>deaths</code> rather than deaths per
 <code class="sourceCode R"><span><span class="va">p</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">target_date</span>, <span class="va">.pred_scaled</span>, <span class="va">.pred_distn_scaled</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/pivot_quantiles_wider.html">pivot_quantiles_wider</a></span><span class="op">(</span><span class="va">.pred_distn_scaled</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 5</span></span></span>
-<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">target_date</span>         <span style="font-weight: bold;">.pred_scaled</span> <span style="font-weight: bold;">`0.25`</span> <span style="font-weight: bold;">`0.75`</span></span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2022-01-07   quantiles(71.82)[3]   50.4   92.0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2022-01-07   quantiles(76.05)[3]   50.9  102. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2022-01-07   quantiles(57.84)[3]   46.6   67.3</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2022-01-07  quantiles(136.78)[3]  110.   159. </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2022-01-07   quantiles(85.73)[3]   66.8  106.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 10</span></span></span>
+<span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">target_date</span>         <span style="font-weight: bold;">.pred_scaled</span> <span style="font-weight: bold;">`0.05`</span> <span style="font-weight: bold;">`0.1`</span> <span style="font-weight: bold;">`0.25`</span> <span style="font-weight: bold;">`0.5`</span> <span style="font-weight: bold;">`0.75`</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ca        2022-01-07   quantiles(62.01)[7]   32.4  52.9   53.7  62.0   71.3</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> fl        2022-01-07   quantiles(62.74)[7]   31.4  43.2   50.1  62.7   69.2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> nj        2022-01-07   quantiles(52.59)[7]   36.3  42.6   45.2  52.6   55.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> ny        2022-01-07  quantiles(124.18)[7]   85.8  98.5  110.  124.   134. </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> tx        2022-01-07   quantiles(85.73)[7]   52.7  64.1   76.5  85.7   94.7</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: </span><span style="color: #949494; font-weight: bold;">`0.9`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.95`</span><span style="color: #949494;"> &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Last but not least, let’s take a look at the regression fit and check
 the coefficients:</p>
 <pre><code><span><span class="co">#&gt; Call:</span></span>
-<span><span class="co">#&gt; quantreg::rq(formula = ..y ~ ., tau = ~c(0.05, 0.5, 0.95), data = data, </span></span>
-<span><span class="co">#&gt;     na.action = stats::na.omit, method = ~"br", model = FALSE)</span></span>
+<span><span class="co">#&gt; quantreg::rq(formula = ..y ~ ., tau = ~c(0.05, 0.1, 0.25, 0.5, </span></span>
+<span><span class="co">#&gt; 0.75, 0.9, 0.95), data = data, na.action = stats::na.omit, method = ~"br", </span></span>
+<span><span class="co">#&gt;     model = FALSE)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Coefficients:</span></span>
-<span><span class="co">#&gt;                        tau= 0.05     tau= 0.50    tau= 0.95</span></span>
-<span><span class="co">#&gt; (Intercept)          0.210972402  0.2947231936  0.415298613</span></span>
-<span><span class="co">#&gt; geo_value_factor_fl  0.029646713  0.0477642418  0.168089770</span></span>
-<span><span class="co">#&gt; geo_value_factor_nj  0.007927635 -0.0022679253 -0.029492405</span></span>
-<span><span class="co">#&gt; geo_value_factor_ny -0.003055366 -0.0186682895 -0.037258463</span></span>
-<span><span class="co">#&gt; geo_value_factor_tx  0.020163817  0.0380479148  0.073000742</span></span>
-<span><span class="co">#&gt; lag_0_case_rate     -0.001497710 -0.0011301607 -0.001683478</span></span>
-<span><span class="co">#&gt; lag_7_case_rate      0.004540193  0.0058296289  0.007268965</span></span>
-<span><span class="co">#&gt; lag_14_case_rate     0.001401322  0.0001946297  0.002825240</span></span>
-<span><span class="co">#&gt; lag_0_death_rate     0.500930277  0.5322549795  0.198207000</span></span>
-<span><span class="co">#&gt; lag_7_death_rate     0.023373823  0.1192945031  0.218447512</span></span>
-<span><span class="co">#&gt; lag_14_death_rate   -0.114626164 -0.0291354449  0.122566902</span></span>
+<span><span class="co">#&gt;                        tau= 0.05     tau= 0.10     tau= 0.25     tau= 0.50</span></span>
+<span><span class="co">#&gt; (Intercept)          0.210972402  0.2359826581  0.2664823658  0.2947231936</span></span>
+<span><span class="co">#&gt; geo_value_factor_fl  0.029646713  0.0164328932  0.0228839635  0.0477642418</span></span>
+<span><span class="co">#&gt; geo_value_factor_nj  0.007927635 -0.0004083631 -0.0012956427 -0.0022679253</span></span>
+<span><span class="co">#&gt; geo_value_factor_ny -0.003055366 -0.0045424488 -0.0154494128 -0.0186682895</span></span>
+<span><span class="co">#&gt; geo_value_factor_tx  0.020163817  0.0260190881  0.0325313901  0.0380479148</span></span>
+<span><span class="co">#&gt; lag_0_case_rate     -0.001497710 -0.0008892893 -0.0011817541 -0.0011301607</span></span>
+<span><span class="co">#&gt; lag_7_case_rate      0.004540193  0.0042615475  0.0055779628  0.0058296289</span></span>
+<span><span class="co">#&gt; lag_14_case_rate     0.001401322  0.0007932742  0.0005183414  0.0001946297</span></span>
+<span><span class="co">#&gt; lag_0_death_rate     0.500930277  0.4897370924  0.4452127352  0.5322549795</span></span>
+<span><span class="co">#&gt; lag_7_death_rate     0.023373823  0.0856670896  0.0800142120  0.1192945031</span></span>
+<span><span class="co">#&gt; lag_14_death_rate   -0.114626164 -0.0610698031  0.0154793659 -0.0291354449</span></span>
+<span><span class="co">#&gt;                         tau= 0.75     tau= 0.90    tau= 0.95</span></span>
+<span><span class="co">#&gt; (Intercept)          0.3389449098  0.3797560267  0.415298613</span></span>
+<span><span class="co">#&gt; geo_value_factor_fl  0.0588500157  0.1331501784  0.168089770</span></span>
+<span><span class="co">#&gt; geo_value_factor_nj -0.0138013295 -0.0137781000 -0.029492405</span></span>
+<span><span class="co">#&gt; geo_value_factor_ny -0.0101301003 -0.0195144856 -0.037258463</span></span>
+<span><span class="co">#&gt; geo_value_factor_tx  0.0489007435  0.0749248485  0.073000742</span></span>
+<span><span class="co">#&gt; lag_0_case_rate     -0.0018750320 -0.0029905834 -0.001683478</span></span>
+<span><span class="co">#&gt; lag_7_case_rate      0.0067506556  0.0060268400  0.007268965</span></span>
+<span><span class="co">#&gt; lag_14_case_rate     0.0007346599  0.0052740974  0.002825240</span></span>
+<span><span class="co">#&gt; lag_0_death_rate     0.5119314030  0.2221271697  0.198207000</span></span>
+<span><span class="co">#&gt; lag_7_death_rate     0.1447297067  0.2473517717  0.218447512</span></span>
+<span><span class="co">#&gt; lag_14_death_rate   -0.0007025566 -0.0003914277  0.122566902</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Degrees of freedom: 950 total; 939 residual</span></span></code></pre>
 </div>

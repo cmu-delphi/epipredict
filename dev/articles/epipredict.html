@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -241,12 +241,12 @@ the forecast is being made).</li>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 5</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">.pred</span>        <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        0.324 quantiles(0.32)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        0.264 quantiles(0.29)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        0.444 quantiles(0.44)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        0.103 quantiles(0.21)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        0.591 quantiles(0.59)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        0.289  quantiles(0.3)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        0.324 quantiles(0.32)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        0.264 quantiles(0.26)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        0.444 quantiles(0.44)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        0.103  quantiles(0.1)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        0.591 quantiles(0.59)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        0.289 quantiles(0.29)[7] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>A list object of class <code>epi_workflow</code>. This object
@@ -324,7 +324,7 @@ request multiple quantiles.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">out_q</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/arx_forecaster.html">arx_forecaster</a></span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"case_rate"</span>, <span class="st">"death_rate"</span><span class="op">)</span>,</span>
 <span>  args_list <span class="op">=</span> <span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
-<span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.01</span>, <span class="fl">.025</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">.95</span>, by <span class="op">=</span> <span class="fl">.05</span><span class="op">)</span>, <span class="fl">.975</span>, <span class="fl">.99</span><span class="op">)</span></span>
+<span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.01</span>, <span class="fl">.025</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">19</span> <span class="op">/</span> <span class="fl">20</span>, <span class="fl">.975</span>, <span class="fl">.99</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The column <code>.pred_dstn</code> in the <code>predictions</code>
@@ -356,7 +356,8 @@ using the function:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span></span>
 <span>  lags <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0L</span>, <span class="fl">7L</span>, <span class="fl">14L</span><span class="op">)</span>, ahead <span class="op">=</span> <span class="fl">7L</span>, n_training <span class="op">=</span> <span class="cn">Inf</span>,</span>
-<span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>, target_date <span class="op">=</span> <span class="cn">NULL</span>, quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>, target_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>, nonneg <span class="op">=</span> <span class="cn">TRUE</span>, quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  nafill_buffer <span class="op">=</span> <span class="cn">Inf</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -515,7 +516,7 @@ to do this (inside the forecaster) is</p>
 <code class="sourceCode R"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles</a></span><span class="op">(</span></span>
-<span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.01</span>, <span class="fl">.025</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">.05</span>, <span class="fl">.95</span>, by <span class="op">=</span> <span class="fl">.05</span><span class="op">)</span>, <span class="fl">.975</span>, <span class="fl">.99</span><span class="op">)</span>,</span>
+<span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">.01</span>, <span class="fl">.025</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">19</span> <span class="op">/</span> <span class="fl">20</span>, <span class="fl">.975</span>, <span class="fl">.99</span><span class="op">)</span>,</span>
 <span>    symmetrize <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_add_forecast_date.html">layer_add_forecast_date</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -591,12 +592,12 @@ procedure.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 56 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span>         <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dist&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31  36.4 quantiles(40.38)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        2021-12-31  89.9 quantiles(89.92)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        2021-12-31  82.6 quantiles(82.58)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2021-12-31   0    quantiles(22.2)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        2021-12-31  58.3 quantiles(58.28)[2] 2021-12-31    2022-01-07 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-12-31  84.3 quantiles(84.34)[2] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31  36.4 quantiles(36.37)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> al        2021-12-31  89.9 quantiles(89.92)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ar        2021-12-31  82.6 quantiles(82.58)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> as        2021-12-31   0       quantiles(0)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> az        2021-12-31  58.3 quantiles(58.28)[7] 2021-12-31    2022-01-07 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> ca        2021-12-31  84.3 quantiles(84.34)[7] 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 50 more rows</span></span></span></code></pre></div>
 </div>
 </div>

@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -590,7 +590,6 @@ frosting layer <code><a href="../reference/layer_population_scaling.html">layer_
 <span>  <span class="fu"><a href="../reference/layer_threshold.html">layer_threshold</a></span><span class="op">(</span><span class="va">.pred</span>, lower <span class="op">=</span> <span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="co"># 90% prediction interval</span></span>
 <span>  <span class="fu"><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles</a></span><span class="op">(</span></span>
-<span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.1</span>, <span class="fl">0.9</span><span class="op">)</span>,</span>
 <span>    symmetrize <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/layer_population_scaling.html">layer_population_scaling</a></span><span class="op">(</span></span>
@@ -643,7 +642,7 @@ intervals.</p>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/pivot_quantiles_wider.html">pivot_quantiles_wider</a></span><span class="op">(</span><span class="va">.pred_distn_scaled</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 12</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span>            <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">edu_qual</span>        <span style="font-weight: bold;">age_group</span>      <span style="font-weight: bold;">.pred_scaled</span></span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;fct&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> Newfoundland and La…       <span style="text-decoration: underline;">2</span>017 Career, techni… 15 to 34 years       <span style="text-decoration: underline;">45</span>724.</span></span>
@@ -652,7 +651,8 @@ intervals.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> Newfoundland and La…       <span style="text-decoration: underline;">2</span>017 Career, techni… 35 to 64 years       <span style="text-decoration: underline;">47</span>802.</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> Newfoundland and La…       <span style="text-decoration: underline;">2</span>017 Post career, t… 15 to 34 years       <span style="text-decoration: underline;">61</span>127.</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> Newfoundland and La…       <span style="text-decoration: underline;">2</span>017 Undergraduate … 15 to 34 years       <span style="text-decoration: underline;">72</span>713.</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: </span><span style="color: #949494; font-weight: bold;">`0.1`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.9`</span><span style="color: #949494;"> &lt;dbl&gt;</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: </span><span style="color: #949494; font-weight: bold;">`0.05`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.1`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.25`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.5`</span><span style="color: #949494;"> &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   </span><span style="color: #949494; font-weight: bold;">`0.75`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.9`</span><span style="color: #949494;"> &lt;dbl&gt;, </span><span style="color: #949494; font-weight: bold;">`0.95`</span><span style="color: #949494;"> &lt;dbl&gt;</span></span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -692,7 +692,7 @@ is the 2-year median income (proportion) at time
 <span><span class="va">out_fl</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type flatline ══════════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2025-02-04 17:02:19</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2025-02-08 19:36:04</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -732,7 +732,7 @@ article, but where all inputs have the same number of lags.</p>
 <span><span class="va">out_arx_lr</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2025-02-04 17:02:21</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2025-02-08 19:36:05</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -762,7 +762,7 @@ linear regression.</p>
 <span><span class="va">out_arx_rf</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2025-02-04 17:02:22</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2025-02-08 19:36:07</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>

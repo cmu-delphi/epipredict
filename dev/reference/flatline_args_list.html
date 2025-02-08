@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
 <span>  n_training <span class="op">=</span> <span class="cn">Inf</span>,</span>
 <span>  forecast_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  target_date <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  nonneg <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  quantile_by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
@@ -138,7 +138,7 @@ residual quantiles are used. It is not applicable with
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span> and <span style="color: #0000BB;">0.95</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span>, <span style="color: #0000BB;">0.1</span>, <span style="color: #0000BB;">0.25</span>, <span style="color: #0000BB;">0.5</span>, <span style="color: #0000BB;">0.75</span>, <span style="color: #0000BB;">0.9</span>, and <span style="color: #0000BB;">0.95</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>
@@ -147,7 +147,7 @@ residual quantiles are used. It is not applicable with
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> n_training : <span style="color: #0000BB;">Inf</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> forecast_date : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> target_date : <span style="color: #0000BB;">"NULL"</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span> and <span style="color: #0000BB;">0.95</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_levels : <span style="color: #0000BB;">0.05</span>, <span style="color: #0000BB;">0.1</span>, <span style="color: #0000BB;">0.25</span>, <span style="color: #0000BB;">0.5</span>, <span style="color: #0000BB;">0.75</span>, <span style="color: #0000BB;">0.9</span>, and <span style="color: #0000BB;">0.95</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> symmetrize : <span style="color: #0000BB;">FALSE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> nonneg : <span style="color: #0000BB;">TRUE</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> quantile_by_key : <span style="color: #0000BB;">"_empty_"</span></span>

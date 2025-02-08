@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.7</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,7 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">layer_residual_quantiles</span><span class="op">(</span></span>
 <span>  <span class="va">frosting</span>,</span>
 <span>  <span class="va">...</span>,</span>
-<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
+<span>  quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.05</span>, <span class="fl">0.1</span>, <span class="fl">0.25</span>, <span class="fl">0.5</span>, <span class="fl">0.75</span>, <span class="fl">0.9</span>, <span class="fl">0.95</span><span class="op">)</span>,</span>
 <span>  symmetrize <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  by_key <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0L</span><span class="op">)</span>,</span>
 <span>  name <span class="op">=</span> <span class="st">".pred_distn"</span>,</span>
@@ -74,7 +74,8 @@
 
 <dt id="arg-quantile-levels">quantile_levels<a class="anchor" aria-label="anchor" href="#arg-quantile-levels"></a></dt>
 <dd><p>numeric vector of probabilities with values in (0,1)
-referring to the desired quantile.</p></dd>
+referring to the desired quantile. Note that 0.5 will always be included
+even if left out by the user.</p></dd>
 
 
 <dt id="arg-symmetrize">symmetrize<a class="anchor" aria-label="anchor" href="#arg-symmetrize"></a></dt>
@@ -116,7 +117,7 @@ residual quantiles added to the prediction</p>
 <span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="frosting.html">frosting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="layer_predict.html">layer_predict</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">layer_residual_quantiles</span><span class="op">(</span></span></span>
-<span class="r-in"><span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.0275</span>, <span class="fl">0.975</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    quantile_levels <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.025</span>, <span class="fl">0.975</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>    symmetrize <span class="op">=</span> <span class="cn">FALSE</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="layer_naomit.html">layer_naomit</a></span><span class="op">(</span><span class="va">.pred</span><span class="op">)</span></span></span>
