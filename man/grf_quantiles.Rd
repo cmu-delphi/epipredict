@@ -52,8 +52,8 @@ details, see \href{https://grf-labs.github.io/grf/articles/categorical_inputs.ht
 #> Model fit template:
 #> grf::quantile_forest(X = missing_arg(), Y = missing_arg(), mtry = min_cols(~integer(1), 
 #>     x), num.trees = integer(1), min.node.size = min_rows(~integer(1), 
-#>     x), quantiles = c(0.1, 0.5, 0.9), num.threads = 1L, seed = stats::runif(1, 
-#>     0, .Machine$integer.max))
+#>     x), quantiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95), 
+#>     num.threads = 1L, seed = stats::runif(1, 0, .Machine$integer.max))
 }\if{html}{\out{</div>}}
 }
 

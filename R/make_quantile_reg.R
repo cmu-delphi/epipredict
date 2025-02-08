@@ -12,7 +12,7 @@
 #' @param engine Character string naming the fitting function. Currently, only
 #'   "rq" and "grf" are supported.
 #' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
-#'   quantiles to estimate (default is 0.5).
+#'   quantiles to estimate (default is the set 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95).
 #' @param method A fitting method used by [quantreg::rq()]. See the
 #'   documentation for a list of options.
 #'
@@ -27,7 +27,9 @@
 #' rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
-quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0.5, method = "br") {
+quantile_reg <- function(mode = "regression", engine = "rq",
+                         quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
+                         method = "br") {
   # Check for correct mode
   if (mode != "regression") {
     cli_abort("`mode` must be 'regression'")

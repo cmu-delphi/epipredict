@@ -9,7 +9,10 @@ test_that("quantile_rand_forest defaults work", {
   spec <- rand_forest(engine = "grf_quantiles", mode = "regression")
   expect_silent(out <- fit(spec, formula = y ~ x + z, data = tib))
   pars <- parsnip::extract_fit_engine(out)
-  manual <- quantile_forest(as.matrix(tib[, 2:3]), tib$y, quantiles = c(0.1, 0.5, 0.9))
+  manual <- quantile_forest(
+    as.matrix(tib[, 2:3]), tib$y,
+    quantiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
+  )
   expect_identical(pars$quantiles.orig, manual$quantiles.orig)
   expect_identical(pars$`_num_trees`, manual$`_num_trees`)
 
@@ -43,7 +46,8 @@ test_that("quantile_rand_forest handles alternative quantiles", {
 
 
 test_that("quantile_rand_forest handles allows setting the trees and mtry", {
-  spec <- rand_forest(mode = "regression", mtry = 2, trees = 100, engine = "grf_quantiles")
+  spec <- rand_forest(mode = "regression", mtry = 2, trees = 100) %>%
+    set_engine(engine = "grf_quantiles", quantiles = c(0.1, 0.5, 0.9))
   expect_silent(out <- fit(spec, formula = y ~ x + z, data = tib))
   pars <- parsnip::extract_fit_engine(out)
   manual <- quantile_forest(as.matrix(tib[, 2:3]), tib$y, mtry = 2, num.trees = 100)
@@ -68,13 +72,13 @@ test_that("quantile_rand_forest operates with arx_forecaster", {
   spec2 <- parsnip::extract_spec_parsnip(o)
   expect_identical(
     rlang::eval_tidy(spec2$eng_args$quantiles),
-    c(.05, .1, .5, .9, .95) # merged with arx_args default
+    c(.05, .1, 0.25, .5, 0.75, .9, .95) # merged with arx_args default
   )
   df <- epidatasets::counts_subset %>% filter(time_value >= "2021-10-01")
 
   z <- arx_forecaster(df, "cases", "cases", spec2)
   expect_identical(
     nested_quantiles(z$predictions$.pred_distn[1])[[1]]$quantile_levels,
-    c(.05, .1, .5, .9, .95)
+    c(.05, .1, 0.25, .5, 0.75, .9, .95)
   )
 })

@@ -381,7 +381,7 @@ f <- frosting() %>%
     df_pop_col = "pop"
   )
 
-wf <- epi_workflow(r, quantile_reg(quantile_levels = c(.05, .5, .95))) %>%
+wf <- epi_workflow(r, quantile_reg()) %>%
   fit(jhu) %>%
   add_frosting(f)
 
