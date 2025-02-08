@@ -8,7 +8,7 @@
 #' long history of such periods rather than heavily using recent data.
 #'
 #' The forecast is taken as the quantiles of the `outcome` in a small window
-#' around the target week, computed over the entire available history.
+#' around the target period, computed over the entire available history.
 #'
 #' @inheritParams flatline_forecaster
 #' @param args_list A list of additional arguments as created by the
@@ -116,7 +116,9 @@ climatological_forecaster <- function(
 #' @inheritParams flatline_args_list
 #' @param ahead Vector of integers giving the number of time steps ahead
 #'   (in weeks) of the forecast date for which forecasts should be produced.
-#' @param time_type Character. The duration to which the forecasts correspond.
+#' @param time_type The duration over which time aggregation should be performed.
+#' @param center_method The measure of center to be calculated over the time
+#'   window.
 #' @param window_size Integer. The number of time points on each side of the
 #'   target to include in the calculation.
 #' @param quantile_method One of either `"base8"` or `"epipredict"`. The first
@@ -157,10 +159,10 @@ climatological_forecaster <- function(
 climate_args_list <- function(
     ahead = 1:4,
     forecast_date = NULL,
-    time_type = c("epiweek", "week", "month", "year", "day"),
+    time_type = c("epiweek", "week", "month", "day"),
     window_size = 3L,
     quantile_method = c("base8", "epipredict"),
-    quantile_levels = c(.1, .25, .5, .75, .9),
+    quantile_levels = c(.05, .1, .25, .5, .75, .9, .95),
     symmetrize = FALSE,
     nonneg = TRUE,
     quantile_by_key = character(0L),
