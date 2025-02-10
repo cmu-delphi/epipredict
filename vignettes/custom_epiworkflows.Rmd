@@ -151,7 +151,7 @@ One way to inspect the roles assigned is to use `prep()`:
 
 ```{r prep_recipe}
 prepped <- four_week_recipe |> prep(training_data)
-prepped$term_info |> print(n=14)
+prepped$term_info |> print(n = 14)
 ```
 
 The way to inspect the columns created is by using `bake()` on the resulting
@@ -291,7 +291,7 @@ growth_rate_recipe |>
 And the role:
 ```{r growth_rate_roles}
 prepped <- growth_rate_recipe |>
-  prep(training_data) 
+  prep(training_data)
 prepped$term_info |> filter(grepl("gr", variable))
 ```
 

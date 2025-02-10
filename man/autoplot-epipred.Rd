@@ -11,6 +11,7 @@
 \method{autoplot}{epi_workflow}(
   object,
   predictions = NULL,
+  plot_data = NULL,
   .levels = c(0.5, 0.8, 0.9),
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
@@ -23,6 +24,7 @@
 
 \method{autoplot}{canned_epipred}(
   object,
+  plot_data = NULL,
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
@@ -41,6 +43,9 @@
 
 \item{predictions}{A data frame with predictions. If \code{NULL}, only the
 original data is shown.}
+
+\item{plot_data}{An epi_df of the data to plot against. This is for the case
+where you have the actual results to compare the forecast against.}
 
 \item{.levels}{A numeric vector of levels to plot for any prediction bands.
 More than 3 levels begins to be difficult to see.}

@@ -72,6 +72,12 @@ argument.
 The step assumes that the data are already \emph{in the proper sequential
 order} for shifting.
 
+While \code{{recipes}} provides a function \code{step_lag()}, it assumes that the data
+have no breaks in the sequence of \code{time_values}, and has no ability to group by
+\code{geo_value} or other keys. Our \code{lag/ahead} functions also appropriately adjust
+the amount of data to avoid accidentally dropping recent predictors from the
+test data.
+
 The \code{prefix} and \code{id} arguments are unchangeable to ensure that the code runs
 properly and to avoid inconsistency with naming. For \code{step_epi_ahead}, they
 are always set to \code{"ahead_"} and \code{"epi_ahead"} respectively, while for
