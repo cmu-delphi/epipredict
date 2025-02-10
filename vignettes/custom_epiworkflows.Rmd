@@ -25,7 +25,7 @@ library(epidatr)
 
 To get a better handle on custom `epi_workflow()`s, lets recreate and then
 modify the example of `four_week_ahead` from the [landing
-page](../index.html#motivating-example), 
+page](../index.html#motivating-example)
 
 ```{r make-four-forecasts, warning=FALSE}
 training_data <- covid_case_death_rates |>
@@ -43,7 +43,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead$epi_workflow
 ```
 # Anatomy of an `epi_workflow`
-An `epi_workflow` is an extension of a `workflows::workflow()` to handle panel
+An `epi_workflow()` is an extension of a `workflows::workflow()` to handle panel
 data and post-processing.
 It consists of 3 components, shown above:
 
@@ -52,17 +52,21 @@ It consists of 3 components, shown above:
   steps](https://recipes.tidymodels.org/reference/index.html).
   Think of it as a more flexible `formula` that you would pass to `lm()`: `y ~
   x1 + log(x2) + lag(x1, 5)`.
+  The above model has 6 of these steps.
   In general, there are 2 broad classes of transformation that `{recipes}`
   handles:
-    - Transforms of both training and test data that are always applied. 
+    - Transforms of both training and test data that are always applied.
       Examples include taking the log of a variable, leading or lagging,
-      filtering out rows, handling dummy variables, etc.
+      filtering out rows, handling dummy variables, calculating growth rates,
+      etc.
     - Operations that fit parameters during training to apply during prediction,
       such as centering by the mean.
       This is a major benefit of `{recipes}`, since it prevents data leakage,
       where information about the test/predict time data "leaks" into the
       parameters. <!-- TODO unsure if worth even keeping, as we effectively
       can't have data leakage. -->
+      However, the main mechanism we rely on to prevent data leakage is proper
+      [backtesting](backtesting.html).
       For the case of centering, we need to store the mean of the predictor from
       the training data and use that value on the prediction data rather than
       accidentally calculating the mean of the test predictor for centering.
@@ -74,24 +78,27 @@ It consists of 3 components, shown above:
   between a wide collection of statistical models.
 3. Postprocessor: unique to this package, and used to format and modify the
    prediction after the model has been fit.
-   Each operation is a layer, and the stack of layers is known as frosting,
+   Each operation is a `layer_`, and the stack of layers is known as `frosting()`,
    continuing the metaphor of baking a cake established in the recipe.
    Some example operations include:
-  - generate quantiles from purely point-prediction models,
-  - undo operations done in the steps, such as convert back to counts from rates
-  - threshold so the forecast doesn't include negative values
-  - generally adapt the format of the prediction to it's eventual use.
+    - generate quantiles from purely point-prediction models,
+    - undo operations done in the steps, such as convert back to counts from rates
+    - threshold so the forecast doesn't include negative values
+    - generally adapt the format of the prediction to it's eventual use.
 
 # Recreating `four_week_ahead` in an `epi_workflow()`
 To be able to extend this beyond what `arx_forecaster()` itself will let us do,
 we first need to understand how to recreate it using a custom `epi_workflow()`.
 
 To use a custom workflow, there are a couple of steps:
+
 1. define the `epi_recipe()`, which contains the preprocessing steps
 2. define the `frosting()` which contains the post-processing layers
-3. Combine these with a trainer such as `quantile_reg()` into an `epi_workflow`, which we can then fit on the training data
-4. fit the workflow on some data
-5. grab the right prediction data using `get_test_data()` and apply the fit data to generate a prediction
+3. Combine these with a trainer such as `quantile_reg()` into an
+   `epi_workflow()`, which we can then fit on the training data
+4. `fit()` the workflow on some data
+5. grab the right prediction data using `get_test_data()` and apply the fit data
+   to generate a prediction
 
 ## Define the `epi_recipe()`
 To do this, we'll first take a look at the steps as they're found in
@@ -103,9 +110,9 @@ hardhat::extract_recipe(four_week_ahead$epi_workflow)
 
 So there are 6 steps we will need to recreate.
 One thing to note about the extracted recipe is that it has already been
-trained; for steps such as `recipes::step_BoxCox()`, this means that their
+trained; for steps such as `recipes::step_BoxCox()` which have parameters, this means that their
 parameters have been calculated.
-Recreating this:
+Before defining steps, we need to create an `epi_recipe()` to hold them
 ```{r make_recipe}
 four_week_recipe <- epi_recipe(
   covid_case_death_rates |>
@@ -120,7 +127,7 @@ or `other_keys`; it is typically easiest to just use the training data itself.
 
 
 Then we add each step via pipes; in principle the order matters, though for this
-recipe only `step_epi_naomit` and `step_training_window` depend on the steps
+recipe only `step_epi_naomit()` and `step_training_window()` depend on the steps
 before them:
 
 ```{r make_steps}
@@ -132,20 +139,21 @@ four_week_recipe <- four_week_recipe |>
   step_training_window()
 ```
 
-one thing to note: we only added 5 steps here because `step_epi_naomit()` is
-actually a wrapper around adding 2 base `step_naomit()`s, on for
+One thing to note: we only added 5 steps here because `step_epi_naomit()` is
+actually a wrapper around adding 2 base `step_naomit()`s, one for
 `all_predictors()` and one for `all_outcomes()`, differing in their treatment at
 predict time.
 
-`step_epi_lag` and `step_epi_ahead` both accept tidy syntax, so if we
-wanted the same lags for both `case_rate` and `death_rate`, we could have done
-`step_epi_lag(ends_with("rate"), lag = c(0, 7, 14))`.
+`step_epi_lag()` and `step_epi_ahead()` both accept tidy syntax, so if for
+example we wanted the same lags for both `case_rate` and `death_rate`, we could
+have done `step_epi_lag(ends_with("rate"), lag = c(0, 7, 14))`.
 
 In general for the `{recipes}` package, steps assign roles, such as `predictor`
-and `outcome` to columns, either by adding new ones or adjusting existing ones. 
-`step_epi_lag()` for example, creates a new column per lag with the name
+and `outcome` to columns, either by adding new columns or adjusting existing
+ones. 
+`step_epi_lag()` for example, creates a new column for each lag with the name
 `lag_x_column_name` and assigns them as predictors, while `step_epi_ahead()`
-creates `ahead_column_name` columns and assigns them as outcomes.[^2]
+creates `ahead_x_column_name` columns and assigns them as outcomes.
 
 One way to inspect the roles assigned is to use `prep()`:
 
@@ -163,9 +171,14 @@ four_week_recipe |>
   bake(training_data)
 ```
 
+This is also useful for debugging malfunctioning pipelines; if you define
+`four_week_recipe` only up to the step that is misbehaving, you can get a
+partial evaluation to see the exact data the step is being applied to.
+It also allows you to see the exact data that the parsnip model is fitting on.
+
 ## Define the `frosting()`
-Since the post-processing frosting[^1] layers are unique to this package, to
-inspect them we use `extract_frosting` from `{epipredict}`:
+Since the post-processing frosting layers[^1] are unique to this package, to
+inspect them we use `extract_frosting()` from `{epipredict}`:
 
 ```{r inspect_fwa_layers, warning=FALSE}
 epipredict::extract_frosting(four_week_ahead$epi_workflow)
@@ -174,7 +187,7 @@ epipredict::extract_frosting(four_week_ahead$epi_workflow)
 The above gives us detailed descriptions of the arguments to the functions named
 above in the postprocessor of `four_week_ahead$epiworkflow`.
 Creating the layers is a similar process, except with frosting instead of a
-`recipe`:
+`recipe`[^2]:
 
 ```{r make_frosting}
 four_week_layers <- frosting() |>
@@ -185,14 +198,17 @@ four_week_layers <- frosting() |>
   layer_threshold()
 ```
 
+
 Most layers will work for any engine or steps; `layer_predict()` you will want
 to call in every case.
 There are a couple of layers, however, which depend on whether the engine used predicts quantiles or point estimates.
 
-The layers that are only supported by point estimate engines (such as `linear_reg()`):
+The layers that are only supported by point estimate engines (such as
+`linear_reg()`) are
 
-- `layer_residual_quantiles()`: the preferred method of generating quantiles, it
-  uses the error residuals of the engine. This will work for most parsnip engines.
+- `layer_residual_quantiles()`: the preferred method of generating quantiles for
+  non-quantile models, it uses the error residuals of the engine. 
+  This will work for most parsnip engines.
 - `layer_predictive_distn()`: alternate method of generating quantiles, it uses
   an approximate parametric distribution. This will work for linear regression
   specifically.
@@ -200,11 +216,13 @@ The layers that are only supported by point estimate engines (such as `linear_re
 TODO check this
   
 On the other hand, the layers that are only supported by quantile estimating
-engines (such as `quantile_reg()`):
+engines (such as `quantile_reg()`) are
 
-- `layer_quantile_distn()`
-- `layer_point_from_distn()`: this adds the median quantile as an point
-  estimate[^3]. 
+- `layer_quantile_distn()`: adds the specified quantiles.
+  If they differ from the ones actually fit, they will be interpolated and/or
+  extrapolated.
+- `layer_point_from_distn()`: this adds the median quantile as a point estimate,
+  and should be called after `layer_quantile_distn()` if called at all. 
 
 ## Fitting an `epi_workflow()`
 
@@ -217,12 +235,10 @@ four_week_workflow <- epi_workflow(
 )
 ```
 
-And fit it[^4]:
+And fit it to recreate `four_week_ahead$epi_workflow`
 ```{r workflow_fitting}
 fit_workflow <- four_week_workflow |> fit(training_data)
 ```
-
-This has recreated `four_week_ahead$epi_workflow`
 
 ## Predicting
 
@@ -231,13 +247,10 @@ datapoints:
 
 ```{r grab_data}
 relevant_data <- get_test_data(
-  extract_preprocessor(fit_workflow),
+  four_week_recipe,
   training_data
 )
 ```
-
-Note the use of `extract_preprocessor()` rather than `extract_recipe()`; this
-gets the unfit version of the `epi_recipe`, which is necessary.
 
 With a fit workflow and test data in hand, we can actually make our predictions:
 
@@ -252,15 +265,26 @@ predictions:
 fit_workflow |> predict(training_data)
 ```
 
-However, this produces forecasts for not just the actual `forecast_date`, but
-for every day in the dataset it has enough data to actually make a prediction.
+The resulting tibble is 800 rows long, however.
+This produces forecasts for not just the actual `forecast_date`, but for every
+day in the dataset it has enough data to actually make a prediction.
+To narrow this down, we could filter to rows where the `time_value` matches the `forecast_date`:
+
+```{r workflow_pred_training_filter}
+fit_workflow |>
+  predict(training_data) |>
+  filter(time_value == forecast_date)
+```
+
+This can be useful for cases where `get_test_data()` doesn't pull sufficient
+data.
 
 # Extending `four_week_ahead`
 
 There are many ways we could modify `four_week_ahead`; one simple modification
 would be to include a growth rate estimate as part of the model.
-Another would be to include a time component to the prediction if we expect
-there to be a strong seasonal variation.
+Another would be to include a time component to the prediction (useful if we
+expect there to be a strong seasonal component).
 Another would be to convert from rates to counts, for example if that were the
 preferred prediction format.
 
@@ -313,11 +337,11 @@ growth_rate_workflow <- epi_workflow(
 )
 
 relevant_data <- get_test_data(
-  extract_preprocessor(fit_workflow),
+  growth_rate_recipe,
   training_data
 )
 gr_fit_workflow <- growth_rate_workflow |> fit(training_data)
-gr_predictions <- fit_workflow |>
+gr_predictions <- gr_fit_workflow |>
   predict(relevant_data) |>
   filter(time_value == forecast_date)
 ```
@@ -354,3 +378,50 @@ result_plot
 ```
 
 TODO `get_test_data` isn't actually working here...
+
+[^1]: Think of baking a cake, where adding the frosting is the last step in the process of actually baking.
+
+[^2]: Note that the frosting doesn't require any information about the training
+    data, since the output of the model only depends on the model used.
+
+## Population scaling
+
+Suppose we're sending our predictions to someone who is looking to understand
+counts, rather than rates.
+Then we can adjust just the frosting to get a forecast for the counts from our
+rates forecaster:
+
+```{r rate_scale}
+count_layers <-
+  frosting() |>
+  layer_predict() |>
+  layer_residual_quantiles(quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)) |>
+  layer_population_scaling(
+    .pred,
+    .pred_distn,
+    df = epidatasets::state_census,
+    df_pop_col = "pop",
+    create_new = FALSE,
+    rate_rescaling = 1e5,
+    by = c("geo_value" = "abbr")
+  ) |>
+  layer_add_forecast_date() |>
+  layer_add_target_date() |>
+  layer_threshold()
+# building the new workflow
+count_workflow <- epi_workflow(
+  four_week_recipe,
+  linear_reg(),
+  count_layers
+)
+count_pred_data <- get_test_data(four_week_recipe, training_data)
+count_predictions <- count_workflow |>
+  fit(training_data) |>
+  predict(count_pred_data)
+count_predictions
+```
+
+which are 2-3 orders of magnitude larger than the corresponding rates above.
+`df` represents the scaling value; in this case it is the state populations,
+while `rate_rescaling` gives the denominator of the rate (our fit values were
+per 100,000).

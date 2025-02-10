@@ -132,6 +132,8 @@ hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 
 The default trainer is `parsnip::linear_reg()`, which generates quantiles after
 the fact in the post-processing layers, rather than as part of the model.
+While this does work, it is generally preferable to use `quantile_reg()`, as the
+quantiles generated in this manner can be poorly behaved.
 `quantile_reg()` on the other hand directly estimates different linear models
 for each quantile, reflected in the 3 different columns for `tau` above.
 
