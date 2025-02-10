@@ -22,9 +22,12 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
 
 ## Bug fixes
+
 - Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
 - Quantiles produced by `grf` were sometimes out of order.
 - dist_quantiles can have all `NA` values without causing unrelated errors
+- adjust default quantiles throughout so that they match.
+- force `layer_residual_quantiles()` to always include `0.5`.
 
 # epipredict 0.1
 

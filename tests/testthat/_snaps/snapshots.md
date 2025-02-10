@@ -3,24 +3,32 @@
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
     ), .pred = c(0.1393442, 0.103199, 0.3121244, 0.4218461, 0.7319844, 
     0.1975426), .pred_distn = structure(list(structure(list(values = c(0, 
-    0.34820911), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+    0.00989957999999999, 0.09353595, 0.1393442, 0.18515245, 0.26878882, 
+    0.34820911), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 
+    0.9, 0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+    "vctrs_vctr")), structure(list(values = c(0, 0, 0.05739075, 0.103199, 
+    0.14900725, 0.23264362, 0.31206391), quantile_levels = c(0.05, 
+    0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0, 0.31206391), quantile_levels = c(0.05, 0.95
-        )), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.10325949, 0.52098931
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.10325949, 0.18267978, 0.26631615, 0.3121244, 
+        0.35793265, 0.44156902, 0.52098931), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0.21298119, 0.63071101), quantile_levels = c(0.05, 
-        0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.52311949, 0.94084931
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.21298119, 0.29240148, 0.37603785, 0.4218461, 
+        0.46765435, 0.55129072, 0.63071101), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0, 0.40640751), quantile_levels = c(0.05, 0.95
-        )), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", "list"
-    )), forecast_date = structure(c(18992, 18992, 18992, 18992, 18992, 
-    18992), class = "Date"), target_date = structure(c(18999, 18999, 
-    18999, 18999, 18999, 18999), class = "Date")), row.names = c(NA, 
+        values = c(0.52311949, 0.60253978, 0.68617615, 0.7319844, 
+        0.77779265, 0.86142902, 0.94084931), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
+    "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+        values = c(0, 0.06809798, 0.15173435, 0.1975426, 0.24335085, 
+        0.32698722, 0.40640751), quantile_levels = c(0.05, 0.1, 0.25, 
+        0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+    "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
+    "list")), forecast_date = structure(c(18992, 18992, 18992, 18992, 
+    18992, 18992), class = "Date"), target_date = structure(c(18999, 
+    18999, 18999, 18999, 18999, 18999), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
 ---
@@ -28,24 +36,31 @@
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
     ), .pred = c(0.1393442, 0.103199, 0.3121244, 0.4218461, 0.7319844, 
     0.1975426), .pred_distn = structure(list(structure(list(values = c(0.084583345, 
-    0.194105055), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+    0.1073314, 0.1292864, 0.1393442, 0.149402, 0.171357, 0.194105055
+    ), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0.048438145, 0.157959855), quantile_levels = c(0.05, 
-        0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.257363545, 0.366885255
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.048438145, 0.0711862, 0.0931412, 0.103199, 0.1132568, 
+        0.1352118, 0.157959855), quantile_levels = c(0.05, 0.1, 0.25, 
+        0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+    "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.257363545, 
+    0.2801116, 0.3020666, 0.3121244, 0.3221822, 0.3441372, 0.366885255
+    ), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0.367085245, 0.476606955), quantile_levels = c(0.05, 
-        0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.677223545, 0.786745255
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.367085245, 0.3898333, 0.4117883, 0.4218461, 
+        0.4319039, 0.4538589, 0.476606955), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0.142781745, 0.252303455), quantile_levels = c(0.05, 
-        0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", "list"
-    )), forecast_date = structure(c(18992, 18992, 18992, 18992, 18992, 
-    18992), class = "Date"), target_date = structure(c(18993, 18993, 
-    18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
+        values = c(0.677223545, 0.6999716, 0.7219266, 0.7319844, 
+        0.7420422, 0.7639972, 0.786745255), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
+    "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+        values = c(0.142781745, 0.1655298, 0.1874848, 0.1975426, 
+        0.2076004, 0.2295554, 0.252303455), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
+    "dist_default", "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", 
+    "vctrs_vctr", "list")), forecast_date = structure(c(18992, 18992, 
+    18992, 18992, 18992, 18992), class = "Date"), target_date = structure(c(18993, 
+    18993, 18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
 ---
@@ -53,24 +68,32 @@
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
     ), .pred = c(0.1393442, 0.103199, 0.3121244, 0.4218461, 0.7319844, 
     0.1975426), .pred_distn = structure(list(structure(list(values = c(0, 
-    0.34820911), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+    0.00989957999999999, 0.09353595, 0.1393442, 0.18515245, 0.26878882, 
+    0.34820911), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 
+    0.9, 0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+    "vctrs_vctr")), structure(list(values = c(0, 0, 0.05739075, 0.103199, 
+    0.14900725, 0.23264362, 0.31206391), quantile_levels = c(0.05, 
+    0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0, 0.31206391), quantile_levels = c(0.05, 0.95
-        )), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.10325949, 0.52098931
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.10325949, 0.18267978, 0.26631615, 0.3121244, 
+        0.35793265, 0.44156902, 0.52098931), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0.21298119, 0.63071101), quantile_levels = c(0.05, 
-        0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.52311949, 0.94084931
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.21298119, 0.29240148, 0.37603785, 0.4218461, 
+        0.46765435, 0.55129072, 0.63071101), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0, 0.40640751), quantile_levels = c(0.05, 0.95
-        )), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", "list"
-    )), forecast_date = structure(c(18992, 18992, 18992, 18992, 18992, 
-    18992), class = "Date"), target_date = structure(c(18999, 18999, 
-    18999, 18999, 18999, 18999), class = "Date")), row.names = c(NA, 
+        values = c(0.52311949, 0.60253978, 0.68617615, 0.7319844, 
+        0.77779265, 0.86142902, 0.94084931), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
+    "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+        values = c(0, 0.06809798, 0.15173435, 0.1975426, 0.24335085, 
+        0.32698722, 0.40640751), quantile_levels = c(0.05, 0.1, 0.25, 
+        0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+    "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
+    "list")), forecast_date = structure(c(18992, 18992, 18992, 18992, 
+    18992, 18992), class = "Date"), target_date = structure(c(18999, 
+    18999, 18999, 18999, 18999, 18999), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
 ---
@@ -78,24 +101,32 @@
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
     ), .pred = c(0.1393442, 0.103199, 0.3121244, 0.4218461, 0.7319844, 
     0.1975426), .pred_distn = structure(list(structure(list(values = c(0, 
-    0.34820911), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+    0.00989957999999999, 0.09353595, 0.1393442, 0.18515245, 0.26878882, 
+    0.34820911), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 
+    0.9, 0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+    "vctrs_vctr")), structure(list(values = c(0, 0, 0.05739075, 0.103199, 
+    0.14900725, 0.23264362, 0.31206391), quantile_levels = c(0.05, 
+    0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0, 0.31206391), quantile_levels = c(0.05, 0.95
-        )), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.10325949, 0.52098931
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.10325949, 0.18267978, 0.26631615, 0.3121244, 
+        0.35793265, 0.44156902, 0.52098931), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0.21298119, 0.63071101), quantile_levels = c(0.05, 
-        0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr")), structure(list(values = c(0.52311949, 0.94084931
-    ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        values = c(0.21298119, 0.29240148, 0.37603785, 0.4218461, 
+        0.46765435, 0.55129072, 0.63071101), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
     "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-        values = c(0, 0.40640751), quantile_levels = c(0.05, 0.95
-        )), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-    "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", "list"
-    )), forecast_date = structure(c(18992, 18992, 18992, 18992, 18992, 
-    18992), class = "Date"), target_date = structure(c(18993, 18993, 
-    18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
+        values = c(0.52311949, 0.60253978, 0.68617615, 0.7319844, 
+        0.77779265, 0.86142902, 0.94084931), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
+    "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
+        values = c(0, 0.06809798, 0.15173435, 0.1975426, 0.24335085, 
+        0.32698722, 0.40640751), quantile_levels = c(0.05, 0.1, 0.25, 
+        0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+    "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
+    "list")), forecast_date = structure(c(18992, 18992, 18992, 18992, 
+    18992, 18992), class = "Date"), target_date = structure(c(18993, 
+    18993, 18993, 18993, 18993, 18993), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
 # cdc_baseline_forecaster snapshots
@@ -983,20 +1014,33 @@
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
     ), .pred = c(0.353013358779435, 0.648525432444877, 0.667670289394328, 
     1.1418673907239, 0.830448695683587, 0.329799431948649), .pred_distn = structure(list(
-        structure(list(values = c(0.171022956902288, 0.535003760656582
-        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        structure(list(values = c(0.171022956902288, 0.244945899624723, 
+        0.308032696431071, 0.353013358779435, 0.397994021127798, 
+        0.461080817934147, 0.535003760656582), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.46653503056773, 0.830515834322024), quantile_levels = c(0.05, 
+            values = c(0.46653503056773, 0.540457973290166, 0.603544770096514, 
+            0.648525432444877, 0.693506094793241, 0.756592891599589, 
+            0.830515834322024), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.485679887517181, 
+        0.559602830239616, 0.622689627045964, 0.667670289394328, 
+        0.712650951742692, 0.77573774854904, 0.849660691271475), 
+            quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.485679887517181, 
-        0.849660691271475), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        "vctrs_vctr")), structure(list(values = c(0.959876988846753, 
+        1.03379993156919, 1.09688672837554, 1.1418673907239, 1.18684805307226, 
+        1.24993484987861, 1.32385779260105), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.959876988846753, 1.32385779260105), quantile_levels = c(0.05, 
-            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.64845829380644, 
-        1.01243909756073), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
-        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.147809030071502, 0.511789833825796), quantile_levels = c(0.05, 
+            values = c(0.64845829380644, 0.722381236528875, 0.785468033335223, 
+            0.830448695683587, 0.875429358031951, 0.938516154838299, 
+            1.01243909756073), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.147809030071502, 
+        0.221731972793937, 0.284818769600285, 0.329799431948649, 
+        0.374780094297013, 0.437866891103361, 0.511789833825796), 
+            quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
         "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
     "list")), forecast_date = structure(c(18992, 18992, 18992, 18992, 
@@ -1007,22 +1051,35 @@
 ---
 
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
-    ), .pred = c(0.149303403634372, 0.139764664505947, 0.333186321066645, 
-    0.470345577837143, 0.725986105412007, 0.212686665274007), .pred_distn = structure(list(
-        structure(list(values = c(0.0961118191398633, 0.202494988128882
-        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+    ), .pred = c(0.149303403634373, 0.139764664505948, 0.333186321066645, 
+    0.470345577837144, 0.725986105412008, 0.212686665274007), .pred_distn = structure(list(
+        structure(list(values = c(0.0961118191398634, 0.118312393281548, 
+        0.13840396557592, 0.149303403634373, 0.160202841692825, 0.180294413987198, 
+        0.202494988128882), quantile_levels = c(0.05, 0.1, 0.25, 
+        0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.0865730800114383, 
+        0.108773654153123, 0.128865226447495, 0.139764664505948, 
+        0.1506641025644, 0.170755674858773, 0.192956249000457), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.0865730800114382, 0.192956249000457), quantile_levels = c(0.05, 
-            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.279994736572135, 
-        0.386377905561154), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
-        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.417153993342634, 0.523537162331653), quantile_levels = c(0.05, 
+            values = c(0.279994736572136, 0.30219531071382, 0.322286883008193, 
+            0.333186321066645, 0.344085759125097, 0.36417733141947, 
+            0.386377905561154), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.417153993342634, 
+        0.439354567484319, 0.459446139778691, 0.470345577837144, 
+        0.481245015895596, 0.501336588189969, 0.523537162331653), 
+            quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
         "vctrs_vctr")), structure(list(values = c(0.672794520917498, 
-        0.779177689906517), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
-        "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.159495080779498, 0.265878249768516), quantile_levels = c(0.05, 
+        0.694995095059183, 0.715086667353556, 0.725986105412008, 
+        0.73688554347046, 0.756977115764833, 0.779177689906517), 
+            quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
+            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
+        "vctrs_vctr")), structure(list(values = c(0.159495080779498, 
+        0.181695654921182, 0.201787227215555, 0.212686665274007, 
+        0.223586103332459, 0.243677675626832, 0.265878249768516), 
+            quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
         "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
     "list")), forecast_date = structure(c(18992, 18992, 18992, 18992, 
@@ -1033,52 +1090,76 @@
 ---
 
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
-    ), .pred = c(0.303244704017742, 0.531332853311081, 0.588827944685979, 
+    ), .pred = c(0.303244704017742, 0.531332853311081, 0.58882794468598, 
     0.98869024921623, 0.79480199700164, 0.306895457225321), .pred_distn = structure(list(
-        structure(list(values = c(0.136509784083987, 0.469979623951498
-        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        structure(list(values = c(0.136509784083987, 0.202348949370703, 
+        0.263837900408968, 0.303244704017742, 0.342651507626517, 
+        0.404140458664782, 0.469979623951498), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.364597933377326, 0.698067773244837), quantile_levels = c(0.05, 
-            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
-        0.755562864619735), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+            values = c(0.364597933377326, 0.430437098664042, 0.491926049702307, 
+            0.531332853311081, 0.570739656919856, 0.632228607958121, 
+            0.698067773244837), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
+        0.48793219003894, 0.549421141077205, 0.58882794468598, 0.628234748294754, 
+        0.689723699333019, 0.755562864619735), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.821955329282475, 1.15542516914999), quantile_levels = c(0.05, 
+            values = c(0.821955329282475, 0.887794494569191, 0.949283445607456, 
+            0.98869024921623, 1.028097052825, 1.08958600386327, 1.15542516914999
+            ), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
         "vctrs_vctr")), structure(list(values = c(0.628067077067884, 
-        0.961536916935395), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        0.693906242354601, 0.755395193392866, 0.79480199700164, 0.834208800610414, 
+        0.895697751648679, 0.961536916935395), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.140160537291565, 0.473630377159077), quantile_levels = c(0.05, 
-            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
-    "list")), forecast_date = structure(c(18997, 18997, 18997, 18997, 
-    18997, 18997), class = "Date"), target_date = structure(c(18998, 
+            values = c(0.140160537291566, 0.205999702578282, 0.267488653616547, 
+            0.306895457225321, 0.346302260834096, 0.407791211872361, 
+            0.473630377159077), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", 
+    "vctrs_vctr", "list")), forecast_date = structure(c(18997, 18997, 
+    18997, 18997, 18997, 18997), class = "Date"), target_date = structure(c(18998, 
     18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 
 ---
 
     structure(list(geo_value = c("ca", "fl", "ga", "ny", "pa", "tx"
-    ), .pred = c(0.303244704017742, 0.531332853311081, 0.588827944685979, 
+    ), .pred = c(0.303244704017742, 0.531332853311081, 0.58882794468598, 
     0.98869024921623, 0.79480199700164, 0.306895457225321), .pred_distn = structure(list(
-        structure(list(values = c(0.136509784083987, 0.469979623951498
-        ), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        structure(list(values = c(0.136509784083987, 0.202348949370703, 
+        0.263837900408968, 0.303244704017742, 0.342651507626517, 
+        0.404140458664782, 0.469979623951498), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.364597933377326, 0.698067773244837), quantile_levels = c(0.05, 
-            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
-        0.755562864619735), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+            values = c(0.364597933377326, 0.430437098664042, 0.491926049702307, 
+            0.531332853311081, 0.570739656919856, 0.632228607958121, 
+            0.698067773244837), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr")), structure(list(values = c(0.422093024752224, 
+        0.48793219003894, 0.549421141077205, 0.58882794468598, 0.628234748294754, 
+        0.689723699333019, 0.755562864619735), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.821955329282475, 1.15542516914999), quantile_levels = c(0.05, 
+            values = c(0.821955329282475, 0.887794494569191, 0.949283445607456, 
+            0.98869024921623, 1.028097052825, 1.08958600386327, 1.15542516914999
+            ), quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 
             0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
         "vctrs_vctr")), structure(list(values = c(0.628067077067884, 
-        0.961536916935395), quantile_levels = c(0.05, 0.95)), class = c("dist_quantiles", 
+        0.693906242354601, 0.755395193392866, 0.79480199700164, 0.834208800610414, 
+        0.895697751648679, 0.961536916935395), quantile_levels = c(0.05, 
+        0.1, 0.25, 0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", 
         "dist_default", "vctrs_rcrd", "vctrs_vctr")), structure(list(
-            values = c(0.140160537291565, 0.473630377159077), quantile_levels = c(0.05, 
-            0.95)), class = c("dist_quantiles", "dist_default", "vctrs_rcrd", 
-        "vctrs_vctr"))), class = c("distribution", "vctrs_vctr", 
-    "list")), forecast_date = structure(c(18997, 18997, 18997, 18997, 
-    18997, 18997), class = "Date"), target_date = structure(c(18998, 
+            values = c(0.140160537291566, 0.205999702578282, 0.267488653616547, 
+            0.306895457225321, 0.346302260834096, 0.407791211872361, 
+            0.473630377159077), quantile_levels = c(0.05, 0.1, 0.25, 
+            0.5, 0.75, 0.9, 0.95)), class = c("dist_quantiles", "dist_default", 
+        "vctrs_rcrd", "vctrs_vctr"))), class = c("distribution", 
+    "vctrs_vctr", "list")), forecast_date = structure(c(18997, 18997, 
+    18997, 18997, 18997, 18997), class = "Date"), target_date = structure(c(18998, 
     18998, 18998, 18998, 18998, 18998), class = "Date")), row.names = c(NA, 
     -6L), class = c("tbl_df", "tbl", "data.frame"))
 

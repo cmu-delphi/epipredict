@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.1.6
+Version: 0.1.9
 Authors@R: c(
     person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -73,7 +73,6 @@ Remotes:
     cmu-delphi/epidatasets,
     cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
-    cmu-delphi/epidatasets,
     dajmcdon/smoothqr
 Config/Needs/website: cmu-delphi/delphidocs
 Config/testthat/edition: 3

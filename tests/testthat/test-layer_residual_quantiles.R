@@ -26,8 +26,8 @@ test_that("Returns expected number or rows and columns", {
   nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.pred_distn))
   unnested <- nested %>% tidyr::unnest(.quantiles)
 
-  expect_equal(nrow(unnested), 9L)
-  expect_equal(unique(unnested$quantile_levels), c(.0275, .8, .95))
+  expect_equal(nrow(unnested), 12L)
+  expect_equal(unique(unnested$quantile_levels), c(.0275, .5, .8, .95))
 })
 
 

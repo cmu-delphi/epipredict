@@ -39,9 +39,7 @@ ggplot2::autoplot
 #'   step_epi_naomit()
 #'
 #' f <- frosting() %>%
-#'   layer_residual_quantiles(
-#'     quantile_levels = c(.025, .1, .25, .75, .9, .975)
-#'   ) %>%
+#'   layer_residual_quantiles() %>%
 #'   layer_threshold(starts_with(".pred")) %>%
 #'   layer_add_target_date()
 #'
@@ -85,7 +83,7 @@ NULL
 #' @rdname autoplot-epipred
 autoplot.epi_workflow <- function(
     object, predictions = NULL,
-    .levels = c(.5, .8, .95), ...,
+    .levels = c(.5, .8, .9), ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "dodgerblue4",
@@ -183,7 +181,7 @@ autoplot.epi_workflow <- function(
   }
 
   if (".pred" %in% names(predictions)) {
-    ntarget_dates <- n_distinct(predictions$time_value)
+    ntarget_dates <- dplyr::n_distinct(predictions$time_value)
     if (ntarget_dates > 1L) {
       bp <- bp +
         geom_line(
@@ -231,24 +229,25 @@ starts_with_impl <- function(x, vars) {
 
 plot_bands <- function(
     base_plot, predictions,
-    levels = c(.5, .8, .95),
+    levels = c(.5, .8, .9),
     fill = "blue4",
     alpha = 0.6,
     linewidth = 0.05) {
   innames <- names(predictions)
-  n <- length(levels)
-  alpha <- alpha / (n - 1)
-  l <- (1 - levels) / 2
-  l <- c(rev(l), 1 - l)
+  n_levels <- length(levels)
+  alpha <- alpha / (n_levels - 1)
+  # generate the corresponding level that is 1 - level
+  levels <- (1 - levels) / 2
+  levels <- c(rev(levels), 1 - levels)
 
   ntarget_dates <- dplyr::n_distinct(predictions$time_value)
 
   predictions <- predictions %>%
-    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, l), l)) %>%
+    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, levels), levels)) %>%
     pivot_quantiles_wider(.pred_distn)
   qnames <- setdiff(names(predictions), innames)
 
-  for (i in 1:n) {
+  for (i in 1:n_levels) {
     bottom <- qnames[i]
     top <- rev(qnames)[i]
     if (i == 1) {

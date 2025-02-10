@@ -3,7 +3,8 @@
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
 #' @param quantile_levels numeric vector of probabilities with values in (0,1)
-#'   referring to the desired quantile.
+#'   referring to the desired quantile. Note that 0.5 will always be included
+#'   even if left out by the user.
 #' @param symmetrize logical. If `TRUE` then interval will be symmetric.
 #' @param by_key A character vector of keys to group the residuals by before
 #'   calculating quantiles. The default, `c()` performs no grouping.
@@ -28,7 +29,7 @@
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_residual_quantiles(
-#'     quantile_levels = c(0.0275, 0.975),
+#'     quantile_levels = c(0.025, 0.975),
 #'     symmetrize = FALSE
 #'   ) %>%
 #'   layer_naomit(.pred)
@@ -48,7 +49,7 @@
 #' p2 <- forecast(wf2)
 layer_residual_quantiles <- function(
     frosting, ...,
-    quantile_levels = c(0.05, 0.95),
+    quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
     symmetrize = TRUE,
     by_key = character(0L),
     name = ".pred_distn",
@@ -59,6 +60,7 @@ layer_residual_quantiles <- function(
   arg_is_chr(by_key, allow_empty = TRUE)
   arg_is_probabilities(quantile_levels)
   arg_is_lgl(symmetrize)
+  quantile_levels <- sort(unique(c(0.5, quantile_levels)))
   add_layer(
     frosting,
     layer_residual_quantiles_new(

@@ -57,8 +57,8 @@ to shift the model to account for this difference. The options are:
 the last day of data. For example, if the last day of data was 3 days ago,
 the ahead becomes \code{ahead+3}.
 \item \code{"extend_lags"}: increase the lags so they're relative to the actual
-forecast date. For example, if the lags are \code{c(0,7,14)} and the last day of
-data was 3 days ago, the lags become \code{c(3,10,17)}.
+forecast date. For example, if the lags are \code{c(0, 7, 14)} and the last day of
+data was 3 days ago, the lags become \code{c(3, 10, 17)}.
 }}
 
 \item{warn_latency}{by default, \code{step_adjust_latency} warns the user if the

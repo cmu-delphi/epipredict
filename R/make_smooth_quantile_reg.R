@@ -5,12 +5,7 @@
 #' the [tidymodels](https://www.tidymodels.org/) framework. Currently, the
 #' only supported engine is [smoothqr::smooth_qr()].
 #'
-#' @param mode A single character string for the type of model.
-#'   The only possible value for this model is "regression".
-#' @param engine Character string naming the fitting function. Currently, only
-#'   "smooth_qr" is supported.
-#' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
-#'   quantiles to estimate (default is 0.5).
+#' @inheritParams quantile_reg
 #' @param outcome_locations Defaults to the vector `1:ncol(y)` but if the
 #'   responses are observed at a different spacing (or appear in a different
 #'   order), that information should be used here. This
@@ -76,7 +71,7 @@ smooth_quantile_reg <- function(
     mode = "regression",
     engine = "smoothqr",
     outcome_locations = NULL,
-    quantile_levels = 0.5,
+    quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
     degree = 3L) {
   # Check for correct mode
   if (mode != "regression") cli_abort("`mode` must be 'regression'")
