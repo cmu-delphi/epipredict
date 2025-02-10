@@ -38,6 +38,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Replace `dist_quantiles()` with `hardhat::quantile_pred()`
 - Allow `quantile()` to threshold to an interval if desired (#434)
 - `arx_forecaster()` detects if there's enough data to predict
+- Add `plot_data` to `autoplot` so that forecasts can be plotted against the values they're predicting
 
 ## Bug fixes
 

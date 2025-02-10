@@ -53,6 +53,7 @@ Suggests:
     epidatr (>= 1.0.0),
     fs,
     grf,
+    here,
     knitr,
     poissonreg,
     purrr,
