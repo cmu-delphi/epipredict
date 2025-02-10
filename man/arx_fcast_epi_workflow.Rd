@@ -58,5 +58,5 @@ arx_fcast_epi_workflow(jhu, "death_rate",
 )
 }
 \seealso{
-\code{\link[=arx_forecaster]{arx_forecaster()}}
+\code{\link[=arx_forecaster]{arx_forecaster()}}, \code{\link[=arx_args_list]{arx_args_list()}}
 }

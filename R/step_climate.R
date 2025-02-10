@@ -144,7 +144,7 @@ step_climate <-
           cli_abort(c("Automatic detection of the `forecast_ahead` is only
             supported if the original data and the time type for aggregation
             are in the same units.",
-            i = "Here, the data is in {.val {edf_time_type}} while
+            i = "Here, the data is in {.val {edf_time_type}}s while
             `time_type` is {.val {time_type}}.",
             i = "This is resolved most easily by specifying `forecast_ahead`."
           ))
@@ -242,13 +242,16 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 
   modulus <- switch(x$time_type, epiweek = 53L, week = 53L, month = 12L, day = 365L)
 
+  fn <- switch(center_method,
+               mean = function(x, w) weighted.mean(x, w, na.rm = TRUE),
+               median = function(x, w) median(x, na.rm = TRUE))
+
   climate_table <- training %>%
     mutate(.idx = x$time_aggr(time_value), .weights = wts) %>%
     select(.idx, .weights, all_of(c(col_names, x$epi_keys))) %>%
     tidyr::pivot_longer(all_of(unname(col_names))) %>%
     dplyr::reframe(
-      roll_modular_multivec(value, .idx, .weights, x$center_method,
-                              x$window_size, modulus),
+      roll_modular_multivec(value, .idx, .weights, fn, x$window_size, modulus),
       .by = c("name", x$epi_keys)
     ) %>%
     tidyr::pivot_wider(
@@ -302,13 +305,7 @@ print.step_climate <- function(x, width = max(20, options()$width - 30), ...) {
   invisible(x)
 }
 
-roll_modular_multivec <- function(col, .idx, weights, center_method,
-                                  window_size, modulus) {
-  if (center_method == "mean") {
-    aggr <- function(x, w) weighted.mean(x, w, na.rm = TRUE)
-  } else {
-    aggr <- function(x, w) median(x, na.rm = TRUE)
-  }
+roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus) {
   tib <- tibble(col = col, weights = weights, .idx = .idx) |>
     arrange(.idx) |>
     tidyr::nest(data = c(col, weights), .by = .idx)
