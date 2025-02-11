@@ -22,9 +22,7 @@
 #'   being removed from the data. Alternatively, you could specify arbitrary
 #'   large values, or perhaps zero. Setting this argument to `NULL` will result
 #'   in no replacement.
-#' @param additional_gr_args_list A list of additional arguments used by
-#'   [epiprocess::growth_rate()]. All `...` arguments may be passed here along
-#'   with `dup_rm` and `na_rm`.
+#' @inheritParams epiprocess::growth_rate
 #' @template step-return
 #'
 #'
@@ -46,11 +44,11 @@ step_growth_rate <-
            horizon = 7,
            method = c("rel_change", "linear_reg"),
            log_scale = FALSE,
+           na_rm = TRUE,
            replace_Inf = NA,
            prefix = "gr_",
            skip = FALSE,
-           id = rand_id("growth_rate"),
-           additional_gr_args_list = list()) {
+           id = rand_id("growth_rate")) {
     if (!is_epi_recipe(recipe)) {
       cli_abort("This recipe step can only operate on an {.cls epi_recipe}.")
     }
@@ -63,15 +61,7 @@ step_growth_rate <-
     }
     arg_is_chr(role)
     arg_is_chr_scalar(prefix, id)
-    arg_is_lgl_scalar(log_scale, skip)
-
-
-    if (!is.list(additional_gr_args_list)) {
-      cli_abort(c(
-        "`additional_gr_args_list` must be a {.cls list}.",
-        i = "See `?epiprocess::growth_rate` for available options."
-      ))
-    }
+    arg_is_lgl_scalar(log_scale, skip, na_rm)
 
     recipes::add_step(
       recipe,
@@ -82,13 +72,13 @@ step_growth_rate <-
         horizon = horizon,
         method = method,
         log_scale = log_scale,
+        na_rm = na_rm,
         replace_Inf = replace_Inf,
         prefix = prefix,
         keys = key_colnames(recipe),
         columns = NULL,
         skip = skip,
-        id = id,
-        additional_gr_args_list = additional_gr_args_list
+        id = id
       )
     )
   }
@@ -101,13 +91,13 @@ step_growth_rate_new <-
            horizon,
            method,
            log_scale,
+           na_rm,
            replace_Inf,
            prefix,
            keys,
            columns,
            skip,
-           id,
-           additional_gr_args_list) {
+           id) {
     recipes::step(
       subclass = "growth_rate",
       terms = terms,
@@ -116,13 +106,13 @@ step_growth_rate_new <-
       horizon = horizon,
       method = method,
       log_scale = log_scale,
+      na_rm = na_rm,
       replace_Inf = replace_Inf,
       prefix = prefix,
       keys = keys,
       columns = columns,
       skip = skip,
-      id = id,
-      additional_gr_args_list = additional_gr_args_list
+      id = id
     )
   }
 
@@ -137,13 +127,13 @@ prep.step_growth_rate <- function(x, training, info = NULL, ...) {
     horizon = x$horizon,
     method = x$method,
     log_scale = x$log_scale,
+    na_rm = x$na_rm,
     replace_Inf = x$replace_Inf,
     prefix = x$prefix,
     keys = x$keys,
     columns = recipes::recipes_eval_select(x$terms, training, info),
     skip = x$skip,
-    id = x$id,
-    additional_gr_args_list = x$additional_gr_args_list
+    id = x$id
   )
 }
 
@@ -177,10 +167,12 @@ bake.step_growth_rate <- function(object, new_data, ...) {
       across(
         all_of(object$columns),
         ~ epiprocess::growth_rate(
-          time_value, .x,
+          .x,
+          x = time_value,
           method = object$method,
-          h = object$horizon, log_scale = object$log_scale,
-          !!!object$additional_gr_args_list
+          h = object$horizon,
+          log_scale = object$log_scale,
+          na_rm = object$na_rm
         ),
         .names = "{object$prefix}{object$horizon}_{object$method}_{.col}"
       )
