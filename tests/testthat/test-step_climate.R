@@ -6,12 +6,12 @@ test_that("roll_modular_multivec works", {
   )
   modulus <- 3L
 
-  Mean = function(x, w) weighted.mean(x, w, na.rm = TRUE)
-  Median = function(x, w) median(x, na.rm = TRUE)
+  Mean <- function(x, w) weighted.mean(x, w, na.rm = TRUE)
+  Median <- function(x, w) median(x, na.rm = TRUE)
 
   # unweighted mean
   expected_res <- tib |>
-    mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus ) |>
+    mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus) |>
     summarise(climate_pred = weighted.mean(col, w = w), .by = .idx)
   expect_equal(
     roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 0, modulus),
@@ -26,7 +26,7 @@ test_that("roll_modular_multivec works", {
   # weighted mean
   tib$w <- c(1, 2, 3, 1, 2, 1, 1, 2, 2, 1)
   expected_res <- tib |>
-    mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus ) |>
+    mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus) |>
     summarise(climate_pred = weighted.mean(col, w = w), .by = .idx)
   expect_equal(
     roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 0, modulus),
@@ -43,7 +43,7 @@ test_that("roll_modular_multivec works", {
   )
   # median
   expected_res <- tib |>
-    mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus ) |>
+    mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus) |>
     summarise(climate_pred = median(col), .by = .idx)
   expect_equal(
     roll_modular_multivec(tib$col, tib$.idx, tib$w, Median, 0, modulus),
@@ -125,7 +125,9 @@ test_that("leading the climate predictor works as expected", {
   td <- get_test_data(r, x)
   expected_test_x <- td %>%
     filter(time_value == "2021-12-31") %>%
-    mutate(ahead_14_y = NA_real_, lag_0_y = 1, lag_7_y = 2, lag_14_y = 3,
-           climate_y = 2)
+    mutate(
+      ahead_14_y = NA_real_, lag_0_y = 1, lag_7_y = 2, lag_14_y = 3,
+      climate_y = 2
+    )
   expect_equal(bake(p, td), expected_test_x)
 })

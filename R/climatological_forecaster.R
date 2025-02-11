@@ -95,8 +95,7 @@ climatological_forecaster <- function(epi_data,
     time_aggr <- lubridate::yday
     modulus <- 365L
   }
-  center_fn <- switch(
-    args_list$center_method,
+  center_fn <- switch(args_list$center_method,
     mean = function(x, w) mean(x, na.rm = TRUE),
     median = function(x, w) stats::median(x, na.rm = TRUE)
   )
@@ -106,8 +105,10 @@ climatological_forecaster <- function(epi_data,
   climate_center <- epi_data %>%
     select(.idx, .weights, all_of(c(outcome, keys))) %>%
     dplyr::reframe(
-      roll_modular_multivec(!!sym_outcome, .idx, .weights, center_fn, window_size,
-                            modulus),
+      roll_modular_multivec(
+        !!sym_outcome, .idx, .weights, center_fn, window_size,
+        modulus
+      ),
       .by = all_of(keys)
     ) %>%
     rename(.pred = climate_pred)
@@ -116,14 +117,17 @@ climatological_forecaster <- function(epi_data,
     x <- x - stats::median(x, na.rm = TRUE)
     if (args_list$symmetrize) x <- c(x, -x)
     list(unname(quantile(
-      x, probs = args_list$quantile_levels, na.rm = TRUE, type = 8
+      x,
+      probs = args_list$quantile_levels, na.rm = TRUE, type = 8
     )))
   }
   climate_quantiles <- epi_data %>%
     select(.idx, .weights, all_of(c(outcome, args_list$quantile_by_key))) %>%
     dplyr::reframe(
-      roll_modular_multivec(!!sym_outcome, .idx, .weights, Quantile, window_size,
-                            modulus),
+      roll_modular_multivec(
+        !!sym_outcome, .idx, .weights, Quantile, window_size,
+        modulus
+      ),
       .by = all_of(args_list$quantile_by_key)
     ) %>%
     rename(.pred_distn = climate_pred) %>%
@@ -138,12 +142,13 @@ climatological_forecaster <- function(epi_data,
     dplyr::distinct() %>%
     mutate(forecast_date = forecast_date, .idx = time_aggr(forecast_date))
   predictions <- map(horizon, ~ {
-      predictions %>%
-        mutate(.idx = .idx + .x, target_date = forecast_date + ttype_dur(.x))
-    }) %>%
+    predictions %>%
+      mutate(.idx = .idx + .x, target_date = forecast_date + ttype_dur(.x))
+  }) %>%
     purrr::list_rbind() %>%
-    mutate(.idx = .idx %% modulus,
-           .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
+    mutate(
+      .idx = .idx %% modulus,
+      .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
     ) %>%
     left_join(climate_table, by = c(".idx", keys)) %>%
     select(-.idx)
@@ -167,16 +172,18 @@ climatological_forecaster <- function(epi_data,
   ))
   other_keys <- key_colnames(epi_data, exclude = c("time_value", "geo_value"))
   if (length(other_keys) > 0) {
-    ewf$pre$mold$extras$roles$key = epi_data %>% select(all_of(other_keys))
+    ewf$pre$mold$extras$roles$key <- epi_data %>% select(all_of(other_keys))
   }
 
-  structure(list(
-    predictions = predictions,
-    epi_workflow = ewf,
-    metadata = list(
-      training = attr(epi_data, "metadata"),
-      forecast_created = Sys.time()
-    )),
+  structure(
+    list(
+      predictions = predictions,
+      epi_workflow = ewf,
+      metadata = list(
+        training = attr(epi_data, "metadata"),
+        forecast_created = Sys.time()
+      )
+    ),
     class = c("climate_fcast", "canned_epipred")
   )
 }
@@ -212,7 +219,6 @@ climate_args_list <- function(
     nonneg = TRUE,
     quantile_by_key = character(0L),
     ...) {
-
   rlang::check_dots_empty()
   time_type <- arg_match(time_type)
   center_method <- rlang::arg_match(center_method)
@@ -226,9 +232,11 @@ climate_args_list <- function(
   arg_is_probabilities(quantile_levels)
   quantile_levels <- sort(unique(c(0.5, quantile_levels)))
 
-  structure(enlist(
-    forecast_date, forecast_horizon, time_type, center_method, window_size,
-    quantile_levels, symmetrize, nonneg, quantile_by_key),
+  structure(
+    enlist(
+      forecast_date, forecast_horizon, time_type, center_method, window_size,
+      quantile_levels, symmetrize, nonneg, quantile_by_key
+    ),
     class = c("climate_fcast", "alist")
   )
 }

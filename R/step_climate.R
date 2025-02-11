@@ -92,8 +92,10 @@
 #' # same idea, but using weekly climate
 #' r <- epi_recipe(covid_case_death_rates) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   step_climate(death_rate, forecast_ahead = 1, time_type = "epiweek",
-#'                window_size = 1L)
+#'   step_climate(death_rate,
+#'     forecast_ahead = 1, time_type = "epiweek",
+#'     window_size = 1L
+#'   )
 #' r
 #'
 #' r %>%
@@ -165,8 +167,11 @@ step_climate <-
     arg_is_lgl_scalar(skip)
 
     time_aggr <- switch(time_type,
-                        epiweek = lubridate::epiweek, week = lubridate::isoweek,
-                        month = lubridate::month, day = lubridate::yday)
+      epiweek = lubridate::epiweek,
+      week = lubridate::isoweek,
+      month = lubridate::month,
+      day = lubridate::yday
+    )
 
     recipes::add_step(
       recipe,
@@ -240,11 +245,17 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
   wts_used <- !is.null(wts)
   wts <- wts %||% rep(1, nrow(training))
 
-  modulus <- switch(x$time_type, epiweek = 53L, week = 53L, month = 12L, day = 365L)
+  modulus <- switch(x$time_type,
+    epiweek = 53L,
+    week = 53L,
+    month = 12L,
+    day = 365L
+  )
 
   fn <- switch(x$center_method,
-               mean = function(x, w) stats::weighted.mean(x, w, na.rm = TRUE),
-               median = function(x, w) median(x, na.rm = TRUE))
+    mean = function(x, w) stats::weighted.mean(x, w, na.rm = TRUE),
+    median = function(x, w) median(x, na.rm = TRUE)
+  )
 
   climate_table <- training %>%
     mutate(

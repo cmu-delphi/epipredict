@@ -360,5 +360,6 @@ print.step_adjust_latency <-
     }
     title <- trimws(paste("Adj.", x$method))
     print_epi_step(x$columns, x$terms, x$trained, title,
-                   conjunction = conj, extra_text = extra_text)
+      conjunction = conj, extra_text = extra_text
+    )
   }
