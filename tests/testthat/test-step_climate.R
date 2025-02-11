@@ -5,18 +5,22 @@ test_that("roll_modular_multivec works", {
     w = rep(1, 10)
   )
   modulus <- 3L
+
+  Mean = function(x, w) weighted.mean(x, w, na.rm = TRUE)
+  Median = function(x, w) median(x, na.rm = TRUE)
+
   # unweighted mean
   expected_res <- tib |>
     mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus ) |>
     summarise(climate_pred = weighted.mean(col, w = w), .by = .idx)
   expect_equal(
-    roll_modular_multivec(tib$col, tib$.idx, tib$w, "mean", 0, modulus),
+    roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 0, modulus),
     expected_res
   )
   w_size <- 1L
   expected_res <- tibble(.idx = as.double(1:3), climate_pred = mean(tib$col))
   expect_equal(
-    roll_modular_multivec(tib$col, tib$.idx, tib$w, "mean", 1L, modulus),
+    roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 1L, modulus),
     expected_res
   )
   # weighted mean
@@ -25,7 +29,7 @@ test_that("roll_modular_multivec works", {
     mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus ) |>
     summarise(climate_pred = weighted.mean(col, w = w), .by = .idx)
   expect_equal(
-    roll_modular_multivec(tib$col, tib$.idx, tib$w, "mean", 0, modulus),
+    roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 0, modulus),
     expected_res
   )
   tib$w <- c(1, 2, 3, 1, 2, 1, 1, 2, 2, 1)
@@ -34,7 +38,7 @@ test_that("roll_modular_multivec works", {
     climate_pred = weighted.mean(tib$col, tib$w)
   )
   expect_equal(
-    roll_modular_multivec(tib$col, tib$.idx, tib$w, "mean", 1L, modulus),
+    roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 1L, modulus),
     expected_res
   )
   # median
@@ -42,12 +46,12 @@ test_that("roll_modular_multivec works", {
     mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus ) |>
     summarise(climate_pred = median(col), .by = .idx)
   expect_equal(
-    roll_modular_multivec(tib$col, tib$.idx, tib$w, "median", 0, modulus),
+    roll_modular_multivec(tib$col, tib$.idx, tib$w, Median, 0, modulus),
     expected_res
   )
   expected_res <- tibble(.idx = as.double(1:3), climate_pred = median(tib$col))
   expect_equal(
-    roll_modular_multivec(tib$col, tib$.idx, tib$w, "median", 1L, modulus),
+    roll_modular_multivec(tib$col, tib$.idx, tib$w, Median, 1L, modulus),
     expected_res
   )
 })

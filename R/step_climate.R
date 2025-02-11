@@ -242,7 +242,7 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 
   modulus <- switch(x$time_type, epiweek = 53L, week = 53L, month = 12L, day = 365L)
 
-  fn <- switch(center_method,
+  fn <- switch(x$center_method,
                mean = function(x, w) weighted.mean(x, w, na.rm = TRUE),
                median = function(x, w) median(x, na.rm = TRUE))
 
