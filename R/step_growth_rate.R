@@ -30,12 +30,17 @@
 #' @importFrom epiprocess growth_rate
 #' @export
 #' @examples
-#' r <- epi_recipe(covid_case_death_rates) %>%
+#' library(dplyr)
+#' tiny_geos <- c("as", "mp", "vi", "gu", "pr")
+#' rates <- covid_case_death_rates %>%
+#'   filter(time_value >= as.Date("2021-11-01"), !(geo_value %in% tiny_geos))
+#'
+#' r <- epi_recipe(rates) %>%
 #'   step_growth_rate(case_rate, death_rate)
 #' r
 #'
 #' r %>%
-#'   prep(covid_case_death_rates) %>%
+#'   prep(rates) %>%
 #'   bake(new_data = NULL)
 step_growth_rate <-
   function(recipe,
