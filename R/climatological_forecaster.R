@@ -183,7 +183,7 @@ climatological_forecaster <- function(epi_data,
 #' Climatological forecaster argument constructor
 #'
 #' @inheritParams epi_recipe
-#' @param prediction_horizon Vector of integers giving the number of time steps,
+#' @param forecast_horizon Vector of integers giving the number of time steps,
 #'   in units of the `time_type`,
 #'   from the `reference_date` for which predictions should be produced.
 #' @inheritParams step_climate
@@ -191,7 +191,7 @@ climatological_forecaster <- function(epi_data,
 #'
 #' @return A list containing updated parameter choices with class `climate_alist`.
 #' @export
-#' @seealso [climatological_predictor()], [step_climate()]
+#' @seealso [climatological_forecaster()], [step_climate()]
 #'
 #' @examples
 #' climate_args_list()

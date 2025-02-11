@@ -27,6 +27,10 @@ adjustment (the default case), or
 non-\code{NULL}.
 }}
 
+\item{forecast_horizon}{Vector of integers giving the number of time steps,
+in units of the \code{time_type},
+from the \code{reference_date} for which predictions should be produced.}
+
 \item{time_type}{The duration over which time aggregation should be performed.}
 
 \item{center_method}{The measure of center to be calculated over the time
@@ -59,10 +63,6 @@ residual quantiles are used. It is not applicable with
 
 \item{...}{Further arguments passed to or from other methods (not currently
 used).}
-
-\item{prediction_horizon}{Vector of integers giving the number of time steps,
-in units of the \code{time_type},
-from the \code{reference_date} for which predictions should be produced.}
 }
 \value{
 A list containing updated parameter choices with class \code{climate_alist}.
@@ -79,5 +79,5 @@ climate_args_list(
 
 }
 \seealso{
-\code{\link[=climatological_predictor]{climatological_predictor()}}, \code{\link[=step_climate]{step_climate()}}
+\code{\link[=climatological_forecaster]{climatological_forecaster()}}, \code{\link[=step_climate]{step_climate()}}
 }

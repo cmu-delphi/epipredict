@@ -31,9 +31,32 @@ The forecast is taken as the quantiles of the \code{outcome} in a small window
 around the target period, computed over the entire available history.
 }
 \examples{
+rates <- cases_deaths_subset
+# set as_of to the last day in the data
+attr(rates, "metadata")$as_of <- as.Date("2021-12-31")
+fcast <- climatological_forecaster(rates, "case_rate_7d_av")
+autoplot(fcast)
 
-1 + 1
-2 + 2
+# Compute quantiles separately by location, and a backcast
+backcast <- climatological_forecaster(
+  rates, "case_rate_7d_av",
+  climate_args_list(
+    quantile_by_key = "geo_value",
+    forecast_date = as.Date("2021-06-01")
+  )
+)
+autoplot(backcast)
+
+# compute the climate "daily" rather than "weekly"
+# use a two week window (on both sides)
+daily_fcast <- climatological_forecaster(
+  rates, "case_rate_7d_av",
+  climate_args_list(
+    time_type = "day", window_size = 14L, forecast_horizon = 0:30
+  )
+)
+autoplot(daily_fcast) +
+  ggplot2::coord_cartesian(xlim = c(as.Date("2021-10-01"), NA))
 }
 \seealso{
 \code{\link[=step_climate]{step_climate()}}
