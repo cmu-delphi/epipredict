@@ -24,5 +24,3 @@ test_that("climate args list validates properly", {
   expect_snapshot(error = TRUE, climate_args_list(quantile_by_key = TRUE))
   expect_snapshot(error = TRUE, climate_args_list(quantile_by_key = 2:3))
 })
-
-
