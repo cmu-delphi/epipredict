@@ -20,12 +20,32 @@
 #' @seealso [step_climate()]
 #'
 #' @examples
-#' jhu <- covid_case_death_rates
+#' rates <- cases_deaths_subset
 #' # set as_of to the last day in the data
-#' attr(jhu, "metadata")$as_of <- as.Date("2021-12-31")
-#' fcast <- climatological_forecaster(jhu, "death_rate")
+#' attr(rates, "metadata")$as_of <- as.Date("2021-12-31")
+#' fcast <- climatological_forecaster(rates, "case_rate_7d_av")
+#' autoplot(fcast)
 #'
-
+#' # Compute quantiles separately by location, and a backcast
+#' backcast <- climatological_forecaster(
+#'   rates, "case_rate_7d_av",
+#'   climate_args_list(
+#'     quantile_by_key = "geo_value",
+#'     forecast_date = as.Date("2021-06-01")
+#'   )
+#' )
+#' autoplot(backcast)
+#'
+#' # compute the climate "daily" rather than "weekly"
+#' # use a two week window (on both sides)
+#' daily_fcast <- climatological_forecaster(
+#'   rates, "case_rate_7d_av",
+#'   climate_args_list(
+#'     time_type = "day", window_size = 14L, forecast_horizon = 0:30
+#'   )
+#' )
+#' autoplot(daily_fcast) +
+#'   ggplot2::coord_cartesian(xlim = c(as.Date("2021-10-01"), NA))
 climatological_forecaster <- function(epi_data,
                                       outcome,
                                       args_list = climate_args_list()) {
@@ -111,13 +131,6 @@ climatological_forecaster <- function(epi_data,
   climate_table <- climate_center %>%
     left_join(climate_quantiles, by = c(".idx", args_list$quantile_by_key)) %>%
     mutate(.pred_distn = .pred_distn + .pred)
-  if (args_list$nonneg) {
-    climate_table <- mutate(
-      climate_table,
-      .pred = snap(.pred, 0, Inf),
-      .pred_distn = snap(.pred_distn, 0, Inf)
-    )
-  }
   # create the predictions
   predictions <- epi_data %>%
     select(all_of(keys)) %>%
@@ -133,6 +146,14 @@ climatological_forecaster <- function(epi_data,
     ) %>%
     left_join(climate_table, by = c(".idx", keys)) %>%
     select(-.idx)
+  if (args_list$nonneg) {
+    predictions <- mutate(
+      predictions,
+      .pred = snap(.pred, 0, Inf),
+      .pred_distn = snap(.pred_distn, 0, Inf)
+    )
+  }
+
   # fill in some extras for plotting methods, etc.
   ewf <- epi_workflow()
   ewf$trained <- TRUE
