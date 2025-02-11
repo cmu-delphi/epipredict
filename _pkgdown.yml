@@ -12,12 +12,11 @@ articles:
     contents:
       - epipredict
       - custom_epiworkflows
-      - preprocessing-and-models
       - backtesting
-      - arx-classifier
       - update
   - title: Advanced methods
     contents:
+      - arx-classifier
       - articles/smooth-qr
       - panel-data
 

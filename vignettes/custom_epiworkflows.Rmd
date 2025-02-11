@@ -301,8 +301,8 @@ growth_rate_recipe <- epi_recipe(
   step_epi_lag(case_rate, lag = c(0, 1, 2, 3, 7, 14)) |>
   step_epi_lag(death_rate, lag = c(0, 7, 14)) |>
   step_epi_ahead(death_rate, ahead = 4 * 7) |>
-  step_growth_rate(death_rate) |>
   step_epi_naomit() |>
+  step_growth_rate(death_rate) |>
   step_training_window()
 ```
 
@@ -317,7 +317,9 @@ growth_rate_recipe |>
     death_rate, gr_7_rel_change_death_rate
   )
 ```
+
 And the role:
+
 ```{r growth_rate_roles}
 prepped <- growth_rate_recipe |>
   prep(training_data)
@@ -329,7 +331,9 @@ To demonstrate the changes in the layers that come along with it, we will use
 ```{r layer_and_fit}
 growth_rate_layers <- frosting() |>
   layer_predict() |>
-  layer_quantile_distn(quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)) |>
+  layer_quantile_distn(
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
+  ) |>
   layer_point_from_distn() |>
   layer_add_forecast_date() |>
   layer_add_target_date() |>
@@ -429,7 +433,121 @@ which are 2-3 orders of magnitude larger than the corresponding rates above.
 while `rate_rescaling` gives the denominator of the rate (our fit values were
 per 100,000).
 
-[^1]: Think of baking a cake, where adding the frosting is the last step in the process of actually baking.
+# Custom classifier workflow
+
+As a more complicated example of the kind of pipeline that you can build using
+this framework, here is an example of a hotspot prediction model, which predicts
+whether the case rates are increasing (`up`), decreasing (`down`) or flat
+(`flat`).
+This comes from a paper by McDonald, Bien, Green, Hu et al[^3], and roughly
+serves as an extension of `arx_classifier()`.
+
+First, we need to add a factor version of the `geo_value`, so that it can
+actually be used as a feature.
+
+```{r training_factor}
+training_data <-
+  training_data %>%
+  mutate(geo_value_factor = as.factor(geo_value))
+```
+
+Then we put together the recipe, using a combination of base `{recipe}`
+functions such as `add_role()` and `step_dummy()`, and `{epipreict}` functions
+such as `step_growth_rate()`.
+
+```{r class_recipe}
+classifier_recipe <- epi_recipe(training_data) %>%
+  add_role(time_value, new_role = "predictor") %>%
+  step_dummy(geo_value_factor) %>%
+  step_growth_rate(case_rate, role = "none", prefix = "gr_") %>%
+  step_epi_lag(starts_with("gr_"), lag = c(0, 7, 14)) %>%
+  step_epi_ahead(starts_with("gr_"), ahead = 7, role = "none") %>%
+  # note recipes::step_cut() has a bug in it, or we could use that here
+  step_mutate(
+    response = cut(
+      ahead_7_gr_7_rel_change_case_rate,
+      breaks = c(-Inf, -0.2, 0.25, Inf) / 7, # division gives weekly not daily
+      labels = c("down", "flat", "up")
+    ),
+    role = "outcome"
+  ) %>%
+  step_rm(has_role("none"), has_role("raw")) %>%
+  step_epi_naomit()
+```
+
+
+Roughly, this adds as predictors:
+
+1. the time value (via `add_role()`)
+2. the `geo_value` (via `step_dummy()` and the `as.factor()` above)
+3. the growth rate, both at prediction time and lagged by one and two weeks
+
+The outcome is created by composing several steps together: `step_epi_ahead()`
+creates a column with the growth rate one week into the future, while
+`step_mutate()` creates a factor with the 3 values:
+
+$$
+ Z_{\ell, t}=
+    \begin{cases}
+      \text{up}, & \text{if}\ Y^{\Delta}_{\ell, t} > 0.25 \\
+      \text{down}, & \text{if}\  Y^{\Delta}_{\ell, t} < -0.20\\
+      \text{flat}, & \text{otherwise}
+    \end{cases}
+$$
+
+where $Y^{\Delta}_{\ell, t}$ is the growth rate at location $\ell$ and time $t$.
+`up` means that the `case_rate` is has increased by at least 25%, while `down`
+means it has decreased by at least 20%.
+
+Note that both `step_growth_rate()` and `step_epi_ahead()` assign the role
+`none` explicitly; this is because they're used as intermediate steps to create
+both predictors and the outcome.
+`step_rm()` drops them after they're done, along with the original `raw` columns
+`death_rate` and `case_rate` (both `geo_value` and `time_value` are retained
+because their roles have been reassigned).
+
+
+To fit a classification model like this, we will need to use a parsnip model
+with mode classification; the simplest example is `multinomial_reg()`.
+We don't actually need to apply any layers, so we can skip adding one to the `epiworkflow()`:
+
+```{r, warning=FALSE}
+wf <- epi_workflow(
+  classifier_recipe,
+  multinom_reg()
+) %>%
+  fit(training_data)
+
+forecast(wf) %>% filter(!is.na(.pred_class))
+```
+
+And comparing the result with the actual growth rates at that point:
+```{r growth_rate_results}
+growth_rates <- covid_case_death_rates |>
+  filter(geo_value %in% used_locations) |>
+  group_by(geo_value) |>
+  mutate(
+    # multiply by 7 to get to weekly equivalents
+    case_gr = growth_rate(x = time_value, y = case_rate) * 7
+  ) |>
+  ungroup()
+
+growth_rates |> filter(time_value == "2021-08-01")
+```
+
+So they're all increasing at significantly higher than 25% per week (36%-62%),
+which matches the classification.
+
+
+See the [tooling book](https://cmu-delphi.github.io/delphi-tooling-book/preprocessing-and-models.html) for a more in depth discussion of this example.
+
+
+[^1]: Think of baking a cake, where adding the frosting is the last step in the
+    process of actually baking.
 
 [^2]: Note that the frosting doesn't require any information about the training
     data, since the output of the model only depends on the model used.
+
+[^3]: McDonald, Bien, Green, Hu, et al. “Can auxiliary indicators improve
+    COVID-19 forecasting and hotspot prediction?.” Proceedings of the National
+    Academy of Sciences 118.51 (2021): e2111453118. doi:10.1073/pnas.2111453118

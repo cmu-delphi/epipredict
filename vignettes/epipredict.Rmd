@@ -330,6 +330,9 @@ autoplot(
 
 The 8 graphs are all pairs of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
 
+## Fitting a non-geo-pooled model
+The primary difference to avoid geo-pooling is to first `group_by(geo_value)`
+before forecasting
 # Anatomy of a canned forecaster
 ## Code object
 Let's dissect the forecaster we trained back on the [landing
