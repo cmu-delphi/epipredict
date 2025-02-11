@@ -78,8 +78,10 @@ climatological_forecaster <- function(epi_data,
     ))
   }
   # process the time types
-  epi_data <- epi_data[!is.na(epi_data[outcome]), ] %>%
-    select(key_colnames(epi_data), outcome)
+  sym_outcome <- sym(outcome)
+  epi_data <- epi_data %>%
+    filter(!is.na(!!outcome)) %>%
+    select(all_of(c(key_colnames(epi_data), outcome)))
   if (time_type %in% c("week", "epiweek")) {
     ttype_dur <- lubridate::weeks
     time_aggr <- ifelse(time_type == "week", lubridate::epiweek, lubridate::isoweek)
@@ -99,15 +101,14 @@ climatological_forecaster <- function(epi_data,
     median = function(x, w) stats::median(x, na.rm = TRUE)
   )
   # get the point predictions
-  sym_outcome <- sym(outcome)
   keys <- key_colnames(epi_data, exclude = "time_value")
   epi_data <- epi_data %>% mutate(.idx = time_aggr(time_value), .weights = 1)
   climate_center <- epi_data %>%
-    select(.idx, .weights, outcome, all_of(keys)) %>%
+    select(.idx, .weights, all_of(c(outcome, keys))) %>%
     dplyr::reframe(
       roll_modular_multivec(!!sym_outcome, .idx, .weights, center_fn, window_size,
                             modulus),
-      .by = keys
+      .by = all_of(keys)
     ) %>%
     rename(.pred = climate_pred)
   # get the quantiles
@@ -119,11 +120,11 @@ climatological_forecaster <- function(epi_data,
     )))
   }
   climate_quantiles <- epi_data %>%
-    select(.idx, .weights, outcome, all_of(args_list$quantile_by_key)) %>%
+    select(.idx, .weights, all_of(c(outcome, args_list$quantile_by_key))) %>%
     dplyr::reframe(
       roll_modular_multivec(!!sym_outcome, .idx, .weights, Quantile, window_size,
                             modulus),
-      .by = args_list$quantile_by_key
+      .by = all_of(args_list$quantile_by_key)
     ) %>%
     rename(.pred_distn = climate_pred) %>%
     mutate(.pred_distn = dist_quantiles(.pred_distn, args_list$quantile_levels))
@@ -158,7 +159,7 @@ climatological_forecaster <- function(epi_data,
   ewf <- epi_workflow()
   ewf$trained <- TRUE
   ewf$pre <- list(mold = list(
-    outcomes = select(epi_data, outcome),
+    outcomes = select(epi_data, !!sym_outcome),
     extras = list(roles = list(
       geo_value = select(epi_data, geo_value),
       time_value = select(epi_data, time_value)
