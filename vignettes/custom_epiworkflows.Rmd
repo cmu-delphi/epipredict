@@ -283,15 +283,15 @@ data.
 
 There are many ways we could modify `four_week_ahead`; one simple modification
 would be to include a growth rate estimate as part of the model.
-Another would be to include a time component to the prediction (useful if we
-expect there to be a strong seasonal component).
 Another would be to convert from rates to counts, for example if that were the
 preferred prediction format.
+Another would be to include a time component to the prediction (useful if we
+expect there to be a strong seasonal component).
 
 ## Growth rate
 
 One feature that may potentially improve our forecast is looking at the growth
-rate 
+rate
 
 ```{r growth_rate_recipe}
 growth_rate_recipe <- epi_recipe(
@@ -305,12 +305,17 @@ growth_rate_recipe <- epi_recipe(
   step_epi_naomit() |>
   step_training_window()
 ```
+
 Inspecting the newly added column:
+
 ```{r growth_rate_print}
 growth_rate_recipe |>
   prep(training_data) |>
   bake(training_data) |>
-  select(geo_value, time_value, case_rate, death_rate, gr_7_rel_change_death_rate)
+  select(
+    geo_value, time_value, case_rate,
+    death_rate, gr_7_rel_change_death_rate
+  )
 ```
 And the role:
 ```{r growth_rate_roles}
@@ -320,7 +325,7 @@ prepped$term_info |> filter(grepl("gr", variable))
 ```
 
 To demonstrate the changes in the layers that come along with it, we will use
-`quantile_reg()` as the model:
+`quantile_reg()` as the model, which requires changing from `layer_residual_quantiles()` to `layer_quantile_distn()` and `layer_point_from_distn()`:
 ```{r layer_and_fit}
 growth_rate_layers <- frosting() |>
   layer_predict() |>
@@ -347,14 +352,17 @@ gr_predictions <- gr_fit_workflow |>
 ```
 <details>
 <summary> Plot </summary>
+
+Plotting the result; this is reusing some code from the landing page to print
+the forecast date.
+
 ```{r plotting}
-# plotting the result
 forecast_date_label <-
   tibble(
     geo_value = rep(used_locations, 2),
     .response_name = c(rep("case_rate", 4), rep("death_rate", 4)),
     dates = rep(forecast_date - 7 * 2, 2 * length(used_locations)),
-    heights = c(rep(150, 4), rep(0.40, 4))
+    heights = c(rep(150, 4), rep(0.30, 4))
   )
 
 result_plot <- autoplot(
@@ -378,11 +386,6 @@ result_plot
 ```
 
 TODO `get_test_data` isn't actually working here...
-
-[^1]: Think of baking a cake, where adding the frosting is the last step in the process of actually baking.
-
-[^2]: Note that the frosting doesn't require any information about the training
-    data, since the output of the model only depends on the model used.
 
 ## Population scaling
 
@@ -425,3 +428,8 @@ which are 2-3 orders of magnitude larger than the corresponding rates above.
 `df` represents the scaling value; in this case it is the state populations,
 while `rate_rescaling` gives the denominator of the rate (our fit values were
 per 100,000).
+
+[^1]: Think of baking a cake, where adding the frosting is the last step in the process of actually baking.
+
+[^2]: Note that the frosting doesn't require any information about the training
+    data, since the output of the model only depends on the model used.
