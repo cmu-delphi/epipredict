@@ -180,22 +180,22 @@
 #' @rdname step_adjust_latency
 #' @export
 #' @examples
-#' jhu <- covid_case_death_rates %>%
+#' rates <- covid_case_death_rates %>%
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' # setting the `as_of` to something realistic
-#' attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+#' attributes(rates)$metadata$as_of <- max(rates$time_value) + 3
 #'
-#' r <- epi_recipe(covid_case_death_rates) %>%
-#'   step_adjust_latency(has_role("raw"), method = "extend_ahead") %>%
+#' r <- epi_recipe(rates) %>%
+#'   step_adjust_latency(recipes::has_role("raw"), method = "extend_ahead") %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r
 #'
-#' jhu_fit <- epi_workflow() %>%
+#' rates_fit <- epi_workflow() %>%
 #'   add_epi_recipe(r) %>%
 #'   add_model(linear_reg()) %>%
-#'   fit(data = jhu)
-#' jhu_fit
+#'   fit(data = rates)
+#' rates_fit
 #'
 #' @importFrom recipes detect_step
 #' @importFrom rlang enquos is_empty
