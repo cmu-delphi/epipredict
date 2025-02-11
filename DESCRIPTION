@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.1.8
+Version: 0.1.9
 Authors@R: c(
     person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -25,7 +25,7 @@ URL: https://github.com/cmu-delphi/epipredict/,
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends:
     epidatasets,
-    epiprocess (>= 0.9.0),
+    epiprocess (>= 0.10.4),
     parsnip (>= 1.0.0),
     R (>= 3.5.0)
 Imports:
@@ -73,7 +73,6 @@ Remotes:
     cmu-delphi/epidatasets,
     cmu-delphi/epidatr,
     cmu-delphi/epiprocess,
-    cmu-delphi/epidatasets,
     dajmcdon/smoothqr
 Config/Needs/website: cmu-delphi/delphidocs
 Config/testthat/edition: 3

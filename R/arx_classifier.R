@@ -58,7 +58,10 @@ arx_classifier <- function(
   if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
     if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+      cli_warn(
+        "The specified forecast date {args_list$forecast_date} doesn't match the
+        date from which the forecast is occurring {forecast_date}."
+      )
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -101,7 +104,7 @@ arx_classifier <- function(
 #'
 #' @return An unfit `epi_workflow`.
 #' @export
-#' @seealso [arx_classifier()]
+#' @seealso [arx_classifier()] [arx_class_args_list()]
 #' @examples
 #' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
@@ -154,12 +157,13 @@ arx_class_epi_workflow <- function(
       role = "grp",
       horizon = args_list$horizon,
       method = args_list$method,
-      log_scale = args_list$log_scale,
-      additional_gr_args_list = args_list$additional_gr_args
+      log_scale = args_list$log_scale
     )
   for (l in seq_along(lags)) {
     pred_names <- predictors[l]
-    pred_names <- as.character(glue::glue_data(args_list, "gr_{horizon}_{method}_{pred_names}"))
+    pred_names <- as.character(glue::glue_data(
+      args_list, "gr_{horizon}_{method}_{pred_names}"
+    ))
     r <- step_epi_lag(r, !!pred_names, lag = lags[[l]])
   }
   # ------- outcome
@@ -185,8 +189,7 @@ arx_class_epi_workflow <- function(
           role = "pre-outcome",
           horizon = args_list$horizon,
           method = args_list$method,
-          log_scale = args_list$log_scale,
-          additional_gr_args_list = args_list$additional_gr_args
+          log_scale = args_list$log_scale
         )
     }
   }
@@ -270,9 +273,6 @@ arx_class_epi_workflow <- function(
 #' @param method Character. Options available for growth rate calculation.
 #' @param log_scale Scalar logical. Whether to compute growth rates on the
 #'   log scale.
-#' @param additional_gr_args List. Optional arguments controlling growth rate
-#'   calculation. See [epiprocess::growth_rate()] and the related Vignette for
-#'   more details.
 #' @param check_enough_data_n Integer. A lower limit for the number of rows per
 #'   epi_key that are required for training. If `NULL`, this check is ignored.
 #' @param check_enough_data_epi_keys Character vector. A character vector of
@@ -301,7 +301,6 @@ arx_class_args_list <- function(
     horizon = 7L,
     method = c("rel_change", "linear_reg"),
     log_scale = FALSE,
-    additional_gr_args = list(),
     check_enough_data_n = NULL,
     check_enough_data_epi_keys = NULL,
     ...) {
@@ -320,23 +319,14 @@ arx_class_args_list <- function(
   arg_is_lgl(log_scale)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (!is.list(additional_gr_args)) {
-    cli_abort(c(
-      "`additional_gr_args` must be a {.cls list}.",
-      "!" = "This is a {.cls {class(additional_gr_args)}}.",
-      i = "See `?epiprocess::growth_rate` for available arguments."
-    ))
-  }
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
       cli_warn(
-        paste0(
-          "`forecast_date`  {.val {forecast_date}} +",
-          " `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}."
-        ),
+        "`forecast_date` {.val {forecast_date}} +
+        `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
         class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
       )
     }
@@ -362,7 +352,6 @@ arx_class_args_list <- function(
       horizon,
       method,
       log_scale,
-      additional_gr_args,
       check_enough_data_n,
       check_enough_data_epi_keys
     ),

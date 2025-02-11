@@ -148,12 +148,12 @@ test_that("arx_forecaster output format snapshots", {
 test_that("arx_classifier snapshots", {
   train <- covid_case_death_rates %>%
     filter(geo_value %nin% c("as", "gu", "mp", "vi"))
-  arc1 <- arx_classifier(
+  expect_warning(arc1 <- arx_classifier(
     train %>%
       dplyr::filter(time_value >= as.Date("2021-11-01")),
     "death_rate",
     c("case_rate", "death_rate")
-  )
+  ), "fitted probabilities numerically")
   expect_snapshot_tibble(arc1$predictions)
   max_date <- train$time_value %>% max()
   arc2 <- arx_classifier(
