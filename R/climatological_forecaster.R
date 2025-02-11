@@ -87,7 +87,7 @@ climatological_forecaster <- function(epi_data,
     time_aggr <- ifelse(time_type == "week", lubridate::epiweek, lubridate::isoweek)
     modulus <- 53L
   } else if (time_type == "month") {
-    ttype_dur <- lubridate::months
+    ttype_dur <- function(x) lubridate::period(month = x)
     time_aggr <- lubridate::month
     modulus <- 12L
   } else if (time_type == "day") {
