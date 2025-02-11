@@ -165,7 +165,7 @@ step_climate <-
     arg_is_lgl_scalar(skip)
 
     time_aggr <- switch(time_type,
-                        epiweek = lubridate::epiweek, week = lubridate::week,
+                        epiweek = lubridate::epiweek, week = lubridate::isoweek,
                         month = lubridate::month, day = lubridate::yday)
 
     recipes::add_step(
@@ -243,11 +243,15 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
   modulus <- switch(x$time_type, epiweek = 53L, week = 53L, month = 12L, day = 365L)
 
   fn <- switch(x$center_method,
-               mean = function(x, w) weighted.mean(x, w, na.rm = TRUE),
+               mean = function(x, w) stats::weighted.mean(x, w, na.rm = TRUE),
                median = function(x, w) median(x, na.rm = TRUE))
 
   climate_table <- training %>%
-    mutate(.idx = x$time_aggr(time_value), .weights = wts) %>%
+    mutate(
+      .idx = x$time_aggr(time_value), .weights = wts,
+      .idx = (.idx - x$forecast_ahead) %% modulus,
+      .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
+    ) %>%
     select(.idx, .weights, all_of(c(col_names, x$epi_keys))) %>%
     tidyr::pivot_longer(all_of(unname(col_names))) %>%
     dplyr::reframe(
@@ -279,14 +283,9 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 }
 
 
-
 #' @export
 bake.step_climate <- function(object, new_data, ...) {
-  climate_table <- object$climate_table %>%
-    mutate(
-      .idx = (.idx - object$forecast_ahead) %% object$modulus,
-      .idx = dplyr::case_when(.idx == 0 ~ object$modulus, TRUE ~ .idx)
-    )
+  climate_table <- object$climate_table
   new_data %>%
     mutate(.idx = object$time_aggr(time_value)) %>%
     left_join(climate_table, by = c(".idx", object$epi_keys)) %>%

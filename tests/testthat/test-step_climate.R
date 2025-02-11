@@ -99,7 +99,12 @@ test_that("leading the climate predictor works as expected", {
     step_epi_naomit()
   p <- prep(r, x)
 
-  expected_res <- tibble(.idx = 1:53, climate_y = c(2, 2:25, 25, 25, 25:2, 2, 2))
+  expected_res <- tibble(.idx = 1:53, climate_y = c(2, 2:25, 25, 25, 25:2, 2, 2)) %>%
+    mutate(
+      .idx = (.idx - 2L) %% 53,
+      .idx = dplyr::case_when(.idx == 0 ~ 53L, TRUE ~ .idx)
+    ) %>%
+    arrange(.idx)
   expect_equal(p$steps[[3]]$climate_table, expected_res)
 
   b <- bake(p, new_data = NULL)
@@ -107,7 +112,7 @@ test_that("leading the climate predictor works as expected", {
   # expected climate predictor should be shifted forward by 2 weeks
   expected_climate_pred <- x %>%
     mutate(
-      .idx = (lubridate::epiweek(time_value) + 2) %% 53,
+      .idx = lubridate::epiweek(time_value) %% 53,
       .idx = dplyr::case_when(.idx == 0 ~ 53, TRUE ~ .idx)
     ) %>%
     left_join(expected_res, by = join_by(.idx)) %>%
