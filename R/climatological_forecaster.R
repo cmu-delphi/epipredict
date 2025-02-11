@@ -20,9 +20,12 @@
 #' @seealso [step_climate()]
 #'
 #' @examples
+#' jhu <- covid_case_death_rates
+#' # set as_of to the last day in the data
+#' attr(jhu, "metadata")$as_of <- as.Date("2021-12-31")
+#' fcast <- climatological_forecaster(jhu, "death_rate")
 #'
-#' 1 + 1
-#' 2 + 2
+
 climatological_forecaster <- function(epi_data,
                                       outcome,
                                       args_list = climate_args_list()) {
@@ -55,31 +58,40 @@ climatological_forecaster <- function(epi_data,
     ))
   }
   # process the time types
-  epi_data <- filter(epi_data, !is.na(!!outcome))
-  ttype_dur <- switch(time_type,
-                      epiweek = lubridate::weeks, week = lubridate::weeks,
-                      month = lubridate::months, day = lubridate::days)
-  time_aggr <- switch(time_type,
-                      epiweek = lubridate::epiweek, week = lubridate::week,
-                      month = lubridate::month, day = lubridate::yday)
-  modulus <- switch(time_type, epiweek = 53L, week = 53L, month = 12L, day = 365L)
-  center_fn <- switch(args_list$center_method,
-                      mean = function(x, w) mean(x, na.rm = TRUE),
-                      median = function(x, w) stats::median(x, na.rm = TRUE))
+  epi_data <- epi_data[!is.na(epi_data[outcome]), ] %>%
+    select(key_colnames(epi_data), outcome)
+  if (time_type %in% c("week", "epiweek")) {
+    ttype_dur <- lubridate::weeks
+    time_aggr <- ifelse(time_type == "week", lubridate::epiweek, lubridate::isoweek)
+    modulus <- 53L
+  } else if (time_type == "month") {
+    ttype_dur <- lubridate::months
+    time_aggr <- lubridate::month
+    modulus <- 12L
+  } else if (time_type == "day") {
+    ttype_dur <- lubridate::days
+    time_aggr <- lubridate::yday
+    modulus <- 365L
+  }
+  center_fn <- switch(
+    args_list$center_method,
+    mean = function(x, w) mean(x, na.rm = TRUE),
+    median = function(x, w) stats::median(x, na.rm = TRUE)
+  )
   # get the point predictions
-  outcome <- sym(outcome)
+  sym_outcome <- sym(outcome)
   keys <- key_colnames(epi_data, exclude = "time_value")
   epi_data <- epi_data %>% mutate(.idx = time_aggr(time_value), .weights = 1)
   climate_center <- epi_data %>%
     select(.idx, .weights, outcome, all_of(keys)) %>%
     dplyr::reframe(
-      roll_modular_multivec(outcome, .idx, .weights, center_fn, window_size,
+      roll_modular_multivec(!!sym_outcome, .idx, .weights, center_fn, window_size,
                             modulus),
       .by = keys
     ) %>%
     rename(.pred = climate_pred)
   # get the quantiles
-  Quantile <- function(x) {
+  Quantile <- function(x, w) {
     x <- x - stats::median(x, na.rm = TRUE)
     if (args_list$symmetrize) x <- c(x, -x)
     list(unname(quantile(
@@ -89,15 +101,16 @@ climatological_forecaster <- function(epi_data,
   climate_quantiles <- epi_data %>%
     select(.idx, .weights, outcome, all_of(args_list$quantile_by_key)) %>%
     dplyr::reframe(
-      roll_modular_multivec(outcome, .idx, .weights, Quantile, window_size,
+      roll_modular_multivec(!!sym_outcome, .idx, .weights, Quantile, window_size,
                             modulus),
       .by = args_list$quantile_by_key
     ) %>%
-    rename(.pred_distn = climate_pred)
+    rename(.pred_distn = climate_pred) %>%
+    mutate(.pred_distn = dist_quantiles(.pred_distn, args_list$quantile_levels))
   # combine them together
   climate_table <- climate_center %>%
     left_join(climate_quantiles, by = c(".idx", args_list$quantile_by_key)) %>%
-    mutate(.pred_distn = .pred_distn - median(.pred_distn) + .pred)
+    mutate(.pred_distn = .pred_distn + .pred)
   if (args_list$nonneg) {
     climate_table <- mutate(
       climate_table,
@@ -115,12 +128,29 @@ climatological_forecaster <- function(epi_data,
         mutate(.idx = .idx + .x, target_date = forecast_date + ttype_dur(.x))
     }) %>%
     purrr::list_rbind() %>%
+    mutate(.idx = .idx %% modulus,
+           .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
+    ) %>%
     left_join(climate_table, by = c(".idx", keys)) %>%
     select(-.idx)
+  # fill in some extras for plotting methods, etc.
+  ewf <- epi_workflow()
+  ewf$trained <- TRUE
+  ewf$pre <- list(mold = list(
+    outcomes = select(epi_data, outcome),
+    extras = list(roles = list(
+      geo_value = select(epi_data, geo_value),
+      time_value = select(epi_data, time_value)
+    ))
+  ))
+  other_keys <- key_colnames(epi_data, exclude = c("time_value", "geo_value"))
+  if (length(other_keys) > 0) {
+    ewf$pre$mold$extras$roles$key = epi_data %>% select(all_of(other_keys))
+  }
 
   structure(list(
     predictions = predictions,
-    epi_workflow = epi_workflow(),
+    epi_workflow = ewf,
     metadata = list(
       training = attr(epi_data, "metadata"),
       forecast_created = Sys.time()
@@ -145,7 +175,7 @@ climatological_forecaster <- function(epi_data,
 #' @examples
 #' climate_args_list()
 #' climate_args_list(
-#'   ahead = 0:10,
+#'   forecast_horizon = 0:10,
 #'   quantile_levels = c(.01, .025, 1:19 / 20, .975, .99)
 #' )
 #'
@@ -163,15 +193,13 @@ climate_args_list <- function(
 
   rlang::check_dots_empty()
   time_type <- arg_match(time_type)
-  if (time_type != "epiweek") {
-    cli_abort("Only epiweek forecasts are currently supported.")
-  }
   center_method <- rlang::arg_match(center_method)
   arg_is_scalar(window_size, symmetrize, nonneg)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
   arg_is_scalar(forecast_date, allow_null = TRUE)
   arg_is_date(forecast_date, allow_null = TRUE)
-  arg_is_nonneg_int(forecast_horizon, window_size)
+  arg_is_nonneg_int(window_size)
+  arg_is_int(forecast_horizon)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(quantile_levels)
   quantile_levels <- sort(unique(c(0.5, quantile_levels)))
@@ -181,68 +209,4 @@ climate_args_list <- function(
     quantile_levels, symmetrize, nonneg, quantile_by_key),
     class = c("climate_fcast", "alist")
   )
-}
-
-
-#' @importFrom lubridate epiyear epiweek ymd
-units_in_year <- function(years, units = c("epiweek", "week", "month", "day")) {
-  units <- arg_match(units)
-  if (units == "month") return(rep(12L, length(years)))
-  if (units == "day") return(c(365, 366)[lubridate::leap_year(years) + 1])
-  unitf <- switch(units, epiweek = lubridate::epiweek, week = lubridate::isoweek)
-  mat <- outer(years, 25:31, function(x, y) paste0(x, "12", y))
-  apply(mat, 1, function(x) max(unitf(lubridate::ymd(x))))
-}
-
-date_window_mod <- function(t0, time_value, left = 1L, right = 1L,
-                            type = c("epiweek", "isoweek", "month", "day")) {
-  checkmate::assert_integerish(left, lower = 0, len = 1)
-  checkmate::assert_integerish(right, lower = 0, len = 1)
-  type <- arg_match(type)
-  unitf <- switch(
-    type,
-    epiweek = lubridate::epiweek,
-    iso = lubridate::isoweek,
-    month = lubridate::month,
-    day = lubridate::day
-  )
-  yearf <- switch(
-    type,
-    epiweek = lubridate::epiyear,
-    isoweek = lubridate::isoyear,
-    month = lubridate::year,
-    day = lubridate::year
-  )
-  cur_years <- yearf(unique(c(t0, time_value)))
-  ll <- vctrs::vec_recycle_common(t0 = t0, time_value = time_value)
-  t0 <- ll$t0
-  time_value <- ll$time_value
-
-  back_years <- cur_years - 1
-  all_years <- sort(unique(c(cur_years, back_years)))
-  year_nunits <- units_in_year(all_years, type)
-  back_nunits <- year_nunits[match(yearf(time_value) - 1, all_years)]
-  forward_nunits <- year_nunits[match(yearf(time_value), all_years)]
-
-  unit_diff <- unitf(t0) - unitf(time_value)
-  in_window <- ((unit_diff >= 0) & (unit_diff %% back_nunits <= left)) |
-    ((unit_diff <= 0) & (unit_diff %% forward_nunits <= right))
-
-  in_window
-}
-
-
-episeason <- function(time_value) {
-  time_value <- time_value - lubridate::dmonths(6)
-  paste0(
-    strftime(time_value, "%Y"),
-    "/",
-    strftime(time_value + lubridate::years(1), "%y")
-  )
-}
-
-season_week <- function(time_value, season_start_epiweek = 39) {
-  stopifnot(season_start_epiweek >= 0L, season_start_epiweek <= 53L)
-  time_value <- time_value - lubridate::weeks(season_start_epiweek)
-  lubridate::epiweek(time_value)
 }
