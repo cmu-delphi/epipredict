@@ -133,8 +133,10 @@ r \%>\%
 # same idea, but using weekly climate
 r <- epi_recipe(covid_case_death_rates) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
-  step_climate(death_rate, forecast_ahead = 1, time_type = "epiweek",
-               window_size = 1L)
+  step_climate(death_rate,
+    forecast_ahead = 1, time_type = "epiweek",
+    window_size = 1L
+  )
 r
 
 r \%>\%

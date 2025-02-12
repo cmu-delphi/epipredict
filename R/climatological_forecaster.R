@@ -163,6 +163,7 @@ climatological_forecaster <- function(epi_data,
   # fill in some extras for plotting methods, etc.
   ewf <- epi_workflow()
   ewf$trained <- TRUE
+  ewf$original_data <- epi_data
   ewf$pre <- list(mold = list(
     outcomes = select(epi_data, !!sym_outcome),
     extras = list(roles = list(
@@ -240,3 +241,10 @@ climate_args_list <- function(
     class = c("climate_fcast", "alist")
   )
 }
+
+#' @export
+print.climate_fcast <- function(x, ...) {
+  name <- "ARX Forecaster"
+  NextMethod(name = name, ...)
+}
+
