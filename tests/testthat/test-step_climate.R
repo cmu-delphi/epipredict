@@ -69,7 +69,7 @@ test_that("prep/bake steps create the correct training data", {
   ) %>%
     as_epi_df()
   # epiweeks 1, 52, and 53 are all 1, note that there are days in wk 52, 2 in wk 53
-  r <- epi_recipe(x) %>% step_climate(y)
+  r <- epi_recipe(x) %>% step_climate(y, time_type = "epiweek")
   p <- prep(r, x)
 
   expected_res <- tibble(.idx = 1:53, climate_y = c(2, 2:25, 25, 25, 25:2, 2, 2))
@@ -97,7 +97,7 @@ test_that("leading the climate predictor works as expected", {
   r <- epi_recipe(x) %>%
     step_epi_ahead(y, ahead = 14L) %>%
     step_epi_lag(y, lag = c(0, 7L, 14L)) %>%
-    step_climate(y, forecast_ahead = 2L) %>%
+    step_climate(y, forecast_ahead = 2L, time_type = "epiweek") %>%
     # matches the response
     step_epi_naomit()
   p <- prep(r, x)

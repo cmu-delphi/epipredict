@@ -117,7 +117,7 @@ step_climate <-
            ...,
            forecast_ahead = "detect",
            role = "predictor",
-           time_type = c("epiweek", "week", "month", "day"),
+           time_type = c("detect", "epiweek", "week", "month", "day"),
            center_method = c("median", "mean"),
            window_size = 3L,
            epi_keys = NULL,
@@ -132,6 +132,11 @@ step_climate <-
     n_outcomes <- sum(recipe$var_info$role == "outcome")
     time_type <- rlang::arg_match(time_type)
     edf_time_type <- attr(recipe$template, "metadata")$time_type
+    if (time_type == "detect") {
+      time_type <- edf_time_type
+    } else {
+      edf_time_type <- attr(recipe$template, "metadata")$time_type
+    }
     if (edf_time_type == "custom") {
       cli_abort("This step only works with daily, weekly, or yearmonth data.")
     }
