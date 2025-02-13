@@ -448,7 +448,7 @@ prep.epi_recipe <- function(
       "!" = "to avoid addtional warning messages."
     ))
   }
-  training <- recipes:::check_training_set(training, x, fresh)
+  training <- recipes:::validate_training_data(training, x, fresh)
   training <- epi_check_training_set(training, x)
   training <- relocate(training, all_of(key_colnames(training)))
   tr_data <- recipes:::train_info(training)
