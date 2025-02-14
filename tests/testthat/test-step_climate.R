@@ -10,6 +10,7 @@ test_that("roll_modular_multivec works", {
   Median <- function(x, w) median(x, na.rm = TRUE)
 
   # unweighted mean
+  # window of size 0
   expected_res <- tib |>
     mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus) |>
     summarise(climate_pred = weighted.mean(col, w = w), .by = .idx)
@@ -17,13 +18,15 @@ test_that("roll_modular_multivec works", {
     roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 0, modulus),
     expected_res
   )
-  w_size <- 1L
+  # window of size 1, which includes everything
   expected_res <- tibble(.idx = as.double(1:3), climate_pred = mean(tib$col))
   expect_equal(
     roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 1L, modulus),
     expected_res
   )
+
   # weighted mean
+  # window of size 0
   tib$w <- c(1, 2, 3, 1, 2, 1, 1, 2, 2, 1)
   expected_res <- tib |>
     mutate(.idx = .idx %% modulus, .idx = .idx + (.idx == 0) * modulus) |>
@@ -32,7 +35,7 @@ test_that("roll_modular_multivec works", {
     roll_modular_multivec(tib$col, tib$.idx, tib$w, Mean, 0, modulus),
     expected_res
   )
-  tib$w <- c(1, 2, 3, 1, 2, 1, 1, 2, 2, 1)
+  # window of size 1
   expected_res <- tibble(
     .idx = as.double(1:3),
     climate_pred = weighted.mean(tib$col, tib$w)
@@ -66,7 +69,7 @@ test_that("prep/bake steps create the correct training data", {
   ) %>%
     as_epi_df()
   # epiweeks 1, 52, and 53 are all 1, note that there are days in wk 52, 2 in wk 53
-  r <- epi_recipe(x) %>% step_climate(y)
+  r <- epi_recipe(x) %>% step_climate(y, time_type = "epiweek")
   p <- prep(r, x)
 
   expected_res <- tibble(.idx = 1:53, climate_y = c(2, 2:25, 25, 25, 25:2, 2, 2))
@@ -94,7 +97,7 @@ test_that("leading the climate predictor works as expected", {
   r <- epi_recipe(x) %>%
     step_epi_ahead(y, ahead = 14L) %>%
     step_epi_lag(y, lag = c(0, 7L, 14L)) %>%
-    step_climate(y, forecast_ahead = 2L) %>%
+    step_climate(y, forecast_ahead = 2L, time_type = "epiweek") %>%
     # matches the response
     step_epi_naomit()
   p <- prep(r, x)

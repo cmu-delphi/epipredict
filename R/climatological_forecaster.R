@@ -67,6 +67,8 @@ climatological_forecaster <- function(epi_data,
   horizon <- args_list$forecast_horizon
   window_size <- args_list$window_size
   time_type <- args_list$time_type
+  # check that the prediction time type is more granular than epi_data's
+  # time_type
   ttype_ord <- match(time_type, c("day", "epiweek", "week", "month"))
   ttype_ord <- ttype_ord - as.integer(ttype_ord > 2)
   edf_ttype_ord <- match(edf_time_type, c("day", "week", "yearmonth"))

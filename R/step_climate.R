@@ -1,13 +1,14 @@
 #' Calculate a climatological variable based on the history
 #'
-#' `step_climate()` creates a *specification* of a recipe step
-#' that will generate one or more new columns of derived data. This step
-#' examines all available seasons in the training data and calculates the
-#' a measure of center for the "typical" season. Think of this like with
-#' the weather: to predict the temperature in January in Pittsburgh, PA,
-#' I might look at all previous January's on record, average their temperatures,
-#' and include that in my model. So it is important to _align_ the forecast
-#' horizon with the climate. See the details for more information.
+#' `step_climate()` creates a *specification* of a recipe step that will
+#' generate one or more new columns of derived data. This step examines all
+#' available seasons in the training data and calculates the a measure of center
+#' for the "typical" season. Think of this like with the weather: to predict the
+#' temperature in January in Pittsburgh, PA, I might look at all previous
+#' January's on record, average their temperatures, and include that in my
+#' model. So it is important to _align_ the forecast horizon with the climate.
+#' This step will work best if added after `step_epi_ahead()`, but that is not
+#' strictly required. See the details for more information.
 #'
 #' @details
 #' Construction of a climate predictor can be helpful with strongly seasonal
@@ -101,12 +102,22 @@
 #' r %>%
 #'   prep(covid_case_death_rates) %>%
 #'   bake(new_data = NULL)
+#'
+#' # switching the order is possible if you specify `forecast_ahead`
+#' r <- epi_recipe(covid_case_death_rates) %>%
+#'   step_climate(death_rate, forecast_ahead = 7, time_type = "day") %>%
+#'   step_epi_ahead(death_rate, ahead = 7) %>%
+#'   r()
+#'
+#' r %>%
+#'   prep(covid_case_death_rates) %>%
+#'   bake(new_data = NULL)
 step_climate <-
   function(recipe,
            ...,
            forecast_ahead = "detect",
            role = "predictor",
-           time_type = c("epiweek", "week", "month", "day"),
+           time_type = c("detect", "epiweek", "week", "month", "day"),
            center_method = c("median", "mean"),
            window_size = 3L,
            epi_keys = NULL,
@@ -121,6 +132,7 @@ step_climate <-
     n_outcomes <- sum(recipe$var_info$role == "outcome")
     time_type <- rlang::arg_match(time_type)
     edf_time_type <- attr(recipe$template, "metadata")$time_type
+    if (time_type == "detect") time_type <- edf_time_type
     if (edf_time_type == "custom") {
       cli_abort("This step only works with daily, weekly, or yearmonth data.")
     }
@@ -315,6 +327,14 @@ print.step_climate <- function(x, width = max(20, options()$width - 30), ...) {
   invisible(x)
 }
 
+#' group col by .idx values and sum windows around each .idx value
+#' @param .idx the relevant periodic part of time value, e.g. the week number
+#' @param col the list of values indexed by `.idx`
+#' @param weights how much to weigh each particular datapoint
+#' @param aggr the aggregation function, probably Quantile, mean or median
+#' @param window_size the number of .idx entries before and after to include in
+#'   the aggregation
+#' @param modulus the maximum value of `.idx`
 roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus) {
   tib <- tibble(col = col, weights = weights, .idx = .idx) |>
     arrange(.idx) |>
