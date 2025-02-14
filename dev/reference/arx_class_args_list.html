@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -62,7 +62,6 @@
 <span>  horizon <span class="op">=</span> <span class="fl">7L</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rel_change"</span>, <span class="st">"linear_reg"</span><span class="op">)</span>,</span>
 <span>  log_scale <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  additional_gr_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  check_enough_data_n <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  check_enough_data_epi_keys <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
@@ -165,12 +164,6 @@ calculate the growth rate.</p></dd>
 log scale.</p></dd>
 
 
-<dt id="arg-additional-gr-args">additional_gr_args<a class="anchor" aria-label="anchor" href="#arg-additional-gr-args"></a></dt>
-<dd><p>List. Optional arguments controlling growth rate
-calculation. See <code><a href="https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html" class="external-link">epiprocess::growth_rate()</a></code> and the related Vignette for
-more details.</p></dd>
-
-
 <dt id="arg-check-enough-data-n">check_enough_data_n<a class="anchor" aria-label="anchor" href="#arg-check-enough-data-n"></a></dt>
 <dd><p>Integer. A lower limit for the number of rows per
 epi_key that are required for training. If <code>NULL</code>, this check is ignored.</p></dd>
@@ -206,7 +199,6 @@ group. Useful if training per group (for example, per geo_value).</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> horizon : <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> method : <span style="color: #0000BB;">"rel_change"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> log_scale : <span style="color: #0000BB;">FALSE</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> additional_gr_args : <span style="color: #0000BB;">"_empty_"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> check_enough_data_n : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> check_enough_data_epi_keys : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-in"><span></span></span>
@@ -225,7 +217,6 @@ group. Useful if training per group (for example, per geo_value).</p></dd>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> horizon : <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> method : <span style="color: #0000BB;">"rel_change"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> log_scale : <span style="color: #0000BB;">FALSE</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> additional_gr_args : <span style="color: #0000BB;">"_empty_"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> check_enough_data_n : <span style="color: #0000BB;">"NULL"</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> check_enough_data_epi_keys : <span style="color: #0000BB;">"NULL"</span></span>
 </code></pre></div>

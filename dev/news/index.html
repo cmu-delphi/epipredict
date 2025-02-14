@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.8</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,7 @@
 <div class="section level3">
 <h3 id="breaking-changes-0-2">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2"></a></h3>
 <ul><li>Moved example datasets from being hosted in the package to being loaded from the <code>epidatasets</code> package. The datasets can no longer be loaded with <code>data(&lt;dataset name&gt;)</code>, but can be accessed with <code>data(&lt;dataset name&gt;, package = "epidatasets")</code>, <code>epidatasets::&lt;dataset name&gt;</code> or, after loading the package, the name of the dataset alone (<a href="https://github.com/cmu-delphi/epipredict/issues/382" class="external-link">#382</a>).</li>
+<li>Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (<code><a href="https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html" class="external-link">growth_rate()</a></code>). <code><a href="../reference/step_growth_rate.html">step_growth_rate()</a></code> has lost its <code>additional_gr_args_list</code> argument and now has an <code>na_rm</code> argument.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2"></a></h3>
@@ -67,6 +68,7 @@
 <li>dist_quantiles can have all <code>NA</code> values without causing unrelated errors</li>
 <li>adjust default quantiles throughout so that they match.</li>
 <li>force <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> to always include <code>0.5</code>.</li>
+<li>Rename <code>recipes:::check_training_set()</code> to <code>recipes:::validate_training_data()</code>, as it changed in recipes 1.1.0.</li>
 </ul></div>
 </div>
     <div class="section level2">
