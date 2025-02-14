@@ -11,6 +11,9 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   `data(<dataset name>)`, but can be accessed with
   `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>`
   or, after loading the package, the name of the dataset alone (#382).
+- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
+  `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
+  has an `na_rm` argument.
 
 ## Improvements
 

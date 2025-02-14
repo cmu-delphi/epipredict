@@ -89,19 +89,18 @@
 ---
 
     Code
-      step_growth_rate(r, value, skip = 1)
+      step_growth_rate(r, value, na_rm = 1)
     Condition
       Error in `step_growth_rate()`:
-      ! `skip` must be a scalar of type <logical>.
+      ! `na_rm` must be a scalar of type <logical>.
 
 ---
 
     Code
-      step_growth_rate(r, value, additional_gr_args_list = 1:5)
+      step_growth_rate(r, value, skip = 1)
     Condition
       Error in `step_growth_rate()`:
-      ! `additional_gr_args_list` must be a <list>.
-      i See `?epiprocess::growth_rate` for available options.
+      ! `skip` must be a scalar of type <logical>.
 
 ---
 

@@ -17,7 +17,6 @@ arx_class_args_list(
   horizon = 7L,
   method = c("rel_change", "linear_reg"),
   log_scale = FALSE,
-  additional_gr_args = list(),
   check_enough_data_n = NULL,
   check_enough_data_epi_keys = NULL,
   ...
@@ -95,10 +94,6 @@ calculate the growth rate.}
 
 \item{log_scale}{Scalar logical. Whether to compute growth rates on the
 log scale.}
-
-\item{additional_gr_args}{List. Optional arguments controlling growth rate
-calculation. See \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} and the related Vignette for
-more details.}
 
 \item{check_enough_data_n}{Integer. A lower limit for the number of rows per
 epi_key that are required for training. If \code{NULL}, this check is ignored.}
