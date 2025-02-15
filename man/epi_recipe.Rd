@@ -56,17 +56,17 @@ anything but common roles are \code{"outcome"}, \code{"predictor"},
 }
 \value{
 An object of class \code{recipe} with sub-objects:
-\item{var_info}{A tibble containing information about the original data
-set columns}
+\item{var_info}{A tibble containing information about the original data set
+columns.}
 \item{term_info}{A tibble that contains the current set of terms in the
 data set. This initially defaults to the same data contained in
 \code{var_info}.}
-\item{steps}{A list of \code{step}  or \code{check} objects that define the sequence of
-preprocessing operations that will be applied to data. The default value is
-\code{NULL}}
-\item{template}{A tibble of the data. This is initialized to be the same
-as the data given in the \code{data} argument but can be different after
-the recipe is trained.}
+\item{steps}{A list of \code{step} or \code{check} objects that define the sequence
+of preprocessing operations that will be applied to data. The default value
+is \code{NULL}.}
+\item{template}{A tibble of the data. This is initialized to be the same as
+the data given in the \code{data} argument but can be different after the recipe
+is trained.}
 }
 \description{
 A recipe is a description of the steps to be applied to a data set in

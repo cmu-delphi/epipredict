@@ -146,16 +146,18 @@ test_that("arx_forecaster output format snapshots", {
 })
 
 test_that("arx_classifier snapshots", {
-  arc1 <- arx_classifier(
-    covid_case_death_rates %>%
+  train <- covid_case_death_rates %>%
+    filter(geo_value %nin% c("as", "gu", "mp", "vi"))
+  expect_warning(arc1 <- arx_classifier(
+    train %>%
       dplyr::filter(time_value >= as.Date("2021-11-01")),
     "death_rate",
     c("case_rate", "death_rate")
-  )
+  ), "fitted probabilities numerically")
   expect_snapshot_tibble(arc1$predictions)
-  max_date <- covid_case_death_rates$time_value %>% max()
+  max_date <- train$time_value %>% max()
   arc2 <- arx_classifier(
-    covid_case_death_rates %>%
+    train %>%
       dplyr::filter(time_value >= as.Date("2021-11-01")),
     "death_rate",
     c("case_rate", "death_rate"),
@@ -164,7 +166,7 @@ test_that("arx_classifier snapshots", {
   expect_snapshot_tibble(arc2$predictions)
   expect_error(
     arc3 <- arx_classifier(
-      covid_case_death_rates %>%
+      train %>%
         dplyr::filter(time_value >= as.Date("2021-11-01")),
       "death_rate",
       c("case_rate", "death_rate"),
@@ -174,7 +176,7 @@ test_that("arx_classifier snapshots", {
   )
   expect_error(
     arc4 <- arx_classifier(
-      covid_case_death_rates %>%
+      train %>%
         dplyr::filter(time_value >= as.Date("2021-11-01")),
       "death_rate",
       c("case_rate", "death_rate"),

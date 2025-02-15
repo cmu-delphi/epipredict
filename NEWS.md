@@ -8,10 +8,13 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 
 - Moved example datasets from being hosted in the package to being loaded
   from the `epidatasets` package. The datasets can no longer be loaded with
-  `data(<dataset name>)`, but can be accessed with 
-  `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>` 
+  `data(<dataset name>)`, but can be accessed with
+  `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>`
   or, after loading the package, the name of the dataset alone (#382).
 - `step_adjust_latency()` no longer allows empty column selection.
+- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
+  `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
+  has an `na_rm` argument.
 
 ## Improvements
 
@@ -30,6 +33,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - dist_quantiles can have all `NA` values without causing unrelated errors
 - adjust default quantiles throughout so that they match.
 - force `layer_residual_quantiles()` to always include `0.5`.
+- Rename `recipes:::check_training_set()` to `recipes:::validate_training_data()`, as it changed in recipes 1.1.0.
 
 # epipredict 0.1
 

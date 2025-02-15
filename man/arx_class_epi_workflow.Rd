@@ -65,5 +65,5 @@ arx_class_epi_workflow(
 )
 }
 \seealso{
-\code{\link[=arx_classifier]{arx_classifier()}}
+\code{\link[=arx_classifier]{arx_classifier()}} \code{\link[=arx_class_args_list]{arx_class_args_list()}}
 }
