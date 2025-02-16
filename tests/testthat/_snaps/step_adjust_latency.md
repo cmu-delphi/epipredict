@@ -36,11 +36,10 @@
       Training data contained 200 data points and no incomplete rows.
       
       -- Operations 
-      1. Adj. extend_lags: case_rate and death_rate w/ forecast date 2021-07-24 |
-      2. Trained
-      3. Lagging: death_rate by 5, 11, 16, (lat adj) | Trained
-      4. Lagging: case_rate by 6, 10, (lat adj) | Trained
-      5. Leading: death_rate by 7 | Trained
+      1. Adj. extend_lags: case_rate death_rate w/ forecast date 2021-07-24 | Trained
+      2. Lagging: death_rate by 5, 11, 16, (lat adj) | Trained
+      3. Lagging: case_rate by 6, 10, (lat adj) | Trained
+      4. Leading: death_rate by 7 | Trained
 
 ---
 
