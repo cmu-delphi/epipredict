@@ -249,4 +249,3 @@ print.climate_fcast <- function(x, ...) {
   name <- "ARX Forecaster"
   NextMethod(name = name, ...)
 }
-
