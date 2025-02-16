@@ -106,8 +106,8 @@
 #' # switching the order is possible if you specify `forecast_ahead`
 #' r <- epi_recipe(covid_case_death_rates) %>%
 #'   step_climate(death_rate, forecast_ahead = 7, time_type = "day") %>%
-#'   step_epi_ahead(death_rate, ahead = 7) %>%
-#'   r()
+#'   step_epi_ahead(death_rate, ahead = 7)
+#' r
 #'
 #' r %>%
 #'   prep(covid_case_death_rates) %>%

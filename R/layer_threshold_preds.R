@@ -61,7 +61,7 @@ layer_threshold_new <-
 
 
 
-#' restrict various objects to the interval [lower, upper]
+# restrict various objects to the interval [lower, upper]
 snap <- function(x, lower, upper, ...) {
   UseMethod("snap")
 }

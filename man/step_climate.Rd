@@ -9,7 +9,7 @@ step_climate(
   ...,
   forecast_ahead = "detect",
   role = "predictor",
-  time_type = c("epiweek", "week", "month", "day"),
+  time_type = c("detect", "epiweek", "week", "month", "day"),
   center_method = c("median", "mean"),
   window_size = 3L,
   epi_keys = NULL,
@@ -72,14 +72,15 @@ An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-\code{step_climate()} creates a \emph{specification} of a recipe step
-that will generate one or more new columns of derived data. This step
-examines all available seasons in the training data and calculates the
-a measure of center for the "typical" season. Think of this like with
-the weather: to predict the temperature in January in Pittsburgh, PA,
-I might look at all previous January's on record, average their temperatures,
-and include that in my model. So it is important to \emph{align} the forecast
-horizon with the climate. See the details for more information.
+\code{step_climate()} creates a \emph{specification} of a recipe step that will
+generate one or more new columns of derived data. This step examines all
+available seasons in the training data and calculates the a measure of center
+for the "typical" season. Think of this like with the weather: to predict the
+temperature in January in Pittsburgh, PA, I might look at all previous
+January's on record, average their temperatures, and include that in my
+model. So it is important to \emph{align} the forecast horizon with the climate.
+This step will work best if added after \code{step_epi_ahead()}, but that is not
+strictly required. See the details for more information.
 }
 \details{
 Construction of a climate predictor can be helpful with strongly seasonal
@@ -137,6 +138,16 @@ r <- epi_recipe(covid_case_death_rates) \%>\%
     forecast_ahead = 1, time_type = "epiweek",
     window_size = 1L
   )
+r
+
+r \%>\%
+  prep(covid_case_death_rates) \%>\%
+  bake(new_data = NULL)
+
+# switching the order is possible if you specify `forecast_ahead`
+r <- epi_recipe(covid_case_death_rates) \%>\%
+  step_climate(death_rate, forecast_ahead = 7, time_type = "day") \%>\%
+  step_epi_ahead(death_rate, ahead = 7)
 r
 
 r \%>\%
