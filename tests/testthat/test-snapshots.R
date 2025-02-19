@@ -196,7 +196,7 @@ test_that("climatological_forecaster snapshots", {
 
   # Compute quantiles separately by location, and a backcast
   backcast <- climatological_forecaster(
-    rates, "case_rate_7d_av",
+    rates, "cases",
     climate_args_list(
       quantile_by_key = "geo_value",
       forecast_date = as.Date("2021-06-01")
@@ -206,8 +206,9 @@ test_that("climatological_forecaster snapshots", {
   # compute the climate "daily" rather than "weekly"
   # use a two week window (on both sides)
   daily_fcast <- climatological_forecaster(
-    rates, "case_rate_7d_av",
+    rates, "cases",
     climate_args_list(
+      quantile_by_key = "geo_value",
       time_type = "day", window_size = 14L, forecast_horizon = 0:30
     )
   )

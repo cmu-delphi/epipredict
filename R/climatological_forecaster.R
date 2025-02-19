@@ -94,7 +94,7 @@ climatological_forecaster <- function(epi_data,
     ))
   }
   # process the time types
-  sym_outcome <- rlang::data_sym(outcome)
+  sym_outcome <- sym(outcome)
   epi_data <- epi_data %>%
     filter(!is.na(!!outcome)) %>%
     select(all_of(c(key_colnames(epi_data), outcome)))
