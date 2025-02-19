@@ -32,34 +32,28 @@ extrapolate_quantiles <- function(x, probs, replace_na = TRUE, ...) {
 }
 
 #' @export
-#' @importFrom vctrs vec_data
-extrapolate_quantiles.distribution <- function(x, probs, replace_na = TRUE, ...) {
-  rlang::check_dots_empty()
+extrapolate_quantiles.quantile_pred <- function(x, probs, replace_na = TRUE, ...) {
   arg_is_lgl_scalar(replace_na)
   arg_is_probabilities(probs)
   if (is.unsorted(probs)) probs <- sort(probs)
-  dstn <- lapply(vec_data(x), extrapolate_quantiles, probs = probs, replace_na = replace_na)
-  new_vctr(dstn, vars = NULL, class = "distribution")
-}
+  orig_probs <- x %@% "quantile_levels"
+  orig_values <- as.matrix(x)
 
-#' @export
-extrapolate_quantiles.dist_default <- function(x, probs, replace_na = TRUE, ...) {
-  values <- quantile(x, probs, ...)
-  new_quantiles(values = values, quantile_levels = probs)
-}
-
-#' @export
-extrapolate_quantiles.dist_quantiles <- function(x, probs, replace_na = TRUE, ...) {
-  orig_probs <- field(x, "quantile_levels")
-  orig_values <- field(x, "values")
-  new_probs <- c(orig_probs, probs)
-  dups <- duplicated(new_probs)
   if (!replace_na || !anyNA(orig_values)) {
-    new_values <- c(orig_values, quantile(x, probs, ...))
+    all_values <- cbind(orig_values, quantile(x, probs, ...))
   } else {
-    nas <- is.na(orig_values)
-    orig_values[nas] <- quantile(x, orig_probs[nas], ...)
-    new_values <- c(orig_values, quantile(x, probs, ...))
+    newx <- quantile(x, orig_probs, ...) %>%
+      hardhat::quantile_pred(orig_probs)
+    all_values <- cbind(as.matrix(newx), quantile(newx, probs, ...))
   }
-  new_quantiles(new_values[!dups], new_probs[!dups])
+  all_probs <- c(orig_probs, probs)
+  dups <- duplicated(all_probs)
+  all_values <- all_values[, !dups, drop = FALSE]
+  all_probs <- all_probs[!dups]
+  o <- order(all_probs)
+
+  hardhat::quantile_pred(
+    all_values[, o, drop = FALSE],
+    quantile_levels = all_probs[o]
+  )
 }

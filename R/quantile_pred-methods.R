@@ -5,26 +5,29 @@ mean.quantile_pred <- function(x, na.rm = FALSE, ...) {
   median(x, ...)
 }
 
+
+# quantiles by treating quantile_pred like a distribution -----------------
+
+
 #' @export
 #' @importFrom stats quantile
-quantile.quantile_pred <- function(x, p, ..., middle = c("cubic", "linear")) {
+quantile.quantile_pred <- function(x, p, na.rm = FALSE, ...,
+                                   middle = c("cubic", "linear")) {
   arg_is_probabilities(p)
   p <- sort(p)
   middle <- rlang::arg_match(middle)
-  quantile_extrapolate(x, p, middle)
+  quantile_internal(x, p, middle)
 }
 
 
-quantile_extrapolate <- function(x, tau_out, middle) {
+quantile_internal <- function(x, tau_out, middle) {
   tau <- x %@% "quantile_levels"
   qvals <- as.matrix(x)
 
   # short circuit if we aren't actually extrapolating
   # matches to ~15 decimals
-  if (all(tau_out %in% tau)) {
-    return(hardhat::quantile_pred(
-      qvals[ ,match(tau_out, tau), drop = FALSE], tau_out
-    ))
+  if (all(tau_out %in% tau) && !anyNA(qvals)) {
+    return(qvals[ , match(tau_out, tau), drop = FALSE])
   }
   if (length(tau) < 2) {
     cli_abort(paste(
@@ -36,15 +39,26 @@ quantile_extrapolate <- function(x, tau_out, middle) {
     vctrs::vec_chop(qvals),
     ~ extrapolate_quantiles_single(.x, tau, tau_out, middle)
   )
-
-  hardhat::quantile_pred(qvals_out, tau_out)
+  qvals_out <- do.call(rbind, qvals_out) # ensure a matrix of the proper dims
+  qvals_out
 }
 
 extrapolate_quantiles_single <- function(qvals, tau, tau_out, middle) {
+  qvals_out <- rep(NA, length(tau_out))
+  good <- !is.na(qvals)
+  qvals <- qvals[good]
+  tau <- tau[good]
+
+  # in case we only have one point, and it matches something we wanted
+  if (length(good) < 2) {
+    matched_one <- tau_out %in% tau
+    qvals_out[matched_one] <- qvals[matched_one]
+    return(qvals_out)
+  }
+
   indl <- tau_out < min(tau)
   indr <- tau_out > max(tau)
   indm <- !indl & !indr
-  qvals_out <- rep(NA, length(tau_out))
 
   if (middle == "cubic") {
     method <- "cubic"
@@ -100,4 +114,45 @@ tail_extrapolate <- function(tau_out, qv) {
   y <- qv$v
   m <- diff(y) / diff(x)
   m * (x0 - x[1]) + y[1]
+}
+
+
+# mathematical operations on the values -----------------------------------
+
+
+#' @importFrom vctrs vec_math
+#' @export
+#' @method vec_math quantile_pred
+vec_math.quantile_pred <- function(.fn, .x, ...) {
+  fn <- .fn
+  .fn <- getExportedValue("base", .fn)
+  if (fn %in% c("any", "all", "prod", "sum", "cumsum", "cummax", "cummin", "cumprod")) {
+    cli_abort("{.fn {fn}} is not a supported operation for {.cls quantile_pred}.")
+  }
+  quantile_levels <- .x %@% "quantile_levels"
+  .x <- as.matrix(.x)
+  hardhat::quantile_pred(.fn(.x), quantile_levels)
+}
+
+#' @importFrom vctrs vec_arith vec_arith.numeric
+#' @export
+#' @method vec_arith quantile_pred
+vec_arith.quantile_pred <- function(op, x, y, ...) {
+  UseMethod("vec_arith.quantile_pred", y)
+}
+
+#' @export
+#' @method vec_arith.quantile_pred numeric
+vec_arith.quantile_pred.numeric <- function(op, x, y, ...) {
+  op_fn <- getExportedValue("base", op)
+  out <- op_fn(as.matrix(x), y)
+  hardhat::quantile_pred(out, x %@% "quantile_levels")
+}
+
+#' @export
+#' @method vec_arith.numeric quantile_pred
+vec_arith.numeric.quantile_pred <- function(op, x, y, ...) {
+  op_fn <- getExportedValue("base", op)
+  out <- op_fn(x, as.matrix(y))
+  hardhat::quantile_pred(out, y %@% "quantile_levels")
 }
