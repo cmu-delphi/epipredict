@@ -51,7 +51,7 @@
 #'   in an additional `<list-col>` named `.pred_distn_all` containing 2-column
 #'   [tibble::tibble()]'s. For each
 #'   desired combination of `key`'s, the tibble will contain one row per ahead
-#'   with the associated [dist_quantiles()].
+#'   with the associated [quantile_pred()].
 #' @export
 #'
 #' @examples
@@ -266,11 +266,10 @@ propagate_samples <- function(
     }
   }
   res <- res[aheads]
+  res_quantiles <- map(res, quantile, probs = quantile_levels)
   list(tibble(
     ahead = aheads,
-    .pred_distn = map_vec(
-      res, ~ dist_quantiles(quantile(.x, quantile_levels), quantile_levels)
-    )
+    .pred_distn = quantile_pred(do.call(rbind, res_quantiles), quantile_levels)
   ))
 }
 

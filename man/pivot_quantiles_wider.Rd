@@ -2,7 +2,7 @@
 % Please edit documentation in R/pivot_quantiles.R
 \name{pivot_quantiles_wider}
 \alias{pivot_quantiles_wider}
-\title{Pivot columns containing \code{dist_quantile} wider}
+\title{Pivot a column containing \code{quantile_pred} wider}
 \usage{
 pivot_quantiles_wider(.data, ...)
 }
@@ -10,26 +10,26 @@ pivot_quantiles_wider(.data, ...)
 \item{.data}{A data frame, or a data frame extension such as a tibble or
 epi_df.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> One or more unquoted
+\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> One unquoted
 expressions separated by commas. Variable names can be used as if they
-were positions in the data frame, so expressions like \code{x:y} can
-be used to select a range of variables.}
+were positions in the data frame. Note that only one variable
+can be selected for this operation.}
 }
 \value{
 An object of the same class as \code{.data}
 }
 \description{
-Any selected columns that contain \code{dist_quantiles} will be "widened" with
+Any selected columns that contain \code{quantile_pred} will be "widened" with
 the "taus" (quantile) serving as names and the values in the data frame.
 When pivoting multiple columns, the original column name will be used as
 a prefix.
 }
 \examples{
-d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))
-d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
-tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
+d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)
+d2 <- quantile_pred(rbind(2:4, 3:5), 2:4 / 5)
+tib <- tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 
-pivot_quantiles_wider(tib, c("d1", "d2"))
-pivot_quantiles_wider(tib, dplyr::starts_with("d"))
+pivot_quantiles_wider(tib, "d1")
+pivot_quantiles_wider(tib, dplyr::ends_with("2"))
 pivot_quantiles_wider(tib, d2)
 }

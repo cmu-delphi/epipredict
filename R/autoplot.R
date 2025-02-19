@@ -243,7 +243,7 @@ plot_bands <- function(
   ntarget_dates <- dplyr::n_distinct(predictions$time_value)
 
   predictions <- predictions %>%
-    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, levels), levels)) %>%
+    mutate(.pred_distn = quantile_pred(quantile(.pred_distn, levels), levels)) %>%
     pivot_quantiles_wider(.pred_distn)
   qnames <- setdiff(names(predictions), innames)
 

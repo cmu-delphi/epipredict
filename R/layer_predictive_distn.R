@@ -45,6 +45,12 @@ layer_predictive_distn <- function(frosting,
                                    truncate = c(-Inf, Inf),
                                    name = ".pred_distn",
                                    id = rand_id("predictive_distn")) {
+  if (!requireNamespace("distributional", quietly = TRUE)) {
+    cli_abort(paste(
+      "You must install the {.pkg distributional} package for",
+      "this functionality."
+    ))
+  }
   rlang::check_dots_empty()
   arg_is_chr_scalar(name, id)
   dist_type <- match.arg(dist_type)

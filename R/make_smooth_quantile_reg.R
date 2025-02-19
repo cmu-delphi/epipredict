@@ -49,7 +49,7 @@
 #'     x = x[length(x) - 20] + ahead / 100 * 2 * pi,
 #'     ahead = NULL
 #'   ) %>%
-#'   pivot_wider(names_from = quantile_levels, values_from = values)
+#'   pivot_wider(names_from = distn_quantile_levels, values_from = distn_value)
 #' plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 #' curve(sin(x), add = TRUE)
 #' abline(v = fd, lty = 2)
@@ -173,7 +173,7 @@ make_smooth_quantile_reg <- function() {
       x <- lapply(unname(split(
         p, seq(nrow(p))
       )), function(q) unname(sort(q, na.last = TRUE)))
-      dist_quantiles(x, list(object$tau))
+      quantile_pred(do.call(rbind, x), object$tau)
     })
     n_preds <- length(list_of_pred_distns[[1]])
     nout <- length(list_of_pred_distns)
