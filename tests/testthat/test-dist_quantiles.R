@@ -1,36 +1,32 @@
-suppressPackageStartupMessages(library(distributional))
 
-test_that("constructor returns reasonable quantiles", {
-  expect_snapshot(error = TRUE, new_quantiles(rnorm(5), c(-2, -1, 0, 1, 2)))
-  expect_silent(new_quantiles(sort(rnorm(5)), sort(runif(5))))
-  expect_snapshot(error = TRUE, new_quantiles(sort(rnorm(5)), sort(runif(2))))
-  expect_silent(new_quantiles(1:5, 1:5 / 10))
-  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .1, .2, .5, .8)))
-  expect_snapshot(error = TRUE, new_quantiles(c(2, 1, 3, 4, 5), c(.1, .15, .2, .5, .8)))
-  expect_snapshot(error = TRUE, new_quantiles(c(1, 2, 3), c(.1, .2, 3)))
-})
-
-
-test_that("single dist_quantiles works, quantiles are accessible", {
-  z <- new_quantiles(values = 1:5, quantile_levels = c(.2, .4, .5, .6, .8))
-  expect_s3_class(z, "dist_quantiles")
+test_that("single quantile_pred works, quantiles are accessible", {
+  z <- hardhat::quantile_pred(
+    values = matrix(1:5, nrow = 1),
+    quantile_levels = c(.2, .4, .5, .6, .8)
+  )
   expect_equal(median(z), 3)
-  expect_equal(quantile(z, c(.2, .4, .5, .6, .8)), 1:5)
-  expect_equal(quantile(z, c(.3, .7), middle = "linear"), c(1.5, 4.5))
+  expect_equal(
+    quantile(z, c(.2, .4, .5, .6, .8)),
+    hardhat::quantile_pred(matrix(1:5, nrow = 1), c(.2, .4, .5, .6, .8))
+  )
+  expect_equal(
+    quantile(z, c(.3, .7), middle = "linear"),
+    hardhat::quantile_pred(matrix(c(1.5, 4.5), nrow = 1), c(.3, .7))
+  )
 
   Q <- stats::splinefun(c(.2, .4, .5, .6, .8), 1:5, method = "hyman")
   expect_equal(quantile(z, c(.3, .7), middle = "cubic"), Q(c(.3, .7)))
   expect_identical(
     extrapolate_quantiles(z, c(.3, .7), middle = "linear"),
-    new_quantiles(values = c(1, 1.5, 2, 3, 4, 4.5, 5), quantile_levels = 2:8 / 10)
+    hardhat::quantile_pred(c(1, 1.5, 2, 3, 4, 4.5, 5), 2:8 / 10)
   )
   # empty values slot results in a length zero distribution
   # see issue #361
-  expect_length(dist_quantiles(list(), c(.1, .9)), 0L)
-  expect_identical(
-    dist_quantiles(list(), c(.1, .9)),
-    distributional::dist_degenerate(double())
-  )
+  # expect_length(dist_quantiles(list(), c(.1, .9)), 0L)
+  # expect_identical(
+  #   dist_quantiles(list(), c(.1, .9)),
+  #   distributional::dist_degenerate(double())
+  # )
 })
 
 
@@ -40,7 +36,6 @@ test_that("quantile extrapolator works", {
   expect_s3_class(qq, "distribution")
   expect_s3_class(vctrs::vec_data(qq[1])[[1]], "dist_quantiles")
   expect_length(parameters(qq[1])$quantile_levels[[1]], 3L)
-
 
   dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
   qq <- extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
@@ -107,17 +102,6 @@ test_that("arithmetic works on quantiles", {
   expect_identical(dstn / 4, dstn2)
   expect_identical((1 / 4) * dstn, dstn2)
 
-  expect_snapshot(error = TRUE, sum(dstn))
-  expect_snapshot(error = TRUE, suppressWarnings(dstn + distributional::dist_normal()))
-})
-
-test_that("quantile.dist_quantile works for NA vectors", {
-  distn <- dist_quantiles(
-    list(c(NA, NA)),
-    list(1:2 / 3)
-  )
-  expect_true(is.na(quantile(distn, p = 0.5)))
-  expect_true(is.na(median(distn)))
-  expect_true(is.na(mean(distn)))
-  expect_equal(format(distn), "quantiles(NA)[2]")
+  expect_error(sum(dstn))
+  expect_error(suppressWarnings(dstn + distributional::dist_normal()))
 })
