@@ -12,7 +12,7 @@ test_that("single quantile_pred works, quantiles are accessible", {
   )
 
   Q <- stats::splinefun(c(.2, .4, .5, .6, .8), 1:5, method = "hyman")
-  expect_equal(quantile(z, c(.3, .7)), Q(c(.3, .7)))
+  expect_equal(quantile(z, c(.3, .7)), matrix(Q(c(.3, .7)), nrow = 1))
   expect_identical(
     extrapolate_quantiles(z, c(.3, .7), middle = "linear"),
     hardhat::quantile_pred(matrix(c(1, 1.5, 2, 3, 4, 4.5, 5), nrow = 1), 2:8 / 10)
@@ -101,5 +101,5 @@ test_that("arithmetic works on quantiles", {
   expect_identical(dstn / 4, dstn2)
   expect_identical((1 / 4) * dstn, dstn2)
 
-  expect_error(sum(dstn))
+  expect_snapshot(error = TRUE, sum(dstn))
 })
