@@ -2,12 +2,9 @@
 % Please edit documentation in R/weighted_interval_score.R
 \name{weighted_interval_score}
 \alias{weighted_interval_score}
-\alias{weighted_interval_score.dist_quantiles}
 \title{Compute weighted interval score}
 \usage{
-weighted_interval_score(x, actual, quantile_levels = NULL, ...)
-
-\method{weighted_interval_score}{dist_quantiles}(
+weighted_interval_score(
   x,
   actual,
   quantile_levels = NULL,
@@ -25,8 +22,6 @@ contains \code{dist_quantiles()}, though other distributions are supported when
 \item{quantile_levels}{probabilities. If specified, the score will be
 computed at this set of levels.}
 
-\item{...}{not used}
-
 \item{na_handling}{character. Determines how \code{quantile_levels} without a
 corresponding \code{value} are handled. For \code{"impute"}, missing values will be
 calculated if possible using the available quantiles. For \code{"drop"},
@@ -37,6 +32,8 @@ exist in the original \code{quantile_levels}. Finally, if
 \code{quantile_levels} is specified, \code{"fail"} will result in
 the score being \code{NA} when any required quantile levels (implicit or explicit)
 are do not have corresponding values.}
+
+\item{...}{not used}
 }
 \value{
 a vector of nonnegative scores.
@@ -48,12 +45,6 @@ approximation of the commonly-used continuous ranked probability score
 generalization of absolute error. For example, see \href{https://arxiv.org/abs/2005.12881}{Bracher et al. (2020)} for discussion in the context
 of COVID-19 forecasting.
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{weighted_interval_score(dist_quantiles)}: Weighted interval score with
-\code{dist_quantiles} allows for different \code{NA} behaviours.
-
-}}
 \examples{
 quantile_levels <- c(.2, .4, .6, .8)
 predq_1 <- 1:4 #
@@ -80,13 +71,13 @@ weighted_interval_score(dist_quantiles(1:4, 1:4 / 5), 2.5, 1:9 / 10,
 
 # Using some actual forecasts --------
 library(dplyr)
-jhu <- covid_case_death_rates \%>\%
+jhu <- case_death_rate_subset \%>\%
   filter(time_value >= "2021-10-01", time_value <= "2021-12-01")
 preds <- flatline_forecaster(
   jhu, "death_rate",
   flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
 )$predictions
-actuals <- covid_case_death_rates \%>\%
+actuals <- case_death_rate_subset \%>\%
   filter(time_value == as.Date("2021-12-01") + 7) \%>\%
   select(geo_value, time_value, actual = death_rate)
 preds <- left_join(preds, actuals,
