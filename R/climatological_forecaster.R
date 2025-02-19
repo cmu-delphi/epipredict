@@ -7,8 +7,15 @@
 #' forecast, essentially predicting "typical January" behavior by relying on a
 #' long history of such periods rather than heavily using recent data.
 #'
-#' The forecast is taken as the quantiles of the `outcome` in a small window
-#' around the target period, computed over the entire available history.
+#' The point forecast is either the mean or median of the `outcome` in a small
+#' window around the target period, computed over the entire available history,
+#' separately for each key in the `epi_df` (`geo_value` and any additional keys).
+#' The forecast quantiles are computed from the residuals for this point prediction.
+#' By default, the residuals are ungrouped, meaning every key will have the same
+#' shape distribution (though different centers). Note that if your data is not
+#' or comparable scales across keys, this default is likely inappropriate. In that
+#' case, you can choose by which keys quantiles are computed using
+#' `climate_args_list(quantile_by_key = ...)`.
 #'
 #' @inheritParams flatline_forecaster
 #' @param args_list A list of additional arguments as created by the
@@ -124,6 +131,8 @@ climatological_forecaster <- function(epi_data,
     )))
   }
   climate_quantiles <- epi_data %>%
+    left_join(climate_center, by = c(".idx", keys)) %>%
+    mutate(sym_outcome = sym_outcome - .pred) %>%
     select(.idx, .weights, all_of(c(outcome, args_list$quantile_by_key))) %>%
     dplyr::reframe(
       roll_modular_multivec(
