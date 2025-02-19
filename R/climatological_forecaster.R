@@ -138,7 +138,7 @@ climatological_forecaster <- function(epi_data,
   }
   climate_quantiles <- epi_data %>%
     left_join(climate_center, by = c(".idx", keys)) %>%
-    mutate({{outcome}} := !!sym_outcome - .pred) %>%
+    mutate({{ outcome }} := !!sym_outcome - .pred) %>%
     select(.idx, .weights, all_of(c(outcome, args_list$quantile_by_key))) %>%
     dplyr::reframe(
       roll_modular_multivec(
