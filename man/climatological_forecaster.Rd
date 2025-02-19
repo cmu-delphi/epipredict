@@ -38,15 +38,18 @@ case, you can choose by which keys quantiles are computed using
 \code{climate_args_list(quantile_by_key = ...)}.
 }
 \examples{
-rates <- cases_deaths_subset
+cases <- cases_deaths_subset
 # set as_of to the last day in the data
-attr(rates, "metadata")$as_of <- as.Date("2021-12-31")
-fcast <- climatological_forecaster(rates, "case_rate_7d_av")
+# "case_rate_7d_av" is on the same scale for all geographies
+attr(cases, "metadata")$as_of <- as.Date("2021-12-31")
+fcast <- climatological_forecaster(cases, "case_rate_7d_av")
 autoplot(fcast)
 
 # Compute quantiles separately by location, and a backcast
+# "cases" is on different scales by geography, due to population size
+# so, it is better to compute quantiles separately
 backcast <- climatological_forecaster(
-  rates, "case_rate_7d_av",
+  cases, "case_rate_7d_av",
   climate_args_list(
     quantile_by_key = "geo_value",
     forecast_date = as.Date("2021-06-01")
@@ -56,10 +59,14 @@ autoplot(backcast)
 
 # compute the climate "daily" rather than "weekly"
 # use a two week window (on both sides)
+# "cases" is on different scales by geography, due to population size
 daily_fcast <- climatological_forecaster(
-  rates, "case_rate_7d_av",
+  cases, "cases",
   climate_args_list(
-    time_type = "day", window_size = 14L, forecast_horizon = 0:30
+    quantile_by_key = "geo_value",
+    time_type = "day",
+    window_size = 14L,
+    forecast_horizon = 0:30
   )
 )
 autoplot(daily_fcast) +

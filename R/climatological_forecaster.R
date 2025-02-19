@@ -27,15 +27,18 @@
 #' @seealso [step_climate()]
 #'
 #' @examples
-#' rates <- cases_deaths_subset
+#' cases <- cases_deaths_subset
 #' # set as_of to the last day in the data
-#' attr(rates, "metadata")$as_of <- as.Date("2021-12-31")
-#' fcast <- climatological_forecaster(rates, "case_rate_7d_av")
+#' # "case_rate_7d_av" is on the same scale for all geographies
+#' attr(cases, "metadata")$as_of <- as.Date("2021-12-31")
+#' fcast <- climatological_forecaster(cases, "case_rate_7d_av")
 #' autoplot(fcast)
 #'
 #' # Compute quantiles separately by location, and a backcast
+#' # "cases" is on different scales by geography, due to population size
+#' # so, it is better to compute quantiles separately
 #' backcast <- climatological_forecaster(
-#'   rates, "case_rate_7d_av",
+#'   cases, "case_rate_7d_av",
 #'   climate_args_list(
 #'     quantile_by_key = "geo_value",
 #'     forecast_date = as.Date("2021-06-01")
@@ -45,10 +48,14 @@
 #'
 #' # compute the climate "daily" rather than "weekly"
 #' # use a two week window (on both sides)
+#' # "cases" is on different scales by geography, due to population size
 #' daily_fcast <- climatological_forecaster(
-#'   rates, "case_rate_7d_av",
+#'   cases, "cases",
 #'   climate_args_list(
-#'     time_type = "day", window_size = 14L, forecast_horizon = 0:30
+#'     quantile_by_key = "geo_value",
+#'     time_type = "day",
+#'     window_size = 14L,
+#'     forecast_horizon = 0:30
 #'   )
 #' )
 #' autoplot(daily_fcast) +
@@ -87,7 +94,7 @@ climatological_forecaster <- function(epi_data,
     ))
   }
   # process the time types
-  sym_outcome <- sym(outcome)
+  sym_outcome <- rlang::data_sym(outcome)
   epi_data <- epi_data %>%
     filter(!is.na(!!outcome)) %>%
     select(all_of(c(key_colnames(epi_data), outcome)))
@@ -123,7 +130,6 @@ climatological_forecaster <- function(epi_data,
     rename(.pred = climate_pred)
   # get the quantiles
   Quantile <- function(x, w) {
-    x <- x - stats::median(x, na.rm = TRUE)
     if (args_list$symmetrize) x <- c(x, -x)
     list(unname(quantile(
       x,
@@ -132,7 +138,7 @@ climatological_forecaster <- function(epi_data,
   }
   climate_quantiles <- epi_data %>%
     left_join(climate_center, by = c(".idx", keys)) %>%
-    mutate(sym_outcome = sym_outcome - .pred) %>%
+    mutate({{outcome}} := !!sym_outcome - .pred) %>%
     select(.idx, .weights, all_of(c(outcome, args_list$quantile_by_key))) %>%
     dplyr::reframe(
       roll_modular_multivec(
