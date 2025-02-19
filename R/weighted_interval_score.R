@@ -7,22 +7,21 @@
 #' al. (2020)](https://arxiv.org/abs/2005.12881) for discussion in the context
 #' of COVID-19 forecasting.
 #'
-#' @param x distribution. A vector of class distribution. Ideally, this vector
-#'   contains `dist_quantiles()`, though other distributions are supported when
-#'   `quantile_levels` is specified. See below.
+#' @param x A vector of class `quantile_pred`.
 #' @param actual double. Actual value(s)
 #' @param quantile_levels probabilities. If specified, the score will be
-#'   computed at this set of levels.
-#' @param na_handling character. Determines how `quantile_levels` without a
-#'   corresponding `value` are handled. For `"impute"`, missing values will be
+#'   computed at this set of levels. Otherwise, those present in `x` will be
+#'   used.
+#' @param na_handling character. Determines missing values are handled.
+#'   For `"impute"`, missing values will be
 #'   calculated if possible using the available quantiles. For `"drop"`,
 #'   explicitly missing values are ignored in the calculation of the score, but
 #'   implicitly missing values are imputed if possible.
 #'   For `"propogate"`, the resulting score will be `NA` if any missing values
-#'   exist in the original `quantile_levels`. Finally, if
+#'   exist. Finally, if
 #'   `quantile_levels` is specified, `"fail"` will result in
 #'   the score being `NA` when any required quantile levels (implicit or explicit)
-#'   are do not have corresponding values.
+#'   do not have corresponding values.
 #' @param ... not used
 #'
 #' @return a vector of nonnegative scores.
@@ -30,24 +29,23 @@
 #' @export
 #' @examples
 #' quantile_levels <- c(.2, .4, .6, .8)
-#' predq_1 <- 1:4 #
-#' predq_2 <- 8:11
-#' dstn <- dist_quantiles(list(predq_1, predq_2), quantile_levels)
+#' predq1 <- 1:4 #
+#' predq2 <- 8:11
+#' dstn <- quantile_pred(rbind(predq1, predq2), quantile_levels)
 #' actual <- c(3.3, 7.1)
 #' weighted_interval_score(dstn, actual)
 #' weighted_interval_score(dstn, actual, c(.25, .5, .75))
 #'
-#' library(distributional)
-#' dstn <- dist_normal(c(.75, 2))
-#' weighted_interval_score(dstn, 1, c(.25, .5, .75))
-#'
 #' # Missing value behaviours
-#' dstn <- dist_quantiles(c(1, 2, NA, 4), 1:4 / 5)
+#' dstn <- quantile_pred(matrix(c(1, 2, NA, 4), nrow = 1), 1:4 / 5)
 #' weighted_interval_score(dstn, 2.5)
 #' weighted_interval_score(dstn, 2.5, 1:9 / 10)
 #' weighted_interval_score(dstn, 2.5, 1:9 / 10, na_handling = "drop")
 #' weighted_interval_score(dstn, 2.5, na_handling = "propagate")
-#' weighted_interval_score(dist_quantiles(1:4, 1:4 / 5), 2.5, 1:9 / 10,
+#' weighted_interval_score(
+#'   quantile_pred(matrix(1:4, nrow = 1), 1:4 / 5),
+#'   actual = 2.5,
+#'   quantile_levels = 1:9 / 10,
 #'   na_handling = "fail"
 #' )
 #'
@@ -101,7 +99,7 @@ weighted_interval_score.quantile_pred <- function(
   }
   tau <- quantile_levels %||% old_quantile_levels
   x <- extrapolate_quantiles(x, tau, replace_na = (na_handling == "impute"))
-  x <- as.matrix(x)[, attr(x, "quantile_levels") %in% tau]
+  x <- as.matrix(x)[, attr(x, "quantile_levels") %in% tau, drop = FALSE]
   na_rm <- (na_handling == "drop")
   map2_dbl(vctrs::vec_chop(x), actual, ~ wis_one_quantile(.x, tau, .y, na_rm))
 }

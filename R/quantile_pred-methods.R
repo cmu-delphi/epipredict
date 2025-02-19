@@ -1,5 +1,6 @@
 
 # placeholder to avoid errors, but not ideal
+#' @importFrom hardhat quantile_pred
 #' @export
 mean.quantile_pred <- function(x, na.rm = FALSE, ...) {
   median(x, ...)
@@ -46,6 +47,7 @@ quantile_internal <- function(x, tau_out, middle) {
 extrapolate_quantiles_single <- function(qvals, tau, tau_out, middle) {
   qvals_out <- rep(NA, length(tau_out))
   good <- !is.na(qvals)
+  if (!any(good)) return(qvals_out)
   qvals <- qvals[good]
   tau <- tau[good]
 
@@ -131,7 +133,7 @@ vec_math.quantile_pred <- function(.fn, .x, ...) {
   }
   quantile_levels <- .x %@% "quantile_levels"
   .x <- as.matrix(.x)
-  hardhat::quantile_pred(.fn(.x), quantile_levels)
+  quantile_pred(.fn(.x), quantile_levels)
 }
 
 #' @importFrom vctrs vec_arith vec_arith.numeric
@@ -145,14 +147,16 @@ vec_arith.quantile_pred <- function(op, x, y, ...) {
 #' @method vec_arith.quantile_pred numeric
 vec_arith.quantile_pred.numeric <- function(op, x, y, ...) {
   op_fn <- getExportedValue("base", op)
-  out <- op_fn(as.matrix(x), y)
-  hardhat::quantile_pred(out, x %@% "quantile_levels")
+  l <- vctrs::vec_recycle_common(x = x, y = y)
+  out <- op_fn(as.matrix(l$x), l$y)
+  quantile_pred(out, x %@% "quantile_levels")
 }
 
 #' @export
 #' @method vec_arith.numeric quantile_pred
 vec_arith.numeric.quantile_pred <- function(op, x, y, ...) {
   op_fn <- getExportedValue("base", op)
-  out <- op_fn(x, as.matrix(y))
-  hardhat::quantile_pred(out, y %@% "quantile_levels")
+  l <- vctrs::vec_recycle_common(x = x, y = y)
+  out <- op_fn(l$x, as.matrix(l$y))
+  quantile_pred(out, y %@% "quantile_levels")
 }

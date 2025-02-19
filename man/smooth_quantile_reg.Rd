@@ -66,7 +66,7 @@ pl <- pl \%>\%
     x = x[length(x) - 20] + ahead / 100 * 2 * pi,
     ahead = NULL
   ) \%>\%
-  pivot_wider(names_from = quantile_levels, values_from = values)
+  pivot_wider(names_from = distn_quantile_levels, values_from = distn_value)
 plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 curve(sin(x), add = TRUE)
 abline(v = fd, lty = 2)

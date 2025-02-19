@@ -104,12 +104,11 @@ flusight_hub_formatter.data.frame <- function(
 
   object <- object %>%
     # combine the predictions and the distribution
-    mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-    tidyr::unnest(.pred_distn) %>%
+    pivot_quantiles_longer(.pred_distn) %>%
     # now we create the correct column names
     rename(
-      value = values,
-      output_type_id = quantile_levels,
+      value = .pred_distn_value,
+      output_type_id = .pred_distn_quantile_level,
       reference_date = forecast_date
     ) %>%
     # convert to fips codes, and add any constant cols passed in ...

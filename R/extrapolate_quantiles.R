@@ -1,32 +1,26 @@
 #' Summarize a distribution with a set of quantiles
 #'
-#' @param x a `distribution` vector
+#' This function takes a `quantile_pred` vector and returns the same
+#' type of object, expanded to include
+#' *additional* quantiles computed at `probs`. If you want behaviour more
+#' similar to [stats::quantile()], then `quantile(x,...)` may be more
+#' appropriate.
+#'
+#' @param x A vector of class `quantile_pred`.
 #' @param probs a vector of probabilities at which to calculate quantiles
 #' @param replace_na logical. If `x` contains `NA`'s, these are imputed if
-#'   possible (if `TRUE`) or retained (if `FALSE`). This only effects
-#'   elements of class `dist_quantiles`.
+#'   possible (if `TRUE`) or retained (if `FALSE`).
 #' @param ... additional arguments passed on to the `quantile` method
 #'
-#' @return a `distribution` vector containing `dist_quantiles`. Any elements
-#'   of `x` which were originally `dist_quantiles` will now have a superset
+#' @return a `quantile_pred` vector. Each element
+#'   of `x` will now have a superset
 #'   of the original `quantile_values` (the union of those and `probs`).
 #' @export
 #'
 #' @examples
-#' library(distributional)
-#' dstn <- dist_normal(c(10, 2), c(5, 10))
-#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
-#'
-#' dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-#' # because this distribution is already quantiles, any extra quantiles are
-#' # appended
-#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
-#'
-#' dstn <- c(
-#'   dist_normal(c(10, 2), c(5, 10)),
-#'   dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-#' )
-#' extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
+#' dstn <- quantile_dstn(rbind(1:4, 8:11), c(.2, .4, .6, .8))
+#' # extra quantiles are appended
+#' as.tibble(extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75)))
 extrapolate_quantiles <- function(x, probs, replace_na = TRUE, ...) {
   UseMethod("extrapolate_quantiles")
 }
