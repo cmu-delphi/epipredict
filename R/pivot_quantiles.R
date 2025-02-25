@@ -1,3 +1,53 @@
+#' Turn a vector of quantile distributions into a list-col
+#'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated. The recommended alternative is
+#' [hardhat::quantile_pred()] with [tibble::as_tibble()]
+
+#'
+#' @param x a `distribution` containing `dist_quantiles`
+#'
+#' @return a list-col
+#' @export
+#'
+#' @examples
+#' .pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
+#' nested_quantiles(.pred_quantile)
+#'
+#' .pred_quantile %>%
+#'   as_tibble() %>%
+#'   tidyr::nest(.by = .row) %>%
+#'   dplyr::select(-.row)
+#'
+nested_quantiles <- function(x) {
+  lifecycle::deprecate_warn("0.1.11", "nested_quantiles()", "hardhat::quantile_pred()")
+  if (inherits(x, "distribution")) {
+    if (requireNamespace("distributional")) {
+      x <- vctrs::vec_data(x)
+      return(distributional:::dist_apply(x, .f = function(z) {
+        as_tibble(vctrs::vec_data(z)) %>%
+          mutate(across(everything(), as.double)) %>%
+          vctrs::list_of()
+      }))
+    } else {
+      cli_abort(c(
+        "`nested_quantiles()` is deprecated and the {.pkg distributional}",
+        `!` = "package is not installed.",
+        i = "See {.fn hardhat::quantile_pred}."
+      ))
+    }
+  }
+  if (inherits(x, "quantile_pred")) {
+    return(x %>% as_tibble() %>% tidyr::nest(.by = .row) %>%
+      dplyr::select(data))
+  }
+  cli_abort(c(
+    "`nested_quantiles()` is deprecated. See {.fn hardhat::quantile_pred}."
+  ))
+}
+
+
 #' Pivot a column containing `quantile_pred` longer
 #'
 #' A column that contains `quantile_pred` will be "lengthened" with

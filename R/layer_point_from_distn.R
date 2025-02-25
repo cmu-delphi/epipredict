@@ -79,10 +79,10 @@ layer_point_from_distn_new <- function(type, name, id) {
 slather.layer_point_from_distn <-
   function(object, components, workflow, new_data, ...) {
     dstn <- components$predictions$.pred
-    if (!inherits(dstn, "distribution")) {
-      rlang::warn(
+    if (!(inherits(dstn, "quantile_pred") | inherits(dstn, "distribution"))) {
+      cli_warn(
         c("`layer_point_from_distn` requires distributional predictions.",
-          i = "These are of class {class(dstn)}. Ignoring this layer."
+          i = "These are of class {.cls {class(dstn)}}. Ignoring this layer."
         )
       )
       return(components)

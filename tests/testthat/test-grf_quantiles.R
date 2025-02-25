@@ -78,7 +78,7 @@ test_that("quantile_rand_forest operates with arx_forecaster", {
 
   z <- arx_forecaster(df, "cases", "cases", spec2)
   expect_identical(
-    nested_quantiles(z$predictions$.pred_distn[1])[[1]]$quantile_levels,
+    hardhat::extract_quantile_levels(z$predictions$.pred_distn),
     c(.05, .1, 0.25, .5, 0.75, .9, .95)
   )
 })
