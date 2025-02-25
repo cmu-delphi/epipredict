@@ -240,18 +240,21 @@ aheads and some variations we will use later.
 ```{r arx-kweek-preliminaries, warning = FALSE}
 forecast_wrapper <- function(
     epi_data, aheads, outcome, predictors,
-    process_data = identity
-    ) {
-  map(aheads,
-      \(ahead) {
-        arx_forecaster(
-          process_data(epi_data), outcome, predictors,
-          args_list = arx_args_list(
-            ahead = ahead,
-            lags = c(0:7, 14, 21),
-            adjust_latency = "extend_ahead")
-        )$predictions %>%
-          pivot_quantiles_wider(.pred_distn)}) %>%
+    process_data = identity) {
+  map(
+    aheads,
+    \(ahead) {
+      arx_forecaster(
+        process_data(epi_data), outcome, predictors,
+        args_list = arx_args_list(
+          ahead = ahead,
+          lags = c(0:7, 14, 21),
+          adjust_latency = "extend_ahead"
+        )
+      )$predictions %>%
+        pivot_quantiles_wider(.pred_distn)
+    }
+  ) %>%
     bind_rows()
 }
 ```
@@ -269,24 +272,25 @@ archives, and bind the results together.
 forecast_dates <- seq(
   from = as.Date("2020-09-01"),
   to = as.Date("2021-11-01"),
-  by = "1 month")
+  by = "1 month"
+)
 aheads <- c(1, 7, 14, 21, 28)
 
 version_faithless <- archive_cases_dv_subset_faux %>%
-      epix_slide(
-        ~forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
-        .before = 120,
-        .versions = forecast_dates
-      ) %>% 
-      mutate(version_faithful = FALSE)
+  epix_slide(
+    ~ forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
+    .before = 120,
+    .versions = forecast_dates
+  ) %>%
+  mutate(version_faithful = FALSE)
 
 version_faithful <- doctor_visits %>%
-      epix_slide(
-        ~forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
-        .before = 120,
-        .versions = forecast_dates
-      ) %>% 
-      mutate(version_faithful = TRUE)
+  epix_slide(
+    ~ forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
+    .before = 120,
+    .versions = forecast_dates
+  ) %>%
+  mutate(version_faithful = TRUE)
 
 forecasts <-
   bind_rows(
@@ -349,7 +353,8 @@ p2 <-
   geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
   geom_vline(
     data = percent_cli_data %>% filter(geo_value == geo_choose) %>% select(-version_faithful),
-    aes(color = factor(version), xintercept = version), lty = 2) +
+    aes(color = factor(version), xintercept = version), lty = 2
+  ) +
   geom_line(
     data = percent_cli_data %>% filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = factor(version)),
