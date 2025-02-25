@@ -51,7 +51,8 @@ test_that("wis dispatches and produces the correct values", {
   ))
   expect_true(is.na(
     weighted_interval_score(
-      quantile_pred(rbind(1:4), 1:4 / 5), 2.5, 1:9 / 10, na_handling = "fail"
+      quantile_pred(rbind(1:4), 1:4 / 5), 2.5, 1:9 / 10,
+      na_handling = "fail"
     )
   ))
 })

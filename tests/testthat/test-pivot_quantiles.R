@@ -40,14 +40,13 @@ test_that("quantile pivotting longer behaves", {
   expect_length(pivot_quantiles_longer(tib, d1), 4L)
   expect_identical(nrow(pivot_quantiles_longer(tib, d1)), 6L)
   expect_identical(pivot_quantiles_longer(tib, d1)$d1_value, c(1:3, 2:4))
-
 })
 
 test_that("nested_quantiles is deprecated, but works where possible", {
   expect_snapshot(d <- dist_quantiles(list(1:4, 2:5), 1:4 / 5))
   expect_snapshot(o <- nested_quantiles(d))
   res <- as_tibble(hardhat::quantile_pred(
-    matrix(c(1:4, 2:5), nrow = 2, byrow = TRUE), 1:4 / 5)
-  )
+    matrix(c(1:4, 2:5), nrow = 2, byrow = TRUE), 1:4 / 5
+  ))
   expect_identical(o |> mutate(.row = dplyr::row_number()) |> unnest(data), res)
 })

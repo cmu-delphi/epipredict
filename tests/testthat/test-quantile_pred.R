@@ -1,4 +1,3 @@
-
 test_that("single quantile_pred works, quantiles are accessible", {
   z <- hardhat::quantile_pred(
     values = matrix(1:5, nrow = 1),
@@ -79,7 +78,6 @@ test_that("unary math works on quantiles", {
     1:4 / 5
   )
   expect_identical(log(dstn), dstn2)
-
 })
 
 test_that("arithmetic works on quantiles", {
