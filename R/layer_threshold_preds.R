@@ -59,8 +59,7 @@ layer_threshold_new <-
     layer("threshold", terms = terms, lower = lower, upper = upper, id = id)
   }
 
-#' @export
-#' @keywords internal
+
 snap <- function(x, lower, upper, ...) {
   UseMethod("snap")
 }

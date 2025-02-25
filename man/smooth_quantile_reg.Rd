@@ -62,13 +62,11 @@ pl <- predict(
 )
 pl <- pl \%>\%
   unnest(.pred) \%>\%
-  mutate(distn = nested_quantiles(distn)) \%>\%
-  unnest(distn) \%>\%
+  pivot_quantiles_wider(distn) \%>\%
   mutate(
     x = x[length(x) - 20] + ahead / 100 * 2 * pi,
     ahead = NULL
-  ) \%>\%
-  pivot_wider(names_from = distn_quantile_levels, values_from = distn_value)
+  )
 plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 curve(sin(x), add = TRUE)
 abline(v = fd, lty = 2)
@@ -78,11 +76,11 @@ lines(pl$x, pl$`0.5`, col = "red")
 
 library(ggplot2)
 ggplot(data.frame(x = x, y = y), aes(x)) +
-  geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
+  geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "cornflowerblue") +
   geom_point(aes(y = y), colour = "grey") + # observed data
   geom_function(fun = sin, colour = "black") + # truth
   geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
-  geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
+  geom_line(data = pl, aes(y = `0.5`), colour = "orange") + # median prediction
   theme_bw() +
   coord_cartesian(xlim = c(0, NA)) +
   ylab("y")
