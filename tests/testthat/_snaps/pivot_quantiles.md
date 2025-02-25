@@ -38,3 +38,21 @@
       Error in `pivot_quantiles_longer()`:
       ! Only one column can be pivotted. Can not pivot all of: `d1` and `d2`.
 
+# nested_quantiles is deprecated, but works where possible
+
+    Code
+      d <- dist_quantiles(list(1:4, 2:5), 1:4 / 5)
+    Condition
+      Warning:
+      `dist_quantiles()` was deprecated in epipredict 0.1.11.
+      i Please use `hardhat::quantile_pred()` instead.
+
+---
+
+    Code
+      o <- nested_quantiles(d)
+    Condition
+      Warning:
+      `nested_quantiles()` was deprecated in epipredict 0.1.11.
+      i Please use `hardhat::quantile_pred()` instead.
+

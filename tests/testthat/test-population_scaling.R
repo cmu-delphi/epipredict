@@ -340,7 +340,6 @@ test_that("test joining by default columns with less common keys/classes", {
       pivot_quantiles_wider(.pred),
     dat1 %>%
       select(!"y") %>%
-      as_tibble() %>%
       mutate(`0.5` = c(2 * 5, 2 * 11))
   )
 
@@ -377,7 +376,6 @@ test_that("test joining by default columns with less common keys/classes", {
           pivot_quantiles_wider(.pred),
         dat1b %>%
           select(!"y") %>%
-          as_tibble() %>%
           # geo 1 scaling used for both:
           mutate(`0.5` = c(2 * 5, 2 * 5))
       ),
@@ -419,10 +417,10 @@ test_that("test joining by default columns with less common keys/classes", {
       expect_equal(
         # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
         predict(fit(ewf1b2, dat1b2), dat1b2) %>%
-          pivot_quantiles_wider(.pred),
+          pivot_quantiles_wider(.pred) %>%
+          as_tibble(),
         dat1b2 %>%
           select(!"y") %>%
-          as_tibble() %>%
           # geo 1 scaling used for both:
           mutate(`0.5` = c(2 * 5, 2 * 5)) %>%
           select(geo_value, age_group, time_value, `0.5`)
@@ -485,7 +483,8 @@ test_that("test joining by default columns with less common keys/classes", {
   )
   expect_equal(
     forecast(fit(ewf2, dat2)) %>%
-      pivot_quantiles_wider(.pred),
+      pivot_quantiles_wider(.pred) %>%
+      as_tibble(),
     dat2 %>%
       select(!"y") %>%
       as_tibble() %>%
@@ -522,7 +521,6 @@ test_that("test joining by default columns with less common keys/classes", {
           pivot_quantiles_wider(.pred),
         dat2b %>%
           select(!"y") %>%
-          as_tibble() %>%
           mutate(`0.5` = c(2 * 5, 2 * 11))
       ),
       class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
@@ -559,8 +557,7 @@ test_that("test joining by default columns with less common keys/classes", {
     # slightly edited copy-pasta due to test time selection:
     dat3 %>%
       select(!"y") %>%
-      as_tibble() %>%
-      slice_max(by = geo_value, time_value) %>%
+      dplyr::slice_max(by = geo_value, time_value) %>%
       mutate(`0.5` = 2 * 11)
   )
 

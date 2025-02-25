@@ -63,6 +63,7 @@ layer_threshold_new <-
 
 # restrict various objects to the interval [lower, upper]
 #' @export
+#' @keywords internal
 snap <- function(x, lower, upper, ...) {
   UseMethod("snap")
 }

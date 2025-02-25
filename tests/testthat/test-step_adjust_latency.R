@@ -13,7 +13,6 @@ x <- tibble(
 ) %>%
   as_epi_df(as_of = as.POSIXct("2024-09-17"))
 max_time <- max(x$time_value)
-class(attributes(x)$metadata$as_of)
 as_of <- attributes(x)$metadata$as_of
 ahead <- 7
 latency <- 5
@@ -241,7 +240,12 @@ test_that("epi_adjust_latency extends multiple aheads", {
   # the as_of on x is today's date, which is >970 days in the future
   # also, there's no data >970 days in the past, so it gets an error trying to
   # fit on no data
-  expect_error(expect_warning(fit3 <- fit(epi_wf, data = x), class = "epipredict__prep.step_latency__very_large_latency"), class = "simpleError")
+  expect_error(
+    expect_warning(
+      fit3 <- fit(epi_wf, data = x),
+      class = "epipredict__prep.step_latency__very_large_latency"),
+    class = "simpleError"
+  )
   # real date example
   fit3 <- fit(epi_wf, data = real_x)
   expect_equal(

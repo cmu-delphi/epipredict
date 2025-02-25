@@ -21,6 +21,10 @@
 \alias{pivot_longer}
 \alias{pivot_wider}
 \alias{unnest}
+\alias{as_tibble}
+\alias{tidy}
+\alias{quantile_pred}
+\alias{extract_quantile_levels}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -36,10 +40,11 @@ below to see their documentation.
 
   \item{ggplot2}{\code{\link[ggplot2]{autoplot}}}
 
+  \item{hardhat}{\code{\link[hardhat:quantile_pred]{extract_quantile_levels}}, \code{\link[hardhat]{quantile_pred}}}
+
   \item{recipes}{\code{\link[recipes]{bake}}, \code{\link[recipes]{prep}}, \code{\link[recipes]{rand_id}}}
 
   \item{tibble}{\code{\link[tibble]{as_tibble}}, \code{\link[tibble]{tibble}}}
 
   \item{tidyr}{\code{\link[tidyr]{pivot_longer}}, \code{\link[tidyr]{pivot_wider}}, \code{\link[tidyr]{unnest}}}
 }}
-

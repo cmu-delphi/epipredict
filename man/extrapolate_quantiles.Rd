@@ -29,7 +29,7 @@ similar to \code{\link[stats:quantile]{stats::quantile()}}, then \code{quantile(
 appropriate.
 }
 \examples{
-dstn <- quantile_dstn(rbind(1:4, 8:11), c(.2, .4, .6, .8))
+dstn <- quantile_pred(rbind(1:4, 8:11), c(.2, .4, .6, .8))
 # extra quantiles are appended
-as.tibble(extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75)))
+as_tibble(extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75)))
 }

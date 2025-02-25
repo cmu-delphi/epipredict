@@ -1,9 +1,114 @@
+#' A distribution parameterized by a set of quantiles
+#'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated. The recommended alternative is
+#' [hardhat::quantile_pred()].
+#'
+#' @param values A vector (or list of vectors) of values.
+#' @param quantile_levels A vector (or list of vectors) of probabilities
+#'   corresponding to `values`.
+#'
+#' When creating multiple sets of `values`/`quantile_levels` resulting in
+#' different distributions, the sizes must match. See the examples below.
+#'
+#' @return A vector of class `"distribution"`.
+#'
+#' @export
+#' @keywords internal
+#'
+#' @importFrom vctrs as_list_of vec_recycle_common new_vctr
+dist_quantiles <- function(values, quantile_levels) {
+  lifecycle::deprecate_warn("0.1.11", "dist_quantiles()", "hardhat::quantile_pred()")
+  if (is.list(values)) {
+    n <- length(values)
+    values <- unlist(values)
+    return(quantile_pred(matrix(values, nrow = n, byrow = TRUE), quantile_levels))
+  } else if (is.matrix(values)) {
+    return(quantile_pred(values, quantile_levels))
+  } else if (is.vector(values)) {
+    return(quantile_pred(matrix(values, nrow = 1), quantile_levels))
+  }
+  cli_abort(c(
+    "`dist_quantiles()` is deprecated and the format of `values` could not",
+    `!` = "be automatically converted to work with the replacement.",
+    i = "See {.fn hardhat::quantile_pred}."
+  ))
+}
 
 # placeholder to avoid errors, but not ideal
 #' @importFrom hardhat quantile_pred
 #' @export
 mean.quantile_pred <- function(x, na.rm = FALSE, ...) {
   median(x, ...)
+}
+
+# These next 3 functions should probably be added via PR to {hardhat}
+# Only the third is actually *needed* at the moment.
+# The second doesn't work correctly (not sure why), but leaving here for the
+# future.
+#
+# We only export the third.
+#
+# self-self method, should work only if attr(quantile_levels) are compatible
+# #' @importFrom vctrs vec_ptype2 vec_cast
+# #' @importFrom hardhat extract_quantile_levels
+# #' @export
+# #' @keywords internal
+# vec_ptype2.quantile_pred.quantile_pred <- function(
+#     x, y, ..., x_arg = "", y_arg = "", call = caller_env()
+# ) {
+#   if (all(extract_quantile_levels(y) %in% extract_quantile_levels(x))) {
+#     return(x)
+#   }
+#   if (all(extract_quantile_levels(x) %in% extract_quantile_levels(y))) {
+#     return(y)
+#   }
+#   vctrs::stop_incompatible_type(
+#     x, y, x_arg = x_arg, y_arg = y_arg,
+#     details = "`quantile_levels` must be compatible (a superset/subset relation)."
+#   )
+# }
+
+# currently doesn't work
+# #' @export
+# vec_cast.quantile_pred.quantile_pred <- function(
+#     x, to, ..., x_arg = caller_arg(x), to_arg = caller_arg(to),
+#     call = caller_env()
+# ) {
+#   to_ql <- extract_quantile_levels(to)
+#   x_ql <- extract_quantile_levels(x)
+#   x_in_to <- x_ql %in% to_ql
+#   to_in_x <- to_ql %in% x_ql
+#   if (all(x_in_to)) {
+#     mat <- matrix(NA, ncol = length(to_ql))
+#     mat[ , to_in_x] <- c(as.matrix(x))
+#   } else if (all(to_in_x)) {
+#     mat <- as.matrix(x)[ , x_in_to, drop = FALSE]
+#   } else {
+#     vctrs::stop_incompatible_type(
+#       x, to, x_arg = x_arg, y_arg = to_arg,
+#       details = "`quantile_levels` must be compatible (a superset/subset relation)."
+#     )
+#   }
+#   quantile_pred(mat, to_ql)
+# }
+
+
+# Convert the quantile_pred to a data frame (named with the .quantile_levels)
+# This powers vec_proxy_equal (and hence ==, !=, is.na, etc)
+# It also powers vec_proxy_compare, so, given matching colnames, these should
+# work out of the box.
+#
+#' @importFrom vctrs vec_proxy_equal
+#' @export
+vec_proxy_equal.quantile_pred <- function(x, ...) {
+  as_tibble(x) %>%
+    tidyr::pivot_wider(
+      names_from = .quantile_levels,
+      values_from = .pred_quantile
+    ) %>%
+    dplyr::select(-.row)
 }
 
 
