@@ -78,7 +78,6 @@ test_that("unary math works on quantiles", {
     1:4 / 5
   )
   expect_identical(log(dstn), dstn2)
-
 })
 
 test_that("arithmetic works on quantiles", {

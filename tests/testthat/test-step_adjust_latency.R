@@ -243,7 +243,8 @@ test_that("epi_adjust_latency extends multiple aheads", {
   expect_error(
     expect_warning(
       fit3 <- fit(epi_wf, data = x),
-      class = "epipredict__prep.step_latency__very_large_latency"),
+      class = "epipredict__prep.step_latency__very_large_latency"
+    ),
     class = "simpleError"
   )
   # real date example

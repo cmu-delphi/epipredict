@@ -133,7 +133,7 @@ quantile_internal <- function(x, tau_out, middle) {
   # short circuit if we aren't actually extrapolating
   # matches to ~15 decimals
   if (all(tau_out %in% tau) && !anyNA(qvals)) {
-    return(qvals[ , match(tau_out, tau), drop = FALSE])
+    return(qvals[, match(tau_out, tau), drop = FALSE])
   }
   if (length(tau) < 2) {
     cli_abort(paste(
@@ -152,7 +152,9 @@ quantile_internal <- function(x, tau_out, middle) {
 extrapolate_quantiles_single <- function(qvals, tau, tau_out, middle) {
   qvals_out <- rep(NA, length(tau_out))
   good <- !is.na(qvals)
-  if (!any(good)) return(qvals_out)
+  if (!any(good)) {
+    return(qvals_out)
+  }
   qvals <- qvals[good]
   tau <- tau[good]
 
@@ -169,21 +171,22 @@ extrapolate_quantiles_single <- function(qvals, tau, tau_out, middle) {
 
   if (middle == "cubic") {
     method <- "cubic"
-    result <- tryCatch({
-      Q <- stats::splinefun(tau, qvals, method = "hyman")
-      quartiles <- Q(c(.25, .5, .75))
-    },
-    error = function(e) {
-      return(NA)
-    })
+    result <- tryCatch(
+      {
+        Q <- stats::splinefun(tau, qvals, method = "hyman")
+        quartiles <- Q(c(.25, .5, .75))
+      },
+      error = function(e) {
+        return(NA)
+      }
+    )
   }
   if (middle == "linear" || any(is.na(result))) {
     method <- "linear"
     quartiles <- stats::approx(tau, qvals, c(.25, .5, .75))$y
   }
   if (any(indm)) {
-    qvals_out[indm] <- switch(
-      method,
+    qvals_out[indm] <- switch(method,
       linear = stats::approx(tau, qvals, tau_out[indm])$y,
       cubic = Q(tau_out[indm])
     )
