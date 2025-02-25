@@ -58,9 +58,9 @@ medical insurance claims and the number of new confirmed COVID-19 cases per
 
 ```{r grab-epi-data}
 # Select the `percent_cli` column from the data archive
-doctor_visits <- archive_cases_dv_subset$DT %>%
-  select(geo_value, time_value, version, percent_cli) %>%
-  drop_na(percent_cli) %>%
+doctor_visits <- archive_cases_dv_subset$DT |>
+  select(geo_value, time_value, version, percent_cli) |>
+  tidyr::drop_na(percent_cli) |>
   as_epi_archive(compactify = TRUE)
 ```
 
@@ -77,8 +77,8 @@ doctor_visits <- pub_covidcast(
   geo_values = "ca,fl,ny,tx",
   time_values = epirange(20200601, 20211201),
   issues = epirange(20200601, 20211201)
-) %>%
-  rename(version = issue, percent_cli = value) %>%
+) |>
+  rename(version = issue, percent_cli = value) |>
   as_epi_archive(compactify = TRUE)
 ```
 
@@ -99,20 +99,20 @@ percent_cli_data <- bind_rows(
   # Snapshotted data for the version-faithful forecasts
   map(
     forecast_dates,
-    ~ doctor_visits %>%
-      epix_as_of(.x) %>%
+    ~ doctor_visits |>
+      epix_as_of(.x) |>
       mutate(version = .x)
-  ) %>%
-    bind_rows() %>%
+  ) |>
+    bind_rows() |>
     mutate(version_faithful = TRUE),
   # Latest data for the version-faithless forecasts
-  doctor_visits %>%
-    epix_as_of(doctor_visits$versions_end) %>%
+  doctor_visits |>
+    epix_as_of(doctor_visits$versions_end) |>
     mutate(version_faithful = FALSE)
 )
 
 p0 <-
-  ggplot(data = percent_cli_data %>% filter(geo_value == geo_choose)) +
+  ggplot(data = percent_cli_data |> filter(geo_value == geo_choose)) +
   geom_vline(aes(color = factor(version), xintercept = version), lty = 2) +
   geom_line(
     aes(x = time_value, y = percent_cli, color = factor(version)),
@@ -154,9 +154,9 @@ of the red time-series to its left.
 In fact, if we take a snapshot and get the last `time_value`:
 
 ```{r}
-doctor_visits %>%
-  epix_as_of(as.Date("2020-08-01")) %>%
-  pull(time_value) %>%
+doctor_visits |>
+  epix_as_of(as.Date("2020-08-01")) |>
+  pull(time_value) |>
   max()
 ```
 
@@ -185,14 +185,14 @@ One way to do this is by setting the `.version` argument for `epix_slide()`:
 
 ```{r single_version, warn = FALSE}
 forecast_date <- as.Date("2021-04-06")
-forecasts <- doctor_visits %>%
+forecasts <- doctor_visits |>
   epix_slide(
     ~ arx_forecaster(
       .x,
       outcome = "percent_cli",
       predictors = "percent_cli",
       args_list = arx_args_list()
-    )$predictions %>%
+    )$predictions |>
       pivot_quantiles_wider(.pred_distn),
     .versions = forecast_date
   )
@@ -202,12 +202,12 @@ As truth data, we'll compare with the `epix_as_of()` to generate a snapshot of
 the archive at the last date[^1].
 
 ```{r compare_single_with_result}
-forecasts %>%
+forecasts |>
   inner_join(
-    doctor_visits %>%
+    doctor_visits |>
       epix_as_of(doctor_visits$versions_end),
     by = c("geo_value", "target_date" = "time_value")
-  ) %>%
+  ) |>
   select(geo_value, forecast_date, .pred, `0.05`, `0.95`, percent_cli)
 ```
 
@@ -227,9 +227,9 @@ This has the effect of simulating a data set that receives the final version
 updates every day.
 
 ```{r}
-archive_cases_dv_subset_faux <- doctor_visits %>%
-  epix_as_of(doctor_visits$versions_end) %>%
-  mutate(version = time_value) %>%
+archive_cases_dv_subset_faux <- doctor_visits |>
+  epix_as_of(doctor_visits$versions_end) |>
+  mutate(version = time_value) |>
   as_epi_archive()
 ```
 
@@ -251,10 +251,10 @@ forecast_wrapper <- function(
           lags = c(0:7, 14, 21),
           adjust_latency = "extend_ahead"
         )
-      )$predictions %>%
+      )$predictions |>
         pivot_quantiles_wider(.pred_distn)
     }
-  ) %>%
+  ) |>
     bind_rows()
 }
 ```
@@ -276,20 +276,20 @@ forecast_dates <- seq(
 )
 aheads <- c(1, 7, 14, 21, 28)
 
-version_faithless <- archive_cases_dv_subset_faux %>%
+version_faithless <- archive_cases_dv_subset_faux |>
   epix_slide(
     ~ forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
     .before = 120,
     .versions = forecast_dates
-  ) %>%
+  ) |>
   mutate(version_faithful = FALSE)
 
-version_faithful <- doctor_visits %>%
+version_faithful <- doctor_visits |>
   epix_slide(
     ~ forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
     .before = 120,
     .versions = forecast_dates
-  ) %>%
+  ) |>
   mutate(version_faithful = TRUE)
 
 forecasts <-
@@ -316,8 +316,8 @@ ny), we'll just display the results for two states, California (CA) and Florida
 
 ```{r plot_ca_forecasts, warning = FALSE}
 geo_choose <- "ca"
-forecasts_filtered <- forecasts %>%
-  filter(geo_value == geo_choose) %>%
+forecasts_filtered <- forecasts |>
+  filter(geo_value == geo_choose) |>
   mutate(time_value = version)
 
 p1 <- # first plotting the forecasts as bands, lines and points
@@ -326,10 +326,10 @@ p1 <- # first plotting the forecasts as bands, lines and points
   geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
   geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
   # the forecast date
-  geom_vline(data = percent_cli_data %>% filter(geo_value == geo_choose) %>% select(-version_faithful), aes(color = factor(version), xintercept = version), lty = 2) +
+  geom_vline(data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful), aes(color = factor(version), xintercept = version), lty = 2) +
   # the underlying data
   geom_line(
-    data = percent_cli_data %>% filter(geo_value == geo_choose),
+    data = percent_cli_data |> filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = factor(version)),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
@@ -342,8 +342,8 @@ p1 <- # first plotting the forecasts as bands, lines and points
 
 ```{r plot_fl_forecasts, warning = FALSE}
 geo_choose <- "fl"
-forecasts_filtered <- forecasts %>%
-  filter(geo_value == geo_choose) %>%
+forecasts_filtered <- forecasts |>
+  filter(geo_value == geo_choose) |>
   mutate(time_value = version)
 
 p2 <-
@@ -352,11 +352,11 @@ p2 <-
   geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
   geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
   geom_vline(
-    data = percent_cli_data %>% filter(geo_value == geo_choose) %>% select(-version_faithful),
+    data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
     aes(color = factor(version), xintercept = version), lty = 2
   ) +
   geom_line(
-    data = percent_cli_data %>% filter(geo_value == geo_choose),
+    data = percent_cli_data |> filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = factor(version)),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
@@ -398,7 +398,7 @@ p2
 
 
 [^1]: For forecasting a single day like this, we could have actually just used
-    `doctor_visits %>% epix_as_of(forecast_date)` to get the relevant snapshot, and then fed that into `arx_forecaster()` as we did in the [landing
+    `doctor_visits |> epix_as_of(forecast_date)` to get the relevant snapshot, and then fed that into `arx_forecaster()` as we did in the [landing
 page](../index.html#motivating-example).
 
 

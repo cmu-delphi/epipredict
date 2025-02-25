@@ -19,6 +19,7 @@ library(recipes)
 library(epidatasets)
 library(epipredict)
 library(ggplot2)
+library(purrr)
 forecast_date <- as.Date("2021-08-01")
 used_locations <- c("ca", "ma", "ny", "tx")
 library(epidatr)
@@ -331,8 +332,41 @@ autoplot(
 The 8 graphs are all pairs of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
 
 ## Fitting a non-geo-pooled model
-The primary difference to avoid geo-pooling is to first `group_by(geo_value)`
-before forecasting
+
+Because our internal methods fit a single model, to fit a non-geo-pooled model
+that has a different fit for each geography, one either needs a multi-level
+engine (which at the moment parsnip doesn't support), or one needs to map over
+geographies.
+
+```{r fit_non_geo_pooled, warning=FALSE}
+geo_values <- covid_case_death_rates |> pull(geo_value) |> unique()
+
+all_fits <-
+  purrr::map(geo_values, \(geo) {
+  covid_case_death_rates |>
+    filter(
+      geo_value == geo,
+      time_value <= forecast_date) |>
+    arx_forecaster(
+      outcome = "death_rate",
+      trainer = linear_reg(),
+      predictors = c("death_rate"),
+      args_list = arx_args_list(
+        lags = list(c(0, 7, 14)),
+        ahead = 14
+      )
+    )
+})
+map_df(all_fits, ~ pluck(., "predictions"))
+```
+
+This is both 56 times slower[^7], and uses far less data to fit each model.
+If the geographies are at all comparable, for example by normalization, we would
+ get much better results by pooling.
+
+If we wanted to build a geo-aware model, such as one that sets the constant in a
+ linear regression fit to be different for each geography, we would need to build a [Custom workflow](custom_epiworkflows) with geography as a factor.
+
 # Anatomy of a canned forecaster
 ## Code object
 Let's dissect the forecaster we trained back on the [landing
@@ -390,7 +424,7 @@ An `epi_workflow()` consists of 3 parts:
   5 of as these well. You can inspect the layers more closely by running
   `epipredict::extract_layers(four_week_ahead$epi_workflow)`.
 
-See the [Guts vignette](preprocessing-and-models) for recreating and then
+See the [Guts vignette](custom_epiworkflows) for recreating and then
 extending `four_week_ahead` using the custom forecaster framework.
 
 ## Mathematical description
@@ -436,3 +470,5 @@ without `NA` values is a training point to fit the coefficients $a_0,\ldots, a_6
 
 [^6]: alternatively, for an unfit version of the preprocessor, you can call
     `hardhat::extract_preprocessor(four_week_ahead$epi_workflow)`
+
+[^7]: the number of geographies
