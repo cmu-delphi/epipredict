@@ -17,6 +17,9 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   has an `na_rm` argument.
 - Moves `epiprocess` out of depends (#440). No internals have changed, but downstream
   users may need to add `library(epiprocess)` to existing code.
+- Removes dependence on the `distributional` package, replacing the quantiles 
+  with `hardhat::quantile_pred()`. Some associated functions are deprecated with
+  `lifecycle` messages.
 
 ## Improvements
 
@@ -28,6 +31,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Add `reference_date` as an argument to `epi_recipe()`
 - Add `step_climate()` to create "climate" predictor in forecast workflows
 - Add `climatological_forecaster()` to automatically create climate baselines
+- Replace `dist_quantiles()` with `hardhat::quantile_pred()`
 
 ## Bug fixes
 
