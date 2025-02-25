@@ -14,6 +14,9 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
   `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
   has an `na_rm` argument.
+- Removes dependence on the `distributional` package, replacing the quantiles 
+  with `hardhat::quantile_pred()`. Some associated functions are deprecated with
+  `lifecycle` messages.
 
 ## Improvements
 
@@ -23,6 +26,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Fix `quantile_reg()` producing error when asked to output just median-level predictions.
 - (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
 - Add `reference_date` as an argument to `epi_recipe()`
+- Replace `dist_quantiles()` with `hardhat::quantile_pred()`
 
 ## Bug fixes
 - Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
