@@ -107,17 +107,18 @@ demonstrate some of the subtleties, let's consider a toy dataset:
    as_epi_df(as_of = as.Date("2015-01-14"))
 }\if{html}{\out{</div>}}
 
-If we're looking to predict the value on the 15th, forecasting from the 14th (the \code{as_of} date above),
-there are two issues we will need to address:
+If we're looking to predict the value on the 15th, forecasting from the 14th
+(the \code{as_of} date above), there are two issues we will need to address:
 \enumerate{
 \item \code{"ca"} is latent by 2 days, whereas \code{"ma"} is latent by 1
-\item if we want to use \code{b} as an exogenous variable, for \code{"ma"} it is latent by 3 days instead of just 1.
+\item if we want to use \code{b} as an exogenous variable, for \code{"ma"} it is latent by
+3 days instead of just 1.
 }
 
-Regardless of \code{method}, \code{epi_keys_checked="geo_value"} guarantees that the
-difference between \code{"ma"} and \code{"ca"} is accounted for by making  the
-latency adjustment at least 2. For some comparison, here's what the various
-methods will do:
+Regardless of \code{method}, \code{epi_keys_checked="geo_value"} guarantees tha the
+difference between \code{"ma"} and \code{"ca"} is accounted for by making the latency
+adjustment at least 2. For some comparison, here's what the various methods
+will do:
 \subsection{\code{locf}}{
 
 Short for "last observation carried forward", \code{locf} assumes that every day
