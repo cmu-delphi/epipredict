@@ -153,8 +153,7 @@ quantile.quantile_pred <- function(x,
                                    lower = -Inf,
                                    upper = Inf,
                                    middle = c("cubic", "linear"),
-                                   ...
-) {
+                                   ...) {
   arg_is_probabilities(probs)
   arg_is_scalar(lower, upper, na.rm)
   arg_is_numeric(lower, upper)
