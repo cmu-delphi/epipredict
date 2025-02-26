@@ -32,6 +32,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Add `step_climate()` to create "climate" predictor in forecast workflows
 - Add `climatological_forecaster()` to automatically create climate baselines
 - Replace `dist_quantiles()` with `hardhat::quantile_pred()`
+- Allow `quantile()` to threshold to an interval if desired (#434)
 
 ## Bug fixes
 

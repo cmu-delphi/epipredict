@@ -136,7 +136,7 @@ vec_proxy_equal.quantile_pred <- function(x, ...) {
 #'   "cubic" should fail for some reason.
 #'
 #' @returns a matrix with one row for each entry in `x` and one column for each
-#'   value in `probs`. If either has length 1, a vector.
+#'   value in `probs`
 #' @seealso [extrapolate_quantiles()]
 #' @export
 #' @importFrom stats quantile
@@ -166,7 +166,7 @@ quantile.quantile_pred <- function(x,
 
   if (is.unsorted(probs)) probs <- sort(probs)
   middle <- rlang::arg_match(middle)
-  drop(snap(quantile_internal(x, probs, middle), lower, upper))
+  snap(quantile_internal(x, probs, middle), lower, upper)
 }
 
 

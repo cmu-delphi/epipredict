@@ -40,7 +40,7 @@ uses \code{\link[stats:approxfun]{stats::approx()}}. The "linear" method is used
 }
 \value{
 a matrix with one row for each entry in \code{x} and one column for each
-value in \code{probs}. If either has length 1, a vector.
+value in \code{probs}
 }
 \description{
 Given a \link[hardhat:quantile_pred]{hardhat::quantile_pred} object, users may wish to compute additional
