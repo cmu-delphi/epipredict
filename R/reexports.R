@@ -54,6 +54,14 @@ tibble::as_tibble
 #' @export
 tibble::tibble
 
+#' @importFrom tidyr pivot_longer
+#' @export
+tidyr::pivot_longer
+
+#' @importFrom tidyr pivot_wider
+#' @export
+tidyr::pivot_wider
+
 #' @importFrom tidyr unnest
 #' @export
 tidyr::unnest

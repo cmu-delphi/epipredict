@@ -35,7 +35,6 @@
 #' qr_spec <- smooth_quantile_reg(quantile_levels = c(.2, .5, .8), outcome_locations = 20:1)
 #' tt <- qr_spec %>% fit_xy(x = XY[, 21:41], y = XY[, 1:20])
 #'
-#' library(dplyr)
 #' pl <- predict(
 #'   object = tt,
 #'   new_data = XY[max(which(complete.cases(XY[, 21:41]))), 21:41]

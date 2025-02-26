@@ -18,6 +18,8 @@
 \alias{rand_id}
 \alias{as_tibble}
 \alias{tibble}
+\alias{pivot_longer}
+\alias{pivot_wider}
 \alias{unnest}
 \title{Objects exported from other packages}
 \keyword{internal}
@@ -38,6 +40,6 @@ below to see their documentation.
 
   \item{tibble}{\code{\link[tibble]{as_tibble}}, \code{\link[tibble]{tibble}}}
 
-  \item{tidyr}{\code{\link[tidyr]{unnest}}}
+  \item{tidyr}{\code{\link[tidyr]{pivot_longer}}, \code{\link[tidyr]{pivot_wider}}, \code{\link[tidyr]{unnest}}}
 }}
 

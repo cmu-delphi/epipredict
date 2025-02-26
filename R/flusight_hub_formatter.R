@@ -55,6 +55,7 @@ abbr_to_location <- function(abbr) {
 #'
 #' @examples
 #' library(dplyr)
+#' library(epiprocess)
 #' weekly_deaths <- covid_case_death_rates %>%
 #'   filter(
 #'     time_value >= as.Date("2021-09-01"),
