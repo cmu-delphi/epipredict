@@ -75,19 +75,14 @@ around \code{\link[recipes:recipe]{recipes::recipe()}} to properly handle the ad
 columns present in an \code{epi_df}
 }
 \examples{
-library(dplyr)
-library(recipes)
 jhu <- covid_case_death_rates \%>\%
-  filter(time_value > "2021-08-01") \%>\%
-  arrange(geo_value, time_value)
+  filter(time_value > "2021-08-01")
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  # below, `skip` means we don't do this at predict time
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
 r
 }

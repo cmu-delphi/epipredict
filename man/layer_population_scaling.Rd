@@ -79,8 +79,7 @@ passed will \emph{multiply} the selected variables while the \code{rate_rescalin
 argument is a common \emph{divisor} of the selected variables.
 }
 \examples{
-library(dplyr)
-jhu <- epidatasets::cases_deaths_subset \%>\%
+jhu <- cases_deaths_subset \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   select(geo_value, time_value, cases)
 

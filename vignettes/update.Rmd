@@ -14,6 +14,9 @@ source("_common.R")
 ```{r setup, message=FALSE}
 library(epipredict)
 library(recipes)
+library(dplyr)
+library(workflows)
+library(parsnip)
 ```
 
 In this vignette, we will state the main goal of the add/update/remove and
@@ -68,7 +71,7 @@ South Carolina.
 
 ```{r}
 jhu <- covid_case_death_rates %>%
-  dplyr::filter(time_value >= as.Date("2021-11-01"), geo_value %in% c("ak", "ca", "ny", "sc"))
+  filter(time_value >= as.Date("2021-11-01"), geo_value %in% c("ak", "ca", "ny", "sc"))
 
 jhu
 ```
@@ -100,7 +103,7 @@ We may then go on to add the fitted linear model to our `epi_workflow`:
 
 ```{r}
 # Fit a linear model
-wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 
 wf
 ```
@@ -139,7 +142,7 @@ using `workflows::remove_recipe()` and then inspect the class of `wf`:
 
 ```{r}
 wf %>% class() # class before
-workflows::remove_recipe(wf) %>% class() # class after removing recipe using workflows function
+remove_recipe(wf) %>% class() # class after removing recipe using workflows function
 ```
 
 We can observe that `wf` is no longer an `epi_workflow` and a `workflow`. It has
@@ -167,7 +170,7 @@ fit as before:
 
 ```{r}
 # fit linear model
-wf <- Update_model(wf, parsnip::linear_reg()) %>% fit(jhu)
+wf <- Update_model(wf, linear_reg()) %>% fit(jhu)
 wf
 ```
 
@@ -243,8 +246,8 @@ number in the order of operations, which can be obtained by inspecting `r2` or
 the tidy summary of it:
 
 ```{r}
-workflows::extract_preprocessor(wf) # step_epi_ahead is the third step in r2
-tidy(workflows::extract_preprocessor(wf)) # tidy tibble summary of r2
+extract_preprocessor(wf) # step_epi_ahead is the third step in r2
+tidy(extract_preprocessor(wf)) # tidy tibble summary of r2
 
 wf <- wf %>% adjust_epi_recipe(which_step = 3, ahead = 14)
 ```
@@ -268,7 +271,7 @@ variable, we would specify the step number of 2 in `which_step`.
 ```{r}
 wf <- wf %>% adjust_epi_recipe(which_step = 2, lag = c(0, 1, 7, 14, 21))
 
-workflows::extract_preprocessor(wf)
+extract_preprocessor(wf)
 ```
 
 We could adjust a recipe directly in the same way as we adjust a recipe in a
@@ -289,7 +292,7 @@ with a new `epi_recipe` that has undergone the adjustment
 ```{r}
 r2 <- adjust_epi_recipe(r2, which_step = 2, lag = 0:21)
 
-workflows::extract_preprocessor(wf)
+extract_preprocessor(wf)
 ```
 
 ## Adjust a single layer of a `frosting`

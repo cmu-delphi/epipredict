@@ -38,7 +38,6 @@ less than the maximum \code{as_of} value (from the data used pre-processing,
 model fitting, and postprocessing), an appropriate warning will be thrown.
 }
 \examples{
-library(dplyr)
 jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%

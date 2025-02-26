@@ -72,7 +72,6 @@ sequence of any existing operations.
 that will generate one or more new columns of derived data.
 }
 \examples{
-library(dplyr)
 tiny_geos <- c("as", "mp", "vi", "gu", "pr")
 rates <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"), !(geo_value \%in\% tiny_geos))

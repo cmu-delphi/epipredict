@@ -48,7 +48,6 @@ This is an autoregressive classification model for
 that it estimates a class at a particular target horizon.
 }
 \examples{
-library(dplyr)
 tiny_geos <- c("as", "mp", "vi", "gu", "pr")
 jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"), !(geo_value \%in\% tiny_geos))

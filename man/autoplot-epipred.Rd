@@ -70,7 +70,6 @@ will be shown as well. Unfit workflows will result in an error, (you
 can simply call \code{autoplot()} on the original \code{epi_df}).
 }
 \examples{
-library(dplyr)
 jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 

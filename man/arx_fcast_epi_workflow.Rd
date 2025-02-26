@@ -42,7 +42,6 @@ may alter the returned \code{epi_workflow} object (e.g., if you intend to
 use \code{\link[=quantile_reg]{quantile_reg()}}) but can be omitted.
 }
 \examples{
-library(dplyr)
 jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-12-01"))
 
