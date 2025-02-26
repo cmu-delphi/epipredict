@@ -41,7 +41,6 @@ layer <- function(subclass, ..., .prefix = "layer_") {
 #' in the layer, and the values are the new values to update the layer with.
 #'
 #' @examples
-#' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%

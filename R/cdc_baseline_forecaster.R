@@ -23,6 +23,7 @@
 #'
 #' @examples
 #' library(dplyr)
+#' library(epiprocess)
 #' weekly_deaths <- covid_case_death_rates %>%
 #'   select(geo_value, time_value, death_rate) %>%
 #'   left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
@@ -36,25 +37,24 @@
 #' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_7dsum")
 #' preds <- pivot_quantiles_wider(cdc$predictions, .pred_distn)
 #'
-#' if (require(ggplot2)) {
-#'   forecast_date <- unique(preds$forecast_date)
-#'   four_states <- c("ca", "pa", "wa", "ny")
-#'   preds %>%
-#'     filter(geo_value %in% four_states) %>%
-#'     ggplot(aes(target_date)) +
-#'     geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
-#'     geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
-#'     geom_line(aes(y = .pred), color = "orange") +
-#'     geom_line(
-#'       data = weekly_deaths %>% filter(geo_value %in% four_states),
-#'       aes(x = time_value, y = deaths_7dsum)
-#'     ) +
-#'     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
-#'     labs(x = "Date", y = "Weekly deaths") +
-#'     facet_wrap(~geo_value, scales = "free_y") +
-#'     theme_bw() +
-#'     geom_vline(xintercept = forecast_date)
-#' }
+#' library(ggplot2)
+#' forecast_date <- unique(preds$forecast_date)
+#' four_states <- c("ca", "pa", "wa", "ny")
+#' preds %>%
+#'   filter(geo_value %in% four_states) %>%
+#'   ggplot(aes(target_date)) +
+#'   geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
+#'   geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
+#'   geom_line(aes(y = .pred), color = "orange") +
+#'   geom_line(
+#'     data = weekly_deaths %>% filter(geo_value %in% four_states),
+#'     aes(x = time_value, y = deaths_7dsum)
+#'   ) +
+#'   scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
+#'   labs(x = "Date", y = "Weekly deaths") +
+#'   facet_wrap(~geo_value, scales = "free_y") +
+#'   theme_bw() +
+#'   geom_vline(xintercept = forecast_date)
 cdc_baseline_forecaster <- function(
     epi_data,
     outcome,

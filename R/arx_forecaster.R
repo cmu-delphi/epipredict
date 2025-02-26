@@ -95,7 +95,6 @@ arx_forecaster <- function(
 #' @seealso [arx_forecaster()]
 #'
 #' @examples
-#' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-12-01"))
 #'

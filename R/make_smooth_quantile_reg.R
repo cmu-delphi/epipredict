@@ -31,11 +31,10 @@
 #' y <- sin(x) + rnorm(length(x), sd = .1)
 #' fd <- x[length(x) - 20]
 #' XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
-#' XY <- tibble::as_tibble(XY)
+#' XY <- as_tibble(XY)
 #' qr_spec <- smooth_quantile_reg(quantile_levels = c(.2, .5, .8), outcome_locations = 20:1)
 #' tt <- qr_spec %>% fit_xy(x = XY[, 21:41], y = XY[, 1:20])
 #'
-#' library(tidyr)
 #' library(dplyr)
 #' pl <- predict(
 #'   object = tt,

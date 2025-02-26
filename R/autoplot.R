@@ -28,7 +28,6 @@ ggplot2::autoplot
 #'
 #' @name autoplot-epipred
 #' @examples
-#' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #'

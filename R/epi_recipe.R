@@ -45,19 +45,14 @@ epi_recipe <- function(x, ...) {
 #'
 #' @export
 #' @examples
-#' library(dplyr)
-#' library(recipes)
 #' jhu <- covid_case_death_rates %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   arrange(geo_value, time_value)
+#'   filter(time_value > "2021-08-01")
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   # below, `skip` means we don't do this at predict time
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   step_epi_naomit(all_predictors())
 #'
 #' r
 epi_recipe.epi_df <- function(x,
@@ -271,19 +266,14 @@ is_epi_recipe <- function(x) {
 #'
 #' @export
 #' @examples
-#' library(dplyr)
-#' library(recipes)
-#'
 #' jhu <- covid_case_death_rates %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   arrange(geo_value, time_value)
+#'   filter(time_value > "2021-08-01")
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   step_epi_naomit()
 #'
 #' workflow <- epi_workflow() %>%
 #'   add_epi_recipe(r)
@@ -355,7 +345,6 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #'
 #' @export
 #' @examples
-#' library(dplyr)
 #' library(workflows)
 #'
 #' jhu <- covid_case_death_rates %>%

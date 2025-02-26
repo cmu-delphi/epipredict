@@ -8,7 +8,6 @@
 #' @export
 #'
 #' @examples
-#' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
@@ -127,7 +126,6 @@ update_frosting <- function(x, frosting, ...) {
 #'
 #' @export
 #' @examples
-#' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
@@ -262,7 +260,6 @@ new_frosting <- function() {
 #' @export
 #'
 #' @examples
-#' library(dplyr)
 #' # Toy example to show that frosting can be created and added for postprocessing
 #' f <- frosting()
 #' wf <- epi_workflow() %>% add_frosting(f)

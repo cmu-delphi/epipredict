@@ -26,7 +26,6 @@
 #' @seealso [arx_class_epi_workflow()], [arx_class_args_list()]
 #'
 #' @examples
-#' library(dplyr)
 #' tiny_geos <- c("as", "mp", "vi", "gu", "pr")
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"), !(geo_value %in% tiny_geos))
@@ -107,7 +106,6 @@ arx_classifier <- function(
 #' @export
 #' @seealso [arx_classifier()] [arx_class_args_list()]
 #' @examples
-#' library(dplyr)
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #'
