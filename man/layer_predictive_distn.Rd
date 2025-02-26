@@ -31,31 +31,13 @@ an updated \code{frosting} postprocessor with additional columns of the
 residual quantiles added to the prediction
 }
 \description{
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+}
+\details{
 This function calculates an \emph{approximation} to a parametric predictive
 distribution. Predictive distributions from linear models require
 \verb{x* (X'X)^\{-1\} x*}
 along with the degrees of freedom. This function approximates both. It
 should be reasonably accurate for models fit using \code{lm} when the new point
 \verb{x*} isn't too far from the bulk of the data.
-}
-\examples{
-library(dplyr)
-jhu <- covid_case_death_rates \%>\%
-  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
-
-r <- epi_recipe(jhu) \%>\%
-  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
-  step_epi_ahead(death_rate, ahead = 7) \%>\%
-  step_epi_naomit()
-
-wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
-
-f <- frosting() \%>\%
-  layer_predict() \%>\%
-  layer_predictive_distn() \%>\%
-  layer_naomit(.pred)
-wf1 <- wf \%>\% add_frosting(f)
-
-p <- forecast(wf1)
-p
 }

@@ -12,39 +12,23 @@
 #' @export
 #'
 #' @examples
-#' .pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
-#' nested_quantiles(.pred_quantile)
+#' pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
+#' nested_quantiles(pred_quantile)
 #'
-#' .pred_quantile %>%
+#' pred_quantile %>%
 #'   as_tibble() %>%
 #'   tidyr::nest(.by = .row) %>%
 #'   dplyr::select(-.row)
 #'
 nested_quantiles <- function(x) {
   lifecycle::deprecate_warn("0.1.11", "nested_quantiles()", "hardhat::quantile_pred()")
-  if (inherits(x, "distribution")) {
-    if (requireNamespace("distributional")) {
-      x <- vctrs::vec_data(x)
-      return(distributional:::dist_apply(x, .f = function(z) {
-        as_tibble(vctrs::vec_data(z)) %>%
-          mutate(across(everything(), as.double)) %>%
-          vctrs::list_of()
-      }))
-    } else {
-      cli_abort(c(
-        "`nested_quantiles()` is deprecated and the {.pkg distributional}",
-        `!` = "package is not installed.",
-        i = "See {.fn hardhat::quantile_pred}."
-      ))
-    }
-  }
   if (inherits(x, "quantile_pred")) {
     return(x %>% as_tibble() %>% tidyr::nest(.by = .row) %>%
       dplyr::select(data))
   }
-  cli_abort(c(
+  cli_abort(
     "`nested_quantiles()` is deprecated. See {.fn hardhat::quantile_pred}."
-  ))
+  )
 }
 
 
@@ -113,11 +97,7 @@ pivot_quantiles_wider <- function(.data, ...) {
 }
 
 pivot_quantiles <- function(.data, ...) {
-  msg <- c(
-    "{.fn pivot_quantiles} was deprecated in {.pkg epipredict} 0.0.6",
-    i = "Please use {.fn pivot_quantiles_wider} instead."
-  )
-  lifecycle::deprecate_stop(msg)
+  lifecycle::deprecate_stop("0.0.6", "pivot_quantiles()", "pivot_quantiles_wider()")
 }
 
 validate_pivot_quantiles <- function(.data, ..., call = caller_env()) {

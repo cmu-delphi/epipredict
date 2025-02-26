@@ -20,10 +20,10 @@ This function is deprecated. The recommended alternative is
 \code{\link[hardhat:quantile_pred]{hardhat::quantile_pred()}} with \code{\link[tibble:as_tibble]{tibble::as_tibble()}}
 }
 \examples{
-.pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
-nested_quantiles(.pred_quantile)
+pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
+nested_quantiles(pred_quantile)
 
-.pred_quantile \%>\%
+pred_quantile \%>\%
   as_tibble() \%>\%
   tidyr::nest(.by = .row) \%>\%
   dplyr::select(-.row)

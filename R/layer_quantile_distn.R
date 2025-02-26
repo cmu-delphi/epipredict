@@ -78,18 +78,10 @@ layer_quantile_distn_new <- function(quantile_levels, truncate, name, id) {
 slather.layer_quantile_distn <-
   function(object, components, workflow, new_data, ...) {
     dstn <- components$predictions$.pred
-    is_supported <- inherits(dstn, "distribution") ||
-      inherits(dstn, "quantile_pred")
-    if (!is_supported) {
+    if (!inherits(dstn, "quantile_pred")) {
       cli_abort(
-        "`layer_quantile_distn()` requires distributional or quantile
+        "`layer_quantile_distn()` requires or quantile
         predictions. These are of class {.cls {class(dstn)}}."
-      )
-    }
-    if (inherits(dstn, "distribution") && !requireNamespace("distributional", quietly = TRUE)) {
-      cli_abort(
-        "You must install the {.pkg distributional} package for this
-        functionality."
       )
     }
     rlang::check_dots_empty()
