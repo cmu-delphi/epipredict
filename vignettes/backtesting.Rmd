@@ -11,8 +11,9 @@ vignette: >
 source("_common.R")
 ```
 
-```{r pkgs, include=FALSE, echo=TRUE}
+```{r pkgs, message=FALSE}
 library(epipredict)
+library(epiprocess)
 library(epidatr)
 library(data.table)
 library(dplyr)
@@ -66,7 +67,7 @@ vignette mentioned above).
 # Select the `percent_cli` column from the data archive
 doctor_visits <- archive_cases_dv_subset$DT %>%
   select(geo_value, time_value, version, percent_cli) %>%
-  tidyr::drop_na(percent_cli) %>%
+  drop_na(percent_cli) %>%
   as_epi_archive(compactify = TRUE)
 ```
 
@@ -166,7 +167,7 @@ forecasts %>%
     doctor_visits %>%
       epix_as_of(doctor_visits$versions_end) %>%
       group_by(geo_value) %>%
-      tidyr::fill(percent_cli),
+      fill(percent_cli),
     by = c("geo_value", "target_date" = "time_value")
   ) %>%
   select(geo_value, forecast_date, .pred, `0.05`, `0.95`, percent_cli)
@@ -376,7 +377,7 @@ linear regression with those from using boosted regression trees.
 
 ```{r get-can-fc, warning = FALSE}
 aheads <- c(7, 14, 21, 28)
-canada_archive <- epidatasets::can_prov_cases
+canada_archive <- can_prov_cases
 canada_archive_faux <- epix_as_of(canada_archive, canada_archive$versions_end) %>%
   mutate(version = time_value) %>%
   as_epi_archive()
