@@ -84,7 +84,6 @@ predict(out, new_data = tib[1:5, ]) \%>\%
 
 # -- a more complicated task
 
-library(dplyr)
 dat <- covid_case_death_rates \%>\%
   filter(time_value > as.Date("2021-10-01"))
 rec <- epi_recipe(dat) \%>\%

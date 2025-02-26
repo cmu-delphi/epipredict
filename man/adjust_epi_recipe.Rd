@@ -52,7 +52,6 @@ must be inputted as \code{...}. See the examples below for brief
 illustrations of the different types of updates.
 }
 \examples{
-library(dplyr)
 library(workflows)
 
 jhu <- covid_case_death_rates \%>\%

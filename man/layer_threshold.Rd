@@ -40,9 +40,9 @@ smaller than the lower threshold or higher than the upper threshold equal
 to the threshold values.
 }
 \examples{
-library(dplyr)
 jhu <- covid_case_death_rates \%>\%
   filter(time_value < "2021-03-08", geo_value \%in\% c("ak", "ca", "ar"))
+
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
