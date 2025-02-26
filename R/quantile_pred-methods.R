@@ -115,14 +115,58 @@ vec_proxy_equal.quantile_pred <- function(x, ...) {
 # quantiles by treating quantile_pred like a distribution -----------------
 
 
+#' Quantiles from a distribution
+#'
+#' Given a [hardhat::quantile_pred] object, users may wish to compute additional
+#' `quantile_levels` that are not part of the object. This function attempts
+#' to estimate these quantities under some assumptions. Interior probabilities,
+#' those contained within, existing probabilities are interpolated in a manner
+#' controled by the `middle` argument. Those outside existing probabilities
+#' are extrapolated under the assumption that the tails of the distribution
+#' decays exponentially. Optionally, one may constrain _all_ quantiles to be
+#' within some support (say, `[0, Inf)`).
+#'
+#' @inheritParams stats::quantile
+#' @param ... unused
+#' @param lower Scalar. Optional lower bound.
+#' @param upper Scalar. Optional upper bound.
+#' @param middle Controls how extrapolation to "interior" probabilities is
+#'   performed. "cubic" attempts to use [stats::splinefun()] while "linear"
+#'   uses [stats::approx()]. The "linear" method is used as a fallback if
+#'   "cubic" should fail for some reason.
+#'
+#' @returns a matrix with one row for each entry in `x` and one column for each
+#'   value in `probs`. If either has length 1, a vector.
+#' @seealso [extrapolate_quantiles()]
 #' @export
 #' @importFrom stats quantile
-quantile.quantile_pred <- function(x, p, na.rm = FALSE, ...,
-                                   middle = c("cubic", "linear")) {
-  arg_is_probabilities(p)
-  p <- sort(p)
+#'
+#' @examples
+#' qp <- quantile_pred(matrix(1:8, nrow = 2, byrow = TRUE), 1:4 / 5)
+#' quantile(qp)
+#' quantile(qp, lower = 0)
+#' quantile(qp, probs = 0.5)
+#' quantile(qp, probs = 1:9 / 10)
+quantile.quantile_pred <- function(x,
+                                   probs = seq(0, 1, 0.25),
+                                   na.rm = FALSE,
+                                   lower = -Inf,
+                                   upper = Inf,
+                                   middle = c("cubic", "linear"),
+                                   ...
+) {
+  arg_is_probabilities(probs)
+  arg_is_scalar(lower, upper, na.rm)
+  arg_is_numeric(lower, upper)
+  arg_is_lgl(na.rm)
+
+  if (lower > upper) {
+    cli_abort("`lower` must be less than `upper`.")
+  }
+
+  if (is.unsorted(probs)) probs <- sort(probs)
   middle <- rlang::arg_match(middle)
-  quantile_internal(x, p, middle)
+  drop(snap(quantile_internal(x, probs, middle), lower, upper))
 }
 
 
