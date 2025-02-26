@@ -35,7 +35,7 @@ Imports:
     generics,
     ggplot2,
     glue,
-    hardhat (>= 1.4.0.9002),
+    hardhat (>= 1.4.1),
     lifecycle,
     lubridate,
     magrittr,
