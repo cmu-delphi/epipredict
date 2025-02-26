@@ -199,7 +199,7 @@ pad_to_end <- function(x, groups, end_date, columns_to_complete = NULL) {
   if (is.null(columns_to_complete)) {
     columns_to_complete <- setdiff(names(x), key_colnames(x))
   }
-  itval <- epiprocess:::guess_period(c(x$time_value, end_date), "time_value")
+  itval <- epiprocess::guess_period(c(x$time_value, end_date), "time_value")
   # get the time values we need to fill in
   completed_time_values <- x %>%
     group_by(across(all_of(groups))) %>%
