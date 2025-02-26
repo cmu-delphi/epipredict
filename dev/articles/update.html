@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.10</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,7 +76,10 @@
     
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/recipes" class="external-link">recipes</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/workflows" class="external-link">workflows</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/tidymodels/parsnip" class="external-link">parsnip</a></span><span class="op">)</span></span></code></pre></div>
 <p>In this vignette, we will state the main goal of the
 add/update/remove and adjust functions and describe what part of the
 processing each function is intended for. We will then demonstrate how
@@ -168,7 +171,7 @@ take a subset of it from Nov. 1, 2021 to Dec. 31, 2021 for the four
 states of Alaska, California, New York, and South Carolina.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">covid_case_death_rates</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2021-11-01"</span><span class="op">)</span>, <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ak"</span>, <span class="st">"ca"</span>, <span class="st">"ny"</span>, <span class="st">"sc"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2021-11-01"</span><span class="op">)</span>, <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ak"</span>, <span class="st">"ca"</span>, <span class="st">"ny"</span>, <span class="st">"sc"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">jhu</span></span>
 <span><span class="co">#&gt; An `epi_df` object, 244 x 4 with metadata:</span></span>
@@ -223,7 +226,7 @@ function:</p>
 <code>epi_workflow</code>:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Fit a linear model</span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="va">r</span>, <span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -307,7 +310,7 @@ and then inspect the class of <code>wf</code>:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class before</span></span>
 <span><span class="co">#&gt; [1] "epi_workflow" "workflow"</span></span>
-<span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://workflows.tidymodels.org/reference/add_recipe.html" class="external-link">remove_recipe</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class after removing recipe using workflows function</span></span>
+<span><span class="fu"><a href="https://workflows.tidymodels.org/reference/add_recipe.html" class="external-link">remove_recipe</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="op">)</span> <span class="co"># class after removing recipe using workflows function</span></span>
 <span><span class="co">#&gt; [1] "workflow"</span></span></code></pre></div>
 <p>We can observe that <code>wf</code> is no longer an
 <code>epi_workflow</code> and a <code>workflow</code>. It has been
@@ -358,7 +361,7 @@ the updated recipe. We can use <code><a href="../reference/Add_model.html">Updat
 the model used in <code>wf</code>, and then fit as before:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># fit linear model</span></span>
-<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu">parsnip</span><span class="fu">::</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
+<span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/Add_model.html">Update_model</a></span><span class="op">(</span><span class="va">wf</span>, <span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span></span>
 <span><span class="va">wf</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ══ Epi Workflow [trained] ═══════════════════════════════════════════════════</span></span>
@@ -459,7 +462,7 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55fefb2d34d8&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x55a93438cfe0&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
@@ -501,7 +504,7 @@ in <code>wf</code> recipe by setting <code>which_step</code> to the step
 number in the order of operations, which can be obtained by inspecting
 <code>r2</code> or the tidy summary of it:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="co"># step_epi_ahead is the third step in r2</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span> <span class="co"># step_epi_ahead is the third step in r2</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
@@ -517,7 +520,7 @@ number in the order of operations, which can be obtained by inspecting
 <span><span class="co">#&gt; 3. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span></span>
 <span><span class="co">#&gt; 4. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_predictors()</span></span></span>
 <span><span class="co">#&gt; 5. <span style="color: #00BBBB;">•</span> Removing rows with NA values in: <span style="color: #0000BB;">all_outcomes()</span></span></span>
-<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
+<span><span class="fu"><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy</a></span><span class="op">(</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span><span class="op">)</span> <span class="co"># tidy tibble summary of r2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">number</span> <span style="font-weight: bold;">operation</span> <span style="font-weight: bold;">type</span>      <span style="font-weight: bold;">trained</span> <span style="font-weight: bold;">skip</span>  <span style="font-weight: bold;">id</span>             </span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          </span></span>
@@ -576,7 +579,7 @@ number of 2 in <code>which_step</code>.</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">wf</span> <span class="op">&lt;-</span> <span class="va">wf</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span>which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>
@@ -624,7 +627,7 @@ transfer over to <code>wf</code>. We would need to modify the recipe in
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">r2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/adjust_epi_recipe.html">adjust_epi_recipe</a></span><span class="op">(</span><span class="va">r2</span>, which_step <span class="op">=</span> <span class="fl">2</span>, lag <span class="op">=</span> <span class="fl">0</span><span class="op">:</span><span class="fl">21</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">workflows</span><span class="fu">::</span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://hardhat.tidymodels.org/reference/hardhat-extract.html" class="external-link">extract_preprocessor</a></span><span class="op">(</span><span class="va">wf</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">───────────────────────────────────────────────────────────────</span></span></span>
 <span><span class="co">#&gt; </span></span>

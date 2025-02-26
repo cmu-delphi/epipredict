@@ -9,7 +9,7 @@ operation that will check if variables contain enough data."><meta name="robots"
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.10</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -77,7 +77,7 @@ sequence of operations for this recipe.</p></dd>
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>One or more selector functions to choose variables for this check.
-See <code><a href="https://recipes.tidymodels.org/reference/selections.html" class="external-link">selections()</a></code> for more details. You will usually want to use
+See <code>selections()</code> for more details. You will usually want to use
 <code><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">recipes::all_predictors()</a></code> here.</p></dd>
 
 
@@ -132,7 +132,7 @@ changed to the data.</p>
     </div>
     <div class="section level2">
     <h2 id="tidy-results">tidy() results<a class="anchor" aria-label="anchor" href="#tidy-results"></a></h2>
-    <p>When you <code><a href="https://recipes.tidymodels.org/reference/tidy.recipe.html" class="external-link">tidy()</a></code> this check, a tibble with column
+    <p>When you <code><a href="https://generics.r-lib.org/reference/tidy.html" class="external-link">tidy()</a></code> this check, a tibble with column
 <code>terms</code> (the selectors or variables selected) is returned.</p>
     </div>
 

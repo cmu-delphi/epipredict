@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.10</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -74,6 +74,16 @@
 
     
     
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/cmu-delphi/epipredict/" class="external-link">epipredict</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmu-delphi.github.io/epiprocess/" class="external-link">epiprocess</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmu-delphi.github.io/epidatr/" class="external-link">epidatr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-datatable.com" class="external-link">data.table</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyr.tidyverse.org" class="external-link">tidyr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://purrr.tidyverse.org/" class="external-link">purrr</a></span><span class="op">)</span></span></code></pre></div>
 <div class="section level2">
 <h2 id="accurately-backtesting-forecasters">Accurately backtesting forecasters<a class="anchor" aria-label="anchor" href="#accurately-backtesting-forecasters"></a>
 </h2>
@@ -116,15 +126,15 @@ percentage of doctor’s visits with CLI (COVID-like illness) computed
 from medical insurance claims and the number of new confirmed COVID-19
 cases per 100,000 population (daily) for 6 states from the COVIDcast API
 (as used in the <code>epiprocess</code> vignette mentioned above).</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Select the `percent_cli` column from the data archive</span></span>
 <span><span class="va">doctor_visits</span> <span class="op">&lt;-</span> <span class="va">archive_cases_dv_subset</span><span class="op">$</span><span class="va">DT</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">time_value</span>, <span class="va">version</span>, <span class="va">percent_cli</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="va">percent_cli</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://tidyr.tidyverse.org/reference/drop_na.html" class="external-link">drop_na</a></span><span class="op">(</span><span class="va">percent_cli</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_archive.html" class="external-link">as_epi_archive</a></span><span class="op">(</span>compactify <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>The data can also be fetched from the Delphi Epidata API with the
 following query:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://cmu-delphi.github.io/epidatr/" class="external-link">epidatr</a></span><span class="op">)</span></span>
 <span><span class="va">doctor_visits</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/pub_covidcast.html" class="external-link">pub_covidcast</a></span><span class="op">(</span></span>
 <span>  source <span class="op">=</span> <span class="st">"doctor-visits"</span>,</span>
@@ -174,7 +184,7 @@ visits with CLI (<code>percent_cli</code>),</li>
 </ul>
 <p>All these default settings and more can be seen by calling
 <code><a href="../reference/arx_args_list.html">arx_args_list()</a></code>:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/arx_args_list.html">arx_args_list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> lags : <span style="color: #0000BB;">0</span>, <span style="color: #0000BB;">7</span>, and <span style="color: #0000BB;">14</span></span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> ahead : <span style="color: #0000BB;">7</span></span></span>
@@ -207,7 +217,7 @@ so we leave it to the user to decide, but flag this modeling decision
 here.</p>
 <p>Let’s use the <code><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of()</a></code> method to generate a snapshot
 of the archive at the last date, and then run the forecaster.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Let's forecast 14 days prior to the last date in the archive, to compare.</span></span>
 <span><span class="va">forecast_date</span> <span class="op">&lt;-</span> <span class="va">doctor_visits</span><span class="op">$</span><span class="va">versions_end</span> <span class="op">-</span> <span class="fl">14</span></span>
 <span><span class="co"># The .versions argument selects only the last version in the archive and</span></span>
@@ -231,7 +241,7 @@ of the archive at the last date, and then run the forecaster.</p>
 <span>    <span class="va">doctor_visits</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">doctor_visits</span><span class="op">$</span><span class="va">versions_end</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>      <span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">geo_value</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>      <span class="fu">tidyr</span><span class="fu">::</span><span class="fu"><a href="https://tidyr.tidyverse.org/reference/fill.html" class="external-link">fill</a></span><span class="op">(</span><span class="va">percent_cli</span><span class="op">)</span>,</span>
+<span>      <span class="fu"><a href="https://tidyr.tidyverse.org/reference/fill.html" class="external-link">fill</a></span><span class="op">(</span><span class="va">percent_cli</span><span class="op">)</span>,</span>
 <span>    by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"geo_value"</span>, <span class="st">"target_date"</span> <span class="op">=</span> <span class="st">"time_value"</span><span class="op">)</span></span>
 <span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">geo_value</span>, <span class="va">forecast_date</span>, <span class="va">.pred</span>, <span class="va">`0.05`</span>, <span class="va">`0.95`</span>, <span class="va">percent_cli</span><span class="op">)</span></span>
@@ -255,14 +265,14 @@ setting <code>version = time_value</code>. This has the effect of
 simulating a data set that receives the final version updates every day.
 For the version aware way, we will simply use the true
 <code>epi_archive</code> object.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">archive_cases_dv_subset_faux</span> <span class="op">&lt;-</span> <span class="va">doctor_visits</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">doctor_visits</span><span class="op">$</span><span class="va">versions_end</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>version <span class="op">=</span> <span class="va">time_value</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_archive.html" class="external-link">as_epi_archive</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p>To reduce typing, we create the wrapper function
 <code>forecast_k_week_ahead()</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Latest snapshot of data, and forecast dates</span></span>
 <span><span class="va">forecast_dates</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span>from <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2020-08-01"</span><span class="op">)</span>, to <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2021-11-01"</span><span class="op">)</span>, by <span class="op">=</span> <span class="st">"1 month"</span><span class="op">)</span></span>
 <span><span class="va">aheads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span>, <span class="fl">28</span><span class="op">)</span></span>
@@ -294,7 +304,7 @@ For the version aware way, we will simply use the true
 <span>      .versions <span class="op">=</span> <span class="va">forecast_dates</span></span>
 <span>    <span class="op">)</span></span>
 <span><span class="op">}</span></span></code></pre></div>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Generate the forecasts and bind them together</span></span>
 <span><span class="va">forecasts</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">aheads</span>, <span class="op">~</span> <span class="fu">forecast_k_week_ahead</span><span class="op">(</span></span>
@@ -324,7 +334,7 @@ Florida (FL), to get a sense of the model performance while keeping the
 graphic simple.</p>
 <details><summary>
 Code for plotting
-</summary><div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+</summary><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geo_choose</span> <span class="op">&lt;-</span> <span class="st">"ca"</span></span>
 <span><span class="va">forecasts_filtered</span> <span class="op">&lt;-</span> <span class="va">forecasts</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op">==</span> <span class="va">geo_choose</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -361,7 +371,7 @@ Code for plotting
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="st">"Date"</span>, y <span class="op">=</span> <span class="st">"smoothed, day of week adjusted covid-like doctors visits"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geo_choose</span> <span class="op">&lt;-</span> <span class="st">"fl"</span></span>
 <span><span class="va">forecasts_filtered</span> <span class="op">&lt;-</span> <span class="va">forecasts</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op">==</span> <span class="va">geo_choose</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -431,9 +441,9 @@ reporting mismatches), we then convert the data to an
 Finally, we run the same forcasting exercise as for the American data,
 but here we compare the forecasts produced from using simple linear
 regression with those from using boosted regression trees.</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">aheads</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">21</span>, <span class="fl">28</span><span class="op">)</span></span>
-<span><span class="va">canada_archive</span> <span class="op">&lt;-</span> <span class="fu">epidatasets</span><span class="fu">::</span><span class="va"><a href="https://cmu-delphi.github.io/epidatasets/reference/can_prov_cases.html" class="external-link">can_prov_cases</a></span></span>
+<span><span class="va">canada_archive</span> <span class="op">&lt;-</span> <span class="va">can_prov_cases</span></span>
 <span><span class="va">canada_archive_faux</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html" class="external-link">epix_as_of</a></span><span class="op">(</span><span class="va">canada_archive</span>, <span class="va">canada_archive</span><span class="op">$</span><span class="va">versions_end</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>version <span class="op">=</span> <span class="va">time_value</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_archive.html" class="external-link">as_epi_archive</a></span><span class="op">(</span><span class="op">)</span></span>
@@ -476,7 +486,7 @@ regression with those from using boosted regression trees.</p>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>The figures below shows the results for a single province.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">geo_choose</span> <span class="op">&lt;-</span> <span class="st">"Alberta"</span></span>
 <span><span class="va">forecasts_filtered</span> <span class="op">&lt;-</span> <span class="va">canada_forecasts</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op">==</span> <span class="va">geo_choose</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>

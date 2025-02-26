@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.10</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,6 +48,7 @@
 <h3 id="breaking-changes-0-2">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2"></a></h3>
 <ul><li>Moved example datasets from being hosted in the package to being loaded from the <code>epidatasets</code> package. The datasets can no longer be loaded with <code>data(&lt;dataset name&gt;)</code>, but can be accessed with <code>data(&lt;dataset name&gt;, package = "epidatasets")</code>, <code>epidatasets::&lt;dataset name&gt;</code> or, after loading the package, the name of the dataset alone (<a href="https://github.com/cmu-delphi/epipredict/issues/382" class="external-link">#382</a>).</li>
 <li>Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (<code><a href="https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html" class="external-link">growth_rate()</a></code>). <code><a href="../reference/step_growth_rate.html">step_growth_rate()</a></code> has lost its <code>additional_gr_args_list</code> argument and now has an <code>na_rm</code> argument.</li>
+<li>Moves <code>epiprocess</code> out of depends (<a href="https://github.com/cmu-delphi/epipredict/issues/440" class="external-link">#440</a>). No internals have changed, but downstream users may need to add <code><a href="https://cmu-delphi.github.io/epiprocess/" class="external-link">library(epiprocess)</a></code> to existing code.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2"></a></h3>
