@@ -358,9 +358,9 @@ roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus
     if (modulus == 365) {
       # we need to grab just the window around the leap day on the leap day
       if (iter == 366) {
-        entries <- ((60 - window_size):(60 + window_size - 1) %% modulus)
+        entries <- ((59 - window_size):(59 + window_size - 1) %% modulus)
         entries <- c(entries, 366)
-      } else if ((60 %in% entries) || (61 %in% entries)) {
+      } else if ((59 %in% entries) || (60 %in% entries)) {
         # if we're on the Feb/March boundary for daily data, we need to add in the
         # leap day data
         entries <- c(entries, 366)

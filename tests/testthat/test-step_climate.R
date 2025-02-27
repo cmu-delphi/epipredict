@@ -138,7 +138,7 @@ test_that("prep/bake steps create the correct training data for daily data", {
 
   expected_res <- tibble(
     .idx = c(1:365, 999),
-    climate_y = c(3, 3, 3:(60 - 4), 57.5:64.5, 66:181, rep(182, 5), 181:3, 3, 60)
+    climate_y = c(3, 3, 3:(59 - 4), 56.5:63.5, 65:181, rep(182, 5), 181:3, 3, 59)
   )
   expect_equal(p$steps[[1]]$climate_table, expected_res)
 
