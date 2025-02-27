@@ -100,15 +100,15 @@ climatological_forecaster <- function(epi_data,
     select(all_of(c(key_colnames(epi_data), outcome)))
   if (time_type %in% c("week", "epiweek")) {
     ttype_dur <- lubridate::weeks
-    time_aggr <- ifelse(time_type == "week", lubridate::epiweek, lubridate::isoweek)
-    modulus <- 53L
+    time_aggr <- ifelse(time_type == "week", epiweek_leap, isoweek_leap)
+    modulus <- 52L
   } else if (time_type == "month") {
     ttype_dur <- function(x) lubridate::period(month = x)
     time_aggr <- lubridate::month
     modulus <- 12L
   } else if (time_type == "day") {
     ttype_dur <- lubridate::days
-    time_aggr <- lubridate::yday
+    time_aggr <- yday_leap
     modulus <- 365L
   }
   center_fn <- switch(args_list$center_method,
