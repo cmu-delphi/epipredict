@@ -179,10 +179,10 @@ step_climate <-
     arg_is_lgl_scalar(skip)
 
     time_aggr <- switch(time_type,
-      epiweek = lubridate::epiweek,
-      week = lubridate::isoweek,
+      epiweek = epiweek_leap,
+      week = isoweek_leap,
       month = lubridate::month,
-      day = lubridate::yday
+      day = yday_leap
     )
 
     recipes::add_step(
@@ -258,22 +258,31 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
   wts <- wts %||% rep(1, nrow(training))
 
   modulus <- switch(x$time_type,
-    epiweek = 53L,
-    week = 53L,
+    epiweek = 52L, # only sometimes true
+    week = 52L,
     month = 12L,
-    day = 365L
+    day = 365L # only sometimes true
   )
 
   fn <- switch(x$center_method,
     mean = function(x, w) stats::weighted.mean(x, w, na.rm = TRUE),
     median = function(x, w) median(x, na.rm = TRUE)
   )
-
-  climate_table <- training %>%
+  # suppose it's week 52, and there is no week 53 this year; then
+  # as originally written for 1 week ahead this grabs from week 52+1 %% 53
+  # which will be week 53, not week 1.
+  ahead_period <- switch(x$time_type,
+    epiweek = lubridate::weeks(x$forecast_ahead),
+    week = lubridate::weeks(x$forecast_ahead),
+    month = lubridate::months(x$forecast_ahead),
+    day = lubridate::days(x$forecast_ahead),
+  )
+  climate_table <-
+    training %>%
     mutate(
-      .idx = x$time_aggr(time_value), .weights = wts,
-      .idx = (.idx - x$forecast_ahead) %% modulus,
-      .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
+      .idx = time_value %m-% ahead_period,
+      .idx = x$time_aggr(.idx),
+      .weights = wts
     ) %>%
     select(.idx, .weights, all_of(c(col_names, x$epi_keys))) %>%
     tidyr::pivot_longer(all_of(unname(col_names))) %>%
@@ -341,12 +350,63 @@ roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus
     tidyr::nest(data = c(col, weights), .by = .idx)
   out <- double(nrow(tib))
   for (iter in seq_along(out)) {
-    entries <- (iter - window_size):(iter + window_size) %% modulus
+    # +1 from 1-indexing
+    entries <- ((iter - window_size):(iter + window_size) %% modulus)
     entries[entries == 0] <- modulus
+    # note that because we are 1-indexing, we're looking for indices that are 1
+    # larger than the actual day/week in the year
+    if (modulus == 365) {
+      # we need to grab just the window around the leap day on the leap day
+      if (iter == 366) {
+        entries <- ((60 - window_size):(60 + window_size - 1) %% modulus)
+        entries <- c(entries, 366)
+      } else if ((60 %in% entries) || (61 %in% entries)) {
+        # if we're on the Feb/March boundary for daily data, we need to add in the
+        # leap day data
+        entries <- c(entries, 366)
+      }
+    } else if (modulus == 52) {
+      # we need to grab just the window around the leap week on the leap week
+      if (iter == 53) {
+        entries <- ((53 - window_size):(53 + window_size - 1) %% 52)
+        entries[entries == 0] <- 52
+        entries <- c(entries, 53)
+      } else if ((52 %in% entries) || (1 %in% entries)) {
+        # if we're on the year boundary for weekly data, we need to add in the
+        # leap week data (which is the extra week at the end)
+        entries <- c(entries, 53)
+      }
+    }
     out[iter] <- with(
       purrr::list_rbind(tib$data[entries]),
       aggr(col, weights)
     )
   }
   tibble(.idx = unique(tib$.idx), climate_pred = out)
+}
+
+
+#' a function that assigns Feb 29th to -1, and aligns all other dates the same
+#' number in the year, regardless of whether it's a leap year
+#' @keywords internal
+yday_leap <- function(time_value) {
+  ifelse(
+    !lubridate::leap_year(time_value),
+    lubridate::yday(time_value),
+    ifelse(
+      (lubridate::month(time_value) == 2) & lubridate::day(time_value) == 29,
+      999,
+      lubridate::yday(time_value) - (lubridate::month(time_value) > 2)
+    )
+  )
+}
+#' epiweek, but it assigns week 53 the value of -1 instead so it mirrors the assignments in yday_leap
+#' @keywords internal
+epiweek_leap <- function(time_value) {
+  lubridate::epiweek(time_value) %>% ifelse(. == 53, 999, .)
+}
+#' isoweek, but it assigns week 53 the value of -1 instead so it mirrors the assignments in yday_leap
+#' @keywords internal
+isoweek_leap <- function(time_value) {
+  lubridate::isoweek(time_value) %>% ifelse(. == 53, 999, .)
 }
