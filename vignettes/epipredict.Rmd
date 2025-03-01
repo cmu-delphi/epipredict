@@ -1,8 +1,8 @@
 ---
-title: "Get started with epipredict"
+title: "Get started with `epipredict`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get started with epipredict}
+  %\VignetteIndexEntry{Get started with `epipredict`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -54,13 +54,13 @@ Towards that end, epipredict provides two main classes of tools:
       Examples include linear regression, quantile regression, or [any parsnip
       engine](https://parsnip.tidymodels.org/).
     * Postprocessor: unique to this package, and used to do things to the
-      predictions after the model has been fit, such as 
+      predictions after the model has been fit, such as
       - generate quantiles from purely point-prediction models,
       - undo operations done in the steps, such as convert back to counts from
       rates
       - generally adapt the format of the prediction to it's eventual use.
 
-The rest of the getting started will focus on using and modifying the canned forecasters. 
+The rest of the getting started will focus on using and modifying the canned forecasters.
 If you need a more complicated model, check out the [Guts
 vignette](preprocessing-and-models) for examples of using the forecaster
 framework.
