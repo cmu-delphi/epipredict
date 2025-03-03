@@ -97,6 +97,29 @@ test_that("prep/bake steps create the correct training data", {
   expect_equal(b, expected_bake)
 })
 
+test_that("prep/bake steps create the correct training data with an incomplete year", {
+  single_yr <- seq(as.Date("2021-01-01"), as.Date("2021-10-31"), by = "1 day")
+  x <- tibble(
+    time_value = rep(single_yr, times = 2L),
+    geo_value = rep(c("reg1", "reg2"), each = length(single_yr)),
+    # shift by 2 days to match the epiweeks of 2021
+    y = rep(c(1, 1, rep(c(1:26, 26:2), each = 7), 1, 1, 1, 1, 1, 1)[1:length(single_yr)], times = 2L)
+  ) %>%
+    as_epi_df()
+  # epiweeks 1, 52, and 53 are all 1, note that there are days in wk 52, 2 in wk 53
+  r <- epi_recipe(x) %>% step_climate(y, time_type = "epiweek")
+  p <- prep(r, x)
+
+  expected_res <- tibble(.idx = c(1:44, 999), climate_y = c(2, 3, 3, 4:25, 25, 25, 25:12, 12, 11, 11, 10))
+  expect_equal(p$steps[[1]]$climate_table, expected_res)
+
+  b <- bake(p, new_data = NULL)
+  expected_bake <- x %>%
+    mutate(.idx = epiweek_leap(time_value)) %>%
+    left_join(expected_res, by = join_by(.idx)) %>%
+    select(-.idx)
+  expect_equal(b, expected_bake)
+})
 
 test_that("prep/bake steps create the correct training data for non leapweeks", {
   single_yr <- seq(as.Date("2023-01-01"), as.Date("2023-12-31"), by = "1 day")
@@ -122,6 +145,30 @@ test_that("prep/bake steps create the correct training data for non leapweeks", 
   expect_equal(b, expected_bake)
 })
 
+test_that("prep/bake steps create the correct training data months", {
+  single_yr <- seq(as.Date("2021-01-01"), as.Date("2023-12-31"), by = "1 day")
+  x <- tibble(
+    time_value = rep(single_yr, times = 2L),
+    geo_value = rep(c("reg1", "reg2"), each = length(single_yr)),
+  ) %>%
+    # 1 2 3 4 5 6 6 5 4 3 2 1, assigned based on the month
+    mutate(y = pmin(13 - month(time_value), month(time_value))) %>%
+    as_epi_df()
+
+  # epiweeks 1, 52, and 53 are all 1, note that there are days in wk 52, 2 in wk 53
+  r <- epi_recipe(x) %>% step_climate(y, time_type = "month", window_size = 1)
+  p <- prep(r, x)
+
+  expected_res <- tibble(.idx = 1:12, climate_y = c(1:6, 6:1))
+  expect_equal(p$steps[[1]]$climate_table, expected_res)
+
+  b <- bake(p, new_data = NULL)
+  expected_bake <- x %>%
+    mutate(.idx = month(time_value)) %>%
+    left_join(expected_res, by = join_by(.idx)) %>%
+    select(-.idx)
+  expect_equal(b, expected_bake)
+})
 
 
 test_that("prep/bake steps create the correct training data for daily data", {
