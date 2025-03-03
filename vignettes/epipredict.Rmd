@@ -339,24 +339,27 @@ engine (which at the moment parsnip doesn't support), or one needs to map over
 geographies.
 
 ```{r fit_non_geo_pooled, warning=FALSE}
-geo_values <- covid_case_death_rates |> pull(geo_value) |> unique()
+geo_values <- covid_case_death_rates |>
+  pull(geo_value) |>
+  unique()
 
 all_fits <-
   purrr::map(geo_values, \(geo) {
-  covid_case_death_rates |>
-    filter(
-      geo_value == geo,
-      time_value <= forecast_date) |>
-    arx_forecaster(
-      outcome = "death_rate",
-      trainer = linear_reg(),
-      predictors = c("death_rate"),
-      args_list = arx_args_list(
-        lags = list(c(0, 7, 14)),
-        ahead = 14
+    covid_case_death_rates |>
+      filter(
+        geo_value == geo,
+        time_value <= forecast_date
+      ) |>
+      arx_forecaster(
+        outcome = "death_rate",
+        trainer = linear_reg(),
+        predictors = c("death_rate"),
+        args_list = arx_args_list(
+          lags = list(c(0, 7, 14)),
+          ahead = 14
+        )
       )
-    )
-})
+  })
 map_df(all_fits, ~ pluck(., "predictions"))
 ```
 
