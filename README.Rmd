@@ -111,18 +111,6 @@ The documentation for the stable version is at
 
 ## Motivating example
 
-To demonstrate using [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) for forecasting, say we want to
-predict COVID-19 deaths per 100k people for each of a subset of states
-
-```{r subset_geos}
-used_locations <- c("ca", "ma", "ny", "tx")
-```
-
-on
-
-```{r fc_date}
-forecast_date <- as.Date("2021-08-01")
-```
 
 <details>
 <summary> Required packages </summary>
@@ -136,24 +124,28 @@ library(ggplot2)
 ```
 </details>
 
-```{r setting_cases_deaths}
-cases_deaths <- covid_case_death_rates |>
-  filter(
-    geo_value %in% used_locations,
-    time_value <= "2021-12-31"
-  )
-attr(cases_deaths, "metadata")$as_of <- as.Date("2022-01-01")
+To demonstrate using [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) for forecasting, say we want to
+predict COVID-19 deaths per 100k people for each of a subset of states
+
+```{r subset_geos}
+used_locations <- c("ca", "ma", "ny", "tx")
 ```
 
-`covid_case_death_rates` is a subset of
-[Johns Hopkins Center for Systems Science and Engineering deaths data](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html) stored in [`{epidatasets}`](https://cmu-delphi.github.io/epidatasets/).
-Below the fold, we clean this dataset and demonstrate pulling it from the epidata API.
+on
+
+```{r fc_date}
+forecast_date <- as.Date("2021-08-01")
+```
+
+We will be using a subset of
+[Johns Hopkins Center for Systems Science and Engineering deaths data](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html).
+Below the fold, we pull the dataset from the epidata API and clean it.
 
 <details>
 <summary> Creating the dataset using `{epidatr}` and `{epiprocess}` </summary>
 
 This section is intended to demonstrate some of the ubiquitous cleaning operations needed to be able to forecast.
-The dataset prepared here is also included ready-to-go in [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) as `covid_case_death_rates`.
+A subset of this dataset prepared here is also included ready-to-go in [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) as `covid_case_death_rates`.
 
 First we pull both `jhu-csse` cases and deaths data from the
 [Delphi API](https://cmu-delphi.github.io/delphi-epidata/api/covidcast.html) using the
