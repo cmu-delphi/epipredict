@@ -4,21 +4,27 @@ development:
   mode: devel
 
 template:
+  light-switch: true
   package: delphidocs
 
-articles:
-  - title: Get started
-    navbar: ~
-    contents:
-      - epipredict
-      - custom_epiworkflows
-      - backtesting
-      - update
-  - title: Advanced methods
-    contents:
-      - arx-classifier
-      - articles/smooth-qr
-      - panel-data
+navbar:
+  structure:
+    left:  [intro, workflows, backtesting, reference, articles, news]
+    right: [search, github, lightswitch]
+  components:
+    workflows:
+      text: Epiworkflows
+      href: articles/custom_epiworkflows.html
+    backtesting:
+      text: Backtesting
+      href: articles/backtesting.html
+    articles:
+      text: Articles
+      menu:
+        - text: Using the add/update/remove/adjust functions
+          href: articles/update.html
+        - text: Using epipredict on non-epidemic panel data
+          href: articles/panel-data.html
 
 home:
   links:

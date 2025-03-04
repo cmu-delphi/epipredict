@@ -234,7 +234,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-03-04 12:12:54.
+#> This forecaster was fit on 2025-03-03 14:43:07.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -298,12 +298,12 @@ four_week_ahead$predictions |>
 #> # A tibble: 20 × 5
 #>   geo_value values quantile_levels forecast_date target_date
 #>   <chr>      <dbl>           <dbl> <date>        <date>     
-#> 1 ca        0.199             0.1  2021-08-01    2021-08-29 
-#> 2 ca        0.285             0.25 2021-08-01    2021-08-29 
-#> 3 ca        0.345             0.5  2021-08-01    2021-08-29 
-#> 4 ca        0.405             0.75 2021-08-01    2021-08-29 
-#> 5 ca        0.491             0.9  2021-08-01    2021-08-29 
-#> 6 ma        0.0285            0.1  2021-08-01    2021-08-29 
+#> 1 ca        0.0425            0.1  2021-08-01    2021-08-29 
+#> 2 ca        0.0803            0.25 2021-08-01    2021-08-29 
+#> 3 ca        0.115             0.5  2021-08-01    2021-08-29 
+#> 4 ca        0.150             0.75 2021-08-01    2021-08-29 
+#> 5 ca        0.187             0.9  2021-08-01    2021-08-29 
+#> 6 ma        0                 0.1  2021-08-01    2021-08-29 
 #> # ℹ 14 more rows
 ```
 

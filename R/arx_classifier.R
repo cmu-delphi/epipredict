@@ -1,8 +1,106 @@
 #' Direct autoregressive classifier with covariates
 #'
-#' This is an autoregressive classification model for
-#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It does "direct" forecasting, meaning
-#' that it estimates a class at a particular target horizon.
+#'
+#' @description
+#' This is an autoregressive classification model for continuous data. It does
+#'   "direct" forecasting, meaning that it estimates a class at a particular
+#'   target horizon.
+#'
+#' @details
+#' The `arx_classifier()` is an autoregressive classification model for `epi_df`
+#'   data that is used to predict a discrete class for each case under
+#'   consideration.  It is a direct forecaster in that it estimates the classes
+#'   at a specific horizon or ahead value.
+#'
+#' To get a sense of how the `arx_classifier()` works, let's consider a simple
+#'   example with minimal inputs. For this, we will use the built-in
+#'   `covid_case_death_rates` that contains confirmed COVID-19 cases and deaths
+#'   from JHU CSSE for all states over Dec 31, 2020 to Dec 31, 2021. From this,
+#'   we'll take a subset of data for five states over June 4, 2021 to December
+#'   31, 2021. Our objective is to predict whether the case rates are increasing
+#'   when considering the 0, 7 and 14 day case rates:
+#'
+#' ```{r}
+#' jhu <- covid_case_death_rates %>%
+#'   filter(
+#'     time_value >= "2021-06-04",
+#'     time_value <= "2021-12-31",
+#'     geo_value %in% c("ca", "fl", "tx", "ny", "nj")
+#'   )
+#'
+#' out <- arx_classifier(jhu, outcome = "case_rate", predictors = "case_rate")
+#'
+#' out$predictions
+#' ```
+#'
+#' The key takeaway from the predictions is that there are two prediction
+#'   classes: (-Inf, 0.25] and (0.25, Inf). This is because for our goal of
+#'   classification the classes must be discrete. The discretization of the
+#'   real-valued outcome is controlled by the `breaks` argument, which defaults
+#'   to 0.25. Such breaks will be automatically extended to cover the entire
+#'   real line. For example, the default break of 0.25 is silently extended to
+#'   breaks = c(-Inf, .25, Inf) and, therefore, results in two classes: [-Inf,
+#'   0.25] and (0.25, Inf). These two classes are used to discretize the
+#'   outcome. The conversion of the outcome to such classes is handled
+#'   internally. So if discrete classes already exist for the outcome in the
+#'   `epi_df`, then we recommend to code a classifier from scratch using the
+#'   `epi_workflow` framework for more control.
+#'
+#' The `trainer` is a `parsnip` model describing the type of estimation such
+#'   that `mode = "classification"` is enforced. The two typical trainers that
+#'   are used are `parsnip::logistic_reg()` for two classes or
+#'   `parsnip::multinom_reg()` for more than two classes.
+#'
+#' ```{r}
+#' workflows::extract_spec_parsnip(out$epi_workflow)
+#' ```
+#'
+#' From the parsnip model specification, we can see that the trainer used is
+#'   logistic regression, which is expected for our binary outcome. More
+#'   complicated trainers like `parsnip::naive_Bayes()` or
+#'   `parsnip::rand_forest()` may also be used (however, we will stick to the
+#'   basics in this gentle introduction to the classifier).
+#'
+#' If you use the default trainer of logistic regression for binary
+#'   classification and you decide against using the default break of 0.25, then
+#'   you should only input one break so that there are two classification bins
+#'   to properly dichotomize the outcome. For example, let's set a break of 0.5
+#'   instead of relying on the default of 0.25. We can do this by passing 0.5 to
+#'   the `breaks` argument in `arx_class_args_list()` as follows:
+#'
+#' ```{r}
+#' out_break_0.5 <- arx_classifier(
+#'   jhu,
+#'   outcome = "case_rate",
+#'   predictors = "case_rate",
+#'   args_list = arx_class_args_list(
+#'     breaks = 0.5
+#'   )
+#' )
+#'
+#' out_break_0.5$predictions
+#' ```
+#' Indeed, we can observe that the two `.pred_class` are now (-Inf, 0.5] and
+#'   (0.5, Inf). See `help(arx_class_args_list)` for other available
+#'   modifications.
+#'
+#' Additional arguments that may be supplied to `arx_class_args_list()` include
+#'   the expected `lags` and `ahead` arguments for an autoregressive-type model.
+#'   These have default values of 0, 7, and 14 days for the lags of the
+#'   predictors and 7 days ahead of the forecast date for predicting the
+#'   outcome. There is also `n_training` to indicate the upper bound for the
+#'   number of training rows per key. If you would like some practice with using
+#'   this, then remove the filtering command to obtain data within "2021-06-04"
+#'   and "2021-12-31" and instead set `n_training` to be the number of days
+#'   between these two dates, inclusive of the end points. The end results
+#'   should be the same. In addition to `n_training`, there are `forecast_date`
+#'   and `target_date` to specify the date that the forecast is created and
+#'   intended, respectively. We will not dwell on such arguments here as they
+#'   are not unique to this classifier or absolutely essential to understanding
+#'   how it operates. The remaining arguments will be discussed organically, as
+#'   they are needed to serve our purposes. For information on any remaining
+#'   arguments that are not discussed here, please see the function
+#'   documentation for a complete list and their definitions.
 #'
 #' @inheritParams arx_forecaster
 #' @param outcome A character (scalar) specifying the outcome (in the
