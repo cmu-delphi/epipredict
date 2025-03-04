@@ -1,8 +1,8 @@
 ---
-title: "Get started with `epipredict`"
+title: "Get started with `{epipredict}`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get started with `epipredict`}
+  %\VignetteIndexEntry{Get started with `{epipredict}`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -26,45 +26,52 @@ used_locations <- c("ca", "ma", "ny", "tx")
 library(epidatr)
 ```
 
-At a high level, the goal of `{epipredict}` is to make running simple machine
-learning / statistical forecasters for epidemiology easy.
-To do this, we have extended several [tidymodels](https://www.tidymodels.org/)
-packages to handle the case of panel time-series data.
-Our hope is that it is easy for users with epi training and some statistics to
-fit baseline models while still allowing those with more nuanced statistical
-understanding to create complicated specializations using the same framework.
-Towards that end, epipredict provides two main classes of tools:
+At a high level, the goal of `{epipredict}` is to make it easy to run simple machine
+learning and statistical forecasters for epidemiological data.
+To do this, we have extended the [tidymodels](https://www.tidymodels.org/)
+framework to handle the case of panel time-series data.
 
-1. A set of basic, easy-to-use "canned" forecasters that work out of the box.
-    For the basic forecasters, we currently provide:
-    * Flatline forecaster: predicts a median that is the last value
-      with increasingly wide quantiles.
-    * Autoregressive forecaster: fits a model (e.g. linear regression) on
-      lagged data to predict quantiles for continuous values.
-    * Autoregressive classifier: fits a model (e.g. logistic regression) on
-      lagged data to predict a binned version of the growth rate.
-    * CDC FluSight flatline forecaster: a variant of the flatline forecaster as
-      used by the CDC in FluSight.
-2. A framework for creating custom forecasters out of modular components, from
-   which the canned forecasters were created.  There are three types of
-   components:
-    * Preprocessor: do things to the data before model training, such as convert
-      counts to rates, create smoothed columns, or [any of the recipes
-      steps](https://recipes.tidymodels.org/reference/index.html)
-    * Trainer: train a model on data, resulting in a fitted model object.
-      Examples include linear regression, quantile regression, or [any parsnip
-      engine](https://parsnip.tidymodels.org/).
-    * Postprocessor: unique to this package, and used to do things to the
-      predictions after the model has been fit, such as
-      - generate quantiles from purely point-prediction models,
-      - undo operations done in the steps, such as convert back to counts from
-      rates
-      - generally adapt the format of the prediction to it's eventual use.
+Our hope is that it is easy for users with epidemiological training and some statistical knowledge to
+fit baseline models, while also allowing those with more nuanced statistical
+understanding to create complex custom models using the same framework.
+Towards that end, `{epipredict}` provides two main classes of tools:
 
-The rest of the getting started will focus on using and modifying the canned forecasters.
-If you need a more complicated model, check out the [Guts
-vignette](preprocessing-and-models) for examples of using the forecaster
-framework.
+## Canned forecasters
+
+A set of basic, easy-to-use "canned" forecasters that work out of the box.
+We currently provide the following basic forecasters:
+  
+  * _Flatline forecaster_: predicts as the median the most recently seen value 
+    with increasingly wide quantiles.
+  * _Autoregressive forecaster_: fits a model (e.g. linear regression) on
+    lagged data to predict quantiles for continuous values.
+  * _Autoregressive classifier_: fits a model (e.g. logistic regression) on
+    lagged data to predict a binned version of the growth rate.
+  * _CDC FluSight flatline forecaster_: a variant of the flatline forecaster that is
+    used as a baseline in the CDC's [FluSight forecasting competition](https://www.cdc.gov/flu-forecasting/about/index.html).
+
+## Forecasting framework
+
+A framework for creating custom forecasters out of modular components, from
+which the canned forecasters were created.  There are three types of
+components:
+ 
+  * _Preprocessor_: transform the data before model training, such as converting
+    counts to rates, creating smoothed columns, or [any `{recipes}`
+    `step`](https://recipes.tidymodels.org/reference/index.html)
+  * _Trainer_: train a model on data, resulting in a fitted model object.
+    Examples include linear regression, quantile regression, or [any `{parsnip}`
+    engine](https://parsnip.tidymodels.org/reference/index.html).
+  * _Postprocessor_: unique to `{epipredict}`; used to transform the
+    predictions after the model has been fit, such as
+    - generating quantiles from purely point-prediction models,
+    - reverting operations done in the `step`s, such as converting from
+    rates back to counts
+    - generally adapting the format of the prediction to its eventual use.
+
+The rest of the "getting started" vignette will focus on using and modifying the canned forecasters.
+Check out the ["guts" vignette](preprocessing-and-models) for examples of using the forecaster
+framework to make more complex, custom forecasters.
 
 If you are interested in time series in a non-panel data context, you may also
 want to look at `{timetk}` and `{modeltime}` for some related techniques.
@@ -76,24 +83,26 @@ For a more in-depth treatment with some practical applications, see also the
 ## Example data
 
 The forecasting methods in this package are designed to work with panel time
-series data, specifically in the form of an `epi_df` from the `{epiprocess}`
+series data in `epi_df` format as made available in the `{epiprocess}`
 package.
-This is a collection of one or more time-series indexed by one or more
+An `epi_df` is a collection of one or more time-series indexed by one or more
 categorical variables.
-For example, on the landing page:
+The [`{epidatasets}`](https://cmu-delphi.github.io/epidatasets/) package makes several
+pre-compiled example datasets available.
+Let's look at an example `epi_df`:
 
 ```{r data_ex}
 covid_case_death_rates
 ```
 
-`geo_value` is the only key for this dataset, while there are two separate
-time-series, `case_rate` and `death_rate`.
-The keys are represented in "long" format (so separate columns for the key and
-the value), while separate time series are represented in "wide" format (so each
-time-series has a separate column).
+This dataset uses a single key, `geo_value`, and two separate
+time series, `case_rate` and `death_rate`.
+The keys are represented in "long" format, with separate columns for the key and
+the value, while separate time series are represented in "wide" format with each
+time series stored in a separate column.
 
 `{epiprocess}` is designed to handle data that always has a geographic key, and
-potentially other key values, such as age, ethnicity or other demographic
+potentially other key values, such as age, ethnicity, or other demographic
 information.
 For example, `grad_employ_subset` from `{epidatasets}` also has both `age_group`
 and `edu_qual` as additional keys:
@@ -102,8 +111,7 @@ and `edu_qual` as additional keys:
 grad_employ_subset
 ```
 
-See `{epiprocess}` for more details
-on the format.
+See `{epiprocess}` for [more details on the `epi_df` format](https://cmu-delphi.github.io/epiprocess/articles/epi_df.html).
 
 Panel time series are ubiquitous in epidemiology, but are also common in
 economics, psychology, sociology, and many other areas.
@@ -111,11 +119,12 @@ While this package was designed with epidemiology in mind, many of the
 techniques are more broadly applicable.
 
 ## Customizing `arx_forecaster()`
-Moving on from the example on the [landing
-page](../index.html#motivating-example), let's adjust some parameters for
+Let's expand on the basic example presented on the [landing
+page](../index.html#motivating-example), starting with adjusting some parameters in
 `arx_forecaster()`.
-`trainer` allows us to set a different fitting engines, either one of the
-included ones, such as `quantile_reg()`, or one of the relevant [parsnip
+
+The `trainer` argument allows us to set the fitting engine. We can use either one of the
+included engines, such as `quantile_reg()`, or one of the relevant [parsnip
 models](https://www.tidymodels.org/find/parsnip/):
 
 ```{r make-forecasts, warning=FALSE}
@@ -135,9 +144,9 @@ hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 The default trainer is `parsnip::linear_reg()`, which generates quantiles after
 the fact in the post-processing layers, rather than as part of the model.
 While this does work, it is generally preferable to use `quantile_reg()`, as the
-quantiles generated in this manner can be poorly behaved.
-`quantile_reg()` on the other hand directly estimates different linear models
-for each quantile, reflected in the 3 different columns for `tau` above.
+quantiles generated in post-processing can be poorly behaved.
+`quantile_reg()` on the other hand directly estimates a different linear model
+for each quantile, reflected in the several different columns for `tau` above.
 
 Because of the flexibility of `{parsnip}`, there are a whole host of models
 available to us[^5]; as an example, we could have just as easily substituted a
@@ -177,16 +186,15 @@ two_week_ahead <- arx_forecaster(
 hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 ```
 
-See the function documentation of `arx_args_list()` for more examples of the modifications available.
-If you are looking for even further modifications, you will want a custom
-workflow, for which you should see the [guts
-vignette](preprocessing-and-models).
+See the function documentation for `arx_args_list()` for more examples of the modifications available.
+If you want to make further modifications, you will need a custom
+workflow; see the ["guts" vignette](custom_epiworkflows) for details.
 
 ## Generating multiple aheads
 Frequently, one doesn't want just a forecast for a single day, but a trajectory
 of forecasts for several weeks.
-The way to do this using `arx_forecaster()` is by looping over aheads; for
-example, to predict every day over 4 weeks:
+We can do this with `arx_forecaster()` by looping over aheads; for
+example, to predict every day over a 4-week time period:
 
 ```{r temp-thing}
 all_canned_results <- lapply(
@@ -428,7 +436,7 @@ An `epi_workflow()` consists of 3 parts:
   5 of as these well. You can inspect the layers more closely by running
   `epipredict::extract_layers(four_week_ahead$epi_workflow)`.
 
-See the [Guts vignette](custom_epiworkflows) for recreating and then
+See the ["guts" vignette](custom_epiworkflows) for recreating and then
 extending `four_week_ahead` using the custom forecaster framework.
 
 ## Mathematical description
