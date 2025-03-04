@@ -86,7 +86,7 @@ Creating the dataset using `{epidatr}` and `{epiprocess}`
 </summary>
 
 This section is intended to demonstrate some of the ubiquitous cleaning
-operations needed to be able to forecast. A subset of this dataset
+operations needed to be able to forecast. A subset of the dataset
 prepared here is also included ready-to-go in
 [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) as
 `covid_case_death_rates`.
@@ -234,7 +234,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-03-03 14:43:07.
+#> This forecaster was fit on 2025-03-04 12:12:54.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -251,8 +251,8 @@ four_week_ahead
 #> 
 ```
 
-In our model setup, we are defining as our predictors case rate lagged
-0-3 days, one week, and two weeks, and death rate lagged 0-2 weeks. The
+In our model setup, we are defining as predictors case rate lagged 0-3
+days, one week, and two weeks, and death rate lagged 0-2 weeks. The
 result `four_week_ahead` is both a fitted model object which could be
 used any time in the future to create different forecasts, and a set of
 predicted values (and prediction intervals) for each location 28 days
@@ -298,12 +298,12 @@ four_week_ahead$predictions |>
 #> # A tibble: 20 × 5
 #>   geo_value values quantile_levels forecast_date target_date
 #>   <chr>      <dbl>           <dbl> <date>        <date>     
-#> 1 ca        0.0425            0.1  2021-08-01    2021-08-29 
-#> 2 ca        0.0803            0.25 2021-08-01    2021-08-29 
-#> 3 ca        0.115             0.5  2021-08-01    2021-08-29 
-#> 4 ca        0.150             0.75 2021-08-01    2021-08-29 
-#> 5 ca        0.187             0.9  2021-08-01    2021-08-29 
-#> 6 ma        0                 0.1  2021-08-01    2021-08-29 
+#> 1 ca        0.199             0.1  2021-08-01    2021-08-29 
+#> 2 ca        0.285             0.25 2021-08-01    2021-08-29 
+#> 3 ca        0.345             0.5  2021-08-01    2021-08-29 
+#> 4 ca        0.405             0.75 2021-08-01    2021-08-29 
+#> 5 ca        0.491             0.9  2021-08-01    2021-08-29 
+#> 6 ma        0.0285            0.1  2021-08-01    2021-08-29 
 #> # ℹ 14 more rows
 ```
 
@@ -313,8 +313,9 @@ For this particular day and these locations, the forecasts are
 relatively accurate, with the true data being at least within the 10-90%
 interval. A couple of things to note:
 
-1.  Our methods are primarily direct forecasters; this means we don’t
-    need to predict 1, 2,…, 27 days ahead to then predict 28 days ahead
+1.  `epipredict` methods are primarily direct forecasters; this means we
+    don’t need to predict 1, 2,…, 27 days ahead to then predict 28 days
+    ahead.
 2.  All of our existing engines are geo-pooled, meaning the training
     data is shared across geographies. This has the advantage of
     increasing the amount of available training data, with the

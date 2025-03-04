@@ -145,13 +145,13 @@ Below the fold, we pull the dataset from the epidata API and clean it.
 <summary> Creating the dataset using `{epidatr}` and `{epiprocess}` </summary>
 
 This section is intended to demonstrate some of the ubiquitous cleaning operations needed to be able to forecast.
-A subset of this dataset prepared here is also included ready-to-go in [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) as `covid_case_death_rates`.
+A subset of the dataset prepared here is also included ready-to-go in [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) as `covid_case_death_rates`.
 
 First we pull both `jhu-csse` cases and deaths data from the
 [Delphi API](https://cmu-delphi.github.io/delphi-epidata/api/covidcast.html) using the
 [`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
 
-```{r case_death, warning = FALSE, eval = FALSE}
+```{r case_death, warning = FALSE, eval = TRUE}
 cases <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_7dav_incidence_prop",
@@ -287,7 +287,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 ```
 
-In our model setup, we are defining as our predictors case rate lagged 0-3
+In our model setup, we are defining as predictors case rate lagged 0-3
 days, one week, and two weeks, and death rate lagged 0-2 weeks.
 The result `four_week_ahead` is both a fitted model object which could be used
 any time in the future to create different forecasts, and a set of predicted
@@ -339,8 +339,8 @@ For this particular day and these locations, the forecasts are relatively
 accurate, with the true data being at least within the 10-90% interval.
 A couple of things to note:
 
-1. Our methods are primarily direct forecasters; this means we don't need to
-   predict 1, 2,..., 27 days ahead to then predict 28 days ahead
+1. `epipredict` methods are primarily direct forecasters; this means we don't need to
+   predict 1, 2,..., 27 days ahead to then predict 28 days ahead.
 2. All of our existing engines are geo-pooled, meaning the training data is
    shared across geographies. This has the advantage of increasing the amount of
    available training data, with the restriction that the data needs to be on
