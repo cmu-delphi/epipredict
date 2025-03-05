@@ -65,3 +65,10 @@ tidyr::pivot_wider
 #' @importFrom tidyr unnest
 #' @export
 tidyr::unnest
+
+#' @importFrom hardhat quantile_pred extract_quantile_levels
+#' @export
+hardhat::quantile_pred
+
+#' @export
+hardhat::extract_quantile_levels
