@@ -7,6 +7,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+# Introduction
+
 ```{r, include = FALSE}
 source(here::here("vignettes/_common.R"))
 ```
@@ -61,7 +63,7 @@ components:
     `step`](https://recipes.tidymodels.org/reference/index.html)
   * _Trainer_: train a model on data, resulting in a fitted model object.
     Examples include linear regression, quantile regression, or [any `{parsnip}`
-    engine](https://parsnip.tidymodels.org/reference/index.html).
+    engine](https://www.tidymodels.org/find/parsnip/).
   * _Postprocessor_: unique to `{epipredict}`; used to transform the
     predictions after the model has been fit, such as
     - generating quantiles from purely point-prediction models,
@@ -69,8 +71,8 @@ components:
     rates back to counts
     - generally adapting the format of the prediction to its eventual use.
 
-The rest of the "getting started" vignette will focus on using and modifying the canned forecasters.
-Check out the ["guts" vignette](preprocessing-and-models) for examples of using the forecaster
+The rest of this "Get Started" vignette will focus on using and modifying the canned forecasters.
+Check out the [Custom Epiworkflows vignette](preprocessing-and-models) for examples of using the forecaster
 framework to make more complex, custom forecasters.
 
 If you are interested in time series in a non-panel data context, you may also
@@ -188,7 +190,7 @@ hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 
 See the function documentation for `arx_args_list()` for more examples of the modifications available.
 If you want to make further modifications, you will need a custom
-workflow; see the ["guts" vignette](custom_epiworkflows) for details.
+workflow; see the [Custom Epiworkflows vignette](custom_epiworkflows) for details.
 
 ## Generating multiple aheads
 Frequently, one doesn't want just a forecast for a single day, but a trajectory
@@ -436,7 +438,7 @@ An `epi_workflow()` consists of 3 parts:
   5 of as these well. You can inspect the layers more closely by running
   `epipredict::extract_layers(four_week_ahead$epi_workflow)`.
 
-See the ["guts" vignette](custom_epiworkflows) for recreating and then
+See the [Custom Epiworkflows vignette](custom_epiworkflows) for recreating and then
 extending `four_week_ahead` using the custom forecaster framework.
 
 ## Mathematical description
