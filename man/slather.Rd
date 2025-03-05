@@ -7,7 +7,7 @@
 slather(object, components, workflow, new_data, ...)
 }
 \arguments{
-\item{object}{a workflow with \code{frosting} postprocessing steps}
+\item{object}{a workflow with \code{frosting} post-processing steps}
 
 \item{components}{a list of components containing model information. These
 will be updated and returned by the layer. These should be
@@ -34,7 +34,7 @@ and predict on}
 The \code{components} list. In the same format after applying any updates.
 }
 \description{
-Slathering frosting means to implement a postprocessing layer. When
-creating a new postprocessing layer, you must implement an S3 method
+Slathering frosting means to implement a post-processing layer. When
+creating a new post-processing layer, you must implement an S3 method
 for this function
 }

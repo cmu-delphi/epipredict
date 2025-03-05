@@ -1,6 +1,6 @@
 #' Lower and upper thresholds for predicted values
 #'
-#' This postprocessing step is used to set prediction values that are
+#' This post-processing step is used to set prediction values that are
 #' smaller than the lower threshold or higher than the upper threshold equal
 #' to the threshold values.
 #'

@@ -1,4 +1,4 @@
-#' Postprocessing step to add the target date
+#' Post-processing step to add the target date
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param target_date The target date to add as a column to the `epi_df`. If
@@ -6,7 +6,7 @@
 #'   `step_adjust_latency` or in a `layer_forecast_date`), then it is the
 #'   forecast date plus `ahead` (from `step_epi_ahead` in the `epi_recipe`).
 #'   Otherwise, it is the maximum `time_value` (from the data used in
-#'   pre-processing, fitting the model, and postprocessing) plus `ahead`, where
+#'   pre-processing, fitting the model, and post-processing) plus `ahead`, where
 #'   `ahead` has been specified in preprocessing. The user may override these by
 #'   specifying a target date of their own (of the form "yyyy-mm-dd").
 #' @param id a random id string

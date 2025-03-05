@@ -1,7 +1,7 @@
 #' Create an epi_workflow
 #'
 #' This is a container object that unifies preprocessing, fitting, prediction,
-#' and postprocessing for predictive modeling on epidemiological data. It extends
+#' and post-processing for predictive modeling on epidemiological data. It extends
 #' the functionality of a [workflows::workflow()] to handle the typical panel
 #' data structures found in this field. This extension is handled completely
 #' internally, and should be invisible to the user. For all intents and purposes,

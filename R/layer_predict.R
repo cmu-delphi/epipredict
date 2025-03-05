@@ -1,8 +1,8 @@
-#' Prediction layer for postprocessing
+#' Prediction layer for post-processing
 #'
 #' Implements prediction on a fitted `epi_workflow`. One may want different
 #' types of prediction, and to potentially apply this after some amount of
-#' postprocessing. This would typically be the first layer in a `frosting`
+#' post-processing. This would typically be the first layer in a `frosting`
 #' postprocessor.
 #'
 #' @seealso `parsnip::predict.model_fit()`

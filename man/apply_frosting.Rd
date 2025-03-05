@@ -5,7 +5,7 @@
 \alias{apply_frosting.default}
 \alias{apply_frosting.epi_recipe}
 \alias{apply_frosting.epi_workflow}
-\title{Apply postprocessing to a fitted workflow}
+\title{Apply post-processing to a fitted workflow}
 \usage{
 apply_frosting(workflow, ...)
 
@@ -39,6 +39,6 @@ and predict on}
 \code{\link[=slather]{slather()}} for supported layers}
 }
 \description{
-This function is intended for internal use. It implements postprocessing
+This function is intended for internal use. It implements post-processing
 inside of the \code{predict()} method for a fitted workflow.
 }

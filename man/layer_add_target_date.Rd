@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_add_target_date.R
 \name{layer_add_target_date}
 \alias{layer_add_target_date}
-\title{Postprocessing step to add the target date}
+\title{Post-processing step to add the target date}
 \usage{
 layer_add_target_date(
   frosting,
@@ -18,7 +18,7 @@ there's a forecast date specified upstream (either in a
 \code{step_adjust_latency} or in a \code{layer_forecast_date}), then it is the
 forecast date plus \code{ahead} (from \code{step_epi_ahead} in the \code{epi_recipe}).
 Otherwise, it is the maximum \code{time_value} (from the data used in
-pre-processing, fitting the model, and postprocessing) plus \code{ahead}, where
+pre-processing, fitting the model, and post-processing) plus \code{ahead}, where
 \code{ahead} has been specified in preprocessing. The user may override these by
 specifying a target date of their own (of the form "yyyy-mm-dd").}
 
@@ -28,7 +28,7 @@ specifying a target date of their own (of the form "yyyy-mm-dd").}
 an updated \code{frosting} postprocessor
 }
 \description{
-Postprocessing step to add the target date
+Post-processing step to add the target date
 }
 \details{
 By default, this function assumes that a value for \code{ahead}

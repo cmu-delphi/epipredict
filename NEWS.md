@@ -70,7 +70,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - training window step debugged
 - `min_train_window` argument removed from canned forecasters
 - add forecasters
-- implement postprocessing
+- implement post-processing
 - vignettes avaliable
 - arx_forecaster
 - pkgdown

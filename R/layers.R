@@ -178,11 +178,11 @@ detect_layer.workflow <- function(x, name, ...) {
 
 #' Spread a layer of frosting on a fitted workflow
 #'
-#' Slathering frosting means to implement a postprocessing layer. When
-#' creating a new postprocessing layer, you must implement an S3 method
+#' Slathering frosting means to implement a post-processing layer. When
+#' creating a new post-processing layer, you must implement an S3 method
 #' for this function
 #'
-#' @param object a workflow with `frosting` postprocessing steps
+#' @param object a workflow with `frosting` post-processing steps
 #' @param components a list of components containing model information. These
 #'   will be updated and returned by the layer. These should be
 #'   * `mold` - the output of calling `hardhat::mold()` on the workflow. This

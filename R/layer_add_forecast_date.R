@@ -1,4 +1,4 @@
-#' Postprocessing step to add the forecast date
+#' Post-processing step to add the forecast date
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
@@ -7,7 +7,7 @@
 #'   values.  If there is a `step_adjust_latency` step present, it uses the
 #'   `forecast_date` as set in that function. Otherwise, it uses the maximum
 #'   `time_value` across the data used for pre-processing, fitting the model,
-#'   and postprocessing.
+#'   and post-processing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -15,9 +15,9 @@
 #' @details To use this function, either specify a forecast date or leave the
 #'  forecast date unspecifed here. In the latter case, the forecast date will
 #'  be set as the maximum time value from the data used in pre-processing,
-#'  fitting the model, and postprocessing. In any case, when the forecast date is
+#'  fitting the model, and post-processing. In any case, when the forecast date is
 #'  less than the maximum `as_of` value (from the data used pre-processing,
-#'  model fitting, and postprocessing), an appropriate warning will be thrown.
+#'  model fitting, and post-processing), an appropriate warning will be thrown.
 #'
 #' @export
 #' @examples

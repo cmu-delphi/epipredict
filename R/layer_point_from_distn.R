@@ -1,6 +1,6 @@
 #' Converts distributional forecasts to point forecasts
 #'
-#' This function adds a postprocessing layer to extract a point forecast from
+#' This function adds a post-processing layer to extract a point forecast from
 #' a distributional forecast. NOTE: With default arguments, this will remove
 #' information, so one should usually call this AFTER `layer_quantile_distn()`
 #' or set the `name` argument to something specific.
