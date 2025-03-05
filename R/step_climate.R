@@ -391,7 +391,7 @@ roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus
 }
 
 
-#' a function that assigns Feb 29th to -1, and aligns all other dates the same
+#' a function that assigns Feb 29th to 999, and aligns all other dates the same
 #' number in the year, regardless of whether it's a leap year
 #' @keywords internal
 #' @importFrom lubridate yday month leap_year
