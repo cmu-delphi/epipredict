@@ -49,17 +49,17 @@ target horizon.
 }
 \details{
 The \code{arx_classifier()} is an autoregressive classification model for \code{epi_df}
-data that is used to predict a discrete class for each case under consideration.
-It is a direct forecaster in that it estimates the classes at a specific horizon
-or ahead value.
+data that is used to predict a discrete class for each case under
+consideration.  It is a direct forecaster in that it estimates the classes
+at a specific horizon or ahead value.
 
 To get a sense of how the \code{arx_classifier()} works, let's consider a simple
 example with minimal inputs. For this, we will use the built-in
-\code{covid_case_death_rates} that contains confirmed COVID-19 cases and deaths from
-JHU CSSE for all states over Dec 31, 2020 to Dec 31, 2021. From this, we'll take
-a subset of data for five states over June 4, 2021 to December 31, 2021. Our
-objective is to predict whether the case rates are increasing when considering
-the 0, 7 and 14 day case rates:
+\code{covid_case_death_rates} that contains confirmed COVID-19 cases and deaths
+from JHU CSSE for all states over Dec 31, 2020 to Dec 31, 2021. From this,
+we'll take a subset of data for five states over June 4, 2021 to December
+31, 2021. Our objective is to predict whether the case rates are increasing
+when considering the 0, 7 and 14 day case rates:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{jhu <- covid_case_death_rates \%>\%
   filter(
@@ -81,22 +81,23 @@ out$predictions
 #> 5 tx        (-Inf,0.25] 2021-12-31    2022-01-07
 }\if{html}{\out{</div>}}
 
-The key takeaway from the predictions is that there are two prediction classes:
-(-Inf, 0.25] and (0.25, Inf). This is because for our goal of classification
-the classes must be discrete. The discretization of the real-valued outcome is
-controlled by the \code{breaks} argument, which defaults to 0.25. Such breaks will be
-automatically extended to cover the entire real line. For example, the default
-break of 0.25 is silently extended to breaks = c(-Inf, .25, Inf) and, therefore,
-results in two classes: \link{-Inf, 0.25} and (0.25, Inf). These two classes are
-used to discretize the outcome. The conversion of the outcome to such classes is
-handled internally. So if discrete classes already exist for the outcome in the
+The key takeaway from the predictions is that there are two prediction
+classes: \verb{(-Inf, 0.25]} and \verb{(0.25, Inf)}. This is because for our goal of
+classification the classes must be discrete. The discretization of the
+real-valued outcome is controlled by the \code{breaks} argument, which defaults
+to \code{0.25}. Such breaks will be automatically extended to cover the entire
+real line. For example, the default break of \code{0.25} is silently extended to
+\code{breaks = c(-Inf, .25, Inf)} and, therefore, results in two classes:
+\verb{[-Inf, 0.25]} and \verb{(0.25, Inf)}. These two classes are used to discretize
+the outcome. The conversion of the outcome to such classes is handled
+internally. So if discrete classes already exist for the outcome in the
 \code{epi_df}, then we recommend to code a classifier from scratch using the
 \code{epi_workflow} framework for more control.
 
-The \code{trainer} is a \code{parsnip} model describing the type of estimation such that
-\code{mode = "classification"} is enforced. The two typical trainers that are used
-are \code{parsnip::logistic_reg()} for two classes or \code{parsnip::multinom_reg()} for
-more than two classes.
+The \code{trainer} is a \code{parsnip} model describing the type of estimation such
+that \code{mode = "classification"} is enforced. The two typical trainers that
+are used are \code{parsnip::logistic_reg()} for two classes or
+\code{parsnip::multinom_reg()} for more than two classes.
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{workflows::extract_spec_parsnip(out$epi_workflow)
 #> Logistic Regression Model Specification (classification)
@@ -105,17 +106,17 @@ more than two classes.
 }\if{html}{\out{</div>}}
 
 From the parsnip model specification, we can see that the trainer used is
-logistic regression, which is expected for our binary outcome. More complicated
-trainers like \code{parsnip::naive_Bayes()} or \code{parsnip::rand_forest()} may also be
-used (however, we will stick to the basics in this gentle introduction to the
-classifier).
+logistic regression, which is expected for our binary outcome. More
+complicated trainers like \code{parsnip::naive_Bayes()} or
+\code{parsnip::rand_forest()} may also be used (however, we will stick to the
+basics in this gentle introduction to the classifier).
 
-If you use the default trainer of logistic regression for binary classification
-and you decide against using the default break of 0.25, then you should only
-input one break so that there are two classification bins to properly
-dichotomize the outcome. For example, let's set a break of 0.5 instead of
-relying on the default of 0.25. We can do this by passing 0.5 to the \code{breaks}
-argument in \code{arx_class_args_list()} as follows:
+If you use the default trainer of logistic regression for binary
+classification and you decide against using the default break of 0.25, then
+you should only input one break so that there are two classification bins
+to properly dichotomize the outcome. For example, let's set a break of 0.5
+instead of relying on the default of 0.25. We can do this by passing 0.5 to
+the \code{breaks} argument in \code{arx_class_args_list()} as follows:
 
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{out_break_0.5 <- arx_classifier(
   jhu,
@@ -139,24 +140,26 @@ out_break_0.5$predictions
 #> 5 tx        (-Inf,0.5]  2021-12-31    2022-01-07
 }\if{html}{\out{</div>}}
 
-Indeed, we can observe that the two \code{.pred_class} are now (-Inf, 0.5] and (0.5,
-Inf). See \code{help(arx_class_args_list)} for other available modifications.
+Indeed, we can observe that the two \code{.pred_class} are now (-Inf, 0.5] and
+(0.5, Inf). See \code{help(arx_class_args_list)} for other available
+modifications.
 
-Additional arguments that may be supplied to \code{arx_class_args_list()} include the
-expected \code{lags} and \code{ahead} arguments for an autoregressive-type model. These
-have default values of 0, 7, and 14 days for the lags of the predictors and 7
-days ahead of the forecast date for predicting the outcome. There is also
-\code{n_training} to indicate the upper bound for the number of training rows per
-key. If you would like some practice with using this, then remove the filtering
-command to obtain data within "2021-06-04" and "2021-12-31" and instead set
-\code{n_training} to be the number of days between these two dates, inclusive of the
-end points. The end results should be the same. In addition to \code{n_training},
-there are \code{forecast_date} and \code{target_date} to specify the date that the
-forecast is created and intended, respectively. We will not dwell on such
-arguments here as they are not unique to this classifier or absolutely essential
-to understanding how it operates. The remaining arguments will be discussed
-organically, as they are needed to serve our purposes. For information on any
-remaining arguments that are not discussed here, please see the function
+Additional arguments that may be supplied to \code{arx_class_args_list()} include
+the expected \code{lags} and \code{ahead} arguments for an autoregressive-type model.
+These have default values of 0, 7, and 14 days for the lags of the
+predictors and 7 days ahead of the forecast date for predicting the
+outcome. There is also \code{n_training} to indicate the upper bound for the
+number of training rows per key. If you would like some practice with using
+this, then remove the filtering command to obtain data within "2021-06-04"
+and "2021-12-31" and instead set \code{n_training} to be the number of days
+between these two dates, inclusive of the end points. The end results
+should be the same. In addition to \code{n_training}, there are \code{forecast_date}
+and \code{target_date} to specify the date that the forecast is created and
+intended, respectively. We will not dwell on such arguments here as they
+are not unique to this classifier or absolutely essential to understanding
+how it operates. The remaining arguments will be discussed organically, as
+they are needed to serve our purposes. For information on any remaining
+arguments that are not discussed here, please see the function
 documentation for a complete list and their definitions.
 }
 \examples{
