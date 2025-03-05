@@ -383,7 +383,7 @@ roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus
       }
     }
     out[iter] <- with(
-      purrr::list_rbind(tib |> filter(.idx %in% entries) |> pull(data)),
+      purrr::list_rbind(tib %>% filter(.idx %in% entries) %>% pull(data)),
       aggr(col, weights)
     )
   }
