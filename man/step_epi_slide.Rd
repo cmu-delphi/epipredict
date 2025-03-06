@@ -75,9 +75,10 @@ An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-\code{step_epi_slide()} creates a \emph{specification} of a recipe step
-that will generate one or more new columns of derived data by "sliding"
-a computation along existing data.
+\code{step_epi_slide()} creates a \emph{specification} of a recipe step that will
+generate one or more new columns of derived data by "sliding" a computation
+along existing data. This is a wrapper around \code{epiprocess::epi_slide()}
+to allow its use within an \code{epi_recipe()}.
 }
 \examples{
 jhu <- covid_case_death_rates \%>\%

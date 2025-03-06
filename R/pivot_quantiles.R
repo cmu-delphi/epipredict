@@ -34,9 +34,9 @@ nested_quantiles <- function(x) {
 
 #' Pivot a column containing `quantile_pred` longer
 #'
-#' A column that contains `quantile_pred` will be "lengthened" with
-#' the quantile levels serving as 1 column and the values as another. If
-#' multiple columns are selected, these will be prefixed with the column name.
+#' Selected columns that contain `quantile_pred` will be "lengthened" with the
+#' `quantile_level`s in one column and the `value`s in another. If multiple
+#' columns are selected, these will be prefixed with the column name.
 #'
 #' @param .data A data frame, or a data frame extension such as a tibble or
 #'   epi_df.
@@ -68,10 +68,10 @@ pivot_quantiles_longer <- function(.data, ...) {
 
 #' Pivot a column containing `quantile_pred` wider
 #'
-#' Any selected columns that contain `quantile_pred` will be "widened" with
-#' the "taus" (quantile) serving as names and the values in the data frame.
-#' When pivoting multiple columns, the original column name will be used as
-#' a prefix.
+#' Any selected columns that contain `quantile_pred` will be "widened" with the
+#' "taus" (quantile) serving as column names and the values in the corresponding
+#' column.  When pivoting multiple columns, the original column name will be
+#' used as a prefix.
 #'
 #' @inheritParams pivot_quantiles_longer
 #'

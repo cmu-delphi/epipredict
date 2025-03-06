@@ -23,10 +23,10 @@ If discrete classes are already in the \code{epi_df}, it is recommended to
 code up a classifier from scratch using \code{\link[=epi_recipe]{epi_recipe()}}.}
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
-This defaults to the \code{outcome}. However, if manually specified, only those variables
-specifically mentioned will be used. (The \code{outcome} will not be added.)
-By default, equals the outcome. If manually specified, does not add the
-outcome variable, so make sure to specify it.}
+This defaults to the \code{outcome}. However, if manually specified, only those
+variables specifically mentioned will be used. (The \code{outcome} will not be
+added.)  By default, equals the outcome. If manually specified, does not
+add the outcome variable, so make sure to specify it.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation.
 For now, we enforce \code{mode = "classification"}. Typical values are

@@ -26,7 +26,8 @@ for this step. See \code{\link[recipes:selections]{recipes::selections()}} for m
 \item{df}{a data frame that contains the population data to be used for
 inverting the existing scaling.}
 
-\item{by}{A (possibly named) character vector of variables to join by.
+\item{by}{A (possibly named) character vector of variables to join \code{df} onto
+the \code{epi_df} by.
 
 If \code{NULL}, the default, the function will try to infer a reasonable set of
 columns. First, it will try to join by all variables in the test data with
@@ -67,16 +68,16 @@ in the \code{epi_df}.}
 an updated \code{frosting} postprocessor
 }
 \description{
-\code{layer_population_scaling} creates a specification of a frosting layer
-that will "undo" per-capita scaling. Typical usage would
-load a dataset that contains state-level population, and use it to convert
-predictions made from a rate-scale model to raw scale by multiplying by
-the population.
-Although, it is worth noting that there is nothing special about "population".
-The function can be used to scale by any variable. Population is the
-standard use case in the epidemiology forecasting scenario. Any value
-passed will \emph{multiply} the selected variables while the \code{rate_rescaling}
-argument is a common \emph{divisor} of the selected variables.
+\code{layer_population_scaling} creates a specification of a frosting layer that
+will "undo" per-capita scaling done in \code{step_population_scaling()}. Typical
+usage would set \code{df} to be a dataset that contains state-level population,
+and use it to convert predictions made from a raw scale model to rate-scale
+by dividing by the population.
+Although, it is worth noting that there is nothing special about
+"population", and  the function can be used to scale by any variable.
+Population is the standard use case in the epidemiology forecasting scenario.
+Any value passed will \emph{multiply} the selected variables while the
+\code{rate_rescaling} argument is a common \emph{divisor} of the selected variables.
 }
 \examples{
 jhu <- cases_deaths_subset \%>\%

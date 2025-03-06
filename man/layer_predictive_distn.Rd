@@ -37,7 +37,9 @@ residual quantiles added to the prediction
 This function calculates an \emph{approximation} to a parametric predictive
 distribution. Predictive distributions from linear models require
 \verb{x* (X'X)^\{-1\} x*}
-along with the degrees of freedom. This function approximates both. It
-should be reasonably accurate for models fit using \code{lm} when the new point
-\verb{x*} isn't too far from the bulk of the data.
+along with the degrees of freedom. This function approximates both. It should
+be reasonably accurate for models fit using \code{lm} when the new point \verb{x*}
+isn't too far from the bulk of the data. Outside of that specific case, it is
+recommended to use \code{layer_residual_quantiles()}, or if you are working with a
+model that produces distributional predictions, use \code{layer_quantile_distn()}.
 }

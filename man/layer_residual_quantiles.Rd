@@ -37,7 +37,10 @@ an updated \code{frosting} postprocessor with additional columns of the
 residual quantiles added to the prediction
 }
 \description{
-Creates predictions based on residual quantiles
+This function calculates quantiles based on the empirical quantiles of the
+model's residuals. If the model producing the forecast is distributional, it
+is recommended to use \code{layer_residual_quantiles()} instead, as those will be
+significantly more accurate.
 }
 \examples{
 jhu <- covid_case_death_rates \%>\%

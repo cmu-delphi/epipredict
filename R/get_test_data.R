@@ -1,10 +1,9 @@
 #' Get test data for prediction based on longest lag period
 #'
-#' Based on the longest lag period in the recipe,
-#' `get_test_data()` creates an [epi_df][epiprocess::as_epi_df]
-#' with columns `geo_value`, `time_value`
-#' and other variables in the original dataset,
-#' which will be used to create features necessary to produce forecasts.
+#' If `predict()` is given the full training dataset, it will produce a forecast
+#' for every day which has enough data. For most cases, this is far more
+#' forecasts than is necessary. `get_test_data()` is designed to restrict the given dataset to the minimum amount needed to produce a forecast on the `forecast_date`.
+#' Primarily this is based on the longest lag period in the recipe.
 #'
 #' The minimum required (recent) data to produce a forecast is equal to
 #' the maximum lag requested (on any predictor) plus the longest horizon

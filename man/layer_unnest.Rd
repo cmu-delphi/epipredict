@@ -20,5 +20,40 @@ be used to select a range of variables.}
 an updated \code{frosting} postprocessor
 }
 \description{
-Unnest prediction list-cols
+For any model that produces forecasts for multiple outcomes, such as multiple
+aheads, the resulting prediction is a list of forecasts inside a column of
+the prediction tibble, which is not an ideal format. This layer "lengthens"
+the result, moving each outcome to a separate row, in the same manner as
+\code{tidyr::unnest()} would. At the moment, the only such engine is
+\code{smooth_quantile_reg()}.
+}
+\examples{
+jhu <- covid_case_death_rates \%>\%
+  filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
+
+aheads <- 1:7
+
+r <- epi_recipe(jhu) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = aheads) \%>\%
+  step_epi_naomit()
+
+wf <- epi_workflow(
+  r,
+  smooth_quantile_reg(
+    quantile_levels = c(.05, .1, .25, .5, .75, .9, .95),
+    outcome_locations = aheads
+  )
+) \%>\%
+  fit(jhu)
+
+f <- frosting() \%>\%
+  layer_predict() \%>\%
+  layer_naomit() \%>\%
+  layer_unnest(.pred)
+
+wf1 <- wf \%>\% add_frosting(f)
+
+p <- forecast(wf1)
+p
 }

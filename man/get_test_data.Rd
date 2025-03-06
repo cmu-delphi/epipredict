@@ -17,11 +17,10 @@ An object of the same type as \code{x} with columns \code{geo_value}, \code{time
 keys, as well other variables in the original dataset.
 }
 \description{
-Based on the longest lag period in the recipe,
-\code{get_test_data()} creates an \link[epiprocess:epi_df]{epi_df}
-with columns \code{geo_value}, \code{time_value}
-and other variables in the original dataset,
-which will be used to create features necessary to produce forecasts.
+If \code{predict()} is given the full training dataset, it will produce a forecast
+for every day which has enough data. For most cases, this is far more
+forecasts than is necessary. \code{get_test_data()} is designed to restrict the given dataset to the minimum amount needed to produce a forecast on the \code{forecast_date}.
+Primarily this is based on the longest lag period in the recipe.
 }
 \details{
 The minimum required (recent) data to produce a forecast is equal to

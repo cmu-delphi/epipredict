@@ -1,5 +1,10 @@
 #' Creates predictions based on residual quantiles
 #'
+#' This function calculates quantiles based on the empirical quantiles of the
+#' model's residuals. If the model producing the forecast is distributional, it
+#' is recommended to use `layer_residual_quantiles()` instead, as those will be
+#' significantly more accurate.
+#'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
 #' @param quantile_levels numeric vector of probabilities with values in (0,1)

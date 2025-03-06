@@ -32,6 +32,8 @@ quantiles will be added to the predictions.
 }
 \description{
 This function calculates quantiles when the prediction was \emph{distributional}.
+If the model producing the forecast is not distributional, it is recommended
+to use \code{layer_residual_quantiles()} instead.
 }
 \details{
 Currently, the only distributional modes/engines are

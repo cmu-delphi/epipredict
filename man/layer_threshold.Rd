@@ -35,9 +35,17 @@ Default value is \code{Inf}.}
 an updated \code{frosting} postprocessor
 }
 \description{
-This post-processing step is used to set prediction values that are
-smaller than the lower threshold or higher than the upper threshold equal
-to the threshold values.
+This post-processing step is used to set prediction values that are smaller
+than the lower threshold or higher than the upper threshold equal to the
+threshold values.
+}
+\details{
+Making case count predictions strictly positive is a typical example usage.
+It can be called before or after the quantiles are created using
+\code{layer_quantile_distn()} since the quantiles are an inherent part of the
+result from \code{layer_predict()} for distributional models, but must be called
+after \code{layer_residual_quantiles()}, since the quantiles for that case don't
+exist until after that layer.
 }
 \examples{
 jhu <- covid_case_death_rates \%>\%

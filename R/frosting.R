@@ -1,4 +1,5 @@
-#' Add frosting to a workflow
+#' Given a `frosting()`, add it to, remove it from, or update it in an
+#' `epi_workflow`
 #'
 #' @param x A workflow
 #' @param frosting A frosting object created using `frosting()`.

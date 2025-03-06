@@ -5,7 +5,7 @@
 #' post-processing. This would typically be the first layer in a `frosting`
 #' postprocessor.
 #'
-#' @seealso `parsnip::predict.model_fit()`
+#' @seealso [parsnip::predict.model_fit()]
 #'
 #' @inheritParams parsnip::predict.model_fit
 #' @param frosting a frosting object

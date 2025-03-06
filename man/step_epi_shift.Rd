@@ -61,22 +61,21 @@ sequence of any existing operations.
 }
 \description{
 \code{step_epi_lag} and \code{step_epi_ahead} create a \emph{specification} of a recipe step
-that will add new columns of shifted data. The former will created a lag
-column, while the latter will create a lead column. Shifted data will
-by default include NA values where the shift was induced.
-These can be properly removed with \code{\link[=step_epi_naomit]{step_epi_naomit()}}, or you may
-specify an alternative filler value with the \code{default}
-argument.
+that will add new columns of shifted data. The \code{step_epi_lag} will created
+a lagged \code{predictor} column, while \code{step_epi_ahead} will create a leading
+\code{outcome} column. Shifted data will by default include NA values where the
+shift was induced.  These can be properly removed with \code{\link[=step_epi_naomit]{step_epi_naomit()}},
+or you may specify an alternative filler value with the \code{default} argument.
 }
 \details{
-The step assumes that the data are already \emph{in the proper sequential
-order} for shifting.
+The step assumes that the data's \code{time_value} column is already \emph{in
+the proper sequential order} for shifting.
 
-While \code{{recipes}} provides a function \code{step_lag()}, it assumes that the data
-have no breaks in the sequence of \code{time_values}, and has no ability to group by
-\code{geo_value} or other keys. Our \code{lag/ahead} functions also appropriately adjust
-the amount of data to avoid accidentally dropping recent predictors from the
-test data.
+Our \code{lag/ahead} functions respect the \code{geo_value} and \code{other_keys} of the
+\code{epi_df}, and allow for discontiguous \code{time_value}s. Both of these features
+are noticably lacking from \code{recipe::step_lag()}.
+Our \code{lag/ahead} functions also appropriately adjust the amount of data to
+avoid accidentally dropping recent predictors from the test data.
 
 The \code{prefix} and \code{id} arguments are unchangeable to ensure that the code runs
 properly and to avoid inconsistency with naming. For \code{step_epi_ahead}, they

@@ -1,7 +1,8 @@
 #' Calculate a growth rate
 #'
-#' `step_growth_rate()` creates a *specification* of a recipe step
-#'   that will generate one or more new columns of derived data.
+#' `step_growth_rate()` creates a *specification* of a recipe step that will
+#'   generate one or more new columns of derived data. This is a wrapper around
+#'   `epiprocess::growth_rate()` to allow its use within an `epi_recipe()`.
 #'
 #'
 #' @inheritParams step_epi_lag

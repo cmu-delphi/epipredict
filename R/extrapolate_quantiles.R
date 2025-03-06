@@ -1,4 +1,16 @@
-#' Summarize a distribution with a set of quantiles
+#' Extrapolate the quantiles to new quantile levels
+#'
+#' This both interpolates between quantile levels already defined in `x` and
+#' extrapolates quantiles outside their bounds. The interpolation method is
+#' determined by the `quantile` argument `middle`, which can be either `"cubic"`
+#' for a (hyman) cubic spline interpolation, or `"linear"` for simple linear
+#' interpolation.
+#'
+#' There is only one extrapolation method for values greater than the largest
+#' known quantile level or smaller than the smallest known quantile level. It
+#' assumes a roughly exponential tail, whose decay rate and offset is derived
+#' from the slope of the two most extreme quantile levels on a logistic scale.
+#' See the internal function `tail_extrapolate()` for the exact implementation.
 #'
 #' This function takes a `quantile_pred` vector and returns the same
 #' type of object, expanded to include
@@ -20,7 +32,9 @@
 #' @examples
 #' dstn <- quantile_pred(rbind(1:4, 8:11), c(.2, .4, .6, .8))
 #' # extra quantiles are appended
-#' as_tibble(extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75)))
+#' as_tibble(extrapolate_quantiles(dstn, probs = c(0.25, 0.5, 0.75)))
+#'
+#' extrapolate_quantiles(dstn, probs = c(0.0001, 0.25, 0.5, 0.75, 0.99999))
 extrapolate_quantiles <- function(x, probs, replace_na = TRUE, ...) {
   UseMethod("extrapolate_quantiles")
 }

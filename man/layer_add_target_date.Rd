@@ -31,15 +31,16 @@ an updated \code{frosting} postprocessor
 Post-processing step to add the target date
 }
 \details{
-By default, this function assumes that a value for \code{ahead}
-has been specified in a preprocessing step (most likely in
-\code{step_epi_ahead}). Then, \code{ahead} is added to the \code{forecast_date}
-in the test data to get the target date. \code{forecast_date} can be set in 3 ways:
+By default, this function assumes that a value for \code{ahead} has been
+specified in a preprocessing step (most likely in \code{step_epi_ahead}). Then,
+\code{ahead} is added to the \code{forecast_date} in the test data to get the target
+date. \code{forecast_date} itself can be set in 3 ways:
 \enumerate{
-\item \code{step_adjust_latency}, which typically uses the training \code{epi_df}'s \code{as_of}
-\item \code{layer_add_forecast_date}, which inherits from 1 if not manually specifed
-\item if none of those are the case, it is simply the maximum \code{time_value} over
-every dataset used (prep, training, and prediction).
+\item The default \code{forecast_date} is simply the maximum \code{time_value} over every
+dataset used (prep, training, and prediction).
+\item if \code{step_adjust_latency} is present, it will typically use the training
+\code{epi_df}'s \code{as_of}
+\item \code{layer_add_forecast_date}, which inherits from 2 if not manually specifed
 }
 }
 \examples{

@@ -22,9 +22,9 @@ The \code{epi_workflow} object, updated with a fit parsnip
 model in the \code{object$fit$fit} slot.
 }
 \description{
-This is the \code{fit()} method for an \code{epi_workflow} object that
+This is the \code{fit()} method for an \code{epi_workflow()} object that
 estimates parameters for a given model from a set of data.
-Fitting an \code{epi_workflow} involves two main steps, which are
+Fitting an \code{epi_workflow()} involves two main steps, which are
 preprocessing the data and fitting the underlying parsnip model.
 }
 \examples{
@@ -40,5 +40,5 @@ wf
 
 }
 \seealso{
-workflows::fit-workflow
+\code{\link[workflows:fit-workflow]{workflows::fit-workflow()}}
 }

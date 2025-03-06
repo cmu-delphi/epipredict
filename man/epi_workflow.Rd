@@ -25,12 +25,12 @@ A new \code{epi_workflow} object.
 }
 \description{
 This is a container object that unifies preprocessing, fitting, prediction,
-and post-processing for predictive modeling on epidemiological data. It extends
-the functionality of a \code{\link[workflows:workflow]{workflows::workflow()}} to handle the typical panel
-data structures found in this field. This extension is handled completely
-internally, and should be invisible to the user. For all intents and purposes,
-this operates exactly like a \code{\link[workflows:workflow]{workflows::workflow()}}. For more details
-and numerous examples, see there.
+and post-processing for predictive modeling on epidemiological data. It
+extends the functionality of a \code{\link[workflows:workflow]{workflows::workflow()}} to handle the typical
+panel data structures found in this field. This extension is handled
+completely internally, and should be invisible to the user. For all intents
+and purposes, this operates exactly like a \code{\link[workflows:workflow]{workflows::workflow()}}. For some
+\code{{epipredict}} specific examples, see the \href{../articles/custom_epiworkflows.html}{custom epiworkflows vignette}.
 }
 \examples{
 jhu <- covid_case_death_rates
@@ -46,5 +46,5 @@ wf <- epi_workflow(r, parsnip::linear_reg())
 wf
 }
 \seealso{
-workflows::workflow
+\code{\link[workflows:workflow]{workflows::workflow()}}
 }

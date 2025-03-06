@@ -19,10 +19,10 @@ can be selected for this operation.}
 An object of the same class as \code{.data}
 }
 \description{
-Any selected columns that contain \code{quantile_pred} will be "widened" with
-the "taus" (quantile) serving as names and the values in the data frame.
-When pivoting multiple columns, the original column name will be used as
-a prefix.
+Any selected columns that contain \code{quantile_pred} will be "widened" with the
+"taus" (quantile) serving as column names and the values in the corresponding
+column.  When pivoting multiple columns, the original column name will be
+used as a prefix.
 }
 \examples{
 d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)

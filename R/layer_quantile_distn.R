@@ -1,6 +1,8 @@
 #' Returns predictive quantiles
 #'
 #' This function calculates quantiles when the prediction was _distributional_.
+#' If the model producing the forecast is not distributional, it is recommended
+#' to use `layer_residual_quantiles()` instead.
 #'
 #' Currently, the only distributional modes/engines are
 #' * `quantile_reg()`

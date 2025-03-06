@@ -19,9 +19,9 @@ can be selected for this operation.}
 An object of the same class as \code{.data}.
 }
 \description{
-A column that contains \code{quantile_pred} will be "lengthened" with
-the quantile levels serving as 1 column and the values as another. If
-multiple columns are selected, these will be prefixed with the column name.
+Selected columns that contain \code{quantile_pred} will be "lengthened" with the
+\code{quantile_level}s in one column and the \code{value}s in another. If multiple
+columns are selected, these will be prefixed with the column name.
 }
 \examples{
 d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)

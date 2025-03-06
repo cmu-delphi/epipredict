@@ -93,7 +93,9 @@ reference:
       - forecast.epi_workflow
 
   - subtitle: Modifying forecasting epiworkflows
-    desc: modify or inspect an existing recipe, workflow, or frosting
+    desc: >
+      Modify or inspect an existing recipe, workflow, or frosting. See also [the
+      article on the topic](../articles/update.html)
     contents:
       - adjust_epi_recipe
       - Add_model
@@ -109,7 +111,9 @@ reference:
 
   ##########################
   - title: Parsnip engines
-    desc: Prediction methods not available elsewhere
+    desc: >
+      Prediction methods not available in the [general parsnip
+      repository](https://www.tidymodels.org/find/parsnip/)
     contents:
       - quantile_reg
       - smooth_quantile_reg

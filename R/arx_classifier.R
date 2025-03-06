@@ -166,9 +166,7 @@ arx_classifier <- function(
   }
   forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
-  preds <- forecast(
-    wf,
-  ) %>%
+  preds <- forecast(wf) %>%
     as_tibble() %>%
     select(-time_value)
 
@@ -347,7 +345,7 @@ arx_class_epi_workflow <- function(
 #'   be created using growth rates (as the predictors are) or lagged
 #'   differences. The second case is closer to the requirements for the
 #'   [2022-23 CDC Flusight Hospitalization Experimental Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md).
-#'   See the Classification Vignette for details of how to create a reasonable
+#'   See the [Classification chapter from the forecasting book](https://cmu-delphi.github.io/delphi-tooling-book/arx-classifier.html) Vignette for details of how to create a reasonable
 #'   baseline for this case. Selecting `"growth_rate"` (the default) uses
 #'   [epiprocess::growth_rate()] to create the outcome using some of the
 #'   additional arguments below. Choosing `"lag_difference"` instead simply

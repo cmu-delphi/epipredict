@@ -2,7 +2,7 @@
 % Please edit documentation in R/extrapolate_quantiles.R
 \name{extrapolate_quantiles}
 \alias{extrapolate_quantiles}
-\title{Summarize a distribution with a set of quantiles}
+\title{Extrapolate the quantiles to new quantile levels}
 \usage{
 extrapolate_quantiles(x, probs, replace_na = TRUE, ...)
 }
@@ -22,6 +22,19 @@ of \code{x} will now have a superset
 of the original \code{quantile_values} (the union of those and \code{probs}).
 }
 \description{
+This both interpolates between quantile levels already defined in \code{x} and
+extrapolates quantiles outside their bounds. The interpolation method is
+determined by the \code{quantile} argument \code{middle}, which can be either \code{"cubic"}
+for a (hyman) cubic spline interpolation, or \code{"linear"} for simple linear
+interpolation.
+}
+\details{
+There is only one extrapolation method for values greater than the largest
+known quantile level or smaller than the smallest known quantile level. It
+assumes a roughly exponential tail, whose decay rate and offset is derived
+from the slope of the two most extreme quantile levels on a logistic scale.
+See the internal function \code{tail_extrapolate()} for the exact implementation.
+
 This function takes a \code{quantile_pred} vector and returns the same
 type of object, expanded to include
 \emph{additional} quantiles computed at \code{probs}. If you want behaviour more
@@ -31,5 +44,7 @@ appropriate.
 \examples{
 dstn <- quantile_pred(rbind(1:4, 8:11), c(.2, .4, .6, .8))
 # extra quantiles are appended
-as_tibble(extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75)))
+as_tibble(extrapolate_quantiles(dstn, probs = c(0.25, 0.5, 0.75)))
+
+extrapolate_quantiles(dstn, probs = c(0.0001, 0.25, 0.5, 0.75, 0.99999))
 }

@@ -13,6 +13,7 @@
 rlang::check_installed(c("pkgdown", "servr", "devtools", "here", "cli", "fs"))
 library(pkgdown)
 pkg <- pkgdown::as_pkgdown(here::here())
+devtools::document(here::here())
 devtools::build_readme()
 pkgdown::build_articles(pkg)
 pkgdown::build_site(pkg, lazy = FALSE, examples = FALSE, devel = TRUE, preview = FALSE)
@@ -39,7 +40,7 @@ servr::httw(
     refs <- grep("man.+R(m?d)?$", files, value = TRUE)
     if (length(refs)) {
       # Doesn't work for me, so I run it manually.
-      # pkgdown::build_reference(pkg, preview = FALSE, examples = FALSE, lazy = FALSE) # nolint: commented_code_linter
+      # pkgdown::build_reference(pkg) # nolint: commented_code_linter
     }
 
     pkgdown <- grep("pkgdown", files, value = TRUE)

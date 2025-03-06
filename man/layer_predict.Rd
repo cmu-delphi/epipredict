@@ -84,5 +84,5 @@ p2 <- predict(wf2, latest)
 p2
 }
 \seealso{
-\code{parsnip::predict.model_fit()}
+\code{\link[parsnip:predict.model_fit]{parsnip::predict.model_fit()}}
 }
