@@ -241,6 +241,7 @@ print.epi_workflow <- function(x, ...) {
 #' `get_test_data()` and `predict()`.
 #'
 #' @param object An epi workflow.
+#' @param ... Not used.
 #'
 #' @return A forecast tibble.
 #'
@@ -257,7 +258,7 @@ print.epi_workflow <- function(x, ...) {
 #' epi_workflow(r, parsnip::linear_reg()) %>%
 #'   fit(jhu) %>%
 #'   forecast()
-forecast.epi_workflow <- function(object) {
+forecast.epi_workflow <- function(object, ...) {
   if (!object$trained) {
     cli_abort(c(
       "You cannot `forecast()` a {.cls workflow} that has not been trained.",

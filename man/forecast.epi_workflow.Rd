@@ -4,10 +4,12 @@
 \alias{forecast.epi_workflow}
 \title{Produce a forecast from just an epi workflow}
 \usage{
-\method{forecast}{epi_workflow}(object)
+\method{forecast}{epi_workflow}(object, ...)
 }
 \arguments{
 \item{object}{An epi workflow.}
+
+\item{...}{Not used.}
 }
 \value{
 A forecast tibble.
