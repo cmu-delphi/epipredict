@@ -120,7 +120,7 @@ vec_proxy_equal.quantile_pred <- function(x, ...) {
 #' Given a [hardhat::quantile_pred] object, users may wish to compute additional
 #' `quantile_levels` that are not part of the object. This function attempts
 #' to estimate these quantities under some assumptions. Interior probabilities,
-#' those contained within, existing probabilities are interpolated in a manner
+#' those contained within existing probabilities are interpolated in a manner
 #' controled by the `middle` argument. Those outside existing probabilities
 #' are extrapolated under the assumption that the tails of the distribution
 #' decays exponentially. Optionally, one may constrain _all_ quantiles to be

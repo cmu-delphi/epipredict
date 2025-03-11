@@ -22,6 +22,11 @@ test_that("pivotting wider still works if there are duplicates", {
   tb <- tibble(.pred = quantile_pred(rbind(1:3, 1:3), c(.1, .5, .9)))
   res <- tibble(`0.1` = c(1, 1), `0.5` = c(2, 2), `0.9` = c(3, 3))
   expect_equal(tb %>% pivot_quantiles_wider(.pred), res)
+  res_longer <- tibble(
+    .pred_value = rep(1:3, 2),
+    .pred_quantile_level = rep(c(0.1, 0.5, 0.9), 2)
+  )
+  expect_equal(tb %>% pivot_quantiles_longer(.pred), res_longer)
 })
 
 
