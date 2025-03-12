@@ -143,7 +143,7 @@ toy_recipe \%>\%
 #> 
 #> # A tibble: 8 x 4
 #>   geo_value time_value     a     b
-#>   <chr>     <date>     <dbl> <dbl>
+#> * <chr>     <date>     <dbl> <dbl>
 #> 1 ca        2015-01-11   100     5
 #> 2 ca        2015-01-12   103    10
 #> 3 ca        2015-01-13   103    10
@@ -179,7 +179,7 @@ toy_recipe \%>\%
 #> 
 #> # A tibble: 21 x 7
 #>    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a
-#>    <chr>     <date>     <dbl> <dbl>   <dbl>   <dbl>     <dbl>
+#>  * <chr>     <date>     <dbl> <dbl>   <dbl>   <dbl>     <dbl>
 #>  1 ca        2015-01-10    NA    NA      NA      NA       100
 #>  2 ca        2015-01-11   100     5      NA      NA       103
 #>  3 ca        2015-01-12   103    10      NA      NA        NA
@@ -227,7 +227,7 @@ toy_recipe \%>\%
 #> 
 #> # A tibble: 10 x 6
 #>    geo_value time_value     a     b lag_0_a ahead_3_a
-#>    <chr>     <date>     <dbl> <dbl>   <dbl>     <dbl>
+#>  * <chr>     <date>     <dbl> <dbl>   <dbl>     <dbl>
 #>  1 ca        2015-01-08    NA    NA      NA       100
 #>  2 ca        2015-01-09    NA    NA      NA       103
 #>  3 ca        2015-01-11   100     5     100        NA
@@ -267,8 +267,8 @@ while this will not:
 \if{html}{\out{<div class="sourceCode r">}}\preformatted{toy_recipe <- epi_recipe(toy_df) \%>\%
    step_epi_lag(a, lag=0) \%>\%
    step_adjust_latency(a, method = "extend_lags")
-#> Warning: If `method` is "extend_lags" or "locf", then the previous `step_epi_lag`s won't work with
-#> modified data.
+#> Warning: If `method` is "extend_lags" or "locf", then the previous `step_epi_lag`s won't
+#> work with modified data.
 }\if{html}{\out{</div>}}
 
 If you create columns that you then apply lags to (such as

@@ -346,6 +346,7 @@ print.step_climate <- function(x, width = max(20, options()$width - 30), ...) {
 #'   the aggregation
 #' @param modulus the maximum value of `.idx`
 #' @importFrom lubridate %m-%
+#' @keywords internal
 roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus) {
   tib <- tibble(col = col, weights = weights, .idx = .idx) |>
     arrange(.idx) |>

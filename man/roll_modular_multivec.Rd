@@ -23,3 +23,4 @@ the aggregation}
 \description{
 group col by .idx values and sum windows around each .idx value
 }
+\keyword{internal}
