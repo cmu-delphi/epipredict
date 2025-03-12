@@ -78,15 +78,15 @@ layer_quantile_distn_new <- function(quantile_levels, truncate, name, id) {
 slather.layer_quantile_distn <-
   function(object, components, workflow, new_data, ...) {
     dstn <- components$predictions$.pred
-    if (!inherits(dstn, "distribution")) {
-      cli_abort(c(
-        "`layer_quantile_distn()` requires distributional predictions.",
-        "These are of class {.cls {class(dstn)}}."
-      ))
+    if (!inherits(dstn, "quantile_pred")) {
+      cli_abort(
+        "`layer_quantile_distn()` requires or quantile
+        predictions. These are of class {.cls {class(dstn)}}."
+      )
     }
     rlang::check_dots_empty()
 
-    dstn <- dist_quantiles(
+    dstn <- quantile_pred(
       quantile(dstn, object$quantile_levels),
       object$quantile_levels
     )

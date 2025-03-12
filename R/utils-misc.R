@@ -47,7 +47,7 @@ format_varnames <- function(x, empty = "*none*") {
   if (length(x) == 0L) {
     empty
   } else {
-    as.character(syms(x))
+    as.character(rlang::syms(x))
   }
 }
 

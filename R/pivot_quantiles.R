@@ -1,162 +1,118 @@
 #' Turn a vector of quantile distributions into a list-col
 #'
+#' `r lifecycle::badge("deprecated")`
+#'
+#' This function is deprecated. The recommended alternative is
+#' [hardhat::quantile_pred()] with [tibble::as_tibble()]
+
+#'
 #' @param x a `distribution` containing `dist_quantiles`
 #'
 #' @return a list-col
 #' @export
 #'
 #' @examples
-#' edf <- covid_case_death_rates[1:3, ]
-#' edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
+#' pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
+#' nested_quantiles(pred_quantile)
 #'
-#' edf_nested <- edf %>% mutate(q = nested_quantiles(q))
-#' edf_nested %>% unnest(q)
+#' pred_quantile %>%
+#'   as_tibble() %>%
+#'   tidyr::nest(.by = .row) %>%
+#'   dplyr::select(-.row)
+#'
 nested_quantiles <- function(x) {
-  stopifnot(is_dist_quantiles(x))
-  distributional:::dist_apply(x, .f = function(z) {
-    as_tibble(vec_data(z)) %>%
-      mutate(across(everything(), as.double)) %>%
-      vctrs::list_of()
-  })
+  lifecycle::deprecate_warn("0.1.11", "nested_quantiles()", "hardhat::quantile_pred()")
+  if (inherits(x, "quantile_pred")) {
+    return(x %>% as_tibble() %>% tidyr::nest(.by = .row) %>%
+      dplyr::select(data))
+  }
+  cli_abort(
+    "`nested_quantiles()` is deprecated. See {.fn hardhat::quantile_pred}."
+  )
 }
 
 
-#' Pivot columns containing `dist_quantile` longer
+#' Pivot a column containing `quantile_pred` longer
 #'
-#' Selected columns that contain `dist_quantiles` will be "lengthened" with
+#' A column that contains `quantile_pred` will be "lengthened" with
 #' the quantile levels serving as 1 column and the values as another. If
 #' multiple columns are selected, these will be prefixed with the column name.
 #'
 #' @param .data A data frame, or a data frame extension such as a tibble or
 #'   epi_df.
-#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> One or more unquoted
+#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> One unquoted
 #'   expressions separated by commas. Variable names can be used as if they
-#'   were positions in the data frame, so expressions like `x:y` can
-#'   be used to select a range of variables.
-#' @param .ignore_length_check If multiple columns are selected, as long as
-#'   each row has contains the same number of quantiles, the result will be
-#'   reasonable. But if, for example, `var1[1]` has 5 quantiles while `var2[1]`
-#'   has 7, then the only option would be to recycle everything, creating a
-#'   _very_ long result. By default, this would throw an error. But if this is
-#'   really the goal, then the error can be bypassed by setting this argument
-#'   to `TRUE`. The quantiles in the first selected column will vary the fastest.
+#'   were positions in the data frame. Note that only one variable
+#'   can be selected for this operation.
 #'
 #' @return An object of the same class as `.data`.
 #' @export
 #'
 #' @examples
-#' d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))
-#' d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
+#' d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)
+#' d2 <- quantile_pred(rbind(2:4, 3:5), 2:4 / 5)
 #' tib <- tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 #'
 #' pivot_quantiles_longer(tib, "d1")
 #' pivot_quantiles_longer(tib, dplyr::ends_with("1"))
-#' pivot_quantiles_longer(tib, d1, d2)
-pivot_quantiles_longer <- function(.data, ..., .ignore_length_check = FALSE) {
-  cols <- validate_pivot_quantiles(.data, ...)
-  .data <- .data %>% mutate(across(all_of(cols), nested_quantiles))
-  if (length(cols) > 1L) {
-    lengths_check <- .data %>%
-      dplyr::transmute(across(all_of(cols), ~ map_int(.x, vctrs::vec_size))) %>%
-      as.matrix() %>%
-      apply(1, function(x) dplyr::n_distinct(x) == 1L) %>%
-      all()
-    if (lengths_check) {
-      .data <- tidyr::unnest(.data, all_of(cols), names_sep = "_")
-    } else {
-      if (.ignore_length_check) {
-        for (col in cols) {
-          .data <- .data %>% tidyr::unnest(all_of(col), names_sep = "_")
-        }
-      } else {
-        cli_abort(paste(
-          "Some selected columns contain different numbers of quantiles.",
-          "The result would be a {.emph very} long {.cls tibble}.",
-          "To do this anyway, rerun with `.ignore_length_check = TRUE`."
-        ))
-      }
-    }
-  } else {
-    .data <- .data %>% tidyr::unnest(all_of(cols))
-  }
-  .data
+#' pivot_quantiles_longer(tib, d2)
+pivot_quantiles_longer <- function(.data, ...) {
+  col <- validate_pivot_quantiles(.data, ...)
+  .data$.row <- seq_len(vctrs::vec_size(.data))
+  long_tib <- as_tibble(.data[[col]])
+  .data <- select(.data, !all_of(col))
+  names(long_tib)[1:2] <- c(glue::glue("{col}_value"), glue::glue("{col}_quantile_level"))
+  left_join(.data, long_tib, by = ".row") %>%
+    select(!.row)
 }
 
-#' Pivot columns containing `dist_quantile` wider
+#' Pivot a column containing `quantile_pred` wider
 #'
-#' Any selected columns that contain `dist_quantiles` will be "widened" with
+#' Any selected columns that contain `quantile_pred` will be "widened" with
 #' the "taus" (quantile) serving as names and the values in the data frame.
 #' When pivoting multiple columns, the original column name will be used as
 #' a prefix.
 #'
-#' @param .data A data frame, or a data frame extension such as a tibble or
-#'   epi_df.
-#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> One or more unquoted
-#'   expressions separated by commas. Variable names can be used as if they
-#'   were positions in the data frame, so expressions like `x:y` can
-#'   be used to select a range of variables.
+#' @inheritParams pivot_quantiles_longer
 #'
 #' @return An object of the same class as `.data`
 #' @export
 #'
 #' @examples
-#' d1 <- c(dist_quantiles(1:3, 1:3 / 4), dist_quantiles(2:4, 1:3 / 4))
-#' d2 <- c(dist_quantiles(2:4, 2:4 / 5), dist_quantiles(3:5, 2:4 / 5))
-#' tib <- tibble::tibble(g = c("a", "b"), d1 = d1, d2 = d2)
+#' d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)
+#' d2 <- quantile_pred(rbind(2:4, 3:5), 2:4 / 5)
+#' tib <- tibble(g = c("a", "b"), d1 = d1, d2 = d2)
 #'
-#' pivot_quantiles_wider(tib, c("d1", "d2"))
-#' pivot_quantiles_wider(tib, dplyr::starts_with("d"))
+#' pivot_quantiles_wider(tib, "d1")
+#' pivot_quantiles_wider(tib, dplyr::ends_with("2"))
 #' pivot_quantiles_wider(tib, d2)
 pivot_quantiles_wider <- function(.data, ...) {
-  cols <- validate_pivot_quantiles(.data, ...)
-  .data <- .data %>% mutate(across(all_of(cols), nested_quantiles))
-  checks <- map_lgl(cols, ~ diff(range(vctrs::list_sizes(.data[[.x]]))) == 0L)
-  if (!all(checks)) {
-    nms <- cols[!checks]
-    cli_abort(c(
-      "Quantiles must be the same length and have the same set of taus.",
-      i = "Check failed for variables(s) {.var {nms}}."
-    ))
-  }
-
-  # tidyr::pivot_wider can crash if there are duplicates, this generally won't
-  # happen in our context. To avoid, silently add an index column and remove it
-  # later
-  .hidden_index <- seq_len(nrow(.data))
-  .data <- tibble::add_column(.data, .hidden_index = .hidden_index)
-  if (length(cols) > 1L) {
-    for (col in cols) {
-      .data <- .data %>%
-        tidyr::unnest(all_of(col)) %>%
-        tidyr::pivot_wider(
-          names_from = "quantile_levels", values_from = "values",
-          names_prefix = paste0(col, "_")
-        )
-    }
-  } else {
-    .data <- .data %>%
-      tidyr::unnest(all_of(cols)) %>%
-      tidyr::pivot_wider(names_from = "quantile_levels", values_from = "values")
-  }
-  select(.data, -.hidden_index)
+  col <- validate_pivot_quantiles(.data, ...)
+  .data$.row <- seq_len(vctrs::vec_size(.data))
+  wide_tib <- as_tibble(.data[[col]]) %>%
+    tidyr::pivot_wider(names_from = .quantile_levels, values_from = .pred_quantile)
+  .data <- select(.data, !all_of(col))
+  left_join(.data, wide_tib, by = ".row") %>%
+    select(!.row)
 }
 
 pivot_quantiles <- function(.data, ...) {
-  msg <- c(
-    "{.fn pivot_quantiles} was deprecated in {.pkg epipredict} 0.0.6",
-    i = "Please use {.fn pivot_quantiles_wider} instead."
-  )
-  lifecycle::deprecate_stop(msg)
+  lifecycle::deprecate_stop("0.0.6", "pivot_quantiles()", "pivot_quantiles_wider()")
 }
 
-validate_pivot_quantiles <- function(.data, ...) {
+validate_pivot_quantiles <- function(.data, ..., call = caller_env()) {
   expr <- rlang::expr(c(...))
   cols <- names(tidyselect::eval_select(expr, .data))
-  dqs <- map_lgl(cols, ~ is_dist_quantiles(.data[[.x]]))
-  if (!all(dqs)) {
-    nms <- cols[!dqs]
+  if (length(cols) > 1L) {
     cli_abort(
-      "Variables(s) {.var {nms}} are not `dist_quantiles`. Cannot pivot them."
+      "Only one column can be pivotted. Can not pivot all of: {.var {cols}}.",
+      call = call
+    )
+  }
+  if (!inherits(.data[[cols]], "quantile_pred")) {
+    cli_abort(
+      "{.var {cols}} is not {.cls `quantile_pred`}. Cannot pivot it.",
+      call = call
     )
   }
   cols

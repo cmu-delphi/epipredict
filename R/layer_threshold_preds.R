@@ -61,7 +61,13 @@ layer_threshold_new <-
 
 
 
-# restrict various objects to the interval [lower, upper]
+#' restrict various objects to the interval \[lower, upper\]
+#' @param x the object to restrict
+#' @param lower numeric, the lower bound
+#' @param upper numeric, the upper bound
+#' @param ... unused
+#' @export
+#' @keywords internal
 snap <- function(x, lower, upper, ...) {
   UseMethod("snap")
 }
@@ -74,25 +80,11 @@ snap.default <- function(x, lower, upper, ...) {
 }
 
 #' @export
-snap.distribution <- function(x, lower, upper, ...) {
-  rlang::check_dots_empty()
-  arg_is_scalar(lower, upper)
-  dstn <- lapply(vec_data(x), snap, lower = lower, upper = upper)
-  distributional:::wrap_dist(dstn)
-}
-
-#' @export
-snap.dist_default <- function(x, lower, upper, ...) {
-  rlang::check_dots_empty()
-  x
-}
-
-#' @export
-snap.dist_quantiles <- function(x, lower, upper, ...) {
-  values <- field(x, "values")
-  quantile_levels <- field(x, "quantile_levels")
-  values <- snap(values, lower, upper)
-  new_quantiles(values = values, quantile_levels = quantile_levels)
+snap.quantile_pred <- function(x, lower, upper, ...) {
+  values <- as.matrix(x)
+  quantile_levels <- x %@% "quantile_levels"
+  values <- map(vctrs::vec_chop(values), ~ snap(.x, lower, upper))
+  quantile_pred(do.call(rbind, values), quantile_levels = quantile_levels)
 }
 
 #' @export

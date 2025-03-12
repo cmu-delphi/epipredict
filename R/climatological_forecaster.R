@@ -148,7 +148,7 @@ climatological_forecaster <- function(epi_data,
       .by = all_of(args_list$quantile_by_key)
     ) %>%
     rename(.pred_distn = climate_pred) %>%
-    mutate(.pred_distn = dist_quantiles(.pred_distn, args_list$quantile_levels))
+    mutate(.pred_distn = hardhat::quantile_pred(do.call(rbind, .pred_distn), args_list$quantile_levels))
   # combine them together
   climate_table <- climate_center %>%
     left_join(climate_quantiles, by = c(".idx", args_list$quantile_by_key)) %>%
