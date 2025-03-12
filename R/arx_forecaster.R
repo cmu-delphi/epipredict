@@ -92,7 +92,7 @@ arx_forecaster <- function(
 #'
 #' @return An unfitted `epi_workflow`.
 #' @export
-#' @seealso [arx_forecaster()]
+#' @seealso [arx_forecaster()], [arx_args_list()]
 #'
 #' @examples
 #' jhu <- covid_case_death_rates %>%
@@ -282,6 +282,7 @@ arx_fcast_epi_workflow <- function(
 #'
 #' @return A list containing updated parameter choices with class `arx_flist`.
 #' @export
+#' @seealso [arx_forecaster()]
 #'
 #' @examples
 #' arx_args_list()

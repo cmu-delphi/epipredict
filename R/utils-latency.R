@@ -319,8 +319,7 @@ get_latency_table <- function(training, columns, forecast_date, latency,
   if (length(columns) > 0) {
     latency_table <- latency_table %>% filter(col_name %in% columns)
   }
-  training_dropped <- training %>%
-    drop_ignored_keys(keys_to_ignore)
+  training_dropped <- training %>% drop_ignored_keys(keys_to_ignore)
   if (is.null(latency)) {
     latency_table <- latency_table %>%
       rowwise() %>%
@@ -479,8 +478,7 @@ compare_bake_prep_latencies <- function(object, new_data, call = caller_env()) {
 
 #' @keywords internal
 create_shift_grid <- function(prefix, amount, target_sign, columns, latency_table, latency_sign) {
-  if (!is.null(latency_table) &&
-    latency_sign == target_sign) {
+  if (!is.null(latency_table) && latency_sign == target_sign) {
     # get the actually used latencies
     rel_latency <- latency_table %>% filter(col_name %in% columns)
     latency_adjusted <- TRUE

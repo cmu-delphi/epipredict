@@ -185,3 +185,32 @@ test_that("arx_classifier snapshots", {
     class = "epipredict__arx_classifier__adjust_latency_unsupported_method"
   )
 })
+
+test_that("climatological_forecaster snapshots", {
+  rates <- cases_deaths_subset
+
+  # set as_of to the last day in the data
+  attr(rates, "metadata")$as_of <- as.Date("2021-12-31")
+  fcast <- climatological_forecaster(rates, "case_rate_7d_av")
+  expect_snapshot_tibble(fcast$predictions)
+
+  # Compute quantiles separately by location, and a backcast
+  backcast <- climatological_forecaster(
+    rates, "cases",
+    climate_args_list(
+      quantile_by_key = "geo_value",
+      forecast_date = as.Date("2021-06-01")
+    )
+  )
+  expect_snapshot_tibble(backcast$predictions)
+  # compute the climate "daily" rather than "weekly"
+  # use a two week window (on both sides)
+  daily_fcast <- climatological_forecaster(
+    rates, "cases",
+    climate_args_list(
+      quantile_by_key = "geo_value",
+      time_type = "day", window_size = 14L, forecast_horizon = 0:30
+    )
+  )
+  expect_snapshot_tibble(daily_fcast$predictions)
+})

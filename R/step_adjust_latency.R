@@ -31,7 +31,7 @@
 #' 1. `"ca"` is latent by 2 days, whereas `"ma"` is latent by 1
 #' 2. if we want to use `b` as an exogenous variable, for `"ma"` it is latent by 3 days instead of just 1.
 #'
-#' Regardless of `method`, `epi_keys_checked="geo_value"` guarantees tha the
+#' Regardless of `method`, `epi_keys_checked="geo_value"` guarantees that the
 #'   difference between `"ma"` and `"ca"` is accounted for by making  the
 #'   latency adjustment at least 2. For some comparison, here's what the various
 #'   methods will do:
@@ -47,7 +47,7 @@
 #'   forward to the `forecast_date`:
 #'   ```{r toy_df}
 #'   toy_recipe <- epi_recipe(toy_df) %>%
-#'     step_adjust_latency(method="locf")
+#'     step_adjust_latency(has_role("raw"), method="locf")
 #'
 #'   toy_recipe %>%
 #'     prep(toy_df) %>%
@@ -62,9 +62,9 @@
 #'   latencies, the lags for each are adjusted separately. In the toy example:
 #'   ```{r toy_df}
 #'   toy_recipe <- epi_recipe(toy_df) %>%
-#'     step_adjust_latency(method="extend_lags") %>%
-#'     step_epi_lag(a,lag=1) %>%
-#'     step_epi_lag(b,lag=1) %>%
+#'     step_adjust_latency(has_role("raw"), method = "extend_lags") %>%
+#'     step_epi_lag(a, lag=1) %>%
+#'     step_epi_lag(b, lag=1) %>%
 #'     step_epi_ahead(a, ahead=1)
 #'
 #'   toy_recipe %>%
@@ -89,8 +89,8 @@
 #'   the most latent data to insure there is data available. In the toy example:
 #'   ```{r toy_df}
 #'   toy_recipe <- epi_recipe(toy_df) %>%
-#'     step_adjust_latency(method="extend_ahead") %>%
-#'     step_epi_lag(a,lag=0) %>%
+#'     step_adjust_latency(has_role("raw"), method="extend_ahead") %>%
+#'     step_epi_lag(a, lag=0) %>%
 #'     step_epi_ahead(a, ahead=1)
 #'
 #'   toy_recipe %>%
@@ -180,22 +180,22 @@
 #' @rdname step_adjust_latency
 #' @export
 #' @examples
-#' jhu <- covid_case_death_rates %>%
+#' rates <- covid_case_death_rates %>%
 #'   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' # setting the `as_of` to something realistic
-#' attributes(jhu)$metadata$as_of <- max(jhu$time_value) + 3
+#' attributes(rates)$metadata$as_of <- max(rates$time_value) + 3
 #'
-#' r <- epi_recipe(covid_case_death_rates) %>%
-#'   step_adjust_latency(method = "extend_ahead") %>%
+#' r <- epi_recipe(rates) %>%
+#'   step_adjust_latency(recipes::has_role("raw"), method = "extend_ahead") %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14))
 #' r
 #'
-#' jhu_fit <- epi_workflow() %>%
+#' rates_fit <- epi_workflow() %>%
 #'   add_epi_recipe(r) %>%
 #'   add_model(linear_reg()) %>%
-#'   fit(data = jhu)
-#' jhu_fit
+#'   fit(data = rates)
+#' rates_fit
 #'
 #' @importFrom recipes detect_step
 #' @importFrom rlang enquos is_empty
@@ -275,20 +275,15 @@ step_adjust_latency_new <-
 #' @importFrom dplyr rowwise
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   latency <- x$latency
+  col_names <- recipes::recipes_eval_select(x$terms, training, info)
+
   forecast_date <- x$fixed_forecast_date %||%
     get_forecast_date(training, info, x$epi_keys_checked, latency)
 
   latency_table <- get_latency_table(
-    training, NULL, forecast_date, latency,
+    training, col_names, forecast_date, latency,
     get_sign(x), x$epi_keys_checked, x$keys_to_ignore, info, x$terms
   )
-  # get the columns used, even if it's all of them
-  terms_used <- x$terms
-  if (is_empty(terms_used)) {
-    terms_used <- info %>%
-      filter(role == "raw") %>%
-      pull(variable)
-  }
 
   step_adjust_latency_new(
     terms = x$terms,
@@ -304,7 +299,7 @@ prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
     epi_keys_checked = x$epi_keys_checked,
     keys_to_ignore = x$keys_to_ignore,
     check_latency_length = x$check_latency_length,
-    columns = recipes_eval_select(latency_table$col_name, training, info),
+    columns = col_names,
     skip = x$skip,
     id = x$id
   )
@@ -350,64 +345,21 @@ bake.step_adjust_latency <- function(object, new_data, ...) {
 print.step_adjust_latency <-
   function(x, width = max(20, options$width - 35), ...) {
     if (!is.null(x$forecast_date)) {
-      conj <- "with forecast date"
+      conj <- "w/ forecast date"
       extra_text <- x$forecast_date
     } else if (!is.null(x$latency_table)) {
       conj <- if (nrow(x$latency) == 1) {
-        "with latency"
+        "w/ latency"
       } else {
-        "with latencies"
+        "w/ latencies"
       }
       extra_text <- unique(x$latency_table$latency)
     } else {
-      conj <- "with latency"
-      extra_text <- "set at train time"
+      conj <- "latency"
+      extra_text <- "TBD at train time"
     }
-    # what follows is a somewhat modified version of print_epi_step, since the case of no arguments for adjust_latency means apply to all relevant columns, and not none of them
-    theme_div_id <- cli::cli_div(
-      theme = list(.pkg = list(`vec-trunc` = Inf, `vec-last` = ", "))
+    title <- trimws(paste("Adj.", x$method))
+    print_epi_step(x$columns, x$terms, x$trained, title,
+      conjunction = conj, extra_text = extra_text
     )
-    # this is a slightly modified copy of
-    title <- trimws(x$method)
-    trained_text <- dplyr::if_else(x$trained, "Trained", "")
-    vline_seperator <- dplyr::if_else(trained_text == "", "", "|")
-    comma_seperator <- dplyr::if_else(
-      trained_text != "", true = ",", false = ""
-    )
-    extra_text <- recipes::format_ch_vec(extra_text)
-    width_title <- nchar(paste0(
-      "* ", title, ":", " ", conj, " ", extra_text, " ", vline_seperator,
-      " ", trained_text, " "
-    ))
-    width_diff <- cli::console_width() * 1 - width_title
-    if (x$trained) {
-      elements <- x$columns
-    } else {
-      if (is_empty(x$terms)) {
-        elements <- "all future predictors"
-      } else {
-        elements <- lapply(x$terms, function(x) {
-          rlang::expr_deparse(rlang::quo_get_expr(x), width = Inf)
-        })
-        elements <- vctrs::list_unchop(elements, ptype = character())
-      }
-    }
-
-    element_print_lengths <- cumsum(nchar(elements)) +
-      c(0L, cumsum(rep(2L, length(elements) - 1))) +
-      c(rep(5L, length(elements) - 1), 0L)
-    first_line <- which(width_diff >= element_print_lengths)
-    first_line <- unname(first_line)
-    first_line <- ifelse(
-      test = identical(first_line, integer(0)),
-      yes = length(element_print_lengths),
-      no = max(first_line)
-    )
-    more_dots <- ifelse(first_line == length(elements), "", ", ...")
-    cli::cli_bullets(
-      c("\n    {title}: \\\n    {.pkg {cli::cli_vec(elements[seq_len(first_line)])}}\\\n    {more_dots} \\\n    {conj} \\\n    {.pkg {extra_text}} \\\n    {vline_seperator} \\\n    {.emph {trained_text}}")
-    )
-
-    cli::cli_end(theme_div_id)
-    invisible(x)
   }

@@ -119,12 +119,13 @@ autoplot.epi_workflow <- function(
     shift <- -as.numeric(old_name_y[2])
     new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
     edf <- rename(edf, !!new_name_y := !!names(y))
+  } else {
+    new_name_y <- names(y)
+    shift <- 0
   }
 
-  if (!is.null(shift)) {
-    edf <- mutate(edf, time_value = time_value + shift)
-  }
-  other_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
+  edf <- mutate(edf, time_value = time_value + shift)
+  other_keys <- key_colnames(object, exclude = c("geo_value", "time_value"))
   edf <- as_epi_df(edf,
     as_of = object$fit$meta$as_of,
     other_keys = other_keys

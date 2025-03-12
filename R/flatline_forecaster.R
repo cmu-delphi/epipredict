@@ -16,7 +16,7 @@
 #'
 #' @param epi_data An [epiprocess::epi_df][epiprocess::as_epi_df]
 #' @param outcome A scalar character for the column name we wish to predict.
-#' @param args_list A list of dditional arguments as created by the
+#' @param args_list A list of additional arguments as created by the
 #'   [flatline_args_list()] constructor function.
 #'
 #' @return A data frame of point (and optionally interval) forecasts at a single
@@ -34,7 +34,7 @@ flatline_forecaster <- function(
     args_list = flatline_args_list()) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("flat_fcast", "alist"))) {
-    cli_abort("`args_list` was not created using `flatline_args_list().")
+    cli_abort("`args_list` was not created using `flatline_args_list()`.")
   }
   keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)

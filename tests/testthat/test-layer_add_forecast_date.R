@@ -77,7 +77,7 @@ test_that("`layer_add_forecast_date()` infers correct date when using `adjust_la
   attributes(jhu_reasonable_date)$metadata$as_of <- as.Date("2022-01-03")
   r_latent <- epi_recipe(jhu_reasonable_date) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
-    step_adjust_latency(method = "extend_ahead") %>%
+    step_adjust_latency(death_rate, method = "extend_ahead") %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_naomit(all_predictors()) %>%
     step_naomit(all_outcomes(), skip = TRUE)

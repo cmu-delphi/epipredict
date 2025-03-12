@@ -66,7 +66,10 @@ step_epi_lag <-
       ))
     }
     arg_is_nonneg_int(lag)
-    arg_is_chr_scalar(prefix, id)
+    arg_is_chr_scalar(prefix, id, role)
+    if (role == "outcome" && length(lag) > 1L) {
+      cli_abort("Only one {.val outcome} may be created with this step.")
+    }
 
     recipes::add_step(
       recipe,
@@ -111,7 +114,7 @@ step_epi_ahead <-
         i = "Did you perhaps pass an integer in `...` accidentally?"
       ))
     }
-    arg_is_chr_scalar(prefix, id)
+    arg_is_chr_scalar(prefix, id, role)
 
     recipes::add_step(
       recipe,

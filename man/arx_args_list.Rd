@@ -101,3 +101,6 @@ arx_args_list()
 arx_args_list(symmetrize = FALSE)
 arx_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 }
+\seealso{
+\code{\link[=arx_forecaster]{arx_forecaster()}}
+}

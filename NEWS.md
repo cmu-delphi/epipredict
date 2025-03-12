@@ -11,6 +11,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   `data(<dataset name>)`, but can be accessed with
   `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>`
   or, after loading the package, the name of the dataset alone (#382).
+- `step_adjust_latency()` no longer allows empty column selection.
 - Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
   `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
   has an `na_rm` argument.
@@ -25,8 +26,11 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Fix `quantile_reg()` producing error when asked to output just median-level predictions.
 - (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
 - Add `reference_date` as an argument to `epi_recipe()`
+- Add `step_climate()` to create "climate" predictor in forecast workflows
+- Add `climatological_forecaster()` to automatically create climate baselines
 
 ## Bug fixes
+
 - Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
 - Quantiles produced by `grf` were sometimes out of order.
 - dist_quantiles can have all `NA` values without causing unrelated errors

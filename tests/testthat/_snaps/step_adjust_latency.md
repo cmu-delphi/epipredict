@@ -13,7 +13,7 @@
       time_value: 1
       
       -- Operations 
-      1. extend_lags: case_rate with latency set at train time
+      1. Adj. extend_lags: has_role("raw") latency TBD at train time
       2. Lagging: death_rate by 0, 6, 11
       3. Lagging: case_rate by 1, 5
       4. Leading: death_rate by 7
@@ -36,8 +36,8 @@
       Training data contained 200 data points and no incomplete rows.
       
       -- Operations 
-      1. extend_lags: case_rate with forecast date 2021-07-24 | Trained
-      2. Lagging: death_rate by 0, 6, 11, (lat adj) | Trained
+      1. Adj. extend_lags: case_rate death_rate w/ forecast date 2021-07-24 | Trained
+      2. Lagging: death_rate by 5, 11, 16, (lat adj) | Trained
       3. Lagging: case_rate by 6, 10, (lat adj) | Trained
       4. Leading: death_rate by 7 | Trained
 
@@ -57,7 +57,7 @@
       
       -- Operations 
       1. Lagging: death_rate by 0, 7, 14
-      2. extend_ahead: all future predictors with latency set at train time
+      2. Adj. extend_ahead: has_role("raw") latency TBD at train time
       3. Leading: death_rate by 7
 
 ---
@@ -79,6 +79,6 @@
       
       -- Operations 
       1. Lagging: death_rate by 0, 7, 14 | Trained
-      2. extend_ahead: case_rate, ... with forecast date 2023-03-10 | Trained
+      2. Adj. extend_ahead: case_rate, ... w/ forecast date 2023-03-10 | Trained
       3. Leading: death_rate by -441, (lat adj) | Trained
 
