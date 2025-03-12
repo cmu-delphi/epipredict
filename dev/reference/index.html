@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -66,6 +66,12 @@
         <dd>Predict the future with the most recent value</dd>
       </dl><dl><dt>
 
+          <code><a href="climatological_forecaster.html">climatological_forecaster()</a></code>
+
+        </dt>
+        <dd>Climatological forecaster</dd>
+      </dl><dl><dt>
+
           <code><a href="flatline_forecaster.html">flatline_forecaster()</a></code>
 
         </dt>
@@ -105,6 +111,12 @@
 
         </dt>
         <dd>CDC baseline forecaster argument constructor</dd>
+      </dl><dl><dt>
+
+          <code><a href="climate_args_list.html">climate_args_list()</a></code>
+
+        </dt>
+        <dd>Climatological forecaster argument constructor</dd>
       </dl><dl><dt>
 
           <code><a href="flatline_args_list.html">flatline_args_list()</a></code>
@@ -251,6 +263,12 @@
 
         </dt>
         <dd>Adapt the model to latent data</dd>
+      </dl><dl><dt>
+
+          <code><a href="step_climate.html">step_climate()</a></code>
+
+        </dt>
+        <dd>Calculate a climatological variable based on the history</dd>
       </dl><dl><dt>
 
           <code><a href="step_epi_naomit.html">step_epi_naomit()</a></code>
@@ -431,7 +449,7 @@
       </dl><dl><dt>
 
           <code><a href="layer_predictive_distn.html">layer_predictive_distn()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Returns predictive distributions</dd>
       </dl><dl><dt>
@@ -501,9 +519,15 @@
       <dl><dt>
 
           <code><a href="dist_quantiles.html">dist_quantiles()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>A distribution parameterized by a set of quantiles</dd>
+      </dl><dl><dt>
+
+          <code><a href="quantile.quantile_pred.html">quantile(<i>&lt;quantile_pred&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Quantiles from a distribution</dd>
       </dl><dl><dt>
 
           <code><a href="extrapolate_quantiles.html">extrapolate_quantiles()</a></code>
@@ -513,7 +537,7 @@
       </dl><dl><dt>
 
           <code><a href="nested_quantiles.html">nested_quantiles()</a></code>
-
+          <span class="badge lifecycle lifecycle-deprecated">deprecated</span>
         </dt>
         <dd>Turn a vector of quantile distributions into a list-col</dd>
       </dl><dl><dt>
@@ -527,13 +551,13 @@
           <code><a href="pivot_quantiles_longer.html">pivot_quantiles_longer()</a></code>
 
         </dt>
-        <dd>Pivot columns containing <code>dist_quantile</code> longer</dd>
+        <dd>Pivot a column containing <code>quantile_pred</code> longer</dd>
       </dl><dl><dt>
 
           <code><a href="pivot_quantiles_wider.html">pivot_quantiles_wider()</a></code>
 
         </dt>
-        <dd>Pivot columns containing <code>dist_quantile</code> wider</dd>
+        <dd>Pivot a column containing <code>quantile_pred</code> wider</dd>
       </dl></div><div class="section level2">
       <h2 id="other-utilities">Other utilities<a class="anchor" aria-label="anchor" href="#other-utilities"></a></h2>
 

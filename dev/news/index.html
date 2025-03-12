@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,8 +47,11 @@
 <div class="section level3">
 <h3 id="breaking-changes-0-2">Breaking changes<a class="anchor" aria-label="anchor" href="#breaking-changes-0-2"></a></h3>
 <ul><li>Moved example datasets from being hosted in the package to being loaded from the <code>epidatasets</code> package. The datasets can no longer be loaded with <code>data(&lt;dataset name&gt;)</code>, but can be accessed with <code>data(&lt;dataset name&gt;, package = "epidatasets")</code>, <code>epidatasets::&lt;dataset name&gt;</code> or, after loading the package, the name of the dataset alone (<a href="https://github.com/cmu-delphi/epipredict/issues/382" class="external-link">#382</a>).</li>
+<li>
+<code><a href="../reference/step_adjust_latency.html">step_adjust_latency()</a></code> no longer allows empty column selection.</li>
 <li>Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (<code><a href="https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html" class="external-link">growth_rate()</a></code>). <code><a href="../reference/step_growth_rate.html">step_growth_rate()</a></code> has lost its <code>additional_gr_args_list</code> argument and now has an <code>na_rm</code> argument.</li>
 <li>Moves <code>epiprocess</code> out of depends (<a href="https://github.com/cmu-delphi/epipredict/issues/440" class="external-link">#440</a>). No internals have changed, but downstream users may need to add <code><a href="https://cmu-delphi.github.io/epiprocess/" class="external-link">library(epiprocess)</a></code> to existing code.</li>
+<li>Removes dependence on the <code>distributional</code> package, replacing the quantiles with <code><a href="https://hardhat.tidymodels.org/reference/quantile_pred.html" class="external-link">hardhat::quantile_pred()</a></code>. Some associated functions are deprecated with <code>lifecycle</code> messages.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2"></a></h3>
@@ -60,6 +63,11 @@
 </li>
 <li>Add <code>reference_date</code> as an argument to <code><a href="../reference/epi_recipe.html">epi_recipe()</a></code>
 </li>
+<li>Add <code><a href="../reference/step_climate.html">step_climate()</a></code> to create “climate” predictor in forecast workflows</li>
+<li>Add <code><a href="../reference/climatological_forecaster.html">climatological_forecaster()</a></code> to automatically create climate baselines</li>
+<li>Replace <code><a href="../reference/dist_quantiles.html">dist_quantiles()</a></code> with <code><a href="https://hardhat.tidymodels.org/reference/quantile_pred.html" class="external-link">hardhat::quantile_pred()</a></code>
+</li>
+<li>Allow <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile()</a></code> to threshold to an interval if desired (<a href="https://github.com/cmu-delphi/epipredict/issues/434" class="external-link">#434</a>)</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-0-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2"></a></h3>

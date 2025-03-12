@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -181,7 +181,7 @@ states of Alaska, California, New York, and South Carolina.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 244 × 4</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-11-01      87.9      0.494</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-11-01      15.6      0.241</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-11-01      19.9      0.177</span></span>
@@ -418,7 +418,7 @@ post-processing predictions. In our initial frosting object,
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>   <span style="font-weight: bold;">.pred</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 -<span style="color: #BB0000;">0.206</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.099<span style="text-decoration: underline;">2</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31  0.295 </span></span>
@@ -447,7 +447,7 @@ the <code>epi_workflow</code> the same, we can use the
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>  <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 0      2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31 0.099<span style="text-decoration: underline;">2</span> 2021-12-31    2022-01-07 </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31 0.295  2021-12-31    2022-01-07 </span></span>
@@ -462,7 +462,7 @@ adding the new frosting, just like when we update a recipe or model.</p>
 <span><span class="co">#&gt;     x &lt;- remove_frosting(x)</span></span>
 <span><span class="co">#&gt;     add_frosting(x, frosting)</span></span>
 <span><span class="co">#&gt; }</span></span>
-<span><span class="co">#&gt; &lt;bytecode: 0x55a93438cfe0&gt;</span></span>
+<span><span class="co">#&gt; &lt;bytecode: 0x565448d7f250&gt;</span></span>
 <span><span class="co">#&gt; &lt;environment: namespace:epipredict&gt;</span></span></code></pre></div>
 <p>If we decide that we do not want the <code>frosting</code>
 post-processing at all, we can remove the <code>frosting</code> object
@@ -478,7 +478,7 @@ from the workflow and make predictions as follows:</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span>   <span style="font-weight: bold;">.pred</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">*</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> ak        2021-12-31 -<span style="color: #BB0000;">0.206</span> </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> ca        2021-12-31  0.099<span style="text-decoration: underline;">2</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> ny        2021-12-31  0.295 </span></span>

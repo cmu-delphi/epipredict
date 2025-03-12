@@ -35,6 +35,8 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/check_interminable_latency.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/check_pname.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/clean_f_name.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/climate_args_list.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/climatological_forecaster.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/construct_shift_tibble.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/count_single_column.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/dist_quantiles.html</loc></url>
@@ -43,6 +45,7 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_shift_single.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_slide_wrapper.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epi_workflow.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/epiweek_leap.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/extract_argument.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/extract_frosting.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/extrapolate_quantiles.html</loc></url>
@@ -64,6 +67,7 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/index.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/is_epi_recipe.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/is_epi_workflow.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/isoweek_leap.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/layer-processors.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/layer.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/layer_add_forecast_date.html</loc></url>
@@ -85,13 +89,17 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/pivot_quantiles_longer.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/pivot_quantiles_wider.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/predict-epi_workflow.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/quantile.quantile_pred.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/quantile_reg.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/reexports.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/roll_modular_multivec.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/seq_forward.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/slather.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/smooth_quantile_reg.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/snap.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_adjust_latency.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_adjust_latency_checks.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_climate.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_naomit.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_shift.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/step_epi_slide.html</loc></url>
@@ -102,5 +110,6 @@
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/tidy.frosting.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/update.layer.html</loc></url>
 <url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/weighted_interval_score.html</loc></url>
+<url><loc>https://cmu-delphi.github.io/epipredict/dev/reference/yday_leap.html</loc></url>
 </urlset>
 

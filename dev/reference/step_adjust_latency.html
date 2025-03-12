@@ -19,7 +19,7 @@ event occurring and the event being reported."><meta name="robots" content="noin
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.11</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.12</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -182,7 +182,7 @@ demonstrate some of the subtleties, let's consider a toy dataset:</p>
 <p>If we're looking to predict the value on the 15th, forecasting from the 14th (the <code>as_of</code> date above),
 there are two issues we will need to address:</p><ol><li><p><code>"ca"</code> is latent by 2 days, whereas <code>"ma"</code> is latent by 1</p></li>
 <li><p>if we want to use <code>b</code> as an exogenous variable, for <code>"ma"</code> it is latent by 3 days instead of just 1.</p></li>
-</ol><p>Regardless of <code>method</code>, <code>epi_keys_checked="geo_value"</code> guarantees tha the
+</ol><p>Regardless of <code>method</code>, <code>epi_keys_checked="geo_value"</code> guarantees that the
 difference between <code>"ma"</code> and <code>"ca"</code> is accounted for by making  the
 latency adjustment at least 2. For some comparison, here's what the various
 methods will do:</p><div class="section">
@@ -198,7 +198,7 @@ nowcasting, an eventual aim for this package. On the toy dataset, it
 doesn't matter which day we're trying to predict, since it just fills
 forward to the <code>forecast_date</code>:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">toy_recipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span>method<span class="op">=</span><span class="st">"locf"</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">has_role</a></span><span class="op">(</span><span class="st">"raw"</span><span class="op">)</span>, method<span class="op">=</span><span class="st">"locf"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">toy_recipe</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://recipes.tidymodels.org/reference/prep.html" class="external-link">prep</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -231,9 +231,9 @@ data. This has the advantage of being applicable on
 a per-column basis; if cases and deaths are reported at different
 latencies, the lags for each are adjusted separately. In the toy example:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">toy_recipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span>method<span class="op">=</span><span class="st">"extend_lags"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">a</span>,lag<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">b</span>,lag<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">has_role</a></span><span class="op">(</span><span class="st">"raw"</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"extend_lags"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">a</span>, lag<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">b</span>, lag<span class="op">=</span><span class="fl">1</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">a</span>, ahead<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">toy_recipe</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -278,8 +278,8 @@ the actual modelling task, but potentially leaves information unused if
 different data sources have different latencies; it must use the latency of
 the most latent data to insure there is data available. In the toy example:</p>
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">toy_recipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span>method<span class="op">=</span><span class="st">"extend_ahead"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">a</span>,lag<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">has_role</a></span><span class="op">(</span><span class="st">"raw"</span><span class="op">)</span>, method<span class="op">=</span><span class="st">"extend_ahead"</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">a</span>, lag<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">a</span>, ahead<span class="op">=</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">toy_recipe</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
@@ -344,13 +344,13 @@ this step should go before both <code>step_epi_ahead</code> and <code>step_epi_l
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">jhu</span> <span class="op">&lt;-</span> <span class="va">covid_case_death_rates</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">rates</span> <span class="op">&lt;-</span> <span class="va">covid_case_death_rates</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-11-01"</span>, <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ak"</span>, <span class="st">"ca"</span>, <span class="st">"ny"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># setting the `as_of` to something realistic</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">)</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">as_of</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">jhu</span><span class="op">$</span><span class="va">time_value</span><span class="op">)</span> <span class="op">+</span> <span class="fl">3</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/attributes.html" class="external-link">attributes</a></span><span class="op">(</span><span class="va">rates</span><span class="op">)</span><span class="op">$</span><span class="va">metadata</span><span class="op">$</span><span class="va">as_of</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">rates</span><span class="op">$</span><span class="va">time_value</span><span class="op">)</span> <span class="op">+</span> <span class="fl">3</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">covid_case_death_rates</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu">step_adjust_latency</span><span class="op">(</span>method <span class="op">=</span> <span class="st">"extend_ahead"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">rates</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span>  <span class="fu">step_adjust_latency</span><span class="op">(</span><span class="fu">recipes</span><span class="fu">::</span><span class="fu"><a href="https://recipes.tidymodels.org/reference/has_role.html" class="external-link">has_role</a></span><span class="op">(</span><span class="st">"raw"</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"extend_ahead"</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_ahead</a></span><span class="op">(</span><span class="va">death_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">death_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">r</span></span></span>
@@ -364,15 +364,15 @@ this step should go before both <code>step_epi_ahead</code> and <code>step_epi_l
 <span class="r-msg co"><span class="r-pr">#&gt;</span> time_value: 1</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Operations </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. extend_ahead: <span style="color: #0000BB;">all future predictors</span> with latency <span style="color: #0000BB;">set at train time</span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. Adj. extend_ahead: <span style="color: #0000BB;">recipes::has_role("raw")</span> latency <span style="color: #0000BB;">TBD at train time</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 3. Lagging: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">0, 7, 14</span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">jhu_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
+<span class="r-in"><span><span class="va">rates_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_workflow.html">epi_workflow</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="add_epi_recipe.html">add_epi_recipe</a></span><span class="op">(</span><span class="va">r</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="Add_model.html">add_model</a></span><span class="op">(</span><span class="fu"><a href="https://parsnip.tidymodels.org/reference/linear_reg.html" class="external-link">linear_reg</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">jhu</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">jhu_fit</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://generics.r-lib.org/reference/fit.html" class="external-link">fit</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">rates</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">rates_fit</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ══ Epi Workflow [trained] ══════════════════════════════════════════════════════</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="font-style: italic;">Preprocessor:</span> Recipe</span>
