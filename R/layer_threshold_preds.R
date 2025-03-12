@@ -61,7 +61,7 @@ layer_threshold_new <-
 
 
 
-#' restrict various objects to the interval [lower, upper]
+#' restrict various objects to the interval \[lower, upper\]
 #' @param x the object to restrict
 #' @param lower numeric, the lower bound
 #' @param upper numeric, the upper bound

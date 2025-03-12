@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_threshold_preds.R
 \name{snap}
 \alias{snap}
-\title{restrict various objects to the interval \link{lower, upper}}
+\title{restrict various objects to the interval [lower, upper]}
 \usage{
 snap(x, lower, upper, ...)
 }
@@ -16,6 +16,6 @@ snap(x, lower, upper, ...)
 \item{...}{unused}
 }
 \description{
-restrict various objects to the interval \link{lower, upper}
+restrict various objects to the interval [lower, upper]
 }
 \keyword{internal}
