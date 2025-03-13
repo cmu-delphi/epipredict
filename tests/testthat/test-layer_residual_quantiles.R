@@ -28,7 +28,7 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(unique(unnested$.pred_distn_quantile_level), c(.0275, 0.5, .8, .95))
 })
 
-tests_that("new name works correctly", {
+test_that("new name works correctly", {
   f <- frosting() %>%
     layer_predict() %>%
     layer_naomit(.pred) %>%
