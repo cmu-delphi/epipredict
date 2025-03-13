@@ -139,7 +139,7 @@ slather.layer_residual_quantiles <-
 
     estimate <- components$predictions$.pred
     res <- tibble(.pred_distn = r$dstn + estimate)
-    res <- check_pname(res, components$predictions, object)
+    res <- check_name(res, components$predictions, object, newname = object$name)
     components$predictions <- mutate(components$predictions, !!!res)
     components
   }
