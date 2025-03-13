@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.12</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.13</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,6 +78,7 @@
 <li>adjust default quantiles throughout so that they match.</li>
 <li>force <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> to always include <code>0.5</code>.</li>
 <li>Rename <code>recipes:::check_training_set()</code> to <code>recipes:::validate_training_data()</code>, as it changed in recipes 1.1.0.</li>
+<li>A new column name duplicating an existing column name results in an error instead of a random name.</li>
 </ul></div>
 </div>
     <div class="section level2">
