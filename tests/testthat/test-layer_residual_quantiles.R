@@ -28,6 +28,23 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(unique(unnested$.pred_distn_quantile_level), c(.0275, 0.5, .8, .95))
 })
 
+tests_that("new name works correctly", {
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(name = "foo")
+
+  wf1 <- wf %>% add_frosting(f)
+  expect_equal(names(forecast(wf1)), c("geo_value", "time_value", ".pred", "foo"))
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(name = "geo_value")
+
+  wf1 <- wf %>% add_frosting(f)
+  expect_error(forecast(wf1))
+})
 
 test_that("Errors when used with a classifier", {
   tib <- tibble(
