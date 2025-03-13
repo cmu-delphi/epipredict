@@ -42,6 +42,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - adjust default quantiles throughout so that they match.
 - force `layer_residual_quantiles()` to always include `0.5`.
 - Rename `recipes:::check_training_set()` to `recipes:::validate_training_data()`, as it changed in recipes 1.1.0.
+- A new column name duplicating an existing column name results in an error instead of a random name.
 
 # epipredict 0.1
 

@@ -227,7 +227,6 @@ slather.layer_cdc_flatline_quantiles <-
       ) %>%
       select(all_of(c(avail_grps, ".pred_distn_all")))
 
-    # res <- check_pname(res, components$predictions, object)
     components$predictions <- left_join(
       components$predictions,
       res,

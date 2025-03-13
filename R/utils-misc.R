@@ -1,36 +1,3 @@
-#' Check that newly created variable names don't overlap
-#'
-#' `check_pname` is to be used in a slather method to ensure that
-#'   newly created variable names don't overlap with existing names.
-#'   Throws an warning if check fails, and creates a random string.
-#' @param res A data frame or tibble of the newly created variables.
-#' @param preds An epi_df or tibble containing predictions.
-#' @param object A layer object passed to [slather()].
-#' @param newname A string of variable names if the object doesn't contain a
-#'   $name element
-#'
-#' @keywords internal
-check_pname <- function(res, preds, object, newname = NULL) {
-  if (is.null(newname)) newname <- object$name
-  new_preds_names <- colnames(preds)
-  intersection <- new_preds_names %in% newname
-  if (any(intersection)) {
-    newname <- rand_id(newname)
-    rlang::warn(
-      paste0(
-        "Name collision occured in `",
-        class(object)[1],
-        "`. The following variable names already exists: ",
-        paste0(new_preds_names[intersection], collapse = ", "),
-        ". Result instead has randomly generated string `",
-        newname, "`."
-      )
-    )
-  }
-  names(res) <- newname
-  res
-}
-
 # Copied from `epiprocess`:
 
 #' "Format" a character vector of column/variable names for cli interpolation

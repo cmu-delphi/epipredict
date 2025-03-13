@@ -96,7 +96,12 @@ slather.layer_quantile_distn <-
       dstn <- snap(dstn, truncate[1], truncate[2])
     }
     dstn <- tibble(dstn = dstn)
-    dstn <- check_pname(dstn, components$predictions, object)
+    dstn <- check_name(
+      dstn,
+      components$predictions,
+      object,
+      newname = object$name
+    )
     components$predictions <- mutate(components$predictions, !!!dstn)
     components
   }
