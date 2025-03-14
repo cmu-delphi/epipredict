@@ -114,8 +114,12 @@ autoplot.epi_workflow <- function(
   keys <- c("geo_value", "time_value", "key")
   mold_roles <- names(mold$extras$roles)
   # extract the relevant column names for plotting
-  old_name_y <- unlist(strsplit(names(y), "_"))
-  new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
+  if (starts_with_impl("ahead_", names(y)) || starts_with_impl("lag_", names(y))) {
+    old_name_y <- unlist(strsplit(names(y), "_"))
+    new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
+  } else {
+    new_name_y <- names(y)
+  }
   if (is.null(plot_data)) {
     # the outcome has shifted, so we need to shift it forward (or back)
     # by the corresponding amount

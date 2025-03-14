@@ -115,10 +115,42 @@ climatological_forecaster <- function(epi_data,
     mean = function(x, w) mean(x, na.rm = TRUE),
     median = function(x, w) stats::median(x, na.rm = TRUE)
   )
-  # get the point predictions
   keys <- key_colnames(epi_data, exclude = "time_value")
-  epi_data <- epi_data %>% mutate(.idx = time_aggr(time_value), .weights = 1)
-  climate_center <- epi_data %>%
+  # Get the prediction geo and .idx for the target date(s)
+  predictions <- epi_data %>%
+    select(all_of(keys)) %>%
+    dplyr::distinct() %>%
+    mutate(forecast_date = forecast_date, .idx = time_aggr(forecast_date))
+  predictions <-
+    map(horizon, ~ {
+      predictions %>%
+        mutate(.idx = .idx + .x, target_date = forecast_date + ttype_dur(.x))
+    }) %>%
+    purrr::list_rbind() %>%
+    mutate(
+      .idx = .idx %% modulus,
+      .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
+    )
+  # get the distinct .idx for the target date(s)
+  distinct_target_idx <- predictions$.idx %>% unique()
+  # get all of the idx's within the window of the target .idxs
+  entries <- map(distinct_target_idx, \(idx) within_window(idx, window_size, modulus)) %>%
+    do.call(c, .) %>%
+    unique()
+  # for the center, we need those within twice the window, since for each point
+  # we're subtracting out the center to generate the quantiles
+  entries_double_window <- map(entries, \(idx) within_window(idx, window_size, modulus)) %>%
+    do.call(c, .) %>%
+    unique()
+
+  epi_data_target <-
+    epi_data %>%
+    mutate(.idx = time_aggr(time_value), .weights = 1)
+  # get the point predictions
+  climate_center <-
+    epi_data_target %>%
+    filter(.idx %in% entries_double_window) %>%
+    mutate(.idx = time_aggr(time_value), .weights = 1) %>%
     select(.idx, .weights, all_of(c(outcome, keys))) %>%
     dplyr::reframe(
       roll_modular_multivec(
@@ -136,7 +168,10 @@ climatological_forecaster <- function(epi_data,
       probs = args_list$quantile_levels, na.rm = TRUE, type = 8
     )))
   }
-  climate_quantiles <- epi_data %>%
+  # add on the centers and subtract them out before computing the quantiles
+  climate_quantiles <-
+    epi_data_target %>%
+    filter(.idx %in% entries) %>%
     left_join(climate_center, by = c(".idx", keys)) %>%
     mutate({{ outcome }} := !!sym_outcome - .pred) %>%
     select(.idx, .weights, all_of(c(outcome, args_list$quantile_by_key))) %>%
@@ -147,31 +182,17 @@ climatological_forecaster <- function(epi_data,
       ),
       .by = all_of(args_list$quantile_by_key)
     ) %>%
-    rename(.pred_distn = climate_pred) %>%
-    mutate(.pred_distn = hardhat::quantile_pred(do.call(rbind, .pred_distn), args_list$quantile_levels))
+    mutate(.pred_distn = hardhat::quantile_pred(do.call(rbind, climate_pred), args_list$quantile_levels)) %>%
+    select(-climate_pred)
   # combine them together
   climate_table <- climate_center %>%
-    left_join(climate_quantiles, by = c(".idx", args_list$quantile_by_key)) %>%
+    inner_join(climate_quantiles, by = c(".idx", args_list$quantile_by_key)) %>%
     mutate(.pred_distn = .pred_distn + .pred)
-  # create the predictions
-  predictions <- epi_data %>%
-    select(all_of(keys)) %>%
-    dplyr::distinct() %>%
-    mutate(forecast_date = forecast_date, .idx = time_aggr(forecast_date))
-  predictions <- map(horizon, ~ {
-    predictions %>%
-      mutate(.idx = .idx + .x, target_date = forecast_date + ttype_dur(.x))
-  }) %>%
-    purrr::list_rbind() %>%
-    mutate(
-      .idx = .idx %% modulus,
-      .idx = dplyr::case_when(.idx == 0 ~ modulus, TRUE ~ .idx)
-    ) %>%
+  predictions <- predictions %>%
     left_join(climate_table, by = c(".idx", keys)) %>%
     select(-.idx)
   if (args_list$nonneg) {
-    predictions <- mutate(
-      predictions,
+    predictions <- predictions %>% mutate(
       .pred = snap(.pred, 0, Inf),
       .pred_distn = snap(.pred_distn, 0, Inf)
     )
