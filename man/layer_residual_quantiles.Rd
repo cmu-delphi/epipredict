@@ -23,7 +23,11 @@ layer_residual_quantiles(
 referring to the desired quantile. Note that 0.5 will always be included
 even if left out by the user.}
 
-\item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
+\item{symmetrize}{logical. If \code{TRUE} then the interval will be symmetric.
+This is achieved by including both the residuals and their negations.
+Typically, one would only want non-symmetric quantiles when increasing
+trajectories are quite different from decreasing ones, such as a strictly
+postive variable near zero.}
 
 \item{by_key}{A character vector of keys to group the residuals by before
 calculating quantiles. The default, \code{c()} performs no grouping.}

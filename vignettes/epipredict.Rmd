@@ -264,16 +264,16 @@ This is a different method of generating a flatline forecast, used as a baseline
 for [COVID19ForecastHub](https://covid19forecasthub.org).
 
 ```{r make-cdc-forecast, warning=FALSE}
-all_cdc_flatline <- 
-cdc_baseline_forecaster(
-  covid_case_death_rates |>
-    filter(time_value <= forecast_date, geo_value %in% used_locations),
-  outcome = "death_rate",
-  args_list = cdc_baseline_args_list(
-    aheads = 1:28,
-    data_frequency = "1 day"
+all_cdc_flatline <-
+  cdc_baseline_forecaster(
+    covid_case_death_rates |>
+      filter(time_value <= forecast_date, geo_value %in% used_locations),
+    outcome = "death_rate",
+    args_list = cdc_baseline_args_list(
+      aheads = 1:28,
+      data_frequency = "1 day"
+    )
   )
-)
 # same plotting code as in the arx multi-ahead case
 workflow <- all_cdc_flatline$epi_workflow
 results <- all_cdc_flatline$predictions

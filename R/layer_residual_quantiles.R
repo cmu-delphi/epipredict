@@ -10,7 +10,11 @@
 #' @param quantile_levels numeric vector of probabilities with values in (0,1)
 #'   referring to the desired quantile. Note that 0.5 will always be included
 #'   even if left out by the user.
-#' @param symmetrize logical. If `TRUE` then interval will be symmetric.
+#' @param symmetrize logical. If `TRUE` then the interval will be symmetric.
+#'   This is achieved by including both the residuals and their negations.
+#'   Typically, one would only want non-symmetric quantiles when increasing
+#'   trajectories are quite different from decreasing ones, such as a strictly
+#'   postive variable near zero.
 #' @param by_key A character vector of keys to group the residuals by before
 #'   calculating quantiles. The default, `c()` performs no grouping.
 #' @param name character. The name for the output column.
@@ -96,7 +100,7 @@ slather.layer_residual_quantiles <-
       return(components)
     }
 
-    s <- ifelse(object$symmetrize, -1, NA)
+    symmetric <- ifelse(object$symmetrize, -1, NA)
     r <- grab_residuals(the_fit, components)
 
     ## Handle any grouping requests
@@ -131,7 +135,7 @@ slather.layer_residual_quantiles <-
 
     r <- r %>%
       summarize(dstn = quantile_pred(matrix(quantile(
-        c(.resid, s * .resid),
+        c(.resid, symmetric * .resid),
         probs = object$quantile_levels, na.rm = TRUE
       ), nrow = 1), quantile_levels = object$quantile_levels))
     # Check for NA

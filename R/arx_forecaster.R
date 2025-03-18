@@ -268,10 +268,13 @@ arx_fcast_epi_workflow <- function(
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
-#' @param symmetrize Logical. The default `TRUE` calculates
-#'   symmetric prediction intervals. This argument only applies when
-#'   residual quantiles are used. It is not applicable with
-#'   `trainer = quantile_reg()`, for example.
+#' @param symmetrize Logical. The default `TRUE` calculates symmetric prediction
+#'   intervals. This argument only applies when residual quantiles are used. It
+#'   is not applicable with `trainer = quantile_reg()`, for example. This is
+#'   achieved by including both the residuals and their negation. Typically, one
+#'   would only want non-symmetric quantiles when increasing trajectories are
+#'   quite different from decreasing ones, such as a strictly postive variable
+#'   near zero.
 #' @param nonneg Logical. The default `TRUE` enforces nonnegative predictions
 #'   by hard-thresholding at 0.
 #' @param quantile_by_key Character vector. Groups residuals by listed keys
