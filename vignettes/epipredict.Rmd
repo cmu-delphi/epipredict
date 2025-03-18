@@ -251,7 +251,6 @@ all_flatlines <- lapply(
 # same plotting code as in the arx multi-ahead case
 workflow <- all_flatlines[[1]]$epi_workflow
 results <- purrr::map_df(all_flatlines, ~ `$`(., "predictions"))
-results %>% filter(target_date == max(target_date))
 autoplot(
   object = workflow,
   predictions = results,
@@ -259,8 +258,39 @@ autoplot(
 )
 ```
 
-Note that the `cdc_baseline_forecaster` is a slight modification of this method
-for use in [the CDC COVID19 Forecasting Hub](https://covid19forecasthub.org/).
+### `cdc_baseline_forecaster()`
+
+This is a different method of generating a flatline forecast, used as a baseline
+for [COVID19ForecastHub](https://covid19forecasthub.org).
+
+```{r make-cdc-forecast, warning=FALSE}
+all_cdc_flatline <- 
+cdc_baseline_forecaster(
+  covid_case_death_rates |>
+    filter(time_value <= forecast_date, geo_value %in% used_locations),
+  outcome = "death_rate",
+  args_list = cdc_baseline_args_list(
+    aheads = 1:28,
+    data_frequency = "1 day"
+  )
+)
+# same plotting code as in the arx multi-ahead case
+workflow <- all_cdc_flatline$epi_workflow
+results <- all_cdc_flatline$predictions
+autoplot(
+  object = workflow,
+  predictions = results,
+  plot_data = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+)
+```
+
+The median is the same, but the quantiles are generated using
+`layer_cdc_flatline_quantiles()` instead of `layer_residual_quantiles()`.
+Both rely on the computing the quantiles of the residuals, but this model
+extrapolates the quantiles by repeatedly sampling the initial quantiles to
+generate the next quantiles.
+This results in much smoother quantiles, but ones that only capture the
+one-ahead uncertainty.
 
 ### `climatological_forecaster()`
 A different kind of baseline, the `climatological_forecaster()` forecasts the
