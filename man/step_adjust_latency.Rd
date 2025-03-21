@@ -140,7 +140,7 @@ toy_recipe \%>\%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2015-01-14
-#> 
+#>
 #> # A tibble: 8 x 4
 #>   geo_value time_value     a     b
 #>   <chr>     <date>     <dbl> <dbl>
@@ -176,7 +176,7 @@ toy_recipe \%>\%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2015-01-14
-#> 
+#>
 #> # A tibble: 21 x 7
 #>    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a
 #>    <chr>     <date>     <dbl> <dbl>   <dbl>   <dbl>     <dbl>
@@ -224,7 +224,7 @@ toy_recipe \%>\%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2015-01-14
-#> 
+#>
 #> # A tibble: 10 x 6
 #>    geo_value time_value     a     b lag_0_a ahead_3_a
 #>    <chr>     <date>     <dbl> <dbl>   <dbl>     <dbl>
@@ -296,7 +296,7 @@ rates_fit
 
 }
 \seealso{
-Other row operation steps: 
+Other row operation steps:
 \code{\link{step_epi_lag}()},
 \code{\link{step_growth_rate}()},
 \code{\link{step_lag_difference}()}

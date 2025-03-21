@@ -1,0 +1,141 @@
+test_that("Yeo-Johnson transformation inverts correctly", {
+  # Note that the special lambda values of 0 and 2 are covered by the tests
+  # below.
+  expect_true(
+    map_lgl(seq(-5, 5, 0.1), function(lambda) {
+      map_lgl(seq(-10, 10, 0.1), \(x) abs(yj_inverse(yj_transform(x, lambda), lambda) - x) < 0.00001) %>% all()
+    }) %>%
+      all()
+  )
+})
+
+test_that("Yeo-Johnson steps and layers invert each other", {
+  jhu <- epidatasets::cases_deaths_subset %>%
+    filter(time_value > "2021-01-01", geo_value %in% c("ca", "ny")) %>%
+    select(geo_value, time_value, cases)
+  filtered_data <- jhu
+
+  # Get some lambda values
+  r <- epi_recipe(filtered_data) %>%
+    step_epi_YeoJohnson(cases) %>%
+    step_epi_lag(cases, lag = 0) %>%
+    step_epi_ahead(cases, ahead = 0, role = "outcome") %>%
+    step_epi_naomit()
+  tr <- r %>% prep(filtered_data)
+
+  # Check general lambda values tibble structure
+  expect_true(".lambda_cases" %in% names(tr$steps[[1]]$lambdas))
+  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_cases))
+  # Still works on a tibble
+  expect_equal(
+    tr %>% bake(filtered_data %>% as_tibble()),
+    tr %>% bake(filtered_data)
+  )
+
+  # Make sure that the inverse transformation works
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_epi_YeoJohnson(.pred)
+  wf <- epi_workflow(r, linear_reg()) %>%
+    fit(filtered_data) %>%
+    add_frosting(f)
+  out1 <- filtered_data %>%
+    as_tibble() %>%
+    slice_max(time_value, by = geo_value)
+  out2 <- forecast(wf) %>% rename(cases = .pred)
+  expect_equal(out1, out2)
+
+  # Make sure it works when there are multiple predictors and outcomes
+  jhu_multi <- epidatasets::covid_case_death_rates_extended %>%
+    filter(time_value > "2021-01-01", geo_value %in% c("ca", "ny")) %>%
+    select(geo_value, time_value, case_rate, death_rate)
+  filtered_data <- jhu_multi
+  r <- epi_recipe(filtered_data) %>%
+    step_epi_YeoJohnson(case_rate, death_rate) %>%
+    step_epi_lag(case_rate, death_rate, lag = 0) %>%
+    step_epi_ahead(case_rate, death_rate, ahead = 0, role = "outcome") %>%
+    step_epi_naomit()
+  tr <- r %>% prep(filtered_data)
+
+  # Check general lambda values tibble structure
+  expect_true(".lambda_case_rate" %in% names(tr$steps[[1]]$lambdas))
+  expect_true(".lambda_death_rate" %in% names(tr$steps[[1]]$lambdas))
+  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_case_rate))
+  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_death_rate))
+
+  # Make sure that the inverse transformation works
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_epi_YeoJohnson(.pred_ahead_0_case_rate, .pred_ahead_0_death_rate)
+  wf <- epi_workflow(r, linear_reg()) %>%
+    fit(filtered_data) %>%
+    add_frosting(f)
+  out1 <- filtered_data %>%
+    as_tibble() %>%
+    slice_max(time_value, by = geo_value)
+  # debugonce(slather.layer_epi_YeoJohnson)
+  out2 <- forecast(wf) %>% rename(case_rate = .pred_ahead_0_case_rate, death_rate = .pred_ahead_0_death_rate)
+  expect_equal(out1, out2)
+})
+
+test_that("Yeo-Johnson steps and layers invert each other when other_keys are present", {
+  # Small synthetic grad_employ_dataset version.
+  filtered_data <- tribble(
+    ~geo_value, ~age_group, ~edu_qual, ~time_value, ~med_income_2y,
+    "ca", "25-34", "bachelor", 2017, 50000,
+    "ca", "25-34", "bachelor", 2018, 50500,
+    "ca", "25-34", "bachelor", 2019, 51000,
+    "ca", "25-34", "bachelor", 2020, 51500,
+    "ca", "25-34", "bachelor", 2021, 52000,
+    "ca", "25-34", "bachelor", 2022, 52500,
+    "ca", "35-1000", "bachelor", 2017, 3e10,
+    "ca", "35-1000", "bachelor", 2018, 3e10 + 10,
+    "ca", "35-1000", "bachelor", 2019, 3e10 + 20,
+    "ca", "35-1000", "bachelor", 2020, 3e10 + 30,
+    "ca", "35-1000", "bachelor", 2021, 3e10 + 40,
+    "ca", "35-1000", "bachelor", 2022, 3e10 + 50,
+    "ca", "25-34", "master", 2017, 2 * 50000,
+    "ca", "25-34", "master", 2018, 2 * 50500,
+    "ca", "25-34", "master", 2019, 2 * 51000,
+    "ca", "25-34", "master", 2020, 2 * 51500,
+    "ca", "25-34", "master", 2021, 2 * 52000,
+    "ca", "25-34", "master", 2022, 2 * 52500,
+    "ca", "35-1000", "master", 2017, 2 * 3e10,
+    "ca", "35-1000", "master", 2018, 2 * (3e10 + 10),
+    "ca", "35-1000", "master", 2019, 2 * (3e10 + 20),
+    "ca", "35-1000", "master", 2020, 2 * (3e10 + 30),
+    "ca", "35-1000", "master", 2021, 2 * (3e10 + 40),
+    "ca", "35-1000", "master", 2022, 2 * (3e10 + 50)
+  ) %>% as_epi_df(other_keys = c("age_group", "edu_qual"))
+
+  # Get some lambda values
+  r <- epi_recipe(filtered_data) %>%
+    step_epi_YeoJohnson(med_income_2y) %>%
+    step_epi_lag(med_income_2y, lag = 0) %>%
+    step_epi_ahead(med_income_2y, ahead = 0, role = "outcome") %>%
+    step_epi_naomit()
+  tr <- r %>% prep(filtered_data)
+  expect_true(".lambda_med_income_2y" %in% names(tr$steps[[1]]$lambdas))
+  expect_true("geo_value" %in% names(tr$steps[[1]]$lambdas))
+  expect_true("age_group" %in% names(tr$steps[[1]]$lambdas))
+  expect_true("edu_qual" %in% names(tr$steps[[1]]$lambdas))
+  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_med_income_2y))
+
+  # Make sure that the inverse transformation works
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_epi_YeoJohnson(.pred)
+  wf <- epi_workflow(r, linear_reg()) %>%
+    fit(filtered_data) %>%
+    add_frosting(f)
+  out1 <- filtered_data %>%
+    as_tibble() %>%
+    slice_max(time_value, by = geo_value) %>%
+    select(geo_value, age_group, time_value, med_income_2y) %>%
+    arrange(geo_value, age_group, time_value)
+  out2 <- forecast(wf) %>%
+    rename(med_income_2y = .pred) %>%
+    select(geo_value, age_group, time_value, med_income_2y) %>%
+    arrange(geo_value, age_group, time_value)
+  expect_equal(out1, out2)
+})
