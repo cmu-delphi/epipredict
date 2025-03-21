@@ -270,6 +270,6 @@ forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = 
     hardhat::extract_preprocessor(object),
     object$original_data
   )
-
+  test_data
   predict(object, new_data = test_data)
 }

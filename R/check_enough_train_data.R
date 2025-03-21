@@ -47,7 +47,7 @@ check_enough_train_data <-
            role = NA,
            trained = FALSE,
            columns = NULL,
-           skip = TRUE,
+           skip = FALSE,
            id = rand_id("enough_train_data")) {
     recipes::add_check(
       recipe,
@@ -90,7 +90,7 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
   }
 
   if (x$drop_na) {
-    training <- tidyr::drop_na(training)
+    training <- tidyr::drop_na(training, any_of(unname(col_names)))
   }
   cols_not_enough_data <- training %>%
     group_by(across(all_of(.env$x$epi_keys))) %>%
@@ -101,7 +101,8 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
 
   if (length(cols_not_enough_data) > 0) {
     cli_abort(
-      "The following columns don't have enough data to predict: {cols_not_enough_data}."
+      "The following columns don't have enough data to predict: {cols_not_enough_data}.",
+      class = "epipredict__not_enough_train_data"
     )
   }
 
@@ -120,6 +121,23 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.check_enough_train_data <- function(object, new_data, ...) {
+  col_names <- object$columns
+  if (object$drop_na) {
+    newish_data <- tidyr::drop_na(new_data, any_of(unname(col_names)))
+  }
+  cols_not_enough_data <- newish_data %>%
+    group_by(across(all_of(.env$object$epi_keys))) %>%
+    summarise(across(all_of(.env$col_names), ~ dplyr::n() < .env$object$n), .groups = "drop") %>%
+    summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
+    unlist() %>%
+    names(.)[.]
+
+  if (length(cols_not_enough_data) > 0) {
+    cli_abort(
+      "The following columns don't have enough data to predict: {cols_not_enough_data}.",
+      class = "epipredict__not_enough_train_data"
+    )
+  }
   new_data
 }
 
