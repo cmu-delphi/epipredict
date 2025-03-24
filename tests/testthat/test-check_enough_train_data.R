@@ -94,25 +94,26 @@ test_that("check_enough_train_data only checks train data", {
     epiprocess::as_epi_df()
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
-      check_enough_train_data(x, y, n = n - 2, epi_keys = "geo_value") %>%
+      check_enough_train_data(x, y, n = n - 2, epi_keys = "geo_value", skip = TRUE) %>%
       prep(toy_epi_df) %>%
       bake(new_data = toy_test_data)
   )
   # Same thing, but skip = FALSE
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
-      check_enough_train_data(y, n = n - 2, epi_keys = "geo_value", skip = FALSE) %>%
+      check_enough_train_data(y, n = n - 2, epi_keys = "geo_value") %>%
       prep(toy_epi_df) %>%
       bake(new_data = toy_test_data)
   )
 })
 
 test_that("check_enough_train_data works with all_predictors() downstream of constructed terms", {
-  # With a lag of 2, we will get 2 * n - 6 non-NA rows
+  # With a lag of 2, we will get 2 * n - 5 non-NA rows (NA's in x but not in the
+  # lags don't count)
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
-      check_enough_train_data(all_predictors(), y, n = 2 * n - 6) %>%
+      check_enough_train_data(all_predictors(), y, n = 2 * n - 5) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
   )
@@ -120,7 +121,7 @@ test_that("check_enough_train_data works with all_predictors() downstream of con
     error = TRUE,
     epi_recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
-      check_enough_train_data(all_predictors(), y, n = 2 * n - 5) %>%
+      check_enough_train_data(all_predictors(), y, n = 2 * n - 4) %>%
       prep(toy_epi_df) %>%
       bake(new_data = NULL)
   )

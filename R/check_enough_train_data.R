@@ -123,9 +123,11 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
 bake.check_enough_train_data <- function(object, new_data, ...) {
   col_names <- object$columns
   if (object$drop_na) {
-    newish_data <- tidyr::drop_na(new_data, any_of(unname(col_names)))
+    non_na_data <- tidyr::drop_na(new_data, any_of(unname(col_names)))
+  } else {
+    non_na_data <- new_data
   }
-  cols_not_enough_data <- newish_data %>%
+  cols_not_enough_data <- non_na_data %>%
     group_by(across(all_of(.env$object$epi_keys))) %>%
     summarise(across(all_of(.env$col_names), ~ dplyr::n() < .env$object$n), .groups = "drop") %>%
     summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%

@@ -38,7 +38,7 @@
 
     Code
       epi_recipe(toy_epi_df) %>% step_epi_lag(x, lag = c(1, 2)) %>%
-        check_enough_train_data(all_predictors(), y, n = 2 * n - 5) %>% prep(
+        check_enough_train_data(all_predictors(), y, n = 2 * n - 4) %>% prep(
         toy_epi_df) %>% bake(new_data = NULL)
     Condition
       Error in `prep()`:
