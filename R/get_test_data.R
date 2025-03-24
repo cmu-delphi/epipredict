@@ -14,6 +14,11 @@
 #' @param recipe A recipe object.
 #' @param x An epi_df. The typical usage is to
 #'   pass the same data as that used for fitting the recipe.
+#' @param test_interval A time interval or integer. The length of time before
+#'   the `forecast_date` to consider for the forecast. The default is 1 year,
+#'   which you will likely only need to make longer if you are doing long
+#'   forecast horizons, or shorter if you are forecasting using an expensive
+#'   model.
 #'
 #' @return An object of the same type as `x` with columns `geo_value`, `time_value`, any additional
 #'   keys, as well other variables in the original dataset.
@@ -27,8 +32,18 @@
 #' @importFrom rlang %@%
 #' @importFrom stats na.omit
 #' @export
-get_test_data <- function(recipe, x) {
+get_test_data <- function(recipe,
+                          x,
+                          test_interval,
+                          reference_date = NULL) {
   if (!is_epi_df(x)) cli_abort("`x` must be an `epi_df`.")
+  browser()
+  names(recipe)
+  reference_date <- reference_date %||% recipe$reference_date
+  full_data %>%
+    filter((max_time_value - time_value) < test_interval) %>%
+    arrange(time_value)
+
 
   check <- hardhat::check_column_names(x, colnames(recipe$template))
   if (!check$ok) {
@@ -73,4 +88,26 @@ get_test_data <- function(recipe, x) {
 
   filter(x, max_time_value - time_value <= keep) %>%
     epiprocess::ungroup()
+}
+
+#' get_test_data is broken, this is a hack that manually sets the amount of data
+#' kept to a large interval to avoid errors/missing data
+#' @param full_data the full data to narrow down from
+#' @param test_data_interval the amount of time to go backwards from the last
+#'   day
+get_oversized_test_data <- function(full_data, test_data_interval, preproc, source_value = "nhsn") {
+  # getting the max time value of data columns actually used
+  non_na_indicators <- preproc$var_info %>%
+    filter(role == "pre-predictor") %>%
+    pull(variable)
+  max_time_value <- full_data %>%
+    na.omit(non_na_indicators) %>%
+    pull(time_value) %>%
+    max()
+  if ("source" %in% names(full_data)) {
+    full_data <- full_data %>% filter(source == source_value)
+  }
+  full_data %>%
+    filter((max_time_value - time_value) < test_data_interval) %>%
+    arrange(time_value)
 }

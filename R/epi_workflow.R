@@ -162,6 +162,7 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
       i = "Do you need to call `fit()`?"
     ))
   }
+  browser()
   components <- list()
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
@@ -271,5 +272,6 @@ forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = 
     object$original_data
   )
 
-  predict(object, new_data = test_data)
+  predictions <- predict(object, new_data = test_data)
+
 }
