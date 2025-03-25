@@ -160,11 +160,14 @@ check_enough_data_core <- function(epi_df, step_obj, col_names, train_or_predict
         ),
         .groups = "drop"
       ) %>%
+      # Aggregate across keys (if present)
       summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
       unlist() %>%
       names(.)[.]
 
-    # if none of the single columns have enough data, that means its the combination of all of them
+    # Either all columns have enough data, in which case this message won't be
+    # sent later or none of the single columns have enough data, that means its
+    # the combination of all of them.
     if (length(cols_not_enough_data) == 0) {
       cols_not_enough_data <-
         glue::glue("no single column, but the combination of {paste0(col_names, collapse = ', ')}")
