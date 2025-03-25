@@ -27,16 +27,14 @@ test_that("check_enough_data works on pooled data", {
     error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_data(x, y, n = 2 * n + 1, drop_na = FALSE) %>%
-      prep(toy_epi_df) %>%
-      bake(new_data = NULL)
+      prep(toy_epi_df)
   )
   # Check drop_na works
   expect_snapshot(
     error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_data(x, y, n = 2 * n - 1, drop_na = TRUE) %>%
-      prep(toy_epi_df) %>%
-      bake(new_data = NULL)
+      prep(toy_epi_df)
   )
 })
 
@@ -53,16 +51,14 @@ test_that("check_enough_data works on unpooled data", {
     error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_data(x, y, n = n + 1, epi_keys = "geo_value", drop_na = FALSE) %>%
-      prep(toy_epi_df) %>%
-      bake(new_data = NULL)
+      prep(toy_epi_df)
   )
   # Check drop_na works
   expect_snapshot(
     error = TRUE,
     epi_recipe(toy_epi_df) %>%
       check_enough_data(x, y, n = 2 * n - 3, epi_keys = "geo_value", drop_na = TRUE) %>%
-      prep(toy_epi_df) %>%
-      bake(new_data = NULL)
+      prep(toy_epi_df)
   )
 })
 
@@ -85,7 +81,7 @@ test_that("check_enough_data outputs the correct recipe values", {
   expect_equal(p$geo_value, rep(c("ca", "hi"), each = n))
 })
 
-test_that("check_enough_train_data only checks train data", {
+test_that("check_enough_data only checks train data when skip = FALSE", {
   # Check that the train data has enough data, the test data does not, but
   # the check passes anyway (because it should be applied to training data)
   toy_test_data <- toy_epi_df %>%
@@ -94,16 +90,32 @@ test_that("check_enough_train_data only checks train data", {
     epiprocess::as_epi_df()
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
-      check_enough_train_data(x, y, n = n - 2, epi_keys = "geo_value", skip = TRUE) %>%
+      check_enough_data(x, y, n = n - 2, epi_keys = "geo_value") %>%
       prep(toy_epi_df) %>%
       bake(new_data = toy_test_data)
   )
-  # Same thing, but skip = FALSE
+  # Making sure `skip = TRUE` is working correctly in `predict`
   expect_no_error(
     epi_recipe(toy_epi_df) %>%
-      check_enough_train_data(y, n = n - 2, epi_keys = "geo_value") %>%
-      prep(toy_epi_df) %>%
-      bake(new_data = toy_test_data)
+      add_role(y, new_role = "outcome") %>%
+      check_enough_data(x, n = n - 2, epi_keys = "geo_value") %>%
+      epi_workflow(linear_reg()) %>%
+      fit(toy_epi_df) %>%
+      predict(new_data = toy_test_data %>% filter(time_value > "2020-01-08"))
+  )
+  # making sure it works for skip = FALSE, where there's enough data to train
+  # but not enough to predict
+  expect_no_error(
+    forecaster <- epi_recipe(toy_epi_df) %>%
+      add_role(y, new_role = "outcome") %>%
+      check_enough_data(x, n = 1, epi_keys = "geo_value", skip = FALSE) %>%
+      epi_workflow(linear_reg()) %>%
+      fit(toy_epi_df)
+  )
+  expect_snapshot(
+    error = TRUE,
+    forecaster %>%
+      predict(new_data = toy_test_data %>% filter(time_value > "2020-01-08"))
   )
 })
 
@@ -122,7 +134,6 @@ test_that("check_enough_data works with all_predictors() downstream of construct
     epi_recipe(toy_epi_df) %>%
       step_epi_lag(x, lag = c(1, 2)) %>%
       check_enough_data(all_predictors(), y, n = 2 * n - 4) %>%
-      prep(toy_epi_df) %>%
-      bake(new_data = NULL)
+      prep(toy_epi_df)
   )
 })

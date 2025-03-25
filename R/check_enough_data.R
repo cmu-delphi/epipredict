@@ -94,22 +94,8 @@ prep.check_enough_data <- function(x, training, info = NULL, ...) {
     x$n <- length(col_names)
   }
 
-  if (x$drop_na) {
-    training <- tidyr::drop_na(training, any_of(unname(col_names)))
-  }
-  cols_not_enough_data <- training %>%
-    group_by(across(all_of(.env$x$epi_keys))) %>%
-    summarise(across(all_of(.env$col_names), ~ dplyr::n() < .env$x$n), .groups = "drop") %>%
-    summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
-    unlist() %>%
-    names(.)[.]
+  check_enough_data_core(training, x, col_names, "train")
 
-  if (length(cols_not_enough_data) > 0) {
-    cli_abort(
-      "The following columns don't have enough data to predict: {cols_not_enough_data}.",
-      class = "epipredict__not_enough_data"
-    )
-  }
 
   check_enough_data_new(
     n = x$n,
@@ -127,24 +113,7 @@ prep.check_enough_data <- function(x, training, info = NULL, ...) {
 #' @export
 bake.check_enough_data <- function(object, new_data, ...) {
   col_names <- object$columns
-  if (object$drop_na) {
-    non_na_data <- tidyr::drop_na(new_data, any_of(unname(col_names)))
-  } else {
-    non_na_data <- new_data
-  }
-  cols_not_enough_data <- non_na_data %>%
-    group_by(across(all_of(.env$object$epi_keys))) %>%
-    summarise(across(all_of(.env$col_names), ~ dplyr::n() < .env$object$n), .groups = "drop") %>%
-    summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
-    unlist() %>%
-    names(.)[.]
-
-  if (length(cols_not_enough_data) > 0) {
-    cli_abort(
-      "The following columns don't have enough data to predict: {cols_not_enough_data}.",
-      class = "epipredict__not_enough_data"
-    )
-  }
+  check_enough_data_core(new_data, object, col_names, "predict")
   new_data
 }
 
@@ -167,4 +136,60 @@ tidy.check_enough_data <- function(x, ...) {
   res$epi_keys <- x$epi_keys
   res$drop_na <- x$drop_na
   res
+}
+
+check_enough_data_core <- function(epi_df, step_obj, col_names, train_or_predict) {
+  epi_df <- epi_df %>%
+    group_by(across(all_of(.env$step_obj$epi_keys)))
+  if (step_obj$drop_na) {
+    any_missing_data <- epi_df %>%
+      mutate(any_are_na = rowSums(across(any_of(.env$col_names), ~ is.na(.x))) > 0) %>%
+      # count the number of rows where they're all not na
+      summarise(sum(any_are_na == 0) < .env$step_obj$n, .groups = "drop")
+    any_missing_data <- any_missing_data %>%
+      summarize(across(all_of(setdiff(names(any_missing_data), step_obj$epi_keys)), any)) %>%
+      any()
+
+    # figuring out which individual columns (if any) are to blame for this darth
+    # of data
+    cols_not_enough_data <- epi_df %>%
+      summarise(
+        across(
+          all_of(.env$col_names),
+          ~ sum(!is.na(.x)) < .env$step_obj$n
+        ),
+        .groups = "drop"
+      ) %>%
+      summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
+      unlist() %>%
+      names(.)[.]
+
+    if (length(cols_not_enough_data) == 0) {
+      cols_not_enough_data <-
+        glue::glue("no single column, but the combination of {paste0(col_names, collapse = ', ')}")
+    }
+  } else {
+    # if we're not dropping na values, just count
+    cols_not_enough_data <- epi_df %>%
+      summarise(
+        across(
+          all_of(.env$col_names),
+          ~ dplyr::n() < .env$step_obj$n
+        )
+      )
+    any_missing_data <- cols_not_enough_data %>%
+      summarize(across(all_of(.env$col_names), all)) %>%
+      all()
+    cols_not_enough_data <- cols_not_enough_data %>%
+      summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
+      unlist() %>%
+      names(.)[.]
+  }
+
+  if (any_missing_data) {
+    cli_abort(
+      "The following columns don't have enough data to {train_or_predict}: {cols_not_enough_data}.",
+      class = "epipredict__not_enough_data"
+    )
+  }
 }
