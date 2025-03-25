@@ -1,13 +1,13 @@
 #' Check the dataset contains enough data points.
 #'
-#' `check_enough_train_data` creates a *specification* of a recipe
+#' `check_enough_data` creates a *specification* of a recipe
 #'  operation that will check if variables contain enough data.
 #'
 #' @param recipe A recipe object. The check will be added to the
 #'  sequence of operations for this recipe.
 #' @param ... One or more selector functions to choose variables for this check.
 #'  See [selections()] for more details. You will usually want to use
-#'  [recipes::all_predictors()] here.
+#'  [recipes::all_predictors()] and/or [recipes::all_outcomes()] here.
 #' @param n The minimum number of data points required for training. If this is
 #'   NULL, the total number of predictors will be used.
 #' @param epi_keys A character vector of column names on which to group the data
@@ -21,24 +21,29 @@
 #' @param columns An internal argument that tracks which columns are evaluated
 #'   for this check. Should not be used by the user.
 #' @param id A character string that is unique to this check to identify it.
-#' @param skip A logical. Should the check be skipped when the
-#'  recipe is baked by [bake()]? While all operations are baked
-#'  when [prep()] is run, some operations may not be able to be
-#'  conducted on new data (e.g. processing the outcome variable(s)).
-#'  Care should be taken when using `skip = TRUE` as it may affect
-#'  the computations for subsequent operations.
+#' @param skip A logical. If `TRUE`, only training data is checked, while if
+#'   `FALSE`, both training and predicting data is checked. Technically, this
+#'   answers the question "should the check be skipped when the recipe is baked
+#'   by [bake()]?" While all operations are baked when [prep()] is run, some
+#'   operations may not be able to be conducted on new data (e.g. processing the
+#'   outcome variable(s)).  Care should be taken when using `skip = TRUE` as it
+#'   may affect the computations for subsequent operations.
 #' @family checks
 #' @export
-#' @details This check will break the `bake` function if any of the checked
-#'  columns have not enough non-NA values. If the check passes, nothing is
-#'  changed to the data.
+#' @details This check will break the `prep` and/or bake function if any of the
+#'   checked columns have not enough non-NA values. If the check passes, nothing
+#'   is changed in the data. It is best used after every other step.
+#'
+#'   For checking training data, it is best to set `...` to be
+#'   `all_predictors(), all_outcomes()`, while for checking prediction data, it
+#'   is best to set `...` to be `all_predictors()` only, with `n = 1`.
 #'
 #'  # tidy() results
 #'
 #'  When you [`tidy()`][tidy.recipe()] this check, a tibble with column
 #'  `terms` (the selectors or variables selected) is returned.
 #'
-check_enough_train_data <-
+check_enough_data <-
   function(recipe,
            ...,
            n = NULL,
@@ -47,11 +52,11 @@ check_enough_train_data <-
            role = NA,
            trained = FALSE,
            columns = NULL,
-           skip = FALSE,
-           id = rand_id("enough_train_data")) {
+           skip = TRUE,
+           id = rand_id("enough_data")) {
     recipes::add_check(
       recipe,
-      check_enough_train_data_new(
+      check_enough_data_new(
         n = n,
         epi_keys = epi_keys,
         drop_na = drop_na,
@@ -65,10 +70,10 @@ check_enough_train_data <-
     )
   }
 
-check_enough_train_data_new <-
+check_enough_data_new <-
   function(n, epi_keys, drop_na, terms, role, trained, columns, skip, id) {
     recipes::check(
-      subclass = "enough_train_data",
+      subclass = "enough_data",
       prefix = "check_",
       n = n,
       epi_keys = epi_keys,
@@ -83,7 +88,7 @@ check_enough_train_data_new <-
   }
 
 #' @export
-prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
+prep.check_enough_data <- function(x, training, info = NULL, ...) {
   col_names <- recipes::recipes_eval_select(x$terms, training, info)
   if (is.null(x$n)) {
     x$n <- length(col_names)
@@ -102,11 +107,11 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
   if (length(cols_not_enough_data) > 0) {
     cli_abort(
       "The following columns don't have enough data to predict: {cols_not_enough_data}.",
-      class = "epipredict__not_enough_train_data"
+      class = "epipredict__not_enough_data"
     )
   }
 
-  check_enough_train_data_new(
+  check_enough_data_new(
     n = x$n,
     epi_keys = x$epi_keys,
     drop_na = x$drop_na,
@@ -120,7 +125,7 @@ prep.check_enough_train_data <- function(x, training, info = NULL, ...) {
 }
 
 #' @export
-bake.check_enough_train_data <- function(object, new_data, ...) {
+bake.check_enough_data <- function(object, new_data, ...) {
   col_names <- object$columns
   if (object$drop_na) {
     non_na_data <- tidyr::drop_na(new_data, any_of(unname(col_names)))
@@ -137,21 +142,21 @@ bake.check_enough_train_data <- function(object, new_data, ...) {
   if (length(cols_not_enough_data) > 0) {
     cli_abort(
       "The following columns don't have enough data to predict: {cols_not_enough_data}.",
-      class = "epipredict__not_enough_train_data"
+      class = "epipredict__not_enough_data"
     )
   }
   new_data
 }
 
 #' @export
-print.check_enough_train_data <- function(x, width = max(20, options()$width - 30), ...) {
+print.check_enough_data <- function(x, width = max(20, options()$width - 30), ...) {
   title <- paste0("Check enough data (n = ", x$n, ") for ")
   recipes::print_step(x$columns, x$terms, x$trained, title, width)
   invisible(x)
 }
 
 #' @export
-tidy.check_enough_train_data <- function(x, ...) {
+tidy.check_enough_data <- function(x, ...) {
   if (recipes::is_trained(x)) {
     res <- tibble(terms = unname(x$columns))
   } else {

@@ -77,7 +77,7 @@ reference:
 
   - title: Epi recipe verification checks
     contents:
-      - check_enough_train_data
+      - check_enough_data
 
   - title: Forecast postprocessing
     desc: Create a series of postprocessing operations

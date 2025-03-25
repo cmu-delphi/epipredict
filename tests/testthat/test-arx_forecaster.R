@@ -40,6 +40,6 @@ test_that("warns if there's not enough data to predict", {
 
   expect_error(
     edf %>% arx_forecaster("value"),
-    class = "epipredict__not_enough_train_data"
+    class = "epipredict__not_enough_data"
   )
 })
