@@ -163,6 +163,7 @@ check_enough_data_core <- function(epi_df, step_obj, col_names, train_or_predict
       # Aggregate across keys (if present)
       summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
       unlist() %>%
+      # Select the names of the columns that are TRUE
       names(.)[.]
 
     # Either all columns have enough data, in which case this message won't be
@@ -187,6 +188,7 @@ check_enough_data_core <- function(epi_df, step_obj, col_names, train_or_predict
     cols_not_enough_data <- cols_not_enough_data %>%
       summarise(across(all_of(.env$col_names), any), .groups = "drop") %>%
       unlist() %>%
+      # Select the names of the columns that are TRUE
       names(.)[.]
   }
 
