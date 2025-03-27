@@ -8,8 +8,8 @@
 #' @param ... One or more selector functions to choose variables for this check.
 #'  See [selections()] for more details. You will usually want to use
 #'  [recipes::all_predictors()] and/or [recipes::all_outcomes()] here.
-#' @param n The minimum number of data points required for training. If this is
-#'   NULL, the total number of predictors will be used.
+#' @param min_data_points The minimum number of data points required for
+#'   training. If this is NULL, the total number of predictors will be used.
 #' @param epi_keys A character vector of column names on which to group the data
 #'   and check threshold within each group. Useful if your forecaster trains
 #'   per group (for example, per geo_value).
@@ -18,8 +18,6 @@
 #'  created.
 #' @param trained A logical for whether the selectors in `...`
 #' have been resolved by [prep()].
-#' @param columns An internal argument that tracks which columns are evaluated
-#'   for this check. Should not be used by the user.
 #' @param id A character string that is unique to this check to identify it.
 #' @param skip A logical. If `TRUE`, only training data is checked, while if
 #'   `FALSE`, both training and predicting data is checked. Technically, this
@@ -46,24 +44,23 @@
 check_enough_data <-
   function(recipe,
            ...,
-           n = NULL,
+           min_data_points = NULL,
            epi_keys = NULL,
            drop_na = TRUE,
            role = NA,
            trained = FALSE,
-           columns = NULL,
            skip = TRUE,
            id = rand_id("enough_data")) {
     recipes::add_check(
       recipe,
       check_enough_data_new(
-        n = n,
+        min_data_points = min_data_points,
         epi_keys = epi_keys,
         drop_na = drop_na,
         terms = enquos(...),
         role = role,
         trained = trained,
-        columns = columns,
+        columns = NULL,
         skip = skip,
         id = id
       )
@@ -71,11 +68,12 @@ check_enough_data <-
   }
 
 check_enough_data_new <-
-  function(n, epi_keys, drop_na, terms, role, trained, columns, skip, id) {
+  function(min_data_points, epi_keys, drop_na, terms,
+           role, trained, columns, skip, id) {
     recipes::check(
       subclass = "enough_data",
       prefix = "check_",
-      n = n,
+      min_data_points = min_data_points,
       epi_keys = epi_keys,
       drop_na = drop_na,
       terms = terms,
@@ -90,15 +88,14 @@ check_enough_data_new <-
 #' @export
 prep.check_enough_data <- function(x, training, info = NULL, ...) {
   col_names <- recipes::recipes_eval_select(x$terms, training, info)
-  if (is.null(x$n)) {
-    x$n <- length(col_names)
+  if (is.null(x$min_data_points)) {
+    x$min_data_points <- length(col_names)
   }
 
   check_enough_data_core(training, x, col_names, "train")
 
-
   check_enough_data_new(
-    n = x$n,
+    min_data_points = x$min_data_points,
     epi_keys = x$epi_keys,
     drop_na = x$drop_na,
     terms = x$terms,
@@ -119,7 +116,7 @@ bake.check_enough_data <- function(object, new_data, ...) {
 
 #' @export
 print.check_enough_data <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- paste0("Check enough data (n = ", x$n, ") for ")
+  title <- paste0("Check enough data (n = ", x$min_data_points, ") for ")
   recipes::print_step(x$columns, x$terms, x$trained, title, width)
   invisible(x)
 }
@@ -132,7 +129,7 @@ tidy.check_enough_data <- function(x, ...) {
     res <- tibble(terms = recipes::sel2char(x$terms))
   }
   res$id <- x$id
-  res$n <- x$n
+  res$min_data_points <- x$min_data_points
   res$epi_keys <- x$epi_keys
   res$drop_na <- x$drop_na
   res
@@ -145,18 +142,18 @@ check_enough_data_core <- function(epi_df, step_obj, col_names, train_or_predict
     any_missing_data <- epi_df %>%
       mutate(any_are_na = rowSums(across(any_of(.env$col_names), ~ is.na(.x))) > 0) %>%
       # count the number of rows where they're all not na
-      summarise(sum(any_are_na == 0) < .env$step_obj$n, .groups = "drop")
+      summarise(sum(any_are_na == 0) < .env$step_obj$min_data_points, .groups = "drop")
     any_missing_data <- any_missing_data %>%
       summarize(across(all_of(setdiff(names(any_missing_data), step_obj$epi_keys)), any)) %>%
       any()
 
-    # figuring out which individual columns (if any) are to blame for this darth
+    # figuring out which individual columns (if any) are to blame for this dearth
     # of data
     cols_not_enough_data <- epi_df %>%
       summarise(
         across(
           all_of(.env$col_names),
-          ~ sum(!is.na(.x)) < .env$step_obj$n
+          ~ sum(!is.na(.x)) < .env$step_obj$min_data_points
         ),
         .groups = "drop"
       ) %>%
@@ -176,12 +173,7 @@ check_enough_data_core <- function(epi_df, step_obj, col_names, train_or_predict
   } else {
     # if we're not dropping na values, just count
     cols_not_enough_data <- epi_df %>%
-      summarise(
-        across(
-          all_of(.env$col_names),
-          ~ dplyr::n() < .env$step_obj$n
-        )
-      )
+      summarise(across(all_of(.env$col_names), ~ dplyr::n() < .env$step_obj$min_data_points))
     any_missing_data <- cols_not_enough_data %>%
       summarize(across(all_of(.env$col_names), all)) %>%
       all()
