@@ -7,12 +7,11 @@
 check_enough_data(
   recipe,
   ...,
-  n = NULL,
+  min_data_points = NULL,
   epi_keys = NULL,
   drop_na = TRUE,
   role = NA,
   trained = FALSE,
-  columns = NULL,
   skip = TRUE,
   id = rand_id("enough_data")
 )
@@ -25,8 +24,8 @@ sequence of operations for this recipe.}
 See \code{\link[=selections]{selections()}} for more details. You will usually want to use
 \code{\link[recipes:has_role]{recipes::all_predictors()}} and/or \code{\link[recipes:has_role]{recipes::all_outcomes()}} here.}
 
-\item{n}{The minimum number of data points required for training. If this is
-NULL, the total number of predictors will be used.}
+\item{min_data_points}{The minimum number of data points required for
+training. If this is NULL, the total number of predictors will be used.}
 
 \item{epi_keys}{A character vector of column names on which to group the data
 and check threshold within each group. Useful if your forecaster trains
@@ -39,9 +38,6 @@ created.}
 
 \item{trained}{A logical for whether the selectors in \code{...}
 have been resolved by \code{\link[=prep]{prep()}}.}
-
-\item{columns}{An internal argument that tracks which columns are evaluated
-for this check. Should not be used by the user.}
 
 \item{skip}{A logical. If \code{TRUE}, only training data is checked, while if
 \code{FALSE}, both training and predicting data is checked. Technically, this
