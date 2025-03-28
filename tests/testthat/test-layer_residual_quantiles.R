@@ -103,7 +103,7 @@ test_that("Canned forecasters work with / without", {
   )
 
   expect_silent(
-    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"))
+    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"), args_list = arx_args_list(check_enough_data_n = 1))
   )
   expect_silent(
     flatline_forecaster(
