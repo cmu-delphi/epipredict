@@ -1,5 +1,5 @@
 ---
-title: "Get started with `{epipredict}`"
+title: "Get started with epipredict"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Get started with `{epipredict}`}
@@ -42,8 +42,8 @@ Towards that end, `{epipredict}` provides two main classes of tools:
 
 A set of basic, easy-to-use "canned" forecasters that work out of the box.
 We currently provide the following basic forecasters:
-  
-  * _Flatline forecaster_: predicts as the median the most recently seen value 
+
+  * _Flatline forecaster_: predicts as the median the most recently seen value
     with increasingly wide quantiles.
   * _Climatological forecaster_: predicts the median and quantiles based on the historical values around the same date in previous years.
   * _Autoregressive forecaster_: fits a model (e.g. linear regression) on
@@ -58,7 +58,7 @@ We currently provide the following basic forecasters:
 A framework for creating custom forecasters out of modular components, from
 which the canned forecasters were created.  There are three types of
 components:
- 
+
   * _Preprocessor_: transform the data before model training, such as converting
     counts to rates, creating smoothed columns, or [any `{recipes}`
     `step`](https://recipes.tidymodels.org/reference/index.html)
@@ -194,12 +194,12 @@ If you want to make further modifications, you will need a custom
 workflow; see the [Custom Epiworkflows vignette](custom_epiworkflows) for details.
 
 ## Generating multiple aheads
-Frequently, one doesn't want just a forecast for a single day, but a trajectory
-of forecasts for several weeks.
-We can do this with `arx_forecaster()` by looping over aheads; for
-example, to predict every day over a 4-week time period:
+We often want to generate a a trajectory
+of forecasts over a range of dates, rather than for a single day.
+We can do this with `arx_forecaster()` by looping over aheads.
+For example, to predict every day over a 4-week time period:
 
-```{r temp-thing}
+```{r aheads-loop}
 all_canned_results <- lapply(
   seq(0, 28),
   \(days_ahead) {
@@ -261,7 +261,7 @@ autoplot(
 ### `cdc_baseline_forecaster()`
 
 This is a different method of generating a flatline forecast, used as a baseline
-for [COVID19ForecastHub](https://covid19forecasthub.org).
+for [the CDC COVID-19 Forecasting Hub](https://covid19forecasthub.org).
 
 ```{r make-cdc-forecast, warning=FALSE}
 all_cdc_flatline <-
@@ -284,17 +284,18 @@ autoplot(
 )
 ```
 
-The median is the same, but the quantiles are generated using
+`cdc_baseline_forecaster()` and `flatline_forecaster()` generate medians in the same way, 
+but `cdc_baseline_forecaster()`'s quantiles are generated using
 `layer_cdc_flatline_quantiles()` instead of `layer_residual_quantiles()`.
-Both rely on the computing the quantiles of the residuals, but this model
-extrapolates the quantiles by repeatedly sampling the initial quantiles to
-generate the next quantiles.
+Both quantile-generating methods use the residuals to compute quantiles, but 
+`layer_cdc_flatline_quantiles()` extrapolates the quantiles by repeatedly 
+sampling the initial quantiles to generate the next set.
 This results in much smoother quantiles, but ones that only capture the
 one-ahead uncertainty.
 
 ### `climatological_forecaster()`
-A different kind of baseline, the `climatological_forecaster()` forecasts the
-point forecast and quantiles based on the historical values for this time of
+The `climatological_forecaster()` is a different kind of baseline. It produces a
+point forecast and quantiles based on the historical values for a given time of
 year, rather than extrapolating from recent values.
 For example, on the same dataset as above:
 ```{r make-climatological-forecast, warning=FALSE}
@@ -318,11 +319,12 @@ autoplot(
 )
 ```
 
-Note that we're using `covid_case_death_rates_extended` rather than
-`covid_case_death_rates`, since it starts in March of 2020 rather than December.
+Note that to have enough training data for this method, we're using 
+`covid_case_death_rates_extended`, which starts in March 2020, rather than
+`covid_case_death_rates`, which starts in December.
 Without at least a year's worth of historical data, it is impossible to do a
 climatological model.
-Even with only one year as we have here the resulting forecasts are unreliable.
+Even with one year of data, as we have here, the resulting forecasts are unreliable.
 
 One feature of the climatological baseline is that it forecasts multiple aheads
 simultaneously.
@@ -331,10 +333,9 @@ smooth_quantile_reg()`, which is built to handle multiple aheads simultaneously.
 
 ### `arx_classifier()`
 
-The most complicated of the canned forecasters, `arx_classifier` first
-translates the outcome into a growth rate, and then classifies that growth rate
-into bins.
-For example, on the same dataset and `forecast_date` as above, we get:
+Unlike the other canned forecasters, `arx_classifier` predicts binned growth rate.
+The forecaster converts the raw outcome variable into a growth rate, which it then bins and predicts, using bin thresholds provided by the user.
+For example, on the same dataset and `forecast_date` as above, this model outputs:
 
 ```{r discrete-rt}
 classifier <- arx_classifier(
@@ -352,14 +353,18 @@ classifier <- arx_classifier(
 classifier$predictions
 ```
 
-The prediction splits into 4 cases: `(-∞, -0.01)`, `(-0.01, 0.01)`,  `(0.01,
-0.1)`, and `(0.1, ∞)`.
-In this case, the classifier put all 4 of the states in the same category,
-`(0.01, 0.1)`. **TODO** _effected by the old data._
-The number and size of the categories is controlled by `breaks`, which gives the
-boundary values.
+The number and size of the growth rate categories is controlled by `breaks`, which define the
+bin boundaries.
 
-For comparison, the growth rates for the `target_date`, as computed using
+In this example, the custom `breaks` passed to `arx_class_args_list()` correspond to 4 bins:
+`(-∞, -0.01)`, `(-0.01, 0.01)`,  `(0.01, 0.1)`, and `(0.1, ∞)`.
+The bins can be interpreted as: the outcome variable is decreasing, approximately stable, slightly increasing, or increasing quickly.
+
+The returned `predictions` assigns each state to one of the growth rate bins.
+In this case, the classifier expects the growth rate for all 4 of the states to fall into the same category,
+`(-0.01, 0.01]`.
+
+To see how this model performed, let's compare to the actual growth rates for the `target_date`, as computed using
 `{epiprocess}`:
 
 ```{r growth_rate_results}
@@ -373,24 +378,29 @@ growth_rates <- covid_case_death_rates |>
 growth_rates |> filter(time_value == "2021-08-14")
 ```
 
-Unfortunately, this forecast was not particularly accurate, since for example
-`-1.39` is not remotely in the interval `(-0.01, 0.01]`.
+Unfortunately, this forecast was not particularly accurate. All real growth rates were larger than the predicted growth rates, with California (real growth rate `-1.39`) not remotely in the interval (`(-0.01, 0.01]`).
 
 
 ## Fitting multi-key panel data
 
-If you have multiple keys that are set in the `epi_df` as `other_keys`,
-`arx_forecaster` will automatically group by those as well.
-For example, predicting the number of graduates in each of the categories in `grad_employ` from above:
+If multiple keys are set in the `epi_df` as `other_keys`,
+`arx_forecaster` will automatically group by those in addition to the required geographic key.
+For example, predicting the number of graduates in each of the categories in `grad_employ_subset` from above:
 
 ```{r multi_key_forecast, warning=FALSE}
 # only fitting a subset, otherwise there are ~550 distinct pairs, which is bad for plotting
 edu_quals <- c("Undergraduate degree", "Professional degree")
 geo_values <- c("Quebec", "British Columbia")
-grad_forecast <- arx_forecaster(
-  grad_employ_subset |>
+
+grad_employ <- grad_employ_subset |>
     filter(time_value < 2017) |>
-    filter(edu_qual %in% edu_quals, geo_value %in% geo_values),
+    filter(edu_qual %in% edu_quals, geo_value %in% geo_values)
+
+grad_employ
+
+grad_forecast <- arx_forecaster(
+  grad_employ |>
+    filter(time_value < 2017),
   outcome = "num_graduates",
   predictors = c("num_graduates"),
   args_list = arx_args_list(
@@ -402,19 +412,20 @@ grad_forecast <- arx_forecaster(
 autoplot(
   grad_forecast$epi_workflow,
   grad_forecast$predictions,
-  grad_employ_subset |>
-    filter(edu_qual %in% edu_quals, geo_value %in% geo_values),
+  grad_employ,
 )
 ```
 
-The 8 graphs are all pairs of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
+The 8 graphs represent all combinations of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
 
 ## Fitting a non-geo-pooled model
 
-Because our internal methods fit a single model, to fit a non-geo-pooled model
-that has a different fit for each geography, one either needs a multi-level
-engine (which at the moment parsnip doesn't support), or one needs to map over
+The methods shown so far fit a single model across all geographic regions.
+This is called "geo-pooling". 
+To fit a non-geo-pooled model that fits each geography separately, one either needs a multi-level
+engine (which at the moment `{parsnip}` doesn't support), or one needs to loop over
 geographies.
+Here, we're using `purrr::map` to perform the loop.
 
 ```{r fit_non_geo_pooled, warning=FALSE}
 geo_values <- covid_case_death_rates |>
@@ -441,12 +452,11 @@ all_fits <-
 map_df(all_fits, ~ pluck(., "predictions"))
 ```
 
-This is both 56 times slower[^7], and uses far less data to fit each model.
-If the geographies are at all comparable, for example by normalization, we would
- get much better results by pooling.
+Fitting separate models for each geography is both 56 times slower[^7] than geo-pooling, and fits each model on far less data.
+If a dataset contains relatively few observations for each geography, fitting a geo-pooled model is likely to produce better, more stable results.
+However, geo-pooling can only be used if values are comparable in meaning and scale across geographies or can be made comparable, for example by normalization.
 
-If we wanted to build a geo-aware model, such as one that sets the constant in a
- linear regression fit to be different for each geography, we would need to build a [Custom workflow](custom_epiworkflows) with geography as a factor.
+If we wanted to build a geo-aware model, such as a linear regression with a different intercept for each geography, we would need to build a [custom workflow](custom_epiworkflows) with geography as a factor.
 
 # Anatomy of a canned forecaster
 ## Code object
@@ -468,21 +478,21 @@ four_week_ahead <- arx_forecaster(
 
 `four_week_ahead` has two components: an `epi_workflow`, and a table of
 `predictions`.
-The table of predictions is simply a tibble of the predictions,
+The table of predictions is a simple tibble,
 
 ```{r show_predictions}
 four_week_ahead$predictions
 ```
 
-`.pred` gives the point/median prediction, while `.pred_distn` is a
+where `.pred` gives the point/median prediction, and `.pred_distn` is a
 `dist_quantiles()` object representing a distribution through various quantile
 levels.
 The `[6]` in the name refers to the number of quantiles that have been
-explicitly created[^4]; by default, this covers a 90% prediction interval, or 5%
-and 95%.
+explicitly created[^4].
+By default, `.pred_distn` covers a 90% prediction interval, reporting the 5% and 95% quantiles.
 
 The `epi_workflow` is a significantly more complicated object, extending a
-`workflows::workflow()`  to include post-processing:
+`workflows::workflow()`  to include post-processing steps:
 
 ```{r show_workflow}
 four_week_ahead$epi_workflow
@@ -491,17 +501,17 @@ four_week_ahead$epi_workflow
 An `epi_workflow()` consists of 3 parts:
 
 - `Preprocessor`: a collection of steps that transform the data to be ready for
-      modelling. They come from this package or [any of the recipes
-      steps](https://recipes.tidymodels.org/reference/index.html);
-      `four_week_ahead` has 5 of these, and you can inspect them more closely by
+      modelling. Steps can be custom, as are those included in this package, 
+      or [be defined in `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
+      `four_week_ahead` has 5 steps; you can inspect them more closely by
       running `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.[^6]
 - `Model`: the actual model that does the fitting, given by a
-  `parsnip::model_spec`; `four_week_ahead` has the default of
-  `parsnip::linear_reg()`, which is a wrapper from `{parsnip}` for
+  `parsnip::model_spec`. `four_week_ahead` uses the default of
+  `parsnip::linear_reg()`, which is a `{parsnip}` wrapper for
   `stats::lm()`. You can inspect the model more closely by running
   `hardhat::extract_fit_recipe(four_week_ahead$epi_workflow)`.
 - `Postprocessor`: a collection of layers to be applied to the resulting
-  forecast, internal to this package. `four_week_ahead` just so happens to have
+  forecast. Layers are internal to this package. `four_week_ahead` just so happens to have
   5 of as these well. You can inspect the layers more closely by running
   `epipredict::extract_layers(four_week_ahead$epi_workflow)`.
 
@@ -510,7 +520,7 @@ extending `four_week_ahead` using the custom forecaster framework.
 
 ## Mathematical description
 
-Let's describe in more detail the actual fit model for a more minimal version of
+Let's look at the mathematical details of the model in more detail, using a minimal version of
 `four_week_ahead`:
 
 ```{r, four_week_again}
@@ -537,9 +547,9 @@ $$
 For example, $a_1$ is `lag_0_death_rate` above, with a value of `r hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"] `,
 while $a_5$ is `r hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"] `.
 
-The training data for fitting this linear model is created by creating a series
-of columns shifted by the appropriate amount; this makes it so that each row
-without `NA` values is a training point to fit the coefficients $a_0,\ldots, a_6$.
+The training data for fitting this linear model is constructed within the `arx_forecaster()` function by shifting a series
+of columns the appropriate amount -- based on the requested `lags`.
+Each row containing no `NA` values is used as a training observation to fit the coefficients $a_0,\ldots, a_6$.
 
 [^4]: in the case of a `{parsnip}` engine which doesn't explicitly predict
     quantiles, these quantiles are created using `layer_residual_quantiles()`,
