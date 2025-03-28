@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.13</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,6 +52,9 @@
 <li>Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (<code><a href="https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html" class="external-link">growth_rate()</a></code>). <code><a href="../reference/step_growth_rate.html">step_growth_rate()</a></code> has lost its <code>additional_gr_args_list</code> argument and now has an <code>na_rm</code> argument.</li>
 <li>Moves <code>epiprocess</code> out of depends (<a href="https://github.com/cmu-delphi/epipredict/issues/440" class="external-link">#440</a>). No internals have changed, but downstream users may need to add <code><a href="https://cmu-delphi.github.io/epiprocess/" class="external-link">library(epiprocess)</a></code> to existing code.</li>
 <li>Removes dependence on the <code>distributional</code> package, replacing the quantiles with <code><a href="https://hardhat.tidymodels.org/reference/quantile_pred.html" class="external-link">hardhat::quantile_pred()</a></code>. Some associated functions are deprecated with <code>lifecycle</code> messages.</li>
+<li>Rename <code>check_enough_train_data()</code> to <code><a href="../reference/check_enough_data.html">check_enough_data()</a></code>, and generalize it enough to use as a check on either training or testing.</li>
+<li>Add check for enough data to predict in <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code>
+</li>
 </ul></div>
 <div class="section level3">
 <h3 id="improvements-0-2">Improvements<a class="anchor" aria-label="anchor" href="#improvements-0-2"></a></h3>
@@ -68,6 +71,8 @@
 <li>Replace <code><a href="../reference/dist_quantiles.html">dist_quantiles()</a></code> with <code><a href="https://hardhat.tidymodels.org/reference/quantile_pred.html" class="external-link">hardhat::quantile_pred()</a></code>
 </li>
 <li>Allow <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile()</a></code> to threshold to an interval if desired (<a href="https://github.com/cmu-delphi/epipredict/issues/434" class="external-link">#434</a>)</li>
+<li>
+<code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> detects if there’s enough data to predict</li>
 </ul></div>
 <div class="section level3">
 <h3 id="bug-fixes-0-2">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-2"></a></h3>
@@ -117,8 +122,8 @@
 <li>use <code>checkmate</code> for input validation</li>
 <li>refactor quantile extrapolation (possibly creates different results)</li>
 <li>force <code>target_date</code> + <code>forecast_date</code> handling to match the time_type of the epi_df. allows for annual and weekly data</li>
-<li>add <code><a href="../reference/check_enough_train_data.html">check_enough_train_data()</a></code> that will error if training data is too small</li>
-<li>added <code><a href="../reference/check_enough_train_data.html">check_enough_train_data()</a></code> to <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code>
+<li>add <code>check_enough_train_data()</code> that will error if training data is too small</li>
+<li>added <code>check_enough_train_data()</code> to <code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code>
 </li>
 <li>
 <code><a href="../reference/layer_residual_quantiles.html">layer_residual_quantiles()</a></code> will now error if any of the residual quantiles are NA</li>

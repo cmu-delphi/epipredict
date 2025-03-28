@@ -19,7 +19,7 @@ event occurring and the event being reported."><meta name="robots" content="noin
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.13</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -211,7 +211,7 @@ forward to the <code>forecast_date</code>:</p>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; # A tibble: 8 x 4</span></span>
 <span><span class="co">#&gt;   geo_value time_value     a     b</span></span>
-<span><span class="co">#&gt; * &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt; 1 ca        2015-01-11   100     5</span></span>
 <span><span class="co">#&gt; 2 ca        2015-01-12   103    10</span></span>
 <span><span class="co">#&gt; 3 ca        2015-01-13   103    10</span></span>
@@ -247,7 +247,7 @@ latencies, the lags for each are adjusted separately. In the toy example:</p>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; # A tibble: 21 x 7</span></span>
 <span><span class="co">#&gt;    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a</span></span>
-<span><span class="co">#&gt;  * &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt;  1 ca        2015-01-10    NA    NA      NA      NA       100</span></span>
 <span><span class="co">#&gt;  2 ca        2015-01-11   100     5      NA      NA       103</span></span>
 <span><span class="co">#&gt;  3 ca        2015-01-12   103    10      NA      NA        NA</span></span>
@@ -293,7 +293,7 @@ the most latent data to insure there is data available. In the toy example:</p>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; # A tibble: 10 x 6</span></span>
 <span><span class="co">#&gt;    geo_value time_value     a     b lag_0_a ahead_3_a</span></span>
-<span><span class="co">#&gt;  * &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;</span></span>
 <span><span class="co">#&gt;  1 ca        2015-01-08    NA    NA      NA       100</span></span>
 <span><span class="co">#&gt;  2 ca        2015-01-09    NA    NA      NA       103</span></span>
 <span><span class="co">#&gt;  3 ca        2015-01-11   100     5     100        NA</span></span>
@@ -328,8 +328,8 @@ this step should go before both <code>step_epi_ahead</code> and <code>step_epi_l
 <p></p><div class="sourceCode r"><pre><code><span><span class="va">toy_recipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">toy_df</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>   <span class="fu"><a href="../reference/step_epi_shift.html">step_epi_lag</a></span><span class="op">(</span><span class="va">a</span>, lag<span class="op">=</span><span class="fl">0</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>   <span class="fu"><a href="../reference/step_adjust_latency.html">step_adjust_latency</a></span><span class="op">(</span><span class="va">a</span>, method <span class="op">=</span> <span class="st">"extend_lags"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: If `method` is "extend_lags" or "locf", then the previous `step_epi_lag`s won't</span></span>
-<span><span class="co">#&gt; work with modified data.</span></span></code></pre><p></p></div>
+<span><span class="co">#&gt; Warning: If `method` is "extend_lags" or "locf", then the previous `step_epi_lag`s won't work with</span></span>
+<span><span class="co">#&gt; modified data.</span></span></code></pre><p></p></div>
 <p>If you create columns that you then apply lags to (such as
 <code><a href="step_growth_rate.html">step_growth_rate()</a></code>), these should be created before
 <code>step_adjust_latency</code>, so any subseqent latency can be addressed.</p>

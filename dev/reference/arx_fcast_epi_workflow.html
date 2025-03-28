@@ -15,7 +15,7 @@ use quantile_reg()) but can be omitted."><meta name="robots" content="noindex"><
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.13</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.1.14</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -128,13 +128,14 @@ the type of forecasting model. See <code><a href="arx_args_list.html">arx_args_l
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Preprocessor ────────────────────────────────────────────────────────────────</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 6 Recipe steps.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7 Recipe steps.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1. step_epi_lag()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2. step_epi_lag()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 3. step_epi_ahead()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 4. step_naomit()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 5. step_naomit()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 6. step_training_window()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7. check_enough_data()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Model ───────────────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Linear Regression Model Specification (regression)</span>
@@ -165,13 +166,14 @@ the type of forecasting model. See <code><a href="arx_args_list.html">arx_args_l
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Preprocessor ────────────────────────────────────────────────────────────────</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 6 Recipe steps.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7 Recipe steps.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 1. step_epi_lag()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2. step_epi_lag()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 3. step_epi_ahead()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 4. step_naomit()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 5. step_naomit()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 6. step_training_window()</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7. check_enough_data()</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> ── Model ───────────────────────────────────────────────────────────────────────</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> quantile reg Model Specification (regression)</span>
