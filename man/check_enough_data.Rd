@@ -7,7 +7,7 @@
 check_enough_data(
   recipe,
   ...,
-  min_data_points = NULL,
+  min_observations = NULL,
   epi_keys = NULL,
   drop_na = TRUE,
   role = NA,
@@ -24,7 +24,7 @@ sequence of operations for this recipe.}
 See \code{\link[=selections]{selections()}} for more details. You will usually want to use
 \code{\link[recipes:has_role]{recipes::all_predictors()}} and/or \code{\link[recipes:has_role]{recipes::all_outcomes()}} here.}
 
-\item{min_data_points}{The minimum number of data points required for
+\item{min_observations}{The minimum number of data points required for
 training. If this is NULL, the total number of predictors will be used.}
 
 \item{epi_keys}{A character vector of column names on which to group the data

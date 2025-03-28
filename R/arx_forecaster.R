@@ -172,13 +172,13 @@ arx_fcast_epi_workflow <- function(
   r <- r %>%
     step_epi_naomit() %>%
     step_training_window(n_recent = args_list$n_training) %>%
-    check_enough_data(all_predictors(), min_data_points = 1, skip = FALSE)
+    check_enough_data(all_predictors(), min_observations = 1, skip = FALSE)
 
   if (!is.null(args_list$check_enough_data_n)) {
     r <- r %>% check_enough_data(
       all_predictors(),
       all_outcomes(),
-      min_data_points = args_list$check_enough_data_n,
+      min_observations = args_list$check_enough_data_n,
       epi_keys = args_list$check_enough_data_epi_keys,
       drop_na = FALSE
     )

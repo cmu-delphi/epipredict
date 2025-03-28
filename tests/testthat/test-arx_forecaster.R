@@ -32,7 +32,7 @@ test_that("warns if there's not enough data to predict", {
   ) %>%
     mutate(value = seq_len(nrow(.)) + rnorm(nrow(.))) %>%
     # Oct to May (flu season, ish) only:
-    filter(!between(as.POSIXlt(time_value)$mon + 1L, 6L, 9L)) %>%
+    filter(!dplyr::between(as.POSIXlt(time_value)$mon + 1L, 6L, 9L)) %>%
     # and actually, pretend we're around mid-October 2022:
     filter(time_value <= as.Date("2022-10-12")) %>%
     as_epi_df(as_of = as.Date("2022-10-12"))
