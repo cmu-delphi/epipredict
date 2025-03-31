@@ -205,13 +205,14 @@ yj_inverse <- function(x, lambda, eps = 0.001) {
   is_neg <- ind_neg[["is"]]
 
   nn_inv_trans <- function(x, lambda) {
-    if (abs(lambda) < eps) {
-      # log(x + 1)
-      exp(x) - 1
-    } else {
-      # ((x + 1)^lambda - 1) / lambda
-      (lambda * x + 1)^(1 / lambda) - 1
-    }
+    out <- double(length(x))
+    sm_lambdas <- abs(lambda) < eps
+    out[sm_lambdas] <- exp(x[sm_lambdas]) - 1
+    x <- x[!sm_lambdas]
+    lambda <- lambda[!sm_lambdas]
+    out[!sm_lambdas] <- (lambda * x + 1)^(1 / lambda) - 1
+    out
+  }
   }
 
   ng_inv_trans <- function(x, lambda) {
