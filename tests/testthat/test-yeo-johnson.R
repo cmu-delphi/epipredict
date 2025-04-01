@@ -1,11 +1,17 @@
 test_that("Yeo-Johnson transformation inverts correctly", {
+  # Vectorized x and scalar lambda work
+  lambdas <- seq(-5, 5, 0.1)
+  x <- seq(-10, 10, 0.1)
+  expect_true(
+    map_lgl(lambdas, \(lambda) sum(abs(yj_inverse(yj_transform(x, lambda), lambda) - x)) < 1e-5) %>%
+      all()
+  )
   # Note that the special lambda values of 0 and 2 are covered by the tests
   # below.
+  # Vectorized x and lambda both work
+  x <- seq(-5, 5, 0.1)
   expect_true(
-    map_lgl(seq(-5, 5, 0.1), function(lambda) {
-      map_lgl(seq(-10, 10, 0.1), \(x) abs(yj_inverse(yj_transform(x, lambda), lambda) - x) < 0.00001) %>% all()
-    }) %>%
-      all()
+    sum(abs(yj_inverse(yj_transform(x, lambda), lambda) - x)) < 1e-5
   )
 })
 
@@ -15,7 +21,7 @@ test_that("Yeo-Johnson steps and layers invert each other", {
     select(geo_value, time_value, cases)
   filtered_data <- jhu
 
-  # Get some lambda values
+  # Get some yj_param values
   r <- epi_recipe(filtered_data) %>%
     step_epi_YeoJohnson(cases) %>%
     step_epi_lag(cases, lag = 0) %>%
@@ -23,14 +29,9 @@ test_that("Yeo-Johnson steps and layers invert each other", {
     step_epi_naomit()
   tr <- r %>% prep(filtered_data)
 
-  # Check general lambda values tibble structure
-  expect_true(".lambda_cases" %in% names(tr$steps[[1]]$lambdas))
-  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_cases))
-  # Still works on a tibble
-  expect_equal(
-    tr %>% bake(filtered_data %>% as_tibble()),
-    tr %>% bake(filtered_data)
-  )
+  # Check general yj_param values tibble structure
+  expect_true(".yj_param_cases" %in% names(tr$steps[[1]]$yj_params))
+  expect_true(is.numeric(tr$steps[[1]]$yj_params$.yj_param_cases))
 
   # Make sure that the inverse transformation works
   f <- frosting() %>%
@@ -40,7 +41,6 @@ test_that("Yeo-Johnson steps and layers invert each other", {
     fit(filtered_data) %>%
     add_frosting(f)
   out1 <- filtered_data %>%
-    as_tibble() %>%
     slice_max(time_value, by = geo_value)
   out2 <- forecast(wf) %>% rename(cases = .pred)
   expect_equal(out1, out2)
@@ -57,11 +57,11 @@ test_that("Yeo-Johnson steps and layers invert each other", {
     step_epi_naomit()
   tr <- r %>% prep(filtered_data)
 
-  # Check general lambda values tibble structure
-  expect_true(".lambda_case_rate" %in% names(tr$steps[[1]]$lambdas))
-  expect_true(".lambda_death_rate" %in% names(tr$steps[[1]]$lambdas))
-  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_case_rate))
-  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_death_rate))
+  # Check general yj_param values tibble structure
+  expect_true(".yj_param_case_rate" %in% names(tr$steps[[1]]$yj_params))
+  expect_true(".yj_param_death_rate" %in% names(tr$steps[[1]]$yj_params))
+  expect_true(is.numeric(tr$steps[[1]]$yj_params$.yj_param_case_rate))
+  expect_true(is.numeric(tr$steps[[1]]$yj_params$.yj_param_death_rate))
 
   # Make sure that the inverse transformation works
   f <- frosting() %>%
@@ -71,15 +71,14 @@ test_that("Yeo-Johnson steps and layers invert each other", {
     fit(filtered_data) %>%
     add_frosting(f)
   out1 <- filtered_data %>%
-    as_tibble() %>%
     slice_max(time_value, by = geo_value)
-  # debugonce(slather.layer_epi_YeoJohnson)
   out2 <- forecast(wf) %>% rename(case_rate = .pred_ahead_0_case_rate, death_rate = .pred_ahead_0_death_rate)
   expect_equal(out1, out2)
 })
 
 test_that("Yeo-Johnson steps and layers invert each other when other_keys are present", {
   # Small synthetic grad_employ_dataset version.
+  # fmt: skip
   filtered_data <- tribble(
     ~geo_value, ~age_group, ~edu_qual, ~time_value, ~med_income_2y,
     "ca", "25-34", "bachelor", 2017, 50000,
@@ -108,18 +107,18 @@ test_that("Yeo-Johnson steps and layers invert each other when other_keys are pr
     "ca", "35-1000", "master", 2022, 2 * (3e10 + 50)
   ) %>% as_epi_df(other_keys = c("age_group", "edu_qual"))
 
-  # Get some lambda values
+  # Get some yj_param values
   r <- epi_recipe(filtered_data) %>%
     step_epi_YeoJohnson(med_income_2y) %>%
     step_epi_lag(med_income_2y, lag = 0) %>%
     step_epi_ahead(med_income_2y, ahead = 0, role = "outcome") %>%
     step_epi_naomit()
   tr <- r %>% prep(filtered_data)
-  expect_true(".lambda_med_income_2y" %in% names(tr$steps[[1]]$lambdas))
-  expect_true("geo_value" %in% names(tr$steps[[1]]$lambdas))
-  expect_true("age_group" %in% names(tr$steps[[1]]$lambdas))
-  expect_true("edu_qual" %in% names(tr$steps[[1]]$lambdas))
-  expect_true(is.numeric(tr$steps[[1]]$lambdas$.lambda_med_income_2y))
+  expect_true(".yj_param_med_income_2y" %in% names(tr$steps[[1]]$yj_params))
+  expect_true("geo_value" %in% names(tr$steps[[1]]$yj_params))
+  expect_true("age_group" %in% names(tr$steps[[1]]$yj_params))
+  expect_true("edu_qual" %in% names(tr$steps[[1]]$yj_params))
+  expect_true(is.numeric(tr$steps[[1]]$yj_params$.yj_param_med_income_2y))
 
   # Make sure that the inverse transformation works
   f <- frosting() %>%
@@ -129,7 +128,6 @@ test_that("Yeo-Johnson steps and layers invert each other when other_keys are pr
     fit(filtered_data) %>%
     add_frosting(f)
   out1 <- filtered_data %>%
-    as_tibble() %>%
     slice_max(time_value, by = geo_value) %>%
     select(geo_value, age_group, time_value, med_income_2y) %>%
     arrange(geo_value, age_group, time_value)

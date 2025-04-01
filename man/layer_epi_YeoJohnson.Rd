@@ -7,7 +7,7 @@
 layer_epi_YeoJohnson(
   frosting,
   ...,
-  lambdas = NULL,
+  yj_params = NULL,
   by = NULL,
   id = rand_id("epi_YeoJohnson")
 )
@@ -19,7 +19,7 @@ sequence of operations for this frosting.}
 \item{...}{One or more selector functions to scale variables
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
-\item{lambdas}{Internal. A data frame of lambda values to be used for
+\item{yj_params}{Internal. A data frame of parameters to be used for
 inverting the transformation.}
 
 \item{by}{A (possibly named) character vector of variables to join by.}

@@ -2,14 +2,10 @@
 #'
 #' Will undo a step_epi_YeoJohnson transformation.
 #'
-#' @param frosting a `frosting` postprocessor. The layer will be added to the
-#'   sequence of operations for this frosting.
-#' @param lambdas Internal. A data frame of lambda values to be used for
+#' @inheritParams layer_population_scaling
+#' @param yj_params Internal. A data frame of parameters to be used for
 #'   inverting the transformation.
-#' @param ... One or more selector functions to scale variables
-#'   for this step. See [recipes::selections()] for more details.
 #' @param by A (possibly named) character vector of variables to join by.
-#' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
@@ -41,13 +37,13 @@
 #' # Compare to the original data.
 #' jhu %>% filter(time_value == "2021-12-31")
 #' forecast(wf)
-layer_epi_YeoJohnson <- function(frosting, ..., lambdas = NULL, by = NULL, id = rand_id("epi_YeoJohnson")) {
-  checkmate::assert_tibble(lambdas, min.rows = 1, null.ok = TRUE)
+layer_epi_YeoJohnson <- function(frosting, ..., yj_params = NULL, by = NULL, id = rand_id("epi_YeoJohnson")) {
+  checkmate::assert_tibble(yj_params, min.rows = 1, null.ok = TRUE)
 
   add_layer(
     frosting,
     layer_epi_YeoJohnson_new(
-      lambdas = lambdas,
+      yj_params = yj_params,
       by = by,
       terms = dplyr::enquos(...),
       id = id
@@ -55,8 +51,8 @@ layer_epi_YeoJohnson <- function(frosting, ..., lambdas = NULL, by = NULL, id = 
   )
 }
 
-layer_epi_YeoJohnson_new <- function(lambdas, by, terms, id) {
-  layer("epi_YeoJohnson", lambdas = lambdas, by = by, terms = terms, id = id)
+layer_epi_YeoJohnson_new <- function(yj_params, by, terms, id) {
+  layer("epi_YeoJohnson", yj_params = yj_params, by = by, terms = terms, id = id)
 }
 
 #' @export
@@ -64,16 +60,18 @@ layer_epi_YeoJohnson_new <- function(lambdas, by, terms, id) {
 slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data, ...) {
   rlang::check_dots_empty()
 
-  # Get the lambdas from the layer or from the workflow.
-  lambdas <- object$lambdas %||% get_lambdas_in_layer(workflow)
+  # TODO: We will error if we don't have a workflow. Write a check later.
 
-  # If the by is not specified, try to infer it from the lambdas.
+  # Get the yj_params from the layer or from the workflow.
+  yj_params <- object$yj_params %||% get_yj_params_in_layer(workflow)
+
+  # If the by is not specified, try to infer it from the yj_params.
   if (is.null(object$by)) {
     # Assume `layer_predict` has calculated the prediction keys and other
     # layers don't change the prediction key colnames:
     prediction_key_colnames <- names(components$keys)
     lhs_potential_keys <- prediction_key_colnames
-    rhs_potential_keys <- colnames(select(lambdas, -starts_with("lambda_")))
+    rhs_potential_keys <- colnames(select(yj_params, -starts_with(".yj_param_")))
     object$by <- intersect(lhs_potential_keys, rhs_potential_keys)
     suggested_min_keys <- setdiff(lhs_potential_keys, "time_value")
     if (!all(suggested_min_keys %in% object$by)) {
@@ -95,16 +93,16 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
   object$by <- object$by %||%
     intersect(
       epi_keys_only(components$predictions),
-      colnames(select(lambdas, -starts_with(".lambda_")))
+      colnames(select(yj_params, -starts_with(".yj_param_")))
     )
   joinby <- list(x = names(object$by) %||% object$by, y = object$by)
   hardhat::validate_column_names(components$predictions, joinby$x)
-  hardhat::validate_column_names(lambdas, joinby$y)
+  hardhat::validate_column_names(yj_params, joinby$y)
 
-  # Join the lambdas.
+  # Join the yj_params.
   components$predictions <- inner_join(
     components$predictions,
-    lambdas,
+    yj_params,
     by = object$by,
     relationship = "many-to-one",
     unmatched = c("error", "drop")
@@ -115,7 +113,7 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
   col_names <- names(pos)
 
   # The `object$terms` is where the user specifies the columns they want to
-  # untransform. We need to match the outcomes with their lambda columns in our
+  # untransform. We need to match the outcomes with their yj_param columns in our
   # parameter table and then apply the inverse transformation.
   if (identical(col_names, ".pred")) {
     # In this case, we don't get a hint for the outcome column name, so we need
@@ -130,8 +128,7 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
       magrittr::extract(, 2)
 
     components$predictions <- components$predictions %>%
-      rowwise() %>%
-      mutate(.pred := yj_inverse(.pred, !!sym(paste0(".lambda_", outcome_cols))))
+      mutate(.pred := yj_inverse(.pred, !!sym(paste0(".yj_param_", outcome_cols))))
   } else if (identical(col_names, character(0))) {
     # Wish I could suggest `all_outcomes()` here, but currently it's the same as
     # not specifying any terms. I don't want to spend time with dealing with
@@ -146,10 +143,10 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
     )
   } else {
     # In this case, we assume that the user has specified the columns they want
-    # transformed here. We then need to determine the lambda columns for each of
+    # transformed here. We then need to determine the yj_param columns for each of
     # these columns. That is, we need to convert a vector of column names like
     # c(".pred_ahead_1_case_rate", ".pred_ahead_7_case_rate") to
-    # c("lambda_ahead_1_case_rate", "lambda_ahead_7_case_rate").
+    # c(".yj_param_ahead_1_case_rate", ".yj_param_ahead_7_case_rate").
     original_outcome_cols <- stringr::str_match(col_names, ".pred_ahead_\\d+_(.*)")[, 2]
     outcomes_wout_ahead <- stringr::str_match(names(components$mold$outcomes), "ahead_\\d+_(.*)")[, 2]
     if (any(original_outcome_cols %nin% outcomes_wout_ahead)) {
@@ -163,33 +160,36 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
 
     for (i in seq_along(col_names)) {
       col <- col_names[i]
-      lambda_col <- paste0(".lambda_", original_outcome_cols[i])
+      yj_param_col <- paste0(".yj_param_", original_outcome_cols[i])
       components$predictions <- components$predictions %>%
-        rowwise() %>%
-        mutate(!!sym(col) := yj_inverse(!!sym(col), !!sym(lambda_col)))
+        mutate(!!sym(col) := yj_inverse(!!sym(col), !!sym(yj_param_col)))
     }
   }
 
-  # Remove the lambda columns.
+  # Remove the yj_param columns.
   components$predictions <- components$predictions %>%
-    select(-any_of(starts_with(".lambda_"))) %>%
+    select(-any_of(starts_with(".yj_param_"))) %>%
     ungroup()
   components
 }
 
 #' @export
 print.layer_epi_YeoJohnson <- function(x, width = max(20, options()$width - 30), ...) {
-  title <- "Yeo-Johnson transformation (see `lambdas` object for values) on "
+  title <- "Yeo-Johnson transformation (see `yj_params` object for values) on "
   print_layer(x$terms, title = title, width = width)
 }
 
 # Inverse Yeo-Johnson transformation
 #
-# Inverse of `yj_transform` in step_yeo_johnson.R. Note that this function is
-# vectorized in x, but not in lambda.
+# Inverse of `yj_transform` in step_yeo_johnson.R.
 yj_inverse <- function(x, lambda, eps = 0.001) {
-  if (is.na(lambda)) {
+  if (any(is.na(lambda))) {
     return(x)
+  }
+  if (length(x) > 1 && length(lambda) == 1) {
+    lambda <- rep(lambda, length(x))
+  } else if (length(x) != length(lambda)) {
+    cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_fn())
   }
   if (!inherits(x, "tbl_df") || is.data.frame(x)) {
     x <- unlist(x, use.names = FALSE)
@@ -199,52 +199,58 @@ yj_inverse <- function(x, lambda, eps = 0.001) {
     }
   }
 
-  dat_neg <- x < 0
-  ind_neg <- list(is = which(dat_neg), not = which(!dat_neg))
-  not_neg <- ind_neg[["not"]]
-  is_neg <- ind_neg[["is"]]
-
   nn_inv_trans <- function(x, lambda) {
     out <- double(length(x))
     sm_lambdas <- abs(lambda) < eps
-    out[sm_lambdas] <- exp(x[sm_lambdas]) - 1
+    if (length(sm_lambdas) > 0) {
+      out[sm_lambdas] <- exp(x[sm_lambdas]) - 1
+    }
     x <- x[!sm_lambdas]
     lambda <- lambda[!sm_lambdas]
-    out[!sm_lambdas] <- (lambda * x + 1)^(1 / lambda) - 1
+    if (length(x) > 0) {
+      out[!sm_lambdas] <- (lambda * x + 1)^(1 / lambda) - 1
+    }
     out
-  }
   }
 
   ng_inv_trans <- function(x, lambda) {
-    if (abs(lambda - 2) < eps) {
-      # -log(-x + 1)
-      -(exp(-x) - 1)
-    } else {
-      # -((-x + 1)^(2 - lambda) - 1) / (2 - lambda)
-      -(((lambda - 2) * x + 1)^(1 / (2 - lambda)) - 1)
+    out <- double(length(x))
+    near2_lambdas <- abs(lambda - 2) < eps
+    if (length(near2_lambdas) > 0) {
+      out[near2_lambdas] <- -(exp(-x[near2_lambdas]) - 1)
     }
+    x <- x[!near2_lambdas]
+    lambda <- lambda[!near2_lambdas]
+    if (length(x) > 0) {
+      out[!near2_lambdas] <- -(((lambda - 2) * x + 1)^(1 / (2 - lambda)) - 1)
+    }
+    out
   }
 
+  dat_neg <- x < 0
+  not_neg <- which(!dat_neg)
+  is_neg <- which(dat_neg)
+
   if (length(not_neg) > 0) {
-    x[not_neg] <- nn_inv_trans(x[not_neg], lambda)
+    x[not_neg] <- nn_inv_trans(x[not_neg], lambda[not_neg])
   }
 
   if (length(is_neg) > 0) {
-    x[is_neg] <- ng_inv_trans(x[is_neg], lambda)
+    x[is_neg] <- ng_inv_trans(x[is_neg], lambda[is_neg])
   }
   x
 }
 
-get_lambdas_in_layer <- function(workflow) {
+get_yj_params_in_layer <- function(workflow) {
   this_recipe <- hardhat::extract_recipe(workflow)
   if (!(this_recipe %>% recipes::detect_step("epi_YeoJohnson"))) {
     cli_abort("`layer_epi_YeoJohnson` requires `step_epi_YeoJohnson` in the recipe.", call = rlang::caller_env())
   }
   for (step in this_recipe$steps) {
     if (inherits(step, "step_epi_YeoJohnson")) {
-      lambdas <- step$lambdas
+      yj_params <- step$yj_params
       break
     }
   }
-  lambdas
+  yj_params
 }
