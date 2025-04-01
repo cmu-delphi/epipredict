@@ -9,7 +9,7 @@ step_epi_YeoJohnson(
   ...,
   role = "predictor",
   trained = FALSE,
-  lambdas = NULL,
+  yj_params = NULL,
   na_lambda_fill = 1/4,
   limits = c(-5, 5),
   num_unique = 5,
@@ -31,7 +31,7 @@ they be assigned? \code{lag} is default a predictor while \code{ahead} is an out
 \item{trained}{A logical for whether the selectors in \code{...}
 have been resolved by \code{\link[=prep]{prep()}}.}
 
-\item{lambdas}{Internal. A numeric vector of transformation values. This
+\item{yj_params}{Internal. A numeric vector of transformation values. This
 is \code{NULL} until computed by \code{\link[=prep]{prep()}}.}
 
 \item{na_lambda_fill}{A numeric value to fill in for any
@@ -46,9 +46,12 @@ many unique values will not be evaluated for a transformation.}
 \item{na_rm}{A logical indicating whether missing values should be
 removed.}
 
-\item{skip}{A logical. Should the step be skipped when the recipe is
-baked by \code{\link[=bake]{bake()}}. On the \code{training} data, the step will always be
-conducted (even if \code{skip = TRUE}).}
+\item{skip}{A logical. Should the step be skipped when the
+recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
+when \code{\link[=prep]{prep()}} is run, some operations may not be able to be
+conducted on new data (e.g. processing the outcome variable(s)).
+Care should be taken when using \code{skip = TRUE} as it may affect
+the computations for subsequent operations.}
 
 \item{id}{A unique identifier for the step}
 }
@@ -105,7 +108,7 @@ r
 # Fit the recipe
 tr <- r \%>\% prep(filtered_data)
 # View the lambda values
-tr$steps[[1]]$lambdas
+tr$steps[[1]]$yj_params
 # View the transformed data
 df <- tr \%>\% bake(filtered_data)
 plot(density(df$cases))

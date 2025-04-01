@@ -4,28 +4,19 @@
 #' transform data using a Yeo-Johnson transformation. This fork works with panel
 #' data and is meant for epidata.
 #'
-#' @param recipe A recipe object. The step will be added to the
-#'  sequence of operations for this recipe.
-#' @param ... One or more selector functions to choose variables
-#'  for this step. See [recipes::selections()] for more details.
-#' @param role For model terms created by this step, what analysis role should
-#'  they be assigned? `lag` is default a predictor while `ahead` is an outcome.
+#' @inheritParams step_population_scaling
 #' @param trained A logical for whether the selectors in `...`
 #' have been resolved by [prep()].
-#' @param lambdas Internal. A numeric vector of transformation values. This
+#' @param yj_params Internal. A numeric vector of transformation values. This
 #'  is `NULL` until computed by [prep()].
-#' @param na_lambda_fill A numeric value to fill in for any
-#'  geos where the lambda cannot be estimated.
-#' @param limits A length 2 numeric vector defining the range to
-#'  compute the transformation parameter lambda.
-#' @param num_unique An integer where data that have fewer than this
-#'  many unique values will not be evaluated for a transformation.
-#' @param na_rm A logical indicating whether missing values should be
-#'  removed.
-#' @param skip A logical. Should the step be skipped when the recipe is
-#'  baked by [bake()]. On the `training` data, the step will always be
-#'  conducted (even if `skip = TRUE`).
-#' @param id A unique identifier for the step
+#' @param na_fill A numeric value to fill in for any geos where a Yeo-Johnson
+#'  parameter cannot be estimated.
+#' @param limits A length 2 numeric vector defining the range to compute the
+#'  transformation parameter.
+#' @param num_unique An integer where data that have fewer than this many unique
+#'  values will not be evaluated for a transformation.
+#' @param na_rm A logical indicating whether missing values should be removed
+#'  before estimating the transformation parameter.
 #' @template step-return
 #' @family individual transformation steps
 #' @export
@@ -73,8 +64,8 @@
 #' r
 #' # Fit the recipe
 #' tr <- r %>% prep(filtered_data)
-#' # View the lambda values
-#' tr$steps[[1]]$lambdas
+#' # View the parameter values
+#' tr$steps[[1]]$yj_params
 #' # View the transformed data
 #' df <- tr %>% bake(filtered_data)
 #' plot(density(df$cases))
@@ -84,8 +75,8 @@ step_epi_YeoJohnson <- function(
   ...,
   role = "predictor",
   trained = FALSE,
-  lambdas = NULL,
-  na_lambda_fill = 1 / 4,
+  yj_params = NULL,
+  na_fill = 1 / 4,
   limits = c(-5, 5),
   num_unique = 5,
   na_rm = TRUE,
@@ -93,7 +84,7 @@ step_epi_YeoJohnson <- function(
   id = rand_id("epi_YeoJohnson")
 ) {
   checkmate::assert_numeric(limits, len = 2)
-  checkmate::assert_numeric(na_lambda_fill, lower = min(limits), upper = max(limits), len = 1)
+  checkmate::assert_numeric(na_fill, lower = min(limits), upper = max(limits), len = 1)
   checkmate::assert_numeric(num_unique, lower = 2, upper = Inf, len = 1)
   checkmate::assert_logical(na_rm, len = 1)
   checkmate::assert_logical(skip, len = 1)
@@ -103,8 +94,8 @@ step_epi_YeoJohnson <- function(
       terms = enquos(...),
       role = role,
       trained = trained,
-      lambdas = lambdas,
-      na_lambda_fill = na_lambda_fill,
+      yj_params = yj_params,
+      na_fill = na_fill,
       limits = sort(limits)[1:2],
       num_unique = num_unique,
       na_rm = na_rm,
@@ -121,8 +112,8 @@ step_epi_YeoJohnson_new <- function(
   terms,
   role,
   trained,
-  lambdas,
-  na_lambda_fill,
+  yj_params,
+  na_fill,
   limits,
   num_unique,
   na_rm,
@@ -137,8 +128,8 @@ step_epi_YeoJohnson_new <- function(
     terms = terms,
     role = role,
     trained = trained,
-    lambdas = lambdas,
-    na_lambda_fill = na_lambda_fill,
+    yj_params = yj_params,
+    na_fill = na_fill,
     limits = limits,
     num_unique = num_unique,
     na_rm = na_rm,
@@ -156,12 +147,12 @@ prep.step_epi_YeoJohnson <- function(x, training, info = NULL, ...) {
   col_names <- recipes_eval_select(x$terms, training, info)
   recipes::check_type(training[, col_names], types = c("double", "integer"))
 
-  lambdas <- get_lambdas_yj_table(
+  yj_params <- compute_yj_params(
     training,
     col_names,
     x$limits,
     x$num_unique,
-    x$na_lambda_fill,
+    x$na_fill,
     x$na_rm,
     key_colnames(training, exclude = "time_value")
   )
@@ -170,8 +161,8 @@ prep.step_epi_YeoJohnson <- function(x, training, info = NULL, ...) {
     terms = x$terms,
     role = x$role,
     trained = TRUE,
-    lambdas = lambdas,
-    na_lambda_fill = x$na_lambda_fill,
+    yj_params = yj_params,
+    na_fill = x$na_fill,
     limits = x$limits,
     num_unique = x$num_unique,
     na_rm = x$na_rm,
@@ -196,14 +187,10 @@ bake.step_epi_YeoJohnson <- function(object, new_data, ...) {
     )
     attr(new_data, "metadata") <- object$metadata
   }
-  # Check that the keys match.
-  keys <- key_colnames(new_data, exclude = "time_value")
-  old_keys <- object$lambdas %>%
-    select(-starts_with(".lambda_")) %>%
-    colnames()
-  if (!all(keys %in% old_keys)) {
+  # Check that the columns for transformation are present in new_data.
+  if (!all(object$columns %in% colnames(new_data))) {
     cli::cli_abort(
-      "The keys of the new data do not match the keys of the training data.",
+      "The columns for transformation are not present in the new data.",
       call = rlang::caller_fn()
     )
   }
@@ -211,67 +198,81 @@ bake.step_epi_YeoJohnson <- function(object, new_data, ...) {
   col_names <- object$columns
   check_new_data(col_names, object, new_data)
 
-  # Transform each column, using the appropriate lambda column per row.
-  # Note that yj_transform() is vectorized in x, but not in lambda.
-  new_data <- left_join(new_data, object$lambdas, by = keys)
+  # Check that the keys match.
+  check <- hardhat::check_column_names(new_data, object$yj_params %>% select(-starts_with(".yj_param_")) %>% colnames())
+  if (!check$ok) {
+    cli_abort(c(
+      "Some variables used for training are not available in {.arg x}.",
+      i = "The following required columns are missing: {check$missing_names}"
+    ), call = rlang::caller_fn())
+  }
+  # Transform each column, using the appropriate yj_param column per row.
+  new_data <- left_join(new_data, object$yj_params, by = key_colnames(new_data, exclude = "time_value"))
   for (col in col_names) {
     new_data <- new_data %>%
-      rowwise() %>%
-      mutate(!!col := yj_transform(!!sym(col), !!sym(paste0(".lambda_", col))))
+      mutate(!!col := yj_transform(!!sym(col), !!sym(paste0(".yj_param_", col))))
   }
-  # Remove the lambda columns.
+  # Remove the yj_param columns.
   new_data %>%
-    select(-starts_with(".lambda_")) %>%
+    select(-starts_with(".yj_param_")) %>%
     ungroup()
 }
 
 #' @export
 print.step_epi_YeoJohnson <- function(x, width = max(20, options()$width - 39), ...) {
-  title <- "Yeo-Johnson transformation (see `lambdas` object for values) on "
+  title <- "Yeo-Johnson transformation (see `yj_params` object for values) on "
   print_epi_step(x$terms, x$terms, title = title, width = width)
   invisible(x)
 }
 
-# Compute the lambda values per group for each column.
-get_lambdas_yj_table <- function(training, col_names, limits, num_unique, na_lambda_fill, na_rm, epi_keys_checked) {
-  # Estimate the lambda for each column, creating a lambda_ column for each.
-  # Note that estimate_yj() operates on a vector.
-  lambdas <- training %>%
+# Compute the yj_param values per group for each column.
+compute_yj_params <- function(training, col_names, limits, num_unique, na_fill, na_rm, epi_keys_checked) {
+  # Estimate the yj_param for each column, creating a .yj_param_<col> column for
+  # each. Note that estimate_yj() operates on each column.
+  yj_params <- training %>%
     summarise(
       across(all_of(col_names), ~ estimate_yj(.x, limits, num_unique, na_rm)),
       .by = all_of(epi_keys_checked)
     ) %>%
-    dplyr::rename_with(~ paste0(".lambda_", .x), -all_of(epi_keys_checked))
+    dplyr::rename_with(~ paste0(".yj_param_", .x), -all_of(epi_keys_checked))
 
-  # Check for NAs in any of the lambda_ columns.
+  # Check for NAs in any of the yj_param_ columns.
   # EDIT: This warning was too noisy. Keeping code around, in case we want it.
   # for (col in col_names) {
-  #   if (any(is.na(values[[paste0("lambda_", col)]]))) {
+  #   if (any(is.na(values[[paste0(".yj_param_", col)]]))) {
   #     cli::cli_warn(
   #       c(
-  #         x = "Yeo-Johnson lambda could not be estimated for some geos for {col}.",
-  #         i = "Using lambda={x$na_lambda_fill} in these cases."
+  #         x = "Yeo-Johnson parameter could not be estimated for some geos for {col}.",
+  #         i = "Using parameter={x$na_fill} in these cases."
   #       ),
   #       call = rlang::caller_fn()
   #     )
   #   }
   # }
 
-  # Fill in NAs with the default lambda.
-  lambdas %>%
-    mutate(across(starts_with(".lambda_"), \(col) ifelse(is.na(col), na_lambda_fill, col)))
+  # Fill in NAs with the default yj_param.
+  yj_params %>%
+    mutate(across(starts_with(".yj_param_"), \(col) ifelse(is.na(col), na_fill, col)))
 }
 
 
 ### Code below taken from recipes::step_YeoJohnson.
+### We keep "lambda" here, but above we renamed it to "yj_param".
+### Modified yj_transform() to be vectorized in lambda.
 ### https://github.com/tidymodels/recipes/blob/v1.1.1/R/YeoJohnson.R#L172
 
 # Yeo-Johnson transformation
-#
-# Note that this function is vectorized in x, but not in lambda.
 yj_transform <- function(x, lambda, ind_neg = NULL, eps = 0.001) {
-  if (is.na(lambda)) {
+  if (any(is.na(lambda))) {
     return(x)
+  }
+  if (length(x) > 1 && length(lambda) == 1) {
+    lambda <- rep(lambda, length(x))
+  } else if (length(x) != length(lambda)) {
+    cli::cli_abort(
+      "Length of `x` must be equal to length of `lambda` or lambda must be a scalar.",
+      call = rlang::caller_fn()
+    )
   }
   if (!inherits(x, "tbl_df") || is.data.frame(x)) {
     x <- unlist(x, use.names = FALSE)
@@ -289,27 +290,39 @@ yj_transform <- function(x, lambda, ind_neg = NULL, eps = 0.001) {
   is_neg <- ind_neg[["is"]]
 
   nn_trans <- function(x, lambda) {
-    if (abs(lambda) < eps) {
-      log(x + 1)
-    } else {
-      ((x + 1)^lambda - 1) / lambda
+    out <- double(length(x))
+    sm_lambdas <- abs(lambda) < eps
+    if (length(sm_lambdas) > 0) {
+      out[sm_lambdas] <- log(x[sm_lambdas] + 1)
     }
+    x <- x[!sm_lambdas]
+    lambda <- lambda[!sm_lambdas]
+    if (length(x) > 0) {
+      out[!sm_lambdas] <- ((x + 1)^lambda - 1) / lambda
+    }
+    out
   }
 
   ng_trans <- function(x, lambda) {
-    if (abs(lambda - 2) < eps) {
-      -log(-x + 1)
-    } else {
-      -((-x + 1)^(2 - lambda) - 1) / (2 - lambda)
+    out <- double(length(x))
+    near2_lambdas <- abs(lambda - 2) < eps
+    if (length(near2_lambdas) > 0) {
+      out[near2_lambdas] <- -log(-x[near2_lambdas] + 1)
     }
+    x <- x[!near2_lambdas]
+    lambda <- lambda[!near2_lambdas]
+    if (length(x) > 0) {
+      out[!near2_lambdas] <- -((-x + 1)^(2 - lambda) - 1) / (2 - lambda)
+    }
+    out
   }
 
   if (length(not_neg) > 0) {
-    x[not_neg] <- nn_trans(x[not_neg], lambda)
+    x[not_neg] <- nn_trans(x[not_neg], lambda[not_neg])
   }
 
   if (length(is_neg) > 0) {
-    x[is_neg] <- ng_trans(x[is_neg], lambda)
+    x[is_neg] <- ng_trans(x[is_neg], lambda[is_neg])
   }
   x
 }
@@ -382,8 +395,8 @@ estimate_yj <- function(dat, limits = c(-5, 5), num_unique = 5, na_rm = TRUE, ca
 tidy.step_epi_YeoJohnson <- function(x, ...) {
   if (is_trained(x)) {
     res <- tibble(
-      terms = names(x$lambdas),
-      value = unname(x$lambdas)
+      terms = names(x$yj_params),
+      value = unname(x$yj_params)
     )
   } else {
     term_names <- sel2char(x$terms)
