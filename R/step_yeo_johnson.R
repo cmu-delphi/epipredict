@@ -71,18 +71,17 @@
 #' plot(density(df$cases))
 #' plot(density(filtered_data$cases))
 step_epi_YeoJohnson <- function(
-  recipe,
-  ...,
-  role = "predictor",
-  trained = FALSE,
-  yj_params = NULL,
-  na_fill = 1 / 4,
-  limits = c(-5, 5),
-  num_unique = 5,
-  na_rm = TRUE,
-  skip = FALSE,
-  id = rand_id("epi_YeoJohnson")
-) {
+    recipe,
+    ...,
+    role = "predictor",
+    trained = FALSE,
+    yj_params = NULL,
+    na_fill = 1 / 4,
+    limits = c(-5, 5),
+    num_unique = 5,
+    na_rm = TRUE,
+    skip = FALSE,
+    id = rand_id("epi_YeoJohnson")) {
   checkmate::assert_numeric(limits, len = 2)
   checkmate::assert_numeric(na_fill, lower = min(limits), upper = max(limits), len = 1)
   checkmate::assert_numeric(num_unique, lower = 2, upper = Inf, len = 1)
@@ -109,20 +108,19 @@ step_epi_YeoJohnson <- function(
 }
 
 step_epi_YeoJohnson_new <- function(
-  terms,
-  role,
-  trained,
-  yj_params,
-  na_fill,
-  limits,
-  num_unique,
-  na_rm,
-  forecast_date,
-  metadata,
-  columns,
-  skip,
-  id
-) {
+    terms,
+    role,
+    trained,
+    yj_params,
+    na_fill,
+    limits,
+    num_unique,
+    na_rm,
+    forecast_date,
+    metadata,
+    columns,
+    skip,
+    id) {
   step(
     subclass = "epi_YeoJohnson",
     terms = terms,

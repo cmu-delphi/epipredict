@@ -11,7 +11,7 @@ test_that("Yeo-Johnson transformation inverts correctly", {
   # Vectorized x and lambda both work
   x <- seq(-5, 5, 0.1)
   expect_true(
-    sum(abs(yj_inverse(yj_transform(x, lambda), lambda) - x)) < 1e-5
+    sum(abs(yj_inverse(yj_transform(x, lambdas), lambdas) - x)) < 1e-5
   )
 })
 

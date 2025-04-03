@@ -10,7 +10,7 @@ step_epi_YeoJohnson(
   role = "predictor",
   trained = FALSE,
   yj_params = NULL,
-  na_lambda_fill = 1/4,
+  na_fill = 1/4,
   limits = c(-5, 5),
   num_unique = 5,
   na_rm = TRUE,
@@ -34,17 +34,17 @@ have been resolved by \code{\link[=prep]{prep()}}.}
 \item{yj_params}{Internal. A numeric vector of transformation values. This
 is \code{NULL} until computed by \code{\link[=prep]{prep()}}.}
 
-\item{na_lambda_fill}{A numeric value to fill in for any
-geos where the lambda cannot be estimated.}
+\item{na_fill}{A numeric value to fill in for any geos where a Yeo-Johnson
+parameter cannot be estimated.}
 
-\item{limits}{A length 2 numeric vector defining the range to
-compute the transformation parameter lambda.}
+\item{limits}{A length 2 numeric vector defining the range to compute the
+transformation parameter.}
 
-\item{num_unique}{An integer where data that have fewer than this
-many unique values will not be evaluated for a transformation.}
+\item{num_unique}{An integer where data that have fewer than this many unique
+values will not be evaluated for a transformation.}
 
-\item{na_rm}{A logical indicating whether missing values should be
-removed.}
+\item{na_rm}{A logical indicating whether missing values should be removed
+before estimating the transformation parameter.}
 
 \item{skip}{A logical. Should the step be skipped when the
 recipe is baked by \code{\link[=bake]{bake()}}? While all operations are baked
@@ -107,7 +107,7 @@ r <- epi_recipe(filtered_data) \%>\%
 r
 # Fit the recipe
 tr <- r \%>\% prep(filtered_data)
-# View the lambda values
+# View the parameter values
 tr$steps[[1]]$yj_params
 # View the transformed data
 df <- tr \%>\% bake(filtered_data)
