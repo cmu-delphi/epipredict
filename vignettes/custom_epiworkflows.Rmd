@@ -24,9 +24,12 @@ used_locations <- c("ca", "ma", "ny", "tx")
 library(epidatr)
 ```
 
-To get a better handle on custom `epi_workflow()`s, lets recreate and then
-modify the example of `four_week_ahead` from the [landing
-page](../index.html#motivating-example)
+If you want to do custom data preprocessing or fit a model that isn't included in the canned workflows, you'll need to write a custom `epi_workflow()`.
+
+To get understand how to work with custom `epi_workflow()`s, let's recreate and then
+modify the `four_week_ahead` example from the [landing
+page](../index.html#motivating-example).
+Let's first remind ourselves how to use a simple canned workflow:
 
 ```{r make-four-forecasts, warning=FALSE}
 training_data <- covid_case_death_rates |>
@@ -43,77 +46,92 @@ four_week_ahead <- arx_forecaster(
 )
 four_week_ahead$epi_workflow
 ```
-# Anatomy of an `epi_workflow`
-An `epi_workflow()` is an extension of a `workflows::workflow()` to handle panel
-data and post-processing.
-It consists of 3 components, shown above:
 
-1. Preprocessor: transform the data before model training and prediction, such
-  as convert counts to rates, create smoothed columns, or [any of the recipes
-  steps](https://recipes.tidymodels.org/reference/index.html).
-  Think of it as a more flexible `formula` that you would pass to `lm()`: `y ~
-  x1 + log(x2) + lag(x1, 5)`.
-  The above model has 6 of these steps.
-  In general, there are 2 broad classes of transformation that `{recipes}`
-  handles:
-    - Transforms of both training and test data that are always applied.
-      Examples include taking the log of a variable, leading or lagging,
-      filtering out rows, handling dummy variables, calculating growth rates,
-      etc.
-    - Operations that fit parameters during training to apply during prediction,
-      such as centering by the mean.
-      This is a major benefit of `{recipes}`, since it prevents data leakage,
-      where information about the test/predict time data "leaks" into the
-      parameters. <!-- TODO unsure if worth even keeping, as we effectively
-      can't have data leakage. -->
-      However, the main mechanism we rely on to prevent data leakage is proper
-      [backtesting](backtesting.html).
-      For the case of centering, we need to store the mean of the predictor from
-      the training data and use that value on the prediction data rather than
-      accidentally calculating the mean of the test predictor for centering.
-2. Trainer: use a `{parsnip}` model to train a model on data, resulting in a
-   fitted model object.
-  Examples include linear regression, quantile regression, or [any parsnip
-  engine](https://www.tidymodels.org/find/parsnip/). 
-  Parsnip serves as a front-end that abstracts away the differences in interface
-  between a wide collection of statistical models.
-3. Postprocessor: unique to this package, and used to format and modify the
-   prediction after the model has been fit.
-   Each operation is a `layer_`, and the stack of layers is known as `frosting()`,
-   continuing the metaphor of baking a cake established in the recipe.
-   Some example operations include:
-    - generate quantiles from purely point-prediction models,
-    - undo operations done in the steps, such as convert back to counts from rates
-    - threshold so the forecast doesn't include negative values
-    - generally adapt the format of the prediction to it's eventual use.
+# Anatomy of an `epi_workflow`
+
+An `epi_workflow()` is an extension of a `workflows::workflow()` that handles panel
+data and post-processing.
+All `epi_workflows`, including simple and canned workflows, consist of 3 components.
+
+### Preprocessor
+
+A preprocessor transforms the data before model training and prediction.
+Transformations can include converting counts to rates, applying a running average 
+to columns, or [any of the `step`s found in `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
+
+You can think of a preprocessor as a more flexible `formula` that you would pass to `lm()`: `y ~ x1 + log(x2) + lag(x1, 5)`.
+The simple model above internally runs 6 of these steps, such as creating lagged predictor columns.
+
+In general, there are 2 broad classes of transformation that `{recipes}` `step`s handle:
+
+- Operations that are applied to both training and test data without using stored information.
+  Examples include taking the log of a variable, leading or lagging columns,
+  filtering out rows, handling dummy variables, calculating growth rates,
+  etc.
+- Operations that rely on stored information (parameters fit during training) to modify train and test data.
+  Examples include centering by the mean, and normalizing the variance (whitening).
+
+We differentiate between these types of transformations because the second type can result in information leakage if not done properly.
+Information leakage or data leakage happens when a system has access to information that would not have been available at prediction time and could change our evaluation of the model's real-world performance.
+
+In the case of centering, we need to store the mean of the predictor from
+the training data and use that value on the prediction data, rather than
+using the mean of the test predictor for centering or including test data in the mean calculation.
+
+A major benefit of `{recipes}` is that it prevents information leakage. 
+<!-- TODO unsure if worth even keeping, as we effectively can't have data leakage. -->
+However, the _main_ mechanism we rely on to prevent data leakage is proper
+[backtesting](backtesting.html).
+
+### Trainer
+
+A trainer fits a `{parsnip}` model on data, and outputs a fitted model object.
+Examples include linear regression, quantile regression, or [any `{parsnip}` engine](https://www.tidymodels.org/find/parsnip/).
+The `{parsnip}` front-end abstracts away the differences in interface between a wide collection of statistical models.
+
+### Postprocessor
+
+Postprocessors are unique to this `{epipredict}`.
+A postprocessor modifies and formats the prediction after a model has been fit.
+
+Each operation within a postprocessor is called a `layer_`, and the stack of layers is known as `frosting()`,
+continuing the metaphor of baking a cake established in `{recipes}`.
+Some example operations include:
+
+- generating quantiles from purely point-prediction models
+- reverting transformations done in prior steps, such as converting from rates back to counts
+- thresholding forecasts to remove negative values
+- generally adapting the format of the prediction to a downstream use.
 
 # Recreating `four_week_ahead` in an `epi_workflow()`
-To be able to extend this beyond what `arx_forecaster()` itself will let us do,
-we first need to understand how to recreate it using a custom `epi_workflow()`.
 
-To use a custom workflow, there are a couple of steps:
+To understand how to create custom workflows, let's first recreate the simple canned `arx_forecaster()` from scratch.
 
-1. define the `epi_recipe()`, which contains the preprocessing steps
-2. define the `frosting()` which contains the post-processing layers
+We'll think through the following sub-steps:
+
+1. Define the `epi_recipe()`, which contains the preprocessing steps
+2. Define the `frosting()` which contains the post-processing layers
 3. Combine these with a trainer such as `quantile_reg()` into an
    `epi_workflow()`, which we can then fit on the training data
 4. `fit()` the workflow on some data
-5. grab the right prediction data using `get_test_data()` and apply the fit data
+5. Grab the right prediction data using `get_test_data()` and apply the fit data
    to generate a prediction
 
 ## Define the `epi_recipe()`
-To do this, we'll first take a look at the steps as they're found in
-`four_week_ahead`:
+
+The steps found in `four_week_ahead` look like:
 
 ```{r inspect_fwa_steps, warning=FALSE}
 hardhat::extract_recipe(four_week_ahead$epi_workflow)
 ```
 
-So there are 6 steps we will need to recreate.
-One thing to note about the extracted recipe is that it has already been
-trained; for steps such as `recipes::step_BoxCox()` which have parameters, this means that their
-parameters have been calculated.
-Before defining steps, we need to create an `epi_recipe()` to hold them
+There are 6 steps we will need to recreate.
+Note that all steps in the extracted recipe are marked as already been
+`Trained`. For steps such as `recipes::step_BoxCox()` that have parameters that change their behavior, this means that their
+parameters have already been calculated based on the training data set.
+
+Let's create an `epi_recipe()` to hold the 6 steps:
+
 ```{r make_recipe}
 four_week_recipe <- epi_recipe(
   covid_case_death_rates |>
@@ -121,15 +139,18 @@ four_week_recipe <- epi_recipe(
 )
 ```
 
-The data here, `covid_case_death_rates` doesn't strictly need to be the actual
-dataset on which you are going to train. 
-However, it should have the same columns and the same metadata, such as `as_of`
-or `other_keys`; it is typically easiest to just use the training data itself.
+The data set passed to `epi_recipe` isn't required to be the actual
+data set on which you are going to train the model. 
+However, it should have the same columns and the same metadata (such as `as_of`
+and `other_keys`); it is typically easiest just to use the training data itself.
 
+This means that you can use the same workflow for multiple data sets as long as the format remains the same.
+This might be useful if you continue to get updates to a data set over time and you want to train a new instance of the same model.
 
-Then we add each step via pipes; in principle the order matters, though for this
+Then we can append each `step` using pipes. In principle, the order matters, though for this
 recipe only `step_epi_naomit()` and `step_training_window()` depend on the steps
-before them:
+before them.
+The other steps can be thought of as setting parameters that help specify later processing and computation.
 
 ```{r make_steps}
 four_week_recipe <- four_week_recipe |>
@@ -140,31 +161,31 @@ four_week_recipe <- four_week_recipe |>
   step_training_window()
 ```
 
-One thing to note: we only added 5 steps here because `step_epi_naomit()` is
-actually a wrapper around adding 2 base `step_naomit()`s, one for
-`all_predictors()` and one for `all_outcomes()`, differing in their treatment at
-predict time.
+Note we said before that `four_week_ahead` contained 6 steps.
+We've only added _5_ top-level steps here because `step_epi_naomit()` is
+actually a wrapper around adding two `step_naomit()`s, one for
+`all_predictors()` and one for `all_outcomes()`.
+The `step_naomit()`s differ in their treatment of the data at predict time.
 
-`step_epi_lag()` and `step_epi_ahead()` both accept tidy syntax, so if for
-example we wanted the same lags for both `case_rate` and `death_rate`, we could
-have done `step_epi_lag(ends_with("rate"), lag = c(0, 7, 14))`.
+`step_epi_lag()` and `step_epi_ahead()` both accept ["tidy" syntax](https://dplyr.tidyverse.org/reference/select.html) so processing can be applied to multiple columns at once.
+For example, if we wanted to use the same lags for both `case_rate` and `death_rate`, we could
+specify them in a single step, like `step_epi_lag(ends_with("rate"), lag = c(0, 7, 14))`.
 
-In general for the `{recipes}` package, steps assign roles, such as `predictor`
-and `outcome` to columns, either by adding new columns or adjusting existing
-ones. 
-`step_epi_lag()` for example, creates a new column for each lag with the name
-`lag_x_column_name` and assigns them as predictors, while `step_epi_ahead()`
-creates `ahead_x_column_name` columns and assigns them as outcomes.
+In general, `{recipes}` `step`s assign roles (`predictor`, `outcome`) to columns either by adding new columns or adjusting existing
+ones.
+`step_epi_lag()`, for example, creates a new column for each lag with the name
+`lag_x_column_name` and labels them each with the `predictor` role.
+`step_epi_ahead()` creates `ahead_x_column_name` columns and labels each with the `outcome` role.
 
-One way to inspect the roles assigned is to use `prep()`:
+We can inspect assigned roles with `prep()` to make sure that we are training on the correct columns:
 
 ```{r prep_recipe}
 prepped <- four_week_recipe |> prep(training_data)
 prepped$term_info |> print(n = 14)
 ```
 
-The way to inspect the columns created is by using `bake()` on the resulting
-recipe:
+We can inspect newly-created columns by running `bake()` on the
+recipe so far:
 
 ```{r bake_recipe}
 four_week_recipe |>
@@ -172,23 +193,24 @@ four_week_recipe |>
   bake(training_data)
 ```
 
-This is also useful for debugging malfunctioning pipelines; if you define
-`four_week_recipe` only up to the step that is misbehaving, you can get a
-partial evaluation to see the exact data the step is being applied to.
-It also allows you to see the exact data that the parsnip model is fitting on.
+This is also useful for debugging malfunctioning pipelines.
+You can run `prep()` and `bake()` on a new recipe containing a subset of `step`s -- all `step`s from the beginning up to the one that is misbehaving -- from the full, original recipe.
+This will return an evaluation of the `recipe` up to that point so that you can see the data that the misbehaving `step` is being applied to.
+It also allows you to see the exact data that a later `{parsnip}` model is trained on.
 
 ## Define the `frosting()`
-Since the post-processing frosting layers[^1] are unique to this package, to
-inspect them we use `extract_frosting()` from `{epipredict}`:
+
+The post-processing `frosting` layers[^1] found in `four_week_ahead` look like:
 
 ```{r inspect_fwa_layers, warning=FALSE}
 epipredict::extract_frosting(four_week_ahead$epi_workflow)
 ```
 
-The above gives us detailed descriptions of the arguments to the functions named
-above in the postprocessor of `four_week_ahead$epiworkflow`.
-Creating the layers is a similar process, except with frosting instead of a
-`recipe`[^2]:
+Note: since `frosting` is unique to this package, we've defined a custom function `extract_frosting()` to inspect these steps.
+
+Using the detailed information in the output above,
+we can recreate the layers similar to how we defined the
+`recipe` `step`s[^2]:
 
 ```{r make_frosting}
 four_week_layers <- frosting() |>
@@ -199,22 +221,23 @@ four_week_layers <- frosting() |>
   layer_threshold()
 ```
 
+`layer_predict()` needs to be included in every postprocessor to actually train the model.
 
-Most layers will work for any engine or steps; `layer_predict()` you will want
-to call in every case.
-There are a couple of layers, however, which depend on whether the engine used predicts quantiles or point estimates.
+Most layers work with any engine or `step`s.
+There are a couple of layers, however, which depend on whether the engine predicts quantiles or point estimates.
 
 The layers that are only supported by point estimate engines (such as
-`linear_reg()`) are
+`linear_reg()`) are:
 
 - `layer_residual_quantiles()`: the preferred method of generating quantiles for
-  non-quantile models, it uses the error residuals of the engine. 
-  This will work for most parsnip engines.
-- `layer_predictive_distn()`: alternate method of generating quantiles, it uses
+  models that don't generate quantiles themselves.
+  This function uses the error residuals of the engine to calculate quantiles. 
+  This will work for most `{parsnip}` engines.
+- `layer_predictive_distn()`: alternate method of generating quantiles using
   an approximate parametric distribution. This will work for linear regression
   specifically.
   
-TODO check this
+<!-- TODO check this -->
   
 On the other hand, the layers that are only supported by quantile estimating
 engines (such as `quantile_reg()`) are
@@ -223,11 +246,13 @@ engines (such as `quantile_reg()`) are
   If they differ from the ones actually fit, they will be interpolated and/or
   extrapolated.
 - `layer_point_from_distn()`: this adds the median quantile as a point estimate,
-  and should be called after `layer_quantile_distn()` if called at all. 
+  and, if called, should be included after `layer_quantile_distn()`. 
 
 ## Fitting an `epi_workflow()`
 
-Given that we now have a recipe and some layers, we need to assemble the workflow:
+Now that we have a recipe and some layers, we can assemble the workflow.
+This is as simple as passing the component preprocessor, model, and postprocessor into `epi_workflow()`.
+
 ```{r workflow_building}
 four_week_workflow <- epi_workflow(
   four_week_recipe,
@@ -236,15 +261,19 @@ four_week_workflow <- epi_workflow(
 )
 ```
 
-And fit it to recreate `four_week_ahead$epi_workflow`
+After fitting it, we will have recreated `four_week_ahead$epi_workflow`.
+
 ```{r workflow_fitting}
 fit_workflow <- four_week_workflow |> fit(training_data)
 ```
 
+Running `fit()` calculates all preprocessor-required parameters, and trains the model on the data passed in `fit()`.
+However, it does not generate any predictions; predictions need to be created in a separate step.
+
 ## Predicting
 
-To do a prediction, we need to first narrow the dataset down to the relevant
-datapoints:
+To make a prediction, we need to first narrow a data set down to the relevant observations.
+This process removes observations that will not be used for training because, for example, they contain missing values or <!-- TODO other reasons?-->.
 
 ```{r grab_data}
 relevant_data <- get_test_data(
@@ -253,13 +282,15 @@ relevant_data <- get_test_data(
 )
 ```
 
-With a fit workflow and test data in hand, we can actually make our predictions:
+In this example, we're creating `relevant_data` from `training_data`, but the data set we want predictions for could be an entirely new data set.
+
+With a trained workflow and data in hand, we can actually make our predictions:
 
 ```{r workflow_pred}
 fit_workflow |> predict(relevant_data)
 ```
 
-Note that if we had simply plugged `training_data` into `predict()` we still get
+Note that if we simply plug `training_data` into `predict()` we will still get
 predictions:
 
 ```{r workflow_pred_training}
@@ -267,8 +298,9 @@ fit_workflow |> predict(training_data)
 ```
 
 The resulting tibble is 800 rows long, however.
-This produces forecasts for not just the actual `forecast_date`, but for every
-day in the dataset it has enough data to actually make a prediction.
+Not running `get_test_data()` means that we're providing irrelevant data along with relevant, valid data.
+Passing the non-subsetted data set produces forecasts for not just the requested `forecast_date`, but for every
+day in the data set that has sufficient data to produce a prediction.
 To narrow this down, we could filter to rows where the `time_value` matches the `forecast_date`:
 
 ```{r workflow_pred_training_filter}
@@ -282,12 +314,18 @@ data.
 
 # Extending `four_week_ahead`
 
-There are many ways we could modify `four_week_ahead`; one simple modification
-would be to include a growth rate estimate as part of the model.
-Another would be to convert from rates to counts, for example if that were the
-preferred prediction format.
-Another would be to include a time component to the prediction (useful if we
-expect there to be a strong seasonal component).
+Now that we've recreated `four_week_ahead`, we can start modifying parts of it to get custom behavior.
+
+There are many ways we could modify `four_week_ahead`. We might consider:
+
+- Including a growth rate estimate as part of the model
+- Converting from rates to counts, for example if that were the
+preferred prediction format
+- Including a time component to the prediction, useful if we
+expect there to be a strong seasonal component
+- Scaling by some factor
+
+We will demo a couple of these modifications below.
 
 ## Growth rate
 
