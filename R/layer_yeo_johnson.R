@@ -190,69 +190,7 @@ yj_inverse <- function(x_in, lambda, eps = 0.001) {
   inv_x
 }
 
-yj_inverse.quantile_pred <- function(x, lambda, eps = 0.001) {
-}
 
-nn_inv_trans <- function(x, lambda, eps) {
-  out <- double(length(x))
-  sm_lambdas <- abs(lambda) < eps
-  if (length(sm_lambdas) > 0) {
-    out[sm_lambdas] <- exp(x[sm_lambdas]) - 1
-  }
-  x <- x[!sm_lambdas]
-  lambda <- lambda[!sm_lambdas]
-  if (length(x) > 0) {
-    out[!sm_lambdas] <- (lambda * x + 1)^(1 / lambda) - 1
-  }
-  out
-}
-nn_inv_trans_new <- function(x, lambda, eps) {
-  out <- double(length(x))
-  sm_lambdas <- abs(lambda) < eps
-  pos_inv_lambda_0 <- fifelse(
-    sm_lambdas,
-    (exp(x) - 1),
-    (lambda * x + 1)^(1 / lambda) - 1
-  )
-  pos_inv <- (!sm_lambdas) * ((lambda * x + 1)^(1 / lambda) - 1)
-  pos_inv_lambda_0
-  if (length(sm_lambdas) > 0) {
-    out[sm_lambdas] <- exp(x[sm_lambdas]) - 1
-  }
-  x <- x[!sm_lambdas]
-  lambda <- lambda[!sm_lambdas]
-  if (length(x) > 0) {
-    out[!sm_lambdas] <- (lambda * x + 1)^(1 / lambda) - 1
-  }
-  out
-}
-
-ng_inv_trans <- function(x, lambda, eps) {
-  out <- double(length(x))
-  near2_lambdas <- abs(lambda - 2) < eps
-  if (length(near2_lambdas) > 0) {
-    out[near2_lambdas] <- -(exp(-x[near2_lambdas]) - 1)
-  }
-  x <- x[!near2_lambdas]
-  lambda <- lambda[!near2_lambdas]
-  if (length(x) > 0) {
-    out[!near2_lambdas] <- -(((lambda - 2) * x + 1)^(1 / (2 - lambda)) - 1)
-  }
-  out
-}
-ng_inv_trans <- function(x, lambda, eps) {
-  out <- double(length(x))
-  near2_lambdas <- abs(lambda - 2) < eps
-  near2_value <- near2_lambdas * -(exp(-x) - 1)
-  away2_value <- -(!near2_lambdas) * (((lambda - 2) * x + 0 * im + 1)^(1 / (2 - lambda)) - 1)
-  0 * (near2_value + away2_value)
-  x <- x[!near2_lambdas]
-  lambda <- lambda[!near2_lambdas]
-  if (length(x) > 0) {
-    out[!near2_lambdas] <- -(((lambda - 2) * x + 1)^(1 / (2 - lambda)) - 1)
-  }
-  out
-}
 #' get the parameters used in the initial step
 #'
 #' @param workflow the workflow to extract the parameters from
