@@ -254,75 +254,71 @@ compute_yj_params <- function(training, col_names, limits, num_unique, na_fill, 
 }
 
 
+yj_input_type_management <- function(x_in, lambda) {
+  if (x_in %>% inherits("quantile_pred")) {
+    x <- as.matrix(x_in)
+    if (length(lambda) == 1) {
+      lambda <- lambda %>%
+        rep(prod(dim(x))) %>%
+        matrix(dim(x))
+    } else if (length(x_in) == length(lambda)) {
+      lambda <- lambda %>%
+        rep(dim(x)[[2]]) %>%
+        matrix(dim(x))
+    } else if (length(x) != length(lambda)) {
+      cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_fn())
+    }
+  } else if (!inherits(x_in, "tbl_df") || is.data.frame(x_in)) {
+    x <- unlist(x_in, use.names = FALSE)
+  } else {
+    if (!is.vector(x_in)) {
+      x <- as.vector(x_in)
+    } else {
+      x <- x_in
+    }
+  }
+
+  # these only apply if x_in isn't a quantile distribution
+  if (length(x) > 1 && length(lambda) == 1) {
+    lambda <- rep(lambda, length(x))
+  } else if (length(x) != length(lambda)) {
+    cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_fn())
+  }
+  list(x, lambda)
+}
 ### Code below taken from recipes::step_YeoJohnson.
 ### We keep "lambda" here, but above we renamed it to "yj_param".
 ### Modified yj_transform() to be vectorized in lambda.
 ### https://github.com/tidymodels/recipes/blob/v1.1.1/R/YeoJohnson.R#L172
-
 # Yeo-Johnson transformation
-yj_transform <- function(x, lambda, ind_neg = NULL, eps = 0.001) {
+yj_transform <- function(x_in, lambda, ind_neg = NULL, eps = 0.001) {
   if (any(is.na(lambda))) {
     return(x)
   }
-  if (length(x) > 1 && length(lambda) == 1) {
-    lambda <- rep(lambda, length(x))
-  } else if (length(x) != length(lambda)) {
-    cli::cli_abort(
-      "Length of `x` must be equal to length of `lambda` or lambda must be a scalar.",
-      call = rlang::caller_fn()
+  x_lambda <- yj_input_type_management(x_in, lambda)
+  x <- x_lambda[[1]]
+  lambda <- x_lambda[[2]]
+
+  transformed <- ifelse(
+    x < 0,
+    # for negative values we test if lambda is ~2
+    ifelse(
+      abs(lambda - 2) < eps,
+      -log(abs(x) + 1),
+      -((abs(x) + 1)^(2 - lambda) - 1) / (2 - lambda)
+    ),
+    # for non-negative values we test if lambda is ~0
+    ifelse(
+      abs(lambda) < eps,
+      log(abs(x) + 1),
+      ((abs(x) + 1)^lambda - 1) / lambda
     )
-  }
-  if (!inherits(x, "tbl_df") || is.data.frame(x)) {
-    x <- unlist(x, use.names = FALSE)
-  } else {
-    if (!is.vector(x)) {
-      x <- as.vector(x)
-    }
-  }
-  # TODO case weights: can we use weights here?
-  if (is.null(ind_neg)) {
-    dat_neg <- x < 0
-    ind_neg <- list(is = which(dat_neg), not = which(!dat_neg))
-  }
-  not_neg <- ind_neg[["not"]]
-  is_neg <- ind_neg[["is"]]
+  )
 
-  nn_trans <- function(x, lambda) {
-    out <- double(length(x))
-    sm_lambdas <- abs(lambda) < eps
-    if (length(sm_lambdas) > 0) {
-      out[sm_lambdas] <- log(x[sm_lambdas] + 1)
-    }
-    x <- x[!sm_lambdas]
-    lambda <- lambda[!sm_lambdas]
-    if (length(x) > 0) {
-      out[!sm_lambdas] <- ((x + 1)^lambda - 1) / lambda
-    }
-    out
+  if (x_in %>% inherits("quantile_pred")) {
+    transformed <- transformed %>% quantile_pred(x_in %@% "quantile_levels")
   }
-
-  ng_trans <- function(x, lambda) {
-    out <- double(length(x))
-    near2_lambdas <- abs(lambda - 2) < eps
-    if (length(near2_lambdas) > 0) {
-      out[near2_lambdas] <- -log(-x[near2_lambdas] + 1)
-    }
-    x <- x[!near2_lambdas]
-    lambda <- lambda[!near2_lambdas]
-    if (length(x) > 0) {
-      out[!near2_lambdas] <- -((-x + 1)^(2 - lambda) - 1) / (2 - lambda)
-    }
-    out
-  }
-
-  if (length(not_neg) > 0) {
-    x[not_neg] <- nn_trans(x[not_neg], lambda[not_neg])
-  }
-
-  if (length(is_neg) > 0) {
-    x[is_neg] <- ng_trans(x[is_neg], lambda[is_neg])
-  }
-  x
+  transformed
 }
 
 ## Helper for the log-likelihood calc for eq 3.1 of Yeo, I. K.,
