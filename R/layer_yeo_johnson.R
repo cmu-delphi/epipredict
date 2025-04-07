@@ -16,7 +16,6 @@
 #'   `ahead_7_cases` and `step_epi_YeoJohnson` transformed cases (possibly with
 #'   other columns), then you wouldn't need to set this. However if you have
 #'   renamed your output column to `diff_7`, then you will need to extract the `yj_params` from the step.
-#' @param by A (possibly named) character vector of variables to join by.
 #'
 #' @return an updated `frosting` postprocessor
 #' @export
@@ -48,22 +47,21 @@
 #' # Compare to the original data.
 #' jhu %>% filter(time_value == "2021-12-31")
 #' forecast(wf)
-layer_epi_YeoJohnson <- function(frosting, ..., yj_params = NULL, by = NULL, id = rand_id("epi_YeoJohnson")) {
+layer_epi_YeoJohnson <- function(frosting, ..., yj_params = NULL, id = rand_id("epi_YeoJohnson")) {
   checkmate::assert_tibble(yj_params, min.rows = 1, null.ok = TRUE)
 
   add_layer(
     frosting,
     layer_epi_YeoJohnson_new(
       yj_params = yj_params,
-      by = by,
       terms = dplyr::enquos(...),
       id = id
     )
   )
 }
 
-layer_epi_YeoJohnson_new <- function(yj_params, by, terms, id) {
-  layer("epi_YeoJohnson", yj_params = yj_params, by = by, terms = terms, id = id)
+layer_epi_YeoJohnson_new <- function(yj_params, terms, id) {
+  layer("epi_YeoJohnson", yj_params = yj_params, terms = terms, id = id)
 }
 
 #' @export
@@ -76,40 +74,9 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
     object$yj_params %||%
     get_params_in_layer(workflow, "epi_YeoJohnson", "yj_params")
 
-  # if the by is not specified, try to infer it from the yj_params.
-  if (is.null(object$by)) {
-    # if not specified, match the keys used in the join step
-    object$by <- key_colnames(new_data, exclude = "time_value")
-    yj_params
-    # assume `layer_predict` has calculated the prediction keys and other
-    # layers don't change the prediction key colnames:
-    prediction_key_colnames <- names(components$keys)
-    lhs_potential_keys <- prediction_key_colnames
-    rhs_potential_keys <- colnames(select(yj_params, -starts_with(".yj_param_")))
-    object$by <- intersect(lhs_potential_keys, rhs_potential_keys)
-    suggested_min_keys <- setdiff(lhs_potential_keys, "time_value")
-    if (!all(suggested_min_keys %in% object$by)) {
-      cli_warn(
-        c(
-          "{setdiff(suggested_min_keys, object$by)} {?was an/were} epikey column{?s} in the predictions,
-          but {?wasn't/weren't} found in the population `df`.",
-          "i" = "defaulting to join by {object$by}",
-          ">" = "double-check whether column names on the population `df` match those expected in your predictions",
-          ">" = "consider using population data with breakdowns by {suggested_min_keys}",
-          ">" = "manually specify `by =` to silence"
-        ),
-        class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
-      )
-    }
-  }
-
   # Establish the join columns.
-  object$by <- object$by %||%
-    intersect(
-      epi_keys_only(components$predictions),
-      colnames(select(yj_params, -starts_with(".yj_param_")))
-    )
-  joinby <- list(x = names(object$by) %||% object$by, y = object$by)
+  join_by_columns <- key_colnames(new_data, exclude = "time_value") %>% sort()
+  joinby <- list(x = join_by_columns, y = join_by_columns)
   hardhat::validate_column_names(components$predictions, joinby$x)
   hardhat::validate_column_names(yj_params, joinby$y)
 
