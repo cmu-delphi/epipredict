@@ -387,17 +387,19 @@ Now let's look at Florida.
 In the version faithful case, the three late-2021 forecasts (purples and pinks) starting in September predict very low values, near 0.
 The trend leading up to each forecast shows a substantial decrease, so these forecasts seem appropriate and we would expect them to score fairly well on various performance metrics when compared to the versioned data.
 
-In hindsight, we know that early versions of the data systematically under-reported COVID-related doctor visits such that these forecasts don't actually perform well compared to _finalized_ data.
+However in hindsight, we know that early versions of the data systematically under-reported COVID-related doctor visits such that these forecasts don't actually perform well compared to _finalized_ data.
 In this example, version faithful forecasts predicted values at or near 0 while finalized data shows values in the 5-10 range.
 As a result, the version un-faithful forecasts for these same dates are quite a bit higher, and would perform well when scored using the finalized data and poorly with versioned data.
 
 In general, the longer ago a forecast was made, the worse its performance is compared to finalized data. Finalized data accumulates revisions over time that make it deviate more and more from the non-finalized data a model was trained on.
-Forecasts trained solely on finalized data will of course appear to perform better when scored on finalized data, but will have unknown performance on the non-finalized data we need to use if we want timely predictions.
+Forecasts _trained_ on finalized data will of course appear to perform better when _scored_ on finalized data, but will have unknown performance on the non-finalized data we need to use if we want timely predictions.
 
 Without using data that would have been available on the actual forecast date, 
 you have little insight into what level of performance you
 can expect in practice.
 
+Good performance of a version un-faithful model is a mirage; it is only achievable if the training data has no revisions.
+If a data source has any revisions, version un-faithful-level performance is unachievable when making forecasts in real time.
 
 
 [^1]: For forecasting a single day like this, we could have actually just used
