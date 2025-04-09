@@ -261,8 +261,8 @@ forecast_wrapper <- function(
 }
 ```
 
-Note that in the helper function, we're using the parameter `adjust_latency`.
-We need to use it because the most recently released data may still be several days old on any given forecast date; 
+_Note:_ In the helper function, we're using the parameter `adjust_latency`.
+We need to use it because the most recently released data may still be several days old on any given forecast date (lag > 0); 
 `adjust_latency` will modify the forecaster to compensate[^5].
 See the function `step_adjust_latency()` for more details and examples.
 
@@ -302,7 +302,7 @@ forecasts <-
 
 `arx_forecaster()` does all the heavy lifting.
 It creates and lags copies of the features (here, the response and doctors visits), 
-creates and leads copies of the target (respecting time stamps and locations), fits a
+creates and leads copies of the target while respecting timestamps and locations, fits a
 forecasting model using the specified engine, creates predictions, and
 creates non-parametric confidence bands.
 
