@@ -19,14 +19,17 @@ library(recipes)
 library(epipredict)
 library(epiprocess)
 library(ggplot2)
+library(rlang) # for %@%
 forecast_date <- as.Date("2021-08-01")
 used_locations <- c("ca", "ma", "ny", "tx")
 library(epidatr)
 ```
 
 If you want to do custom data preprocessing or fit a model that isn't included in the canned workflows, you'll need to write a custom `epi_workflow()`.
+An `epi_workflow()` is a sub-class of a `workflows::workflow()` from the
+`{workflows}` package designed to handle panel data specifically.
 
-To get understand how to work with custom `epi_workflow()`s, let's recreate and then
+To understand how to work with custom `epi_workflow()`s, let's recreate and then
 modify the `four_week_ahead` example from the [landing
 page](../index.html#motivating-example).
 Let's first remind ourselves how to use a simple canned workflow:
@@ -133,9 +136,11 @@ parameters have already been calculated based on the training data set.
 Let's create an `epi_recipe()` to hold the 6 steps:
 
 ```{r make_recipe}
-four_week_recipe <- epi_recipe(
-  covid_case_death_rates |>
+filtered_data <- covid_case_death_rates |>
     filter(time_value <= forecast_date, geo_value %in% used_locations)
+four_week_recipe <- epi_recipe(
+  filtered_data,
+  reference_date = (filtered_data %@% metadata)$as_of
 )
 ```
 
@@ -171,21 +176,28 @@ The `step_naomit()`s differ in their treatment of the data at predict time.
 For example, if we wanted to use the same lags for both `case_rate` and `death_rate`, we could
 specify them in a single step, like `step_epi_lag(ends_with("rate"), lag = c(0, 7, 14))`.
 
-In general, `{recipes}` `step`s assign roles (`predictor`, `outcome`) to columns either by adding new columns or adjusting existing
+In general, `{recipes}` `step`s assign roles (such as `predictor`, or `outcome`,
+see the [Roles vignette for
+details](https://recipes.tidymodels.org/articles/Roles.html)) to columns either
+by adding new columns or adjusting existing
 ones.
 `step_epi_lag()`, for example, creates a new column for each lag with the name
 `lag_x_column_name` and labels them each with the `predictor` role.
-`step_epi_ahead()` creates `ahead_x_column_name` columns and labels each with the `outcome` role.
+`step_epi_ahead()` creates `ahead_x_column_name` columns and labels each with
+the `outcome` role.
 
-We can inspect assigned roles with `prep()` to make sure that we are training on the correct columns:
+In general, to inspect the 'prepared' steps, we can run `prep()`, which fits any
+parameters used in the recipe, calculates new columns, and assigns roles[^4].
+For example, we can use `prep()` to make sure that we are training on the
+correct columns:
 
 ```{r prep_recipe}
 prepped <- four_week_recipe |> prep(training_data)
 prepped$term_info |> print(n = 14)
 ```
 
-We can inspect newly-created columns by running `bake()` on the
-recipe so far:
+`bake()` applies a prepared recipe to a (potentially new) dataset to create the dataset as handed to the `epi_workflow()`.
+We can inspect newly-created columns by running `bake()` on the recipe so far:
 
 ```{r bake_recipe}
 four_week_recipe |>
@@ -243,7 +255,7 @@ On the other hand, the layers that are only supported by quantile estimating
 engines (such as `quantile_reg()`) are
 
 - `layer_quantile_distn()`: adds the specified quantiles.
-  If they differ from the ones actually fit, they will be interpolated and/or
+  If the quantile levels specified differ from the ones actually fit, they will be interpolated and/or
   extrapolated.
 - `layer_point_from_distn()`: this adds the median quantile as a point estimate,
   and, if called, should be included after `layer_quantile_distn()`. 
@@ -272,8 +284,7 @@ However, it does not generate any predictions; predictions need to be created in
 
 ## Predicting
 
-To make a prediction, we need to first narrow a data set down to the relevant observations.
-This process removes observations that will not be used for training because, for example, they contain missing values or <!-- TODO other reasons?-->.
+To make a prediction, it helps to narrow the data set down to the relevant observations using `get_test_data()`. Not doing this will still fit, but it will predict on every day in the data-set, and not just on the `reference_date`.
 
 ```{r grab_data}
 relevant_data <- get_test_data(
@@ -299,7 +310,7 @@ fit_workflow |> predict(training_data)
 
 The resulting tibble is 800 rows long, however.
 Not running `get_test_data()` means that we're providing irrelevant data along with relevant, valid data.
-Passing the non-subsetted data set produces forecasts for not just the requested `forecast_date`, but for every
+Passing the non-subsetted data set produces forecasts for not just the requested `reference_date`, but for every
 day in the data set that has sufficient data to produce a prediction.
 To narrow this down, we could filter to rows where the `time_value` matches the `forecast_date`:
 
@@ -356,6 +367,7 @@ growth_rate_recipe |>
     geo_value, time_value, case_rate,
     death_rate, gr_7_rel_change_death_rate
   ) |>
+  arrange(geo_value, time_value) |>
   tail()
 ```
 
@@ -484,7 +496,8 @@ First, we need to add a factor version of `geo_value`, so that it can be used as
 
 ```{r training_factor}
 training_data <-
-  training_data |>
+  covid_case_death_rates |>
+  filter(time_value <= forecast_date, geo_value %in% used_locations) |>
   mutate(geo_value_factor = as.factor(geo_value))
 ```
 
@@ -496,7 +509,7 @@ such as `step_growth_rate()`.
 classifier_recipe <- epi_recipe(training_data) |>
   # Turn `time_value` into predictor
   add_role(time_value, new_role = "predictor") |>
-  # Turn `geo_value_factor` into predictor
+  # Turn `geo_value_factor` into predictor by adding indicators for each value
   step_dummy(geo_value_factor) |>
   # Create and lag growth rate
   step_growth_rate(case_rate, role = "none", prefix = "gr_") |>
@@ -514,15 +527,15 @@ classifier_recipe <- epi_recipe(training_data) |>
     ),
     role = "outcome"
   ) |>
-  # Drop unused columns.
+  # Drop unused columns, not strictly necessary
   step_rm(has_role("none"), has_role("raw")) |>
   step_epi_naomit()
 ```
 
 This adds as predictors:
 
-- time value (via `add_role()`)
-- `geo_value` (via `step_dummy()` and the previous `as.factor()`)
+- time value as a continuous variable (via `add_role()`)
+- `geo_value` as a set of indicator variables (via `step_dummy()` and the previous `as.factor()`)
 - growth rate of case rate, both at prediction time (no lag), and lagged by one and two weeks
 
 The outcome variable is created by composing several steps together. `step_epi_ahead()`
@@ -553,17 +566,25 @@ because their roles have been reassigned.
 To fit a classification model like this, we will need to use a `{parsnip}` model
 that has `mode = "classification"`.
 The simplest example of a `{parsnip}` `classification`-`mode` model is `multinomial_reg()`.
-We don't need to do any post-processing, so we can skip adding `layer`s to the `epiworkflow()`.
-So our workflow looks like:
+The needed layers are more or less the same as the `linear_reg()` regression layers, with the addition that we need to remove some `NA` values:
+
+```{r, warning=FALSE}
+frost <- frosting() |>
+  layer_naomit(starts_with(".pred")) |>
+  layer_add_forecast_date() |>
+  layer_add_target_date() |>
+  layer_threshold()
+```
 
 ```{r, warning=FALSE}
 wf <- epi_workflow(
   classifier_recipe,
-  multinom_reg()
+  multinom_reg(),
+  frost
 ) |>
   fit(training_data)
 
-forecast(wf) |> filter(!is.na(.pred_class))
+forecast(wf)
 ```
 
 And comparing the result with the actual growth rates at that point in time,
@@ -596,3 +617,5 @@ See the [tooling book](https://cmu-delphi.github.io/delphi-tooling-book/preproce
 [^3]: McDonald, Bien, Green, Hu, et al. “Can auxiliary indicators improve
     COVID-19 forecasting and hotspot prediction?.” Proceedings of the National
     Academy of Sciences 118.51 (2021): e2111453118. doi:10.1073/pnas.2111453118
+
+[^4]: Note that `prep()` and `bake()` are standard `{recipes}` functions, so any discussion of them there applies just as well here. For example in the [guide to creating a new step](https://www.tidymodels.org/learn/develop/recipes/#create-the-prep-method).

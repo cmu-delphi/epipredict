@@ -122,7 +122,7 @@ p0 <-
 ```
 </details>
 
-```{r plot_just_revisioning, warn = FALSE, message = FALSE}
+```{r plot_just_revisioning, echo = FALSE, warn = FALSE, message = FALSE}
 p0
 ```
 
