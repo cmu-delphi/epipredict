@@ -266,7 +266,7 @@ prep.step_climate <- function(x, training, info = NULL, ...) {
 
   fn <- switch(x$center_method,
     mean = function(x, w) stats::weighted.mean(x, w, na.rm = TRUE),
-    median = function(x, w) median(x, na.rm = TRUE)
+    median = function(x, w) stats::median(x, na.rm = TRUE)
   )
   # suppose it's week 52, and there is no week 53 this year; then
   # as originally written for 1 week ahead this grabs from week 52+1 %% 53

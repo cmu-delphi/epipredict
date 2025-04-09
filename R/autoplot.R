@@ -13,7 +13,7 @@ ggplot2::autoplot
 #'
 #'
 #' @inheritParams epiprocess::autoplot.epi_df
-#' @param object An `epi_workflow`
+#' @param object,x An `epi_workflow`
 #' @param predictions A data frame with predictions. If `NULL`, only the
 #'   original data is shown.
 #' @param .levels A numeric vector of levels to plot for any prediction bands.
