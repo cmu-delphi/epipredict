@@ -198,6 +198,11 @@ forecasts <- doctor_visits |>
 We need truth data to compare our forecast against. We can construct it by using `epix_as_of()` to snapshot
 the archive at the last available date[^1].
 
+_Note:_ We always want to compare our forecasts to actual (most recently reported) values because that is the outcome we care about.
+`as_of` data is useful for understanding why we're getting the forecasts we're getting, but `as_of` values are not the real outcome
+Therefore, it's not meaningful to use them for evaluating the performance of a forecast.
+Unfortunately, it's not uncommon for revisions to cause poor (final) performance of a forecaster that was decent at the time of the forecast.
+
 ```{r compare_single_with_result}
 forecasts |>
   inner_join(
