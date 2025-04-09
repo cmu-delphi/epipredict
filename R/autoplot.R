@@ -70,7 +70,7 @@ ggplot2::autoplot
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #' flat <- flatline_forecaster(jhu, "death_rate")
-#' autoplot(flat, .max_facets = 4)
+#' autoplot(flat, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' arx <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
 #'   args_list = arx_args_list(ahead = 14L)
