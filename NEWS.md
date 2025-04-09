@@ -20,6 +20,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Removes dependence on the `distributional` package, replacing the quantiles 
   with `hardhat::quantile_pred()`. Some associated functions are deprecated with
   `lifecycle` messages.
+- Adds the `.facet_filter` option in `epiprocess::autoplot()` (cmu-delphi/epiprocess#647).
 
 ## Improvements
 
