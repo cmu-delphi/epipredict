@@ -52,16 +52,20 @@ four_week_ahead$epi_workflow
 
 # Anatomy of an `epi_workflow`
 
-An `epi_workflow()` is an extension of a `workflows::workflow()` that handles panel
-data and post-processing.
-All `epi_workflows`, including simple and canned workflows, consist of 3 components.
+An `epi_workflow()` is an extension of a `workflows::workflow()` that is specially designed to handle panel
+data, and to apply custom post-processing steps to the output of a model.
+All `epi_workflows`, including simple and canned workflows, consist of 3 components, a preprocessor, trainer, and postprocessor.
 
 ### Preprocessor
 
-A preprocessor transforms the data before model training and prediction.
+A preprocessor (also called a recipe) transforms the data before model training and prediction.
 Transformations can include converting counts to rates, applying a running average 
 to columns, or [any of the `step`s found in `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
 
+All workflows must include a preprocessor.
+The most basic preprocessor just assigns roles to columns, telling the model in the next step which to use as predictors or the outcome.
+
+However, preprocessors can do much more.
 You can think of a preprocessor as a more flexible `formula` that you would pass to `lm()`: `y ~ x1 + log(x2) + lag(x1, 5)`.
 The simple model above internally runs 6 of these steps, such as creating lagged predictor columns.
 
@@ -88,14 +92,19 @@ However, the _main_ mechanism we rely on to prevent data leakage is proper
 
 ### Trainer
 
-A trainer fits a `{parsnip}` model on data, and outputs a fitted model object.
+A trainer (aso called a model or engine) fits a `{parsnip}` model on data, and outputs a fitted model object.
 Examples include linear regression, quantile regression, or [any `{parsnip}` engine](https://www.tidymodels.org/find/parsnip/).
 The `{parsnip}` front-end abstracts away the differences in interface between a wide collection of statistical models.
+
+All workflows must include a model.
 
 ### Postprocessor
 
 Postprocessors are unique to `{epipredict}`.
-A postprocessor modifies and formats the prediction after a model has been fit.
+A postprocessor (also known as frosting) modifies and formats the prediction after a model has been fit.
+
+The postprocessor is _optional_.
+It only needs to be included in a workflow if you need to process the model output.
 
 Each operation within a postprocessor is called a "layer" (functions are named `layer_*`), and the stack of layers is known as `frosting()`,
 continuing the metaphor of baking a cake established in `{recipes}`.
