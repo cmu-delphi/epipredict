@@ -330,7 +330,8 @@ And as a tibble of quantile level-value pairs:
 ```{r pivot_wider}
 four_week_ahead$predictions |>
   select(-.pred) |>
-  pivot_quantiles_longer(.pred_distn)
+  pivot_quantiles_longer(.pred_distn) |>
+  select(geo_value, forecast_date, target_date, quantile = .pred_distn_quantile_level, value = .pred_distn_value)
 ```
 
 The yellow dot gives the median prediction, while the blue intervals give the

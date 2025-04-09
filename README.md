@@ -294,16 +294,17 @@ And as a tibble of quantile level-value pairs:
 ``` r
 four_week_ahead$predictions |>
   select(-.pred) |>
-  pivot_quantiles_longer(.pred_distn)
+  pivot_quantiles_longer(.pred_distn) |>
+  select(geo_value, forecast_date, target_date, quantile = .pred_distn_quantile_level, value = .pred_distn_value)
 #> # A tibble: 20 × 5
-#>   geo_value values quantile_levels forecast_date target_date
-#>   <chr>      <dbl>           <dbl> <date>        <date>     
-#> 1 ca        0.0425            0.1  2021-08-01    2021-08-29 
-#> 2 ca        0.0803            0.25 2021-08-01    2021-08-29 
-#> 3 ca        0.115             0.5  2021-08-01    2021-08-29 
-#> 4 ca        0.150             0.75 2021-08-01    2021-08-29 
-#> 5 ca        0.187             0.9  2021-08-01    2021-08-29 
-#> 6 ma        0                 0.1  2021-08-01    2021-08-29 
+#>   geo_value forecast_date target_date quantile  value
+#>   <chr>     <date>        <date>         <dbl>  <dbl>
+#> 1 ca        2021-08-01    2021-08-29      0.1  0.198 
+#> 2 ca        2021-08-01    2021-08-29      0.25 0.285 
+#> 3 ca        2021-08-01    2021-08-29      0.5  0.345 
+#> 4 ca        2021-08-01    2021-08-29      0.75 0.405 
+#> 5 ca        2021-08-01    2021-08-29      0.9  0.491 
+#> 6 ma        2021-08-01    2021-08-29      0.1  0.0277
 #> # ℹ 14 more rows
 ```
 

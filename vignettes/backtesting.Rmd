@@ -320,6 +320,13 @@ geo_choose <- "ca"
 forecasts_filtered <- forecasts |>
   filter(geo_value == geo_choose) |>
   mutate(time_value = version)
+# we need to add the ground truth data to the version faithful plot as well
+plotting_data <- bind_rows(
+  percent_cli_data,
+  percent_cli_data %>%
+    filter(version_faithful == "Version un-faithful") %>%
+    mutate(version_faithful = "Version faithful")
+)
 
 p1 <- # first plotting the forecasts as bands, lines and points
   ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
@@ -327,10 +334,13 @@ p1 <- # first plotting the forecasts as bands, lines and points
   geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
   geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
   # the forecast date
-  geom_vline(data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful), aes(color = factor(version), xintercept = version), lty = 2) +
+  geom_vline(
+    data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
+    aes(color = factor(version), xintercept = version),
+    lty = 2) +
   # the underlying data
   geom_line(
-    data = percent_cli_data |> filter(geo_value == geo_choose),
+    data = plotting_data |> filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = factor(version)),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
@@ -357,7 +367,7 @@ p2 <-
     aes(color = factor(version), xintercept = version), lty = 2
   ) +
   geom_line(
-    data = percent_cli_data |> filter(geo_value == geo_choose),
+    data = plotting_data |> filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = factor(version)),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
