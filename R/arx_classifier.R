@@ -222,7 +222,7 @@ arx_class_epi_workflow <- function(
     step_training_window(n_recent = args_list$n_training)
 
   if (!is.null(args_list$check_enough_data_n)) {
-    r <- check_enough_train_data(
+    r <- check_enough_data(
       r,
       recipes::all_predictors(),
       recipes::all_outcomes(),

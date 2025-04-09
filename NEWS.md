@@ -20,6 +20,9 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Removes dependence on the `distributional` package, replacing the quantiles 
   with `hardhat::quantile_pred()`. Some associated functions are deprecated with
   `lifecycle` messages.
+- Rename `check_enough_train_data()` to `check_enough_data()`, and generalize it
+  enough to use as a check on either training or testing.
+- Add check for enough data to predict in `arx_forecaster()`
 - Adds the `.facet_filter` option in `epiprocess::autoplot()` (cmu-delphi/epiprocess#647).
 
 ## Improvements
@@ -34,6 +37,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Add `climatological_forecaster()` to automatically create climate baselines
 - Replace `dist_quantiles()` with `hardhat::quantile_pred()`
 - Allow `quantile()` to threshold to an interval if desired (#434)
+- `arx_forecaster()` detects if there's enough data to predict
 
 ## Bug fixes
 
