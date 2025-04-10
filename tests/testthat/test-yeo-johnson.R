@@ -120,7 +120,14 @@ test_that("Yeo-Johnson layers work on quantiles", {
   wf <- epi_workflow(r, linear_reg()) %>%
     fit(filtered_data) %>%
     add_frosting(f)
-  out2 <- forecast(wf)
+  out1 <- filtered_data %>%
+    dplyr::slice_max(time_value, by = geo_value) %>%
+    rename(.pred = cases) %>%
+    tidyr::expand_grid(.pred_distn_quantile_level = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)) %>%
+    mutate(.pred_distn_value = .pred) %>%
+    select(geo_value, time_value, .pred, .pred_distn_value, .pred_distn_quantile_level)
+  out2 <- forecast(wf) %>% pivot_quantiles_longer(.pred_distn) %>% as_tibble()
+  expect_equal(out1, out2)
 })
 
 test_that("Yeo-Johnson steps and layers invert each other when other_keys are present", {
@@ -170,6 +177,7 @@ test_that("Yeo-Johnson steps and layers invert each other when other_keys are pr
   # Make sure that the inverse transformation works
   f <- frosting() %>%
     layer_predict() %>%
+    layer_residual_quantiles() %>%
     layer_epi_YeoJohnson(.pred)
   wf <- epi_workflow(r, linear_reg()) %>%
     fit(filtered_data) %>%
