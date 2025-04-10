@@ -13,7 +13,7 @@ ggplot2::autoplot
 #'
 #'
 #' @inheritParams epiprocess::autoplot.epi_df
-#' @param object An `epi_workflow`
+#' @param object,x An `epi_workflow`
 #' @param predictions A data frame with predictions. If `NULL`, only the
 #'   original data is shown.
 #' @param .levels A numeric vector of levels to plot for any prediction bands.
@@ -48,7 +48,7 @@ ggplot2::autoplot
 #'
 #' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #' preds <- predict(wf, latest)
-#' autoplot(wf, preds, .max_facets = 4)
+#' autoplot(wf, preds, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' # ------- Show multiple horizons
 #'
@@ -63,19 +63,19 @@ ggplot2::autoplot
 #' })
 #'
 #' p <- do.call(rbind, p)
-#' autoplot(wf, p, .max_facets = 4)
+#' autoplot(wf, p, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' # ------- Plotting canned forecaster output
 #'
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #' flat <- flatline_forecaster(jhu, "death_rate")
-#' autoplot(flat, .max_facets = 4)
+#' autoplot(flat, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' arx <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
 #'   args_list = arx_args_list(ahead = 14L)
 #' )
-#' autoplot(arx, .max_facets = 6)
+#' autoplot(arx, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt", "mo", "in"))
 NULL
 
 #' @export
@@ -87,7 +87,8 @@ autoplot.epi_workflow <- function(
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "dodgerblue4",
     .point_pred_color = "orange",
-    .max_facets = Inf) {
+    .facet_filter = NULL,
+    .max_facets = deprecated()) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
   rlang::arg_match(.color_by)
@@ -134,7 +135,7 @@ autoplot.epi_workflow <- function(
     return(autoplot(
       edf, new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
-      .max_facets = .max_facets
+      .facet_filter = {{ .facet_filter }}
     ))
   }
 
@@ -153,25 +154,25 @@ autoplot.epi_workflow <- function(
     return(autoplot(
       edf, !!new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
-      .max_facets = .max_facets
+      .facet_filter = {{ .facet_filter }}
     ))
   }
 
   # First we plot the history, always faceted by everything
   bp <- autoplot(edf, !!new_name_y,
     .color_by = "none", .facet_by = "all_keys",
-    .base_color = "black", .max_facets = .max_facets
+    .base_color = "black", .facet_filter =  {{ .facet_filter }}
   )
 
   # Now, prepare matching facets in the predictions
   ek <- epi_keys_only(edf)
   predictions <- predictions %>%
     mutate(
-      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "/"),
+      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = " / "),
     )
-  if (.max_facets < Inf) {
-    top_n <- levels(as.factor(bp$data$.facets))[seq_len(.max_facets)]
-    predictions <- filter(predictions, .facets %in% top_n) %>%
+  .facet_filter <- rlang::enquo(.facet_filter)
+  if (!rlang::quo_is_null(.facet_filter) && ".facets" %in% names(bp$data)) {
+    predictions <- filter(predictions, .facets %in% unique(bp$data$.facets)) %>%
       mutate(.facets = droplevels(.facets))
   }
 
@@ -207,7 +208,8 @@ autoplot.canned_epipred <- function(
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "dodgerblue4",
     .point_pred_color = "orange",
-    .max_facets = Inf) {
+    .facet_filter = NULL,
+    .max_facets = deprecated()) {
   rlang::check_dots_empty()
   rlang::arg_match(.color_by)
   rlang::arg_match(.facet_by)
@@ -218,9 +220,22 @@ autoplot.canned_epipred <- function(
 
   autoplot(ewf, predictions,
     .color_by = .color_by, .facet_by = .facet_by,
-    .base_color = .base_color, .max_facets = .max_facets
+    .base_color = .base_color, .facet_filter = {{ .facet_filter }}
   )
 }
+
+#' @export
+#' @rdname autoplot-epipred
+plot.epi_workflow <- function(x, ...) {
+  autoplot(x, ...)
+}
+
+#' @export
+#' @rdname autoplot-epipred
+plot.canned_epipred <- function(x, ...) {
+  autoplot(x, ...)
+}
+
 
 starts_with_impl <- function(x, vars) {
   n <- nchar(x)

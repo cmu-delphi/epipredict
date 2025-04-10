@@ -23,6 +23,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Rename `check_enough_train_data()` to `check_enough_data()`, and generalize it
   enough to use as a check on either training or testing.
 - Add check for enough data to predict in `arx_forecaster()`
+- Adds the `.facet_filter` option in `epiprocess::autoplot()` (cmu-delphi/epiprocess#647).
 
 ## Improvements
 

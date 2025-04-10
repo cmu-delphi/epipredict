@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.1.14
+Version: 0.1.15
 Authors@R: c(
     person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -31,7 +31,7 @@ Imports:
     checkmate,
     cli,
     dplyr,
-    epiprocess (>= 0.10.4),
+    epiprocess (>= 0.11.2),
     generics,
     ggplot2,
     glue,
