@@ -8,7 +8,6 @@ layer_epi_YeoJohnson(
   frosting,
   ...,
   yj_params = NULL,
-  by = NULL,
   id = rand_id("epi_YeoJohnson")
 )
 }
@@ -28,8 +27,6 @@ example where you wouldn't need to set this, if your output is
 \code{ahead_7_cases} and \code{step_epi_YeoJohnson} transformed cases (possibly with
 other columns), then you wouldn't need to set this. However if you have
 renamed your output column to \code{diff_7}, then you will need to extract the \code{yj_params} from the step.}
-
-\item{by}{A (possibly named) character vector of variables to join by.}
 
 \item{id}{a random id string}
 }
