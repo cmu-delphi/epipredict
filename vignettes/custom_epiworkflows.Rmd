@@ -293,7 +293,8 @@ However, it does not generate any predictions; predictions need to be created in
 
 ## Predicting
 
-To make a prediction, it helps to narrow the data set down to the relevant observations using `get_test_data()`. Not doing this will still fit, but it will predict on every day in the data-set, and not just on the `reference_date`.
+To make a prediction, it helps to narrow the data set down to the relevant observations using `get_test_data()`.
+We can still generate predictions without doing this first, but it will predict on _every_ day in the data-set, and not just on the `reference_date`.
 
 ```{r grab_data}
 relevant_data <- get_test_data(
@@ -302,7 +303,7 @@ relevant_data <- get_test_data(
 )
 ```
 
-In this example, we're creating `relevant_data` from `training_data`, but the data set we want predictions for could be an entirely new data set.
+In this example, we're creating `relevant_data` from `training_data`, but the data set we want predictions for could be entirely new data, unrelated to the one we used when building the workflow.
 
 With a trained workflow and data in hand, we can actually make our predictions:
 
@@ -310,7 +311,7 @@ With a trained workflow and data in hand, we can actually make our predictions:
 fit_workflow |> predict(relevant_data)
 ```
 
-Note that if we simply plug `training_data` into `predict()` we will still get
+Note that if we simply plug the full `training_data` into `predict()` we will still get
 predictions:
 
 ```{r workflow_pred_training}
@@ -318,7 +319,6 @@ fit_workflow |> predict(training_data)
 ```
 
 The resulting tibble is 800 rows long, however.
-Not running `get_test_data()` means that we're providing irrelevant data along with relevant, valid data.
 Passing the non-subsetted data set produces forecasts for not just the requested `reference_date`, but for every
 day in the data set that has sufficient data to produce a prediction.
 To narrow this down, we could filter to rows where the `time_value` matches the `forecast_date`:
@@ -329,8 +329,9 @@ fit_workflow |>
   filter(time_value == forecast_date)
 ```
 
-This can be useful for cases where `get_test_data()` doesn't pull sufficient
-data.
+This can be useful for as a workaround when `get_test_data()` fails to pull enough
+data to produce a forecast.
+This is generally a problem when the recipe (preprocessor) is sufficiently complicated, and `get_test_data()` can't determine precisely what data is required.
 
 # Extending `four_week_ahead`
 
