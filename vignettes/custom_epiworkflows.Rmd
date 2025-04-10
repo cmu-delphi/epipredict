@@ -227,7 +227,7 @@ The post-processing `frosting` layers[^1] found in `four_week_ahead` look like:
 epipredict::extract_frosting(four_week_ahead$epi_workflow)
 ```
 
-Note: since `frosting` is unique to this package, we've defined a custom function `extract_frosting()` to inspect these steps.
+_Note_: since `frosting` is unique to this package, we've defined a custom function `extract_frosting()` to inspect these steps.
 
 Using the detailed information in the output above,
 we can recreate the layers similar to how we defined the
@@ -245,10 +245,10 @@ four_week_layers <- frosting() |>
 `layer_predict()` needs to be included in every postprocessor to actually train the model.
 
 Most layers work with any engine or `step`s.
-There are a couple of layers, however, which depend on whether the engine predicts quantiles or point estimates.
+There are a couple of layers, however, that depend on whether the engine predicts quantiles or point estimates.
 
-The layers that are only supported by point estimate engines (such as
-`linear_reg()`) are:
+The following layers are only supported by point estimate engines, such as
+`linear_reg()`:
 
 - `layer_residual_quantiles()`: the preferred method of generating quantiles for
   models that don't generate quantiles themselves.
@@ -260,14 +260,14 @@ The layers that are only supported by point estimate engines (such as
   
 <!-- TODO check this -->
   
-On the other hand, the layers that are only supported by quantile estimating
-engines (such as `quantile_reg()`) are
+On the other hand, the following layers are only supported by engines that 
+output quantiles, such as `quantile_reg()`:
 
 - `layer_quantile_distn()`: adds the specified quantiles.
-  If the quantile levels specified differ from the ones actually fit, they will be interpolated and/or
+  If the user-requested quantile levels differ from the ones actually fit, they will be interpolated and/or
   extrapolated.
-- `layer_point_from_distn()`: this adds the median quantile as a point estimate,
-  and, if called, should be included after `layer_quantile_distn()`. 
+- `layer_point_from_distn()`: this adds the middle quantile (median) as a point estimate,
+  and, if used, should be included after `layer_quantile_distn()`. 
 
 ## Fitting an `epi_workflow()`
 
