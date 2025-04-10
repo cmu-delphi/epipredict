@@ -8,7 +8,6 @@ layer_epi_YeoJohnson(
   frosting,
   ...,
   yj_params = NULL,
-  by = NULL,
   id = rand_id("epi_YeoJohnson")
 )
 }
@@ -19,10 +18,15 @@ sequence of operations for this frosting.}
 \item{...}{One or more selector functions to scale variables
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
-\item{yj_params}{Internal. A data frame of parameters to be used for
-inverting the transformation.}
-
-\item{by}{A (possibly named) character vector of variables to join by.}
+\item{yj_params}{A data frame of parameters to be used for inverting the
+transformation. Typically set automatically. If you have done multiple
+transformations such that the outcome variable name no longer contains the
+column that this step transforms, then you should manually specify this to
+be the parameters fit in the corresponding \code{step_epi_YeoJohnson}. For an
+example where you wouldn't need to set this, if your output is
+\code{ahead_7_cases} and \code{step_epi_YeoJohnson} transformed cases (possibly with
+other columns), then you wouldn't need to set this. However if you have
+renamed your output column to \code{diff_7}, then you will need to extract the \code{yj_params} from the step.}
 
 \item{id}{a random id string}
 }
@@ -30,7 +34,11 @@ inverting the transformation.}
 an updated \code{frosting} postprocessor
 }
 \description{
-Will undo a step_epi_YeoJohnson transformation.
+Will undo a step_epi_YeoJohnson transformation. For practical reasons, if you
+are using this step on a column that will eventually become the outcome
+variable, you should make sure that the original name of that column is a
+subset of the outcome variable name. \code{ahead_7_cases} when \code{cases} is
+transformed will work well, while \code{ahead_7} will not.
 }
 \examples{
 library(dplyr)

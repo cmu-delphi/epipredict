@@ -13,6 +13,29 @@ test_that("Yeo-Johnson transformation inverts correctly", {
   expect_true(
     sum(abs(yj_inverse(yj_transform(x, lambdas), lambdas) - x)) < 1e-5
   )
+
+  # also works on quantile distributions
+  x <- quantile_pred(matrix(c(-5, 1, 3, 0, 0.1, 0.5), nrow = 2, byrow = TRUE), c(0.01, 0.5, 0.7))
+  x_back <- map(
+      lambdas,
+      \(lambda) mean(abs(yj_inverse(yj_transform(x, lambda), lambda) - x)) < 1e-5
+    )
+  expect_true(all(unlist(x_back)))
+
+  # Get coverage on yj_input_type_management
+  # Breaks on bad length of lambda
+  expect_snapshot(error = TRUE,
+    yj_transform(x, c(1, 2, 3))
+  )
+  expect_snapshot(error = TRUE,
+    yj_transform(list(1, 2), c(1, 2, 3))
+  )
+  expect_true(
+    identical(
+      yj_input_type_management(list(1, 2, 3), c(1, 2, 3)),
+      list(c(1, 2, 3), c(1, 2, 3))
+    )
+  )
 })
 
 test_that("Yeo-Johnson steps and layers invert each other", {
@@ -36,16 +59,16 @@ test_that("Yeo-Johnson steps and layers invert each other", {
   # Make sure that the inverse transformation works
   f <- frosting() %>%
     layer_predict() %>%
-    layer_epi_YeoJohnson(.pred)
+    layer_epi_YeoJohnson()
   wf <- epi_workflow(r, linear_reg()) %>%
     fit(filtered_data) %>%
     add_frosting(f)
   out1 <- filtered_data %>%
-    slice_max(time_value, by = geo_value)
+    dplyr::slice_max(time_value, by = geo_value)
   out2 <- forecast(wf) %>% rename(cases = .pred)
   expect_equal(out1, out2)
 
-  # Make sure it works when there are multiple predictors and outcomes
+  # Make sure it works when there are multiple predictors
   jhu_multi <- epidatasets::covid_case_death_rates_extended %>%
     filter(time_value > "2021-01-01", geo_value %in% c("ca", "ny")) %>%
     select(geo_value, time_value, case_rate, death_rate)
@@ -53,7 +76,7 @@ test_that("Yeo-Johnson steps and layers invert each other", {
   r <- epi_recipe(filtered_data) %>%
     step_epi_YeoJohnson(case_rate, death_rate) %>%
     step_epi_lag(case_rate, death_rate, lag = 0) %>%
-    step_epi_ahead(case_rate, death_rate, ahead = 0, role = "outcome") %>%
+    step_epi_ahead(case_rate, ahead = 0, role = "outcome") %>%
     step_epi_naomit()
   tr <- r %>% prep(filtered_data)
 
@@ -66,13 +89,43 @@ test_that("Yeo-Johnson steps and layers invert each other", {
   # Make sure that the inverse transformation works
   f <- frosting() %>%
     layer_predict() %>%
-    layer_epi_YeoJohnson(.pred_ahead_0_case_rate, .pred_ahead_0_death_rate)
+    layer_epi_YeoJohnson()
   wf <- epi_workflow(r, linear_reg()) %>%
     fit(filtered_data) %>%
     add_frosting(f)
   out1 <- filtered_data %>%
-    slice_max(time_value, by = geo_value)
-  out2 <- forecast(wf) %>% rename(case_rate = .pred_ahead_0_case_rate, death_rate = .pred_ahead_0_death_rate)
+    select(-death_rate) %>%
+    dplyr::slice_max(time_value, by = geo_value)
+  out2 <- forecast(wf) %>% rename(case_rate = .pred)
+  expect_equal(out1, out2)
+})
+
+test_that("Yeo-Johnson layers work on quantiles", {
+  jhu <- epidatasets::cases_deaths_subset %>%
+    filter(time_value > "2021-01-01", geo_value %in% c("ca", "ny")) %>%
+    select(geo_value, time_value, cases)
+  filtered_data <- jhu
+
+  r <- epi_recipe(filtered_data) %>%
+    step_epi_YeoJohnson(cases) %>%
+    step_epi_lag(cases, lag = 0) %>%
+    step_epi_ahead(cases, ahead = 0, role = "outcome") %>%
+    step_epi_naomit()
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_residual_quantiles() %>%
+    layer_epi_YeoJohnson()
+  wf <- epi_workflow(r, linear_reg()) %>%
+    fit(filtered_data) %>%
+    add_frosting(f)
+  out1 <- filtered_data %>%
+    dplyr::slice_max(time_value, by = geo_value) %>%
+    rename(.pred = cases) %>%
+    tidyr::expand_grid(.pred_distn_quantile_level = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)) %>%
+    mutate(.pred_distn_value = .pred) %>%
+    select(geo_value, time_value, .pred, .pred_distn_value, .pred_distn_quantile_level)
+  out2 <- forecast(wf) %>% pivot_quantiles_longer(.pred_distn) %>% as_tibble()
   expect_equal(out1, out2)
 })
 
@@ -123,12 +176,13 @@ test_that("Yeo-Johnson steps and layers invert each other when other_keys are pr
   # Make sure that the inverse transformation works
   f <- frosting() %>%
     layer_predict() %>%
+    layer_residual_quantiles() %>%
     layer_epi_YeoJohnson(.pred)
   wf <- epi_workflow(r, linear_reg()) %>%
     fit(filtered_data) %>%
     add_frosting(f)
   out1 <- filtered_data %>%
-    slice_max(time_value, by = geo_value) %>%
+    dplyr::slice_max(time_value, by = geo_value) %>%
     select(geo_value, age_group, time_value, med_income_2y) %>%
     arrange(geo_value, age_group, time_value)
   out2 <- forecast(wf) %>%
