@@ -329,9 +329,10 @@ fit_workflow |>
   filter(time_value == forecast_date)
 ```
 
-This can be useful for as a workaround when `get_test_data()` fails to pull enough
+This can be useful as a workaround when `get_test_data()` fails to pull enough
 data to produce a forecast.
 This is generally a problem when the recipe (preprocessor) is sufficiently complicated, and `get_test_data()` can't determine precisely what data is required.
+The forecasts generated with `filter` and `get_test_data` are identical.
 
 # Extending `four_week_ahead`
 
