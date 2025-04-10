@@ -519,16 +519,16 @@ such as `step_growth_rate()`.
 
 ```{r class_recipe}
 classifier_recipe <- epi_recipe(training_data) |>
-  # Turn `time_value` into predictor
+  # Label `time_value` as predictor and do no other processing
   add_role(time_value, new_role = "predictor") |>
-  # Turn `geo_value_factor` into predictor by adding indicators for each value
+  # Use one-hot encoding on `geo_value_factor` and label each resulting column as a predictor
   step_dummy(geo_value_factor) |>
-  # Create and lag growth rate
+  # Create and lag `case_rate` growth rate
   step_growth_rate(case_rate, role = "none", prefix = "gr_") |>
   step_epi_lag(starts_with("gr_"), lag = c(0, 7, 14)) |>
   step_epi_ahead(starts_with("gr_"), ahead = 7, role = "none") |>
-  # Divide growth rate into 3 bins.
-  # Note `recipes::step_cut()` has a bug, or we could use that here.
+  # Divide growth rate into 3 bins, and label as outcome variable
+  # Note `recipes::step_cut()` has a bug that prevents us from using it here
   step_mutate(
     response = cut(
       ahead_7_gr_7_rel_change_case_rate,
@@ -539,7 +539,8 @@ classifier_recipe <- epi_recipe(training_data) |>
     ),
     role = "outcome"
   ) |>
-  # Drop unused columns, not strictly necessary
+  # Drop unused columns based on role assignments. This is not strictly 
+  # necessary, as columns with roles unused in the model will be ignored anyway.
   step_rm(has_role("none"), has_role("raw")) |>
   step_epi_naomit()
 ```
