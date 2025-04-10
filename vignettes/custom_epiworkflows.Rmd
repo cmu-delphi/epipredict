@@ -390,8 +390,9 @@ prepped <- growth_rate_recipe |>
 prepped$term_info |> filter(grepl("gr", variable))
 ```
 
-To demonstrate the changes in the layers that come along with it, we will use
-`quantile_reg()` as the model, which requires changing from `layer_residual_quantiles()` to `layer_quantile_distn()` and `layer_point_from_distn()`:
+Let's say we want to use `quantile_reg()` as the model.
+Because `quantile_reg()` outputs quantiles only, we need to change our `frosting` to convert a quantile distribution into quantiles and point predictions.
+To do that, we need to switch out `layer_residual_quantiles()` (used for converting point + residuals output, e.g. from `linear_reg()` into quantiles) for `layer_quantile_distn()` and `layer_point_from_distn()`:
 ```{r layer_and_fit}
 growth_rate_layers <- frosting() |>
   layer_predict() |>
