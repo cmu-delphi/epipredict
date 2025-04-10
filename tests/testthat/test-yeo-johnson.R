@@ -16,8 +16,7 @@ test_that("Yeo-Johnson transformation inverts correctly", {
 
   # also works on quantile distributions
   x <- quantile_pred(matrix(c(-5, 1, 3, 0, 0.1, 0.5), nrow = 2, byrow = TRUE), c(0.01, 0.5, 0.7))
-  x_back <-
-    map(
+  x_back <- map(
       lambdas,
       \(lambda) mean(abs(yj_inverse(yj_transform(x, lambda), lambda) - x)) < 1e-5
     )
