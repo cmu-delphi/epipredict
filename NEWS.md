@@ -12,12 +12,12 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>`
   or, after loading the package, the name of the dataset alone (#382).
 - `step_adjust_latency()` no longer allows empty column selection.
-- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
+- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`).
   `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
   has an `na_rm` argument.
 - Moves `epiprocess` out of depends (#440). No internals have changed, but downstream
   users may need to add `library(epiprocess)` to existing code.
-- Removes dependence on the `distributional` package, replacing the quantiles 
+- Removes dependence on the `distributional` package, replacing the quantiles
   with `hardhat::quantile_pred()`. Some associated functions are deprecated with
   `lifecycle` messages.
 - Rename `check_enough_train_data()` to `check_enough_data()`, and generalize it
@@ -38,6 +38,8 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Replace `dist_quantiles()` with `hardhat::quantile_pred()`
 - Allow `quantile()` to threshold to an interval if desired (#434)
 - `arx_forecaster()` detects if there's enough data to predict
+- `pivot_quantiles_longer()` now appropriately adds `quantile_level` to the
+  `epi_df` other keys
 
 ## Bug fixes
 
