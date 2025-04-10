@@ -16,14 +16,27 @@ test_that("Yeo-Johnson transformation inverts correctly", {
 
   # also works on quantile distributions
   x <- quantile_pred(matrix(c(-5, 1, 3, 0, 0.1, 0.5), nrow = 2, byrow = TRUE), c(0.01, 0.5, 0.7))
-  yj_inverse(x, lambdas[[1]])
-  map(lambdas, \(lambda) yj_transform(x, lambda))
   x_back <-
     map(
       lambdas,
       \(lambda) mean(abs(yj_inverse(yj_transform(x, lambda), lambda) - x)) < 1e-5
     )
   expect_true(all(unlist(x_back)))
+
+  # Get coverage on yj_input_type_management
+  # Breaks on bad length of lambda
+  expect_snapshot(error = TRUE,
+    yj_input_type_management(x, c(1, 2, 3))
+  )
+  expect_snapshot(error = TRUE,
+    yj_input_type_management(list(1, 2), c(1, 2, 3))
+  )
+  expect_true(
+    identical(
+      yj_input_type_management(list(1, 2, 3), c(1, 2, 3)),
+      list(c(1, 2, 3), c(1, 2, 3))
+    )
+  )
 })
 
 test_that("Yeo-Johnson steps and layers invert each other", {

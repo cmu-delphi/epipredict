@@ -288,12 +288,12 @@ yj_input_type_management <- function(x_in, lambda) {
 }
 ### Code below taken from recipes::step_YeoJohnson.
 ### We keep "lambda" here, but above we renamed it to "yj_param".
-### Modified yj_transform() to be vectorized in lambda.
+### Modified yj_transform() to be vectorized in lambda. Also modified to work on distributions.
 ### https://github.com/tidymodels/recipes/blob/v1.1.1/R/YeoJohnson.R#L172
 # Yeo-Johnson transformation
 yj_transform <- function(x_in, lambda, ind_neg = NULL, eps = 0.001) {
   if (any(is.na(lambda))) {
-    return(x)
+    cli::cli_abort("`lambda` cannot be `NA`.", call = rlang::caller_fn())
   }
   x_lambda <- yj_input_type_management(x_in, lambda)
   x <- x_lambda[[1]]

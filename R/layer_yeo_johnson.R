@@ -99,17 +99,11 @@ slather.layer_epi_YeoJohnson <- function(object, components, workflow, new_data,
   if (length(col_names) == 0) {
     # not specified by the user, so just modify everything starting with `.pred`
     components$predictions <- components$predictions %>%
-      mutate(across(
-        starts_with(".pred"),
-        \(.pred) yj_inverse(.pred, .lambda) # debug(yj_inverse)
-      )) %>%
+      mutate(across(starts_with(".pred"), \(.pred) yj_inverse(.pred, .lambda))) %>%
       select(-.lambda)
   } else {
     components$predictions <- components$predictions %>%
-      mutate(across(
-        all_of(col_names),
-        \(.pred) yj_inverse(.pred, .lambda)
-      )) %>%
+      mutate(across(all_of(col_names), \(.pred) yj_inverse(.pred, .lambda))) %>%
       select(-.lambda)
   }
 
@@ -131,7 +125,7 @@ print.layer_epi_YeoJohnson <- function(x, width = max(20, options()$width - 30),
 # Inverse of `yj_transform` in step_yeo_johnson.R.
 yj_inverse <- function(x_in, lambda, eps = 0.001) {
   if (any(is.na(lambda))) {
-    return(x)
+    cli::cli_abort("`lambda` cannot be `NA`.", call = rlang::caller_fn())
   }
   x_lambda <- yj_input_type_management(x_in, lambda)
   x <- x_lambda[[1]]
@@ -176,7 +170,8 @@ get_params_in_layer <- function(workflow, step_name = "epi_YeoJohnson", param_na
     pull(variable)
   if (length(outcomes) > 1) {
     cli_abort(
-      "`layer_{step_name}` doesn't support multiple output columns. This workflow produces {outcomes} as output columns.",
+      "`layer_{step_name}` doesn't support multiple output columns.
+      This workflow produces {outcomes} as output columns.",
       call = rlang::caller_env(),
       class = "epipredict__layer_yeo_johnson_multi_outcome_error"
     )
@@ -185,9 +180,7 @@ get_params_in_layer <- function(workflow, step_name = "epi_YeoJohnson", param_na
     # if it's a `step_name` step that also transforms a column that is a subset
     # of the output column name
     is_outcome_subset <- map_lgl(step$columns, ~ grepl(.x, outcomes))
-    if (inherits(step, full_step_name) &&
-      any(is_outcome_subset)
-    ) {
+    if (inherits(step, full_step_name) && any(is_outcome_subset)) {
       params <- step[[param_name]] %>%
         select(
           key_colnames(workflow$original_data, exclude = "time_value"),
