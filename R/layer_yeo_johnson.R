@@ -125,7 +125,7 @@ print.layer_epi_YeoJohnson <- function(x, width = max(20, options()$width - 30),
 # Inverse of `yj_transform` in step_yeo_johnson.R.
 yj_inverse <- function(x_in, lambda, eps = 0.001) {
   if (any(is.na(lambda))) {
-    cli::cli_abort("`lambda` cannot be `NA`.", call = rlang::caller_fn())
+    cli::cli_abort("`lambda` cannot be `NA`.", call = rlang::caller_call())
   }
   x_lambda <- yj_input_type_management(x_in, lambda)
   x <- x_lambda[[1]]
@@ -162,7 +162,7 @@ get_params_in_layer <- function(workflow, step_name = "epi_YeoJohnson", param_na
   full_step_name <- glue::glue("step_{step_name}")
   this_recipe <- hardhat::extract_recipe(workflow)
   if (!(this_recipe %>% recipes::detect_step(step_name))) {
-    cli_abort("`layer_{step_name}` requires `step_{step_name}` in the recipe.", call = rlang::caller_env())
+    cli_abort("`layer_{step_name}` requires `step_{step_name}` in the recipe.", call = rlang::caller_call())
   }
   outcomes <-
     workflows::extract_recipe(workflow)$term_info %>%
@@ -172,7 +172,7 @@ get_params_in_layer <- function(workflow, step_name = "epi_YeoJohnson", param_na
     cli_abort(
       "`layer_{step_name}` doesn't support multiple output columns.
       This workflow produces {outcomes} as output columns.",
-      call = rlang::caller_env(),
+      call = rlang::caller_call(),
       class = "epipredict__layer_yeo_johnson_multi_outcome_error"
     )
   }

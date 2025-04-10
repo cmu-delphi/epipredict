@@ -25,10 +25,10 @@ test_that("Yeo-Johnson transformation inverts correctly", {
   # Get coverage on yj_input_type_management
   # Breaks on bad length of lambda
   expect_snapshot(error = TRUE,
-    yj_input_type_management(x, c(1, 2, 3))
+    yj_transform(x, c(1, 2, 3))
   )
   expect_snapshot(error = TRUE,
-    yj_input_type_management(list(1, 2), c(1, 2, 3))
+    yj_transform(list(1, 2), c(1, 2, 3))
   )
   expect_true(
     identical(

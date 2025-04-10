@@ -188,8 +188,7 @@ bake.step_epi_YeoJohnson <- function(object, new_data, ...) {
   # Check that the columns for transformation are present in new_data.
   if (!all(object$columns %in% colnames(new_data))) {
     cli::cli_abort(
-      "The columns for transformation are not present in the new data.",
-      call = rlang::caller_fn()
+      "The columns for transformation are not present in the new data."
     )
   }
   # Check that the columns for transformation are present in new_data.
@@ -202,7 +201,7 @@ bake.step_epi_YeoJohnson <- function(object, new_data, ...) {
     cli_abort(c(
       "Some variables used for training are not available in {.arg x}.",
       i = "The following required columns are missing: {check$missing_names}"
-    ), call = rlang::caller_fn())
+    ))
   }
   # Transform each column, using the appropriate yj_param column per row.
   new_data <- left_join(new_data, object$yj_params, by = key_colnames(new_data, exclude = "time_value"))
@@ -243,7 +242,7 @@ compute_yj_params <- function(training, col_names, limits, num_unique, na_fill, 
   #         x = "Yeo-Johnson parameter could not be estimated for some geos for {col}.",
   #         i = "Using parameter={x$na_fill} in these cases."
   #       ),
-  #       call = rlang::caller_fn()
+  #       call = rlang::caller_call()
   #     )
   #   }
   # }
@@ -266,7 +265,7 @@ yj_input_type_management <- function(x_in, lambda) {
         rep(dim(x)[[2]]) %>%
         matrix(dim(x))
     } else if (length(x) != length(lambda)) {
-      cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_fn())
+      cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_call(n = 2))
     }
   } else if (!inherits(x_in, "tbl_df") || is.data.frame(x_in)) {
     x <- unlist(x_in, use.names = FALSE)
@@ -282,7 +281,7 @@ yj_input_type_management <- function(x_in, lambda) {
   if (length(x) > 1 && length(lambda) == 1) {
     lambda <- rep(lambda, length(x))
   } else if (length(x) != length(lambda)) {
-    cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_fn())
+    cli::cli_abort("Length of `x` must be equal to length of `lambda`.", call = rlang::caller_call(n = 2))
   }
   list(x, lambda)
 }
@@ -293,7 +292,7 @@ yj_input_type_management <- function(x_in, lambda) {
 # Yeo-Johnson transformation
 yj_transform <- function(x_in, lambda, ind_neg = NULL, eps = 0.001) {
   if (any(is.na(lambda))) {
-    cli::cli_abort("`lambda` cannot be `NA`.", call = rlang::caller_fn())
+    cli::cli_abort("`lambda` cannot be `NA`.", call = rlang::caller_call())
   }
   x_lambda <- yj_input_type_management(x_in, lambda)
   x <- x_lambda[[1]]
@@ -340,7 +339,7 @@ yj_obj <- function(lam, dat, ind_neg, const) {
 }
 
 ## estimates the values
-estimate_yj <- function(dat, limits = c(-5, 5), num_unique = 5, na_rm = TRUE, call = caller_env(2)) {
+estimate_yj <- function(dat, limits = c(-5, 5), num_unique = 5, na_rm = TRUE) {
   na_rows <- which(is.na(dat))
   if (length(na_rows) > 0) {
     if (na_rm) {
@@ -351,7 +350,7 @@ estimate_yj <- function(dat, limits = c(-5, 5), num_unique = 5, na_rm = TRUE, ca
           x = "Missing values are not allowed for the YJ transformation.",
           i = "See {.arg na_rm} option."
         ),
-        call = call
+        call = rlang::caller_call(n = 2)
       )
     }
   }
