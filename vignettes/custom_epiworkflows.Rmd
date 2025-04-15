@@ -86,7 +86,6 @@ the training data and use that value on the prediction data, rather than
 using the mean of the test predictor for centering or including test data in the mean calculation.
 
 A major benefit of `{recipes}` is that it prevents information leakage. 
-<!-- TODO unsure if worth even keeping, as we effectively can't have data leakage. -->
 However, the _main_ mechanism we rely on to prevent data leakage is proper
 [backtesting](backtesting.html).
 
@@ -257,8 +256,6 @@ The following layers are only supported by point estimate engines, such as
 - `layer_predictive_distn()`: alternate method of generating quantiles using
   an approximate parametric distribution. This will work for linear regression
   specifically.
-  
-<!-- TODO check this -->
   
 On the other hand, the following layers are only supported by engines that 
 output quantiles, such as `quantile_reg()`:
@@ -452,8 +449,6 @@ result_plot <- autoplot(
 ```{r, echo=FALSE}
 result_plot
 ```
-
-<!-- TODO `get_test_data` isn't actually working here... -->
 
 ## Population scaling
 
