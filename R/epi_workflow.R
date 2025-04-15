@@ -132,6 +132,9 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #' @param new_data A data frame containing the new predictors to preprocess
 #'   and predict on
 #'
+#' @param reference_dates A vector matching the type of `time_value` in
+#'   `new_data` giving the dates of the predictions to keep. Defaults to the `reference_date` of the `object`'s recipe.
+#'
 #' @inheritParams parsnip::predict.model_fit
 #'
 #' @return
@@ -155,14 +158,13 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' preds <- predict(wf, latest)
 #' preds
-predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), ...) {
+predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), reference_dates = NULL, ...) {
   if (!workflows::is_trained_workflow(object)) {
     cli_abort(c(
       "Can't predict on an untrained epi_workflow.",
       i = "Do you need to call `fit()`?"
     ))
   }
-  browser()
   components <- list()
   components$mold <- workflows::extract_mold(object)
   components$forged <- hardhat::forge(new_data,
@@ -171,7 +173,8 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), .
 
   components$keys <- grab_forged_keys(components$forged, object, new_data)
   components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
-  components$predictions
+  reference_dates <- reference_dates %||% extract_recipe(object)$reference_date
+  components$predictions %>% filter(time_value %in% reference_dates)
 }
 
 
@@ -267,11 +270,12 @@ forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = 
     }
   }
 
-  test_data <- get_test_data(
+  predict_data <- get_predict_data(
     hardhat::extract_preprocessor(object),
-    object$original_data
+    object$original_data,
+    reference_date = forecast_date
   )
+  predict_data$time_value %>% max
 
-  predictions <- predict(object, new_data = test_data)
-
+  predict(object, new_data = predict_data, forecast_date)
 }

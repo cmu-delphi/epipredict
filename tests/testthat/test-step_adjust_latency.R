@@ -96,7 +96,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
       "lag_6_case_rate", "lag_10_case_rate"
     )
   )
-  latest <- get_test_data(r1, real_x)
+  latest <- get_predict_data(r1, real_x)
   pred <- predict(fit1, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(nrow(point_pred), 1)
@@ -106,7 +106,7 @@ test_that("epi_adjust_latency correctly extends the lags", {
     names(fit1$pre$mold$outcomes),
     glue::glue("ahead_{ahead}_death_rate")
   )
-  latest <- get_test_data(r1, x)
+  latest <- get_predict_data(r1, x)
   pred1 <- predict(fit1, latest)
   actual_solutions <- pred1 %>% filter(!is.na(.pred))
   expect_equal(actual_solutions$time_value, testing_as_of)
@@ -146,7 +146,7 @@ test_that("epi_adjust_latency correctly extends the ahead", {
       "lag_1_case_rate", "lag_5_case_rate"
     )
   )
-  latest <- get_test_data(r2, real_x)
+  latest <- get_predict_data(r2, real_x)
   pred2 <- predict(fit2, latest)
   point_pred2 <- pred2 %>% filter(!is.na(.pred))
   # max time is still the forecast date
@@ -262,7 +262,7 @@ test_that("epi_adjust_latency extends multiple aheads", {
       "lag_1_case_rate", "lag_5_case_rate"
     )
   )
-  latest <- get_test_data(r3, real_x)
+  latest <- get_predict_data(r3, real_x)
   pred3 <- predict(fit3, latest)
   point_pred <- pred3 %>%
     unnest(.pred) %>%
@@ -393,7 +393,7 @@ test_that("epi_adjust_latency correctly extends the lags when there are differen
       "lag_7_case_rate", "lag_11_case_rate"
     )
   )
-  latest <- get_test_data(r5, x_lagged)
+  latest <- get_predict_data(r5, x_lagged)
   pred <- predict(fit5, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(nrow(point_pred), 1)
@@ -435,7 +435,7 @@ test_that("epi_adjust_latency correctly extends the ahead when there are differe
       "lag_1_case_rate", "lag_5_case_rate"
     )
   )
-  latest <- get_test_data(r5, x_lagged)
+  latest <- get_predict_data(r5, x_lagged)
   pred <- predict(fit5, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(nrow(point_pred), 1)
@@ -568,7 +568,7 @@ test_that("locf works as intended", {
       "lag_1_case_rate", "lag_5_case_rate"
     )
   )
-  latest <- get_test_data(r6, real_x)
+  latest <- get_predict_data(r6, real_x)
   pred <- predict(fit6, latest)
   point_pred <- pred %>% filter(!is.na(.pred))
   expect_equal(max(point_pred$time_value), as.Date(testing_as_of))
@@ -577,7 +577,7 @@ test_that("locf works as intended", {
     names(fit6$pre$mold$outcomes),
     glue::glue("ahead_{ahead}_death_rate")
   )
-  latest <- get_test_data(r6, x)
+  latest <- get_predict_data(r6, x)
   pred1 <- predict(fit6, latest)
   actual_solutions <- pred1 %>% filter(!is.na(.pred))
   expect_equal(max(actual_solutions$time_value), testing_as_of)

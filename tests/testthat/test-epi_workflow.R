@@ -66,14 +66,14 @@ test_that("model can be added/updated/removed from epi_workflow", {
 test_that("forecast method works", {
   jhu <- covid_case_death_rates %>%
     filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
-  r <- epi_recipe(jhu) %>%
+  r <- epi_recipe(jhu, reference_date = max(jhu$time_value)) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_naomit()
   wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
   expect_equal(
     forecast(wf),
-    predict(wf, new_data = get_test_data(
+    predict(wf, new_data = get_predict_data(
       hardhat::extract_preprocessor(wf),
       jhu
     ))
@@ -81,7 +81,7 @@ test_that("forecast method works", {
 
   expect_equal(
     forecast(wf),
-    predict(wf, new_data = get_test_data(
+    predict(wf, new_data = get_predict_data(
       hardhat::extract_preprocessor(wf),
       jhu
     ))

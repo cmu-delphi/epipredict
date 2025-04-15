@@ -9,7 +9,7 @@ r <- epi_recipe(jhu) %>%
 
 wf <- epipredict::epi_workflow(r, parsnip::linear_reg()) %>% parsnip::fit(jhu)
 
-latest <- get_test_data(recipe = r, x = jhu) %>% # 93 x 4
+latest <- get_predict_data(recipe = r, x = jhu) %>% # 93 x 4
   dplyr::arrange(geo_value, time_value)
 latest[1:10, 4] <- NA # 10 rows have NA
 

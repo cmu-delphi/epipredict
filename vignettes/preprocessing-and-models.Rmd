@@ -179,7 +179,7 @@ modeling and producing the prediction for death count, 7 days after the
 latest available date in the dataset.
 
 ```{r}
-latest <- get_test_data(r, counts_subset)
+latest <- get_predict_data(r, counts_subset)
 
 wf <- epi_workflow(r, parsnip::poisson_reg()) %>%
   fit(counts_subset)

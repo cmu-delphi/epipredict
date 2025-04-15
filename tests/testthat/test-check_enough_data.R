@@ -84,7 +84,7 @@ test_that("check_enough_data outputs the correct recipe values", {
 test_that("check_enough_data only checks train data when skip = FALSE", {
   # Check that the train data has enough data, the test data does not, but
   # the check passes anyway (because it should be applied to training data)
-  toy_test_data <- toy_epi_df %>%
+  toy_predict_data <- toy_epi_df %>%
     group_by(geo_value) %>%
     slice(3:10) %>%
     epiprocess::as_epi_df()
@@ -92,7 +92,7 @@ test_that("check_enough_data only checks train data when skip = FALSE", {
     epi_recipe(toy_epi_df) %>%
       check_enough_data(x, y, min_observations = n - 2, epi_keys = "geo_value") %>%
       prep(toy_epi_df) %>%
-      bake(new_data = toy_test_data)
+      bake(new_data = toy_predict_data)
   )
   # Making sure `skip = TRUE` is working correctly in `predict`
   expect_no_error(
@@ -101,7 +101,7 @@ test_that("check_enough_data only checks train data when skip = FALSE", {
       check_enough_data(x, min_observations = n - 2, epi_keys = "geo_value") %>%
       epi_workflow(linear_reg()) %>%
       fit(toy_epi_df) %>%
-      predict(new_data = toy_test_data %>% filter(time_value > "2020-01-08"))
+      predict(new_data = toy_predict_data %>% filter(time_value > "2020-01-08"))
   )
   # making sure it works for skip = FALSE, where there's enough data to train
   # but not enough to predict
@@ -115,7 +115,7 @@ test_that("check_enough_data only checks train data when skip = FALSE", {
   expect_snapshot(
     error = TRUE,
     forecaster %>%
-      predict(new_data = toy_test_data %>% filter(time_value > "2020-01-08"))
+      predict(new_data = toy_predict_data %>% filter(time_value > "2020-01-08"))
   )
 })
 
