@@ -111,7 +111,6 @@ vec_proxy_equal.quantile_pred <- function(x, ...) {
     dplyr::select(-.row)
 }
 
-
 # quantiles by treating quantile_pred like a distribution -----------------
 
 
@@ -287,11 +286,30 @@ vec_math.quantile_pred <- function(.fn, .x, ...) {
   quantile_pred(.fn(.x), quantile_levels)
 }
 
+#' Internal vctrs methods
+#'
+#' @import vctrs
+#' @keywords internal
+#' @name epipredict-vctrs
+
 #' @importFrom vctrs vec_arith vec_arith.numeric
 #' @export
 #' @method vec_arith quantile_pred
 vec_arith.quantile_pred <- function(op, x, y, ...) {
   UseMethod("vec_arith.quantile_pred", y)
+}
+
+
+#' @export
+#' @method vec_arith.quantile_pred quantile_pred
+vec_arith.quantile_pred.quantile_pred <- function(op, x, y, ...) {
+  all_quantiles <- unique(c(x %@% "quantile_levels", y %@% "quantile_levels"))
+  op_fn <- getExportedValue("base", op)
+  # Interpolate/extrapolate to the same quantiles
+  x <- quantile.quantile_pred(x, all_quantiles)
+  y <- quantile.quantile_pred(y, all_quantiles)
+  out <- op_fn(x, y, ...)
+  quantile_pred(out, all_quantiles)
 }
 
 #' @export

@@ -272,7 +272,6 @@ step_adjust_latency_new <-
 # lags introduces max(lags) NA's after the max_time_value.
 #' @export
 #' @importFrom glue glue
-#' @importFrom dplyr rowwise
 prep.step_adjust_latency <- function(x, training, info = NULL, ...) {
   latency <- x$latency
   col_names <- recipes::recipes_eval_select(x$terms, training, info)

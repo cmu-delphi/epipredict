@@ -81,6 +81,7 @@ test_that("unary math works on quantiles", {
 })
 
 test_that("arithmetic works on quantiles", {
+  # Quantile and numeric arithmetic works
   dstn <- hardhat::quantile_pred(
     matrix(c(1:4, 8:11), nrow = 2, byrow = TRUE),
     1:4 / 5
@@ -100,4 +101,28 @@ test_that("arithmetic works on quantiles", {
   expect_identical((1 / 4) * dstn, dstn2)
 
   expect_snapshot(error = TRUE, sum(dstn))
+
+  # Quantile and quantile arithmetic works
+  val <- c(1:4, 8:11)
+  dstn3 <- hardhat::quantile_pred(
+    matrix(val, nrow = 2, byrow = TRUE),
+    1:4 / 5
+  )
+  dstn4 <- hardhat::quantile_pred(
+    matrix(val + 2 * val, nrow = 2, byrow = TRUE),
+    1:4 / 5
+  )
+  expect_identical(dstn3 + (2 * dstn3), dstn4)
+
+  # Extrapolate when quantile_levels are not the same
+  val <- c(1:4, 8:11)
+  dstn5 <- hardhat::quantile_pred(
+    matrix(val, nrow = 2, byrow = TRUE),
+    c(0.1, 0.25, 0.5, 0.75)
+  )
+  dstn6 <- hardhat::quantile_pred(
+    matrix(val, nrow = 2, byrow = TRUE),
+    c(0.25, 0.5, 0.75, 0.9)
+  )
+  expect_identical((dstn5 + dstn6) %@% "quantile_levels", c(0.1, 0.25, 0.5, 0.75, 0.9))
 })
