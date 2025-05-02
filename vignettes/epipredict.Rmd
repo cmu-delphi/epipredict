@@ -102,14 +102,9 @@ Let's look at an example `epi_df`:
 covid_case_death_rates
 ```
 
-This dataset uses a single key, `geo_value`, and two separate
-time series, `case_rate` and `death_rate`.
-The keys are represented in "long" format, with separate columns for the key and
-the value, while separate time series are represented in "wide" format with each
-time series stored in a separate column.
-
-`{epiprocess}` is designed to handle data that always has a geographic key, and
-potentially other key values, such as age, ethnicity, or other demographic
+An `epi_df` always has a `geo_value` and a `time_value` as keys, along with some number of value columns, in this case `case_rate` and `death_rate`.
+Each of these has an associated `geo_type` (state) and `time_type` (day), for which there are some utilities.
+While this `geo_value` and `time_value` are the minimal set of keys, the functions of `{epiprocess}` and `{epipredict}` are designed to accommodate other key values, such as age, ethnicity, or other demographic
 information.
 For example, `grad_employ_subset` from `{epidatasets}` also has both `age_group`
 and `edu_qual` as additional keys:
@@ -314,17 +309,26 @@ one-ahead uncertainty.
 The `climatological_forecaster()` is a different kind of baseline. It produces a
 point forecast and quantiles based on the historical values for a given time of
 year, rather than extrapolating from recent values.
-For example, on the same dataset as above:
+Among our forecasters, it is the only one well suited for forecasts at long time horizons.
+
+Since it requires multiple years of data and a roughly seasonal signal, the dataset we've been using for demonstrations so far is poor example for a climate forecast[^8].
+Instead, we'll use the fluview ILI dataset, which is weekly influenza like illness data for hhs regions, going back to 1997.
+
+
+We'll predict the 2023/24 season using all previous data, including 2020-2022, the two years where there was approximately no seasonal flu, forecasting from the start of the season, `2023-10-08`:
+
 ```{r make-climatological-forecast, warning=FALSE}
+fluview_hhs <- pub_fluview(regions = paste0("hhs", 1:10), epiweeks = epirange(100001,222201))
+fluview <- fluview_hhs %>% select(geo_value = region, time_value = epiweek, issue, ili) %>% as_epi_archive() %>% epix_as_of_current()
+
 all_climate <- climatological_forecaster(
-  covid_case_death_rates_extended |>
-    filter(time_value <= forecast_date, geo_value %in% used_locations),
-  outcome = "death_rate",
+  fluview %>% filter(time_value < "2023-10-08"),
+  outcome = "ili",
   args_list = climate_args_list(
     forecast_horizon = seq(0, 28),
-    window_size = 14,
-    time_type = "day",
-    forecast_date = forecast_date
+    time_type = "week",
+    quantile_by_key = "geo_value",
+    forecast_date = as.Date("2023-10-08")
   )
 )
 workflow <- all_climate$epi_workflow
@@ -332,21 +336,18 @@ results <- all_climate$predictions
 autoplot(
   object = workflow,
   predictions = results,
-  observed_response = covid_case_death_rates_extended |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = fluview %>% filter(time_value >= "2023-10-08", time_value < "2024-05-01") %>% mutate(geo_value = factor(geo_value, levels = paste0("hhs", 1:10)))
 )
 ```
 
-Note that to have enough training data for this method, we're using 
-`covid_case_death_rates_extended`, which starts in March 2020, rather than
-`covid_case_death_rates`, which starts in December.
-Without at least a year's worth of historical data, it is impossible to do a
-climatological model.
-Even with one year of data, as we have here, the resulting forecasts are unreliable.
 
 One feature of the climatological baseline is that it forecasts multiple aheads
-simultaneously.
+simultaneously; here we do so for the entire season of 28 weeks.
 This is possible for `arx_forecaster()`, but only using `trainer =
-smooth_quantile_reg()`, which is built to handle multiple aheads simultaneously.
+smooth_quantile_reg()`, which is built to handle multiple aheads simultaneously[^9].
+
+A pure climatological forecast can be thought of as forecasting a typical year so far.
+The 2023/24 had some regions, such as `hhs10` which were quite close to the typical year, and some, such as `hhs2` that were frequently outside even the 90% prediction band (the lightest shown above).
 
 ### `arx_classifier()`
 
@@ -410,7 +411,6 @@ edu_quals <- c("Undergraduate degree", "Professional degree")
 geo_values <- c("Quebec", "British Columbia")
 
 grad_employ <- grad_employ_subset |>
-  filter(time_value < 2017) |>
   filter(edu_qual %in% edu_quals, geo_value %in% geo_values)
 
 grad_employ
@@ -429,8 +429,8 @@ grad_forecast <- arx_forecaster(
 autoplot(
   grad_forecast$epi_workflow,
   grad_forecast$predictions,
-  grad_employ,
-)
+  observed_response = grad_employ,
+) + geom_vline(aes(xintercept = 2016))
 ```
 
 The 8 graphs represent all combinations of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
@@ -590,3 +590,7 @@ Each row containing no `NA` values is used as a training observation to fit the 
     `hardhat::extract_preprocessor(four_week_ahead$epi_workflow)`
 
 [^7]: the number of geographies
+
+[^8]: It has only a year of data, which is barely enough to run the method without errors, let alone get a meaningful prediction.
+
+[^9]: Though not 28 weeks into the future! Such a forecast will be an absurd extrapolation.

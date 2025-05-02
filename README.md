@@ -309,11 +309,11 @@ four_week_ahead$predictions |>
 #> # ℹ 14 more rows
 ```
 
-The yellow dot gives the median prediction, while the blue intervals
-give the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges[^3].
-For this particular day and these locations, the forecasts are
-relatively accurate, with the true data being at least within the 10-90%
-interval. A couple of things to note:
+The orange dot gives the point prediction, while the blue intervals give
+the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges[^3]. For
+this particular day and these locations, the forecasts are relatively
+accurate, with the true data being at least within the 10-90% interval.
+A couple of things to note:
 
 1.  `epipredict` methods are primarily direct forecasters; this means we
     don’t need to predict 1, 2,…, 27 days ahead to then predict 28 days

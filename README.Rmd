@@ -334,7 +334,7 @@ four_week_ahead$predictions |>
   select(geo_value, forecast_date, target_date, quantile = .pred_distn_quantile_level, value = .pred_distn_value)
 ```
 
-The yellow dot gives the median prediction, while the blue intervals give the
+The orange dot gives the point prediction, while the blue intervals give the
 25-75%, the 10-90%, and 2.5-97.5%  inter-quantile ranges[^4].
 For this particular day and these locations, the forecasts are relatively
 accurate, with the true data being at least within the 10-90% interval.
