@@ -337,7 +337,8 @@ p1 <- # first plotting the forecasts as bands, lines and points
   geom_vline(
     data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
     aes(color = factor(version), xintercept = version),
-    lty = 2) +
+    lty = 2
+  ) +
   # the underlying data
   geom_line(
     data = plotting_data |> filter(geo_value == geo_choose),

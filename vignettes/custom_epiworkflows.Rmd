@@ -145,7 +145,7 @@ Let's create an `epi_recipe()` to hold the 6 steps:
 
 ```{r make_recipe}
 filtered_data <- covid_case_death_rates |>
-    filter(time_value <= forecast_date, geo_value %in% used_locations)
+  filter(time_value <= forecast_date, geo_value %in% used_locations)
 four_week_recipe <- epi_recipe(
   filtered_data,
   reference_date = (filtered_data %@% metadata)$as_of
@@ -433,7 +433,7 @@ forecast_date_label <-
 result_plot <- autoplot(
   object = gr_fit_workflow,
   predictions = gr_predictions,
-  plot_data = covid_case_death_rates |>
+  observed_response = covid_case_death_rates |>
     filter(geo_value %in% used_locations, time_value > "2021-07-01")
 ) +
   geom_vline(aes(xintercept = forecast_date)) +
@@ -534,7 +534,7 @@ classifier_recipe <- epi_recipe(training_data) |>
     ),
     role = "outcome"
   ) |>
-  # Drop unused columns based on role assignments. This is not strictly 
+  # Drop unused columns based on role assignments. This is not strictly
   # necessary, as columns with roles unused in the model will be ignored anyway.
   step_rm(has_role("none"), has_role("raw")) |>
   step_epi_naomit()

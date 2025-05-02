@@ -62,8 +62,8 @@ library(ggplot2)
 
 To demonstrate using
 [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) for
-forecasting, say we want to predict COVID-19 deaths per 100k people for
-each of a subset of states
+forecasting, suppose we want to predict COVID-19 deaths per 100k people
+for each of a subset of states
 
 ``` r
 used_locations <- c("ca", "ma", "ny", "tx")
@@ -173,8 +173,9 @@ cases_deaths <-
 
 </details>
 
-After downloading and cleaning the cases and deaths data, we can plot a
-subset of the states, marking the desired forecast date:
+After downloading and cleaning deaths per capita, as well as cases per
+100k people, we can plot a subset of the states, marking the desired
+forecast date with a vertical line:
 
 <details>
 <summary>
@@ -234,7 +235,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-03-03 14:43:07.
+#> This forecaster was fit on 2025-04-09 17:23:00.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
@@ -251,8 +252,8 @@ four_week_ahead
 #> 
 ```
 
-In our model setup, we are defining as predictors case rate lagged 0-3
-days, one week, and two weeks, and death rate lagged 0-2 weeks. The
+In our model setup, we are using as predictors the case rate lagged 0-3
+days, one week, and two weeks, and the death rate lagged 0-2 weeks. The
 result `four_week_ahead` is both a fitted model object which could be
 used any time in the future to create different forecasts, and a set of
 predicted values (and prediction intervals) for each location 28 days
@@ -274,14 +275,14 @@ restricted_predictions <-
   mutate(.response_name = "death_rate")
 forecast_plot <-
   four_week_ahead |>
-  autoplot(plot_data = cases_deaths) +
+  autoplot(observed_response = cases_deaths) +
   geom_vline(aes(xintercept = forecast_date)) +
   geom_text(
     data = forecast_date_label %>% filter(.response_name == "death_rate"),
     aes(x = dates, label = "forecast\ndate", y = heights),
     size = 3, hjust = "right"
   ) +
-  scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
+  scale_x_date(date_breaks = "3 months", date_labels = "%y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
@@ -337,9 +338,9 @@ email, or the InsightNet Slack.
     ago.
 
 [^2]: Alternatively, you could call
-    `autoplot(four_week_ahead, plot_data = cases_deaths)` to get the
-    full collection of forecasts. This is too busy for the space we have
-    for plotting here.
+    `autoplot(four_week_ahead, observed_response = cases_deaths)` to get
+    the full collection of forecasts. This is too busy for the space we
+    have for plotting here.
 
 [^3]: Note that these are not the same quantiles that we fit when
     creating `four_week_ahead`. They are extrapolated from those

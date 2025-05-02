@@ -43,14 +43,15 @@ Towards that end, `{epipredict}` provides two main classes of tools:
 A set of basic, easy-to-use "canned" forecasters that work out of the box.
 We currently provide the following basic forecasters:
 
-  * _Flatline forecaster_: predicts as the median the most recently seen value
+  * `flatline_forecaster()`: predicts as the median the most recently seen value
     with increasingly wide quantiles.
-  * _Climatological forecaster_: predicts the median and quantiles based on the historical values around the same date in previous years.
-  * _Autoregressive forecaster_: fits a model (e.g. linear regression) on
-    lagged data to predict quantiles for continuous values.
-  * _Autoregressive classifier_: fits a model (e.g. logistic regression) on
-    lagged data to predict a binned version of the growth rate.
-  * _CDC FluSight flatline forecaster_: a variant of the flatline forecaster that is
+  * `climatological_forecaster()`: predicts the median and quantiles based on the historical values around the same date in previous years.
+  * `arx_forecaster()`: an AutoRegressive eXogenous feature forecaster, which
+    fits a model (e.g. linear regression) on lagged data to predict quantiles
+    for continuous values.
+  * `arx_classifier()`: fits a model (e.g. logistic regression) on lagged data
+    to predict a binned version of the growth rate.
+  * `cdc_baseline_forecaster()`: a variant of the flatline forecaster that is
     used as a baseline in the CDC's [FluSight forecasting competition](https://www.cdc.gov/flu-forecasting/about/index.html).
 
 ## Forecasting framework
@@ -83,6 +84,9 @@ For a more in-depth treatment with some practical applications, see also the
 [Forecasting Book](https://cmu-delphi.github.io/delphi-tooling-book/).
 
 # Panel forecasting basics
+
+This section gives basic usage examples for the package beyond the most basic usage of `arx_forecaster()` for forecasting a single ahead using the default engine.
+
 ## Example data
 
 The forecasting methods in this package are designed to work with panel time
@@ -122,13 +126,14 @@ While this package was designed with epidemiology in mind, many of the
 techniques are more broadly applicable.
 
 ## Customizing `arx_forecaster()`
+
 Let's expand on the basic example presented on the [landing
 page](../index.html#motivating-example), starting with adjusting some parameters in
 `arx_forecaster()`.
 
-The `trainer` argument allows us to set the fitting engine. We can use either one of the
-included engines, such as `quantile_reg()`, or one of the relevant [parsnip
-models](https://www.tidymodels.org/find/parsnip/):
+The `trainer` argument allows us to set the fitting engine. We can use either
+one of the relevant [parsnip models](https://www.tidymodels.org/find/parsnip/),
+or one of the included engines, such as `smooth_quantile_reg()`:
 
 ```{r make-forecasts, warning=FALSE}
 two_week_ahead <- arx_forecaster(
@@ -146,8 +151,10 @@ hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 
 The default trainer is `parsnip::linear_reg()`, which generates quantiles after
 the fact in the post-processing layers, rather than as part of the model.
-While this does work, it is generally preferable to use `quantile_reg()`, as the
-quantiles generated in post-processing can be poorly behaved.
+While these post-processing layers will produce prediction intervals for an
+arbitrary trainer, it is generally preferable to use `quantile_reg()` (or an
+alternative that produces statistically justifiable prediction intervals), as
+the quantiles generated in post-processing can be poorly behaved.
 `quantile_reg()` on the other hand directly estimates a different linear model
 for each quantile, reflected in the several different columns for `tau` above.
 
@@ -168,8 +175,8 @@ two_week_ahead <- arx_forecaster(
 )
 ```
 
-Any other customization is routed through `arx_args_list()`; for example, if we
-wanted to increase the number of quantiles fit:
+Other customization is possible via `args_list = arx_args_list()`; for
+example, if we wanted to increase the number of quantiles fit:
 
 ```{r make-quantile-levels-forecasts, warning=FALSE}
 two_week_ahead <- arx_forecaster(
@@ -194,6 +201,7 @@ If you want to make further modifications, you will need a custom
 workflow; see the [Custom Epiworkflows vignette](custom_epiworkflows) for details.
 
 ## Generating multiple aheads
+
 We often want to generate a a trajectory
 of forecasts over a range of dates, rather than for a single day.
 We can do this with `arx_forecaster()` by looping over aheads.
@@ -219,17 +227,23 @@ all_canned_results <- lapply(
 # pull out the workflow and the predictions to be able to
 #  effectively use autoplot
 workflow <- all_canned_results[[1]]$epi_workflow
-results <- purrr::map_df(all_canned_results, ~ `$`(., "predictions"))
+results <- all_canned_results |>
+  purrr::map(~ `$`(., "predictions")) |>
+  list_rbind()
 autoplot(
   object = workflow,
   predictions = results,
-  plot_data = covid_case_death_rates |>
+  observed_response = covid_case_death_rates |>
     filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
 ## Other canned forecasters
+
+This section gives a brief example of each of the canned forecasters.
+
 ### `flatline_forecaster()`
+
 The simplest model we provide is the `flatline_forecaster()`, which predicts a
 flat line (with quantiles generated from the residuals using
 `layer_residual_quantiles()`).
@@ -250,11 +264,13 @@ all_flatlines <- lapply(
 )
 # same plotting code as in the arx multi-ahead case
 workflow <- all_flatlines[[1]]$epi_workflow
-results <- purrr::map_df(all_flatlines, ~ `$`(., "predictions"))
+results <- all_flatlines |>
+  purrr::map(~ `$`(., "predictions")) |>
+  list_rbind()
 autoplot(
   object = workflow,
   predictions = results,
-  plot_data = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
@@ -280,7 +296,7 @@ results <- all_cdc_flatline$predictions
 autoplot(
   object = workflow,
   predictions = results,
-  plot_data = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
@@ -294,6 +310,7 @@ This results in much smoother quantiles, but ones that only capture the
 one-ahead uncertainty.
 
 ### `climatological_forecaster()`
+
 The `climatological_forecaster()` is a different kind of baseline. It produces a
 point forecast and quantiles based on the historical values for a given time of
 year, rather than extrapolating from recent values.
@@ -315,7 +332,7 @@ results <- all_climate$predictions
 autoplot(
   object = workflow,
   predictions = results,
-  plot_data = covid_case_death_rates_extended |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates_extended |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
@@ -347,22 +364,22 @@ classifier <- arx_classifier(
   args_list = arx_class_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
     ahead = 2 * 7,
-    breaks = c(-0.01, 0.01, 0.1)
+    breaks = 0.25 / 7
   )
 )
 classifier$predictions
 ```
 
-The number and size of the growth rate categories is controlled by `breaks`, which define the
-bin boundaries.
+The number and size of the growth rate categories is controlled by `breaks`,
+which define the bin boundaries.
 
-In this example, the custom `breaks` passed to `arx_class_args_list()` correspond to 4 bins:
-`(-∞, -0.01)`, `(-0.01, 0.01)`,  `(0.01, 0.1)`, and `(0.1, ∞)`.
+In this example, the custom `breaks` passed to `arx_class_args_list()` correspond to 2 bins:
+`(-∞, 0.0357]` and `(0.0357, ∞)`.
 The bins can be interpreted as: the outcome variable is decreasing, approximately stable, slightly increasing, or increasing quickly.
 
 The returned `predictions` assigns each state to one of the growth rate bins.
 In this case, the classifier expects the growth rate for all 4 of the states to fall into the same category,
-`(-0.01, 0.01]`.
+`(-∞, 0.0357]`.
 
 To see how this model performed, let's compare to the actual growth rates for the `target_date`, as computed using
 `{epiprocess}`:
@@ -378,7 +395,7 @@ growth_rates <- covid_case_death_rates |>
 growth_rates |> filter(time_value == "2021-08-14")
 ```
 
-Unfortunately, this forecast was not particularly accurate. All real growth rates were larger than the predicted growth rates, with California (real growth rate `-1.39`) not remotely in the interval (`(-0.01, 0.01]`).
+The accuracy is 50%, since all 4 states were predicted to be in the interval `(-Inf, 0.0357]`, while two,  `ca` and `ny` actually were.
 
 
 ## Fitting multi-key panel data
@@ -393,8 +410,8 @@ edu_quals <- c("Undergraduate degree", "Professional degree")
 geo_values <- c("Quebec", "British Columbia")
 
 grad_employ <- grad_employ_subset |>
-    filter(time_value < 2017) |>
-    filter(edu_qual %in% edu_quals, geo_value %in% geo_values)
+  filter(time_value < 2017) |>
+  filter(edu_qual %in% edu_quals, geo_value %in% geo_values)
 
 grad_employ
 
@@ -449,7 +466,9 @@ all_fits <-
         )
       )
   })
-map_df(all_fits, ~ pluck(., "predictions"))
+all_fits |>
+  map(~ pluck(., "predictions")) |>
+  list_rbind()
 ```
 
 Fitting separate models for each geography is both 56 times slower[^7] than geo-pooling, and fits each model on far less data.
@@ -459,6 +478,9 @@ However, geo-pooling can only be used if values are comparable in meaning and sc
 If we wanted to build a geo-aware model, such as a linear regression with a different intercept for each geography, we would need to build a [custom workflow](custom_epiworkflows) with geography as a factor.
 
 # Anatomy of a canned forecaster
+
+This section describes the resulting object from `arx_forecaster()`, an `arx_fcast` object, along with a fairly minimal description of the actual mathematical model used for `arx_forecaster()`.
+
 ## Code object
 Let's dissect the forecaster we trained back on the [landing
 page](../index.html#motivating-example):
@@ -476,8 +498,8 @@ four_week_ahead <- arx_forecaster(
 )
 ```
 
-`four_week_ahead` has two components: an `epi_workflow`, and a table of
-`predictions`.
+`four_week_ahead` has three components: an `epi_workflow`, a table of
+`predictions`, and a list of `metadata`.
 The table of predictions is a simple tibble,
 
 ```{r show_predictions}
@@ -485,11 +507,11 @@ four_week_ahead$predictions
 ```
 
 where `.pred` gives the point/median prediction, and `.pred_distn` is a
-`dist_quantiles()` object representing a distribution through various quantile
+`hardhat::quantile_pred()` object representing a distribution through various quantile
 levels.
-The `[6]` in the name refers to the number of quantiles that have been
-explicitly created[^4].
-By default, `.pred_distn` covers a 90% prediction interval, reporting the 5% and 95% quantiles.
+The `5` in `<qtls(5)>` refers to the number of quantiles that have been
+explicitly created, while the [0.234] is the median value[^4].
+By default, `.pred_distn` covers the quantiles `c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)`.
 
 The `epi_workflow` is a significantly more complicated object, extending a
 `workflows::workflow()`  to include post-processing steps:
@@ -500,17 +522,19 @@ four_week_ahead$epi_workflow
 
 An `epi_workflow()` consists of 3 parts:
 
-- `Preprocessor`: a collection of steps that transform the data to be ready for
+- `preprocessor`: a collection of steps that transform the data to be ready for
       modelling. Steps can be custom, as are those included in this package, 
       or [be defined in `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
       `four_week_ahead` has 5 steps; you can inspect them more closely by
       running `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.[^6]
-- `Model`: the actual model that does the fitting, given by a
-  `parsnip::model_spec`. `four_week_ahead` uses the default of
-  `parsnip::linear_reg()`, which is a `{parsnip}` wrapper for
-  `stats::lm()`. You can inspect the model more closely by running
+- `spec`: a `parsnip::model_spec` which includes both the model parameters and
+  an engine to fit those parameters to the training data as prepared by
+  `preprocessor`.  `four_week_ahead` uses the default of
+  `parsnip::linear_reg()`, which is a `{parsnip}` wrapper for several linear
+  regression engines, by default `stats::lm()`. You can inspect the model more
+  closely by running
   `hardhat::extract_fit_recipe(four_week_ahead$epi_workflow)`.
-- `Postprocessor`: a collection of layers to be applied to the resulting
+- `postprocessor`: a collection of layers to be applied to the resulting
   forecast. Layers are internal to this package. `four_week_ahead` just so happens to have
   5 of as these well. You can inspect the layers more closely by running
   `epipredict::extract_layers(four_week_ahead$epi_workflow)`.
@@ -537,15 +561,18 @@ four_week_small <- arx_forecaster(
 hardhat::extract_fit_engine(four_week_small$epi_workflow)
 ```
 
-If $d_t$ is the death rate on day $t$ and $c_t$ is the case rate, then the model
-we're fitting is:
+If $d_{t,j}$ is the death rate on day $t$ at location $j$ and $c_{t,j}$ is the
+associated case rate, then the model we're fitting is:
 
 $$
-d_{t+28} = a_0 + a_1 d_t + a_2 d_{t-7} + a_3 d_{t-14} + a_4 c_t + a_5 c_{t-7} + a_6 c_{t-14}.
+\begin{aligned}
+d_{t+28, j} = & a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
+     & a_4 c_{t, j} + a_5 c_{t-7, j} + a_6 c_{t-14, j} + \varepsilon_{t,j}.
+\end{aligned}
 $$
 
-For example, $a_1$ is `lag_0_death_rate` above, with a value of `r hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"] `,
-while $a_5$ is `r hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"] `.
+For example, $a_1$ is `lag_0_death_rate` above, with a value of `r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"], 3)`,
+while $a_5$ is `r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"], 4) `.
 
 The training data for fitting this linear model is constructed within the `arx_forecaster()` function by shifting a series
 of columns the appropriate amount -- based on the requested `lags`.
