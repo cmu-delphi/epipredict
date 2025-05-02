@@ -13,20 +13,6 @@ vignette: >
 source(here::here("vignettes/_common.R"))
 ```
 
-```{r setup, message=FALSE, include = FALSE}
-library(dplyr)
-library(parsnip)
-library(workflows)
-library(recipes)
-library(epidatasets)
-library(epipredict)
-library(epiprocess)
-library(ggplot2)
-library(purrr)
-forecast_date <- as.Date("2021-08-01")
-used_locations <- c("ca", "ma", "ny", "tx")
-library(epidatr)
-```
 
 At a high level, the goal of `{epipredict}` is to make it easy to run simple machine
 learning and statistical forecasters for epidemiological data.
@@ -86,6 +72,27 @@ For a more in-depth treatment with some practical applications, see also the
 # Panel forecasting basics
 
 This section gives basic usage examples for the package beyond the most basic usage of `arx_forecaster()` for forecasting a single ahead using the default engine.
+Before we start actually building forecasters, lets import some relevant libraries
+
+```{r setup, message=FALSE}
+library(dplyr)
+library(parsnip)
+library(workflows)
+library(recipes)
+library(epidatasets)
+library(epipredict)
+library(epiprocess)
+library(ggplot2)
+library(purrr)
+library(epidatr)
+```
+
+And our default forecasting date and selected states (we will use these to limit the data to make discussion easier):
+
+```{r}
+forecast_date <- as.Date("2021-08-01")
+used_locations <- c("ca", "ma", "ny", "tx")
+```
 
 ## Example data
 
@@ -435,14 +442,11 @@ autoplot(
 
 The 8 graphs represent all combinations of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
 
-## Fitting a non-geo-pooled model
+## Fitting a forecaster without geo-pooling
 
-The methods shown so far fit a single model across all geographic regions.
-This is called "geo-pooling". 
-To fit a non-geo-pooled model that fits each geography separately, one either needs a multi-level
-engine (which at the moment `{parsnip}` doesn't support), or one needs to loop over
-geographies.
-Here, we're using `purrr::map` to perform the loop.
+The methods shown so far fit a single model across all geographic regions, treating them as if they are independently and identically distributed (see [Mathematical description] for an explicit model example).
+This is called "geo-pooling".
+In the context of `{epipredict}`, the simplest way to avoid geo-pooling and use different parameters for each geography is to loop over the `geo_value`s:
 
 ```{r fit_non_geo_pooled, warning=FALSE}
 geo_values <- covid_case_death_rates |>
@@ -475,7 +479,9 @@ Fitting separate models for each geography is both 56 times slower[^7] than geo-
 If a dataset contains relatively few observations for each geography, fitting a geo-pooled model is likely to produce better, more stable results.
 However, geo-pooling can only be used if values are comparable in meaning and scale across geographies or can be made comparable, for example by normalization.
 
-If we wanted to build a geo-aware model, such as a linear regression with a different intercept for each geography, we would need to build a [custom workflow](custom_epiworkflows) with geography as a factor.
+If we wanted to build a geo-aware model, such as a linear regression with a
+different intercept for each geography, we would need to build a [custom
+workflow](custom_epiworkflows) with geography as a factor.
 
 # Anatomy of a canned forecaster
 
@@ -573,6 +579,8 @@ $$
 
 For example, $a_1$ is `lag_0_death_rate` above, with a value of `r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"], 3)`,
 while $a_5$ is `r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"], 4) `.
+Note that unlike `d_{t,j}` or `c_{t,j}`, these *don't* depend on either the time $t$ or the location $j$.
+This is what make it a geo-pooled model.
 
 The training data for fitting this linear model is constructed within the `arx_forecaster()` function by shifting a series
 of columns the appropriate amount -- based on the requested `lags`.
