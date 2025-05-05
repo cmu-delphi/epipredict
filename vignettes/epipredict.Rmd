@@ -424,7 +424,7 @@ ewf %>%
   forecast()
 ```
 
-The above `get_test_data()` function examines the recipe and ensures that enough
+The above `get_predict_data()` function examines the recipe and ensures that enough
 test data is available to create the necessary lags and produce a prediction
 for the desired future time point (after the end of the training data). This mimics
 what would happen if `jhu` contained the most recent available historical data and

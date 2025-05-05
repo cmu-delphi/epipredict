@@ -78,7 +78,7 @@ cdc_baseline_forecaster <- function(
   # target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
 
-  latest <- get_test_data(epi_recipe(epi_data), epi_data)
+  latest <- get_predict_data(epi_recipe(epi_data), epi_data)
 
   f <- frosting() %>%
     layer_predict() %>%

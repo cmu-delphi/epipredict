@@ -8,7 +8,7 @@ arx_args_list(
   lags = c(0L, 7L, 14L),
   ahead = 7L,
   n_training = Inf,
-  forecast_date = NULL,
+  reference_date = NULL,
   target_date = NULL,
   adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
   warn_latency = TRUE,
@@ -18,6 +18,7 @@ arx_args_list(
   quantile_by_key = character(0L),
   check_enough_data_n = NULL,
   check_enough_data_epi_keys = NULL,
+  predict_interval = NULL,
   ...
 )
 }
@@ -33,7 +34,7 @@ date for which forecasts should be produced.}
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date from which the forecast is occurring.
+\item{reference_date}{Date. The date from which the forecast is occurring.
 The default \code{NULL} will determine this automatically from either
 \enumerate{
 \item the maximum time value for which there's data if there is no latency
@@ -87,6 +88,12 @@ epi_key that are required for training. If \code{NULL}, this check is ignored.}
 \item{check_enough_data_epi_keys}{Character vector. A character vector of
 column names on which to group the data and check threshold within each
 group. Useful if training per group (for example, per geo_value).}
+
+\item{predict_interval}{A time interval or integer. The length of time before
+the \code{forecast_date} to consider for the forecast. The default is 1 year,
+which you will likely only need to make longer if you are doing long
+forecast horizons, or shorter if you are forecasting using an expensive
+model.}
 
 \item{...}{Space to handle future expansions (unused).}
 }

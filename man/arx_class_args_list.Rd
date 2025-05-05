@@ -34,15 +34,6 @@ date for which forecasts should be produced.}
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date from which the forecast is occurring.
-The default \code{NULL} will determine this automatically from either
-\enumerate{
-\item the maximum time value for which there's data if there is no latency
-adjustment (the default case), or
-\item the \code{as_of} date of \code{epi_data} if \code{adjust_latency} is
-non-\code{NULL}.
-}}
-
 \item{target_date}{Date. The date that is being forecast. The default \code{NULL}
 will determine this automatically as \code{forecast_date + ahead}.}
 

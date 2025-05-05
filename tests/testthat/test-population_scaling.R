@@ -235,7 +235,7 @@ test_that("test joining by default columns", {
     fit(jhu) %>%
     add_frosting(f)
 
-  latest <- get_test_data(
+  latest <- get_predict_data(
     recipe = r,
     x = covid_case_death_rates %>%
       dplyr::filter(
@@ -415,7 +415,7 @@ test_that("test joining by default columns with less common keys/classes", {
   expect_warning(
     expect_warning(
       expect_equal(
-        # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
+        # get_predict_data doesn't work with non-`epi_df`s, so provide test data manually:
         predict(fit(ewf1b2, dat1b2), dat1b2) %>%
           pivot_quantiles_wider(.pred) %>%
           as_tibble(),
@@ -583,7 +583,7 @@ test_that("test joining by default columns with less common keys/classes", {
       mutate(y_scaled = c(3e-6, 7e-6))
   )
   expect_error(
-    # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
+    # get_predict_data doesn't work with non-`epi_df`s, so provide test data manually:
     predict(fit(ewf4, dat4), dat4) %>%
       pivot_quantiles_wider(.pred),
     class = "epipredict__grab_forged_keys__nonunique_key"

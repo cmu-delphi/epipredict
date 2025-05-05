@@ -252,7 +252,7 @@ data. For this demo, we will predict the number of graduates using the last 2
 years of our dataset.
 
 ```{r linearreg-predict, include=T}
-latest <- get_test_data(recipe = r, x = employ_small)
+latest <- get_predict_data(recipe = r, x = employ_small)
 preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
 # Display a sample of the prediction values, excluding NAs
 preds %>% sample_n(5)
@@ -384,7 +384,7 @@ and perform hypothesis tests as usual.
 Let's take a look at the predictions along with their 90% prediction intervals.
 
 ```{r}
-latest <- get_test_data(recipe = rx, x = employ_small)
+latest <- get_predict_data(recipe = rx, x = employ_small)
 predsx <- predict(wfx_linreg, latest)
 
 # Display predictions along with prediction intervals

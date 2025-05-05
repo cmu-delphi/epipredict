@@ -37,7 +37,7 @@
 # check_enough_data only checks train data when skip = FALSE
 
     Code
-      forecaster %>% predict(new_data = toy_test_data %>% filter(time_value >
+      forecaster %>% predict(new_data = toy_predict_data %>% filter(time_value >
         "2020-01-08"))
     Condition
       Error in `check_enough_data_core()`:

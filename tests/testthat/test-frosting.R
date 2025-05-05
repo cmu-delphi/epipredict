@@ -99,7 +99,7 @@ test_that("parsnip settings can be passed through predict.epi_workflow", {
 
   wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
 
-  latest <- get_test_data(r, jhu)
+  latest <- get_predict_data(r, jhu)
 
   f1 <- frosting() %>% layer_predict()
   f2 <- frosting() %>% layer_predict(type = "pred_int")

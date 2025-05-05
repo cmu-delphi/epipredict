@@ -35,7 +35,7 @@
 #'   step_epi_naomit()
 #'
 #' wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
-#' latest <- get_test_data(recipe = r, x = jhu)
+#' latest <- get_predict_data(recipe = r, x = jhu)
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%

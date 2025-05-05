@@ -4,7 +4,13 @@
 \alias{forecast.epi_workflow}
 \title{Produce a forecast from an epi workflow}
 \usage{
-\method{forecast}{epi_workflow}(object, ..., n_recent = NULL, forecast_date = NULL)
+\method{forecast}{epi_workflow}(
+  object,
+  ...,
+  n_recent = NULL,
+  reference_date = NULL,
+  predict_interval = NULL
+)
 }
 \arguments{
 \item{object}{An epi workflow.}
@@ -18,9 +24,15 @@ example, suppose n_recent = 3, then if the 3 most recent observations in any
 geo_value are all NA’s, we won’t be able to fill anything, and an error
 message will be thrown. (See details.)}
 
-\item{forecast_date}{By default, this is set to the maximum time_value in x.
+\item{reference_date}{By default, this is set to the maximum time_value in x.
 But if there is data latency such that recent NA's should be filled, this may
 be after the last available time_value.}
+
+\item{predict_interval}{A time interval or integer. The length of time before
+the \code{forecast_date} to consider for the forecast. The default is 1 year,
+which you will likely only need to make longer if you are doing long
+forecast horizons, or shorter if you are forecasting using an expensive
+model.}
 }
 \value{
 A forecast tibble.

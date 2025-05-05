@@ -238,7 +238,7 @@ test_that("leading the climate predictor works as expected", {
   expect_identical(b$climate_y, expected_climate_pred)
 
   # Check if our test data has the right values
-  td <- get_test_data(r, x)
+  td <- get_predict_data(r, x)
   expected_test_x <- td %>%
     filter(time_value == "2021-12-31") %>%
     mutate(

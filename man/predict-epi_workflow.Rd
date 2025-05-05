@@ -5,7 +5,14 @@
 \alias{predict.epi_workflow}
 \title{Predict from an epi_workflow}
 \usage{
-\method{predict}{epi_workflow}(object, new_data, type = NULL, opts = list(), ...)
+\method{predict}{epi_workflow}(
+  object,
+  new_data,
+  type = NULL,
+  opts = list(),
+  reference_dates = NULL,
+  ...
+)
 }
 \arguments{
 \item{object}{An epi_workflow that has been fit by
@@ -23,6 +30,9 @@ are \code{"numeric"}, \code{"class"}, \code{"prob"}, \code{"conf_int"}, \code{"p
 predict function that will be used when \code{type = "raw"}. The
 list should not include options for the model object or the
 new data being predicted.}
+
+\item{reference_dates}{A vector matching the type of \code{time_value} in
+\code{new_data} giving the dates of the predictions to keep. Defaults to the \code{reference_date} of the \code{object}'s recipe.}
 
 \item{...}{Additional \code{parsnip}-related options, depending on the
 value of \code{type}. Arguments to the underlying model's prediction

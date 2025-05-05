@@ -84,7 +84,7 @@ reference:
     contents:
       - frosting
       - ends_with("_frosting")
-      - get_test_data
+      - get_predict_data
       - tidy.frosting
 
   - title: Frosting layers

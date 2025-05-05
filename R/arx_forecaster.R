@@ -47,20 +47,19 @@ arx_forecaster <- function(
   if (!is_regression(trainer)) {
     cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
-
   wf <- arx_fcast_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
   wf <- fit(wf, epi_data)
 
   # get the forecast date for the forecast function
   if (args_list$adjust_latency == "none") {
-    forecast_date_default <- max(epi_data$time_value)
+    reference_date_default <- max(epi_data$time_value)
   } else {
-    forecast_date_default <- attributes(epi_data)$metadata$as_of
+    reference_date_default <- attributes(epi_data)$metadata$as_of
   }
-  forecast_date <- args_list$forecast_date %||% forecast_date_default
+  reference_date <- args_list$reference_date %||% reference_date_default
+  predict_interval <- args_list$predict_interval
 
-
-  preds <- forecast(wf, forecast_date = forecast_date) %>%
+  preds <- forecast(wf, reference_dates = reference_date, predict_interval = predict_interval) %>%
     as_tibble() %>%
     select(-time_value)
 
@@ -126,21 +125,21 @@ arx_fcast_epi_workflow <- function(
   # if they don't and they're not adjusting latency, it defaults to the max time_value
   # if they're adjusting, it defaults to the as_of
   if (args_list$adjust_latency == "none") {
-    forecast_date_default <- max(epi_data$time_value)
-    if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
+    reference_date_default <- max(epi_data$time_value)
+    if (!is.null(args_list$reference_date) && args_list$reference_date != reference_date_default) {
       cli_warn(
-        "The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is actually occurring {forecast_date_default}.",
+        "The specified forecast date {args_list$reference_date} doesn't match the date from which the forecast is actually occurring {reference_date_default}.",
         class = "epipredict__arx_forecaster__forecast_date_defaulting"
       )
     }
   } else {
-    forecast_date_default <- attributes(epi_data)$metadata$as_of
+    reference_date_default <- attributes(epi_data)$metadata$as_of
   }
-  forecast_date <- args_list$forecast_date %||% forecast_date_default
-  target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
-  if (forecast_date + args_list$ahead != target_date) {
-    cli_abort("`forecast_date` {.val {forecast_date}} + `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
-      class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecaste_date"
+  reference_date <- args_list$reference_date %||% reference_date_default
+  target_date <- args_list$target_date %||% (reference_date + args_list$ahead)
+  if (reference_date + args_list$ahead != target_date) {
+    cli_abort("`reference_date` {.val {reference_date}} + `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
+      class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecast_date"
     )
   }
 
@@ -153,12 +152,12 @@ arx_fcast_epi_workflow <- function(
   if (!is.null(method_adjust_latency)) {
     if (method_adjust_latency == "extend_ahead") {
       r <- r %>% step_adjust_latency(all_outcomes(),
-        fixed_forecast_date = forecast_date,
+        fixed_reference_date = reference_date,
         method = method_adjust_latency
       )
     } else if (method_adjust_latency == "extend_lags") {
       r <- r %>% step_adjust_latency(all_predictors(),
-        fixed_forecast_date = forecast_date,
+        fixed_reference_date = reference_date,
         method = method_adjust_latency
       )
     }
@@ -218,7 +217,7 @@ arx_fcast_epi_workflow <- function(
       by_key = args_list$quantile_by_key
     )
   }
-  f <- layer_add_forecast_date(f, forecast_date = forecast_date) %>%
+  f <- layer_add_forecast_date(f, forecast_date = reference_date) %>%
     layer_add_target_date(target_date = target_date)
   if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
 
@@ -238,19 +237,19 @@ arx_fcast_epi_workflow <- function(
 #' @param n_training Integer. An upper limit for the number of rows per
 #'   key that are used for training
 #'   (in the time unit of the `epi_df`).
-#' @param forecast_date Date. The date from which the forecast is occurring.
+#' @param reference_date Date. The date from which the forecast is occurring.
 #'   The default `NULL` will determine this automatically from either
 #'   1. the maximum time value for which there's data if there is no latency
 #'   adjustment (the default case), or
 #'   2. the `as_of` date of `epi_data` if `adjust_latency` is
 #'   non-`NULL`.
 #' @param target_date Date. The date that is being forecast. The default `NULL`
-#'   will determine this automatically as `forecast_date + ahead`.
+#'   will determine this automatically as `reference_date + ahead`.
 #' @param adjust_latency Character. One of the `method`s of
 #'   [step_adjust_latency()], or `"none"` (in which case there is no adjustment).
-#'   If the `forecast_date` is after the last day of data, this determines how
+#'   If the `reference_date` is after the last day of data, this determines how
 #'   to shift the model to account for this difference. The options are:
-#'   - `"none"` the default, assumes the `forecast_date` is the last day of data
+#'   - `"none"` the default, assumes the `reference_date` is the last day of data
 #'   - `"extend_ahead"`: increase the `ahead` by the latency so it's relative to
 #'   the last day of data. For example, if the last day of data was 3 days ago,
 #'   the ahead becomes `ahead+3`.
@@ -280,6 +279,7 @@ arx_fcast_epi_workflow <- function(
 #'   column names on which to group the data and check threshold within each
 #'   group. Useful if training per group (for example, per geo_value).
 #' @param ... Space to handle future expansions (unused).
+#' @inheritParams get_predict_data
 #'
 #'
 #' @return A list containing updated parameter choices with class `arx_flist`.
@@ -294,7 +294,7 @@ arx_args_list <- function(
     lags = c(0L, 7L, 14L),
     ahead = 7L,
     n_training = Inf,
-    forecast_date = NULL,
+    reference_date = NULL,
     target_date = NULL,
     adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
     warn_latency = TRUE,
@@ -304,6 +304,7 @@ arx_args_list <- function(
     quantile_by_key = character(0L),
     check_enough_data_n = NULL,
     check_enough_data_epi_keys = NULL,
+    predict_interval = NULL,
     ...) {
   # error checking if lags is a list
   rlang::check_dots_empty()
@@ -313,8 +314,8 @@ arx_args_list <- function(
   adjust_latency <- rlang::arg_match(adjust_latency)
   arg_is_scalar(ahead, n_training, symmetrize, nonneg, adjust_latency, warn_latency)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
-  arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
-  arg_is_date(forecast_date, target_date, allow_null = TRUE)
+  arg_is_scalar(reference_date, target_date, allow_null = TRUE)
+  arg_is_date(reference_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags)
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
@@ -323,9 +324,9 @@ arx_args_list <- function(
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
-  if (!is.null(forecast_date) && !is.null(target_date)) {
-    if (forecast_date + ahead != target_date) {
-      cli_abort("`forecast_date` {.val {forecast_date}} + `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
+  if (!is.null(reference_date) && !is.null(target_date)) {
+    if (reference_date + ahead != target_date) {
+      cli_abort("`reference_date` {.val {reference_date}} + `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
         class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
       )
     }
@@ -338,8 +339,9 @@ arx_args_list <- function(
       ahead,
       n_training,
       quantile_levels,
-      forecast_date,
+      reference_date,
       target_date,
+      predict_interval,
       adjust_latency,
       warn_latency,
       symmetrize,
