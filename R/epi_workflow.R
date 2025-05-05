@@ -174,7 +174,18 @@ predict.epi_workflow <- function(object, new_data, type = NULL, opts = list(), r
   components$keys <- grab_forged_keys(components$forged, object, new_data)
   components <- apply_frosting(object, components, new_data, type = type, opts = opts, ...)
   reference_dates <- reference_dates %||% extract_recipe(object)$reference_date
-  components$predictions %>% filter(time_value %in% reference_dates)
+  #browser()
+  predictions <- components$predictions %>% filter(time_value %in% reference_dates)
+  predictions
+  if (nrow(predictions) == 0) {
+    last_pred_date <- components$predictions %>% pull(time_value) %>% max()
+    last_data_date <- new_data %>% pull(time_value) %>% max()
+    cli_warn(
+      "no predictions on the reference date(s) {reference_dates}. The last prediction was on {last_pred_date}. The most recent prediction data is on {last_data_date}",
+      class = "epipredict__predict_epi_workflow__no_predictions"
+    )
+  }
+  predictions
 }
 
 
@@ -242,14 +253,12 @@ print.epi_workflow <- function(x, ...) {
 #' example, suppose n_recent = 3, then if the 3 most recent observations in any
 #' geo_value are all NA’s, we won’t be able to fill anything, and an error
 #' message will be thrown. (See details.)
-#' @param forecast_date By default, this is set to the maximum time_value in x.
-#' But if there is data latency such that recent NA's should be filled, this may
-#' be after the last available time_value.
+#' @inheritParams get_predict_data
 #'
 #' @return A forecast tibble.
 #'
 #' @export
-forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = NULL) {
+forecast.epi_workflow <- function(object, ..., n_recent = NULL, reference_dates = NULL, predict_interval = NULL) {
   rlang::check_dots_empty()
 
   if (!object$trained) {
@@ -259,6 +268,7 @@ forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = 
     ))
   }
 
+  #browser()
   frosting_fd <- NULL
   if (has_postprocessor(object) && detect_layer(object, "layer_add_forecast_date")) {
     frosting_fd <- extract_argument(object, "layer_add_forecast_date", "forecast_date")
@@ -273,9 +283,9 @@ forecast.epi_workflow <- function(object, ..., n_recent = NULL, forecast_date = 
   predict_data <- get_predict_data(
     hardhat::extract_preprocessor(object),
     object$original_data,
-    reference_date = forecast_date
+    reference_date = reference_dates,
+    predict_interval = predict_interval
   )
-  predict_data$time_value %>% max
 
-  predict(object, new_data = predict_data, forecast_date)
+  predict(object, new_data = predict_data, reference_dates = reference_dates)
 }

@@ -4,13 +4,23 @@
 \alias{get_predict_data}
 \title{Get test data for prediction based on longest lag period}
 \usage{
-get_predict_data(recipe, x)
+get_predict_data(recipe, x, predict_interval = NULL, reference_date = NULL)
 }
 \arguments{
 \item{recipe}{A recipe object.}
 
 \item{x}{An epi_df. The typical usage is to
 pass the same data as that used for fitting the recipe.}
+
+\item{predict_interval}{A time interval or integer. The length of time before
+the \code{forecast_date} to consider for the forecast. The default is 1 year,
+which you will likely only need to make longer if you are doing long
+forecast horizons, or shorter if you are forecasting using an expensive
+model.}
+
+\item{reference_date}{By default, this is set to the maximum time_value in x.
+But if there is data latency such that recent NA's should be filled, this may
+be after the last available time_value.}
 }
 \value{
 An object of the same type as \code{x} with columns \code{geo_value}, \code{time_value}, any additional

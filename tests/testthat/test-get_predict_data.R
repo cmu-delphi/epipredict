@@ -1,6 +1,6 @@
 suppressPackageStartupMessages(library(dplyr))
 forecast_date <- max(covid_case_death_rates$time_value)
-test_that("return expected number of rows for various `test_intervals`", {
+test_that("return expected number of rows for various `predict_intervals`", {
   r <- epi_recipe(covid_case_death_rates, reference_date = forecast_date) %>%
     step_epi_ahead(death_rate, ahead = 7) %>%
     step_epi_lag(death_rate, lag = c(0, 7, 14, 21, 28)) %>%
@@ -15,14 +15,14 @@ test_that("return expected number of rows for various `test_intervals`", {
     dplyr::n_distinct(covid_case_death_rates$geo_value) * 365
   )
 
-  predict_data <- get_predict_data(recipe = r, test_interval = 5, x = covid_case_death_rates)
+  predict_data <- get_predict_data(recipe = r, predict_interval = 5, x = covid_case_death_rates)
 
   expect_equal(
     nrow(predict_data),
     dplyr::n_distinct(covid_case_death_rates$geo_value) * 5
   )
 
-  predict_data <- get_predict_data(recipe = r, test_interval = as.difftime(35, units = "days"), x = covid_case_death_rates)
+  predict_data <- get_predict_data(recipe = r, predict_interval = as.difftime(35, units = "days"), x = covid_case_death_rates)
 
   expect_equal(
     nrow(predict_data),

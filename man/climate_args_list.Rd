@@ -18,15 +18,6 @@ climate_args_list(
 )
 }
 \arguments{
-\item{forecast_date}{Date. The date from which the forecast is occurring.
-The default \code{NULL} will determine this automatically from either
-\enumerate{
-\item the maximum time value for which there's data if there is no latency
-adjustment (the default case), or
-\item the \code{as_of} date of \code{epi_data} if \code{adjust_latency} is
-non-\code{NULL}.
-}}
-
 \item{forecast_horizon}{Vector of integers giving the number of time steps,
 in units of the \code{time_type},
 from the \code{reference_date} for which predictions should be produced.}

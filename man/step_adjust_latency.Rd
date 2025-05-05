@@ -150,8 +150,7 @@ toy_recipe \%>\%
 #> 4 ca        2015-01-14   103    10
 #> 5 ma        2015-01-11    20     6
 #> 6 ma        2015-01-12    23     6
-#> 7 ma        2015-01-13    25     6
-#> 8 ma        2015-01-14    25     6
+#> # i 2 more rows
 }\if{html}{\out{</div>}}
 }
 
@@ -178,19 +177,15 @@ toy_recipe \%>\%
 #> * as_of     = 2015-01-14
 #> 
 #> # A tibble: 21 x 7
-#>    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a
-#>    <chr>     <date>     <dbl> <dbl>   <dbl>   <dbl>     <dbl>
-#>  1 ca        2015-01-10    NA    NA      NA      NA       100
-#>  2 ca        2015-01-11   100     5      NA      NA       103
-#>  3 ca        2015-01-12   103    10      NA      NA        NA
-#>  4 ca        2015-01-13    NA    NA      NA      NA        NA
-#>  5 ca        2015-01-14    NA    NA     100      NA        NA
-#>  6 ca        2015-01-15    NA    NA     103       5        NA
-#>  7 ca        2015-01-16    NA    NA      NA      10        NA
-#>  8 ca        2015-01-17    NA    NA      NA      NA        NA
-#>  9 ca        2015-01-18    NA    NA      NA      NA        NA
-#> 10 ca        2015-01-19    NA    NA      NA      NA        NA
-#> # i 11 more rows
+#>   geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a
+#>   <chr>     <date>     <dbl> <dbl>   <dbl>   <dbl>     <dbl>
+#> 1 ca        2015-01-10    NA    NA      NA      NA       100
+#> 2 ca        2015-01-11   100     5      NA      NA       103
+#> 3 ca        2015-01-12   103    10      NA      NA        NA
+#> 4 ca        2015-01-13    NA    NA      NA      NA        NA
+#> 5 ca        2015-01-14    NA    NA     100      NA        NA
+#> 6 ca        2015-01-15    NA    NA     103       5        NA
+#> # i 15 more rows
 }\if{html}{\out{</div>}}
 
 The maximum latency in column \code{a} is 2 days, so the lag is increased to 3,
@@ -226,18 +221,15 @@ toy_recipe \%>\%
 #> * as_of     = 2015-01-14
 #> 
 #> # A tibble: 10 x 6
-#>    geo_value time_value     a     b lag_0_a ahead_3_a
-#>    <chr>     <date>     <dbl> <dbl>   <dbl>     <dbl>
-#>  1 ca        2015-01-08    NA    NA      NA       100
-#>  2 ca        2015-01-09    NA    NA      NA       103
-#>  3 ca        2015-01-11   100     5     100        NA
-#>  4 ca        2015-01-12   103    10     103        NA
-#>  5 ma        2015-01-08    NA    NA      NA        20
-#>  6 ma        2015-01-09    NA    NA      NA        23
-#>  7 ma        2015-01-10    NA    NA      NA        25
-#>  8 ma        2015-01-11    20     6      20        NA
-#>  9 ma        2015-01-12    23    NA      23        NA
-#> 10 ma        2015-01-13    25    NA      25        NA
+#>   geo_value time_value     a     b lag_0_a ahead_3_a
+#>   <chr>     <date>     <dbl> <dbl>   <dbl>     <dbl>
+#> 1 ca        2015-01-08    NA    NA      NA       100
+#> 2 ca        2015-01-09    NA    NA      NA       103
+#> 3 ca        2015-01-11   100     5     100        NA
+#> 4 ca        2015-01-12   103    10     103        NA
+#> 5 ma        2015-01-08    NA    NA      NA        20
+#> 6 ma        2015-01-09    NA    NA      NA        23
+#> # i 4 more rows
 }\if{html}{\out{</div>}}
 
 Even though we're doing a 1 day ahead forecast, because our worst latency
