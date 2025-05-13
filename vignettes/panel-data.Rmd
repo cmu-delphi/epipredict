@@ -109,7 +109,7 @@ sample_n(employ, 6)
 ```
 
 In the following sections, we will go over pre-processing the data in the
-`epi_recipe` framework, and fitting a model and making predictions within the
+`epi_recipe` framework, and estimating a model and making predictions within the
 `epipredict` framework and using the package's canned forecasters.
 
 # Autoregressive (AR) model to predict number of graduates in a year
@@ -213,9 +213,9 @@ our `epi_recipe`:
 `lag_2_num_graduates_prop` correspond to $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$
 respectively.
 
-## Model fitting and prediction
+## Model estimation and prediction
 
-Since our goal for now is to fit a simple autoregressive model, we can use
+Since our goal for now is to estimate a simple autoregressive model, we can use
 [`parsnip::linear_reg()`](
   https://parsnip.tidymodels.org/reference/linear_reg.html) with the default
 engine `lm`, which fits a linear regression using ordinary least squares.
@@ -333,9 +333,9 @@ rx <- epi_recipe(employ_small) %>%
 bake_and_show_sample(rx, employ_small)
 ```
 
-## Model fitting & post-processing
+## Model estimation & post-processing
 
-Before fitting our model and making predictions, let's add some post-processing
+Before estimating our model and making predictions, let's add some post-processing
 steps using a few [`frosting`](
   https://cmu-delphi.github.io/epipredict/reference/frosting.html) layers to do
 a few things:

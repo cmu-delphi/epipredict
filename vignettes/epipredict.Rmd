@@ -20,7 +20,7 @@ To do this, we have extended the [tidymodels](https://www.tidymodels.org/)
 framework to handle the case of panel time-series data.
 
 Our hope is that it is easy for users with epidemiological training and some statistical knowledge to
-fit baseline models, while also allowing those with more nuanced statistical
+estimate baseline models, while also allowing those with more nuanced statistical
 understanding to create complex custom models using the same framework.
 Towards that end, `{epipredict}` provides two main classes of tools:
 
@@ -33,7 +33,7 @@ We currently provide the following basic forecasters:
     with increasingly wide quantiles.
   * `climatological_forecaster()`: predicts the median and quantiles based on the historical values around the same date in previous years.
   * `arx_forecaster()`: an AutoRegressive eXogenous feature forecaster, which
-    fits a model (e.g. linear regression) on lagged data to predict quantiles
+    estimates a model (e.g. linear regression) on lagged data to predict quantiles
     for continuous values.
   * `arx_classifier()`: fits a model (e.g. logistic regression) on lagged data
     to predict a binned version of the growth rate.
@@ -133,7 +133,7 @@ Let's expand on the basic example presented on the [landing
 page](../index.html#motivating-example), starting with adjusting some parameters in
 `arx_forecaster()`.
 
-The `trainer` argument allows us to set the fitting engine. We can use either
+The `trainer` argument allows us to set the computational engine. We can use either
 one of the relevant [parsnip models](https://www.tidymodels.org/find/parsnip/),
 or one of the included engines, such as `smooth_quantile_reg()`:
 
@@ -383,7 +383,8 @@ which define the bin boundaries.
 
 In this example, the custom `breaks` passed to `arx_class_args_list()` correspond to 2 bins:
 `(-∞, 0.0357]` and `(0.0357, ∞)`.
-The bins can be interpreted as: the outcome variable is decreasing, approximately stable, slightly increasing, or increasing quickly.
+The bins can be interpreted as: `death_rate` is decreasing/growing slowly,
+ or `death_rate` is growing quickly.
 
 The returned `predictions` assigns each state to one of the growth rate bins.
 In this case, the classifier expects the growth rate for all 4 of the states to fall into the same category,
@@ -403,14 +404,16 @@ growth_rates <- covid_case_death_rates |>
 growth_rates |> filter(time_value == "2021-08-14")
 ```
 
-The accuracy is 50%, since all 4 states were predicted to be in the interval `(-Inf, 0.0357]`, while two,  `ca` and `ny` actually were.
+The accuracy is 50%, since all 4 states were predicted to be in the interval
+`(-Inf, 0.0357]`, while two,  `ca` and `ny` actually were.
 
 
-## Fitting multi-key panel data
+## Handling multi-key panel data
 
-If multiple keys are set in the `epi_df` as `other_keys`,
-`arx_forecaster` will automatically group by those in addition to the required geographic key.
-For example, predicting the number of graduates in each of the categories in `grad_employ_subset` from above:
+If multiple keys are set in the `epi_df` as `other_keys`, `arx_forecaster` will
+automatically group by those in addition to the required geographic key.
+For example, predicting the number of graduates in each of the categories in
+`grad_employ_subset` from above:
 
 ```{r multi_key_forecast, warning=FALSE}
 # only fitting a subset, otherwise there are ~550 distinct pairs, which is bad for plotting
@@ -442,9 +445,9 @@ autoplot(
 
 The 8 graphs represent all combinations of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
 
-## Fitting a forecaster without geo-pooling
+## Estimating models without geo-pooling
 
-The methods shown so far fit a single model across all geographic regions, treating them as if they are independently and identically distributed (see [Mathematical description] for an explicit model example).
+The methods shown so far estimate a single model across all geographic regions, treating them as if they are independently and identically distributed (see [Mathematical description] for an explicit model example).
 This is called "geo-pooling".
 In the context of `{epipredict}`, the simplest way to avoid geo-pooling and use different parameters for each geography is to loop over the `geo_value`s:
 
@@ -475,7 +478,7 @@ all_fits |>
   list_rbind()
 ```
 
-Fitting separate models for each geography is both 56 times slower[^7] than geo-pooling, and fits each model on far less data.
+Estimating separate models for each geography is both 56 times slower[^7] than geo-pooling, and uses far less data for each estimate.
 If a dataset contains relatively few observations for each geography, fitting a geo-pooled model is likely to produce better, more stable results.
 However, geo-pooling can only be used if values are comparable in meaning and scale across geographies or can be made comparable, for example by normalization.
 
@@ -568,7 +571,7 @@ hardhat::extract_fit_engine(four_week_small$epi_workflow)
 ```
 
 If $d_{t,j}$ is the death rate on day $t$ at location $j$ and $c_{t,j}$ is the
-associated case rate, then the model we're fitting is:
+associated case rate, then the corresponding model is:
 
 $$
 \begin{aligned}
@@ -577,14 +580,21 @@ d_{t+28, j} = & a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
 \end{aligned}
 $$
 
-For example, $a_1$ is `lag_0_death_rate` above, with a value of `r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"], 3)`,
-while $a_5$ is `r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"], 4) `.
-Note that unlike `d_{t,j}` or `c_{t,j}`, these *don't* depend on either the time $t$ or the location $j$.
+For example, $a_1$ is `lag_0_death_rate` above, with a value of `r
+round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"],
+3)`,
+while $a_5$ is `r
+round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"],
+4) `.
+Note that unlike `d_{t,j}` or `c_{t,j}`, these *don't* depend on either the time
+$t$ or the location $j$.
 This is what make it a geo-pooled model.
 
-The training data for fitting this linear model is constructed within the `arx_forecaster()` function by shifting a series
-of columns the appropriate amount -- based on the requested `lags`.
-Each row containing no `NA` values is used as a training observation to fit the coefficients $a_0,\ldots, a_6$.
+The training data for estimating the parameters of this linear model is
+constructed within the `arx_forecaster()` function by shifting a series of
+columns the appropriate amount -- based on the requested `lags`.
+Each row containing no `NA` values in the predictors is used as a training observation to fit the
+coefficients $a_0,\ldots, a_6$.
 
 [^4]: in the case of a `{parsnip}` engine which doesn't explicitly predict
     quantiles, these quantiles are created using `layer_residual_quantiles()`,
