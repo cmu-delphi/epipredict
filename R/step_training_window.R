@@ -18,8 +18,8 @@
 #'   `step_epi_lag()`, or `step_epi_naomit()` steps. If `step_training_window()`
 #'   happens first, there will be less than `n_training` remaining examples,
 #'   since either leading or lagging will introduce `NA`'s later removed by
-#'   `step_epi_naomit()`. Typical usage will have this function applied after
-#'   every other step.
+#'   `step_epi_naomit()`. Typical usage will use this step last in an
+#'   `epi_recipe()`.
 #'
 #' @export
 #'

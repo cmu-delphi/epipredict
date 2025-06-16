@@ -24,9 +24,8 @@ code up a classifier from scratch using \code{\link[=epi_recipe]{epi_recipe()}}.
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
 This defaults to the \code{outcome}. However, if manually specified, only those
-variables specifically mentioned will be used. (The \code{outcome} will not be
-added.)  By default, equals the outcome. If manually specified, does not
-add the outcome variable, so make sure to specify it.}
+variables specifically mentioned will be used, and the \code{outcome} will not be
+added.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation.
 For now, we enforce \code{mode = "classification"}. Typical values are
@@ -82,17 +81,15 @@ out$predictions
 }\if{html}{\out{</div>}}
 
 The key takeaway from the predictions is that there are two prediction
-classes: \verb{(-Inf, 0.25]} and \verb{(0.25, Inf)}. This is because for our goal of
-classification the classes must be discrete. The discretization of the
-real-valued outcome is controlled by the \code{breaks} argument, which defaults
-to \code{0.25}. Such breaks will be automatically extended to cover the entire
-real line. For example, the default break of \code{0.25} is silently extended to
-\code{breaks = c(-Inf, .25, Inf)} and, therefore, results in two classes:
-\verb{[-Inf, 0.25]} and \verb{(0.25, Inf)}. These two classes are used to discretize
-the outcome. The conversion of the outcome to such classes is handled
-internally. So if discrete classes already exist for the outcome in the
-\code{epi_df}, then we recommend to code a classifier from scratch using the
-\code{epi_workflow} framework for more control.
+classes: \verb{(-Inf, 0.25]} and \verb{(0.25, Inf)}: the classes to predict must be
+discrete. The discretization of the real-valued outcome is controlled by
+the \code{breaks} argument, which defaults to \code{0.25}. Such breaks will be
+automatically extended to cover the entire real line. For example, the
+default break of \code{0.25} is silently extended to \code{breaks = c(-Inf, .25, Inf)} and, therefore, results in two classes: \verb{[-Inf, 0.25]} and \verb{(0.25, Inf)}. These two classes are used to discretize the outcome. The conversion
+of the outcome to such classes is handled internally. So if discrete
+classes already exist for the outcome in the \code{epi_df}, then we recommend to
+code a classifier from scratch using the \code{epi_workflow} framework for more
+control.
 
 The \code{trainer} is a \code{parsnip} model describing the type of estimation such
 that \code{mode = "classification"} is enforced. The two typical trainers that

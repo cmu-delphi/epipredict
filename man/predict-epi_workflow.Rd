@@ -47,19 +47,24 @@ time points at which the survival probability or hazard is estimated.
 }
 \value{
 A data frame of model predictions, with as many rows as \code{new_data} has.
-If \code{new_data} is an \code{epi_df()} or a data frame with \code{time_value} or
+If \code{new_data} is an \code{epiprocess::epi_df} or a data frame with \code{time_value} or
 \code{geo_value} columns, then the result will have those as well.
 }
 \description{
 This is the \code{predict()} method for a fit epi_workflow object. The 3 steps that this implements are:
 \itemize{
+\item Preprocess \code{new_data} using the preprocessing method specified when the
+workflow was created and fit. This is accomplished using
+\code{\link[hardhat:forge]{hardhat::forge()}}, which will apply any formula preprocessing or call
+\code{\link[recipes:bake]{recipes::bake()}} if a recipe was supplied.
 \item Preprocessing \code{new_data} using the preprocessing method specified when the
 epi_workflow was created and fit. This is accomplished using
-\code{recipes::bake()} if a recipe was supplied. Note that this is a slightly
-different \code{bake} operation than the one occuring during the fit. Any \code{step}
-that has \code{skip = TRUE} isn't applied during prediction; for example in
-\code{step_epi_naomit()}, \code{all_outcomes()} isn't \code{NA} omitted, since doing so
-would drop the exact \code{time_values} we are trying to predict.
+\code{hardhat::bake()} if a recipe was supplied (passing through
+\code{\link[hardhat:forge]{hardhat::forge()}}, which is used for non-recipe preprocessors). Note that
+this is a slightly different \code{bake} operation than the one occuring during
+the fit. Any \code{step} that has \code{skip = TRUE} isn't applied during prediction;
+for example in \code{step_epi_naomit()}, \code{all_outcomes()} isn't \code{NA} omitted,
+since doing so would drop the exact \code{time_values} we are trying to predict.
 \item Calling \code{parsnip::predict.model_fit()} for you using the underlying fit
 parsnip model.
 \item \code{slather()} any frosting that has been included in the \code{epi_workflow}.

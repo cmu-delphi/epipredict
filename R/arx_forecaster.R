@@ -3,7 +3,7 @@
 #' This is an autoregressive forecasting model for
 #' [epiprocess::epi_df][epiprocess::as_epi_df] data. It does "direct"
 #' forecasting, meaning that it estimates a model for a particular target
-#' horizon of `outcome` based on the lags of the `predictors`. See the [Get
+#' horizon of the `outcome` based on the lags of the `predictors`. See the [Get
 #' started vignette](../articles/epipredict.html) for some worked examples and
 #' [Custom epi_workflows vignette](../articles/custom_epiworkflows.html) for a
 #' recreation using a custom `epi_workflow()`.
@@ -13,16 +13,15 @@
 #' @param outcome A character (scalar) specifying the outcome (in the `epi_df`).
 #' @param predictors A character vector giving column(s) of predictor variables.
 #'   This defaults to the `outcome`. However, if manually specified, only those
-#'   variables specifically mentioned will be used. (The `outcome` will not be
-#'   added.)  By default, equals the outcome. If manually specified, does not
-#'   add the outcome variable, so make sure to specify it.
+#'   variables specifically mentioned will be used, and the `outcome` will not be
+#'   added.
 #' @param trainer A `{parsnip}` model describing the type of estimation.  For
 #'   now, we enforce `mode = "regression"`.
 #' @param args_list A list of customization arguments to determine the type of
 #'   forecasting model. See [arx_args_list()].
 #'
 #' @return An `arx_fcast`, with the fields `predictions` and `epi_workflow`.
-#'   `predictions` is an `epi_df` of predicted values while `epi_workflow()` is
+#'   `predictions` is a `tibble` of predicted values while `epi_workflow()` is
 #'   the fit workflow used to make those predictions
 #' @export
 #' @seealso [arx_fcast_epi_workflow()], [arx_args_list()]
@@ -270,8 +269,7 @@ arx_fcast_epi_workflow <- function(
 #'   training residuals. A `NULL` value will result in point forecasts only.
 #' @param symmetrize Logical. The default `TRUE` calculates symmetric prediction
 #'   intervals. This argument only applies when residual quantiles are used. It
-#'   is not applicable with `trainer = quantile_reg()`, for example. This is
-#'   achieved by including both the residuals and their negation. Typically, one
+#'   is not applicable with `trainer = quantile_reg()`, for example. Typically, one
 #'   would only want non-symmetric quantiles when increasing trajectories are
 #'   quite different from decreasing ones, such as a strictly postive variable
 #'   near zero.

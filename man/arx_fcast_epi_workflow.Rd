@@ -19,9 +19,8 @@ arx_fcast_epi_workflow(
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
 This defaults to the \code{outcome}. However, if manually specified, only those
-variables specifically mentioned will be used. (The \code{outcome} will not be
-added.)  By default, equals the outcome. If manually specified, does not
-add the outcome variable, so make sure to specify it.}
+variables specifically mentioned will be used, and the \code{outcome} will not be
+added.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation. For
 now, we enforce \code{mode = "regression"}. May be \code{NULL} if you'd like to

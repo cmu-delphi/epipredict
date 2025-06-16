@@ -28,11 +28,11 @@ for this step. See \code{\link[recipes:selections]{recipes::selections()}} for m
 \item{role}{For model terms created by this step, what analysis role should
 they be assigned?}
 
-\item{df}{a data frame containing the scaling data (such as population). The
+\item{df}{a data frame containing the scaling data (typically population). The
 target column is divided by the value in \code{df_pop_col}.}
 
-\item{by}{A (possibly named) character vector of variables to join \code{df} onto
-the \code{epi_df} by.
+\item{by}{A (possibly named) character vector of variables by which to join
+\code{df} to the \code{epi_df}.
 
 If \code{NULL}, the default, the function will try to infer a reasonable set of
 columns. First, it will try to join by all variables in the training/test
@@ -83,9 +83,9 @@ Scales raw data by the population
 \description{
 \code{step_population_scaling()} creates a specification of a recipe step that
 will perform per-capita scaling. Typical usage would set \code{df} to be a dataset
-that contains state-level population, and use it to convert predictions made
-from a raw scale model to rate-scale by dividing by the population.
-Although, it is worth noting that there is nothing special about
+that contains population for each \code{geo_value}, and use it to convert
+predictions made from a raw scale model to rate-scale by dividing by the
+population.  Although, it is worth noting that there is nothing special about
 "population", and the function can be used to scale by any variable.
 Population is the standard use case in the epidemiology forecasting scenario.
 Any value passed will \emph{divide} the selected variables while the

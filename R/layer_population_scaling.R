@@ -1,10 +1,10 @@
 #' Convert per-capita predictions to raw scale
 #'
 #' `layer_population_scaling` creates a specification of a frosting layer that
-#' will "undo" per-capita scaling done in `step_population_scaling()`. Typical
-#' usage would set `df` to be a dataset that contains state-level population,
-#' and use it to convert predictions made from a raw scale model to rate-scale
-#' by dividing by the population.
+#' will "undo" per-capita scaling done in `step_population_scaling()`.
+#' Typical usage would set `df` to be a dataset that contains a list of
+#' population for the `geo_value`s, and use it to convert predictions made from
+#' a raw scale model to rate-scale by dividing by the population.
 #' Although, it is worth noting that there is nothing special about
 #' "population", and  the function can be used to scale by any variable.
 #' Population is the standard use case in the epidemiology forecasting scenario.

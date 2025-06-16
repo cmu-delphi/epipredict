@@ -41,11 +41,7 @@ threshold values.
 }
 \details{
 Making case count predictions strictly positive is a typical example usage.
-It can be called before or after the quantiles are created using
-\code{layer_quantile_distn()} since the quantiles are an inherent part of the
-result from \code{layer_predict()} for distributional models, but must be called
-after \code{layer_residual_quantiles()}, since the quantiles for that case don't
-exist until after that layer.
+It must be called after there is a column containing quantiles. This means at earliest it can be called after \code{layer_predict()} for distributional models, or after \code{layer_residual_quantiles()} for point prediction models. Typical best practice will use \code{starts_with(".pred")} as the variables to threshold.
 }
 \examples{
 jhu <- covid_case_death_rates \%>\%
@@ -59,7 +55,7 @@ wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_threshold(.pred, lower = 0.180, upper = 0.310)
+  layer_threshold(starts_with(".pred"), lower = 0.180, upper = 0.310)
 wf <- wf \%>\% add_frosting(f)
 p <- forecast(wf)
 p

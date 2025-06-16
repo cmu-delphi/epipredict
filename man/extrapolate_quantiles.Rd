@@ -25,15 +25,16 @@ of the original \code{quantile_values} (the union of those and \code{probs}).
 This both interpolates between quantile levels already defined in \code{x} and
 extrapolates quantiles outside their bounds. The interpolation method is
 determined by the \code{quantile} argument \code{middle}, which can be either \code{"cubic"}
-for a (hyman) cubic spline interpolation, or \code{"linear"} for simple linear
+for a (Hyman) cubic spline interpolation, or \code{"linear"} for simple linear
 interpolation.
 }
 \details{
 There is only one extrapolation method for values greater than the largest
-known quantile level or smaller than the smallest known quantile level. It
-assumes a roughly exponential tail, whose decay rate and offset is derived
-from the slope of the two most extreme quantile levels on a logistic scale.
-See the internal function \code{tail_extrapolate()} for the exact implementation.
+available quantile level or smaller than the smallest available quantile
+level. It assumes a roughly exponential tail, whose decay rate and offset is
+derived from the slope of the two most extreme quantile levels on a logistic
+scale.  See the internal function \code{tail_extrapolate()} for the exact
+implementation.
 
 This function takes a \code{quantile_pred} vector and returns the same
 type of object, expanded to include

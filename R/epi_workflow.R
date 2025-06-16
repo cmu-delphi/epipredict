@@ -113,14 +113,19 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' @description
 #' This is the `predict()` method for a fit epi_workflow object. The 3 steps that this implements are:
+#' - Preprocess `new_data` using the preprocessing method specified when the
+#'   workflow was created and fit. This is accomplished using
+#'   [hardhat::forge()], which will apply any formula preprocessing or call
+#'   [recipes::bake()] if a recipe was supplied.
 #'
 #' - Preprocessing `new_data` using the preprocessing method specified when the
 #'   epi_workflow was created and fit. This is accomplished using
-#'   `recipes::bake()` if a recipe was supplied. Note that this is a slightly
-#'   different `bake` operation than the one occuring during the fit. Any `step`
-#'   that has `skip = TRUE` isn't applied during prediction; for example in
-#'   `step_epi_naomit()`, `all_outcomes()` isn't `NA` omitted, since doing so
-#'   would drop the exact `time_values` we are trying to predict.
+#'   `hardhat::bake()` if a recipe was supplied (passing through
+#'   [hardhat::forge()], which is used for non-recipe preprocessors). Note that
+#'   this is a slightly different `bake` operation than the one occuring during
+#'   the fit. Any `step` that has `skip = TRUE` isn't applied during prediction;
+#'   for example in `step_epi_naomit()`, `all_outcomes()` isn't `NA` omitted,
+#'   since doing so would drop the exact `time_values` we are trying to predict.
 #'
 #' - Calling `parsnip::predict.model_fit()` for you using the underlying fit
 #'   parsnip model.
@@ -137,7 +142,7 @@ fit.epi_workflow <- function(object, data, ..., control = workflows::control_wor
 #'
 #' @return
 #' A data frame of model predictions, with as many rows as `new_data` has.
-#' If `new_data` is an `epi_df()` or a data frame with `time_value` or
+#' If `new_data` is an `epiprocess::epi_df` or a data frame with `time_value` or
 #' `geo_value` columns, then the result will have those as well.
 #'
 #' @name predict-epi_workflow
@@ -234,7 +239,7 @@ print.epi_workflow <- function(x, ...) {
 }
 
 
-#' Produce a forecast from just an epi workflow
+#' Produce a forecast from an epi workflow and it's training data
 #'
 #' `forecast.epi_workflow` predicts by restricting the training data to the
 #' latest available data, and predicting on that. It binds together

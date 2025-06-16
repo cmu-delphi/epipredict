@@ -4,8 +4,7 @@
 \alias{add_epi_recipe}
 \alias{remove_epi_recipe}
 \alias{update_epi_recipe}
-\title{Given an \code{epi_recipe}, add it to, remove it from, or update it in an
-\code{epi_workflow}}
+\title{Add/remove/update the \code{epi_recipe} of an \code{epi_workflow}}
 \usage{
 add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 

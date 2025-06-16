@@ -24,7 +24,7 @@ new data is constantly being collected and added to the dataset, and old data po
 Training and making
 predictions only on finalized data can lead to overly optimistic estimates of accuracy
 (see, for example, [McDonald et al.
-(2021)](https://www.pnas.org/content/118/51/e2111453118/) and the references
+2021](https://www.pnas.org/content/118/51/e2111453118/) and the references
 therein).
 
 In the `{epiprocess}` package, we provide the function `epix_slide()` to help conviently perform version-faithful forecasting by only using the data as
@@ -46,6 +46,7 @@ library(tidyr)
 library(ggplot2)
 library(magrittr)
 library(purrr)
+library(lubridate)
 ```
 
 First, we create an `epi_archive()` to store the version history of the
@@ -76,12 +77,12 @@ doctor_visits <- pub_covidcast(
   issues = epirange(20200601, 20211201)
 ) |>
   # The version date column is called `issue` in the Epidata API. Rename it.
-  rename(version = issue, percent_cli = value) |>
+  select(version = issue, geo_value, time_value, percent_cli = value) |>
   as_epi_archive(compactify = TRUE)
 ```
 
 In the interest of computational speed, we limit the dataset to 4 states and 
-2020-2021, but the full archive can be used in the same way and has performed
+2020–2021, but the full archive can be used in the same way and has performed
 well in the past.
 
 We choose this dataset in particular partly because it is revision heavy; for
@@ -89,7 +90,7 @@ example, here is a plot that compares monthly snapshots of the data.
 
 <details>
 <summary>Code for plotting</summary>
-```{r plot_revision_example, warn = FALSE}
+```{r plot_revision_example, warn = FALSE, message = FALSE}
 geo_choose <- "ca"
 forecast_dates <- seq(from = as.Date("2020-08-01"), to = as.Date("2021-11-01"), by = "1 month")
 percent_cli_data <- bind_rows(
@@ -106,23 +107,22 @@ percent_cli_data <- bind_rows(
   doctor_visits |>
     epix_as_of(doctor_visits$versions_end) |>
     mutate(version_faithful = "Version un-faithful")
-)
-
-p0 <-
-  ggplot(data = percent_cli_data |> filter(geo_value == geo_choose)) +
-  geom_vline(aes(color = factor(version), xintercept = version), lty = 2) +
-  geom_line(
-    aes(x = time_value, y = percent_cli, color = factor(version)),
-    inherit.aes = FALSE, na.rm = TRUE
-  ) +
-  scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
-  scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
+) |> as_tibble()
+p0 <- autoplot(
+  archive_cases_dv_subset, percent_cli, 
+  .versions = seq(ymd("2020-07-01"), ymd("2021-11-30"), by = "1 month"), 
+  .mark_versions = TRUE,
+  .facet_filter = (geo_value == "ca")
+) +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %Y") +
+  labs(x = "", y = "% of doctor's visits with\n Covid-like illness") + 
+  scale_color_viridis_c(option = "turbo", guide = guide_legend(reverse=TRUE), direction = -1) +
+  scale_y_continuous(limits = c(0, NA), expand = expansion(c(0, 0.05))) +
   theme(legend.position = "none")
 ```
 </details>
 
-```{r plot_just_revisioning, echo = FALSE, warn = FALSE, message = FALSE}
+```{r plot_just_revisioning, echo = FALSE, warning = FALSE, warn = FALSE, message = FALSE}
 p0
 ```
 
@@ -166,8 +166,8 @@ Much of that functionality is built into `arx_forecaster()` using the parameter
 
 # Backtesting a simple autoregressive forecaster
 
-One of the most common use cases of `epiprocess::epi_archive()` object is for
-accurate model back-testing.
+In addition to outlier detection and nowcasting, a common use case of `epiprocess::epi_archive()` object is for accurate model
+back-testing.
 
 To start, let's use a simple autoregressive forecaster to predict `percent_cli`, the percentage
 of doctor's hospital visits associated with COVID-like illness, 14
@@ -178,7 +178,7 @@ For increased accuracy we will use quantile regression.
 
 As a sanity check before we backtest the _entire_ dataset, let's 
 forecast a single day in the middle of the dataset. 
-We can do this by setting the `.version` argument in `epix_slide()`:
+We can do this by setting the `.versions` argument in `epix_slide()`:
 
 ```{r single_version, warn = FALSE}
 forecast_date <- as.Date("2021-04-06")
@@ -199,7 +199,7 @@ We need truth data to compare our forecast against. We can construct it by using
 the archive at the last available date[^1].
 
 _Note:_ We always want to compare our forecasts to actual (most recently reported) values because that is the outcome we care about.
-`as_of` data is useful for understanding why we're getting the forecasts we're getting, but `as_of` values are not the real outcome
+`as_of` data is useful for understanding why we're getting the forecasts we're getting, but `as_of` values are only preliminary outcomes.
 Therefore, it's not meaningful to use them for evaluating the performance of a forecast.
 Unfortunately, it's not uncommon for revisions to cause poor (final) performance of a forecaster that was decent at the time of the forecast.
 
@@ -241,8 +241,8 @@ We will also create the helper function `forecast_wrapper()` to let us easily ma
 
 ```{r arx-kweek-preliminaries, warning = FALSE}
 forecast_wrapper <- function(
-    epi_data, aheads, outcome, predictors,
-    process_data = identity) {
+    epi_data, aheads, outcome, predictors, process_data = identity
+    ) {
   map(
     aheads,
     \(ahead) {
@@ -253,11 +253,9 @@ forecast_wrapper <- function(
           lags = c(0:7, 14, 21),
           adjust_latency = "extend_ahead"
         )
-      )$predictions |>
-        pivot_quantiles_wider(.pred_distn)
+      )$predictions |> pivot_quantiles_wider(.pred_distn)
     }
-  ) |>
-    bind_rows()
+  ) |> bind_rows()
 }
 ```
 
@@ -323,33 +321,35 @@ forecasts_filtered <- forecasts |>
 # we need to add the ground truth data to the version faithful plot as well
 plotting_data <- bind_rows(
   percent_cli_data,
-  percent_cli_data %>%
-    filter(version_faithful == "Version un-faithful") %>%
+  percent_cli_data |>
+    filter(version_faithful == "Version un-faithful") |>
+    mutate(version = max(percent_cli_data$version)) |>
     mutate(version_faithful = "Version faithful")
 )
-
-p1 <- # first plotting the forecasts as bands, lines and points
-  ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = factor(time_value)), alpha = 0.4) +
-  geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
-  geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
+p1 <- ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
+  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)), alpha = 0.4) +
+  geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
+  geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
   # the forecast date
   geom_vline(
     data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
-    aes(color = factor(version), xintercept = version),
+    aes(color = version, xintercept = version, group = version),
     lty = 2
   ) +
   # the underlying data
   geom_line(
     data = plotting_data |> filter(geo_value == geo_choose),
-    aes(x = time_value, y = percent_cli, color = factor(version)),
+    aes(x = time_value, y = percent_cli, color = (version), group = version),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
   facet_grid(version_faithful ~ geo_value, scales = "free") +
   scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
   labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
+  scale_color_viridis_c(option = "turbo", direction = -1) +
+  scale_fill_viridis_c(option = "turbo", direction = -1) +
   theme(legend.position = "none")
+p1
 ```
 
 ```{r plot_fl_forecasts, warning = FALSE}
@@ -358,25 +358,32 @@ forecasts_filtered <- forecasts |>
   filter(geo_value == geo_choose) |>
   mutate(time_value = version)
 
+forecasts_filtered %>% names
 p2 <-
   ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = factor(time_value)), alpha = 0.4) +
-  geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
-  geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
+  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)), alpha = 0.4) +
+  geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
+  geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
+  # the forecast date
   geom_vline(
     data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
-    aes(color = factor(version), xintercept = version), lty = 2
+    aes(color = version, xintercept = version, group = version),
+    lty = 2
   ) +
+  # the underlying data
   geom_line(
     data = plotting_data |> filter(geo_value == geo_choose),
-    aes(x = time_value, y = percent_cli, color = factor(version)),
+    aes(x = time_value, y = percent_cli, color = (version), group = version),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
   facet_grid(version_faithful ~ geo_value, scales = "free") +
   scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
   labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
+  scale_color_viridis_c(option = "turbo", direction = -1) +
+  scale_fill_viridis_c(option = "turbo", direction = -1) +
   theme(legend.position = "none")
+p2
 ```
 </details>
 
@@ -384,7 +391,7 @@ p2 <-
 p1
 ```
 
-The version faithful and un-faithful forecasts look moderately similar except for the 1 day horizons  
+The version faithful and un-faithful forecasts look moderately similar except for the 1 day horizons
 (although neither approach produces amazingly accurate forecasts).
 
 In the version faithful case for California, the March 2021 forecast (turquoise)

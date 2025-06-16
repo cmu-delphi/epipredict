@@ -1,9 +1,12 @@
 #' Get test data for prediction based on longest lag period
 #'
-#' If `predict()` is given the full training dataset, it will produce a forecast
-#' for every day which has enough data. For most cases, this is far more
-#' forecasts than is necessary. `get_test_data()` is designed to restrict the given dataset to the minimum amount needed to produce a forecast on the `forecast_date`.
-#' Primarily this is based on the longest lag period in the recipe.
+#' If `predict()` is given the full training dataset, it will produce a
+#' prediction for every `time_value` which has enough data. For most cases, this
+#' generates predictions for `time_values` where the `outcome` has already been
+#' observed.  `get_test_data()` is designed to restrict the given dataset to the
+#' minimum amount needed to produce a forecast on the `forecast_date` for future
+#' data, rather than a prediction on past `time_value`s.  Primarily this is
+#' based on the longest lag period in the recipe.
 #'
 #' The minimum required (recent) data to produce a forecast is equal to
 #' the maximum lag requested (on any predictor) plus the longest horizon

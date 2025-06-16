@@ -32,9 +32,17 @@ nested_quantiles <- function(x) {
 }
 
 
-#' Pivot a column containing `quantile_pred` longer
+#' Pivot a column containing `quantile_pred` to explicit rows or columns
 #'
-#' Selected columns that contain `quantile_pred` will be "lengthened" with the
+#' Both functions expand a column of `quantile_pred`s into the separate
+#' quantiles. Since each consists of a set of names (quantiles) and values,
+#' these operate analogously with `pivot_wider` and `pivot_longer`.
+#'
+#' `piot_quantiles_wider` creates a new column for each `quantile_level`, with
+#' the values as the corresponding quantile values.  When pivoting multiple
+#' columns, the original column name will be used as a prefix.
+#'
+#' Similarly, `pivot_quantiles_longer` assigns the selected columns
 #' `quantile_level`s in one column and the `value`s in another. If multiple
 #' columns are selected, these will be prefixed with the column name.
 #'
@@ -47,6 +55,7 @@ nested_quantiles <- function(x) {
 #'
 #' @return An object of the same class as `.data`.
 #' @export
+#' @name pivot_quantiles
 #'
 #' @examples
 #' d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)
@@ -56,6 +65,15 @@ nested_quantiles <- function(x) {
 #' pivot_quantiles_longer(tib, "d1")
 #' pivot_quantiles_longer(tib, dplyr::ends_with("1"))
 #' pivot_quantiles_longer(tib, d2)
+#'
+#' pivot_quantiles_wider(tib, "d1")
+#' pivot_quantiles_wider(tib, dplyr::ends_with("2"))
+#' pivot_quantiles_wider(tib, d2)
+NULL
+
+
+#' @rdname pivot_quantiles
+#' @export
 pivot_quantiles_longer <- function(.data, ...) {
   col <- validate_pivot_quantiles(.data, ...)
   .data$.row <- seq_len(vctrs::vec_size(.data))
@@ -66,26 +84,8 @@ pivot_quantiles_longer <- function(.data, ...) {
     select(!.row)
 }
 
-#' Pivot a column containing `quantile_pred` wider
-#'
-#' Any selected columns that contain `quantile_pred` will be "widened" with the
-#' "taus" (quantile) serving as column names and the values in the corresponding
-#' column.  When pivoting multiple columns, the original column name will be
-#' used as a prefix.
-#'
-#' @inheritParams pivot_quantiles_longer
-#'
-#' @return An object of the same class as `.data`
+#' @rdname pivot_quantiles
 #' @export
-#'
-#' @examples
-#' d1 <- quantile_pred(rbind(1:3, 2:4), 1:3 / 4)
-#' d2 <- quantile_pred(rbind(2:4, 3:5), 2:4 / 5)
-#' tib <- tibble(g = c("a", "b"), d1 = d1, d2 = d2)
-#'
-#' pivot_quantiles_wider(tib, "d1")
-#' pivot_quantiles_wider(tib, dplyr::ends_with("2"))
-#' pivot_quantiles_wider(tib, d2)
 pivot_quantiles_wider <- function(.data, ...) {
   col <- validate_pivot_quantiles(.data, ...)
   .data$.row <- seq_len(vctrs::vec_size(.data))

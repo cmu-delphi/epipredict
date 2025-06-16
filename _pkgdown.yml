@@ -128,9 +128,9 @@ reference:
 
   - subtitle: Utilities for quantile distribution processing
     contents:
+      - pivot_quantiles
       - dist_quantiles
       - contains("quantile_pred")
       - extrapolate_quantiles
       - nested_quantiles
       - weighted_interval_score
-      - starts_with("pivot_quantiles")

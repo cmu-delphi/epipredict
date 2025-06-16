@@ -34,17 +34,17 @@
 #' ```
 #'
 #' The key takeaway from the predictions is that there are two prediction
-#'   classes: `(-Inf, 0.25]` and `(0.25, Inf)`. This is because for our goal of
-#'   classification the classes must be discrete. The discretization of the
-#'   real-valued outcome is controlled by the `breaks` argument, which defaults
-#'   to `0.25`. Such breaks will be automatically extended to cover the entire
-#'   real line. For example, the default break of `0.25` is silently extended to
-#'   `breaks = c(-Inf, .25, Inf)` and, therefore, results in two classes:
-#'   `[-Inf, 0.25]` and `(0.25, Inf)`. These two classes are used to discretize
-#'   the outcome. The conversion of the outcome to such classes is handled
-#'   internally. So if discrete classes already exist for the outcome in the
-#'   `epi_df`, then we recommend to code a classifier from scratch using the
-#'   `epi_workflow` framework for more control.
+#'   classes: `(-Inf, 0.25]` and `(0.25, Inf)`: the classes to predict must be
+#'   discrete. The discretization of the real-valued outcome is controlled by
+#'   the `breaks` argument, which defaults to `0.25`. Such breaks will be
+#'   automatically extended to cover the entire real line. For example, the
+#'   default break of `0.25` is silently extended to `breaks = c(-Inf, .25,
+#'   Inf)` and, therefore, results in two classes: `[-Inf, 0.25]` and `(0.25,
+#'   Inf)`. These two classes are used to discretize the outcome. The conversion
+#'   of the outcome to such classes is handled internally. So if discrete
+#'   classes already exist for the outcome in the `epi_df`, then we recommend to
+#'   code a classifier from scratch using the `epi_workflow` framework for more
+#'   control.
 #'
 #' The `trainer` is a `parsnip` model describing the type of estimation such
 #'   that `mode = "classification"` is enforced. The two typical trainers that

@@ -2,7 +2,7 @@
 #'
 #' For any model that produces forecasts for multiple outcomes, such as multiple
 #' aheads, the resulting prediction is a list of forecasts inside a column of
-#' the prediction tibble, which is not an ideal format. This layer "lengthens"
+#' the prediction tibble, which is may not be desirable. This layer "lengthens"
 #' the result, moving each outcome to a separate row, in the same manner as
 #' `tidyr::unnest()` would. At the moment, the only such engine is
 #' `smooth_quantile_reg()`.

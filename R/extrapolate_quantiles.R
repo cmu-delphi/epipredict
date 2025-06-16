@@ -3,14 +3,15 @@
 #' This both interpolates between quantile levels already defined in `x` and
 #' extrapolates quantiles outside their bounds. The interpolation method is
 #' determined by the `quantile` argument `middle`, which can be either `"cubic"`
-#' for a (hyman) cubic spline interpolation, or `"linear"` for simple linear
+#' for a (Hyman) cubic spline interpolation, or `"linear"` for simple linear
 #' interpolation.
 #'
 #' There is only one extrapolation method for values greater than the largest
-#' known quantile level or smaller than the smallest known quantile level. It
-#' assumes a roughly exponential tail, whose decay rate and offset is derived
-#' from the slope of the two most extreme quantile levels on a logistic scale.
-#' See the internal function `tail_extrapolate()` for the exact implementation.
+#' available quantile level or smaller than the smallest available quantile
+#' level. It assumes a roughly exponential tail, whose decay rate and offset is
+#' derived from the slope of the two most extreme quantile levels on a logistic
+#' scale.  See the internal function `tail_extrapolate()` for the exact
+#' implementation.
 #'
 #' This function takes a `quantile_pred` vector and returns the same
 #' type of object, expanded to include

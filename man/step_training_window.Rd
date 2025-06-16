@@ -44,8 +44,8 @@ It is recommended to do this after any \code{step_epi_ahead()},
 \code{step_epi_lag()}, or \code{step_epi_naomit()} steps. If \code{step_training_window()}
 happens first, there will be less than \code{n_training} remaining examples,
 since either leading or lagging will introduce \code{NA}'s later removed by
-\code{step_epi_naomit()}. Typical usage will have this function applied after
-every other step.
+\code{step_epi_naomit()}. Typical usage will use this step last in an
+\code{epi_recipe()}.
 }
 \examples{
 tib <- tibble(

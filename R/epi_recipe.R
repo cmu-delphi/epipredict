@@ -232,8 +232,7 @@ is_epi_recipe <- function(x) {
 
 
 
-#' Given an `epi_recipe`, add it to, remove it from, or update it in an
-#' `epi_workflow`
+#' Add/remove/update the `epi_recipe` of an `epi_workflow`
 #'
 #' @description
 #' - `add_recipe()` specifies the terms of the model and any preprocessing that

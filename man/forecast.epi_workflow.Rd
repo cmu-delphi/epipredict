@@ -2,7 +2,7 @@
 % Please edit documentation in R/epi_workflow.R
 \name{forecast.epi_workflow}
 \alias{forecast.epi_workflow}
-\title{Produce a forecast from just an epi workflow}
+\title{Produce a forecast from an epi workflow and it's training data}
 \usage{
 \method{forecast}{epi_workflow}(object, ...)
 }

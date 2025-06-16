@@ -58,7 +58,7 @@ All `epi_workflows`, including simple and canned workflows, consist of 3 compone
 
 ### Preprocessor
 
-A preprocessor (also called a recipe) transforms the data before model training and prediction.
+A preprocessor (in the context of epipredict this means a `{recipe}`) transforms the data before model training and prediction.
 Transformations can include converting counts to rates, applying a running average 
 to columns, or [any of the `step`s found in `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
 
@@ -75,8 +75,8 @@ In general, there are 2 broad classes of transformation that `{recipes}` `step`s
   Examples include taking the log of a variable, leading or lagging columns,
   filtering out rows, handling dummy variables, calculating growth rates,
   etc.
-- Operations that rely on stored information (parameters fit during training) to modify train and test data.
-  Examples include centering by the mean, and normalizing the variance (whitening).
+- Operations that rely on stored information (parameters estimated during training) to modify both train and test data.
+  Examples include centering by the mean, and normalizing the variance to be one (whitening).
 
 We differentiate between these types of transformations because the second type can result in information leakage if not done properly.
 Information leakage or data leakage happens when a system has access to information that would not have been available at prediction time and could change our evaluation of the model's real-world performance.
@@ -86,12 +86,12 @@ the training data and use that value on the prediction data, rather than
 using the mean of the test predictor for centering or including test data in the mean calculation.
 
 A major benefit of `{recipes}` is that it prevents information leakage. 
-However, the _main_ mechanism we rely on to prevent data leakage is proper
-[backtesting](backtesting.html).
+However, the _main_ mechanism we rely on to prevent data leakage in the context
+of epidemiological forecasting is proper [backtesting](backtesting.html).
 
 ### Trainer
 
-A trainer (aso called a model or engine) fits a `{parsnip}` model on data, and outputs a fitted model object.
+A trainer (aso called a model or engine) fits a `{parsnip}` model to training data, and outputs a fitted model object.
 Examples include linear regression, quantile regression, or [any `{parsnip}` engine](https://www.tidymodels.org/find/parsnip/).
 The `{parsnip}` front-end abstracts away the differences in interface between a wide collection of statistical models.
 
@@ -99,14 +99,17 @@ All workflows must include a model.
 
 ### Postprocessor
 
-Postprocessors are unique to `{epipredict}`.
-A postprocessor (also known as frosting) modifies and formats the prediction after a model has been fit.
+Generally  a postprocessor modifies and formats the prediction after a model has
+been fit.
+An `{epipredict}` postprocessor is called a `frosting()`; there are alternatives
+such as [tailor](https://tailor.tidymodels.org/) which performs calibration.
 
 The postprocessor is _optional_.
 It only needs to be included in a workflow if you need to process the model output.
 
-Each operation within a postprocessor is called a "layer" (functions are named `layer_*`), and the stack of layers is known as `frosting()`,
-continuing the metaphor of baking a cake established in `{recipes}`.
+Each operation within a postprocessor is called a "layer" (functions are named
+`layer_*`), and the stack of layers is known as `frosting()`, continuing the
+metaphor of baking a cake established in `{recipes}`.
 Some example operations include:
 
 - generating quantiles from purely point-prediction models
@@ -137,7 +140,7 @@ hardhat::extract_recipe(four_week_ahead$epi_workflow)
 ```
 
 There are 6 steps we will need to recreate.
-Note that all steps in the extracted recipe are marked as already been
+Note that all steps in the extracted recipe are marked as already having been
 `Trained`. For steps such as `recipes::step_BoxCox()` that have parameters that change their behavior, this means that their
 parameters have already been calculated based on the training data set.
 
@@ -241,7 +244,7 @@ four_week_layers <- frosting() |>
   layer_threshold()
 ```
 
-`layer_predict()` needs to be included in every postprocessor to actually train the model.
+`layer_predict()` needs to be included in every postprocessor to actually predict on the prediction data.
 
 Most layers work with any engine or `step`s.
 There are a couple of layers, however, that depend on whether the engine predicts quantiles or point estimates.
@@ -249,8 +252,8 @@ There are a couple of layers, however, that depend on whether the engine predict
 The following layers are only supported by point estimate engines, such as
 `linear_reg()`:
 
-- `layer_residual_quantiles()`: the preferred method of generating quantiles for
-  models that don't generate quantiles themselves.
+- `layer_residual_quantiles()`: for models that don't generate quantiles, the
+  preferred method of generating quantiles.
   This function uses the error residuals of the engine to calculate quantiles. 
   This will work for most `{parsnip}` engines.
 - `layer_predictive_distn()`: alternate method of generating quantiles using
@@ -263,8 +266,9 @@ output quantiles, such as `quantile_reg()`:
 - `layer_quantile_distn()`: adds the specified quantiles.
   If the user-requested quantile levels differ from the ones actually fit, they will be interpolated and/or
   extrapolated.
-- `layer_point_from_distn()`: this adds the middle quantile (median) as a point estimate,
-  and, if used, should be included after `layer_quantile_distn()`. 
+- `layer_point_from_distn()`: this generates a point estimate from a
+  distribution (either median or mean), and, if used, should be included after
+  `layer_quantile_distn()`. 
 
 ## Fitting an `epi_workflow()`
 
@@ -339,7 +343,7 @@ There are many ways we could modify `four_week_ahead`. We might consider:
 
 - Converting from rates to counts
 - Including a growth rate estimate as a predictor
-- Including a time component as a predictor -- useful if we
+- Including a time component as a predictor --- useful if we
 expect there to be a strong seasonal component to the outcome
 - Scaling by a factor
 
@@ -356,12 +360,12 @@ growth_rate_recipe <- epi_recipe(
   covid_case_death_rates |>
     filter(time_value <= forecast_date, geo_value %in% used_locations)
 ) |>
+  # Calculate growth rate from death rate column.
+  step_growth_rate(death_rate) |>
   step_epi_lag(case_rate, lag = c(0, 1, 2, 3, 7, 14)) |>
   step_epi_lag(death_rate, lag = c(0, 7, 14)) |>
   step_epi_ahead(death_rate, ahead = 4 * 7) |>
   step_epi_naomit() |>
-  # Calculate growth rate from death rate column.
-  step_growth_rate(death_rate) |>
   step_training_window()
 ```
 
@@ -462,8 +466,7 @@ count_layers <-
   layer_predict() |>
   layer_residual_quantiles(quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)) |>
   layer_population_scaling(
-    .pred,
-    .pred_distn,
+    starts_with(".pred"),
     # `df` contains scaling values for all regions; in this case it is the state populations
     df = epidatasets::state_census,
     df_pop_col = "pop",
@@ -489,6 +492,8 @@ count_predictions <- count_workflow |>
 
 count_predictions
 ```
+
+note that we've used `tidyselect::starts_with(".pred")` here, which will apply the function to both the `.pred` and `.pred_distn` columns.
 
 # Custom classifier workflow
 
@@ -521,19 +526,9 @@ classifier_recipe <- epi_recipe(training_data) |>
   # Create and lag `case_rate` growth rate
   step_growth_rate(case_rate, role = "none", prefix = "gr_") |>
   step_epi_lag(starts_with("gr_"), lag = c(0, 7, 14)) |>
-  step_epi_ahead(starts_with("gr_"), ahead = 7, role = "none") |>
-  # Divide growth rate into 3 bins, and label as outcome variable
-  # Note `recipes::step_cut()` has a bug that prevents us from using it here
-  step_mutate(
-    response = cut(
-      ahead_7_gr_7_rel_change_case_rate,
-      # Define bin thresholds.
-      # Divide by 7 to create weekly values.
-      breaks = c(-Inf, -0.2, 0.25, Inf) / 7,
-      labels = c("down", "flat", "up")
-    ),
-    role = "outcome"
-  ) |>
+  step_epi_ahead(starts_with("gr_"), ahead = 7) |>
+  # divide growth rate into 3 bins
+  step_cut(ahead_7_gr_7_rel_change_case_rate, breaks = c(-Inf, -0.2, 0.25, Inf) / 7) |>
   # Drop unused columns based on role assignments. This is not strictly
   # necessary, as columns with roles unused in the model will be ignored anyway.
   step_rm(has_role("none"), has_role("raw")) |>
@@ -571,7 +566,7 @@ Afterwards, `step_rm()` drops the temporary columns, along with the original `ro
 because their roles have been reassigned.
 
 
-To fit a classification model like this, we will need to use a `{parsnip}` model
+To fit a 3-class classification model like this, we will need to use a `{parsnip}` model
 that has `mode = "classification"`.
 The simplest example of a `{parsnip}` `classification`-`mode` model is `multinomial_reg()`.
 The needed layers are more or less the same as the `linear_reg()` regression layers, with the addition that we need to remove some `NA` values:
@@ -580,8 +575,7 @@ The needed layers are more or less the same as the `linear_reg()` regression lay
 frost <- frosting() |>
   layer_naomit(starts_with(".pred")) |>
   layer_add_forecast_date() |>
-  layer_add_target_date() |>
-  layer_threshold()
+  layer_add_target_date()
 ```
 
 ```{r, warning=FALSE}
@@ -606,7 +600,7 @@ growth_rates <- covid_case_death_rates |>
   ) |>
   ungroup()
 
-growth_rates |> filter(time_value == "2021-08-01")
+growth_rates |> filter(time_value == "2021-08-01") |> select(-death_rate)
 ```
 
 we see that they're all significantly higher than 25% per week (36%-62%),
@@ -627,3 +621,4 @@ See the [tooling book](https://cmu-delphi.github.io/delphi-tooling-book/preproce
     Academy of Sciences 118.51 (2021): e2111453118. doi:10.1073/pnas.2111453118
 
 [^4]: Note that `prep()` and `bake()` are standard `{recipes}` functions, so any discussion of them there applies just as well here. For example in the [guide to creating a new step](https://www.tidymodels.org/learn/develop/recipes/#create-the-prep-method).
+

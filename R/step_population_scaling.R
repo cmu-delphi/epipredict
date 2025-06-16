@@ -2,9 +2,9 @@
 #'
 #' `step_population_scaling()` creates a specification of a recipe step that
 #' will perform per-capita scaling. Typical usage would set `df` to be a dataset
-#' that contains state-level population, and use it to convert predictions made
-#' from a raw scale model to rate-scale by dividing by the population.
-#' Although, it is worth noting that there is nothing special about
+#' that contains population for each `geo_value`, and use it to convert
+#' predictions made from a raw scale model to rate-scale by dividing by the
+#' population.  Although, it is worth noting that there is nothing special about
 #' "population", and the function can be used to scale by any variable.
 #' Population is the standard use case in the epidemiology forecasting scenario.
 #' Any value passed will *divide* the selected variables while the
@@ -13,10 +13,10 @@
 #' @inheritParams step_epi_lag
 #' @param role For model terms created by this step, what analysis role should
 #'   they be assigned?
-#' @param df a data frame containing the scaling data (such as population). The
+#' @param df a data frame containing the scaling data (typically population). The
 #'   target column is divided by the value in `df_pop_col`.
-#' @param by A (possibly named) character vector of variables to join `df` onto
-#'   the `epi_df` by.
+#' @param by A (possibly named) character vector of variables by which to join
+#'   `df` to the `epi_df`.
 #'
 #' If `NULL`, the default, the function will try to infer a reasonable set of
 #' columns. First, it will try to join by all variables in the training/test

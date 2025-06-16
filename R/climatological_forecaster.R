@@ -134,12 +134,12 @@ climatological_forecaster <- function(epi_data,
   # get the distinct .idx for the target date(s)
   distinct_target_idx <- predictions$.idx %>% unique()
   # get all of the idx's within the window of the target .idxs
-  entries <- map(distinct_target_idx, \(idx) within_window(idx, window_size, modulus)) %>%
+  entries <- map(distinct_target_idx, function(idx) within_window(idx, window_size, modulus)) %>%
     do.call(c, .) %>%
     unique()
   # for the center, we need those within twice the window, since for each point
   # we're subtracting out the center to generate the quantiles
-  entries_double_window <- map(entries, \(idx) within_window(idx, window_size, modulus)) %>%
+  entries_double_window <- map(entries, function(idx) within_window(idx, window_size, modulus)) %>%
     do.call(c, .) %>%
     unique()
 

@@ -1,9 +1,9 @@
 #' Creates predictions based on residual quantiles
 #'
-#' This function calculates quantiles based on the empirical quantiles of the
-#' model's residuals. If the model producing the forecast is distributional, it
-#' is recommended to use `layer_residual_quantiles()` instead, as those will be
-#' significantly more accurate.
+#' This function calculates predictive quantiles based on the empirical
+#' quantiles of the model's residuals. If the model producing the forecast is
+#' distributional, it is recommended to use `layer_residual_quantiles()`
+#' instead, as those will be more accurate.
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
@@ -11,7 +11,6 @@
 #'   referring to the desired quantile. Note that 0.5 will always be included
 #'   even if left out by the user.
 #' @param symmetrize logical. If `TRUE` then the interval will be symmetric.
-#'   This is achieved by including both the residuals and their negations.
 #'   Typically, one would only want non-symmetric quantiles when increasing
 #'   trajectories are quite different from decreasing ones, such as a strictly
 #'   postive variable near zero.

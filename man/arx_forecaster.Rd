@@ -19,9 +19,8 @@ arx_forecaster(
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
 This defaults to the \code{outcome}. However, if manually specified, only those
-variables specifically mentioned will be used. (The \code{outcome} will not be
-added.)  By default, equals the outcome. If manually specified, does not
-add the outcome variable, so make sure to specify it.}
+variables specifically mentioned will be used, and the \code{outcome} will not be
+added.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation.  For
 now, we enforce \code{mode = "regression"}.}
@@ -31,14 +30,14 @@ forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
 }
 \value{
 An \code{arx_fcast}, with the fields \code{predictions} and \code{epi_workflow}.
-\code{predictions} is an \code{epi_df} of predicted values while \code{epi_workflow()} is
+\code{predictions} is a \code{tibble} of predicted values while \code{epi_workflow()} is
 the fit workflow used to make those predictions
 }
 \description{
 This is an autoregressive forecasting model for
 \link[epiprocess:epi_df]{epiprocess::epi_df} data. It does "direct"
 forecasting, meaning that it estimates a model for a particular target
-horizon of \code{outcome} based on the lags of the \code{predictors}. See the \href{../articles/epipredict.html}{Get started vignette} for some worked examples and
+horizon of the \code{outcome} based on the lags of the \code{predictors}. See the \href{../articles/epipredict.html}{Get started vignette} for some worked examples and
 \href{../articles/custom_epiworkflows.html}{Custom epi_workflows vignette} for a
 recreation using a custom \code{epi_workflow()}.
 }
