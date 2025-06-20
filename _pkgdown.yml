@@ -4,7 +4,6 @@ development:
   mode: devel
 
 template:
-  light-switch: true
   package: delphidocs
 
 navbar:
