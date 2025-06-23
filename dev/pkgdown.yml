@@ -1,15 +1,13 @@
 pandoc: 3.1.11
-pkgdown: 2.1.1
+pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
-  arx-classifier: arx-classifier.html
   backtesting: backtesting.html
+  custom_epiworkflows: custom_epiworkflows.html
   epipredict: epipredict.html
   panel-data: panel-data.html
-  preprocessing-and-models: preprocessing-and-models.html
-  articles/smooth-qr: smooth-qr.html
   update: update.html
-last_built: 2025-04-10T01:27Z
+last_built: 2025-06-23T21:49Z
 urls:
   reference: https://cmu-delphi.github.io/epipredict/reference
   article: https://cmu-delphi.github.io/epipredict/articles
