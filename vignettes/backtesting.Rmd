@@ -92,7 +92,10 @@ example, here is a plot that compares monthly snapshots of the data.
 <summary>Code for plotting</summary>
 ```{r plot_revision_example, warn = FALSE, message = FALSE}
 geo_choose <- "ca"
-forecast_dates <- seq(from = as.Date("2020-08-01"), to = as.Date("2021-11-01"), by = "1 month")
+forecast_dates <- seq(
+  from = as.Date("2020-08-01"),
+  to = as.Date("2021-11-01"),
+  by = "1 month")
 percent_cli_data <- bind_rows(
   # Snapshotted data for the version-faithful forecasts
   map(
@@ -110,13 +113,15 @@ percent_cli_data <- bind_rows(
 ) |> as_tibble()
 p0 <- autoplot(
   archive_cases_dv_subset, percent_cli, 
-  .versions = seq(ymd("2020-07-01"), ymd("2021-11-30"), by = "1 month"), 
+  .versions = forecast_dates, 
   .mark_versions = TRUE,
   .facet_filter = (geo_value == "ca")
 ) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %Y") +
   labs(x = "", y = "% of doctor's visits with\n Covid-like illness") + 
-  scale_color_viridis_c(option = "turbo", guide = guide_legend(reverse=TRUE), direction = -1) +
+  scale_color_viridis_c(
+    option = "viridis",
+    guide = guide_legend(reverse=TRUE), direction = -1) +
   scale_y_continuous(limits = c(0, NA), expand = expansion(c(0, 0.05))) +
   theme(legend.position = "none")
 ```
@@ -133,11 +138,11 @@ For example, the snapshot on March 1st, 2021 is aquamarine, and increases to
 slightly over 10.
 Every series is necessarily to the left of the snapshot date (since all known
 values must happen before the snapshot is taken[^4]).
-The grey line overlaying the various snapshots represents the "final
+The black line overlaying the various snapshots represents the "final
 value", which is just the snapshot at the last version in the archive (the
 `versions_end`).
 
-Comparing with the grey line tells us how much the value at the time of the
+Comparing with the black line tells us how much the value at the time of the
 snapshot differs with what was eventually reported.
 The drop in January 2021 in the snapshot on `2021-02-01` was initially reported
 as much steeper than it eventually turned out to be, while in the period after
@@ -145,7 +150,7 @@ that the values were initially reported as higher than they actually were.
 
 Handling data latency is important in both real-time forecasting and retrospective
 forecasting.
-Looking at the very first snapshot, `2020-08-01` (the red dotted
+Looking at the very first snapshot, `2020-08-01` (the purple dotted
 vertical line), there is a noticeable gap between the forecast date and the end
 of the red time-series to its left.
 In fact, if we take a snapshot and get the last `time_value`,
@@ -308,7 +313,7 @@ To see how the version faithful and un-faithful predictions compare, let's plot 
 rates, using the same versioned plotting method as above.
 Note that even though we fit the model on four states (California, Texas, Florida, and
 New York), we'll just display the results for two states, California (CA) and Florida
-(FL), to get a sense of the model performance while keeping the graphic simple.
+(FL), to get a sense of the model performance while keeping the graphic simpler.
 
 <details>
 <summary>Code for plotting</summary>
@@ -326,13 +331,19 @@ plotting_data <- bind_rows(
     mutate(version = max(percent_cli_data$version)) |>
     mutate(version_faithful = "Version faithful")
 )
-p1 <- ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)), alpha = 0.4) +
+
+p1 <- ggplot(data = forecasts_filtered,
+             aes(x = target_date, group = time_value)) +
+  geom_ribbon(
+    aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)),
+    alpha = 0.4) +
   geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
   geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
   # the forecast date
   geom_vline(
-    data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
+    data = percent_cli_data |>
+      filter(geo_value == geo_choose) |>
+      select(-version_faithful),
     aes(color = version, xintercept = version, group = version),
     lty = 2
   ) +
@@ -345,11 +356,11 @@ p1 <- ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)
   facet_grid(version_faithful ~ geo_value, scales = "free") +
   scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
-  scale_color_viridis_c(option = "turbo", direction = -1) +
-  scale_fill_viridis_c(option = "turbo", direction = -1) +
+  labs(x = "Date",
+       y = "smoothed, day of week adjusted covid-like doctors visits") +
+  scale_color_viridis_c(option = "viridis", direction = -1) +
+  scale_fill_viridis_c(option = "viridis", direction = -1) +
   theme(legend.position = "none")
-p1
 ```
 
 ```{r plot_fl_forecasts, warning = FALSE}
@@ -380,8 +391,8 @@ p2 <-
   scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
   labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
-  scale_color_viridis_c(option = "turbo", direction = -1) +
-  scale_fill_viridis_c(option = "turbo", direction = -1) +
+  scale_color_viridis_c(option = "viridis", direction = -1) +
+  scale_fill_viridis_c(option = "viridis", direction = -1) +
   theme(legend.position = "none")
 p2
 ```
@@ -391,16 +402,16 @@ p2
 p1
 ```
 
-The version faithful and un-faithful forecasts look moderately similar except for the 1 day horizons
-(although neither approach produces amazingly accurate forecasts).
+There are some weeks when the forecasts are somewhat similar, and others when they are wildly different, although neither approach produces amazingly accurate forecasts.
 
 In the version faithful case for California, the March 2021 forecast (turquoise)
 starts at a value just above 10, which is very well lined up with reported values leading up to that forecast.
 The measured and forecasted trends are also concordant (both increasingly moderately fast).
 
 Because the data for this time period was later adjusted down with a decreasing trend, the March 2021 forecast looks quite bad compared to finalized data.
-
 The equivalent version un-faithful forecast starts at a value of 5, which is in line with the finalized data but would have been out of place compared to the version data.
+
+The October 2021 forecast for the version faithful case floors out at zero, whereas the un-faithful is much closer to the finalized data.
 
 ```{r show-plot2, warning = FALSE, echo=FALSE}
 p2

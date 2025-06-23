@@ -347,7 +347,7 @@ There are many ways we could modify `four_week_ahead`. We might consider:
 expect there to be a strong seasonal component to the outcome
 - Scaling by a factor
 
-We will demo a couple of these modifications below.
+We will demonstrate a couple of these modifications below.
 
 ## Growth rate
 
@@ -456,9 +456,9 @@ result_plot
 
 ## Population scaling
 
-Suppose we want to modify our predictions to apply to counts, rather than rates.
+Suppose we want to modify our predictions to return a rate prediction, rather than the count prediction.
 To do that, we can adjust _just_ the `frosting` to perform post-processing on our existing rates forecaster.
-Since rates are calculated as counts per 100 000 people, we will convert back to counts by multiplying rates by the factor $\frac{regional \text{ } population}{100000}$.
+Since rates are calculated as counts per 100 000 people, we will convert back to counts by multiplying rates by the factor $\frac{ \text{regional population} }{100,000}$.
 
 ```{r rate_scale}
 count_layers <-

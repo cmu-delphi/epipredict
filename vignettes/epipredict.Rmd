@@ -325,8 +325,18 @@ Instead, we'll use the fluview ILI dataset, which is weekly influenza like illne
 We'll predict the 2023/24 season using all previous data, including 2020-2022, the two years where there was approximately no seasonal flu, forecasting from the start of the season, `2023-10-08`:
 
 ```{r make-climatological-forecast, warning=FALSE}
-fluview_hhs <- pub_fluview(regions = paste0("hhs", 1:10), epiweeks = epirange(100001,222201))
-fluview <- fluview_hhs %>% select(geo_value = region, time_value = epiweek, issue, ili) %>% as_epi_archive() %>% epix_as_of_current()
+fluview_hhs <- pub_fluview(
+  regions = paste0("hhs", 1:10),
+  epiweeks = epirange(100001,222201)
+)
+fluview <- fluview_hhs %>%
+  select(
+    geo_value = region,
+    time_value = epiweek,
+    issue,
+    ili) %>%
+  as_epi_archive() %>%
+  epix_as_of_current()
 
 all_climate <- climatological_forecaster(
   fluview %>% filter(time_value < "2023-10-08"),
@@ -343,7 +353,9 @@ results <- all_climate$predictions
 autoplot(
   object = workflow,
   predictions = results,
-  observed_response = fluview %>% filter(time_value >= "2023-10-08", time_value < "2024-05-01") %>% mutate(geo_value = factor(geo_value, levels = paste0("hhs", 1:10)))
+  observed_response = fluview %>%
+    filter(time_value >= "2023-10-08", time_value < "2024-05-01") %>%
+    mutate(geo_value = factor(geo_value, levels = paste0("hhs", 1:10)))
 )
 ```
 
@@ -412,11 +424,10 @@ The accuracy is 50%, since all 4 states were predicted to be in the interval
 
 If multiple keys are set in the `epi_df` as `other_keys`, `arx_forecaster` will
 automatically group by those in addition to the required geographic key.
-For example, predicting the number of graduates in each of the categories in
+For example, predicting the number of graduates in a subset of the categories in
 `grad_employ_subset` from above:
 
 ```{r multi_key_forecast, warning=FALSE}
-# only fitting a subset, otherwise there are ~550 distinct pairs, which is bad for plotting
 edu_quals <- c("Undergraduate degree", "Professional degree")
 geo_values <- c("Quebec", "British Columbia")
 
@@ -478,7 +489,7 @@ all_fits |>
   list_rbind()
 ```
 
-Estimating separate models for each geography is both 56 times slower[^7] than geo-pooling, and uses far less data for each estimate.
+Estimating separate models for each geography uses far less data for each estimate than geo-pooling and is 56 times slower[^7].
 If a dataset contains relatively few observations for each geography, fitting a geo-pooled model is likely to produce better, more stable results.
 However, geo-pooling can only be used if values are comparable in meaning and scale across geographies or can be made comparable, for example by normalization.
 
@@ -488,7 +499,56 @@ workflow](custom_epiworkflows) with geography as a factor.
 
 # Anatomy of a canned forecaster
 
-This section describes the resulting object from `arx_forecaster()`, an `arx_fcast` object, along with a fairly minimal description of the actual mathematical model used for `arx_forecaster()`.
+This section describes the resulting object from `arx_forecaster()`, a fairly minimal description of the mathematical model used, and a description of an `arx_fcast` object.
+
+## Mathematical description
+
+Let's look at the mathematical details of the model in more detail, using a minimal version of
+`four_week_ahead`:
+
+```{r, four_week_again}
+four_week_small <- arx_forecaster(
+  covid_case_death_rates |> filter(time_value <= forecast_date),
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0, 7, 14), c(0, 7, 14)),
+    ahead = 4 * 7,
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
+  )
+)
+hardhat::extract_fit_engine(four_week_small$epi_workflow)
+```
+
+If $d_{t,j}$ is the death rate on day $t$ at location $j$ and $c_{t,j}$ is the
+associated case rate, then the corresponding model is:
+
+$$
+\begin{aligned}
+d_{t+28, j} = & a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
+     & a_4 c_{t, j} + a_5 c_{t-7, j} + a_6 c_{t-14, j} + \varepsilon_{t,j}.
+\end{aligned}
+$$
+
+For example, $a_1$ is `lag_0_death_rate` above, with a value of 
+`r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"],3)`,
+while $a_5$ is 
+`r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"],4) `.
+Note that unlike `d_{t,j}` or `c_{t,j}`, these *don't* depend on either the time
+$t$ or the location $j$.
+This is what make it a geo-pooled model.
+
+
+The training data for estimating the parameters of this linear model is
+constructed within the `arx_forecaster()` function by shifting a series of
+columns the appropriate amount -- based on the requested `lags`.
+Each row containing no `NA` values in the predictors is used as a training
+observation to fit the coefficients $a_0,\ldots, a_6$.
+
+The equation above is only an accurate description of the model for a linear
+engine like `quantile_reg()` or `linear_reg()`; a nonlinear model like
+`rand_forest(mode = "regression")` will use the same input variables and
+training data, but fit the appropriate model for them.
 
 ## Code object
 Let's dissect the forecaster we trained back on the [landing
@@ -551,50 +611,6 @@ An `epi_workflow()` consists of 3 parts:
 See the [Custom Epiworkflows vignette](custom_epiworkflows) for recreating and then
 extending `four_week_ahead` using the custom forecaster framework.
 
-## Mathematical description
-
-Let's look at the mathematical details of the model in more detail, using a minimal version of
-`four_week_ahead`:
-
-```{r, four_week_again}
-four_week_small <- arx_forecaster(
-  covid_case_death_rates |> filter(time_value <= forecast_date),
-  outcome = "death_rate",
-  predictors = c("case_rate", "death_rate"),
-  args_list = arx_args_list(
-    lags = list(c(0, 7, 14), c(0, 7, 14)),
-    ahead = 4 * 7,
-    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
-  )
-)
-hardhat::extract_fit_engine(four_week_small$epi_workflow)
-```
-
-If $d_{t,j}$ is the death rate on day $t$ at location $j$ and $c_{t,j}$ is the
-associated case rate, then the corresponding model is:
-
-$$
-\begin{aligned}
-d_{t+28, j} = & a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
-     & a_4 c_{t, j} + a_5 c_{t-7, j} + a_6 c_{t-14, j} + \varepsilon_{t,j}.
-\end{aligned}
-$$
-
-For example, $a_1$ is `lag_0_death_rate` above, with a value of `r
-round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"],
-3)`,
-while $a_5$ is `r
-round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"],
-4) `.
-Note that unlike `d_{t,j}` or `c_{t,j}`, these *don't* depend on either the time
-$t$ or the location $j$.
-This is what make it a geo-pooled model.
-
-The training data for estimating the parameters of this linear model is
-constructed within the `arx_forecaster()` function by shifting a series of
-columns the appropriate amount -- based on the requested `lags`.
-Each row containing no `NA` values in the predictors is used as a training observation to fit the
-coefficients $a_0,\ldots, a_6$.
 
 [^4]: in the case of a `{parsnip}` engine which doesn't explicitly predict
     quantiles, these quantiles are created using `layer_residual_quantiles()`,
@@ -611,4 +627,4 @@ coefficients $a_0,\ldots, a_6$.
 
 [^8]: It has only a year of data, which is barely enough to run the method without errors, let alone get a meaningful prediction.
 
-[^9]: Though not 28 weeks into the future! Such a forecast will be an absurd extrapolation.
+[^9]: Though not 28 weeks into the future! Such a forecast will likely be absurdly low or high.
