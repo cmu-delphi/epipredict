@@ -2,29 +2,33 @@
 % Please edit documentation in R/epi_workflow.R
 \name{forecast.epi_workflow}
 \alias{forecast.epi_workflow}
-\title{Produce a forecast from an epi workflow}
+\title{Produce a forecast from an epi workflow and it's training data}
 \usage{
-\method{forecast}{epi_workflow}(object, ..., n_recent = NULL, forecast_date = NULL)
+\method{forecast}{epi_workflow}(object, ...)
 }
 \arguments{
 \item{object}{An epi workflow.}
 
 \item{...}{Not used.}
-
-\item{n_recent}{Integer or NULL. If filling missing data with locf = TRUE,
-how far back are we willing to tolerate missing data? Larger values allow
-more filling. The default NULL will determine this from the the recipe. For
-example, suppose n_recent = 3, then if the 3 most recent observations in any
-geo_value are all NA’s, we won’t be able to fill anything, and an error
-message will be thrown. (See details.)}
-
-\item{forecast_date}{By default, this is set to the maximum time_value in x.
-But if there is data latency such that recent NA's should be filled, this may
-be after the last available time_value.}
 }
 \value{
 A forecast tibble.
 }
 \description{
-Produce a forecast from an epi workflow
+\code{forecast.epi_workflow} predicts by restricting the training data to the
+latest available data, and predicting on that. It binds together
+\code{get_test_data()} and \code{predict()}.
+}
+\examples{
+jhu <- covid_case_death_rates \%>\%
+  filter(time_value > "2021-08-01")
+
+r <- epi_recipe(jhu) \%>\%
+  step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
+  step_epi_ahead(death_rate, ahead = 7) \%>\%
+  step_epi_naomit()
+
+epi_workflow(r, parsnip::linear_reg()) \%>\%
+  fit(jhu) \%>\%
+  forecast()
 }

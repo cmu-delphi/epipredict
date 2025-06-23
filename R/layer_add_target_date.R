@@ -1,4 +1,4 @@
-#' Postprocessing step to add the target date
+#' Post-processing step to add the target date
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param target_date The target date to add as a column to the `epi_df`. If
@@ -6,21 +6,22 @@
 #'   `step_adjust_latency` or in a `layer_forecast_date`), then it is the
 #'   forecast date plus `ahead` (from `step_epi_ahead` in the `epi_recipe`).
 #'   Otherwise, it is the maximum `time_value` (from the data used in
-#'   pre-processing, fitting the model, and postprocessing) plus `ahead`, where
+#'   pre-processing, fitting the model, and post-processing) plus `ahead`, where
 #'   `ahead` has been specified in preprocessing. The user may override these by
 #'   specifying a target date of their own (of the form "yyyy-mm-dd").
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
 #'
-#' @details By default, this function assumes that a value for `ahead`
-#' has been specified in a preprocessing step (most likely in
-#' `step_epi_ahead`). Then, `ahead` is added to the `forecast_date`
-#' in the test data to get the target date. `forecast_date` can be set in 3 ways:
-#' 1. `step_adjust_latency`, which typically uses the training `epi_df`'s `as_of`
-#' 2. `layer_add_forecast_date`, which inherits from 1 if not manually specifed
-#' 3. if none of those are the case, it is simply the maximum `time_value` over
-#'   every dataset used (prep, training, and prediction).
+#' @details By default, this function assumes that a value for `ahead` has been
+#'   specified in a preprocessing step (most likely in `step_epi_ahead`). Then,
+#'   `ahead` is added to the `forecast_date` in the test data to get the target
+#'   date. `forecast_date` itself can be set in 3 ways:
+#' 1. The default `forecast_date` is simply the maximum `time_value` over every
+#'   dataset used (prep, training, and prediction).
+#' 2. if `step_adjust_latency` is present, it will typically use the training
+#'   `epi_df`'s `as_of`
+#' 3. `layer_add_forecast_date`, which inherits from 2 if not manually specifed
 #'
 #' @export
 #' @examples

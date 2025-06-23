@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_add_forecast_date.R
 \name{layer_add_forecast_date}
 \alias{layer_add_forecast_date}
-\title{Postprocessing step to add the forecast date}
+\title{Post-processing step to add the forecast date}
 \usage{
 layer_add_forecast_date(
   frosting,
@@ -19,7 +19,7 @@ that when the forecast date is left unspecified, it is set to one of two
 values.  If there is a \code{step_adjust_latency} step present, it uses the
 \code{forecast_date} as set in that function. Otherwise, it uses the maximum
 \code{time_value} across the data used for pre-processing, fitting the model,
-and postprocessing.}
+and post-processing.}
 
 \item{id}{a random id string}
 }
@@ -27,15 +27,15 @@ and postprocessing.}
 an updated \code{frosting} postprocessor
 }
 \description{
-Postprocessing step to add the forecast date
+Post-processing step to add the forecast date
 }
 \details{
 To use this function, either specify a forecast date or leave the
 forecast date unspecifed here. In the latter case, the forecast date will
 be set as the maximum time value from the data used in pre-processing,
-fitting the model, and postprocessing. In any case, when the forecast date is
+fitting the model, and post-processing. In any case, when the forecast date is
 less than the maximum \code{as_of} value (from the data used pre-processing,
-model fitting, and postprocessing), an appropriate warning will be thrown.
+model fitting, and post-processing), an appropriate warning will be thrown.
 }
 \examples{
 jhu <- covid_case_death_rates \%>\%

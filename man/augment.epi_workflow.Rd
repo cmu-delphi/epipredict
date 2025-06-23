@@ -17,5 +17,8 @@
 new_data with additional columns containing the predicted values
 }
 \description{
-Augment data with predictions
+\code{augment()}, unlike \code{forecast()}, has the goal of modifying the training
+data, rather than just producing new forecasts. It does a prediction on
+\code{new_data}, which will produce a prediction for most \code{time_values}, and then
+adds \code{.pred} as a column to \code{new_data} and returns the resulting join.
 }

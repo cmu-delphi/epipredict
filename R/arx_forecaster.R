@@ -1,26 +1,28 @@
 #' Direct autoregressive forecaster with covariates
 #'
 #' This is an autoregressive forecasting model for
-#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It does "direct" forecasting, meaning
-#' that it estimates a model for a particular target horizon.
+#' [epiprocess::epi_df][epiprocess::as_epi_df] data. It does "direct"
+#' forecasting, meaning that it estimates a model for a particular target
+#' horizon of the `outcome` based on the lags of the `predictors`. See the [Get
+#' started vignette](../articles/epipredict.html) for some worked examples and
+#' [Custom epi_workflows vignette](../articles/custom_epiworkflows.html) for a
+#' recreation using a custom `epi_workflow()`.
 #'
 #'
 #' @param epi_data An `epi_df` object
-#' @param outcome A character (scalar) specifying the outcome (in the
-#'   `epi_df`).
+#' @param outcome A character (scalar) specifying the outcome (in the `epi_df`).
 #' @param predictors A character vector giving column(s) of predictor variables.
-#'   This defaults to the `outcome`. However, if manually specified, only those variables
-#'   specifically mentioned will be used. (The `outcome` will not be added.)
-#'   By default, equals the outcome. If manually specified, does not add the
-#'   outcome variable, so make sure to specify it.
-#' @param trainer A `{parsnip}` model describing the type of estimation.
-#'   For now, we enforce `mode = "regression"`.
-#' @param args_list A list of customization arguments to determine
-#'   the type of forecasting model. See [arx_args_list()].
+#'   This defaults to the `outcome`. However, if manually specified, only those
+#'   variables specifically mentioned will be used, and the `outcome` will not be
+#'   added.
+#' @param trainer A `{parsnip}` model describing the type of estimation.  For
+#'   now, we enforce `mode = "regression"`.
+#' @param args_list A list of customization arguments to determine the type of
+#'   forecasting model. See [arx_args_list()].
 #'
-#' @return A list with (1) `predictions` an `epi_df` of predicted values
-#'   and (2) `epi_workflow`, a list that encapsulates the entire estimation
-#'   workflow
+#' @return An `arx_fcast`, with the fields `predictions` and `epi_workflow`.
+#'   `predictions` is a `tibble` of predicted values while `epi_workflow()` is
+#'   the fit workflow used to make those predictions
 #' @export
 #' @seealso [arx_fcast_epi_workflow()], [arx_args_list()]
 #'
@@ -29,15 +31,18 @@
 #'   dplyr::filter(time_value >= as.Date("2021-12-01"))
 #'
 #' out <- arx_forecaster(
-#'   jhu, "death_rate",
+#'   jhu,
+#'   "death_rate",
 #'   c("case_rate", "death_rate")
 #' )
 #'
-#' out <- arx_forecaster(jhu, "death_rate",
+#' out <- arx_forecaster(jhu,
+#'   "death_rate",
 #'   c("case_rate", "death_rate"),
 #'   trainer = quantile_reg(),
 #'   args_list = arx_args_list(quantile_levels = 1:9 / 10)
 #' )
+#' out
 arx_forecaster <- function(
     epi_data,
     outcome,
@@ -60,7 +65,7 @@ arx_forecaster <- function(
   forecast_date <- args_list$forecast_date %||% forecast_date_default
 
 
-  preds <- forecast(wf, forecast_date = forecast_date) %>%
+  preds <- forecast(wf) %>%
     as_tibble() %>%
     select(-time_value)
 
@@ -262,10 +267,12 @@ arx_fcast_epi_workflow <- function(
 #' @param quantile_levels Vector or `NULL`. A vector of probabilities to produce
 #'   prediction intervals. These are created by computing the quantiles of
 #'   training residuals. A `NULL` value will result in point forecasts only.
-#' @param symmetrize Logical. The default `TRUE` calculates
-#'   symmetric prediction intervals. This argument only applies when
-#'   residual quantiles are used. It is not applicable with
-#'   `trainer = quantile_reg()`, for example.
+#' @param symmetrize Logical. The default `TRUE` calculates symmetric prediction
+#'   intervals. This argument only applies when residual quantiles are used. It
+#'   is not applicable with `trainer = quantile_reg()`, for example. Typically, one
+#'   would only want non-symmetric quantiles when increasing trajectories are
+#'   quite different from decreasing ones, such as a strictly postive variable
+#'   near zero.
 #' @param nonneg Logical. The default `TRUE` enforces nonnegative predictions
 #'   by hard-thresholding at 0.
 #' @param quantile_by_key Character vector. Groups residuals by listed keys

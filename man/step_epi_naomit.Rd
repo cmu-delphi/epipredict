@@ -10,10 +10,15 @@ step_epi_naomit(recipe)
 \item{recipe}{Recipe to be used for omission steps}
 }
 \value{
-Omits NA's from both predictors and outcomes at training time
-to fit the model. Also only omits associated predictors and not
-outcomes at prediction time due to lack of response and avoidance
-of data loss.
+Omits NA's from both predictors and outcomes at training time to fit
+the model. Also only omits associated predictors and not outcomes at
+prediction time due to lack of response and avoidance of data loss. Given a
+\code{recipe}, this step is literally equivalent to
+
+\if{html}{\out{<div class="sourceCode r">}}\preformatted{ recipe \%>\%
+   recipes::step_naomit(all_predictors(), skip = FALSE) \%>\%
+   recipes::step_naomit(all_outcomes(), skip = TRUE)
+}\if{html}{\out{</div>}}
 }
 \description{
 Unified NA omission wrapper function for recipes

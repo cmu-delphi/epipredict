@@ -1,12 +1,11 @@
 #' Create a shifted predictor
 #'
 #' `step_epi_lag` and `step_epi_ahead` create a *specification* of a recipe step
-#'   that will add new columns of shifted data. The former will created a lag
-#'   column, while the latter will create a lead column. Shifted data will
-#'   by default include NA values where the shift was induced.
-#'   These can be properly removed with [step_epi_naomit()], or you may
-#'   specify an alternative filler value with the `default`
-#'   argument.
+#'   that will add new columns of shifted data. The `step_epi_lag` will create
+#'   a lagged `predictor` column, while `step_epi_ahead` will create a leading
+#'   `outcome` column. Shifted data will by default include NA values where the
+#'   shift was induced.  These can be properly removed with [step_epi_naomit()],
+#'   or you may specify an alternative value with the `default` argument.
 #'
 #'
 #' @param recipe A recipe object. The step will be added to the
@@ -30,8 +29,13 @@
 #' @param id A unique identifier for the step
 #' @template step-return
 #'
-#' @details The step assumes that the data are already _in the proper sequential
-#'  order_ for shifting.
+#' @details
+#'
+#'  Our `lag/ahead` functions respect the `geo_value` and `other_keys` of the
+#'   `epi_df`, and allow for discontiguous `time_value`s. Both of these features
+#'   are noticably lacking from `recipe::step_lag()`.
+#'  Our `lag/ahead` functions also appropriately adjust the amount of data to
+#'   avoid accidentally dropping recent predictors from the test data.
 #'
 #' The `prefix` and `id` arguments are unchangeable to ensure that the code runs
 #' properly and to avoid inconsistency with naming. For `step_epi_ahead`, they

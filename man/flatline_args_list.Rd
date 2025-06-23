@@ -44,10 +44,12 @@ will determine this automatically as \code{forecast_date + ahead}.}
 prediction intervals. These are created by computing the quantiles of
 training residuals. A \code{NULL} value will result in point forecasts only.}
 
-\item{symmetrize}{Logical. The default \code{TRUE} calculates
-symmetric prediction intervals. This argument only applies when
-residual quantiles are used. It is not applicable with
-\code{trainer = quantile_reg()}, for example.}
+\item{symmetrize}{Logical. The default \code{TRUE} calculates symmetric prediction
+intervals. This argument only applies when residual quantiles are used. It
+is not applicable with \code{trainer = quantile_reg()}, for example. Typically, one
+would only want non-symmetric quantiles when increasing trajectories are
+quite different from decreasing ones, such as a strictly postive variable
+near zero.}
 
 \item{nonneg}{Logical. The default \code{TRUE} enforces nonnegative predictions
 by hard-thresholding at 0.}

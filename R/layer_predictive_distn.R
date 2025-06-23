@@ -5,9 +5,11 @@
 #' This function calculates an _approximation_ to a parametric predictive
 #' distribution. Predictive distributions from linear models require
 #' `x* (X'X)^{-1} x*`
-#' along with the degrees of freedom. This function approximates both. It
-#' should be reasonably accurate for models fit using `lm` when the new point
-#' `x*` isn't too far from the bulk of the data.
+#' along with the degrees of freedom. This function approximates both. It should
+#' be reasonably accurate for models fit using `lm` when the new point `x*`
+#' isn't too far from the bulk of the data. Outside of that specific case, it is
+#' recommended to use `layer_residual_quantiles()`, or if you are working with a
+#' model that produces distributional predictions, use `layer_quantile_distn()`.
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.

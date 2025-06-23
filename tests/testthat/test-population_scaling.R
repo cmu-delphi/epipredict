@@ -88,8 +88,8 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
   expect_equal(ncol(b), 5L)
 })
 
-## Postprocessing
-test_that("Postprocessing workflow works and values correct", {
+## Post-processing
+test_that("Post-processing workflow works and values correct", {
   jhu <- epidatasets::cases_deaths_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, cases)
@@ -149,7 +149,7 @@ test_that("Postprocessing workflow works and values correct", {
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
 })
 
-test_that("Postprocessing to get cases from case rate", {
+test_that("Post-processing to get cases from case rate", {
   jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)

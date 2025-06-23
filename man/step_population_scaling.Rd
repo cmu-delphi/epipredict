@@ -26,12 +26,13 @@ sequence of operations for this recipe.}
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
-they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
+they be assigned?}
 
-\item{df}{a data frame that contains the population data to be used for
-inverting the existing scaling.}
+\item{df}{a data frame containing the scaling data (typically population). The
+target column is divided by the value in \code{df_pop_col}.}
 
-\item{by}{A (possibly named) character vector of variables to join by.
+\item{by}{A (possibly named) character vector of variables by which to join
+\code{df} to the \code{epi_df}.
 
 If \code{NULL}, the default, the function will try to infer a reasonable set of
 columns. First, it will try to join by all variables in the training/test
@@ -61,7 +62,7 @@ This should be one column.}
 Adjustments can be made here. For example, if the original
 scale is "per 100K", then set \code{rate_rescaling = 1e5} to get rates.}
 
-\item{create_new}{TRUE to create a new column and keep the original column
+\item{create_new}{\code{TRUE} to create a new column and keep the original column
 in the \code{epi_df}}
 
 \item{suffix}{a character. The suffix added to the column name if
@@ -80,16 +81,15 @@ the computations for subsequent operations.}
 Scales raw data by the population
 }
 \description{
-\code{step_population_scaling} creates a specification of a recipe step
-that will perform per-capita scaling. Typical usage would
-load a dataset that contains state-level population, and use it to convert
-predictions made from a raw scale model to rate-scale by dividing by
-the population.
-Although, it is worth noting that there is nothing special about "population".
-The function can be used to scale by any variable. Population is the
-standard use case in the epidemiology forecasting scenario. Any value
-passed will \emph{divide} the selected variables while the \code{rate_rescaling}
-argument is a common \emph{multiplier} of the selected variables.
+\code{step_population_scaling()} creates a specification of a recipe step that
+will perform per-capita scaling. Typical usage would set \code{df} to be a dataset
+that contains population for each \code{geo_value}, and use it to convert
+predictions made from a raw scale model to rate-scale by dividing by the
+population.  Although, it is worth noting that there is nothing special about
+"population", and the function can be used to scale by any variable.
+Population is the standard use case in the epidemiology forecasting scenario.
+Any value passed will \emph{divide} the selected variables while the
+\code{rate_rescaling} argument is a common \emph{multiplier} of the selected variables.
 }
 \examples{
 jhu <- cases_deaths_subset \%>\%

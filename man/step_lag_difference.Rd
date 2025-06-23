@@ -43,8 +43,16 @@ An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-\code{step_lag_difference()} creates a \emph{specification} of a recipe step
-that will generate one or more new columns of derived data.
+\code{step_lag_difference()} creates a \emph{specification} of a recipe step that will
+generate one or more new columns of derived data. For each column in the
+specification, \code{step_lag_difference()} will calculate the difference
+between the values at a distance of \code{horizon}. For example, with
+\code{horizon=1}, this would simply be the difference between adjacent days.
+}
+\details{
+Much like \code{step_epi_lag()} this step works with the actual time values (so if
+there are gaps it will fill with \code{NA} values), and respects the grouping
+inherent in the \code{epi_df()} as specified by \code{geo_value} and \code{other_keys}.
 }
 \examples{
 r <- epi_recipe(covid_case_death_rates) \%>\%

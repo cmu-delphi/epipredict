@@ -8,10 +8,35 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-source("_common.R")
+source(here::here("vignettes/_common.R"))
 ```
 
+Backtesting is a crucial step in the development of forecasting models. It
+involves testing the model on historical time periods to see how well it generalizes to new
+data.
+
+In the context of
+epidemiological forecasting, to do backtesting accurately, we need to account
+for the fact that the data available at _the time of the forecast_ would have been
+different from the data available at the time of the _backtest_.
+This is because
+new data is constantly being collected and added to the dataset, and old data potentially revised.
+Training and making
+predictions only on finalized data can lead to overly optimistic estimates of accuracy
+(see, for example, [McDonald et al.
+2021](https://www.pnas.org/content/118/51/e2111453118/) and the references
+therein).
+
+In the `{epiprocess}` package, we provide the function `epix_slide()` to help conviently perform version-faithful forecasting by only using the data as
+it would have been available at forecast reference time.
+In this vignette, we will demonstrate how to use `epix_slide()` to backtest an
+auto-regressive forecaster constructed using `arx_forecaster()` on historical
+COVID-19 case data from the US and Canada. 
+
+# Getting case data from US states into an `epi_archive`
+
 ```{r pkgs, message=FALSE}
+# Setup
 library(epipredict)
 library(epiprocess)
 library(epidatr)
@@ -21,53 +46,19 @@ library(tidyr)
 library(ggplot2)
 library(magrittr)
 library(purrr)
+library(lubridate)
 ```
 
-# Accurately backtesting forecasters
-
-Backtesting is a crucial step in the development of forecasting models. It
-involves testing the model on historical data to see how well it performs. This
-is important because it allows us to see how well the model generalizes to new
-data and to identify any potential issues with the model. In the context of
-epidemiological forecasting, to do backtesting accurately, we need to account
-for the fact that the data available at the time of the forecast would have been
-different from the data available at the time of the backtest. This is because
-new data is constantly being collected and added to the dataset, which can
-affect the accuracy of the forecast.
-
-For this reason, it is important to use version-aware forecasting, where the
-model is trained on data that would have been available at the time of the
-forecast. This ensures that the model is tested on data that is as close as
-possible to what would have been available in real-time; training and making
-predictions on finalized data can lead to an overly optimistic sense of accuracy
-(see, for example, [McDonald et al.
-(2021)](https://www.pnas.org/content/118/51/e2111453118/) and the references
-therein).
-
-In the `{epiprocess}` package, we provide `epix_slide()`, a function that allows
-a convenient way to perform version-aware forecasting by only using the data as
-it would have been available at forecast reference time. In
-`vignette("epi_archive", package = "epiprocess")`, we introduced the concept of
-an `epi_archive` and we demonstrated how to use `epix_slide()` to forecast the
-future using a simple quantile regression model. In this vignette, we will
-demonstrate how to use `epix_slide()` to backtest an auto-regressive forecaster
-on historical COVID-19 case data from the US and Canada. Instead of building a
-forecaster from scratch as we did in the previous vignette, we will use the
-`arx_forecaster()` function from the `{epipredict}` package.
-
-## Getting case data from US states into an `epi_archive`
-
-First, we download the version history (ie. archive) of the percentage of
-doctor's visits with CLI (COVID-like illness) computed from medical insurance
-claims and the number of new confirmed COVID-19 cases per 100,000 population
-(daily) for 6 states from the COVIDcast API (as used in the `epiprocess`
-vignette mentioned above).
+First, we create an `epi_archive()` to store the version history of the
+percentage of doctor's visits with CLI (COVID-like illness) computed from
+medical insurance claims and the number of new confirmed COVID-19 cases per
+100,000 population (daily) for 4 states 
 
 ```{r grab-epi-data}
 # Select the `percent_cli` column from the data archive
-doctor_visits <- archive_cases_dv_subset$DT %>%
-  select(geo_value, time_value, version, percent_cli) %>%
-  drop_na(percent_cli) %>%
+doctor_visits <- archive_cases_dv_subset$DT |>
+  select(geo_value, time_value, version, percent_cli) |>
+  tidyr::drop_na(percent_cli) |>
   as_epi_archive(compactify = TRUE)
 ```
 
@@ -84,384 +75,380 @@ doctor_visits <- pub_covidcast(
   geo_values = "ca,fl,ny,tx",
   time_values = epirange(20200601, 20211201),
   issues = epirange(20200601, 20211201)
-) %>%
-  rename(version = issue, percent_cli = value) %>%
+) |>
+  # The version date column is called `issue` in the Epidata API. Rename it.
+  select(version = issue, geo_value, time_value, percent_cli = value) |>
   as_epi_archive(compactify = TRUE)
 ```
 
-## Backtesting a simple autoregressive forecaster
+In the interest of computational speed, we limit the dataset to 4 states and 
+2020–2021, but the full archive can be used in the same way and has performed
+well in the past.
 
-One of the most common use cases of `epiprocess::epi_archive()` object
-is for accurate model backtesting.
+We choose this dataset in particular partly because it is revision heavy; for
+example, here is a plot that compares monthly snapshots of the data.
 
-In this section we will:
+<details>
+<summary>Code for plotting</summary>
+```{r plot_revision_example, warn = FALSE, message = FALSE}
+geo_choose <- "ca"
+forecast_dates <- seq(
+  from = as.Date("2020-08-01"),
+  to = as.Date("2021-11-01"),
+  by = "1 month")
+percent_cli_data <- bind_rows(
+  # Snapshotted data for the version-faithful forecasts
+  map(
+    forecast_dates,
+    ~ doctor_visits |>
+      epix_as_of(.x) |>
+      mutate(version = .x)
+  ) |>
+    bind_rows() |>
+    mutate(version_faithful = "Version faithful"),
+  # Latest data for the version-un-faithful forecasts
+  doctor_visits |>
+    epix_as_of(doctor_visits$versions_end) |>
+    mutate(version_faithful = "Version un-faithful")
+) |> as_tibble()
+p0 <- autoplot(
+  archive_cases_dv_subset, percent_cli, 
+  .versions = forecast_dates, 
+  .mark_versions = TRUE,
+  .facet_filter = (geo_value == "ca")
+) +
+  scale_x_date(minor_breaks = "month", date_labels = "%b %Y") +
+  labs(x = "", y = "% of doctor's visits with\n Covid-like illness") + 
+  scale_color_viridis_c(
+    option = "viridis",
+    guide = guide_legend(reverse=TRUE), direction = -1) +
+  scale_y_continuous(limits = c(0, NA), expand = expansion(c(0, 0.05))) +
+  theme(legend.position = "none")
+```
+</details>
 
-- develop a simple autoregressive forecaster that predicts the next value of the
-signal based on the current and past values of the signal itself, and
-- demonstrate how to slide this forecaster over the `epi_archive` object to
-produce forecasts at a few dates date, using version-unaware and -aware
-computations,
-- compare the two approaches.
-
-To start, let's use a simple autoregressive forecaster to predict the percentage
-of doctor's hospital visits with CLI (COVID-like illness) (`percent_cli`) in the
-future (we choose this target because of the dataset's pattern of substantial
-revisions; forecasting doctor's visits is an unusual forecasting target
-otherwise). While some AR models output single point forecasts, we will use
-quantile regression to produce a point prediction along with an 90\% uncertainty
-band, represented by a predictive quantiles at the 5\% and 95\% levels (lower
-and upper endpoints of the uncertainty band).
-
-The `arx_forecaster()` function wraps the autoregressive forecaster we need and
-comes with sensible defaults:
-
-- we specify the predicted outcome to be the percentage of doctor's visits with
-  CLI (`percent_cli`),
-- we use a linear regression model as the engine,
-- the autoregressive features assume lags of 0, 7, and 14 days,
-- we forecast 7 days ahead.
-
-All these default settings and more can be seen by calling `arx_args_list()`:
-
-```{r}
-arx_args_list()
+```{r plot_just_revisioning, echo = FALSE, warning = FALSE, warn = FALSE, message = FALSE}
+p0
 ```
 
-These can be modified as needed, by sending your desired arguments into
-`arx_forecaster(args_list = arx_args_list())`. For now we will use the defaults.
+The snapshots are taken on the first of each month, with the vertical dashed
+line representing the issue date for the time series of the corresponding
+color.
+For example, the snapshot on March 1st, 2021 is aquamarine, and increases to
+slightly over 10.
+Every series is necessarily to the left of the snapshot date (since all known
+values must happen before the snapshot is taken[^4]).
+The black line overlaying the various snapshots represents the "final
+value", which is just the snapshot at the last version in the archive (the
+`versions_end`).
 
-__Note__: We will use a __geo-pooled approach__, where we train the model on
-data from all states and territories combined. This is because the data is quite
-similar across states, and pooling the data can help improve the accuracy of the
-forecasts, while also reducing the susceptibility of the model to noise. In the
-interest of computational speed, we only use the 6 state dataset here, but the
-full archive can be used in the same way and has performed well in the past.
-Implementation-wise, geo-pooling is achieved by not using `group_by(geo_value)`
-prior to `epix_slide()`. In other cases, grouping may be preferrable, so we
-leave it to the user to decide, but flag this modeling decision here.
+Comparing with the black line tells us how much the value at the time of the
+snapshot differs with what was eventually reported.
+The drop in January 2021 in the snapshot on `2021-02-01` was initially reported
+as much steeper than it eventually turned out to be, while in the period after
+that the values were initially reported as higher than they actually were.
 
-Let's use the `epix_as_of()` method to generate a snapshot of the archive at the
-last date, and then run the forecaster.
+Handling data latency is important in both real-time forecasting and retrospective
+forecasting.
+Looking at the very first snapshot, `2020-08-01` (the purple dotted
+vertical line), there is a noticeable gap between the forecast date and the end
+of the red time-series to its left.
+In fact, if we take a snapshot and get the last `time_value`,
 
 ```{r}
-# Let's forecast 14 days prior to the last date in the archive, to compare.
-forecast_date <- doctor_visits$versions_end - 14
-# The .versions argument selects only the last version in the archive and
-# produces a forecast only on that date.
-forecasts <- doctor_visits %>%
+doctor_visits |>
+  epix_as_of(as.Date("2020-08-01")) |>
+  pull(time_value) |>
+  max()
+```
+
+the last day of data is the 25th, a entire week before `2020-08-01`.
+This can require some effort to work around, especially if the latency is
+variable; see `step_adjust_latency()` for some methods included in this package.
+Much of that functionality is built into `arx_forecaster()` using the parameter
+`adjust_ahead`, which we will use below.
+
+
+# Backtesting a simple autoregressive forecaster
+
+In addition to outlier detection and nowcasting, a common use case of `epiprocess::epi_archive()` object is for accurate model
+back-testing.
+
+To start, let's use a simple autoregressive forecaster to predict `percent_cli`, the percentage
+of doctor's hospital visits associated with COVID-like illness, 14
+days in the future. 
+For increased accuracy we will use quantile regression.
+
+## Comparing a single day and ahead
+
+As a sanity check before we backtest the _entire_ dataset, let's 
+forecast a single day in the middle of the dataset. 
+We can do this by setting the `.versions` argument in `epix_slide()`:
+
+```{r single_version, warn = FALSE}
+forecast_date <- as.Date("2021-04-06")
+forecasts <- doctor_visits |>
   epix_slide(
     ~ arx_forecaster(
       .x,
       outcome = "percent_cli",
       predictors = "percent_cli",
       args_list = arx_args_list()
-    )$predictions %>%
+    )$predictions |>
       pivot_quantiles_wider(.pred_distn),
     .versions = forecast_date
   )
-# Join the forecasts with with the latest data at the time of the forecast to
-# compare. Since `percent_cli` data has a few days of lag, we use `tidyr::fill` to
-# fill the missing values with the last observed value.
-forecasts %>%
+```
+
+We need truth data to compare our forecast against. We can construct it by using `epix_as_of()` to snapshot
+the archive at the last available date[^1].
+
+_Note:_ We always want to compare our forecasts to actual (most recently reported) values because that is the outcome we care about.
+`as_of` data is useful for understanding why we're getting the forecasts we're getting, but `as_of` values are only preliminary outcomes.
+Therefore, it's not meaningful to use them for evaluating the performance of a forecast.
+Unfortunately, it's not uncommon for revisions to cause poor (final) performance of a forecaster that was decent at the time of the forecast.
+
+```{r compare_single_with_result}
+forecasts |>
   inner_join(
-    doctor_visits %>%
-      epix_as_of(doctor_visits$versions_end) %>%
-      group_by(geo_value) %>%
-      fill(percent_cli),
+    doctor_visits |>
+      epix_as_of(doctor_visits$versions_end),
     by = c("geo_value", "target_date" = "time_value")
-  ) %>%
+  ) |>
   select(geo_value, forecast_date, .pred, `0.05`, `0.95`, percent_cli)
 ```
 
-The resulting epi_df now contains two new columns: `.pred` and `.pred_distn`,
-corresponding to the point forecast (median) and the quantile distribution
-containing our requested quantile forecasts (in this case, 0.05 and 0.95)
-respectively. The forecasts fall within the prediction interval, so our
+`.pred` corresponds to the point forecast (median), and `0.05` and `0.95`
+correspond to the 5th and 95th quantiles.
+The `percent_cli` truth data falls within the prediction intervals, so our
 implementation passes a simple validation.
 
-Now let's go ahead and slide this forecaster in a version unaware way and a
-version aware way. For the version unaware way, we need to snapshot the latest
-version of the data, and then make a faux archive by setting `version =
-time_value`. This has the effect of simulating a data set that receives the
-final version updates every day. For the version aware way, we will simply use
-the true `epi_archive` object.
+## Comparing version faithful and version un-faithful forecasts
+
+Now let's compare the behavior of this forecaster, both properly considering data versioning 
+("version faithful") and ignoring data versions ("version un-faithful").
+
+For the version un-faithful approach, we need to do some setup if we want to use `epix_slide` for backtesting.
+We want to simulate a data set that receives finalized updates every day, that is, a data set with no revisions.
+To do this, we will snapshot the latest version of the data to create a synthetic data set, and convert it into an archive
+where `version = time_value`[^2].
 
 ```{r}
-archive_cases_dv_subset_faux <- doctor_visits %>%
-  epix_as_of(doctor_visits$versions_end) %>%
-  mutate(version = time_value) %>%
+archive_cases_dv_subset_faux <- doctor_visits |>
+  epix_as_of(doctor_visits$versions_end) |>
+  mutate(version = time_value) |>
   as_epi_archive()
 ```
 
-To reduce typing, we create the wrapper function `forecast_k_week_ahead()`.
+For the version faithful approach, we will continue using the original `epi_archive` object containing all version updates.
+
+We will also create the helper function `forecast_wrapper()` to let us easily map across aheads.
 
 ```{r arx-kweek-preliminaries, warning = FALSE}
-# Latest snapshot of data, and forecast dates
-forecast_dates <- seq(from = as.Date("2020-08-01"), to = as.Date("2021-11-01"), by = "1 month")
-aheads <- c(7, 14, 21, 28)
-
-# @param epi_archive The epi_archive object to forecast from
-# @param ahead The number of days ahead to forecast
-# @param outcome The outcome variable to forecast
-# @param predictors The predictors to use in the model
-# @param forecast_dates The dates to forecast on
-# @param process_data A function to process the data before forecasting
-forecast_k_week_ahead <- function(
-    epi_archive,
-    ahead = 7,
-    outcome = NULL, predictors = NULL, forecast_dates = NULL, process_data = identity) {
-  if (is.null(forecast_dates)) {
-    forecast_dates <- epi_archive$versions_end
-  }
-  if (is.null(outcome) || is.null(predictors)) {
-    stop("Please specify the outcome and predictors.")
-  }
-  epi_archive %>%
-    epix_slide(
-      ~ arx_forecaster(
-        process_data(.x), outcome, predictors,
-        args_list = arx_args_list(ahead = ahead)
-      )$predictions %>%
-        pivot_quantiles_wider(.pred_distn),
-      .before = 120,
-      .versions = forecast_dates
-    )
+forecast_wrapper <- function(
+    epi_data, aheads, outcome, predictors, process_data = identity
+    ) {
+  map(
+    aheads,
+    \(ahead) {
+      arx_forecaster(
+        process_data(epi_data), outcome, predictors,
+        args_list = arx_args_list(
+          ahead = ahead,
+          lags = c(0:7, 14, 21),
+          adjust_latency = "extend_ahead"
+        )
+      )$predictions |> pivot_quantiles_wider(.pred_distn)
+    }
+  ) |> bind_rows()
 }
 ```
 
-```{r}
-# Generate the forecasts and bind them together
-forecasts <- bind_rows(
-  map(aheads, ~ forecast_k_week_ahead(
-    archive_cases_dv_subset_faux,
-    ahead = .x,
-    outcome = "percent_cli",
-    predictors = "percent_cli",
-    forecast_dates = forecast_dates
-  ) %>% mutate(version_aware = FALSE)),
-  map(aheads, ~ forecast_k_week_ahead(
-    doctor_visits,
-    ahead = .x,
-    outcome = "percent_cli",
-    predictors = "percent_cli",
-    forecast_dates = forecast_dates
-  ) %>% mutate(version_aware = TRUE))
+_Note:_ In the helper function, we're using the parameter `adjust_latency`.
+We need to use it because the most recently released data may still be several days old on any given forecast date (lag > 0); 
+`adjust_latency` will modify the forecaster to compensate[^5].
+See the function `step_adjust_latency()` for more details and examples.
+
+Now that we're set up, we can generate forecasts for both the version faithful and un-faithful
+archives, and bind the results together.
+
+```{r generate_forecasts, warning = FALSE}
+forecast_dates <- seq(
+  from = as.Date("2020-09-01"),
+  to = as.Date("2021-11-01"),
+  by = "1 month"
 )
+aheads <- c(1, 7, 14, 21, 28)
+
+version_unfaithful <- archive_cases_dv_subset_faux |>
+  epix_slide(
+    ~ forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
+    .before = 120,
+    .versions = forecast_dates
+  ) |>
+  mutate(version_faithful = "Version un-faithful")
+
+version_faithful <- doctor_visits |>
+  epix_slide(
+    ~ forecast_wrapper(.x, aheads, "percent_cli", "percent_cli"),
+    .before = 120,
+    .versions = forecast_dates
+  ) |>
+  mutate(version_faithful = "Version faithful")
+
+forecasts <-
+  bind_rows(
+    version_unfaithful,
+    version_faithful
+  )
 ```
 
-Here, `arx_forecaster()` does all the heavy lifting. It creates leads of the
-target (respecting time stamps and locations) along with lags of the features
-(here, the response and doctors visits), estimates a forecasting model using the
-specified engine, creates predictions, and non-parametric confidence bands.
+`arx_forecaster()` does all the heavy lifting.
+It creates and lags copies of the features (here, the response and doctors visits), 
+creates and leads copies of the target while respecting timestamps and locations, fits a
+forecasting model using the specified engine, creates predictions, and
+creates non-parametric confidence bands.
 
-To see how the predictions compare, we plot them on top of the latest case
-rates. Note that even though we've fitted the model on all states, we'll just
-display the results for two states, California (CA) and Florida (FL), to get a
-sense of the model performance while keeping the graphic simple.
+To see how the version faithful and un-faithful predictions compare, let's plot them on top of the latest case
+rates, using the same versioned plotting method as above.
+Note that even though we fit the model on four states (California, Texas, Florida, and
+New York), we'll just display the results for two states, California (CA) and Florida
+(FL), to get a sense of the model performance while keeping the graphic simpler.
 
 <details>
 <summary>Code for plotting</summary>
 
-```{r}
+```{r plot_ca_forecasts, warning = FALSE}
 geo_choose <- "ca"
-forecasts_filtered <- forecasts %>%
-  filter(geo_value == geo_choose) %>%
+forecasts_filtered <- forecasts |>
+  filter(geo_value == geo_choose) |>
   mutate(time_value = version)
-percent_cli_data <- bind_rows(
-  # Snapshotted data for the version-aware forecasts
-  map(
-    forecast_dates,
-    ~ doctor_visits %>%
-      epix_as_of(.x) %>%
-      mutate(version = .x)
-  ) %>%
-    bind_rows() %>%
-    mutate(version_aware = TRUE),
-  # Latest data for the version-unaware forecasts
-  doctor_visits %>%
-    epix_as_of(doctor_visits$versions_end) %>%
-    mutate(version_aware = FALSE)
-) %>%
-  filter(geo_value == geo_choose)
+# we need to add the ground truth data to the version faithful plot as well
+plotting_data <- bind_rows(
+  percent_cli_data,
+  percent_cli_data |>
+    filter(version_faithful == "Version un-faithful") |>
+    mutate(version = max(percent_cli_data$version)) |>
+    mutate(version_faithful = "Version faithful")
+)
 
-p1 <- ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = factor(time_value)), alpha = 0.4) +
-  geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
-  geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
-  geom_vline(data = percent_cli_data, aes(color = factor(version), xintercept = version), lty = 2) +
+p1 <- ggplot(data = forecasts_filtered,
+             aes(x = target_date, group = time_value)) +
+  geom_ribbon(
+    aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)),
+    alpha = 0.4) +
+  geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
+  geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
+  # the forecast date
+  geom_vline(
+    data = percent_cli_data |>
+      filter(geo_value == geo_choose) |>
+      select(-version_faithful),
+    aes(color = version, xintercept = version, group = version),
+    lty = 2
+  ) +
+  # the underlying data
   geom_line(
-    data = percent_cli_data,
-    aes(x = time_value, y = percent_cli, color = factor(version)),
+    data = plotting_data |> filter(geo_value == geo_choose),
+    aes(x = time_value, y = percent_cli, color = (version), group = version),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
-  facet_grid(version_aware ~ geo_value, scales = "free") +
-  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  facet_grid(version_faithful ~ geo_value, scales = "free") +
+  scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
+  labs(x = "Date",
+       y = "smoothed, day of week adjusted covid-like doctors visits") +
+  scale_color_viridis_c(option = "viridis", direction = -1) +
+  scale_fill_viridis_c(option = "viridis", direction = -1) +
   theme(legend.position = "none")
 ```
 
-```{r}
+```{r plot_fl_forecasts, warning = FALSE}
 geo_choose <- "fl"
-forecasts_filtered <- forecasts %>%
-  filter(geo_value == geo_choose) %>%
+forecasts_filtered <- forecasts |>
+  filter(geo_value == geo_choose) |>
   mutate(time_value = version)
-percent_cli_data <- bind_rows(
-  # Snapshotted data for the version-aware forecasts
-  map(
-    forecast_dates,
-    ~ doctor_visits %>%
-      epix_as_of(.x) %>%
-      mutate(version = .x)
-  ) %>%
-    bind_rows() %>%
-    mutate(version_aware = TRUE),
-  # Latest data for the version-unaware forecasts
-  doctor_visits %>%
-    epix_as_of(doctor_visits$versions_end) %>%
-    mutate(version_aware = FALSE)
-) %>%
-  filter(geo_value == geo_choose)
 
-p2 <- ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = factor(time_value)), alpha = 0.4) +
-  geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
-  geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
-  geom_vline(data = percent_cli_data, aes(color = factor(version), xintercept = version), lty = 2) +
+forecasts_filtered %>% names
+p2 <-
+  ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
+  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)), alpha = 0.4) +
+  geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
+  geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
+  # the forecast date
+  geom_vline(
+    data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
+    aes(color = version, xintercept = version, group = version),
+    lty = 2
+  ) +
+  # the underlying data
   geom_line(
-    data = percent_cli_data,
-    aes(x = time_value, y = percent_cli, color = factor(version)),
+    data = plotting_data |> filter(geo_value == geo_choose),
+    aes(x = time_value, y = percent_cli, color = (version), group = version),
     inherit.aes = FALSE, na.rm = TRUE
   ) +
-  facet_grid(version_aware ~ geo_value, scales = "free") +
-  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
+  facet_grid(version_faithful ~ geo_value, scales = "free") +
+  scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
   labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
+  scale_color_viridis_c(option = "viridis", direction = -1) +
+  scale_fill_viridis_c(option = "viridis", direction = -1) +
   theme(legend.position = "none")
+p2
 ```
 </details>
 
-```{r show-plot1, echo=FALSE}
+```{r show-plot1, warning = FALSE, echo=FALSE}
 p1
+```
+
+There are some weeks when the forecasts are somewhat similar, and others when they are wildly different, although neither approach produces amazingly accurate forecasts.
+
+In the version faithful case for California, the March 2021 forecast (turquoise)
+starts at a value just above 10, which is very well lined up with reported values leading up to that forecast.
+The measured and forecasted trends are also concordant (both increasingly moderately fast).
+
+Because the data for this time period was later adjusted down with a decreasing trend, the March 2021 forecast looks quite bad compared to finalized data.
+The equivalent version un-faithful forecast starts at a value of 5, which is in line with the finalized data but would have been out of place compared to the version data.
+
+The October 2021 forecast for the version faithful case floors out at zero, whereas the un-faithful is much closer to the finalized data.
+
+```{r show-plot2, warning = FALSE, echo=FALSE}
 p2
 ```
 
-For the two states of interest, neither approach produces amazingly accurate
-forecasts. However, the extent to which using versioned data can affect
-backtesting, scoring, and therefore model choice for production can be inferred
-from these plots.
+Now let's look at Florida.
+In the version faithful case, the three late-2021 forecasts (purples and pinks) starting in September predict very low values, near 0.
+The trend leading up to each forecast shows a substantial decrease, so these forecasts seem appropriate and we would expect them to score fairly well on various performance metrics when compared to the versioned data.
 
-### Example using case data from Canada
+However in hindsight, we know that early versions of the data systematically under-reported COVID-related doctor visits such that these forecasts don't actually perform well compared to _finalized_ data.
+In this example, version faithful forecasts predicted values at or near 0 while finalized data shows values in the 5-10 range.
+As a result, the version un-faithful forecasts for these same dates are quite a bit higher, and would perform well when scored using the finalized data and poorly with versioned data.
 
-<details>
+In general, the longer ago a forecast was made, the worse its performance is compared to finalized data. Finalized data accumulates revisions over time that make it deviate more and more from the non-finalized data a model was trained on.
+Forecasts _trained_ on finalized data will of course appear to perform better when _scored_ on finalized data, but will have unknown performance on the non-finalized data we need to use if we want timely predictions.
 
-<summary>Data and forecasts. Similar to the above.</summary>
+Without using data that would have been available on the actual forecast date, 
+you have little insight into what level of performance you
+can expect in practice.
 
-By leveraging the flexibility of `epiprocess`, we can apply the same techniques
-to data from other sources. Since some collaborators are in British Columbia,
-Canada, we'll do essentially the same thing for Canada as we did above.
+Good performance of a version un-faithful model is a mirage; it is only achievable if the training data has no revisions.
+If a data source has any revisions, version un-faithful-level performance is unachievable when making forecasts in real time.
 
-The [COVID-19 Canada Open Data Working Group](https://opencovid.ca/) collects
-daily time series data on COVID-19 cases, deaths, recoveries, testing and
-vaccinations at the health region and province levels. Data are collected from
-publicly available sources such as government datasets and news releases.
-Unfortunately, there is no simple versioned source, so we have created our own
-from the Github commit history.
 
-First, we load versioned case rates at the provincial level. After converting
-these to 7-day averages (due to highly variable provincial reporting
-mismatches), we then convert the data to an `epi_archive` object, and extract
-the latest version from it. Finally, we run the same forcasting exercise as for
-the American data, but here we compare the forecasts produced from using simple
-linear regression with those from using boosted regression trees.
+[^1]: For forecasting a single day like this, we could have actually just used
+    `doctor_visits |> epix_as_of(forecast_date)` to get the relevant snapshot, and then fed that into `arx_forecaster()` as we did in the [landing
+page](../index.html#motivating-example).
 
-```{r get-can-fc, warning = FALSE}
-aheads <- c(7, 14, 21, 28)
-canada_archive <- can_prov_cases
-canada_archive_faux <- epix_as_of(canada_archive, canada_archive$versions_end) %>%
-  mutate(version = time_value) %>%
-  as_epi_archive()
-# This function will add the 7-day average of the case rate to the data
-# before forecasting.
-smooth_cases <- function(epi_df) {
-  epi_df %>%
-    group_by(geo_value) %>%
-    epi_slide_mean("case_rate", .window_size = 7, na.rm = TRUE, .suffix = "_{.n}dav")
-}
-forecast_dates <- seq.Date(
-  from = min(canada_archive$DT$version),
-  to = max(canada_archive$DT$version),
-  by = "1 month"
-)
 
-# Generate the forecasts, and bind them together
-canada_forecasts <- bind_rows(
-  map(
-    aheads,
-    ~ forecast_k_week_ahead(
-      canada_archive_faux,
-      ahead = .x,
-      outcome = "case_rate_7dav",
-      predictors = "case_rate_7dav",
-      forecast_dates = forecast_dates,
-      process_data = smooth_cases
-    ) %>% mutate(version_aware = FALSE)
-  ),
-  map(
-    aheads,
-    ~ forecast_k_week_ahead(
-      canada_archive,
-      ahead = .x,
-      outcome = "case_rate_7dav",
-      predictors = "case_rate_7dav",
-      forecast_dates = forecast_dates,
-      process_data = smooth_cases
-    ) %>% mutate(version_aware = TRUE)
-  )
-)
-```
+[^2]: Generally we advise against this; the only time to consider faking
+ versioning like this are if you're back-testing data with no versions available
+ at all, or if you're doing an explicit comparison like this. If you have no
+ versions you should assume performance is worse than what the test would
+ otherwise suggest.
+    
+[^4]: Until we have a time machine
 
-The figures below shows the results for a single province.
-
-```{r plot-can-fc-lr, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 12}
-geo_choose <- "Alberta"
-forecasts_filtered <- canada_forecasts %>%
-  filter(geo_value == geo_choose) %>%
-  mutate(time_value = version)
-case_rate_data <- bind_rows(
-  # Snapshotted data for the version-aware forecasts
-  map(
-    forecast_dates,
-    ~ canada_archive %>%
-      epix_as_of(.x) %>%
-      smooth_cases() %>%
-      mutate(case_rate = case_rate_7dav, version = .x)
-  ) %>%
-    bind_rows() %>%
-    mutate(version_aware = TRUE),
-  # Latest data for the version-unaware forecasts
-  canada_archive %>%
-    epix_as_of(doctor_visits$versions_end) %>%
-    smooth_cases() %>%
-    mutate(case_rate = case_rate_7dav, version_aware = FALSE)
-) %>%
-  filter(geo_value == geo_choose)
-
-ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = factor(time_value)), alpha = 0.4) +
-  geom_line(aes(y = .pred, color = factor(time_value)), linetype = 2L) +
-  geom_point(aes(y = .pred, color = factor(time_value)), size = 0.75) +
-  geom_vline(data = case_rate_data, aes(color = factor(version), xintercept = version), lty = 2) +
-  geom_line(
-    data = case_rate_data,
-    aes(x = time_value, y = case_rate, color = factor(version)),
-    inherit.aes = FALSE, na.rm = TRUE
-  ) +
-  facet_grid(version_aware ~ geo_value, scales = "free") +
-  scale_x_date(minor_breaks = "month", date_labels = "%b %y") +
-  scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
-  theme(legend.position = "none")
-```
-
-</details>
+[^5]: In this case by adjusting the length of the ahead so that it is actually
+ forecasting from the last day of data (e.g. for 2 day latent data and a true
+ ahead of 5, the `extended_ahead` would actually be 7)

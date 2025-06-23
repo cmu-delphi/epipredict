@@ -4,21 +4,24 @@
 \alias{roll_modular_multivec}
 \title{group col by .idx values and sum windows around each .idx value}
 \usage{
-roll_modular_multivec(col, .idx, weights, aggr, window_size, modulus)
+roll_modular_multivec(col, idx_in, weights, aggr, window_size, modulus)
 }
 \arguments{
-\item{col}{the list of values indexed by \code{.idx}}
+\item{col}{the list of values indexed by \code{idx_in}}
 
-\item{.idx}{the relevant periodic part of time value, e.g. the week number}
+\item{idx_in}{the relevant periodic part of time value, e.g. the week number,
+limited to the relevant range}
 
-\item{weights}{how much to weigh each particular datapoint}
+\item{weights}{how much to weigh each particular datapoint (also indexed by
+\code{idx_in})}
 
-\item{aggr}{the aggregation function, probably Quantile, mean or median}
+\item{aggr}{the aggregation function, probably Quantile, mean, or median}
 
 \item{window_size}{the number of .idx entries before and after to include in
 the aggregation}
 
-\item{modulus}{the maximum value of \code{.idx}}
+\item{modulus}{the number of days/weeks/months in the year, not including any
+leap days/weeks}
 }
 \description{
 group col by .idx values and sum windows around each .idx value

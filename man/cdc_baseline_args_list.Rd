@@ -51,10 +51,12 @@ These samples are spaced evenly on the (0, 1) scale, F_X(x) resulting
 in linear interpolation on the X scale. This is achieved with
 \code{\link[stats:quantile]{stats::quantile()}} Type 7 (the default for that function).}
 
-\item{symmetrize}{Logical. The default \code{TRUE} calculates
-symmetric prediction intervals. This argument only applies when
-residual quantiles are used. It is not applicable with
-\code{trainer = quantile_reg()}, for example.}
+\item{symmetrize}{Logical. The default \code{TRUE} calculates symmetric prediction
+intervals. This argument only applies when residual quantiles are used. It
+is not applicable with \code{trainer = quantile_reg()}, for example. Typically, one
+would only want non-symmetric quantiles when increasing trajectories are
+quite different from decreasing ones, such as a strictly postive variable
+near zero.}
 
 \item{nonneg}{Logical. Force all predictive intervals be non-negative.
 Because non-negativity is forced \emph{before} propagating forward, this

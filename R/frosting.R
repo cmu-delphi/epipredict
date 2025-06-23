@@ -1,4 +1,4 @@
-#' Add frosting to a workflow
+#' Add/remove/update the `frosting` of an `epi_workflow`
 #'
 #' @param x A workflow
 #' @param frosting A frosting object created using `frosting()`.
@@ -246,10 +246,10 @@ new_frosting <- function() {
 }
 
 
-#' Create frosting for postprocessing predictions
+#' Create frosting for post-processing predictions
 #'
-#' This generates a postprocessing container (much like `recipes::recipe()`)
-#' to hold steps for postprocessing predictions.
+#' This generates a post-processing container (much like `recipes::recipe()`)
+#' to hold steps for post-processing predictions.
 #'
 #' The arguments are currently placeholders and must be NULL
 #'
@@ -260,7 +260,7 @@ new_frosting <- function() {
 #' @export
 #'
 #' @examples
-#' # Toy example to show that frosting can be created and added for postprocessing
+#' # Toy example to show that frosting can be created and added for post-processing
 #' f <- frosting()
 #' wf <- epi_workflow() %>% add_frosting(f)
 #'
@@ -322,9 +322,9 @@ extract_frosting.epi_workflow <- function(x, ...) {
   }
 }
 
-#' Apply postprocessing to a fitted workflow
+#' Apply post-processing to a fitted workflow
 #'
-#' This function is intended for internal use. It implements postprocessing
+#' This function is intended for internal use. It implements post-processing
 #' inside of the `predict()` method for a fitted workflow.
 #'
 #' @param workflow An object of class workflow
@@ -342,7 +342,7 @@ apply_frosting <- function(workflow, ...) {
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
     cli_abort(c(
-      "Postprocessing is only available for epi_workflows currently.",
+      "Post-processing is only available for epi_workflows currently.",
       i = "Can you use `epi_workflow()` instead of `workflow()`?"
     ))
   }

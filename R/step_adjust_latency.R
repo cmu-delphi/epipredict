@@ -26,15 +26,16 @@
 #' ) %>%
 #'    as_epi_df(as_of = as.Date("2015-01-14"))
 #' ```
-#' If we're looking to predict the value on the 15th, forecasting from the 14th (the `as_of` date above),
-#'   there are two issues we will need to address:
+#' If we're looking to predict the value on the 15th, forecasting from the 14th
+#'   (the `as_of` date above), there are two issues we will need to address:
 #' 1. `"ca"` is latent by 2 days, whereas `"ma"` is latent by 1
-#' 2. if we want to use `b` as an exogenous variable, for `"ma"` it is latent by 3 days instead of just 1.
+#' 2. if we want to use `b` as an exogenous variable, for `"ma"` it is latent by
+#'   3 days instead of just 1.
 #'
-#' Regardless of `method`, `epi_keys_checked="geo_value"` guarantees that the
-#'   difference between `"ma"` and `"ca"` is accounted for by making  the
-#'   latency adjustment at least 2. For some comparison, here's what the various
-#'   methods will do:
+#' Regardless of `method`, `epi_keys_checked="geo_value"` guarantees tha the
+#'   difference between `"ma"` and `"ca"` is accounted for by making the latency
+#'   adjustment at least 2. For some comparison, here's what the various methods
+#'   will do:
 #'
 #' ## `locf`
 #' Short for "last observation carried forward", `locf` assumes that every day

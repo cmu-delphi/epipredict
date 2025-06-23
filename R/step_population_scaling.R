@@ -1,20 +1,22 @@
 #' Convert raw scale predictions to per-capita
 #'
-#' `step_population_scaling` creates a specification of a recipe step
-#' that will perform per-capita scaling. Typical usage would
-#' load a dataset that contains state-level population, and use it to convert
-#' predictions made from a raw scale model to rate-scale by dividing by
-#' the population.
-#' Although, it is worth noting that there is nothing special about "population".
-#' The function can be used to scale by any variable. Population is the
-#' standard use case in the epidemiology forecasting scenario. Any value
-#' passed will *divide* the selected variables while the `rate_rescaling`
-#' argument is a common *multiplier* of the selected variables.
+#' `step_population_scaling()` creates a specification of a recipe step that
+#' will perform per-capita scaling. Typical usage would set `df` to be a dataset
+#' that contains population for each `geo_value`, and use it to convert
+#' predictions made from a raw scale model to rate-scale by dividing by the
+#' population.  Although, it is worth noting that there is nothing special about
+#' "population", and the function can be used to scale by any variable.
+#' Population is the standard use case in the epidemiology forecasting scenario.
+#' Any value passed will *divide* the selected variables while the
+#' `rate_rescaling` argument is a common *multiplier* of the selected variables.
 #'
 #' @inheritParams step_epi_lag
-#' @param df a data frame that contains the population data to be used for
-#'   inverting the existing scaling.
-#' @param by A (possibly named) character vector of variables to join by.
+#' @param role For model terms created by this step, what analysis role should
+#'   they be assigned?
+#' @param df a data frame containing the scaling data (typically population). The
+#'   target column is divided by the value in `df_pop_col`.
+#' @param by A (possibly named) character vector of variables by which to join
+#'   `df` to the `epi_df`.
 #'
 #' If `NULL`, the default, the function will try to infer a reasonable set of
 #' columns. First, it will try to join by all variables in the training/test
@@ -41,7 +43,7 @@
 #' @param rate_rescaling Sometimes raw scales are "per 100K" or "per 1M".
 #' Adjustments can be made here. For example, if the original
 #' scale is "per 100K", then set `rate_rescaling = 1e5` to get rates.
-#' @param create_new TRUE to create a new column and keep the original column
+#' @param create_new `TRUE` to create a new column and keep the original column
 #' in the `epi_df`
 #' @param suffix a character. The suffix added to the column name if
 #' `create_new = TRUE`. Default to "_scaled".

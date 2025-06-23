@@ -338,57 +338,74 @@ print.step_climate <- function(x, width = max(20, options()$width - 30), ...) {
 }
 
 #' group col by .idx values and sum windows around each .idx value
-#' @param .idx the relevant periodic part of time value, e.g. the week number
-#' @param col the list of values indexed by `.idx`
-#' @param weights how much to weigh each particular datapoint
-#' @param aggr the aggregation function, probably Quantile, mean or median
+#' @param idx_in the relevant periodic part of time value, e.g. the week number,
+#'   limited to the relevant range
+#' @param col the list of values indexed by `idx_in`
+#' @param weights how much to weigh each particular datapoint (also indexed by
+#'   `idx_in`)
+#' @param aggr the aggregation function, probably Quantile, mean, or median
 #' @param window_size the number of .idx entries before and after to include in
 #'   the aggregation
-#' @param modulus the maximum value of `.idx`
+#' @param modulus the number of days/weeks/months in the year, not including any
+#'   leap days/weeks
 #' @importFrom lubridate %m-%
 #' @keywords internal
-roll_modular_multivec <- function(col, .idx, weights, aggr, window_size, modulus) {
-  tib <- tibble(col = col, weights = weights, .idx = .idx) |>
+roll_modular_multivec <- function(col, idx_in, weights, aggr, window_size, modulus) {
+  # make a tibble where data gives the list of all datapoints with the
+  # corresponding .idx
+  tib <- tibble(col = col, weights = weights, .idx = idx_in) |>
     arrange(.idx) |>
     tidyr::nest(data = c(col, weights), .by = .idx)
-  out <- double(modulus + 1)
-  for (iter in seq_along(out)) {
-    # +1 from 1-indexing
-    entries <- (iter - window_size):(iter + window_size) %% modulus
-    entries[entries == 0] <- modulus
-    # note that because we are 1-indexing, we're looking for indices that are 1
-    # larger than the actual day/week in the year
-    if (modulus == 365) {
-      # we need to grab just the window around the leap day on the leap day
-      if (iter == 366) {
-        # there's an extra data point in front of the leap day
-        entries <- (59 - window_size):(59 + window_size - 1) %% modulus
-        entries[entries == 0] <- modulus
-        # adding in the leap day itself
-        entries <- c(entries, 999)
-      } else if ((59 %in% entries) || (60 %in% entries)) {
-        # if we're on the Feb/March boundary for daily data, we need to add in the
-        # leap day data
-        entries <- c(entries, 999)
-      }
-    } else if (modulus == 52) {
-      # we need to grab just the window around the leap week on the leap week
-      if (iter == 53) {
-        entries <- (53 - window_size):(53 + window_size - 1) %% 52
-        entries[entries == 0] <- 52
-        entries <- c(entries, 999)
-      } else if ((52 %in% entries) || (1 %in% entries)) {
-        # if we're on the year boundary for weekly data, we need to add in the
-        # leap week data (which is the extra week at the end)
-        entries <- c(entries, 999)
-      }
-    }
-    out[iter] <- with(
+  # storage for the results, includes all possible time indexes
+  out <- tibble(.idx = c(1:modulus, 999), climate_pred = double(modulus + 1))
+  for (tib_idx in tib$.idx) {
+    entries <- within_window(tib_idx, window_size, modulus)
+    out$climate_pred[out$.idx == tib_idx] <- with(
       purrr::list_rbind(tib %>% filter(.idx %in% entries) %>% pull(data)),
       aggr(col, weights)
     )
   }
-  tibble(.idx = unique(tib$.idx), climate_pred = out[seq_len(nrow(tib))])
+  # filter to only the ones we actually computed
+  out %>% filter(.idx %in% idx_in)
+}
+
+#' generate the idx values within `window_size` of `target_idx` given that our
+#' time value is of the type matching modulus
+#' @param target_idx the time index which we're drawing the window around
+#' @param window_size the size of the window on one side of `target_idx`
+#' @param modulus the number of days/weeks/months in the year, not including any leap days/weeks
+#' @keywords internal
+within_window <- function(target_idx, window_size, modulus) {
+  entries <- (target_idx - window_size):(target_idx + window_size) %% modulus
+  entries[entries == 0] <- modulus
+  # note that because we are 1-indexing, we're looking for indices that are 1
+  # larger than the actual day/week in the year
+  if (modulus == 365) {
+    # we need to grab just the window around the leap day on the leap day
+    if (target_idx == 999) {
+      # there's an extra data point in front of the leap day
+      entries <- (59 - window_size):(59 + window_size - 1) %% modulus
+      entries[entries == 0] <- modulus
+      # adding in the leap day itself
+      entries <- c(entries, 999)
+    } else if ((59 %in% entries) || (60 %in% entries)) {
+      # if we're on the Feb/March boundary for daily data, we need to add in the
+      # leap day data
+      entries <- c(entries, 999)
+    }
+  } else if (modulus == 52) {
+    # we need to grab just the window around the leap week on the leap week
+    if (target_idx == 999) {
+      entries <- (53 - window_size):(53 + window_size - 1) %% 52
+      entries[entries == 0] <- 52
+      entries <- c(entries, 999)
+    } else if ((52 %in% entries) || (1 %in% entries)) {
+      # if we're on the year boundary for weekly data, we need to add in the
+      # leap week data (which is the extra week at the end)
+      entries <- c(entries, 999)
+    }
+  }
+  entries
 }
 
 

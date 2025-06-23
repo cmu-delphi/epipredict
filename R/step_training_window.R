@@ -14,8 +14,12 @@
 #' @inheritParams step_epi_lag
 #' @template step-return
 #'
-#' @details Note that `step_epi_lead()` and `step_epi_lag()` should come
-#' after any filtering step.
+#' @details It is recommended to do this after any `step_epi_ahead()`,
+#'   `step_epi_lag()`, or `step_epi_naomit()` steps. If `step_training_window()`
+#'   happens first, there will be less than `n_training` remaining examples,
+#'   since either leading or lagging will introduce `NA`'s later removed by
+#'   `step_epi_naomit()`. Typical usage will use this step last in an
+#'   `epi_recipe()`.
 #'
 #' @export
 #'

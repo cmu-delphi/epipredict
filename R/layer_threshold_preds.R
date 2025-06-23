@@ -1,8 +1,12 @@
 #' Lower and upper thresholds for predicted values
 #'
-#' This postprocessing step is used to set prediction values that are
-#' smaller than the lower threshold or higher than the upper threshold equal
-#' to the threshold values.
+#' This post-processing step is used to set prediction values that are smaller
+#' than the lower threshold or higher than the upper threshold equal to the
+#' threshold values.
+
+#' @details
+#' Making case count predictions strictly positive is a typical example usage.
+#'   It must be called after there is a column containing quantiles. This means at earliest it can be called after `layer_predict()` for distributional models, or after `layer_residual_quantiles()` for point prediction models. Typical best practice will use `starts_with(".pred")` as the variables to threshold.
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> One or more unquoted
@@ -33,7 +37,7 @@
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_threshold(.pred, lower = 0.180, upper = 0.310)
+#'   layer_threshold(starts_with(".pred"), lower = 0.180, upper = 0.310)
 #' wf <- wf %>% add_frosting(f)
 #' p <- forecast(wf)
 #' p

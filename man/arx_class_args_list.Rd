@@ -67,7 +67,7 @@ latency is large. If this is \code{FALSE}, that warning is turned off.}
 be created using growth rates (as the predictors are) or lagged
 differences. The second case is closer to the requirements for the
 \href{https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md}{2022-23 CDC Flusight Hospitalization Experimental Target}.
-See the Classification Vignette for details of how to create a reasonable
+See the \href{https://cmu-delphi.github.io/delphi-tooling-book/arx-classifier.html}{Classification chapter from the forecasting book} Vignette for details of how to create a reasonable
 baseline for this case. Selecting \code{"growth_rate"} (the default) uses
 \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}} to create the outcome using some of the
 additional arguments below. Choosing \code{"lag_difference"} instead simply

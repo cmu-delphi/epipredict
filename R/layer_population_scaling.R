@@ -1,15 +1,15 @@
 #' Convert per-capita predictions to raw scale
 #'
-#' `layer_population_scaling` creates a specification of a frosting layer
-#' that will "undo" per-capita scaling. Typical usage would
-#' load a dataset that contains state-level population, and use it to convert
-#' predictions made from a rate-scale model to raw scale by multiplying by
-#' the population.
-#' Although, it is worth noting that there is nothing special about "population".
-#' The function can be used to scale by any variable. Population is the
-#' standard use case in the epidemiology forecasting scenario. Any value
-#' passed will *multiply* the selected variables while the `rate_rescaling`
-#' argument is a common *divisor* of the selected variables.
+#' `layer_population_scaling` creates a specification of a frosting layer that
+#' will "undo" per-capita scaling done in `step_population_scaling()`.
+#' Typical usage would set `df` to be a dataset that contains a list of
+#' population for the `geo_value`s, and use it to convert predictions made from
+#' a raw scale model to rate-scale by dividing by the population.
+#' Although, it is worth noting that there is nothing special about
+#' "population", and  the function can be used to scale by any variable.
+#' Population is the standard use case in the epidemiology forecasting scenario.
+#' Any value passed will *multiply* the selected variables while the
+#' `rate_rescaling` argument is a common *divisor* of the selected variables.
 #'
 #' @param frosting a `frosting` postprocessor. The layer will be added to the
 #'   sequence of operations for this frosting.
@@ -17,7 +17,8 @@
 #'   for this step. See [recipes::selections()] for more details.
 #' @param df a data frame that contains the population data to be used for
 #'   inverting the existing scaling.
-#' @param by A (possibly named) character vector of variables to join by.
+#' @param by A (possibly named) character vector of variables to join `df` onto
+#'   the `epi_df` by.
 #'
 #' If `NULL`, the default, the function will try to infer a reasonable set of
 #' columns. First, it will try to join by all variables in the test data with

@@ -68,8 +68,9 @@ An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-\code{step_growth_rate()} creates a \emph{specification} of a recipe step
-that will generate one or more new columns of derived data.
+\code{step_growth_rate()} creates a \emph{specification} of a recipe step that will
+generate one or more new columns of derived data. This is a wrapper around
+\code{epiprocess::growth_rate()} to allow its use within an \code{epi_recipe()}.
 }
 \examples{
 tiny_geos <- c("as", "mp", "vi", "gu", "pr")

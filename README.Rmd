@@ -7,24 +7,94 @@ output: github_document
 ```{r, include = FALSE}
 options(width = 76)
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
   fig.path = "man/figures/README-",
-  out.width = "100%"
+  digits = 3,
+  comment = "#>",
+  collapse = TRUE,
+  cache = TRUE,
+  dev.args = list(bg = "transparent"),
+  dpi = 300,
+  cache.lazy = FALSE,
+  out.width = "90%",
+  fig.align = "center",
+  fig.width = 9,
+  fig.height = 6
+)
+ggplot2::theme_set(ggplot2::theme_bw())
+options(
+  dplyr.print_min = 6,
+  dplyr.print_max = 6,
+  pillar.max_footer_lines = 2,
+  pillar.min_chars = 15,
+  stringr.view_n = 6,
+  pillar.bold = TRUE,
+  width = 77
 )
 ```
+```{r pkgs, include=FALSE, echo=FALSE}
+library(epipredict)
+library(epidatr)
+library(data.table)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(magrittr)
+library(purrr)
+library(scales)
+```
 
-# epipredict
+```{r coloration, include=FALSE, echo=FALSE}
+base <- "#002676"
+primary <- "#941120"
+secondary <- "#f9c80e"
+tertiary <- "#177245"
+fourth_colour <- "#A393BF"
+fifth_colour <- "#2e8edd"
+colvec <- c(
+  base = base, primary = primary, secondary = secondary,
+  tertiary = tertiary, fourth_colour = fourth_colour,
+  fifth_colour = fifth_colour
+)
+library(epiprocess)
+suppressMessages(library(tidyverse))
+theme_update(legend.position = "bottom", legend.title = element_blank())
+delphi_pal <- function(n) {
+  if (n > 6L) warning("Not enough colors in this palette!")
+  unname(colvec)[1:n]
+}
+scale_fill_delphi <- function(..., aesthetics = "fill") {
+  discrete_scale(aesthetics = aesthetics, palette = delphi_pal, ...)
+}
+scale_color_delphi <- function(..., aesthetics = "color") {
+  discrete_scale(aesthetics = aesthetics, palette = delphi_pal, ...)
+}
+scale_colour_delphi <- scale_color_delphi
+```
+
+# Epipredict
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cmu-delphi/epipredict/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-**Note:** This package is currently in development and may not work as expected. Please file bug reports as issues in this repo, and we will do our best to address them quickly.
+[`{epipredict}`](https://cmu-delphi.github.io/epipredict/) is a framework for building transformation and forecasting pipelines for epidemiological and other panel time-series datasets.
+In addition to tools for building forecasting pipelines, it contains a number of “canned” forecasters meant to run with little modification as an easy way to get started forecasting.
+
+It is designed to work well with
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/), a utility for time series handling and geographic processing in an epidemiological context.
+Both of the packages are meant to work well with the panel data provided by
+[`{epidatr}`](https://cmu-delphi.github.io/epidatr/).
+Pre-compiled example datasets are also available in
+[`{epidatasets}`](https://cmu-delphi.github.io/epidatasets/).
+
+If you are looking for detail beyond the package documentation, see our
+[forecasting book](https://cmu-delphi.github.io/delphi-tooling-book/).
+
 
 ## Installation
 
-To install (unless you're making changes to the package, use the stable version):
+Unless you’re planning on contributing to package development, we suggest using the stable version.
+To install, run:
 
 ```r
 # Stable version
@@ -34,93 +104,255 @@ pak::pkg_install("cmu-delphi/epipredict@main")
 pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
 
-## Documentation
+The documentation for the stable version is at
+<https://cmu-delphi.github.io/epipredict>, while the development version is at
+<https://cmu-delphi.github.io/epipredict/dev>.
 
-You can view documentation for the `main` branch at <https://cmu-delphi.github.io/epipredict>.
 
-## Goals for `epipredict`
+## Motivating example
 
-**We hope to provide:**
 
-1. A set of basic, easy-to-use forecasters that work out of the box. You should be able to do a reasonably limited amount of customization on them. For the basic forecasters, we currently provide:
-    * Baseline flatline forecaster
-    * Autoregressive forecaster
-    * Autoregressive classifier
-    * CDC FluSight flatline forecaster
-2. A framework for creating custom forecasters out of modular components. There are four types of components:
-    * Preprocessor: do things to the data before model training
-    * Trainer: train a model on data, resulting in a fitted model object
-    * Predictor: make predictions, using a fitted model object
-    * Postprocessor: do things to the predictions before returning
+<details>
+<summary> Required packages </summary>
 
-**Target audiences:**
-
-* Basic. Has data, calls forecaster with default arguments.
-* Intermediate. Wants to examine changes to the arguments, take advantage of
-built in flexibility.
-* Advanced. Wants to write their own forecasters. Maybe willing to build up
-from some components.
-
-The Advanced user should find their task to be relatively easy. Examples of
-these tasks are illustrated in the [vignettes and articles](https://cmu-delphi.github.io/epipredict).
-
-See also the (in progress) [Forecasting Book](https://cmu-delphi.github.io/delphi-tooling-book/).
-
-## Intermediate example
-
-The package comes with some built-in historical data for illustration, but
-up-to-date versions of this could be downloaded with the
-[`{epidatr}` package](https://cmu-delphi.github.io/epidatr/)
-and processed using
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/).[^1]
-
-[^1]: Other epidemiological signals for non-Covid related illnesses are also
-available with [`{epidatr}`](https://github.com/cmu-delphi/epidatr) which
-interfaces directly to Delphi's
-[Epidata API](https://cmu-delphi.github.io/delphi-epidata/)
-
-```{r epidf, message=FALSE}
+```{r install, run = FALSE}
 library(epipredict)
-covid_case_death_rates
+library(epidatr)
+library(epiprocess)
+library(dplyr)
+library(ggplot2)
+```
+</details>
+
+To demonstrate using [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) for forecasting, suppose we want to
+predict COVID-19 deaths per 100k people for each of a subset of states
+
+```{r subset_geos}
+used_locations <- c("ca", "ma", "ny", "tx")
 ```
 
-To create and train a simple auto-regressive forecaster to predict the death rate two weeks into the future using past (lagged) deaths and cases, we could use the following function.
+on
+
+```{r fc_date}
+forecast_date <- as.Date("2021-08-01")
+```
+
+We will be using a subset of
+[Johns Hopkins Center for Systems Science and Engineering deaths data](https://cmu-delphi.github.io/delphi-epidata/api/covidcast-signals/jhu-csse.html).
+Below the fold, we pull the dataset from the epidata API and clean it.
+
+<details>
+<summary> Creating the dataset using `{epidatr}` and `{epiprocess}` </summary>
+
+This section is intended to demonstrate some of the ubiquitous cleaning operations needed to be able to forecast.
+A subset of the dataset prepared here is also included ready-to-go in [`{epipredict}`](https://cmu-delphi.github.io/epipredict/) as `covid_case_death_rates`.
+
+First we pull both `jhu-csse` cases and deaths data from the
+[Delphi API](https://cmu-delphi.github.io/delphi-epidata/api/covidcast.html) using the
+[`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
+
+```{r case_death, warning = FALSE, eval = TRUE}
+cases <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "confirmed_7dav_incidence_prop",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200601, 20211231),
+  geo_values = "*"
+) |>
+  select(geo_value, time_value, case_rate = value)
+
+deaths <- pub_covidcast(
+  source = "jhu-csse",
+  signals = "deaths_7dav_incidence_prop",
+  time_type = "day",
+  geo_type = "state",
+  time_values = epirange(20200601, 20211231),
+  geo_values = "*"
+) |>
+  select(geo_value, time_value, death_rate = value)
+cases_deaths <-
+  full_join(cases, deaths, by = c("time_value", "geo_value")) |>
+  filter(geo_value %in% used_locations) |>
+  as_epi_df(as_of = as.Date("2022-01-01"))
+```
+
+Since visualizing the results on every geography is somewhat overwhelming,
+we’ll only train on a subset of locations.
+
+```{r date, warning = FALSE}
+# plotting the data as it was downloaded
+cases_deaths |>
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(
+    rows = vars(.response_name),
+    cols = vars(geo_value),
+    scale = "free"
+  ) +
+  scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+As with the typical dataset, we will need to do some cleaning to
+make it actually usable; we’ll use some utilities from
+[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/) for this.
+Specifically we'll trim outliers, especially negative values:
+
+```{r outlier}
+cases_deaths <-
+  cases_deaths |>
+  group_by(geo_value) |>
+  mutate(
+    outlr_death_rate = detect_outlr_rm(
+      time_value, death_rate,
+      detect_negatives = TRUE
+    ),
+    outlr_case_rate = detect_outlr_rm(
+      time_value, case_rate,
+      detect_negatives = TRUE
+    )
+  ) |>
+  unnest(cols = starts_with("outlr"), names_sep = "_") |>
+  ungroup() |>
+  mutate(
+    death_rate = outlr_death_rate_replacement,
+    case_rate = outlr_case_rate_replacement
+  ) |>
+  select(geo_value, time_value, case_rate, death_rate)
+```
+</details>
+
+After downloading and cleaning deaths per capita, as well as cases per 100k people, we can plot
+a subset of the states, marking the desired forecast date with a vertical line:
+
+<details>
+<summary> Plot </summary>
+
+```{r plot_locs}
+forecast_date_label <-
+  tibble(
+    geo_value = rep(used_locations, 2),
+    .response_name = c(rep("case_rate", 4), rep("death_rate", 4)),
+    dates = rep(forecast_date - 7 * 2, 2 * length(used_locations)),
+    heights = c(rep(150, 4), rep(0.75, 4))
+  )
+processed_data_plot <-
+  cases_deaths |>
+  filter(geo_value %in% used_locations) |>
+  autoplot(
+    case_rate,
+    death_rate,
+    .color_by = "none"
+  ) +
+  facet_grid(
+    rows = vars(.response_name),
+    cols = vars(geo_value),
+    scale = "free"
+  ) +
+  geom_vline(aes(xintercept = forecast_date)) +
+  geom_text(
+    data = forecast_date_label,
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
+  ) +
+  scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+</details>
+```{r show-processed-data, warning=FALSE, echo=FALSE}
+processed_data_plot
+```
+
+To make a forecast, we will use a simple “canned” auto-regressive forecaster to
+predict the death rate four weeks into the future using lagged[^3] deaths and
+cases.
+
+[^3]: lagged by 3 in this context meaning using the value from 3 days ago.
 
 ```{r make-forecasts, warning=FALSE}
-two_week_ahead <- arx_forecaster(
-  covid_case_death_rates,
+four_week_ahead <- arx_forecaster(
+  cases_deaths |> filter(time_value <= forecast_date),
   outcome = "death_rate",
   predictors = c("case_rate", "death_rate"),
   args_list = arx_args_list(
     lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
-    ahead = 14
+    ahead = 4 * 7,
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
   )
 )
-two_week_ahead
+four_week_ahead
 ```
 
-In this case, we have used a number of different lags for the case rate, while
-only using 3 weekly lags for the death rate (as predictors). The result is both
-a fitted model object which could be used any time in the future to create
-different forecasts, as well as a set of predicted values (and prediction
-intervals) for each location 14 days after the last available time value in the
-data.
+In our model setup, we are using as predictors the case rate lagged 0-3
+days, one week, and two weeks, and the death rate lagged 0-2 weeks.
+The result `four_week_ahead` is both a fitted model object which could be used
+any time in the future to create different forecasts, and a set of predicted
+values (and prediction intervals) for each location 28 days after the forecast
+date.
 
-```{r print-model}
-two_week_ahead$epi_workflow
+Plotting the prediction intervals on the true values for our location subset[^2]:
+
+[^2]: Alternatively, you could call `autoplot(four_week_ahead, observed_response =
+    cases_deaths)` to get the full collection of forecasts. This is too busy for
+    the space we have for plotting here.
+
+<details>
+<summary> Plot </summary>
+```{r plotting_forecast, warning=FALSE}
+epiworkflow <- four_week_ahead$epi_workflow
+restricted_predictions <-
+  four_week_ahead$predictions |>
+  rename(time_value = target_date, value = .pred) |>
+  mutate(.response_name = "death_rate")
+forecast_plot <-
+  four_week_ahead |>
+  autoplot(observed_response = cases_deaths) +
+  geom_vline(aes(xintercept = forecast_date)) +
+  geom_text(
+    data = forecast_date_label %>% filter(.response_name == "death_rate"),
+    aes(x = dates, label = "forecast\ndate", y = heights),
+    size = 3, hjust = "right"
+  ) +
+  scale_x_date(date_breaks = "3 months", date_labels = "%y %b") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+</details>
+
+```{r show-single-forecast, warning=FALSE, echo=FALSE}
+forecast_plot
 ```
 
-The fitted model here involved preprocessing the data to appropriately generate
-lagged predictors, estimating a linear model with `stats::lm()` and then
-postprocessing the results to be meaningful for epidemiological tasks. We can
-also examine the predictions.
-
-```{r show-preds}
-two_week_ahead$predictions
+And as a tibble of quantile level-value pairs:
+```{r pivot_wider}
+four_week_ahead$predictions |>
+  select(-.pred) |>
+  pivot_quantiles_longer(.pred_distn) |>
+  select(geo_value, forecast_date, target_date, quantile = .pred_distn_quantile_level, value = .pred_distn_value)
 ```
 
-The results above show a distributional forecast produced using data through
-the end of 2021 for the 14th of January 2022. A prediction for the death rate
-per 100K inhabitants is available for every state (`geo_value`) along with a
-90% predictive interval.
+The orange dot gives the point prediction, while the blue intervals give the
+25-75%, the 10-90%, and 2.5-97.5%  inter-quantile ranges[^4].
+For this particular day and these locations, the forecasts are relatively
+accurate, with the true data being at least within the 10-90% interval.
+A couple of things to note:
 
+1. `epipredict` methods are primarily direct forecasters; this means we don't need to
+   predict 1, 2,..., 27 days ahead to then predict 28 days ahead.
+2. All of our existing engines are geo-pooled, meaning the training data is
+   shared across geographies. This has the advantage of increasing the amount of
+   available training data, with the restriction that the data needs to be on
+   comparable scales, such as rates.
+
+## Getting Help
+If you encounter a bug or have a feature request, feel free to file an [issue on
+our GitHub page](https://github.com/cmu-delphi/epipredict/issues).
+For other questions, feel free to reach out to the authors, either via this
+[contact form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
+email, or the InsightNet Slack.
+
+[^4]: Note that these are not the same quantiles that we fit when creating
+    `four_week_ahead`. They are extrapolated from those quantiles using `extrapolate_quantiles()` (which assumes an exponential decay in the tails).

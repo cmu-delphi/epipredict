@@ -110,7 +110,7 @@ test_that("prep/bake steps create the correct training data with an incomplete y
   r <- epi_recipe(x) %>% step_climate(y, time_type = "epiweek")
   p <- prep(r, x)
 
-  expected_res <- tibble(.idx = c(1:44, 999), climate_y = c(2, 3, 3, 4:25, 25, 25, 25:12, 12, 11, 11, 10))
+  expected_res <- tibble(.idx = c(1:44, 999), climate_y = c(2, 3, 3, 4:25, 25, 25, 25:12, 12, 11, 11, 2))
   expect_equal(p$steps[[1]]$climate_table, expected_res)
 
   b <- bake(p, new_data = NULL)

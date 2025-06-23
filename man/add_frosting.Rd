@@ -4,7 +4,7 @@
 \alias{add_frosting}
 \alias{remove_frosting}
 \alias{update_frosting}
-\title{Add frosting to a workflow}
+\title{Add/remove/update the \code{frosting} of an \code{epi_workflow}}
 \usage{
 add_frosting(x, frosting, ...)
 
@@ -23,7 +23,7 @@ update_frosting(x, frosting, ...)
 \code{x}, updated with a new frosting postprocessor
 }
 \description{
-Add frosting to a workflow
+Add/remove/update the \code{frosting} of an \code{epi_workflow}
 }
 \examples{
 jhu <- covid_case_death_rates \%>\%

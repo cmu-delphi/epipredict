@@ -8,7 +8,7 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-source("_common.R")
+source(here::here("vignettes/_common.R"))
 ```
 
 ```{r libraries, warning=FALSE, message=FALSE}
@@ -109,7 +109,7 @@ sample_n(employ, 6)
 ```
 
 In the following sections, we will go over pre-processing the data in the
-`epi_recipe` framework, and fitting a model and making predictions within the
+`epi_recipe` framework, and estimating a model and making predictions within the
 `epipredict` framework and using the package's canned forecasters.
 
 # Autoregressive (AR) model to predict number of graduates in a year
@@ -213,9 +213,9 @@ our `epi_recipe`:
 `lag_2_num_graduates_prop` correspond to $y_{tijk}$, $y_{t-1,ijk}$, and $y_{t-2,ijk}$
 respectively.
 
-## Model fitting and prediction
+## Model estimation and prediction
 
-Since our goal for now is to fit a simple autoregressive model, we can use
+Since our goal for now is to estimate a simple autoregressive model, we can use
 [`parsnip::linear_reg()`](
   https://parsnip.tidymodels.org/reference/linear_reg.html) with the default
 engine `lm`, which fits a linear regression using ordinary least squares.
@@ -234,9 +234,9 @@ summary(extract_fit_engine(wf_linreg))
 
 This output tells us the coefficients of the fitted model; for instance,
 the estimated intercept is $\widehat{\alpha}_0 =$
-`r round(coef(extract_fit_engine(wf_linreg))[1], 3)` and the coefficient for
+`r round(coef(hardhat::extract_fit_engine(wf_linreg))[1], 3)` and the coefficient for
 $y_{tijk}$ is
-$\widehat\alpha_1 =$ `r round(coef(extract_fit_engine(wf_linreg))[2], 3)`.
+$\widehat\alpha_1 =$ `r round(coef(hardhat::extract_fit_engine(wf_linreg))[2], 3)`.
 The summary also tells us that all estimated coefficients are significantly
 different from zero. Extracting the 95% confidence intervals for the
 coefficients also leads us to
@@ -333,9 +333,9 @@ rx <- epi_recipe(employ_small) %>%
 bake_and_show_sample(rx, employ_small)
 ```
 
-## Model fitting & post-processing
+## Model estimation & post-processing
 
-Before fitting our model and making predictions, let's add some post-processing
+Before estimating our model and making predictions, let's add some post-processing
 steps using a few [`frosting`](
   https://cmu-delphi.github.io/epipredict/reference/frosting.html) layers to do
 a few things:

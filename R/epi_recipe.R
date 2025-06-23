@@ -232,9 +232,9 @@ is_epi_recipe <- function(x) {
 
 
 
-#' Add an `epi_recipe` to a workflow
+#' Add/remove/update the `epi_recipe` of an `epi_workflow`
 #'
-#' @seealso [workflows::add_recipe()]
+#' @description
 #' - `add_recipe()` specifies the terms of the model and any preprocessing that
 #'   is required through the usage of a recipe.
 #'
@@ -244,9 +244,9 @@ is_epi_recipe <- function(x) {
 #' recipe with the new one.
 #'
 #' @details
-#' `add_epi_recipe` has the same behaviour as
-#' [workflows::add_recipe()] but sets a different
-#' default blueprint to automatically handle [epiprocess::epi_df][epiprocess::as_epi_df] data.
+#' `add_epi_recipe()` has the same behaviour as [workflows::add_recipe()] but
+#'   sets a different default blueprint to automatically handle
+#'   `epiprocess::epi_df()` data.
 #'
 #' @param x A `workflow` or `epi_workflow`
 #'
@@ -265,6 +265,7 @@ is_epi_recipe <- function(x) {
 #' `x`, updated with a new recipe preprocessor.
 #'
 #' @export
+#' @seealso [workflows::add_recipe()]
 #' @examples
 #' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-08-01")

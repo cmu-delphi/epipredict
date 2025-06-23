@@ -2,7 +2,7 @@
 % Please edit documentation in R/frosting.R
 \name{frosting}
 \alias{frosting}
-\title{Create frosting for postprocessing predictions}
+\title{Create frosting for post-processing predictions}
 \usage{
 frosting(layers = NULL, requirements = NULL)
 }
@@ -15,14 +15,14 @@ frosting(layers = NULL, requirements = NULL)
 A frosting object.
 }
 \description{
-This generates a postprocessing container (much like \code{recipes::recipe()})
-to hold steps for postprocessing predictions.
+This generates a post-processing container (much like \code{recipes::recipe()})
+to hold steps for post-processing predictions.
 }
 \details{
 The arguments are currently placeholders and must be NULL
 }
 \examples{
-# Toy example to show that frosting can be created and added for postprocessing
+# Toy example to show that frosting can be created and added for post-processing
 f <- frosting()
 wf <- epi_workflow() \%>\% add_frosting(f)
 
