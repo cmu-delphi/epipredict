@@ -1,27 +1,34 @@
 #' Convert raw scale predictions to per-capita
 #'
-#' `step_population_scaling` creates a specification of a recipe step
-#' that will perform per-capita scaling. Typical usage would
-#' load a dataset that contains state-level population, and use it to convert
-#' predictions made from a raw scale model to rate-scale by dividing by
-#' the population.
-#' Although, it is worth noting that there is nothing special about "population".
-#' The function can be used to scale by any variable. Population is the
-#' standard use case in the epidemiology forecasting scenario. Any value
-#' passed will *divide* the selected variables while the `rate_rescaling`
-#' argument is a common *multiplier* of the selected variables.
+#' `step_population_scaling()` creates a specification of a recipe step that
+#' will perform per-capita scaling. Typical usage would set `df` to be a dataset
+#' that contains population for each `geo_value`, and use it to convert
+#' predictions made from a raw scale model to rate-scale by dividing by the
+#' population.  Although, it is worth noting that there is nothing special about
+#' "population", and the function can be used to scale by any variable.
+#' Population is the standard use case in the epidemiology forecasting scenario.
+#' Any value passed will *divide* the selected variables while the
+#' `rate_rescaling` argument is a common *multiplier* of the selected variables.
 #'
 #' @inheritParams step_epi_lag
-#' @param df a data frame that contains the population data to be used for
-#'   inverting the existing scaling.
-#' @param by A (possibly named) character vector of variables to join by.
+#' @param role For model terms created by this step, what analysis role should
+#'   they be assigned?
+#' @param df a data frame containing the scaling data (typically population). The
+#'   target column is divided by the value in `df_pop_col`.
+#' @param by A (possibly named) character vector of variables by which to join
+#'   `df` to the `epi_df`.
 #'
-#' If `NULL`, the default, the function will perform a natural join, using all
-#' variables in common across the `epi_df` produced by the `predict()` call
-#' and the user-provided dataset.
-#' If columns in that `epi_df` and `df` have the same name (and aren't
-#' included in `by`), `.df` is added to the one from the user-provided data
-#' to disambiguate.
+#' If `NULL`, the default, the function will try to infer a reasonable set of
+#' columns. First, it will try to join by all variables in the training/test
+#' data with roles `"geo_value"`, `"key"`, or `"time_value"` that also appear in
+#' `df`; these roles are automatically set if you are using an `epi_df`, or you
+#' can use, e.g., `update_role`. If no such roles are set, it will try to
+#' perform a natural join, using variables in common between the training/test
+#' data and population data.
+#'
+#' If columns in the training/testing data and `df` have the same name (and
+#' aren't included in `by`), a `.df` suffix is added to the one from the
+#' user-provided data to disambiguate.
 #'
 #' To join by different variables on the `epi_df` and `df`, use a named vector.
 #' For example, `by = c("geo_value" = "states")` will match `epi_df$geo_value`
@@ -29,14 +36,14 @@
 #' For example, `by = c("geo_value" = "states", "county" = "county")` will match
 #' `epi_df$geo_value` to `df$states` and `epi_df$county` to `df$county`.
 #'
-#' See [dplyr::left_join()] for more details.
+#' See [dplyr::inner_join()] for more details.
 #' @param df_pop_col the name of the column in the data frame `df` that
 #' contains the population data and will be used for scaling.
 #' This should be one column.
 #' @param rate_rescaling Sometimes raw scales are "per 100K" or "per 1M".
 #' Adjustments can be made here. For example, if the original
 #' scale is "per 100K", then set `rate_rescaling = 1e5` to get rates.
-#' @param create_new TRUE to create a new column and keep the original column
+#' @param create_new `TRUE` to create a new column and keep the original column
 #' in the `epi_df`
 #' @param suffix a character. The suffix added to the column name if
 #' `create_new = TRUE`. Default to "_scaled".
@@ -44,7 +51,6 @@
 #' @return Scales raw data by the population
 #' @export
 #' @examples
-#' library(dplyr)
 #' jhu <- cases_deaths_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   select(geo_value, time_value, cases)
@@ -89,13 +95,25 @@ step_population_scaling <-
            suffix = "_scaled",
            skip = FALSE,
            id = rand_id("population_scaling")) {
-    arg_is_scalar(role, df_pop_col, rate_rescaling, create_new, suffix, id)
-    arg_is_lgl(create_new, skip)
-    arg_is_chr(df_pop_col, suffix, id)
+    if (rlang::dots_n(...) == 0L) {
+      cli_abort(c(
+        "`...` must not be empty.",
+        ">" = "Please provide one or more tidyselect expressions in `...`
+               specifying the columns to which scaling should be applied.",
+        ">" = "If you really want to list `step_population_scaling` in your
+               recipe but not have it do anything, you can use a tidyselection
+               that selects zero variables, such as `c()`."
+      ))
+    }
+    arg_is_scalar(role, df_pop_col, rate_rescaling, create_new, suffix, skip, id)
+    arg_is_chr(role, df_pop_col, suffix, id)
+    hardhat::validate_column_names(df, df_pop_col)
     arg_is_chr(by, allow_null = TRUE)
+    arg_is_numeric(rate_rescaling)
     if (rate_rescaling <= 0) {
       cli_abort("`rate_rescaling` must be a positive number.")
     }
+    arg_is_lgl(create_new, skip)
 
     recipes::add_step(
       recipe,
@@ -138,6 +156,42 @@ step_population_scaling_new <-
 
 #' @export
 prep.step_population_scaling <- function(x, training, info = NULL, ...) {
+  if (is.null(x$by)) {
+    rhs_potential_keys <- setdiff(colnames(x$df), x$df_pop_col)
+    lhs_potential_keys <- info %>%
+      filter(role %in% c("geo_value", "key", "time_value")) %>%
+      extract2("variable") %>%
+      unique() # in case of weird var with multiple of above roles
+    if (length(lhs_potential_keys) == 0L) {
+      # We're working with a recipe and tibble, and *_role hasn't set up any of
+      # the above roles. Let's say any column could actually act as a key, and
+      # lean on `intersect` below to make this something reasonable.
+      lhs_potential_keys <- names(training)
+    }
+    suggested_min_keys <- info %>%
+      filter(role %in% c("geo_value", "key")) %>%
+      extract2("variable") %>%
+      unique()
+    # (0 suggested keys if we weren't given any epikeytime var info.)
+    x$by <- intersect(lhs_potential_keys, rhs_potential_keys)
+    if (length(x$by) == 0L) {
+      cli_stop(c(
+        "Couldn't guess a default for `by`",
+        ">" = "Please rename columns in your population data to match those in your training data,
+               or manually specify `by =` in `step_population_scaling()`."
+      ), class = "epipredict__step_population_scaling__default_by_no_intersection")
+    }
+    if (!all(suggested_min_keys %in% x$by)) {
+      cli_warn(c(
+        "{setdiff(suggested_min_keys, x$by)} {?was an/were} epikey column{?s} in the training data,
+         but {?wasn't/weren't} found in the population `df`.",
+        "i" = "Defaulting to join by {x$by}.",
+        ">" = "Double-check whether column names on the population `df` match those for your training data.",
+        ">" = "Consider using population data with breakdowns by {suggested_min_keys}.",
+        ">" = "Manually specify `by =` to silence."
+      ), class = "epipredict__step_population_scaling__default_by_missing_suggested_keys")
+    }
+  }
   step_population_scaling_new(
     terms = x$terms,
     role = x$role,
@@ -156,16 +210,20 @@ prep.step_population_scaling <- function(x, training, info = NULL, ...) {
 
 #' @export
 bake.step_population_scaling <- function(object, new_data, ...) {
-  object$by <- object$by %||% intersect(
-    epi_keys_only(new_data),
-    colnames(select(object$df, !object$df_pop_col))
-  )
+  if (is.null(object$by)) {
+    cli::cli_abort(c(
+      "`by` was not set and no default was filled in",
+      ">" = "If this was a fit recipe generated from an older version
+             of epipredict that you loaded in from a file,
+             please regenerate with the current version of epipredict."
+    ))
+  }
   joinby <- list(x = names(object$by) %||% object$by, y = object$by)
   hardhat::validate_column_names(new_data, joinby$x)
   hardhat::validate_column_names(object$df, joinby$y)
 
   if (object$suffix != "_scaled" && object$create_new == FALSE) {
-    cli::cli_warn(c(
+    cli_warn(c(
       "Custom `suffix` {.val {object$suffix}} was ignored in `step_population_scaling`.",
       i = "Perhaps `create_new` should be {.val {TRUE}}?"
     ))
@@ -177,7 +235,10 @@ bake.step_population_scaling <- function(object, new_data, ...) {
   suffix <- ifelse(object$create_new, object$suffix, "")
   col_to_remove <- setdiff(colnames(object$df), colnames(new_data))
 
-  left_join(new_data, object$df, by = object$by, suffix = c("", ".df")) %>%
+  inner_join(new_data, object$df,
+    by = object$by, relationship = "many-to-one", unmatched = c("error", "drop"),
+    suffix = c("", ".df")
+  ) %>%
     mutate(
       across(
         all_of(object$columns),

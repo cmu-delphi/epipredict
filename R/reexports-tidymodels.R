@@ -18,10 +18,20 @@ recipes::bake
 #' @export
 recipes::rand_id
 
-#' @importFrom tibble tibble
+#' @importFrom tibble tibble as_tibble
 #' @export
 tibble::tibble
+
+#' @export
+tibble::as_tibble
 
 #' @importFrom generics tidy
 #' @export
 generics::tidy
+
+#' @importFrom hardhat quantile_pred extract_quantile_levels
+#' @export
+hardhat::quantile_pred
+
+#' @export
+hardhat::extract_quantile_levels

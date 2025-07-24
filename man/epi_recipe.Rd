@@ -9,18 +9,36 @@
 \usage{
 epi_recipe(x, ...)
 
-\method{epi_recipe}{default}(x, ...)
+\method{epi_recipe}{epi_df}(
+  x,
+  reference_date = NULL,
+  formula = NULL,
+  ...,
+  vars = NULL,
+  roles = NULL
+)
 
-\method{epi_recipe}{epi_df}(x, formula = NULL, ..., vars = NULL, roles = NULL)
-
-\method{epi_recipe}{formula}(formula, data, ...)
+\method{epi_recipe}{formula}(formula, data, reference_date = NULL, ...)
 }
 \arguments{
-\item{x, data}{A data frame, tibble, or epi_df of the \emph{template} data set
-(see below). This is always coerced to the first row to avoid memory issues}
+\item{x, data}{An epi_df of the \emph{template} data set (see below).}
 
 \item{...}{Further arguments passed to or from other methods (not currently
 used).}
+
+\item{reference_date}{Either a date of the same class as the \code{time_value}
+column in the \code{epi_df} or \code{NULL}. If a date, it gives the date to which all
+operations are relative. Typically, in real-time tasks this is the date that
+the model is created (and presumably trained). In forecasting, this is
+often the same as the most recent date of
+data availability, but when data is "latent" (reported after the date to
+which it corresponds), or if performing a nowcast, the \code{reference_date} may
+be later than this. Setting \code{reference_date}
+to a value BEFORE the most recent data is not a true "forecast",
+because future data is being used to create the model, but this may be
+reasonable in model building, nowcasting (predicting finalized values from
+preliminary data), or if producing a backcast. If \code{NULL}, it will be set
+to the \code{as_of} date of the \code{epi_df}.}
 
 \item{formula}{A model formula. No in-line functions should be used here
 (e.g. \code{log(x)}, \code{x:y}, etc.) and minus signs are not allowed. These types of
@@ -38,17 +56,17 @@ anything but common roles are \code{"outcome"}, \code{"predictor"},
 }
 \value{
 An object of class \code{recipe} with sub-objects:
-\item{var_info}{A tibble containing information about the original data
-set columns}
+\item{var_info}{A tibble containing information about the original data set
+columns.}
 \item{term_info}{A tibble that contains the current set of terms in the
 data set. This initially defaults to the same data contained in
 \code{var_info}.}
-\item{steps}{A list of \code{step}  or \code{check} objects that define the sequence of
-preprocessing operations that will be applied to data. The default value is
-\code{NULL}}
-\item{template}{A tibble of the data. This is initialized to be the same
-as the data given in the \code{data} argument but can be different after
-the recipe is trained.}
+\item{steps}{A list of \code{step} or \code{check} objects that define the sequence
+of preprocessing operations that will be applied to data. The default value
+is \code{NULL}.}
+\item{template}{A tibble of the data. This is initialized to be the same as
+the data given in the \code{data} argument but can be different after the recipe
+is trained.}
 }
 \description{
 A recipe is a description of the steps to be applied to a data set in
@@ -57,19 +75,14 @@ around \code{\link[recipes:recipe]{recipes::recipe()}} to properly handle the ad
 columns present in an \code{epi_df}
 }
 \examples{
-library(dplyr)
-library(recipes)
-jhu <- case_death_rate_subset \%>\%
-  filter(time_value > "2021-08-01") \%>\%
-  arrange(geo_value, time_value)
+jhu <- covid_case_death_rates \%>\%
+  filter(time_value > "2021-08-01")
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  # below, `skip` means we don't do this at predict time
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
 r
 }

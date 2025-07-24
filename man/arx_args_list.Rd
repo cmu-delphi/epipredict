@@ -10,11 +10,12 @@ arx_args_list(
   n_training = Inf,
   forecast_date = NULL,
   target_date = NULL,
-  quantile_levels = c(0.05, 0.95),
+  adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
+  warn_latency = TRUE,
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
   symmetrize = TRUE,
   nonneg = TRUE,
   quantile_by_key = character(0L),
-  nafill_buffer = Inf,
   check_enough_data_n = NULL,
   check_enough_data_epi_keys = NULL,
   ...
@@ -32,20 +33,45 @@ date for which forecasts should be produced.}
 key that are used for training
 (in the time unit of the \code{epi_df}).}
 
-\item{forecast_date}{Date. The date on which the forecast is created.
-The default \code{NULL} will attempt to determine this automatically.}
+\item{forecast_date}{Date. The date from which the forecast is occurring.
+The default \code{NULL} will determine this automatically from either
+\enumerate{
+\item the maximum time value for which there's data if there is no latency
+adjustment (the default case), or
+\item the \code{as_of} date of \code{epi_data} if \code{adjust_latency} is
+non-\code{NULL}.
+}}
 
-\item{target_date}{Date. The date for which the forecast is intended.
-The default \code{NULL} will attempt to determine this automatically.}
+\item{target_date}{Date. The date that is being forecast. The default \code{NULL}
+will determine this automatically as \code{forecast_date + ahead}.}
+
+\item{adjust_latency}{Character. One of the \code{method}s of
+\code{\link[=step_adjust_latency]{step_adjust_latency()}}, or \code{"none"} (in which case there is no adjustment).
+If the \code{forecast_date} is after the last day of data, this determines how
+to shift the model to account for this difference. The options are:
+\itemize{
+\item \code{"none"} the default, assumes the \code{forecast_date} is the last day of data
+\item \code{"extend_ahead"}: increase the \code{ahead} by the latency so it's relative to
+the last day of data. For example, if the last day of data was 3 days ago,
+the ahead becomes \code{ahead+3}.
+\item \code{"extend_lags"}: increase the lags so they're relative to the actual
+forecast date. For example, if the lags are \code{c(0, 7, 14)} and the last day of
+data was 3 days ago, the lags become \code{c(3, 10, 17)}.
+}}
+
+\item{warn_latency}{by default, \code{step_adjust_latency} warns the user if the
+latency is large. If this is \code{FALSE}, that warning is turned off.}
 
 \item{quantile_levels}{Vector or \code{NULL}. A vector of probabilities to produce
 prediction intervals. These are created by computing the quantiles of
 training residuals. A \code{NULL} value will result in point forecasts only.}
 
-\item{symmetrize}{Logical. The default \code{TRUE} calculates
-symmetric prediction intervals. This argument only applies when
-residual quantiles are used. It is not applicable with
-\code{trainer = quantile_reg()}, for example.}
+\item{symmetrize}{Logical. The default \code{TRUE} calculates symmetric prediction
+intervals. This argument only applies when residual quantiles are used. It
+is not applicable with \code{trainer = quantile_reg()}, for example. Typically, one
+would only want non-symmetric quantiles when increasing trajectories are
+quite different from decreasing ones, such as a strictly postive variable
+near zero.}
 
 \item{nonneg}{Logical. The default \code{TRUE} enforces nonnegative predictions
 by hard-thresholding at 0.}
@@ -56,16 +82,6 @@ before calculating residual quantiles. See the \code{by_key} argument to
 \code{character(0)} performs no grouping. This argument only applies when
 residual quantiles are used. It is not applicable with
 \code{trainer = quantile_reg()}, for example.}
-
-\item{nafill_buffer}{At predict time, recent values of the training data
-are used to create a forecast. However, these can be \code{NA} due to, e.g.,
-data latency issues. By default, any missing values will get filled with
-less recent data. Setting this value to \code{NULL} will result in 1 extra
-recent row (beyond those required for lag creation) to be used. Note that
-we require at least \code{min(lags)} rows of recent data per \code{geo_value} to
-create a prediction. For this reason, setting \code{nafill_buffer < min(lags)}
-will be treated as \emph{additional} allowed recent data rather than the
-total amount of recent data to examine.}
 
 \item{check_enough_data_n}{Integer. A lower limit for the number of rows per
 epi_key that are required for training. If \code{NULL}, this check is ignored.}
@@ -86,4 +102,7 @@ Constructs a list of arguments for \code{\link[=arx_forecaster]{arx_forecaster()
 arx_args_list()
 arx_args_list(symmetrize = FALSE)
 arx_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
+}
+\seealso{
+\code{\link[=arx_forecaster]{arx_forecaster()}}
 }

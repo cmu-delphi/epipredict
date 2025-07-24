@@ -2,43 +2,76 @@
 #'
 #' This is a lower-level function. As such it performs no error checking.
 #'
-#' @param x Data frame. Variables to shift
-#' @param shifts List. Each list element is a vector of shifts.
-#'   Negative values produce leads. The list should have the same
-#'   length as the number of columns in `x`.
-#' @param time_value Vector. Same length as `x` giving time stamps.
-#' @param keys Data frame, vector, or `NULL`. Additional grouping vars.
-#' @param out_name Chr. The output list will use this as a prefix.
+#' @param x Data frame.
+#' @param shift_val a single integer. Negative values produce leads.
+#' @param newname the name for the newly shifted column
+#' @param key_cols vector, or `NULL`. Additional grouping vars.
 #'
 #' @keywords internal
 #'
 #' @return a list of tibbles
-epi_shift <- function(x, shifts, time_value, keys = NULL, out_name = "x") {
-  if (!is.data.frame(x)) x <- data.frame(x)
-  if (is.null(keys)) keys <- rep("empty", nrow(x))
-  p_in <- ncol(x)
-  out_list <- tibble(i = 1:p_in, shift = shifts) %>%
-    tidyr::unchop(shift) %>% # what is chop
-    mutate(name = paste0(out_name, 1:nrow(.))) %>%
-    # One list element for each shifted feature
-    pmap(function(i, shift, name) {
-      tibble(keys,
-        time_value = time_value + shift, # Shift back
-        !!name := x[[i]]
-      )
-    })
-  if (is.data.frame(keys)) {
-    common_names <- c(names(keys), "time_value")
-  } else {
-    common_names <- c("keys", "time_value")
-  }
-
-  reduce(out_list, dplyr::full_join, by = common_names)
-}
-
 epi_shift_single <- function(x, col, shift_val, newname, key_cols) {
   x %>%
     select(all_of(c(key_cols, col))) %>%
     mutate(time_value = time_value + shift_val) %>%
     rename(!!newname := {{ col }})
+}
+
+#' lags move columns forward to bring the past up to today, while aheads drag
+#' the future back to today
+#' @keywords internal
+get_sign <- function(object) {
+  if (!is.null(object$prefix)) {
+    if (object$prefix == "lag_") {
+      return(1)
+    } else {
+      return(-1)
+    }
+  } else if (object$method == "extend_lags") {
+    return(1)
+  } else {
+    return(-1)
+  }
+}
+
+#' backend for both `bake.step_epi_ahead` and `bake.step_epi_lag`, performs the
+#' checks missing in `epi_shift_single`
+#' @keywords internal
+#' @importFrom tidyr expand_grid
+#' @importFrom dplyr join_by
+add_shifted_columns <- function(new_data, object) {
+  grid <- object$shift_grid
+
+  if (nrow(object$shift_grid) == 0) {
+    # we're not shifting any rows, so this is a no-op
+    return(new_data)
+  }
+  ## ensure no name clashes
+  new_data_names <- colnames(new_data)
+  intersection <- new_data_names %in% grid$newname
+  if (any(intersection)) {
+    cli_abort(c(
+      "Name collision occured in {.cls {class(object)[1]}}",
+      "The following variable name{?s} already exist{?s/}: {.val {new_data_names[intersection]}}."
+    ))
+  }
+  ok <- object$keys
+  shifted <- reduce(
+    pmap(grid, epi_shift_single, x = new_data, key_cols = ok),
+    full_join,
+    by = ok
+  )
+  processed <- new_data %>%
+    full_join(shifted, by = ok) %>%
+    group_by(across(all_of(kill_time_value(ok)))) %>%
+    arrange(time_value)
+  if (inherits(new_data, "epi_df")) {
+    processed <- processed %>%
+      ungroup() %>%
+      as_epi_df(
+        as_of = attributes(new_data)$metadata$as_of,
+        other_keys = attributes(new_data)$metadata$other_keys
+      )
+  }
+  return(processed)
 }

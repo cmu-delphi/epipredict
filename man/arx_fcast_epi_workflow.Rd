@@ -15,21 +15,19 @@ arx_fcast_epi_workflow(
 \arguments{
 \item{epi_data}{An \code{epi_df} object}
 
-\item{outcome}{A character (scalar) specifying the outcome (in the
-\code{epi_df}).}
+\item{outcome}{A character (scalar) specifying the outcome (in the \code{epi_df}).}
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
-This defaults to the \code{outcome}. However, if manually specified, only those variables
-specifically mentioned will be used. (The \code{outcome} will not be added.)
-By default, equals the outcome. If manually specified, does not add the
-outcome variable, so make sure to specify it.}
+This defaults to the \code{outcome}. However, if manually specified, only those
+variables specifically mentioned will be used, and the \code{outcome} will not be
+added.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation. For
 now, we enforce \code{mode = "regression"}. May be \code{NULL} if you'd like to
 decide later.}
 
-\item{args_list}{A list of customization arguments to determine
-the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
+\item{args_list}{A list of customization arguments to determine the type of
+forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
 }
 \value{
 An unfitted \code{epi_workflow}.
@@ -42,8 +40,7 @@ may alter the returned \code{epi_workflow} object (e.g., if you intend to
 use \code{\link[=quantile_reg]{quantile_reg()}}) but can be omitted.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-12-01"))
 
 arx_fcast_epi_workflow(
@@ -58,5 +55,5 @@ arx_fcast_epi_workflow(jhu, "death_rate",
 )
 }
 \seealso{
-\code{\link[=arx_forecaster]{arx_forecaster()}}
+\code{\link[=arx_forecaster]{arx_forecaster()}}, \code{\link[=arx_args_list]{arx_args_list()}}
 }

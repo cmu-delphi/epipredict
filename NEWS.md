@@ -2,6 +2,54 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2
+
+## Breaking changes
+
+- Moved example datasets from being hosted in the package to being loaded
+  from the `epidatasets` package. The datasets can no longer be loaded with
+  `data(<dataset name>)`, but can be accessed with
+  `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>`
+  or, after loading the package, the name of the dataset alone (#382).
+- `step_adjust_latency()` no longer allows empty column selection.
+- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
+  `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
+  has an `na_rm` argument.
+- Moves `epiprocess` out of depends (#440). No internals have changed, but downstream
+  users may need to add `library(epiprocess)` to existing code.
+- Removes dependence on the `distributional` package, replacing the quantiles 
+  with `hardhat::quantile_pred()`. Some associated functions are deprecated with
+  `lifecycle` messages.
+- Rename `check_enough_train_data()` to `check_enough_data()`, and generalize it
+  enough to use as a check on either training or testing.
+- Add check for enough data to predict in `arx_forecaster()`
+- Adds the `.facet_filter` option in `epiprocess::autoplot()` (cmu-delphi/epiprocess#647).
+
+## Improvements
+
+- Add `step_adjust_latency`, which give several methods to adjust the forecast if the `forecast_date` is after the last day of data.
+- Fix `layer_population_scaling` default `by` with `other_keys`.
+- Make key column inference more consistent within the package and with current `epiprocess`.
+- Fix `quantile_reg()` producing error when asked to output just median-level predictions.
+- (temporary) ahead negative is allowed for `step_epi_ahead` until we have `step_epi_shift`
+- Add `reference_date` as an argument to `epi_recipe()`
+- Add `step_climate()` to create "climate" predictor in forecast workflows
+- Add `climatological_forecaster()` to automatically create climate baselines
+- Replace `dist_quantiles()` with `hardhat::quantile_pred()`
+- Allow `quantile()` to threshold to an interval if desired (#434)
+- `arx_forecaster()` detects if there's enough data to predict
+- Add `observed_response` to `autoplot` so that forecasts can be plotted against the values they're predicting
+
+## Bug fixes
+
+- Shifting no columns results in no error for either `step_epi_ahead` and `step_epi_lag`
+- Quantiles produced by `grf` were sometimes out of order.
+- dist_quantiles can have all `NA` values without causing unrelated errors
+- adjust default quantiles throughout so that they match.
+- force `layer_residual_quantiles()` to always include `0.5`.
+- Rename `recipes:::check_training_set()` to `recipes:::validate_training_data()`, as it changed in recipes 1.1.0.
+- A new column name duplicating an existing column name results in an error instead of a random name.
+
 # epipredict 0.1
 
 - simplify `layer_residual_quantiles()` to avoid timesuck in `utils::methods()`
@@ -22,7 +70,7 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - training window step debugged
 - `min_train_window` argument removed from canned forecasters
 - add forecasters
-- implement postprocessing
+- implement post-processing
 - vignettes avaliable
 - arx_forecaster
 - pkgdown

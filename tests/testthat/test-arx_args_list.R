@@ -26,11 +26,14 @@ test_that("arx_args checks inputs", {
   expect_snapshot(error = TRUE, arx_args_list(n_training_min = "de"))
   expect_snapshot(error = TRUE, arx_args_list(epi_keys = 1))
 
-  expect_warning(arx_args_list(
-    forecast_date = as.Date("2022-01-01"),
-    target_date = as.Date("2022-01-03"),
-    ahead = 1L
-  ))
+  expect_error(
+    arx_args_list(
+      forecast_date = as.Date("2022-01-01"),
+      target_date = as.Date("2022-01-04"),
+      ahead = 1L
+    ),
+    class = "epipredict__arx_args__inconsistent_target_ahead_forecaste_date"
+  )
 })
 
 test_that("arx forecaster disambiguates quantiles", {
@@ -38,8 +41,13 @@ test_that("arx forecaster disambiguates quantiles", {
   tlist <- eval(formals(quantile_reg)$quantile_levels)
   expect_identical( # both default
     compare_quantile_args(alist, tlist),
-    sort(c(alist, tlist))
+    c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)
   )
+  expect_snapshot(
+    error = TRUE,
+    compare_quantile_args(alist / 10, 1:9 / 10, "grf")
+  )
+  expect_identical(compare_quantile_args(alist, 1:9 / 10, "grf"), 1:9 / 10)
   alist <- c(.5, alist)
   expect_identical( # tlist is default, should give alist
     compare_quantile_args(alist, tlist),

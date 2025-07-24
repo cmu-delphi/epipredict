@@ -62,7 +62,7 @@ an updated \code{frosting} postprocessor. Calling \code{\link[=predict]{predict(
 in an additional \verb{<list-col>} named \code{.pred_distn_all} containing 2-column
 \code{\link[tibble:tibble]{tibble::tibble()}}'s. For each
 desired combination of \code{key}'s, the tibble will contain one row per ahead
-with the associated \code{\link[=dist_quantiles]{dist_quantiles()}}.
+with the associated \code{\link[=quantile_pred]{quantile_pred()}}.
 }
 \description{
 This layer creates quantile forecasts by taking a sample from the
@@ -84,15 +84,15 @@ the future. This version continues to use the same set of residuals, and
 adds them on to produce wider intervals as \code{ahead} increases.
 }
 \examples{
-library(dplyr)
-r <- epi_recipe(case_death_rate_subset) \%>\%
+library(recipes)
+r <- epi_recipe(covid_case_death_rates) \%>\%
   # data is "daily", so we fit this to 1 ahead, the result will contain
   # 1 day ahead residuals
   step_epi_ahead(death_rate, ahead = 1L, skip = TRUE) \%>\%
-  recipes::update_role(death_rate, new_role = "predictor") \%>\%
-  recipes::add_role(time_value, geo_value, new_role = "predictor")
+  update_role(death_rate, new_role = "predictor") \%>\%
+  add_role(time_value, geo_value, new_role = "predictor")
 
-forecast_date <- max(case_death_rate_subset$time_value)
+forecast_date <- max(covid_case_death_rates$time_value)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
@@ -100,7 +100,7 @@ f <- frosting() \%>\%
 
 eng <- linear_reg(engine = "flatline")
 
-wf <- epi_workflow(r, eng, f) \%>\% fit(case_death_rate_subset)
+wf <- epi_workflow(r, eng, f) \%>\% fit(covid_case_death_rates)
 preds <- forecast(wf) \%>\%
   select(-time_value) \%>\%
   mutate(forecast_date = forecast_date)
@@ -111,22 +111,21 @@ preds <- preds \%>\%
   pivot_quantiles_wider(.pred_distn) \%>\%
   mutate(target_date = forecast_date + ahead)
 
-if (require("ggplot2")) {
-  four_states <- c("ca", "pa", "wa", "ny")
-  preds \%>\%
-    filter(geo_value \%in\% four_states) \%>\%
-    ggplot(aes(target_date)) +
-    geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
-    geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
-    geom_line(aes(y = .pred), color = "orange") +
-    geom_line(
-      data = case_death_rate_subset \%>\% filter(geo_value \%in\% four_states),
-      aes(x = time_value, y = death_rate)
-    ) +
-    scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
-    labs(x = "Date", y = "Death rate") +
-    facet_wrap(~geo_value, scales = "free_y") +
-    theme_bw() +
-    geom_vline(xintercept = forecast_date)
-}
+library(ggplot2)
+four_states <- c("ca", "pa", "wa", "ny")
+preds \%>\%
+  filter(geo_value \%in\% four_states) \%>\%
+  ggplot(aes(target_date)) +
+  geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
+  geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
+  geom_line(aes(y = .pred), color = "orange") +
+  geom_line(
+    data = covid_case_death_rates \%>\% filter(geo_value \%in\% four_states),
+    aes(x = time_value, y = death_rate)
+  ) +
+  scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
+  labs(x = "Date", y = "Death rate") +
+  facet_wrap(~geo_value, scales = "free_y") +
+  theme_bw() +
+  geom_vline(xintercept = forecast_date)
 }

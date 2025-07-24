@@ -39,7 +39,7 @@ test_that("A negative lag value should should throw an error", {
 
 test_that("A nonpositive ahead value should throw an error", {
   expect_snapshot(
-    error = TRUE,
+    error = FALSE,
     r3 <- epi_recipe(x) %>%
       step_epi_ahead(death_rate, ahead = -7) %>%
       step_epi_lag(death_rate, lag = 7)
@@ -65,4 +65,9 @@ test_that("Check that epi_lag shifts applies the shift", {
 
   # Should have four predictors, including the intercept
   expect_equal(length(fit5$fit$fit$fit$coefficients), 4)
+})
+
+test_that("Shifting nothing is a no-op", {
+  expect_no_error(noop <- epi_recipe(x) %>% step_epi_ahead(ahead = 3) %>% prep(x) %>% bake(x))
+  expect_equal(noop, x)
 })

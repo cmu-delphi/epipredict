@@ -13,14 +13,6 @@ epi_recipe <- function(x, ...) {
 }
 
 
-#' @rdname epi_recipe
-#' @export
-epi_recipe.default <- function(x, ...) {
-  cli_abort(paste(
-    "`x` must be an {.cls epi_df} or a {.cls formula},",
-    "not a {.cls {class(x)[[1]]}}."
-  ))
-}
 
 #' @rdname epi_recipe
 #' @inheritParams recipes::recipe
@@ -28,6 +20,19 @@ epi_recipe.default <- function(x, ...) {
 #'   describes a single role that the variable will take. This value could be
 #'   anything but common roles are `"outcome"`, `"predictor"`,
 #'   `"time_value"`, and `"geo_value"`
+#' @param reference_date Either a date of the same class as the `time_value`
+#'   column in the `epi_df` or `NULL`. If a date, it gives the date to which all
+#'   operations are relative. Typically, in real-time tasks this is the date that
+#'   the model is created (and presumably trained). In forecasting, this is
+#'   often the same as the most recent date of
+#'   data availability, but when data is "latent" (reported after the date to
+#'   which it corresponds), or if performing a nowcast, the `reference_date` may
+#'   be later than this. Setting `reference_date`
+#'   to a value BEFORE the most recent data is not a true "forecast",
+#'   because future data is being used to create the model, but this may be
+#'   reasonable in model building, nowcasting (predicting finalized values from
+#'   preliminary data), or if producing a backcast. If `NULL`, it will be set
+#'   to the `as_of` date of the `epi_df`.
 #' @param ... Further arguments passed to or from other methods (not currently
 #'   used).
 #' @param formula A model formula. No in-line functions should be used here
@@ -35,124 +40,122 @@ epi_recipe.default <- function(x, ...) {
 #'  transformations should be enacted using `step` functions in this package.
 #'  Dots are allowed as are simple multivariate outcome terms (i.e. no need for
 #'  `cbind`; see Examples).
-#' @param x,data A data frame, tibble, or epi_df of the *template* data set
-#'   (see below). This is always coerced to the first row to avoid memory issues
+#' @param x,data An epi_df of the *template* data set (see below).
 #' @inherit recipes::recipe return
 #'
 #' @export
 #' @examples
-#' library(dplyr)
-#' library(recipes)
-#' jhu <- case_death_rate_subset %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   arrange(geo_value, time_value)
+#' jhu <- covid_case_death_rates %>%
+#'   filter(time_value > "2021-08-01")
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   # below, `skip` means we don't do this at predict time
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   step_epi_naomit()
 #'
 #' r
-epi_recipe.epi_df <-
-  function(x, formula = NULL, ..., vars = NULL, roles = NULL) {
-    attr(x, "decay_to_tibble") <- FALSE
-    if (!is.null(formula)) {
-      if (!is.null(vars)) {
-        rlang::abort(
-          paste0(
-            "This `vars` specification will be ignored ",
-            "when a formula is used"
-          )
-        )
-      }
-      if (!is.null(roles)) {
-        rlang::abort(
-          paste0(
-            "This `roles` specification will be ignored ",
-            "when a formula is used"
-          )
-        )
-      }
-
-      obj <- epi_recipe.formula(formula, x, ...)
-      return(obj)
-    }
-    if (is.null(vars)) vars <- colnames(x)
-    if (any(table(vars) > 1)) {
-      rlang::abort("`vars` should have unique members")
-    }
-    if (any(!(vars %in% colnames(x)))) {
-      rlang::abort("1 or more elements of `vars` are not in the data")
-    }
-
-    keys <- key_colnames(x) # we know x is an epi_df
-
-    var_info <- tibble(variable = vars)
-    key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
-
-    ## Check and add roles when available
-    if (!is.null(roles)) {
-      if (length(roles) != length(vars)) {
-        rlang::abort(c(
-          "The number of roles should be the same as the number of ",
-          "variables."
-        ))
-      }
-      var_info$role <- roles
-    } else {
-      var_info <- var_info %>% dplyr::filter(!(variable %in% keys))
-      var_info$role <- "raw"
-    }
-    ## Now we add the keys when necessary
-    var_info <- dplyr::union(
-      var_info,
-      tibble::tibble(variable = keys, role = key_roles)
-    )
-
-    ## Add types
-    var_info <- dplyr::full_join(recipes:::get_types(x), var_info, by = "variable")
-    var_info$source <- "original"
-
-    ## arrange to easy order
-    var_info <- var_info %>%
-      dplyr::arrange(factor(
-        role,
-        levels = union(
-          c("predictor", "outcome", "time_value", "geo_value", "key"),
-          unique(role)
-        ) # anything else
+epi_recipe.epi_df <- function(x,
+                              reference_date = NULL,
+                              formula = NULL,
+                              ...,
+                              vars = NULL,
+                              roles = NULL) {
+  attr(x, "decay_to_tibble") <- FALSE
+  if (!is.null(formula)) {
+    if (!is.null(vars)) {
+      cli_abort(paste0(
+        "This `vars` specification will be ignored ",
+        "when a formula is used"
       ))
+    }
+    if (!is.null(roles)) {
+      cli_abort(
+        paste0(
+          "This `roles` specification will be ignored ",
+          "when a formula is used"
+        )
+      )
+    }
 
-    ## Return final object of class `recipe`
-    out <- list(
-      var_info = var_info,
-      term_info = var_info,
-      steps = NULL,
-      template = x[1, ],
-      max_time_value = max(x$time_value),
-      levels = NULL,
-      retained = NA
-    )
-    class(out) <- c("epi_recipe", "recipe")
-    out
+    obj <- epi_recipe.formula(formula, x, ...)
+    return(obj)
   }
+  if (is.null(vars)) vars <- colnames(x)
+  if (any(table(vars) > 1)) {
+    cli_abort("`vars` should have unique members")
+  }
+  if (any(!(vars %in% colnames(x)))) {
+    cli_abort("1 or more elements of `vars` are not in the data")
+  }
+
+  keys <- key_colnames(x) # we know x is an epi_df
+
+  var_info <- tibble(variable = vars)
+  key_roles <- c("geo_value", rep("key", length(keys) - 2), "time_value")
+
+  ## Check and add roles when available
+  if (!is.null(roles)) {
+    if (length(roles) != length(vars)) {
+      cli_abort(paste0(
+        "The number of roles should be the same as the number of ",
+        "variables."
+      ))
+    }
+    var_info$role <- roles
+  } else {
+    var_info <- var_info %>% filter(!(variable %in% keys))
+    var_info$role <- "raw"
+  }
+  ## Now we add the keys when necessary
+  var_info <- dplyr::union(
+    var_info,
+    tibble::tibble(variable = keys, role = key_roles)
+  )
+
+  ## Add types
+  var_info <- full_join(recipes:::get_types(x), var_info, by = "variable")
+  var_info$source <- "original"
+
+  ## arrange to easy order
+  var_info <- var_info %>%
+    arrange(factor(
+      role,
+      levels = union(
+        c("predictor", "outcome", "time_value", "geo_value", "key"),
+        unique(role)
+      ) # anything else
+    ))
+
+  ## Return final object of class `recipe`
+  max_time_value <- max(x$time_value)
+  reference_date <- reference_date %||% attr(x, "metadata")$as_of
+  out <- list(
+    var_info = var_info,
+    term_info = var_info,
+    steps = NULL,
+    template = x[1, ],
+    max_time_value = max_time_value,
+    reference_date = reference_date,
+    levels = NULL,
+    retained = NA
+  )
+  class(out) <- c("epi_recipe", "recipe")
+  out
+}
 
 
 #' @rdname epi_recipe
-#' @importFrom rlang abort
 #' @export
-epi_recipe.formula <- function(formula, data, ...) {
+epi_recipe.formula <- function(formula, data, reference_date = NULL, ...) {
   # we ensure that there's only 1 row in the template
   data <- data[1, ]
   # check for minus:
   if (!epiprocess::is_epi_df(data)) {
-    cli_abort(paste(
-      "`epi_recipe()` has been called with a non-{.cls epi_df} object.",
-      "Use `recipe()` instead."
-    ))
+    cli_abort(
+      "`epi_recipe()` has been called with a non-{.cls epi_df} object.
+      Use `recipe()` instead."
+    )
   }
 
   attr(data, "decay_to_tibble") <- FALSE
@@ -229,9 +232,9 @@ is_epi_recipe <- function(x) {
 
 
 
-#' Add an `epi_recipe` to a workflow
+#' Add/remove/update the `epi_recipe` of an `epi_workflow`
 #'
-#' @seealso [workflows::add_recipe()]
+#' @description
 #' - `add_recipe()` specifies the terms of the model and any preprocessing that
 #'   is required through the usage of a recipe.
 #'
@@ -241,9 +244,9 @@ is_epi_recipe <- function(x) {
 #' recipe with the new one.
 #'
 #' @details
-#' `add_epi_recipe` has the same behaviour as
-#' [workflows::add_recipe()] but sets a different
-#' default blueprint to automatically handle [epiprocess::epi_df][epiprocess::as_epi_df] data.
+#' `add_epi_recipe()` has the same behaviour as [workflows::add_recipe()] but
+#'   sets a different default blueprint to automatically handle
+#'   `epiprocess::epi_df()` data.
 #'
 #' @param x A `workflow` or `epi_workflow`
 #'
@@ -262,20 +265,16 @@ is_epi_recipe <- function(x) {
 #' `x`, updated with a new recipe preprocessor.
 #'
 #' @export
+#' @seealso [workflows::add_recipe()]
 #' @examples
-#' library(dplyr)
-#' library(recipes)
-#'
-#' jhu <- case_death_rate_subset %>%
-#'   filter(time_value > "2021-08-01") %>%
-#'   arrange(geo_value, time_value)
+#' jhu <- covid_case_death_rates %>%
+#'   filter(time_value > "2021-08-01")
 #'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
 #'   step_epi_lag(case_rate, lag = c(0, 7, 14)) %>%
-#'   step_naomit(all_predictors()) %>%
-#'   step_naomit(all_outcomes(), skip = TRUE)
+#'   step_epi_naomit()
 #'
 #' workflow <- epi_workflow() %>%
 #'   add_epi_recipe(r)
@@ -347,10 +346,9 @@ update_epi_recipe <- function(x, recipe, ..., blueprint = default_epi_recipe_blu
 #'
 #' @export
 #' @examples
-#' library(dplyr)
 #' library(workflows)
 #'
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -395,7 +393,7 @@ adjust_epi_recipe.epi_workflow <- function(x, which_step, ..., blueprint = defau
 #' @export
 adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default_epi_recipe_blueprint()) {
   if (!(is.numeric(which_step) || is.character(which_step))) {
-    cli::cli_abort(
+    cli_abort(
       c("`which_step` must be a number or a character.",
         i = "`which_step` has class {.cls {class(which_step)[1]}}."
       )
@@ -408,7 +406,7 @@ adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default
     if (!starts_with_step) which_step <- paste0("step_", which_step)
 
     if (!(which_step %in% step_names)) {
-      cli::cli_abort(c(
+      cli_abort(c(
         "`which_step` does not appear in the available `epi_recipe` step names. ",
         i = "The step names are {.val {step_names}}."
       ))
@@ -417,7 +415,7 @@ adjust_epi_recipe.epi_recipe <- function(x, which_step, ..., blueprint = default
     if (length(which_step_idx) == 1) {
       x$steps[[which_step_idx]] <- update(x$steps[[which_step_idx]], ...)
     } else {
-      cli::cli_abort(c(
+      cli_abort(c(
         "`which_step` is not unique. Matches steps: {.val {which_step_idx}}.",
         i = "Please use the step number instead for precise alterations."
       ))
@@ -432,7 +430,7 @@ prep.epi_recipe <- function(
     x, training = NULL, fresh = FALSE, verbose = FALSE,
     retain = TRUE, log_changes = FALSE, strings_as_factors = TRUE, ...) {
   if (is.null(training)) {
-    cli::cli_warn(c(
+    cli_warn(c(
       "!" = "No training data was supplied to {.fn prep}.",
       "!" = "Unlike a {.cls recipe}, an {.cls epi_recipe} does not ",
       "!" = "store the full template data in the object.",
@@ -440,9 +438,9 @@ prep.epi_recipe <- function(
       "!" = "to avoid addtional warning messages."
     ))
   }
-  training <- recipes:::check_training_set(training, x, fresh)
+  training <- recipes:::validate_training_data(training, x, fresh)
   training <- epi_check_training_set(training, x)
-  training <- dplyr::relocate(training, dplyr::all_of(key_colnames(training)))
+  training <- relocate(training, all_of(key_colnames(training)))
   tr_data <- recipes:::train_info(training)
   keys <- key_colnames(x)
 
@@ -457,7 +455,7 @@ prep.epi_recipe <- function(
   }
   skippers <- map_lgl(x$steps, recipes:::is_skipable)
   if (any(skippers) & !retain) {
-    cli::cli_warn(c(
+    cli_warn(paste(
       "Since some operations have `skip = TRUE`, using ",
       "`retain = TRUE` will allow those steps results to ",
       "be accessible."
@@ -465,9 +463,9 @@ prep.epi_recipe <- function(
   }
   if (fresh) x$term_info <- x$var_info
 
-  running_info <- x$term_info %>% dplyr::mutate(number = 0, skip = FALSE)
-  for (i in seq(along.with = x$steps)) {
-    needs_tuning <- map_lgl(x$steps[[i]], recipes:::is_tune)
+  running_info <- x$term_info %>% mutate(number = 0, skip = FALSE)
+  for (ii in seq(along.with = x$steps)) {
+    needs_tuning <- map_lgl(x$steps[[ii]], recipes:::is_tune)
     if (any(needs_tuning)) {
       arg <- names(needs_tuning)[needs_tuning]
       arg <- paste0("'", arg, "'", collapse = ", ")
@@ -475,22 +473,22 @@ prep.epi_recipe <- function(
         "You cannot `prep()` a tuneable recipe. Argument(s) with `tune()`: ",
         arg, ". Do you want to use a tuning function such as `tune_grid()`?"
       )
-      rlang::abort(msg)
+      cli_abort(msg)
     }
-    note <- paste("oper", i, gsub("_", " ", class(x$steps[[i]])[1]))
-    if (!x$steps[[i]]$trained | fresh) {
+    note <- paste("oper", ii, gsub("_", " ", class(x$steps[[ii]])[1]))
+    if (!x$steps[[ii]]$trained || fresh) {
       if (verbose) {
         cat(note, "[training]", "\n")
       }
       before_nms <- names(training)
       before_template <- training[1, ]
-      x$steps[[i]] <- prep(x$steps[[i]],
+      x$steps[[ii]] <- prep(x$steps[[ii]],
         training = training,
         info = x$term_info
       )
-      training <- bake(x$steps[[i]], new_data = training)
+      training <- bake(x$steps[[ii]], new_data = training)
       if (!tibble::is_tibble(training)) {
-        cli::cli_abort("`bake()` methods should always return {.cls tibble}.")
+        cli_abort("`bake()` methods should always return {.cls tibble}.")
       }
       if (!is_epi_df(training)) {
         # tidymodels killed our class
@@ -502,20 +500,20 @@ prep.epi_recipe <- function(
           other_keys = metadata$other_keys %||% character()
         )
       }
-      training <- dplyr::relocate(training, all_of(key_colnames(training)))
+      training <- relocate(training, all_of(key_colnames(training)))
       x$term_info <- recipes:::merge_term_info(get_types(training), x$term_info)
-      if (!is.na(x$steps[[i]]$role)) {
+      if (!is.na(x$steps[[ii]]$role)) {
         new_vars <- setdiff(x$term_info$variable, running_info$variable)
         pos_new_var <- x$term_info$variable %in% new_vars
         pos_new_and_na_role <- pos_new_var & is.na(x$term_info$role)
         pos_new_and_na_source <- pos_new_var & is.na(x$term_info$source)
-        x$term_info$role[pos_new_and_na_role] <- x$steps[[i]]$role
+        x$term_info$role[pos_new_and_na_role] <- x$steps[[ii]]$role
         x$term_info$source[pos_new_and_na_source] <- "derived"
       }
       recipes:::changelog(log_changes, before_nms, names(training), x$steps[[i]])
       running_info <- rbind(
         running_info,
-        dplyr::mutate(x$term_info, number = i, skip = x$steps[[i]]$skip)
+        mutate(x$term_info, number = ii, skip = x$steps[[ii]]$skip)
       )
     } else {
       if (verbose) cat(note, "[pre-trained]\n")
@@ -547,9 +545,9 @@ prep.epi_recipe <- function(
   x$orig_lvls <- orig_lvls
   x$retained <- retain
   x$last_term_info <- running_info %>%
-    dplyr::group_by(variable) %>%
-    dplyr::arrange(dplyr::desc(number)) %>%
-    dplyr::summarise(
+    group_by(variable) %>%
+    arrange(dplyr::desc(number)) %>%
+    summarise(
       type = list(dplyr::first(type)),
       role = list(unique(unlist(role))),
       source = dplyr::first(source),
@@ -571,6 +569,7 @@ bake.epi_recipe <- function(object, new_data, ..., composition = "epi_df") {
     }
     composition <- "tibble"
   }
+
   new_data <- NextMethod("bake")
   if (!is.null(meta)) {
     # Baking should have dropped epi_df-ness and metadata. Re-infer some

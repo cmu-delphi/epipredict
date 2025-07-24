@@ -23,7 +23,8 @@
 #'
 #' @examples
 #' library(dplyr)
-#' weekly_deaths <- case_death_rate_subset %>%
+#' library(epiprocess)
+#' weekly_deaths <- covid_case_death_rates %>%
 #'   select(geo_value, time_value, death_rate) %>%
 #'   left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
 #'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
@@ -36,25 +37,24 @@
 #' cdc <- cdc_baseline_forecaster(weekly_deaths, "deaths_7dsum")
 #' preds <- pivot_quantiles_wider(cdc$predictions, .pred_distn)
 #'
-#' if (require(ggplot2)) {
-#'   forecast_date <- unique(preds$forecast_date)
-#'   four_states <- c("ca", "pa", "wa", "ny")
-#'   preds %>%
-#'     filter(geo_value %in% four_states) %>%
-#'     ggplot(aes(target_date)) +
-#'     geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
-#'     geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
-#'     geom_line(aes(y = .pred), color = "orange") +
-#'     geom_line(
-#'       data = weekly_deaths %>% filter(geo_value %in% four_states),
-#'       aes(x = time_value, y = deaths_7dsum)
-#'     ) +
-#'     scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
-#'     labs(x = "Date", y = "Weekly deaths") +
-#'     facet_wrap(~geo_value, scales = "free_y") +
-#'     theme_bw() +
-#'     geom_vline(xintercept = forecast_date)
-#' }
+#' library(ggplot2)
+#' forecast_date <- unique(preds$forecast_date)
+#' four_states <- c("ca", "pa", "wa", "ny")
+#' preds %>%
+#'   filter(geo_value %in% four_states) %>%
+#'   ggplot(aes(target_date)) +
+#'   geom_ribbon(aes(ymin = `0.1`, ymax = `0.9`), fill = blues9[3]) +
+#'   geom_ribbon(aes(ymin = `0.25`, ymax = `0.75`), fill = blues9[6]) +
+#'   geom_line(aes(y = .pred), color = "orange") +
+#'   geom_line(
+#'     data = weekly_deaths %>% filter(geo_value %in% four_states),
+#'     aes(x = time_value, y = deaths_7dsum)
+#'   ) +
+#'   scale_x_date(limits = c(forecast_date - 90, forecast_date + 30)) +
+#'   labs(x = "Date", y = "Weekly deaths") +
+#'   facet_wrap(~geo_value, scales = "free_y") +
+#'   theme_bw() +
+#'   geom_vline(xintercept = forecast_date)
 cdc_baseline_forecaster <- function(
     epi_data,
     outcome,
@@ -78,10 +78,7 @@ cdc_baseline_forecaster <- function(
   # target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
 
 
-  latest <- get_test_data(
-    epi_recipe(epi_data), epi_data, TRUE, args_list$nafill_buffer,
-    forecast_date
-  )
+  latest <- get_test_data(epi_recipe(epi_data), epi_data)
 
   f <- frosting() %>%
     layer_predict() %>%
@@ -169,7 +166,6 @@ cdc_baseline_args_list <- function(
     symmetrize = TRUE,
     nonneg = TRUE,
     quantile_by_key = "geo_value",
-    nafill_buffer = Inf,
     ...) {
   rlang::check_dots_empty()
   arg_is_scalar(n_training, nsims, data_frequency)
@@ -183,7 +179,6 @@ cdc_baseline_args_list <- function(
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
   if (is.finite(n_training)) arg_is_pos_int(n_training)
-  if (is.finite(nafill_buffer)) arg_is_pos_int(nafill_buffer, allow_null = TRUE)
 
   structure(
     enlist(
@@ -195,8 +190,7 @@ cdc_baseline_args_list <- function(
       nsims,
       symmetrize,
       nonneg,
-      quantile_by_key,
-      nafill_buffer
+      quantile_by_key
     ),
     class = c("cdc_baseline_fcast", "alist")
   )

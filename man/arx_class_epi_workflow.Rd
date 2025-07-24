@@ -23,10 +23,9 @@ If discrete classes are already in the \code{epi_df}, it is recommended to
 code up a classifier from scratch using \code{\link[=epi_recipe]{epi_recipe()}}.}
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
-This defaults to the \code{outcome}. However, if manually specified, only those variables
-specifically mentioned will be used. (The \code{outcome} will not be added.)
-By default, equals the outcome. If manually specified, does not add the
-outcome variable, so make sure to specify it.}
+This defaults to the \code{outcome}. However, if manually specified, only those
+variables specifically mentioned will be used, and the \code{outcome} will not be
+added.}
 
 \item{trainer}{A \code{{parsnip}} model describing the type of estimation. For
 now, we enforce \code{mode = "classification"}. Typical values are
@@ -47,8 +46,7 @@ before fitting and predicting. Supplying a trainer to the function
 may alter the returned \code{epi_workflow} object but can be omitted.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 
 arx_class_epi_workflow(jhu, "death_rate", c("case_rate", "death_rate"))
@@ -65,5 +63,5 @@ arx_class_epi_workflow(
 )
 }
 \seealso{
-\code{\link[=arx_classifier]{arx_classifier()}}
+\code{\link[=arx_classifier]{arx_classifier()}} \code{\link[=arx_class_args_list]{arx_class_args_list()}}
 }

@@ -1,474 +1,630 @@
 ---
-title: "Get started with epipredict"
+title: "Get started with `epipredict`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Get started with epipredict}
+  %\VignetteIndexEntry{Get started with `epipredict`}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
+# Introduction
+
 ```{r, include = FALSE}
-knitr::opts_chunk$set(
-  echo = TRUE,
-  collapse = TRUE,
-  comment = "#>",
-  out.width = "100%"
-)
+source(here::here("vignettes/_common.R"))
 ```
+
+
+At a high level, the goal of `{epipredict}` is to make it easy to run simple machine
+learning and statistical forecasters for epidemiological data.
+To do this, we have extended the [tidymodels](https://www.tidymodels.org/)
+framework to handle the case of panel time-series data.
+
+Our hope is that it is easy for users with epidemiological training and some statistical knowledge to
+estimate baseline models, while also allowing those with more nuanced statistical
+understanding to create complex custom models using the same framework.
+Towards that end, `{epipredict}` provides two main classes of tools:
+
+## Canned forecasters
+
+A set of basic, easy-to-use "canned" forecasters that work out of the box.
+We currently provide the following basic forecasters:
+
+  * `flatline_forecaster()`: predicts as the median the most recently seen value
+    with increasingly wide quantiles.
+  * `climatological_forecaster()`: predicts the median and quantiles based on the historical values around the same date in previous years.
+  * `arx_forecaster()`: an AutoRegressive eXogenous feature forecaster, which
+    estimates a model (e.g. linear regression) on lagged data to predict quantiles
+    for continuous values.
+  * `arx_classifier()`: fits a model (e.g. logistic regression) on lagged data
+    to predict a binned version of the growth rate.
+  * `cdc_baseline_forecaster()`: a variant of the flatline forecaster that is
+    used as a baseline in the CDC's [FluSight forecasting competition](https://www.cdc.gov/flu-forecasting/about/index.html).
+
+## Forecasting framework
+
+A framework for creating custom forecasters out of modular components, from
+which the canned forecasters were created.  There are three types of
+components:
+
+  * _Preprocessor_: transform the data before model training, such as converting
+    counts to rates, creating smoothed columns, or [any `{recipes}`
+    `step`](https://recipes.tidymodels.org/reference/index.html)
+  * _Trainer_: train a model on data, resulting in a fitted model object.
+    Examples include linear regression, quantile regression, or [any `{parsnip}`
+    engine](https://www.tidymodels.org/find/parsnip/).
+  * _Postprocessor_: unique to `{epipredict}`; used to transform the
+    predictions after the model has been fit, such as
+    - generating quantiles from purely point-prediction models,
+    - reverting operations done in the `step`s, such as converting from
+    rates back to counts
+    - generally adapting the format of the prediction to its eventual use.
+
+The rest of this "Get Started" vignette will focus on using and modifying the canned forecasters.
+Check out the [Custom Epiworkflows vignette](preprocessing-and-models) for examples of using the forecaster
+framework to make more complex, custom forecasters.
+
+If you are interested in time series in a non-panel data context, you may also
+want to look at `{timetk}` and `{modeltime}` for some related techniques.
+
+For a more in-depth treatment with some practical applications, see also the
+[Forecasting Book](https://cmu-delphi.github.io/delphi-tooling-book/).
+
+# Panel forecasting basics
+
+This section gives basic usage examples for the package beyond the most basic usage of `arx_forecaster()` for forecasting a single ahead using the default engine.
+Before we start actually building forecasters, lets import some relevant libraries
 
 ```{r setup, message=FALSE}
 library(dplyr)
 library(parsnip)
 library(workflows)
 library(recipes)
+library(epidatasets)
 library(epipredict)
+library(epiprocess)
+library(ggplot2)
+library(purrr)
+library(epidatr)
 ```
 
+And our default forecasting date and selected states (we will use these to limit the data to make discussion easier):
 
-# Goals for the package
-
-At a high level, our goal with `{epipredict}` is to make running simple Machine
-Learning / Statistical forecasters for epidemiology easy. However, this package
-is extremely extensible, and that is part of its utility. Our hope is that it is
-easy for users with epi training and some statistics to fit baseline models
-while still allowing those with more nuanced statistical understanding to create
-complicated specializations using the same framework.
-
-Serving both populations is the main motivation for our efforts, but at the same
-time, we have tried hard to make it useful.
-
-
-## Baseline models
-
-We provide a set of basic, easy-to-use forecasters that work out of the box. You
-should be able to do a reasonably limited amount of customization on them. Any
-serious customization happens with the framework discussed below).
-
-For the basic forecasters, we provide:
-
-* Baseline flat-line forecaster
-* Autoregressive forecaster
-* Autoregressive classifier
-
-All the forcasters we provide are built on our framework. So we will use these
-basic models to illustrate its flexibility.
-
-## Forecasting framework
-
-Our framework for creating custom forecasters views the prediction task as a set
-of modular components. There are four types of components:
-
-1. Preprocessor: make transformations to the data before model training
-2. Trainer: train a model on data, resulting in a fitted model object
-3. Predictor: make predictions, using a fitted model object and processed test data
-4. Postprocessor: manipulate or transform the predictions before returning
-
-Users familiar with [`{tidymodels}`](https://www.tidymodels.org) and especially
-the [`{workflows}`](https://workflows.tidymodels.org) package will notice a lot
-of overlap. This is by design, and is in fact a feature. The truth is that
-`{epipredict}` is a wrapper around much that is contained in these packages.
-Therefore, if you want something from this -verse, it should "just work" (we
-hope).
-
-The reason for the overlap is that `{workflows}` *already implements* the first
-three steps. And it does this very well. However, it is missing the
-postprocessing stage and currently has no plans for such an implementation. And
-this feature is important. The baseline forecaster we provide *requires*
-postprocessing. Anything more complicated needs this as well.
-
-The second omission from `{tidymodels}` is support for panel data. Besides
-epidemiological data, economics, psychology, sociology, and many other areas
-frequently deal with data of this type. So the framework of behind
-`{epipredict}` implements this. In principle, this has nothing to do with
-epidemiology, and one could simply use this package as a solution for the
-missing functionality in `{tidymodels}`. Again, this should "just work".
-
-All of the *panel data* functionality is implemented through the `epi_df` data
-type in the companion [`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/)
-package. There is much more to see there, but for the moment, it's enough to
-look at a simple one:
-
-```{r epidf}
-jhu <- case_death_rate_subset
-jhu
+```{r}
+forecast_date <- as.Date("2021-08-01")
+used_locations <- c("ca", "ma", "ny", "tx")
 ```
 
-This data is built into the package and contains the measured variables
-`case_rate` and `death_rate` for COVID-19 at the daily level for each US state
-for the year 2021. The "panel" part is because we have repeated measurements
-across a number of locations.
+## Example data
 
-The `epi_df` encodes the time stamp as `time_value` and the `key` as
-`geo_value`. While these 2 names are required, the values don't need to actually
-represent such objects. Additional `key`'s are also supported (like age group,
-ethnicity, taxonomy, etc.).
+The forecasting methods in this package are designed to work with panel time
+series data in `epi_df` format as made available in the `{epiprocess}`
+package.
+An `epi_df` is a collection of one or more time-series indexed by one or more
+categorical variables.
+The [`{epidatasets}`](https://cmu-delphi.github.io/epidatasets/) package makes several
+pre-compiled example datasets available.
+Let's look at an example `epi_df`:
 
-The `epi_df` also contains some metadata that describes the keys as well as the
-vintage of the data. It's possible that data collected at different times for
-the *same set* of `geo_value`'s and `time_value`'s could actually be different.
-For more details, see
-[`{epiprocess}`](https://cmu-delphi.github.io/epiprocess/articles/epiprocess.html).
+```{r data_ex}
+covid_case_death_rates
+```
 
-## Why doesn't this package already exist?
+An `epi_df` always has a `geo_value` and a `time_value` as keys, along with some number of value columns, in this case `case_rate` and `death_rate`.
+Each of these has an associated `geo_type` (state) and `time_type` (day), for which there are some utilities.
+While this `geo_value` and `time_value` are the minimal set of keys, the functions of `{epiprocess}` and `{epipredict}` are designed to accommodate other key values, such as age, ethnicity, or other demographic
+information.
+For example, `grad_employ_subset` from `{epidatasets}` also has both `age_group`
+and `edu_qual` as additional keys:
 
-As described above:
+```{r extra_keys}
+grad_employ_subset
+```
 
-* Parts actually DO exist. There's a universe called `{tidymodels}`. It handles
-preprocessing, training, and prediction, bound together, through a package called
-`{workflows}`. We built `{epipredict}` on top of that setup. In this way, you CAN
-use almost everything they provide.
+See `{epiprocess}` for [more details on the `epi_df` format](https://cmu-delphi.github.io/epiprocess/articles/epi_df.html).
 
-* However, `{workflows}` doesn't do postprocessing. And nothing in the -verse
-handles _panel data_.
+Panel time series are ubiquitous in epidemiology, but are also common in
+economics, psychology, sociology, and many other areas.
+While this package was designed with epidemiology in mind, many of the
+techniques are more broadly applicable.
 
-* The tidy-team doesn't have plans to do either of these things. (We checked).
+## Customizing `arx_forecaster()`
 
-* There are two packages that do _time series_ built on `{tidymodels}`, but it's
-"basic" time series: 1-step AR models, exponential smoothing, STL decomposition,
-etc.[^2] Our group has not prioritized these sorts of models for epidemic
-forecasting, but one could also integrate these methods into our framework.
+Let's expand on the basic example presented on the [landing
+page](../index.html#motivating-example), starting with adjusting some parameters in
+`arx_forecaster()`.
 
-[^2]: These are [`{timetk}`](https://business-science.github.io/timetk/index.html)
-and [`{modeltime}`](https://business-science.github.io/timetk/index.html). There
-are *lots* of useful methods there than can be used to do fairly complex machine
-learning methodology, though not directly for panel data and not for direct
-prediction of future targets.
+The `trainer` argument allows us to set the computational engine. We can use either
+one of the relevant [parsnip models](https://www.tidymodels.org/find/parsnip/),
+or one of the included engines, such as `smooth_quantile_reg()`:
 
-# Show me the basics
-
-We start with the `jhu` data displayed above. One of the "canned" forecasters we
-provide is an autoregressive forecaster with (or without) covariates that
-*directly* trains on the response. This is in contrast to a typical "iterative"
-AR model that trains to predict one-step-ahead, and then plugs in the
-predictions to "leverage up" to longer horizons.
-
-We'll estimate the model jointly across all locations using only the most
-recent 30 days.
-
-```{r demo-workflow}
-jhu <- jhu %>% filter(time_value >= max(time_value) - 30)
-out <- arx_forecaster(
-  jhu,
+```{r make-forecasts, warning=FALSE}
+two_week_ahead <- arx_forecaster(
+  covid_case_death_rates |> filter(time_value <= forecast_date),
   outcome = "death_rate",
-  predictors = c("case_rate", "death_rate")
-)
-```
-
-The `out` object has two components:
-
-  1. The predictions which is just another `epi_df`. It contains the predictions for
-each location along with additional columns. By default, these are a 90%
-predictive interval, the `forecast_date` (the date on which the forecast was
-putatively made) and the `target_date` (the date for which the forecast is being
-made).
-  ```{r}
-out$predictions
-  ```
-  2. A list object of class `epi_workflow`. This object encapsulates all the
-instructions necessary to create the prediction. More details on this below.
-  ```{r}
-out$epi_workflow
-  ```
-
-By default, the forecaster predicts the outcome (`death_rate`) 1-week ahead,
-using 3 lags of each predictor (`case_rate` and `death_rate`) at 0 (today), 1
-week back and 2 weeks back. The predictors and outcome can be changed directly.
-The rest of the defaults are encapsulated into a list of arguments. This list is
-produced by `arx_args_list()`.
-
-## Simple adjustments
-
-Basic adjustments can be made through the `args_list`.
-
-```{r kill-warnings, echo=FALSE}
-knitr::opts_chunk$set(warning = FALSE, message = FALSE)
-```
-
-```{r differential-lags}
-out2week <- arx_forecaster(
-  jhu,
-  outcome = "death_rate",
-  predictors = c("case_rate", "death_rate"),
+  trainer = quantile_reg(),
+  predictors = c("death_rate"),
   args_list = arx_args_list(
-    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
+    lags = list(c(0, 7, 14)),
+    ahead = 14
+  )
+)
+hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
+```
+
+The default trainer is `parsnip::linear_reg()`, which generates quantiles after
+the fact in the post-processing layers, rather than as part of the model.
+While these post-processing layers will produce prediction intervals for an
+arbitrary trainer, it is generally preferable to use `quantile_reg()` (or an
+alternative that produces statistically justifiable prediction intervals), as
+the quantiles generated in post-processing can be poorly behaved.
+`quantile_reg()` on the other hand directly estimates a different linear model
+for each quantile, reflected in the several different columns for `tau` above.
+
+Because of the flexibility of `{parsnip}`, there are a whole host of models
+available to us[^5]; as an example, we could have just as easily substituted a
+non-linear random forest model from `{ranger}`:
+
+```{r rand_forest_ex, warning=FALSE}
+two_week_ahead <- arx_forecaster(
+  covid_case_death_rates |> filter(time_value <= forecast_date),
+  outcome = "death_rate",
+  trainer = rand_forest(mode = "regression"),
+  predictors = c("death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0, 7, 14)),
     ahead = 14
   )
 )
 ```
 
-Here, we've used different lags on the `case_rate` and are now predicting 2
-weeks ahead. This example also illustrates a major difficulty with the
-"iterative" versions of AR models. This model doesn't produce forecasts for
-`case_rate`, and so, would not have data to "plug in" for the necessary
-lags.[^1]
+Other customization is possible via `args_list = arx_args_list()`; for
+example, if we wanted to increase the number of quantiles fit:
 
-[^1]: An obvious fix is to instead use a VAR and predict both, but this would
-likely increase the variance of the model, and therefore, may lead to less
-accurate forecasts for the variable of interest.
-
-Another property of the basic model is the predictive interval. We describe this
-in more detail in a different vignette, but it is easy to request multiple
-quantiles.
-
-```{r differential-levels}
-out_q <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
+```{r make-quantile-levels-forecasts, warning=FALSE}
+two_week_ahead <- arx_forecaster(
+  covid_case_death_rates |>
+    filter(time_value <= forecast_date, geo_value %in% used_locations),
+  outcome = "death_rate",
+  trainer = quantile_reg(),
+  predictors = c("death_rate"),
   args_list = arx_args_list(
-    quantile_levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99)
+    lags = list(c(0, 7, 14)),
+    ahead = 14,
+    ############ changing quantile_levels ############
+    quantile_levels = c(0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9, 0.95)
+    ##################################################
+  )
+)
+hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
+```
+
+See the function documentation for `arx_args_list()` for more examples of the modifications available.
+If you want to make further modifications, you will need a custom
+workflow; see the [Custom Epiworkflows vignette](custom_epiworkflows) for details.
+
+## Generating multiple aheads
+
+We often want to generate a a trajectory
+of forecasts over a range of dates, rather than for a single day.
+We can do this with `arx_forecaster()` by looping over aheads.
+For example, to predict every day over a 4-week time period:
+
+```{r aheads-loop}
+all_canned_results <- lapply(
+  seq(0, 28),
+  \(days_ahead) {
+    arx_forecaster(
+      covid_case_death_rates |>
+        filter(time_value <= forecast_date, geo_value %in% used_locations),
+      outcome = "death_rate",
+      predictors = c("case_rate", "death_rate"),
+      trainer = quantile_reg(),
+      args_list = arx_args_list(
+        lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
+        ahead = days_ahead
+      )
+    )
+  }
+)
+# pull out the workflow and the predictions to be able to
+#  effectively use autoplot
+workflow <- all_canned_results[[1]]$epi_workflow
+results <- all_canned_results |>
+  purrr::map(~ `$`(., "predictions")) |>
+  list_rbind()
+autoplot(
+  object = workflow,
+  predictions = results,
+  observed_response = covid_case_death_rates |>
+    filter(geo_value %in% used_locations, time_value > "2021-07-01")
+)
+```
+
+## Other canned forecasters
+
+This section gives a brief example of each of the canned forecasters.
+
+### `flatline_forecaster()`
+
+The simplest model we provide is the `flatline_forecaster()`, which predicts a
+flat line (with quantiles generated from the residuals using
+`layer_residual_quantiles()`).
+For example, on the same dataset as above:
+```{r make-flatline-forecast, warning=FALSE}
+all_flatlines <- lapply(
+  seq(0, 28),
+  \(days_ahead) {
+    flatline_forecaster(
+      covid_case_death_rates |>
+        filter(time_value <= forecast_date, geo_value %in% used_locations),
+      outcome = "death_rate",
+      args_list = flatline_args_list(
+        ahead = days_ahead,
+      )
+    )
+  }
+)
+# same plotting code as in the arx multi-ahead case
+workflow <- all_flatlines[[1]]$epi_workflow
+results <- all_flatlines |>
+  purrr::map(~ `$`(., "predictions")) |>
+  list_rbind()
+autoplot(
+  object = workflow,
+  predictions = results,
+  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+)
+```
+
+### `cdc_baseline_forecaster()`
+
+This is a different method of generating a flatline forecast, used as a baseline
+for [the CDC COVID-19 Forecasting Hub](https://covid19forecasthub.org).
+
+```{r make-cdc-forecast, warning=FALSE}
+all_cdc_flatline <-
+  cdc_baseline_forecaster(
+    covid_case_death_rates |>
+      filter(time_value <= forecast_date, geo_value %in% used_locations),
+    outcome = "death_rate",
+    args_list = cdc_baseline_args_list(
+      aheads = 1:28,
+      data_frequency = "1 day"
+    )
+  )
+# same plotting code as in the arx multi-ahead case
+workflow <- all_cdc_flatline$epi_workflow
+results <- all_cdc_flatline$predictions
+autoplot(
+  object = workflow,
+  predictions = results,
+  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+)
+```
+
+`cdc_baseline_forecaster()` and `flatline_forecaster()` generate medians in the same way, 
+but `cdc_baseline_forecaster()`'s quantiles are generated using
+`layer_cdc_flatline_quantiles()` instead of `layer_residual_quantiles()`.
+Both quantile-generating methods use the residuals to compute quantiles, but 
+`layer_cdc_flatline_quantiles()` extrapolates the quantiles by repeatedly 
+sampling the initial quantiles to generate the next set.
+This results in much smoother quantiles, but ones that only capture the
+one-ahead uncertainty.
+
+### `climatological_forecaster()`
+
+The `climatological_forecaster()` is a different kind of baseline. It produces a
+point forecast and quantiles based on the historical values for a given time of
+year, rather than extrapolating from recent values.
+Among our forecasters, it is the only one well suited for forecasts at long time horizons.
+
+Since it requires multiple years of data and a roughly seasonal signal, the dataset we've been using for demonstrations so far is poor example for a climate forecast[^8].
+Instead, we'll use the fluview ILI dataset, which is weekly influenza like illness data for hhs regions, going back to 1997.
+
+
+We'll predict the 2023/24 season using all previous data, including 2020-2022, the two years where there was approximately no seasonal flu, forecasting from the start of the season, `2023-10-08`:
+
+```{r make-climatological-forecast, warning=FALSE}
+fluview_hhs <- pub_fluview(
+  regions = paste0("hhs", 1:10),
+  epiweeks = epirange(100001,222201)
+)
+fluview <- fluview_hhs %>%
+  select(
+    geo_value = region,
+    time_value = epiweek,
+    issue,
+    ili) %>%
+  as_epi_archive() %>%
+  epix_as_of_current()
+
+all_climate <- climatological_forecaster(
+  fluview %>% filter(time_value < "2023-10-08"),
+  outcome = "ili",
+  args_list = climate_args_list(
+    forecast_horizon = seq(0, 28),
+    time_type = "week",
+    quantile_by_key = "geo_value",
+    forecast_date = as.Date("2023-10-08")
+  )
+)
+workflow <- all_climate$epi_workflow
+results <- all_climate$predictions
+autoplot(
+  object = workflow,
+  predictions = results,
+  observed_response = fluview %>%
+    filter(time_value >= "2023-10-08", time_value < "2024-05-01") %>%
+    mutate(geo_value = factor(geo_value, levels = paste0("hhs", 1:10)))
+)
+```
+
+
+One feature of the climatological baseline is that it forecasts multiple aheads
+simultaneously; here we do so for the entire season of 28 weeks.
+This is possible for `arx_forecaster()`, but only using `trainer =
+smooth_quantile_reg()`, which is built to handle multiple aheads simultaneously[^9].
+
+A pure climatological forecast can be thought of as forecasting a typical year so far.
+The 2023/24 had some regions, such as `hhs10` which were quite close to the typical year, and some, such as `hhs2` that were frequently outside even the 90% prediction band (the lightest shown above).
+
+### `arx_classifier()`
+
+Unlike the other canned forecasters, `arx_classifier` predicts binned growth rate.
+The forecaster converts the raw outcome variable into a growth rate, which it then bins and predicts, using bin thresholds provided by the user.
+For example, on the same dataset and `forecast_date` as above, this model outputs:
+
+```{r discrete-rt}
+classifier <- arx_classifier(
+  covid_case_death_rates |>
+    filter(geo_value %in% used_locations, time_value < forecast_date),
+  outcome = "death_rate",
+  predictors = c("death_rate", "case_rate"),
+  trainer = multinom_reg(),
+  args_list = arx_class_args_list(
+    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
+    ahead = 2 * 7,
+    breaks = 0.25 / 7
+  )
+)
+classifier$predictions
+```
+
+The number and size of the growth rate categories is controlled by `breaks`,
+which define the bin boundaries.
+
+In this example, the custom `breaks` passed to `arx_class_args_list()` correspond to 2 bins:
+`(-∞, 0.0357]` and `(0.0357, ∞)`.
+The bins can be interpreted as: `death_rate` is decreasing/growing slowly,
+ or `death_rate` is growing quickly.
+
+The returned `predictions` assigns each state to one of the growth rate bins.
+In this case, the classifier expects the growth rate for all 4 of the states to fall into the same category,
+`(-∞, 0.0357]`.
+
+To see how this model performed, let's compare to the actual growth rates for the `target_date`, as computed using
+`{epiprocess}`:
+
+```{r growth_rate_results}
+growth_rates <- covid_case_death_rates |>
+  filter(geo_value %in% used_locations) |>
+  group_by(geo_value) |>
+  mutate(
+    deaths_gr = growth_rate(x = time_value, y = death_rate)
+  ) |>
+  ungroup()
+growth_rates |> filter(time_value == "2021-08-14")
+```
+
+The accuracy is 50%, since all 4 states were predicted to be in the interval
+`(-Inf, 0.0357]`, while two,  `ca` and `ny` actually were.
+
+
+## Handling multi-key panel data
+
+If multiple keys are set in the `epi_df` as `other_keys`, `arx_forecaster` will
+automatically group by those in addition to the required geographic key.
+For example, predicting the number of graduates in a subset of the categories in
+`grad_employ_subset` from above:
+
+```{r multi_key_forecast, warning=FALSE}
+edu_quals <- c("Undergraduate degree", "Professional degree")
+geo_values <- c("Quebec", "British Columbia")
+
+grad_employ <- grad_employ_subset |>
+  filter(edu_qual %in% edu_quals, geo_value %in% geo_values)
+
+grad_employ
+
+grad_forecast <- arx_forecaster(
+  grad_employ |>
+    filter(time_value < 2017),
+  outcome = "num_graduates",
+  predictors = c("num_graduates"),
+  args_list = arx_args_list(
+    lags = list(c(0, 1, 2)),
+    ahead = 1
+  )
+)
+# and plotting
+autoplot(
+  grad_forecast$epi_workflow,
+  grad_forecast$predictions,
+  observed_response = grad_employ,
+) + geom_vline(aes(xintercept = 2016))
+```
+
+The 8 graphs represent all combinations of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).
+
+## Estimating models without geo-pooling
+
+The methods shown so far estimate a single model across all geographic regions, treating them as if they are independently and identically distributed (see [Mathematical description] for an explicit model example).
+This is called "geo-pooling".
+In the context of `{epipredict}`, the simplest way to avoid geo-pooling and use different parameters for each geography is to loop over the `geo_value`s:
+
+```{r fit_non_geo_pooled, warning=FALSE}
+geo_values <- covid_case_death_rates |>
+  pull(geo_value) |>
+  unique()
+
+all_fits <-
+  purrr::map(geo_values, \(geo) {
+    covid_case_death_rates |>
+      filter(
+        geo_value == geo,
+        time_value <= forecast_date
+      ) |>
+      arx_forecaster(
+        outcome = "death_rate",
+        trainer = linear_reg(),
+        predictors = c("death_rate"),
+        args_list = arx_args_list(
+          lags = list(c(0, 7, 14)),
+          ahead = 14
+        )
+      )
+  })
+all_fits |>
+  map(~ pluck(., "predictions")) |>
+  list_rbind()
+```
+
+Estimating separate models for each geography uses far less data for each estimate than geo-pooling and is 56 times slower[^7].
+If a dataset contains relatively few observations for each geography, fitting a geo-pooled model is likely to produce better, more stable results.
+However, geo-pooling can only be used if values are comparable in meaning and scale across geographies or can be made comparable, for example by normalization.
+
+If we wanted to build a geo-aware model, such as a linear regression with a
+different intercept for each geography, we would need to build a [custom
+workflow](custom_epiworkflows) with geography as a factor.
+
+# Anatomy of a canned forecaster
+
+This section describes the resulting object from `arx_forecaster()`, a fairly minimal description of the mathematical model used, and a description of an `arx_fcast` object.
+
+## Mathematical description
+
+Let's look at the mathematical details of the model in more detail, using a minimal version of
+`four_week_ahead`:
+
+```{r, four_week_again}
+four_week_small <- arx_forecaster(
+  covid_case_death_rates |> filter(time_value <= forecast_date),
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0, 7, 14), c(0, 7, 14)),
+    ahead = 4 * 7,
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
+  )
+)
+hardhat::extract_fit_engine(four_week_small$epi_workflow)
+```
+
+If $d_{t,j}$ is the death rate on day $t$ at location $j$ and $c_{t,j}$ is the
+associated case rate, then the corresponding model is:
+
+$$
+\begin{aligned}
+d_{t+28, j} = & a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
+     & a_4 c_{t, j} + a_5 c_{t-7, j} + a_6 c_{t-14, j} + \varepsilon_{t,j}.
+\end{aligned}
+$$
+
+For example, $a_1$ is `lag_0_death_rate` above, with a value of 
+`r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_0_death_rate"],3)`,
+while $a_5$ is 
+`r round(hardhat::extract_fit_engine(four_week_small$epi_workflow)$coefficients["lag_7_case_rate"],4) `.
+Note that unlike `d_{t,j}` or `c_{t,j}`, these *don't* depend on either the time
+$t$ or the location $j$.
+This is what make it a geo-pooled model.
+
+
+The training data for estimating the parameters of this linear model is
+constructed within the `arx_forecaster()` function by shifting a series of
+columns the appropriate amount -- based on the requested `lags`.
+Each row containing no `NA` values in the predictors is used as a training
+observation to fit the coefficients $a_0,\ldots, a_6$.
+
+The equation above is only an accurate description of the model for a linear
+engine like `quantile_reg()` or `linear_reg()`; a nonlinear model like
+`rand_forest(mode = "regression")` will use the same input variables and
+training data, but fit the appropriate model for them.
+
+## Code object
+Let's dissect the forecaster we trained back on the [landing
+page](../index.html#motivating-example):
+
+```{r make-four-forecasts, warning=FALSE}
+four_week_ahead <- arx_forecaster(
+  covid_case_death_rates |> filter(time_value <= forecast_date),
+  outcome = "death_rate",
+  predictors = c("case_rate", "death_rate"),
+  args_list = arx_args_list(
+    lags = list(c(0, 1, 2, 3, 7, 14), c(0, 7, 14)),
+    ahead = 4 * 7,
+    quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)
   )
 )
 ```
 
-The column `.pred_dstn` in the `predictions` object is actually a "distribution"
-here parameterized by its quantiles. For this default forecaster, these are
-created using the quantiles of the residuals of the predictive model (possibly
-symmetrized). Here, we used 23 quantiles, but one can grab a particular
-quantile,
+`four_week_ahead` has three components: an `epi_workflow`, a table of
+`predictions`, and a list of `metadata`.
+The table of predictions is a simple tibble,
 
-```{r q1}
-round(head(quantile(out_q$predictions$.pred_distn, p = .4)), 3)
+```{r show_predictions}
+four_week_ahead$predictions
 ```
 
-or extract the entire distribution into a "long" `epi_df` with `quantile_levels`
-being the probability and `values` being the value associated to that quantile.
+where `.pred` gives the point/median prediction, and `.pred_distn` is a
+`hardhat::quantile_pred()` object representing a distribution through various quantile
+levels.
+The `5` in `<qtls(5)>` refers to the number of quantiles that have been
+explicitly created, while the [0.234] is the median value[^4].
+By default, `.pred_distn` covers the quantiles `c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)`.
 
-```{r q2}
-out_q$predictions %>%
-  pivot_quantiles_longer(.pred_distn)
+The `epi_workflow` is a significantly more complicated object, extending a
+`workflows::workflow()`  to include post-processing steps:
+
+```{r show_workflow}
+four_week_ahead$epi_workflow
 ```
 
-Additional simple adjustments to the basic forecaster can be made using the
-function:
+An `epi_workflow()` consists of 3 parts:
 
-```{r, eval = FALSE}
-arx_args_list(
-  lags = c(0L, 7L, 14L), ahead = 7L, n_training = Inf,
-  forecast_date = NULL, target_date = NULL, quantile_levels = c(0.05, 0.95),
-  symmetrize = TRUE, nonneg = TRUE, quantile_by_key = character(0L),
-  nafill_buffer = Inf
-)
-```
+- `preprocessor`: a collection of steps that transform the data to be ready for
+      modelling. Steps can be custom, as are those included in this package, 
+      or [be defined in `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
+      `four_week_ahead` has 5 steps; you can inspect them more closely by
+      running `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.[^6]
+- `spec`: a `parsnip::model_spec` which includes both the model parameters and
+  an engine to fit those parameters to the training data as prepared by
+  `preprocessor`.  `four_week_ahead` uses the default of
+  `parsnip::linear_reg()`, which is a `{parsnip}` wrapper for several linear
+  regression engines, by default `stats::lm()`. You can inspect the model more
+  closely by running
+  `hardhat::extract_fit_recipe(four_week_ahead$epi_workflow)`.
+- `postprocessor`: a collection of layers to be applied to the resulting
+  forecast. Layers are internal to this package. `four_week_ahead` just so happens to have
+  5 of as these well. You can inspect the layers more closely by running
+  `epipredict::extract_layers(four_week_ahead$epi_workflow)`.
 
-## Changing the engine
-
-So far, our forecasts have been produced using simple linear regression. But
-this is not the only way to estimate such a model. The `trainer` argument
-determines the type of model we want. This takes a
-[`{parsnip}`](https://parsnip.tidymodels.org) model. The default is linear
-regression, but we could instead use a random forest with the `{ranger}`
-package:
-
-```{r ranger, warning = FALSE}
-out_rf <- arx_forecaster(
-  jhu,
-  outcome = "death_rate",
-  predictors = c("case_rate", "death_rate"),
-  trainer = rand_forest(mode = "regression")
-)
-```
-
-Or boosted regression trees with `{xgboost}`:
-
-```{r xgboost, warning = FALSE}
-out_gb <- arx_forecaster(
-  jhu,
-  outcome = "death_rate",
-  predictors = c("case_rate", "death_rate"),
-  trainer = boost_tree(mode = "regression", trees = 20)
-)
-```
-
-Or quantile regression, using our custom forecasting engine `quantile_reg()`:
-
-```{r quantreg, warning = FALSE}
-out_qr <- arx_forecaster(
-  jhu,
-  outcome = "death_rate",
-  predictors = c("case_rate", "death_rate"),
-  trainer = quantile_reg()
-)
-```
-
-FWIW, this last case (using quantile regression), is not far from what the
-Delphi production forecast team used for its Covid forecasts over the past few
-years.
-
-## Inner workings
-
-Underneath the hood, this forecaster creates (and returns) an `epi_workflow`.
-Essentially, this is a big S3 object that wraps up the 4 modular steps
-(preprocessing - postprocessing) described above.
-
-### Preprocessing
-
-Preprocessing is accomplished through a `recipe` (imagine baking a cake) as
-provided in the [`{recipes}`](https://recipes.tidymodels.org) package.
-We've made a few modifications (to handle
-panel data) as well as added some additional options. The recipe gives a
-specification of how to handle training data. Think of it like a fancified
-`formula` that you would pass to `lm()`: `y ~ x1 + log(x2)`. In general,
-there are 2 extensions to the `formula` that `{recipes}` handles:
-
-  1. Doing transformations of both training and test data that can always be
-  applied. These are things like taking the log of a variable, leading or
-  lagging, filtering out rows, handling dummy variables, etc.
-  2. Using statistics from the training data to eventually process test data.
-    This is a major benefit of `{recipes}`. It prevents what the tidy team calls
-    "data leakage". A simple example is centering a predictor by its mean. We
-    need to store the mean of the predictor from the training data and use that
-    value on the test data rather than accidentally calculating the mean of
-    the test predictor for centering.
-
-A recipe is processed in 2 steps, first it is "prepped". This calculates and
-stores any intermediate statistics necessary for use on the test data.
-Then it is "baked"
-resulting in training data ready for passing into a statistical model (like `lm`).
-
-We have introduced an `epi_recipe`. It's just a `recipe` that knows how to handle
-the `time_value`, `geo_value`, and any additional keys so that these are available
-when necessary.
-
-The `epi_recipe` from `out_gb` can be extracted from the result:
-
-```{r}
-extract_recipe(out_gb$epi_workflow)
-```
-
-The "Inputs" are the original `epi_df` and the "roles" that these are assigned.
-None of these are predictors or outcomes. Those will be created
-by the recipe when it is prepped. The "Operations" are the sequence of
-instructions to create the cake (baked training data).
-Here we create lagged predictors, lead the outcome, and then remove `NA`s.
-Some models like `lm` internally handle `NA`s, but not everything does, so we
-deal with them explicitly. The code to do this (inside the forecaster) is
-
-```{r}
-er <- epi_recipe(jhu) %>%
-  step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
-  step_epi_ahead(death_rate, ahead = 7) %>%
-  step_epi_naomit()
-```
-
-While `{recipes}` provides a function `step_lag()`, it assumes that the data
-have no breaks in the sequence of `time_values`. This is a bit dangerous, so
-we avoid that behaviour. Our `lag/ahead` functions also appropriately adjust the
-amount of data to avoid accidentally dropping recent predictors from the test
-data.
-
-### The model specification
-
-Users with familiarity with the `{parsnip}` package will have no trouble here.
-Basically, `{parsnip}` unifies the function signature across statistical models.
-For example, `lm()` "likes" to work with formulas, but `glmnet::glmnet()` uses
-`x` and `y` for predictors and response. `{parsnip}` is agnostic. Both of these
-do "linear regression". Above we switched from `lm()` to `xgboost()` without
-any issue despite the fact that these functions couldn't be more different.
-
-```{r, eval = FALSE}
-lm(formula, data, subset, weights, na.action,
-  method = "qr",
-  model = TRUE, x = FALSE, y = FALSE, qr = TRUE, singular.ok = TRUE,
-  contrasts = NULL, offset, ...
-)
-
-xgboost(
-  data = NULL, label = NULL, missing = NA, weight = NULL,
-  params = list(), nrounds, verbose = 1, print_every_n = 1L,
-  early_stopping_rounds = NULL, maximize = NULL, save_period = NULL,
-  save_name = "xgboost.model", xgb_model = NULL, callbacks = list(),
-  ...
-)
-```
-
-`{epipredict}` provides a few engines/modules (the flatline forecaster and
-quantile regression), but you should be able to use any available models
-listed [here](https://www.tidymodels.org/find/parsnip/).
-
-To estimate (fit) a preprocessed model, one calls `fit()` on the `epi_workflow`.
-
-```{r}
-ewf <- epi_workflow(er, linear_reg()) %>% fit(jhu)
-```
-
-### Postprocessing
-
-To stretch the metaphor of preparing a cake to its natural limits, we have
-created postprocessing functionality called "frosting". Much like the recipe,
-each postprocessing operation is a "layer" and we "slather" these onto our
-baked cake. To fix ideas, below is the postprocessing `frosting` for
-`arx_forecaster()`
-
-```{r}
-extract_frosting(out_q$epi_workflow)
-```
-
-Here we have 5 layers of frosting. The first generates the forecasts from the test data.
-The second uses quantiles of the residuals to create distributional
-forecasts. The next two add columns for the date the forecast was made and the
-date for which it is intended to occur. Because we are predicting rates, they
-should be non-negative, so the last layer thresholds both predicted values and
-intervals at 0. The code to do this (inside the forecaster) is
-
-```{r}
-f <- frosting() %>%
-  layer_predict() %>%
-  layer_residual_quantiles(
-    quantile_levels = c(.01, .025, seq(.05, .95, by = .05), .975, .99),
-    symmetrize = TRUE
-  ) %>%
-  layer_add_forecast_date() %>%
-  layer_add_target_date() %>%
-  layer_threshold(starts_with(".pred"))
-```
-
-At predict time, we add this object onto the `epi_workflow` and call `forecast()`
-
-```{r, warning=FALSE}
-ewf %>%
-  add_frosting(f) %>%
-  forecast()
-```
-
-The above `get_test_data()` function examines the recipe and ensures that enough
-test data is available to create the necessary lags and produce a prediction
-for the desired future time point (after the end of the training data). This mimics
-what would happen if `jhu` contained the most recent available historical data and
-we wanted to actually predict the future. We could have instead used any test data
-that contained the necessary predictors.
+See the [Custom Epiworkflows vignette](custom_epiworkflows) for recreating and then
+extending `four_week_ahead` using the custom forecaster framework.
 
 
-## Conclusion
+[^4]: in the case of a `{parsnip}` engine which doesn't explicitly predict
+    quantiles, these quantiles are created using `layer_residual_quantiles()`,
+    which infers the quantiles from the residuals of the fit.
 
-Internally, we provide some simple functions to create reasonable forecasts.
-But ideally, a user could create their own forecasters by building up the
-components we provide. In other vignettes, we try to walk through some of these
-customizations.
+[^5]: in the case of `arx_forecaster`, this is any model with
+    `mode="regression"` from [this
+    list](https://www.tidymodels.org/find/parsnip/).
 
-To illustrate everything above, here is (roughly) the code for the
-`flatline_forecaster()` applied to the `case_rate`.
+[^6]: alternatively, for an unfit version of the preprocessor, you can call
+    `hardhat::extract_preprocessor(four_week_ahead$epi_workflow)`
 
-```{r}
-r <- epi_recipe(jhu) %>%
-  step_epi_ahead(case_rate, ahead = 7, skip = TRUE) %>%
-  update_role(case_rate, new_role = "predictor") %>%
-  add_role(all_of(key_colnames(jhu)), new_role = "predictor")
+[^7]: the number of geographies
 
-f <- frosting() %>%
-  layer_predict() %>%
-  layer_residual_quantiles() %>%
-  layer_add_forecast_date() %>%
-  layer_add_target_date() %>%
-  layer_threshold(starts_with(".pred"))
+[^8]: It has only a year of data, which is barely enough to run the method without errors, let alone get a meaningful prediction.
 
-eng <- linear_reg() %>% set_engine("flatline")
-wf <- epi_workflow(r, eng, f) %>% fit(jhu)
-preds <- forecast(wf)
-```
-
-All that really differs from the `arx_forecaster()` is the `recipe`, the
-test data, and the engine. The `frosting` is identical, as is the fitting
-and predicting procedure.
-
-```{r}
-preds
-```
-
+[^9]: Though not 28 weeks into the future! Such a forecast will likely be absurdly low or high.

@@ -13,14 +13,19 @@ nested_quantiles(x)
 a list-col
 }
 \description{
-Turn a vector of quantile distributions into a list-col
+\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}
+}
+\details{
+This function is deprecated. The recommended alternative is
+\code{\link[hardhat:quantile_pred]{hardhat::quantile_pred()}} with \code{\link[tibble:as_tibble]{tibble::as_tibble()}}
 }
 \examples{
-library(dplyr)
-library(tidyr)
-edf <- case_death_rate_subset[1:3, ]
-edf$q <- dist_quantiles(list(1:5, 2:4, 3:10), list(1:5 / 6, 2:4 / 5, 3:10 / 11))
+pred_quantile <- quantile_pred(matrix(rnorm(20), 5), c(.2, .4, .6, .8))
+nested_quantiles(pred_quantile)
 
-edf_nested <- edf \%>\% mutate(q = nested_quantiles(q))
-edf_nested \%>\% unnest(q)
+pred_quantile \%>\%
+  as_tibble() \%>\%
+  tidyr::nest(.by = .row) \%>\%
+  dplyr::select(-.row)
+
 }

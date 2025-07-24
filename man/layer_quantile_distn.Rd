@@ -7,7 +7,7 @@
 layer_quantile_distn(
   frosting,
   ...,
-  quantile_levels = c(0.25, 0.75),
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
   truncate = c(-Inf, Inf),
   name = ".pred_distn",
   id = rand_id("quantile_distn")
@@ -32,6 +32,8 @@ quantiles will be added to the predictions.
 }
 \description{
 This function calculates quantiles when the prediction was \emph{distributional}.
+If the model producing the forecast is not distributional, it is recommended
+to use \code{layer_residual_quantiles()} instead.
 }
 \details{
 Currently, the only distributional modes/engines are
@@ -45,8 +47,7 @@ If these engines were used, then this layer will grab out estimated
 (or extrapolated) quantiles at the requested quantile values.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%

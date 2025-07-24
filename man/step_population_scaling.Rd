@@ -26,19 +26,25 @@ sequence of operations for this recipe.}
 for this step. See \code{\link[recipes:selections]{recipes::selections()}} for more details.}
 
 \item{role}{For model terms created by this step, what analysis role should
-they be assigned? \code{lag} is default a predictor while \code{ahead} is an outcome.}
+they be assigned?}
 
-\item{df}{a data frame that contains the population data to be used for
-inverting the existing scaling.}
+\item{df}{a data frame containing the scaling data (typically population). The
+target column is divided by the value in \code{df_pop_col}.}
 
-\item{by}{A (possibly named) character vector of variables to join by.
+\item{by}{A (possibly named) character vector of variables by which to join
+\code{df} to the \code{epi_df}.
 
-If \code{NULL}, the default, the function will perform a natural join, using all
-variables in common across the \code{epi_df} produced by the \code{predict()} call
-and the user-provided dataset.
-If columns in that \code{epi_df} and \code{df} have the same name (and aren't
-included in \code{by}), \code{.df} is added to the one from the user-provided data
-to disambiguate.
+If \code{NULL}, the default, the function will try to infer a reasonable set of
+columns. First, it will try to join by all variables in the training/test
+data with roles \code{"geo_value"}, \code{"key"}, or \code{"time_value"} that also appear in
+\code{df}; these roles are automatically set if you are using an \code{epi_df}, or you
+can use, e.g., \code{update_role}. If no such roles are set, it will try to
+perform a natural join, using variables in common between the training/test
+data and population data.
+
+If columns in the training/testing data and \code{df} have the same name (and
+aren't included in \code{by}), a \code{.df} suffix is added to the one from the
+user-provided data to disambiguate.
 
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
 For example, \code{by = c("geo_value" = "states")} will match \code{epi_df$geo_value}
@@ -46,7 +52,7 @@ to \code{df$states}. To join by multiple variables, use a vector with length > 1
 For example, \code{by = c("geo_value" = "states", "county" = "county")} will match
 \code{epi_df$geo_value} to \code{df$states} and \code{epi_df$county} to \code{df$county}.
 
-See \code{\link[dplyr:mutate-joins]{dplyr::left_join()}} for more details.}
+See \code{\link[dplyr:mutate-joins]{dplyr::inner_join()}} for more details.}
 
 \item{df_pop_col}{the name of the column in the data frame \code{df} that
 contains the population data and will be used for scaling.
@@ -56,7 +62,7 @@ This should be one column.}
 Adjustments can be made here. For example, if the original
 scale is "per 100K", then set \code{rate_rescaling = 1e5} to get rates.}
 
-\item{create_new}{TRUE to create a new column and keep the original column
+\item{create_new}{\code{TRUE} to create a new column and keep the original column
 in the \code{epi_df}}
 
 \item{suffix}{a character. The suffix added to the column name if
@@ -75,19 +81,17 @@ the computations for subsequent operations.}
 Scales raw data by the population
 }
 \description{
-\code{step_population_scaling} creates a specification of a recipe step
-that will perform per-capita scaling. Typical usage would
-load a dataset that contains state-level population, and use it to convert
-predictions made from a raw scale model to rate-scale by dividing by
-the population.
-Although, it is worth noting that there is nothing special about "population".
-The function can be used to scale by any variable. Population is the
-standard use case in the epidemiology forecasting scenario. Any value
-passed will \emph{divide} the selected variables while the \code{rate_rescaling}
-argument is a common \emph{multiplier} of the selected variables.
+\code{step_population_scaling()} creates a specification of a recipe step that
+will perform per-capita scaling. Typical usage would set \code{df} to be a dataset
+that contains population for each \code{geo_value}, and use it to convert
+predictions made from a raw scale model to rate-scale by dividing by the
+population.  Although, it is worth noting that there is nothing special about
+"population", and the function can be used to scale by any variable.
+Population is the standard use case in the epidemiology forecasting scenario.
+Any value passed will \emph{divide} the selected variables while the
+\code{rate_rescaling} argument is a common \emph{multiplier} of the selected variables.
 }
 \examples{
-library(dplyr)
 jhu <- cases_deaths_subset \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   select(geo_value, time_value, cases)

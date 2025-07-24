@@ -1,10 +1,19 @@
 #' Creates predictions based on residual quantiles
 #'
+#' This function calculates predictive quantiles based on the empirical
+#' quantiles of the model's residuals. If the model producing the forecast is
+#' distributional, it is recommended to use `layer_residual_quantiles()`
+#' instead, as those will be more accurate.
+#'
 #' @param frosting a `frosting` postprocessor
 #' @param ... Unused, include for consistency with other layers.
 #' @param quantile_levels numeric vector of probabilities with values in (0,1)
-#'   referring to the desired quantile.
-#' @param symmetrize logical. If `TRUE` then interval will be symmetric.
+#'   referring to the desired quantile. Note that 0.5 will always be included
+#'   even if left out by the user.
+#' @param symmetrize logical. If `TRUE` then the interval will be symmetric.
+#'   Typically, one would only want non-symmetric quantiles when increasing
+#'   trajectories are quite different from decreasing ones, such as a strictly
+#'   postive variable near zero.
 #' @param by_key A character vector of keys to group the residuals by before
 #'   calculating quantiles. The default, `c()` performs no grouping.
 #' @param name character. The name for the output column.
@@ -14,8 +23,7 @@
 #'   residual quantiles added to the prediction
 #' @export
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
@@ -28,7 +36,7 @@
 #' f <- frosting() %>%
 #'   layer_predict() %>%
 #'   layer_residual_quantiles(
-#'     quantile_levels = c(0.0275, 0.975),
+#'     quantile_levels = c(0.025, 0.975),
 #'     symmetrize = FALSE
 #'   ) %>%
 #'   layer_naomit(.pred)
@@ -48,7 +56,7 @@
 #' p2 <- forecast(wf2)
 layer_residual_quantiles <- function(
     frosting, ...,
-    quantile_levels = c(0.05, 0.95),
+    quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
     symmetrize = TRUE,
     by_key = character(0L),
     name = ".pred_distn",
@@ -59,6 +67,7 @@ layer_residual_quantiles <- function(
   arg_is_chr(by_key, allow_empty = TRUE)
   arg_is_probabilities(quantile_levels)
   arg_is_lgl(symmetrize)
+  quantile_levels <- sort(unique(c(0.5, quantile_levels)))
   add_layer(
     frosting,
     layer_residual_quantiles_new(
@@ -90,7 +99,7 @@ slather.layer_residual_quantiles <-
       return(components)
     }
 
-    s <- ifelse(object$symmetrize, -1, NA)
+    symmetric <- ifelse(object$symmetrize, -1, NA)
     r <- grab_residuals(the_fit, components)
 
     ## Handle any grouping requests
@@ -102,7 +111,7 @@ slather.layer_residual_quantiles <-
       common <- intersect(object$by_key, names(key_cols))
       excess <- setdiff(object$by_key, names(key_cols))
       if (length(excess) > 0L) {
-        cli::cli_warn(c(
+        cli_warn(paste(
           "Requested residual grouping key(s) {.val {excess}} are unavailable ",
           "in the original data. Grouping by the remainder: {.val {common}}."
         ))
@@ -113,7 +122,7 @@ slather.layer_residual_quantiles <-
         if (length(common_in_r) == length(common)) {
           r <- left_join(key_cols, r, by = common_in_r)
         } else {
-          cli::cli_warn(c(
+          cli_warn(paste(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
@@ -124,32 +133,33 @@ slather.layer_residual_quantiles <-
     }
 
     r <- r %>%
-      summarize(
-        dstn = list(quantile(
-          c(.resid, s * .resid),
-          probs = object$quantile_levels, na.rm = TRUE
-        ))
-      )
+      summarize(dstn = quantile_pred(matrix(quantile(
+        c(.resid, symmetric * .resid),
+        probs = object$quantile_levels, na.rm = TRUE
+      ), nrow = 1), quantile_levels = object$quantile_levels))
     # Check for NA
-    if (any(sapply(r$dstn, is.na))) {
-      cli::cli_abort(c(
+    if (anyNA(as.matrix(r$dstn))) {
+      cli_abort(c(
         "Residual quantiles could not be calculated due to missing residuals.",
         i = "This may be due to `n_train` < `ahead` in your {.cls epi_recipe}."
       ))
     }
 
     estimate <- components$predictions$.pred
-    res <- tibble(
-      .pred_distn = dist_quantiles(map2(estimate, r$dstn, "+"), object$quantile_levels)
+    res <- tibble(.pred_distn = r$dstn + estimate)
+    res <- check_name(
+      res,
+      components$predictions,
+      object,
+      newname = object$name
     )
-    res <- check_pname(res, components$predictions, object)
     components$predictions <- mutate(components$predictions, !!!res)
     components
   }
 
 grab_residuals <- function(the_fit, components) {
   if (the_fit$spec$mode != "regression") {
-    cli::cli_abort("For meaningful residuals, the predictor should be a regression model.")
+    cli_abort("For meaningful residuals, the predictor should be a regression model.")
   }
   r <- stats::residuals(the_fit$fit)
   if (!is.null(r)) { # Got something from the method
@@ -157,7 +167,7 @@ grab_residuals <- function(the_fit, components) {
       if (".resid" %in% names(r)) { # success
         return(r)
       } else { # failure
-        cli::cli_warn(c(
+        cli_warn(c(
           "The `residuals()` method for objects of class {.cls {cl}} results in",
           "a data frame without a column named `.resid`.",
           i = "Residual quantiles will be calculated directly from the",
@@ -168,7 +178,7 @@ grab_residuals <- function(the_fit, components) {
     } else if (is.vector(drop(r))) { # also success
       return(tibble(.resid = drop(r)))
     } else { # failure
-      cli::cli_warn(c(
+      cli_warn(paste(
         "The `residuals()` method for objects of class {.cls {cl}} results in an",
         "object that is neither a data frame with a column named `.resid`,",
         "nor something coercible to a vector.",

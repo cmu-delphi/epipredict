@@ -41,8 +41,7 @@ layer <- function(subclass, ..., .prefix = "layer_") {
 #' in the layer, and the values are the new values to update the layer with.
 #'
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -148,9 +147,9 @@ validate_layer <- function(x, ..., arg = rlang::caller_arg(x),
                            call = caller_env()) {
   rlang::check_dots_empty()
   if (!is_layer(x)) {
-    cli::cli_abort(
+    cli_abort(
       "{arg} must be a frosting layer, not a {.cls {class(x)[[1]]}}.",
-      .call = call
+      call = call
     )
   }
   invisible(x)
@@ -179,11 +178,14 @@ detect_layer.workflow <- function(x, name, ...) {
 
 #' Spread a layer of frosting on a fitted workflow
 #'
-#' Slathering frosting means to implement a postprocessing layer. When
-#' creating a new postprocessing layer, you must implement an S3 method
-#' for this function
+#' Slathering frosting means to implement a post-processing layer. It is the
+#' post-processing equivalent of `bake` for a recipe. Given a layer, it applies
+#' the actual transformation of that layer. When creating a new post-processing
+#' layer, you must implement an S3 method for this function. Generally, you will
+#' not need to call this function directly, as it will be used indirectly during
+#' `predict`.
 #'
-#' @param object a workflow with `frosting` postprocessing steps
+#' @param object a workflow with `frosting` post-processing steps
 #' @param components a list of components containing model information. These
 #'   will be updated and returned by the layer. These should be
 #'   * `mold` - the output of calling `hardhat::mold()` on the workflow. This
@@ -201,7 +203,8 @@ detect_layer.workflow <- function(x, name, ...) {
 #'
 #' @param ... additional arguments used by methods. Currently unused.
 #'
-#' @return The `components` list. In the same format after applying any updates.
+#' @return The `components` list, in the same format as before, after applying
+#'   any updates.
 #' @export
 slather <- function(object, components, workflow, new_data, ...) {
   UseMethod("slather")

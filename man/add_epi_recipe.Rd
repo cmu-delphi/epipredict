@@ -4,7 +4,7 @@
 \alias{add_epi_recipe}
 \alias{remove_epi_recipe}
 \alias{update_epi_recipe}
-\title{Add an \code{epi_recipe} to a workflow}
+\title{Add/remove/update the \code{epi_recipe} of an \code{epi_workflow}}
 \usage{
 add_epi_recipe(x, recipe, ..., blueprint = default_epi_recipe_blueprint())
 
@@ -30,27 +30,28 @@ might be done automatically by the underlying model.}
 \code{x}, updated with a new recipe preprocessor.
 }
 \description{
-Add an \code{epi_recipe} to a workflow
+\itemize{
+\item \code{add_recipe()} specifies the terms of the model and any preprocessing that
+is required through the usage of a recipe.
+\item \code{remove_recipe()} removes the recipe as well as any downstream objects
+\item \code{update_recipe()} first removes the recipe, then replaces the previous
+recipe with the new one.
+}
 }
 \details{
-\code{add_epi_recipe} has the same behaviour as
-\code{\link[workflows:add_recipe]{workflows::add_recipe()}} but sets a different
-default blueprint to automatically handle \link[epiprocess:epi_df]{epiprocess::epi_df} data.
+\code{add_epi_recipe()} has the same behaviour as \code{\link[workflows:add_recipe]{workflows::add_recipe()}} but
+sets a different default blueprint to automatically handle
+\code{epiprocess::epi_df()} data.
 }
 \examples{
-library(dplyr)
-library(recipes)
-
-jhu <- case_death_rate_subset \%>\%
-  filter(time_value > "2021-08-01") \%>\%
-  arrange(geo_value, time_value)
+jhu <- covid_case_death_rates \%>\%
+  filter(time_value > "2021-08-01")
 
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
   step_epi_lag(case_rate, lag = c(0, 7, 14)) \%>\%
-  step_naomit(all_predictors()) \%>\%
-  step_naomit(all_outcomes(), skip = TRUE)
+  step_epi_naomit()
 
 workflow <- epi_workflow() \%>\%
   add_epi_recipe(r)
@@ -70,11 +71,4 @@ workflow
 }
 \seealso{
 \code{\link[workflows:add_recipe]{workflows::add_recipe()}}
-\itemize{
-\item \code{add_recipe()} specifies the terms of the model and any preprocessing that
-is required through the usage of a recipe.
-\item \code{remove_recipe()} removes the recipe as well as any downstream objects
-\item \code{update_recipe()} first removes the recipe, then replaces the previous
-recipe with the new one.
-}
 }

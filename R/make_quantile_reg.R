@@ -12,7 +12,7 @@
 #' @param engine Character string naming the fitting function. Currently, only
 #'   "rq" and "grf" are supported.
 #' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
-#'   quantiles to estimate (default is 0.5).
+#'   quantiles to estimate (default is the set 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95).
 #' @param method A fitting method used by [quantreg::rq()]. See the
 #'   documentation for a list of options.
 #'
@@ -27,7 +27,9 @@
 #' rq_spec <- quantile_reg(quantile_levels = c(.2, .8)) %>% set_engine("rq")
 #' ff <- rq_spec %>% fit(y ~ ., data = tib)
 #' predict(ff, new_data = tib)
-quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0.5, method = "br") {
+quantile_reg <- function(mode = "regression", engine = "rq",
+                         quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
+                         method = "br") {
   # Check for correct mode
   if (mode != "regression") {
     cli_abort("`mode` must be 'regression'")
@@ -37,7 +39,7 @@ quantile_reg <- function(mode = "regression", engine = "rq", quantile_levels = 0
   if (any(quantile_levels > 1)) cli_abort("All `quantile_levels` must be less than 1.")
   if (any(quantile_levels < 0)) cli_abort("All `quantile_levels` must be greater than 0.")
   if (is.unsorted(quantile_levels)) {
-    cli::cli_warn("Sorting `quantile_levels` to increasing order.")
+    cli_warn("Sorting `quantile_levels` to increasing order.")
     quantile_levels <- sort(quantile_levels)
   }
   args <- list(quantile_levels = rlang::enquo(quantile_levels), method = rlang::enquo(method))
@@ -108,21 +110,11 @@ make_quantile_reg <- function() {
 
   process_rq_preds <- function(x, object) {
     object <- parsnip::extract_fit_engine(object)
-    type <- class(object)[1]
-
-    # can't make a method because object is second
-    out <- switch(type,
-      rq = dist_quantiles(unname(as.list(x)), object$quantile_levels), # one quantile
-      rqs = {
-        x <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
-        dist_quantiles(x, list(object$tau))
-      },
-      cli_abort(c(
-        "Prediction is not implemented for this `rq` type.",
-        i = "See {.fun quantreg::rq}."
-      ))
-    )
-    return(dplyr::tibble(.pred = out))
+    if (!is.matrix(x)) x <- as.matrix(x)
+    rownames(x) <- NULL
+    n_pred_quantiles <- ncol(x)
+    quantile_levels <- object$tau
+    tibble(.pred = hardhat::quantile_pred(x, quantile_levels))
   }
 
   parsnip::set_pred(

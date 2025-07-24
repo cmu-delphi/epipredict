@@ -2,42 +2,50 @@
 % Please edit documentation in R/extrapolate_quantiles.R
 \name{extrapolate_quantiles}
 \alias{extrapolate_quantiles}
-\title{Summarize a distribution with a set of quantiles}
+\title{Extrapolate the quantiles to new quantile levels}
 \usage{
 extrapolate_quantiles(x, probs, replace_na = TRUE, ...)
 }
 \arguments{
-\item{x}{a \code{distribution} vector}
+\item{x}{A vector of class \code{quantile_pred}.}
 
 \item{probs}{a vector of probabilities at which to calculate quantiles}
 
 \item{replace_na}{logical. If \code{x} contains \code{NA}'s, these are imputed if
-possible (if \code{TRUE}) or retained (if \code{FALSE}). This only effects
-elements of class \code{dist_quantiles}.}
+possible (if \code{TRUE}) or retained (if \code{FALSE}).}
 
 \item{...}{additional arguments passed on to the \code{quantile} method}
 }
 \value{
-a \code{distribution} vector containing \code{dist_quantiles}. Any elements
-of \code{x} which were originally \code{dist_quantiles} will now have a superset
+a \code{quantile_pred} vector. Each element
+of \code{x} will now have a superset
 of the original \code{quantile_values} (the union of those and \code{probs}).
 }
 \description{
-Summarize a distribution with a set of quantiles
+This both interpolates between quantile levels already defined in \code{x} and
+extrapolates quantiles outside their bounds. The interpolation method is
+determined by the \code{quantile} argument \code{middle}, which can be either \code{"cubic"}
+for a (Hyman) cubic spline interpolation, or \code{"linear"} for simple linear
+interpolation.
+}
+\details{
+There is only one extrapolation method for values greater than the largest
+available quantile level or smaller than the smallest available quantile
+level. It assumes a roughly exponential tail, whose decay rate and offset is
+derived from the slope of the two most extreme quantile levels on a logistic
+scale.  See the internal function \code{tail_extrapolate()} for the exact
+implementation.
+
+This function takes a \code{quantile_pred} vector and returns the same
+type of object, expanded to include
+\emph{additional} quantiles computed at \code{probs}. If you want behaviour more
+similar to \code{\link[stats:quantile]{stats::quantile()}}, then \code{quantile(x,...)} may be more
+appropriate.
 }
 \examples{
-library(distributional)
-dstn <- dist_normal(c(10, 2), c(5, 10))
-extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
+dstn <- quantile_pred(rbind(1:4, 8:11), c(.2, .4, .6, .8))
+# extra quantiles are appended
+as_tibble(extrapolate_quantiles(dstn, probs = c(0.25, 0.5, 0.75)))
 
-dstn <- dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-# because this distribution is already quantiles, any extra quantiles are
-# appended
-extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
-
-dstn <- c(
-  dist_normal(c(10, 2), c(5, 10)),
-  dist_quantiles(list(1:4, 8:11), list(c(.2, .4, .6, .8)))
-)
-extrapolate_quantiles(dstn, probs = c(.25, 0.5, .75))
+extrapolate_quantiles(dstn, probs = c(0.0001, 0.25, 0.5, 0.75, 0.99999))
 }

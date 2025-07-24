@@ -4,35 +4,48 @@
 \alias{autoplot-epipred}
 \alias{autoplot.epi_workflow}
 \alias{autoplot.canned_epipred}
+\alias{plot.epi_workflow}
+\alias{plot.canned_epipred}
 \title{Automatically plot an \code{epi_workflow} or \code{canned_epipred} object}
 \usage{
 \method{autoplot}{epi_workflow}(
   object,
   predictions = NULL,
-  .levels = c(0.5, 0.8, 0.95),
+  observed_response = NULL,
+  .levels = c(0.5, 0.8, 0.9),
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
   .base_color = "dodgerblue4",
   .point_pred_color = "orange",
-  .max_facets = Inf
+  .facet_filter = NULL,
+  .max_facets = deprecated()
 )
 
 \method{autoplot}{canned_epipred}(
   object,
+  observed_response = NULL,
   ...,
   .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
   .base_color = "dodgerblue4",
   .point_pred_color = "orange",
-  .max_facets = Inf
+  .facet_filter = NULL,
+  .max_facets = deprecated()
 )
+
+\method{plot}{epi_workflow}(x, ...)
+
+\method{plot}{canned_epipred}(x, ...)
 }
 \arguments{
-\item{object}{An \code{epi_workflow}}
+\item{object, x}{An \code{epi_workflow}}
 
 \item{predictions}{A data frame with predictions. If \code{NULL}, only the
 original data is shown.}
+
+\item{observed_response}{An epi_df of the data to plot against. This is for the case
+where you have the actual results to compare the forecast against.}
 
 \item{.levels}{A numeric vector of levels to plot for any prediction bands.
 More than 3 levels begins to be difficult to see.}
@@ -60,8 +73,16 @@ color.}
 \item{.point_pred_color}{If available, point forecasts will be shown with
 this color.}
 
-\item{.max_facets}{Cut down of the number of facets displayed. Especially
-useful for testing when there are many \code{geo_value}'s or keys.}
+\item{.facet_filter}{Select which facets will be displayed. Especially
+useful for when there are many \code{geo_value}'s or keys. This is a
+<\code{\link[=args_data_masking]{rlang}}> expression along the lines of \code{\link[dplyr:filter]{dplyr::filter()}}.
+However, it must be a single expression combined with the \code{&} operator. This
+contrasts to the typical use case which allows multiple comma-separated expressions
+which are implicitly combined with \code{&}. When multiple variables are selected
+with \code{...}, their names can be filtered in combination with other factors
+by using \code{.response_name}. See the examples below.}
+
+\item{.max_facets}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \description{
 For a fit workflow, the training data will be displayed, the response by
@@ -70,8 +91,7 @@ will be shown as well. Unfit workflows will result in an error, (you
 can simply call \code{autoplot()} on the original \code{epi_df}).
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 
 r <- epi_recipe(jhu) \%>\%
@@ -81,9 +101,7 @@ r <- epi_recipe(jhu) \%>\%
   step_epi_naomit()
 
 f <- frosting() \%>\%
-  layer_residual_quantiles(
-    quantile_levels = c(.025, .1, .25, .75, .9, .975)
-  ) \%>\%
+  layer_residual_quantiles() \%>\%
   layer_threshold(starts_with(".pred")) \%>\%
   layer_add_target_date()
 
@@ -93,7 +111,7 @@ autoplot(wf)
 
 latest <- jhu \%>\% filter(time_value >= max(time_value) - 14)
 preds <- predict(wf, latest)
-autoplot(wf, preds, .max_facets = 4)
+autoplot(wf, preds, .facet_filter = geo_value \%in\% c("ca", "ny", "de", "mt"))
 
 # ------- Show multiple horizons
 
@@ -108,17 +126,17 @@ p <- lapply(c(7, 14, 21, 28), function(h) {
 })
 
 p <- do.call(rbind, p)
-autoplot(wf, p, .max_facets = 4)
+autoplot(wf, p, .facet_filter = geo_value \%in\% c("ca", "ny", "de", "mt"))
 
 # ------- Plotting canned forecaster output
 
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value >= as.Date("2021-11-01"))
 flat <- flatline_forecaster(jhu, "death_rate")
-autoplot(flat, .max_facets = 4)
+autoplot(flat, .facet_filter = geo_value \%in\% c("ca", "ny", "de", "mt"))
 
 arx <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
   args_list = arx_args_list(ahead = 14L)
 )
-autoplot(arx, .max_facets = 6)
+autoplot(arx, .facet_filter = geo_value \%in\% c("ca", "ny", "de", "mt", "mo", "in"))
 }

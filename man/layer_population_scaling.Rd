@@ -26,14 +26,20 @@ for this step. See \code{\link[recipes:selections]{recipes::selections()}} for m
 \item{df}{a data frame that contains the population data to be used for
 inverting the existing scaling.}
 
-\item{by}{A (possibly named) character vector of variables to join by.
+\item{by}{A (possibly named) character vector of variables to join \code{df} onto
+the \code{epi_df} by.
 
-If \code{NULL}, the default, the function will perform a natural join, using all
-variables in common across the \code{epi_df} produced by the \code{predict()} call
-and the user-provided dataset.
-If columns in that \code{epi_df} and \code{df} have the same name (and aren't
-included in \code{by}), \code{.df} is added to the one from the user-provided data
-to disambiguate.
+If \code{NULL}, the default, the function will try to infer a reasonable set of
+columns. First, it will try to join by all variables in the test data with
+roles \code{"geo_value"}, \code{"key"}, or \code{"time_value"} that also appear in \code{df};
+these roles are automatically set if you are using an \code{epi_df}, or you can
+use, e.g., \code{update_role}. If no such roles are set, it will try to perform a
+natural join, using variables in common between the training/test data and
+population data.
+
+If columns in the training/testing data and \code{df} have the same name (and
+aren't included in \code{by}), a \code{.df} suffix is added to the one from the
+user-provided data to disambiguate.
 
 To join by different variables on the \code{epi_df} and \code{df}, use a named vector.
 For example, \code{by = c("geo_value" = "states")} will match \code{epi_df$geo_value}
@@ -62,19 +68,18 @@ in the \code{epi_df}.}
 an updated \code{frosting} postprocessor
 }
 \description{
-\code{layer_population_scaling} creates a specification of a frosting layer
-that will "undo" per-capita scaling. Typical usage would
-load a dataset that contains state-level population, and use it to convert
-predictions made from a rate-scale model to raw scale by multiplying by
-the population.
-Although, it is worth noting that there is nothing special about "population".
-The function can be used to scale by any variable. Population is the
-standard use case in the epidemiology forecasting scenario. Any value
-passed will \emph{multiply} the selected variables while the \code{rate_rescaling}
-argument is a common \emph{divisor} of the selected variables.
+\code{layer_population_scaling} creates a specification of a frosting layer that
+will "undo" per-capita scaling done in \code{step_population_scaling()}.
+Typical usage would set \code{df} to be a dataset that contains a list of
+population for the \code{geo_value}s, and use it to convert predictions made from
+a raw scale model to rate-scale by dividing by the population.
+Although, it is worth noting that there is nothing special about
+"population", and  the function can be used to scale by any variable.
+Population is the standard use case in the epidemiology forecasting scenario.
+Any value passed will \emph{multiply} the selected variables while the
+\code{rate_rescaling} argument is a common \emph{divisor} of the selected variables.
 }
 \examples{
-library(dplyr)
 jhu <- cases_deaths_subset \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ca", "ny")) \%>\%
   select(geo_value, time_value, cases)

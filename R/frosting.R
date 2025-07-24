@@ -1,4 +1,4 @@
-#' Add frosting to a workflow
+#' Add/remove/update the `frosting` of an `epi_workflow`
 #'
 #' @param x A workflow
 #' @param frosting A frosting object created using `frosting()`.
@@ -8,8 +8,7 @@
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -89,7 +88,7 @@ validate_has_postprocessor <- function(x, ..., call = caller_env()) {
       "The workflow must have a frosting postprocessor.",
       i = "Provide one with `add_frosting()`."
     )
-    rlang::abort(message, call = call)
+    cli_abort(message, call = call)
   }
   invisible(x)
 }
@@ -127,8 +126,7 @@ update_frosting <- function(x, frosting, ...) {
 #'
 #' @export
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -248,10 +246,10 @@ new_frosting <- function() {
 }
 
 
-#' Create frosting for postprocessing predictions
+#' Create frosting for post-processing predictions
 #'
-#' This generates a postprocessing container (much like `recipes::recipe()`)
-#' to hold steps for postprocessing predictions.
+#' This generates a post-processing container (much like `recipes::recipe()`)
+#' to hold steps for post-processing predictions.
 #'
 #' The arguments are currently placeholders and must be NULL
 #'
@@ -262,13 +260,12 @@ new_frosting <- function() {
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' # Toy example to show that frosting can be created and added for postprocessing
+#' # Toy example to show that frosting can be created and added for post-processing
 #' f <- frosting()
 #' wf <- epi_workflow() %>% add_frosting(f)
 #'
 #' # A more realistic example
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
@@ -288,7 +285,7 @@ new_frosting <- function() {
 #' p
 frosting <- function(layers = NULL, requirements = NULL) {
   if (!is_null(layers) || !is_null(requirements)) {
-    cli::cli_abort(
+    cli_abort(
       "Currently, no arguments to `frosting()` are allowed to be non-null."
     )
   }
@@ -325,9 +322,9 @@ extract_frosting.epi_workflow <- function(x, ...) {
   }
 }
 
-#' Apply postprocessing to a fitted workflow
+#' Apply post-processing to a fitted workflow
 #'
-#' This function is intended for internal use. It implements postprocessing
+#' This function is intended for internal use. It implements post-processing
 #' inside of the `predict()` method for a fitted workflow.
 #'
 #' @param workflow An object of class workflow
@@ -345,7 +342,7 @@ apply_frosting <- function(workflow, ...) {
 apply_frosting.default <- function(workflow, components, ...) {
   if (has_postprocessor(workflow)) {
     cli_abort(c(
-      "Postprocessing is only available for epi_workflows currently.",
+      "Post-processing is only available for epi_workflows currently.",
       i = "Can you use `epi_workflow()` instead of `workflow()`?"
     ))
   }
@@ -356,7 +353,6 @@ apply_frosting.default <- function(workflow, components, ...) {
 
 #' @rdname apply_frosting
 #' @importFrom rlang is_null
-#' @importFrom rlang abort
 #' @param type,opts forwarded (along with `...`) to [`predict.model_fit()`] and
 #'   [`slather()`] for supported layers
 #' @export
@@ -368,21 +364,21 @@ apply_frosting.epi_workflow <-
       components$predictions <- predict(
         the_fit, components$forged$predictors, ...
       )
-      components$predictions <- dplyr::bind_cols(
+      components$predictions <- bind_cols(
         components$keys, components$predictions
       )
       return(components)
     }
 
     if (!has_postprocessor_frosting(workflow)) {
-      cli_warn(c(
+      cli_warn(paste(
         "Only postprocessors of class {.cls frosting} are allowed.",
         "Returning unpostprocessed predictions."
       ))
       components$predictions <- predict(
         the_fit, components$forged$predictors, type, opts, ...
       )
-      components$predictions <- dplyr::bind_cols(
+      components$predictions <- bind_cols(
         components$keys, components$predictions
       )
       return(components)

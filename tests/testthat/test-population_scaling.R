@@ -7,7 +7,7 @@ test_that("Column names can be passed with and without the tidy way", {
 
   pop_data2 <- pop_data %>% dplyr::rename(geo_value = states)
 
-  newdata <- case_death_rate_subset %>%
+  newdata <- covid_case_death_rates %>%
     filter(geo_value %in% c("ak", "al", "ar", "as", "az", "ca"))
 
   r1 <- epi_recipe(newdata) %>%
@@ -88,9 +88,9 @@ test_that("Number of columns and column names returned correctly, Upper and lowe
   expect_equal(ncol(b), 5L)
 })
 
-## Postprocessing
-test_that("Postprocessing workflow works and values correct", {
-  jhu <- cases_deaths_subset %>%
+## Post-processing
+test_that("Post-processing workflow works and values correct", {
+  jhu <- epidatasets::cases_deaths_subset %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, cases)
 
@@ -149,8 +149,8 @@ test_that("Postprocessing workflow works and values correct", {
   expect_equal(p$.pred_scaled, p$.pred * c(2, 3))
 })
 
-test_that("Postprocessing to get cases from case rate", {
-  jhu <- case_death_rate_subset %>%
+test_that("Post-processing to get cases from case rate", {
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -193,7 +193,64 @@ test_that("Postprocessing to get cases from case rate", {
 
 
 test_that("test joining by default columns", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
+    dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
+    dplyr::select(geo_value, time_value, case_rate)
+
+  reverse_pop_data <- data.frame(
+    geo_value = c("ca", "ny"),
+    values = c(1 / 20000, 1 / 30000)
+  )
+
+  r <- epi_recipe(jhu) %>%
+    step_population_scaling(case_rate,
+      df = reverse_pop_data,
+      df_pop_col = "values",
+      by = NULL,
+      suffix = "_scaled"
+    ) %>%
+    step_epi_lag(case_rate_scaled, lag = c(0, 7, 14)) %>% # cases
+    step_epi_ahead(case_rate_scaled, ahead = 7, role = "outcome") %>% # cases
+    recipes::step_naomit(recipes::all_predictors()) %>%
+    recipes::step_naomit(recipes::all_outcomes(), skip = TRUE)
+
+  prep <- prep(r, jhu)
+
+  b <- bake(prep, jhu)
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_threshold(.pred) %>%
+    layer_naomit(.pred) %>%
+    layer_population_scaling(.pred,
+      df = reverse_pop_data,
+      by = NULL,
+      df_pop_col = "values"
+    )
+
+  wf <- epi_workflow(
+    r,
+    parsnip::linear_reg()
+  ) %>%
+    fit(jhu) %>%
+    add_frosting(f)
+
+  latest <- get_test_data(
+    recipe = r,
+    x = covid_case_death_rates %>%
+      dplyr::filter(
+        time_value > "2021-11-01",
+        geo_value %in% c("ca", "ny")
+      ) %>%
+      dplyr::select(geo_value, time_value, case_rate)
+  )
+
+
+  p <- predict(wf, latest)
+
+
+
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 
@@ -247,8 +304,295 @@ test_that("test joining by default columns", {
 })
 
 
+test_that("test joining by default columns with less common keys/classes", {
+  # Make a model spec that expects no predictor columns and outputs a fixed
+  # (rate) prediction. Based on combining two linear inequalities.
+  fixed_rate_prediction <- 2e-6
+  model_spec <- quantile_reg(quantile_levels = 0.5, method = "fnc") %>%
+    set_engine(
+      "rq",
+      R = matrix(c(1, -1), 2, 1), r = c(1, -1) * fixed_rate_prediction,
+      eps = fixed_rate_prediction * 1e-6 # prevent early stop
+    )
+
+  # Here's the typical setup
+  dat1 <- tibble::tibble(geo_value = 1:2, time_value = 1, y = c(3 * 5, 7 * 11)) %>%
+    as_epi_df()
+  pop1 <- tibble::tibble(geo_value = 1:2, population = c(5e6, 11e6))
+  ewf1 <- epi_workflow(
+    epi_recipe(dat1) %>%
+      step_population_scaling(y, df = pop1, df_pop_col = "population") %>%
+      step_epi_ahead(y_scaled, ahead = 0),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_equal(
+    extract_recipe(ewf1, estimated = FALSE) %>%
+      prep(dat1) %>%
+      bake(new_data = NULL),
+    dat1 %>%
+      mutate(y_scaled = c(3e-6, 7e-6), ahead_0_y_scaled = y_scaled)
+  )
+  expect_equal(
+    forecast(fit(ewf1, dat1)) %>%
+      pivot_quantiles_wider(.pred),
+    dat1 %>%
+      select(!"y") %>%
+      mutate(`0.5` = c(2 * 5, 2 * 11))
+  )
+
+  # With geo x age in time series but only geo in population data:
+  dat1b <- dat1 %>%
+    as_tibble() %>%
+    mutate(age_group = geo_value, geo_value = 1) %>%
+    as_epi_df(other_keys = "age_group")
+  pop1b <- pop1
+  ewf1b <- epi_workflow(
+    epi_recipe(dat1b) %>%
+      step_population_scaling(y, df = pop1b, df_pop_col = "population") %>%
+      step_epi_ahead(y_scaled, ahead = 0),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1b, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_warning(
+    expect_equal(
+      extract_recipe(ewf1b, estimated = FALSE) %>%
+        prep(dat1b) %>%
+        bake(new_data = NULL),
+      dat1b %>%
+        # geo 1 scaling used for both:
+        mutate(y_scaled = c(3e-6, 7 * 11 / 5e6), ahead_0_y_scaled = y_scaled)
+    ),
+    class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+  )
+  expect_warning(
+    expect_warning(
+      expect_equal(
+        forecast(fit(ewf1b, dat1b)) %>%
+          pivot_quantiles_wider(.pred),
+        dat1b %>%
+          select(!"y") %>%
+          # geo 1 scaling used for both:
+          mutate(`0.5` = c(2 * 5, 2 * 5))
+      ),
+      class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+    ),
+    class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
+  )
+
+  # Same thing but with time series in tibble, but with role hints:
+  dat1b2 <- dat1 %>%
+    as_tibble() %>%
+    mutate(age_group = geo_value, geo_value = 1)
+  pop1b2 <- pop1b
+  ewf1b2 <- epi_workflow(
+    # Can't use epi_recipe or step_epi_ahead; adjust.
+    recipe(dat1b2) %>%
+      update_role("geo_value", new_role = "geo_value") %>%
+      update_role("age_group", new_role = "key") %>%
+      update_role("time_value", new_role = "time_value") %>%
+      step_population_scaling(y, df = pop1b2, df_pop_col = "population", role = "outcome"),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1b2, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_warning(
+    expect_equal(
+      extract_recipe(ewf1b2, estimated = FALSE) %>%
+        prep(dat1b2) %>%
+        bake(new_data = NULL),
+      dat1b2 %>%
+        # geo 1 scaling used for both:
+        mutate(y_scaled = c(3e-6, 7 * 11 / 5e6))
+    ),
+    class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+  )
+  expect_warning(
+    expect_warning(
+      expect_equal(
+        # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
+        predict(fit(ewf1b2, dat1b2), dat1b2) %>%
+          pivot_quantiles_wider(.pred) %>%
+          as_tibble(),
+        dat1b2 %>%
+          select(!"y") %>%
+          # geo 1 scaling used for both:
+          mutate(`0.5` = c(2 * 5, 2 * 5)) %>%
+          select(geo_value, age_group, time_value, `0.5`)
+      ),
+      class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+    ),
+    class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
+  )
+
+  # Same thing but with time series in tibble, but no role hints -> incorrect
+  # key guess -> we prep without warning, but error when we realize we don't
+  # actually have a unique key for our predictions:
+  dat1b3 <- dat1b2
+  pop1b3 <- pop1b2
+  ewf1b3 <- epi_workflow(
+    # Can't use epi_recipe or step_epi_ahead; adjust.
+    recipe(dat1b3) %>%
+      step_population_scaling(y, df = pop1b3, df_pop_col = "population", role = "outcome"),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1b3, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_equal(
+    extract_recipe(ewf1b3, estimated = FALSE) %>%
+      prep(dat1b3) %>%
+      bake(new_data = NULL),
+    dat1b3 %>%
+      # geo 1 scaling used for both:
+      mutate(y_scaled = c(3e-6, 7 * 11 / 5e6))
+  )
+  expect_error(
+    predict(fit(ewf1b3, dat1b3), dat1b3) %>%
+      pivot_quantiles_wider(.pred),
+    class = "epipredict__grab_forged_keys__nonunique_key"
+  )
+
+  # With geo x age_group breakdown on both:
+  dat2 <- dat1 %>%
+    as_tibble() %>%
+    mutate(age_group = geo_value, geo_value = 1) %>%
+    as_epi_df(other_keys = "age_group")
+  pop2 <- pop1 %>%
+    mutate(age_group = geo_value, geo_value = 1)
+  ewf2 <- epi_workflow(
+    epi_recipe(dat2) %>%
+      step_population_scaling(y, df = pop2, df_pop_col = "population") %>%
+      step_epi_ahead(y_scaled, ahead = 0),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop2, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_equal(
+    extract_recipe(ewf2, estimated = FALSE) %>%
+      prep(dat2) %>%
+      bake(new_data = NULL),
+    dat2 %>%
+      mutate(y_scaled = c(3e-6, 7e-6), ahead_0_y_scaled = y_scaled)
+  )
+  expect_equal(
+    forecast(fit(ewf2, dat2)) %>%
+      pivot_quantiles_wider(.pred) %>%
+      as_tibble(),
+    dat2 %>%
+      select(!"y") %>%
+      as_tibble() %>%
+      mutate(`0.5` = c(2 * 5, 2 * 11))
+  )
+
+  # With only an age column in population data:
+  dat2b <- dat2
+  pop2b <- pop1 %>%
+    mutate(age_group = geo_value, geo_value = NULL)
+  ewf2b <- epi_workflow(
+    epi_recipe(dat2b) %>%
+      step_population_scaling(y, df = pop2b, df_pop_col = "population") %>%
+      step_epi_ahead(y_scaled, ahead = 0),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop2b, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_warning(
+    expect_equal(
+      extract_recipe(ewf2b, estimated = FALSE) %>%
+        prep(dat2b) %>%
+        bake(new_data = NULL),
+      dat2b %>%
+        mutate(y_scaled = c(3e-6, 7e-6), ahead_0_y_scaled = y_scaled)
+    ),
+    class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+  )
+  expect_warning(
+    expect_warning(
+      expect_equal(
+        forecast(fit(ewf2b, dat2b)) %>%
+          pivot_quantiles_wider(.pred),
+        dat2b %>%
+          select(!"y") %>%
+          mutate(`0.5` = c(2 * 5, 2 * 11))
+      ),
+      class = "epipredict__step_population_scaling__default_by_missing_suggested_keys"
+    ),
+    class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys"
+  )
+
+  # with geo x time_value breakdown instead:
+  dat3 <- dat1 %>%
+    as_tibble() %>%
+    mutate(time_value = geo_value, geo_value = 1) %>%
+    as_epi_df()
+  pop3 <- pop1 %>%
+    mutate(time_value = geo_value, geo_value = 1)
+  ewf3 <- epi_workflow(
+    epi_recipe(dat3) %>%
+      step_population_scaling(y, df = pop3, df_pop_col = "population") %>%
+      step_epi_ahead(y_scaled, ahead = 0),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop3, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_equal(
+    extract_recipe(ewf3, estimated = FALSE) %>%
+      prep(dat3) %>%
+      bake(new_data = NULL),
+    dat3 %>%
+      mutate(y_scaled = c(3e-6, 7e-6), ahead_0_y_scaled = y_scaled)
+  )
+  expect_equal(
+    forecast(fit(ewf3, dat3)) %>%
+      pivot_quantiles_wider(.pred),
+    # slightly edited copy-pasta due to test time selection:
+    dat3 %>%
+      select(!"y") %>%
+      dplyr::slice_max(by = geo_value, time_value) %>%
+      mutate(`0.5` = 2 * 11)
+  )
+
+  # With alternative geo naming... we're able to successfully prep (and we're
+  # not missing a warning as in 1b3 since we're actually in a "correct" setup),
+  # but still like 1b3, we fail at prediction time as key roles have not been
+  # set up and inference fails:
+  dat4 <- dat1 %>% rename(geo = geo_value)
+  pop4 <- pop1 %>% rename(geo = geo_value)
+  ewf4 <- epi_workflow(
+    recipe(dat4) %>%
+      step_population_scaling(y, df = pop4, df_pop_col = "population", role = "outcome"),
+    model_spec,
+    frosting() %>%
+      layer_predict() %>%
+      layer_population_scaling(.pred, df = pop1, df_pop_col = "population", create_new = FALSE)
+  )
+  expect_equal(
+    extract_recipe(ewf4, estimated = FALSE) %>%
+      prep(dat4) %>%
+      bake(new_data = NULL),
+    dat4 %>%
+      mutate(y_scaled = c(3e-6, 7e-6))
+  )
+  expect_error(
+    # get_test_data doesn't work with non-`epi_df`s, so provide test data manually:
+    predict(fit(ewf4, dat4), dat4) %>%
+      pivot_quantiles_wider(.pred),
+    class = "epipredict__grab_forged_keys__nonunique_key"
+  )
+})
+
+
 test_that("expect error if `by` selector does not match", {
-  jhu <- case_death_rate_subset %>%
+  jhu <- covid_case_death_rates %>%
     dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
     dplyr::select(geo_value, time_value, case_rate)
 

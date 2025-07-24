@@ -1,8 +1,12 @@
 #' Lower and upper thresholds for predicted values
 #'
-#' This postprocessing step is used to set prediction values that are
-#' smaller than the lower threshold or higher than the upper threshold equal
-#' to the threshold values.
+#' This post-processing step is used to set prediction values that are smaller
+#' than the lower threshold or higher than the upper threshold equal to the
+#' threshold values.
+
+#' @details
+#' Making case count predictions strictly positive is a typical example usage.
+#'   It must be called after there is a column containing quantiles. This means at earliest it can be called after `layer_predict()` for distributional models, or after `layer_residual_quantiles()` for point prediction models. Typical best practice will use `starts_with(".pred")` as the variables to threshold.
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> One or more unquoted
@@ -22,9 +26,9 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value < "2021-03-08", geo_value %in% c("ak", "ca", "ar"))
+#'
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
 #'   step_epi_ahead(death_rate, ahead = 7) %>%
@@ -33,7 +37,7 @@
 #'
 #' f <- frosting() %>%
 #'   layer_predict() %>%
-#'   layer_threshold(.pred, lower = 0.180, upper = 0.310)
+#'   layer_threshold(starts_with(".pred"), lower = 0.180, upper = 0.310)
 #' wf <- wf %>% add_frosting(f)
 #' p <- forecast(wf)
 #' p
@@ -61,6 +65,13 @@ layer_threshold_new <-
 
 
 
+#' restrict various objects to the interval \[lower, upper\]
+#' @param x the object to restrict
+#' @param lower numeric, the lower bound
+#' @param upper numeric, the upper bound
+#' @param ... unused
+#' @export
+#' @keywords internal
 snap <- function(x, lower, upper, ...) {
   UseMethod("snap")
 }
@@ -73,25 +84,11 @@ snap.default <- function(x, lower, upper, ...) {
 }
 
 #' @export
-snap.distribution <- function(x, lower, upper, ...) {
-  rlang::check_dots_empty()
-  arg_is_scalar(lower, upper)
-  dstn <- lapply(vec_data(x), snap, lower = lower, upper = upper)
-  distributional:::wrap_dist(dstn)
-}
-
-#' @export
-snap.dist_default <- function(x, lower, upper, ...) {
-  rlang::check_dots_empty()
-  x
-}
-
-#' @export
-snap.dist_quantiles <- function(x, lower, upper, ...) {
-  values <- field(x, "values")
-  quantile_levels <- field(x, "quantile_levels")
-  values <- snap(values, lower, upper)
-  new_quantiles(values = values, quantile_levels = quantile_levels)
+snap.quantile_pred <- function(x, lower, upper, ...) {
+  values <- as.matrix(x)
+  quantile_levels <- x %@% "quantile_levels"
+  values <- map(vctrs::vec_chop(values), ~ snap(.x, lower, upper))
+  quantile_pred(do.call(rbind, values), quantile_levels = quantile_levels)
 }
 
 #' @export

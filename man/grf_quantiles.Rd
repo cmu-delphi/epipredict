@@ -52,8 +52,8 @@ details, see \href{https://grf-labs.github.io/grf/articles/categorical_inputs.ht
 #> Model fit template:
 #> grf::quantile_forest(X = missing_arg(), Y = missing_arg(), mtry = min_cols(~integer(1), 
 #>     x), num.trees = integer(1), min.node.size = min_rows(~integer(1), 
-#>     x), quantiles = c(0.1, 0.5, 0.9), num.threads = 1L, seed = stats::runif(1, 
-#>     0, .Machine$integer.max))
+#>     x), quantiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95), 
+#>     num.threads = 1L, seed = stats::runif(1, 0, .Machine$integer.max))
 }\if{html}{\out{</div>}}
 }
 
@@ -84,8 +84,7 @@ predict(out, new_data = tib[1:5, ]) \%>\%
 
 # -- a more complicated task
 
-library(dplyr)
-dat <- case_death_rate_subset \%>\%
+dat <- covid_case_death_rates \%>\%
   filter(time_value > as.Date("2021-10-01"))
 rec <- epi_recipe(dat) \%>\%
   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) \%>\%

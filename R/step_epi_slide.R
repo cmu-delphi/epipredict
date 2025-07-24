@@ -1,8 +1,9 @@
 #' Calculate a rolling window transformation
 #'
-#' `step_epi_slide()` creates a *specification* of a recipe step
-#'   that will generate one or more new columns of derived data by "sliding"
-#'   a computation along existing data.
+#' `step_epi_slide()` creates a *specification* of a recipe step that will
+#'   generate one or more new columns of derived data by "sliding" a computation
+#'   along existing data. This is a wrapper around `epiprocess::epi_slide()`
+#'   to allow its use within an `epi_recipe()`.
 #'
 #' @inheritParams step_epi_lag
 #' @param .f A function in one of the following formats:
@@ -36,8 +37,7 @@
 #'
 #' @export
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-01-01"), geo_value %in% c("ca", "ny"))
 #' rec <- epi_recipe(jhu) %>%
 #'   step_epi_slide(case_rate, death_rate,

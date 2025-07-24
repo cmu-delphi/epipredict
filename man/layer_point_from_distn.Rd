@@ -28,14 +28,13 @@ will overwrite the \code{.pred} column, removing the distribution information.}
 an updated \code{frosting} postprocessor.
 }
 \description{
-This function adds a postprocessing layer to extract a point forecast from
+This function adds a post-processing layer to extract a point forecast from
 a distributional forecast. NOTE: With default arguments, this will remove
 information, so one should usually call this AFTER \code{layer_quantile_distn()}
 or set the \code{name} argument to something specific.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%

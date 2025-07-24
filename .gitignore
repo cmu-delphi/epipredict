@@ -10,3 +10,4 @@ inst/doc
 .Rprofile
 renv.lock
 renv/
+.Renviron

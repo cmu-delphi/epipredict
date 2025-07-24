@@ -60,8 +60,7 @@
 #'
 #' # -- a more complicated task
 #'
-#' library(dplyr)
-#' dat <- case_death_rate_subset %>%
+#' dat <- covid_case_death_rates %>%
 #'   filter(time_value > as.Date("2021-10-01"))
 #' rec <- epi_recipe(dat) %>%
 #'   step_epi_lag(case_rate, death_rate, lag = c(0, 7, 14)) %>%
@@ -141,7 +140,7 @@ make_grf_quantiles <- function() {
       data = c(x = "X", y = "Y"),
       func = c(pkg = "grf", fun = "quantile_forest"),
       defaults = list(
-        quantiles = c(0.1, 0.5, 0.9),
+        quantiles = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
         num.threads = 1L,
         seed = rlang::expr(stats::runif(1, 0, .Machine$integer.max))
       )
@@ -163,12 +162,12 @@ make_grf_quantiles <- function() {
     )
   )
 
-  # turn the predictions into a tibble with a dist_quantiles column
+  # turn the predictions into a tibble with a quantile_pred column
   process_qrf_preds <- function(x, object) {
-    quantile_levels <- parsnip::extract_fit_engine(object)$quantiles.orig
+    quantile_levels <- parsnip::extract_fit_engine(object)$quantiles.orig %>% sort()
     x <- x$predictions
     out <- lapply(vctrs::vec_chop(x), function(x) sort(drop(x)))
-    out <- dist_quantiles(out, list(quantile_levels))
+    out <- hardhat::quantile_pred(do.call(rbind, out), quantile_levels)
     return(dplyr::tibble(.pred = out))
   }
 

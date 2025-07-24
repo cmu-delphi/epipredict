@@ -1,6 +1,6 @@
 #' Converts distributional forecasts to point forecasts
 #'
-#' This function adds a postprocessing layer to extract a point forecast from
+#' This function adds a post-processing layer to extract a point forecast from
 #' a distributional forecast. NOTE: With default arguments, this will remove
 #' information, so one should usually call this AFTER `layer_quantile_distn()`
 #' or set the `name` argument to something specific.
@@ -16,8 +16,7 @@
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
@@ -79,10 +78,10 @@ layer_point_from_distn_new <- function(type, name, id) {
 slather.layer_point_from_distn <-
   function(object, components, workflow, new_data, ...) {
     dstn <- components$predictions$.pred
-    if (!inherits(dstn, "distribution")) {
-      rlang::warn(
+    if (!(inherits(dstn, "quantile_pred") | inherits(dstn, "distribution"))) {
+      cli_warn(
         c("`layer_point_from_distn` requires distributional predictions.",
-          i = "These are of class {class(dstn)}. Ignoring this layer."
+          i = "These are of class {.cls {class(dstn)}}. Ignoring this layer."
         )
       )
       return(components)
@@ -94,7 +93,12 @@ slather.layer_point_from_distn <-
       components$predictions$.pred <- dstn
     } else {
       dstn <- tibble(dstn = dstn)
-      dstn <- check_pname(dstn, components$predictions, object)
+      dstn <- check_name(
+        dstn,
+        components$predictions,
+        object,
+        newname = object$name
+      )
       components$predictions <- mutate(components$predictions, !!!dstn)
     }
     components

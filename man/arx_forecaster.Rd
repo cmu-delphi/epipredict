@@ -15,45 +15,49 @@ arx_forecaster(
 \arguments{
 \item{epi_data}{An \code{epi_df} object}
 
-\item{outcome}{A character (scalar) specifying the outcome (in the
-\code{epi_df}).}
+\item{outcome}{A character (scalar) specifying the outcome (in the \code{epi_df}).}
 
 \item{predictors}{A character vector giving column(s) of predictor variables.
-This defaults to the \code{outcome}. However, if manually specified, only those variables
-specifically mentioned will be used. (The \code{outcome} will not be added.)
-By default, equals the outcome. If manually specified, does not add the
-outcome variable, so make sure to specify it.}
+This defaults to the \code{outcome}. However, if manually specified, only those
+variables specifically mentioned will be used, and the \code{outcome} will not be
+added.}
 
-\item{trainer}{A \code{{parsnip}} model describing the type of estimation.
-For now, we enforce \code{mode = "regression"}.}
+\item{trainer}{A \code{{parsnip}} model describing the type of estimation.  For
+now, we enforce \code{mode = "regression"}.}
 
-\item{args_list}{A list of customization arguments to determine
-the type of forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
+\item{args_list}{A list of customization arguments to determine the type of
+forecasting model. See \code{\link[=arx_args_list]{arx_args_list()}}.}
 }
 \value{
-A list with (1) \code{predictions} an \code{epi_df} of predicted values
-and (2) \code{epi_workflow}, a list that encapsulates the entire estimation
-workflow
+An \code{arx_fcast}, with the fields \code{predictions} and \code{epi_workflow}.
+\code{predictions} is a \code{tibble} of predicted values while \code{epi_workflow()} is
+the fit workflow used to make those predictions
 }
 \description{
 This is an autoregressive forecasting model for
-\link[epiprocess:epi_df]{epiprocess::epi_df} data. It does "direct" forecasting, meaning
-that it estimates a model for a particular target horizon.
+\link[epiprocess:epi_df]{epiprocess::epi_df} data. It does "direct"
+forecasting, meaning that it estimates a model for a particular target
+horizon of the \code{outcome} based on the lags of the \code{predictors}. See the \href{../articles/epipredict.html}{Get started vignette} for some worked examples and
+\href{../articles/custom_epiworkflows.html}{Custom epi_workflows vignette} for a
+recreation using a custom \code{epi_workflow()}.
 }
 \examples{
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   dplyr::filter(time_value >= as.Date("2021-12-01"))
 
 out <- arx_forecaster(
-  jhu, "death_rate",
+  jhu,
+  "death_rate",
   c("case_rate", "death_rate")
 )
 
-out <- arx_forecaster(jhu, "death_rate",
+out <- arx_forecaster(jhu,
+  "death_rate",
   c("case_rate", "death_rate"),
   trainer = quantile_reg(),
   args_list = arx_args_list(quantile_levels = 1:9 / 10)
 )
+out
 }
 \seealso{
 \code{\link[=arx_fcast_epi_workflow]{arx_fcast_epi_workflow()}}, \code{\link[=arx_args_list]{arx_args_list()}}

@@ -1,15 +1,15 @@
 #' Convert per-capita predictions to raw scale
 #'
-#' `layer_population_scaling` creates a specification of a frosting layer
-#' that will "undo" per-capita scaling. Typical usage would
-#' load a dataset that contains state-level population, and use it to convert
-#' predictions made from a rate-scale model to raw scale by multiplying by
-#' the population.
-#' Although, it is worth noting that there is nothing special about "population".
-#' The function can be used to scale by any variable. Population is the
-#' standard use case in the epidemiology forecasting scenario. Any value
-#' passed will *multiply* the selected variables while the `rate_rescaling`
-#' argument is a common *divisor* of the selected variables.
+#' `layer_population_scaling` creates a specification of a frosting layer that
+#' will "undo" per-capita scaling done in `step_population_scaling()`.
+#' Typical usage would set `df` to be a dataset that contains a list of
+#' population for the `geo_value`s, and use it to convert predictions made from
+#' a raw scale model to rate-scale by dividing by the population.
+#' Although, it is worth noting that there is nothing special about
+#' "population", and  the function can be used to scale by any variable.
+#' Population is the standard use case in the epidemiology forecasting scenario.
+#' Any value passed will *multiply* the selected variables while the
+#' `rate_rescaling` argument is a common *divisor* of the selected variables.
 #'
 #' @param frosting a `frosting` postprocessor. The layer will be added to the
 #'   sequence of operations for this frosting.
@@ -17,14 +17,20 @@
 #'   for this step. See [recipes::selections()] for more details.
 #' @param df a data frame that contains the population data to be used for
 #'   inverting the existing scaling.
-#' @param by A (possibly named) character vector of variables to join by.
+#' @param by A (possibly named) character vector of variables to join `df` onto
+#'   the `epi_df` by.
 #'
-#' If `NULL`, the default, the function will perform a natural join, using all
-#' variables in common across the `epi_df` produced by the `predict()` call
-#' and the user-provided dataset.
-#' If columns in that `epi_df` and `df` have the same name (and aren't
-#' included in `by`), `.df` is added to the one from the user-provided data
-#' to disambiguate.
+#' If `NULL`, the default, the function will try to infer a reasonable set of
+#' columns. First, it will try to join by all variables in the test data with
+#' roles `"geo_value"`, `"key"`, or `"time_value"` that also appear in `df`;
+#' these roles are automatically set if you are using an `epi_df`, or you can
+#' use, e.g., `update_role`. If no such roles are set, it will try to perform a
+#' natural join, using variables in common between the training/test data and
+#' population data.
+#'
+#' If columns in the training/testing data and `df` have the same name (and
+#' aren't included in `by`), a `.df` suffix is added to the one from the
+#' user-provided data to disambiguate.
 #'
 #' To join by different variables on the `epi_df` and `df`, use a named vector.
 #' For example, `by = c("geo_value" = "states")` will match `epi_df$geo_value`
@@ -47,7 +53,6 @@
 #' @return an updated `frosting` postprocessor
 #' @export
 #' @examples
-#' library(dplyr)
 #' jhu <- cases_deaths_subset %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ca", "ny")) %>%
 #'   select(geo_value, time_value, cases)
@@ -135,6 +140,26 @@ slather.layer_population_scaling <-
     )
     rlang::check_dots_empty()
 
+    if (is.null(object$by)) {
+      # Assume `layer_predict` has calculated the prediction keys and other
+      # layers don't change the prediction key colnames:
+      prediction_key_colnames <- names(components$keys)
+      lhs_potential_keys <- prediction_key_colnames
+      rhs_potential_keys <- colnames(select(object$df, !object$df_pop_col))
+      object$by <- intersect(lhs_potential_keys, rhs_potential_keys)
+      suggested_min_keys <- kill_time_value(lhs_potential_keys)
+      if (!all(suggested_min_keys %in% object$by)) {
+        cli_warn(c(
+          "{setdiff(suggested_min_keys, object$by)} {?was an/were} epikey column{?s} in the predictions,
+           but {?wasn't/weren't} found in the population `df`.",
+          "i" = "Defaulting to join by {object$by}",
+          ">" = "Double-check whether column names on the population `df` match those expected in your predictions",
+          ">" = "Consider using population data with breakdowns by {suggested_min_keys}",
+          ">" = "Manually specify `by =` to silence"
+        ), class = "epipredict__layer_population_scaling__default_by_missing_suggested_keys")
+      }
+    }
+
     object$by <- object$by %||% intersect(
       epi_keys_only(components$predictions),
       colnames(select(object$df, !object$df_pop_col))
@@ -152,10 +177,12 @@ slather.layer_population_scaling <-
     suffix <- ifelse(object$create_new, object$suffix, "")
     col_to_remove <- setdiff(colnames(object$df), colnames(components$predictions))
 
-    components$predictions <- left_join(
+    components$predictions <- inner_join(
       components$predictions,
       object$df,
       by = object$by,
+      relationship = "many-to-one",
+      unmatched = c("error", "drop"),
       suffix = c("", ".df")
     ) %>%
       mutate(across(

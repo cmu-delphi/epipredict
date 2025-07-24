@@ -4,7 +4,7 @@
 \alias{add_frosting}
 \alias{remove_frosting}
 \alias{update_frosting}
-\title{Add frosting to a workflow}
+\title{Add/remove/update the \code{frosting} of an \code{epi_workflow}}
 \usage{
 add_frosting(x, frosting, ...)
 
@@ -23,11 +23,10 @@ update_frosting(x, frosting, ...)
 \code{x}, updated with a new frosting postprocessor
 }
 \description{
-Add frosting to a workflow
+Add/remove/update the \code{frosting} of an \code{epi_workflow}
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%

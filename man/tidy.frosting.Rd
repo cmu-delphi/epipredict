@@ -37,8 +37,7 @@ method for the operation exists). Note that this is a modified
 version of the \code{tidy} method for a recipe.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%
@@ -48,6 +47,7 @@ r <- epi_recipe(jhu) \%>\%
 
 wf <- epi_workflow(r, parsnip::linear_reg()) \%>\% fit(jhu)
 latest <- get_test_data(recipe = r, x = jhu)
+
 f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_naomit(.pred)

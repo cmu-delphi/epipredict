@@ -40,8 +40,12 @@ observations in \code{time_value} per group, where the groups are formed
 based on the remaining \code{epi_keys}.
 }
 \details{
-Note that \code{step_epi_lead()} and \code{step_epi_lag()} should come
-after any filtering step.
+It is recommended to do this after any \code{step_epi_ahead()},
+\code{step_epi_lag()}, or \code{step_epi_naomit()} steps. If \code{step_training_window()}
+happens first, there will be less than \code{n_training} remaining examples,
+since either leading or lagging will introduce \code{NA}'s later removed by
+\code{step_epi_naomit()}. Typical usage will use this step last in an
+\code{epi_recipe()}.
 }
 \examples{
 tib <- tibble(

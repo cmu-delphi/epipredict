@@ -2,7 +2,7 @@
 % Please edit documentation in R/layer_predict.R
 \name{layer_predict}
 \alias{layer_predict}
-\title{Prediction layer for postprocessing}
+\title{Prediction layer for post-processing}
 \usage{
 layer_predict(
   frosting,
@@ -54,12 +54,11 @@ An updated \code{frosting} object
 \description{
 Implements prediction on a fitted \code{epi_workflow}. One may want different
 types of prediction, and to potentially apply this after some amount of
-postprocessing. This would typically be the first layer in a \code{frosting}
+post-processing. This would typically be the first layer in a \code{frosting}
 postprocessor.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%
@@ -85,5 +84,5 @@ p2 <- predict(wf2, latest)
 p2
 }
 \seealso{
-\code{parsnip::predict.model_fit()}
+\code{\link[parsnip:predict.model_fit]{parsnip::predict.model_fit()}}
 }

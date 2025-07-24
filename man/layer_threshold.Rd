@@ -35,14 +35,18 @@ Default value is \code{Inf}.}
 an updated \code{frosting} postprocessor
 }
 \description{
-This postprocessing step is used to set prediction values that are
-smaller than the lower threshold or higher than the upper threshold equal
-to the threshold values.
+This post-processing step is used to set prediction values that are smaller
+than the lower threshold or higher than the upper threshold equal to the
+threshold values.
+}
+\details{
+Making case count predictions strictly positive is a typical example usage.
+It must be called after there is a column containing quantiles. This means at earliest it can be called after \code{layer_predict()} for distributional models, or after \code{layer_residual_quantiles()} for point prediction models. Typical best practice will use \code{starts_with(".pred")} as the variables to threshold.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value < "2021-03-08", geo_value \%in\% c("ak", "ca", "ar"))
+
 r <- epi_recipe(jhu) \%>\%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) \%>\%
   step_epi_ahead(death_rate, ahead = 7) \%>\%
@@ -51,7 +55,7 @@ wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 
 f <- frosting() \%>\%
   layer_predict() \%>\%
-  layer_threshold(.pred, lower = 0.180, upper = 0.310)
+  layer_threshold(starts_with(".pred"), lower = 0.180, upper = 0.310)
 wf <- wf \%>\% add_frosting(f)
 p <- forecast(wf)
 p

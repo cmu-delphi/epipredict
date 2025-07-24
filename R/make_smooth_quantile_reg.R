@@ -5,12 +5,7 @@
 #' the [tidymodels](https://www.tidymodels.org/) framework. Currently, the
 #' only supported engine is [smoothqr::smooth_qr()].
 #'
-#' @param mode A single character string for the type of model.
-#'   The only possible value for this model is "regression".
-#' @param engine Character string naming the fitting function. Currently, only
-#'   "smooth_qr" is supported.
-#' @param quantile_levels A scalar or vector of values in (0, 1) to determine which
-#'   quantiles to estimate (default is 0.5).
+#' @inheritParams quantile_reg
 #' @param outcome_locations Defaults to the vector `1:ncol(y)` but if the
 #'   responses are observed at a different spacing (or appear in a different
 #'   order), that information should be used here. This
@@ -36,25 +31,21 @@
 #' y <- sin(x) + rnorm(length(x), sd = .1)
 #' fd <- x[length(x) - 20]
 #' XY <- smoothqr::lagmat(y[1:(length(y) - 20)], c(-20:20))
-#' XY <- tibble::as_tibble(XY)
+#' XY <- as_tibble(XY)
 #' qr_spec <- smooth_quantile_reg(quantile_levels = c(.2, .5, .8), outcome_locations = 20:1)
 #' tt <- qr_spec %>% fit_xy(x = XY[, 21:41], y = XY[, 1:20])
 #'
-#' library(tidyr)
-#' library(dplyr)
 #' pl <- predict(
 #'   object = tt,
 #'   new_data = XY[max(which(complete.cases(XY[, 21:41]))), 21:41]
 #' )
 #' pl <- pl %>%
 #'   unnest(.pred) %>%
-#'   mutate(distn = nested_quantiles(distn)) %>%
-#'   unnest(distn) %>%
+#'   pivot_quantiles_wider(distn) %>%
 #'   mutate(
 #'     x = x[length(x) - 20] + ahead / 100 * 2 * pi,
 #'     ahead = NULL
-#'   ) %>%
-#'   pivot_wider(names_from = quantile_levels, values_from = values)
+#'   )
 #' plot(x, y, pch = 16, xlim = c(pi, 2 * pi), col = "lightgrey")
 #' curve(sin(x), add = TRUE)
 #' abline(v = fd, lty = 2)
@@ -64,11 +55,11 @@
 #'
 #' library(ggplot2)
 #' ggplot(data.frame(x = x, y = y), aes(x)) +
-#'   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "lightblue") +
+#'   geom_ribbon(data = pl, aes(ymin = `0.2`, ymax = `0.8`), fill = "cornflowerblue") +
 #'   geom_point(aes(y = y), colour = "grey") + # observed data
 #'   geom_function(fun = sin, colour = "black") + # truth
 #'   geom_vline(xintercept = fd, linetype = "dashed") + # end of training data
-#'   geom_line(data = pl, aes(y = `0.5`), colour = "red") + # median prediction
+#'   geom_line(data = pl, aes(y = `0.5`), colour = "orange") + # median prediction
 #'   theme_bw() +
 #'   coord_cartesian(xlim = c(0, NA)) +
 #'   ylab("y")
@@ -76,7 +67,7 @@ smooth_quantile_reg <- function(
     mode = "regression",
     engine = "smoothqr",
     outcome_locations = NULL,
-    quantile_levels = 0.5,
+    quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
     degree = 3L) {
   # Check for correct mode
   if (mode != "regression") cli_abort("`mode` must be 'regression'")
@@ -178,7 +169,7 @@ make_smooth_quantile_reg <- function() {
       x <- lapply(unname(split(
         p, seq(nrow(p))
       )), function(q) unname(sort(q, na.last = TRUE)))
-      dist_quantiles(x, list(object$tau))
+      quantile_pred(do.call(rbind, x), object$tau)
     })
     n_preds <- length(list_of_pred_distns[[1]])
     nout <- length(list_of_pred_distns)

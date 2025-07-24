@@ -1,6 +1,8 @@
 #' Returns predictive quantiles
 #'
 #' This function calculates quantiles when the prediction was _distributional_.
+#' If the model producing the forecast is not distributional, it is recommended
+#' to use `layer_residual_quantiles()` instead.
 #'
 #' Currently, the only distributional modes/engines are
 #' * `quantile_reg()`
@@ -22,8 +24,7 @@
 #' @export
 #'
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #'
 #' r <- epi_recipe(jhu) %>%
@@ -44,7 +45,7 @@
 #' p
 layer_quantile_distn <- function(frosting,
                                  ...,
-                                 quantile_levels = c(.25, .75),
+                                 quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
                                  truncate = c(-Inf, Inf),
                                  name = ".pred_distn",
                                  id = rand_id("quantile_distn")) {
@@ -79,15 +80,15 @@ layer_quantile_distn_new <- function(quantile_levels, truncate, name, id) {
 slather.layer_quantile_distn <-
   function(object, components, workflow, new_data, ...) {
     dstn <- components$predictions$.pred
-    if (!inherits(dstn, "distribution")) {
-      cli_abort(c(
-        "`layer_quantile_distn()` requires distributional predictions.",
-        "These are of class {.cls {class(dstn)}}."
-      ))
+    if (!inherits(dstn, "quantile_pred")) {
+      cli_abort(
+        "`layer_quantile_distn()` requires or quantile
+        predictions. These are of class {.cls {class(dstn)}}."
+      )
     }
     rlang::check_dots_empty()
 
-    dstn <- dist_quantiles(
+    dstn <- quantile_pred(
       quantile(dstn, object$quantile_levels),
       object$quantile_levels
     )
@@ -97,7 +98,12 @@ slather.layer_quantile_distn <-
       dstn <- snap(dstn, truncate[1], truncate[2])
     }
     dstn <- tibble(dstn = dstn)
-    dstn <- check_pname(dstn, components$predictions, object)
+    dstn <- check_name(
+      dstn,
+      components$predictions,
+      object,
+      newname = object$name
+    )
     components$predictions <- mutate(components$predictions, !!!dstn)
     components
   }

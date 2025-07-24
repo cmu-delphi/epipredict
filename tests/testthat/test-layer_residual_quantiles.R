@@ -1,4 +1,4 @@
-jhu <- case_death_rate_subset %>%
+jhu <- covid_case_death_rates %>%
   dplyr::filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) %>%
@@ -23,13 +23,28 @@ test_that("Returns expected number or rows and columns", {
   expect_equal(nrow(p), 3L)
   expect_named(p, c("geo_value", "time_value", ".pred", ".pred_distn"))
 
-  nested <- p %>% dplyr::mutate(.quantiles = nested_quantiles(.pred_distn))
-  unnested <- nested %>% tidyr::unnest(.quantiles)
-
-  expect_equal(nrow(unnested), 9L)
-  expect_equal(unique(unnested$quantile_levels), c(.0275, .8, .95))
+  unnested <- p %>% pivot_quantiles_longer(.pred_distn)
+  expect_equal(nrow(unnested), 12L)
+  expect_equal(unique(unnested$.pred_distn_quantile_level), c(.0275, 0.5, .8, .95))
 })
 
+test_that("new name works correctly", {
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(name = "foo")
+
+  wf1 <- wf %>% add_frosting(f)
+  expect_equal(names(forecast(wf1)), c("geo_value", "time_value", ".pred", "foo"))
+
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(name = "geo_value")
+
+  wf1 <- wf %>% add_frosting(f)
+  expect_error(forecast(wf1))
+})
 
 test_that("Errors when used with a classifier", {
   tib <- tibble(
@@ -88,7 +103,7 @@ test_that("Canned forecasters work with / without", {
   )
 
   expect_silent(
-    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"))
+    arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"), args_list = arx_args_list(check_enough_data_n = 1))
   )
   expect_silent(
     flatline_forecaster(

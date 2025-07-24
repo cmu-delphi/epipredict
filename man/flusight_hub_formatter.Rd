@@ -42,7 +42,8 @@ format for this forecast task is \href{https://github.com/cdcepi/FluSight-foreca
 }
 \examples{
 library(dplyr)
-weekly_deaths <- case_death_rate_subset \%>\%
+library(epiprocess)
+weekly_deaths <- covid_case_death_rates \%>\%
   filter(
     time_value >= as.Date("2021-09-01"),
     geo_value \%in\% c("ca", "ny", "dc", "ga", "vt")

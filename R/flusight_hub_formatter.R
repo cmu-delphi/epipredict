@@ -1,7 +1,6 @@
 location_to_abbr <- function(location) {
   dictionary <-
     state_census %>%
-    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -12,7 +11,6 @@ location_to_abbr <- function(location) {
 abbr_to_location <- function(abbr) {
   dictionary <-
     state_census %>%
-    dplyr::mutate(fips = sprintf("%02d", fips)) %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -57,7 +55,8 @@ abbr_to_location <- function(abbr) {
 #'
 #' @examples
 #' library(dplyr)
-#' weekly_deaths <- case_death_rate_subset %>%
+#' library(epiprocess)
+#' weekly_deaths <- covid_case_death_rates %>%
 #'   filter(
 #'     time_value >= as.Date("2021-09-01"),
 #'     geo_value %in% c("ca", "ny", "dc", "ga", "vt")
@@ -105,12 +104,11 @@ flusight_hub_formatter.data.frame <- function(
 
   object <- object %>%
     # combine the predictions and the distribution
-    mutate(.pred_distn = nested_quantiles(.pred_distn)) %>%
-    tidyr::unnest(.pred_distn) %>%
+    pivot_quantiles_longer(.pred_distn) %>%
     # now we create the correct column names
     rename(
-      value = values,
-      output_type_id = quantile_levels,
+      value = .pred_distn_value,
+      output_type_id = .pred_distn_quantile_level,
       reference_date = forecast_date
     ) %>%
     # convert to fips codes, and add any constant cols passed in ...

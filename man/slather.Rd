@@ -7,7 +7,7 @@
 slather(object, components, workflow, new_data, ...)
 }
 \arguments{
-\item{object}{a workflow with \code{frosting} postprocessing steps}
+\item{object}{a workflow with \code{frosting} post-processing steps}
 
 \item{components}{a list of components containing model information. These
 will be updated and returned by the layer. These should be
@@ -31,10 +31,14 @@ and predict on}
 \item{...}{additional arguments used by methods. Currently unused.}
 }
 \value{
-The \code{components} list. In the same format after applying any updates.
+The \code{components} list, in the same format as before, after applying
+any updates.
 }
 \description{
-Slathering frosting means to implement a postprocessing layer. When
-creating a new postprocessing layer, you must implement an S3 method
-for this function
+Slathering frosting means to implement a post-processing layer. It is the
+post-processing equivalent of \code{bake} for a recipe. Given a layer, it applies
+the actual transformation of that layer. When creating a new post-processing
+layer, you must implement an S3 method for this function. Generally, you will
+not need to call this function directly, as it will be used indirectly during
+\code{predict}.
 }

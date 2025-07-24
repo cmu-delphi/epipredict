@@ -13,9 +13,11 @@ ggplot2::autoplot
 #'
 #'
 #' @inheritParams epiprocess::autoplot.epi_df
-#' @param object An `epi_workflow`
+#' @param object,x An `epi_workflow`
 #' @param predictions A data frame with predictions. If `NULL`, only the
 #'   original data is shown.
+#' @param observed_response An epi_df of the data to plot against. This is for the case
+#'   where you have the actual results to compare the forecast against.
 #' @param .levels A numeric vector of levels to plot for any prediction bands.
 #'   More than 3 levels begins to be difficult to see.
 #' @param ... Ignored
@@ -28,8 +30,7 @@ ggplot2::autoplot
 #'
 #' @name autoplot-epipred
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #'
 #' r <- epi_recipe(jhu) %>%
@@ -39,9 +40,7 @@ ggplot2::autoplot
 #'   step_epi_naomit()
 #'
 #' f <- frosting() %>%
-#'   layer_residual_quantiles(
-#'     quantile_levels = c(.025, .1, .25, .75, .9, .975)
-#'   ) %>%
+#'   layer_residual_quantiles() %>%
 #'   layer_threshold(starts_with(".pred")) %>%
 #'   layer_add_target_date()
 #'
@@ -51,7 +50,7 @@ ggplot2::autoplot
 #'
 #' latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 #' preds <- predict(wf, latest)
-#' autoplot(wf, preds, .max_facets = 4)
+#' autoplot(wf, preds, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' # ------- Show multiple horizons
 #'
@@ -66,31 +65,34 @@ ggplot2::autoplot
 #' })
 #'
 #' p <- do.call(rbind, p)
-#' autoplot(wf, p, .max_facets = 4)
+#' autoplot(wf, p, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' # ------- Plotting canned forecaster output
 #'
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value >= as.Date("2021-11-01"))
 #' flat <- flatline_forecaster(jhu, "death_rate")
-#' autoplot(flat, .max_facets = 4)
+#' autoplot(flat, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' arx <- arx_forecaster(jhu, "death_rate", c("case_rate", "death_rate"),
 #'   args_list = arx_args_list(ahead = 14L)
 #' )
-#' autoplot(arx, .max_facets = 6)
+#' autoplot(arx, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt", "mo", "in"))
 NULL
 
 #' @export
 #' @rdname autoplot-epipred
 autoplot.epi_workflow <- function(
-    object, predictions = NULL,
-    .levels = c(.5, .8, .95), ...,
+    object,
+    predictions = NULL,
+    observed_response = NULL,
+    .levels = c(.5, .8, .9), ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "dodgerblue4",
     .point_pred_color = "orange",
-    .max_facets = Inf) {
+    .facet_filter = NULL,
+    .max_facets = deprecated()) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
   rlang::arg_match(.color_by)
@@ -111,32 +113,41 @@ autoplot.epi_workflow <- function(
   }
   keys <- c("geo_value", "time_value", "key")
   mold_roles <- names(mold$extras$roles)
-  edf <- bind_cols(mold$extras$roles[mold_roles %in% keys], y)
-  if (starts_with_impl("ahead_", names(y))) {
+  # extract the relevant column names for plotting
+  if (starts_with_impl("ahead_", names(y)) || starts_with_impl("lag_", names(y))) {
     old_name_y <- unlist(strsplit(names(y), "_"))
-    shift <- as.numeric(old_name_y[2])
     new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
-    edf <- rename(edf, !!new_name_y := !!names(y))
-  } else if (starts_with_impl("lag_", names(y))) {
-    old_name_y <- unlist(strsplit(names(y), "_"))
-    shift <- -as.numeric(old_name_y[2])
-    new_name_y <- paste(old_name_y[-c(1:2)], collapse = "_")
-    edf <- rename(edf, !!new_name_y := !!names(y))
+  } else {
+    new_name_y <- names(y)
   }
-
-  if (!is.null(shift)) {
-    edf <- mutate(edf, time_value = time_value + shift)
+  if (is.null(observed_response)) {
+    # the outcome has shifted, so we need to shift it forward (or back)
+    # by the corresponding amount
+    observed_response <- bind_cols(mold$extras$roles[mold_roles %in% keys], y)
+    if (starts_with_impl("ahead_", names(y))) {
+      shift <- as.numeric(old_name_y[2])
+    } else if (starts_with_impl("lag_", names(y))) {
+      old_name_y <- unlist(strsplit(names(y), "_"))
+      shift <- -as.numeric(old_name_y[2])
+    } else {
+      new_name_y <- names(y)
+      shift <- 0
+    }
+    observed_response <- rename(observed_response, !!new_name_y := !!names(y))
+    if (!is.null(shift)) {
+      observed_response <- mutate(observed_response, time_value = time_value + shift)
+    }
+    other_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
+    observed_response <- as_epi_df(observed_response,
+      as_of = object$fit$meta$as_of,
+      other_keys = other_keys
+    )
   }
-  extra_keys <- setdiff(key_colnames(object), c("geo_value", "time_value"))
-  if (length(extra_keys) == 0L) extra_keys <- NULL
-  edf <- as_epi_df(edf,
-    as_of = object$fit$meta$as_of,
-    other_keys = extra_keys %||% character()
-  )
   if (is.null(predictions)) {
     return(autoplot(
-      edf, new_name_y,
+      observed_response, new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
+      .facet_filter = {{ .facet_filter }},
       .max_facets = .max_facets
     ))
   }
@@ -147,34 +158,36 @@ autoplot.epi_workflow <- function(
     }
     predictions <- rename(predictions, time_value = target_date)
   }
-  pred_cols_ok <- hardhat::check_column_names(predictions, key_colnames(edf))
+  pred_cols_ok <- hardhat::check_column_names(predictions, key_colnames(observed_response))
   if (!pred_cols_ok$ok) {
     cli_warn(c(
       "`predictions` is missing required variables: {.var {pred_cols_ok$missing_names}}.",
       i = "Plotting the original data."
     ))
     return(autoplot(
-      edf, !!new_name_y,
+      observed_response, !!new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
+      .facet_filter = {{ .facet_filter }},
       .max_facets = .max_facets
     ))
   }
 
   # First we plot the history, always faceted by everything
-  bp <- autoplot(edf, !!new_name_y,
+  bp <- autoplot(observed_response, !!new_name_y,
     .color_by = "none", .facet_by = "all_keys",
-    .base_color = "black", .max_facets = .max_facets
+    .base_color = "black", .facet_filter = {{ .facet_filter }},
+    .max_facets = .max_facets
   )
 
   # Now, prepare matching facets in the predictions
-  ek <- epi_keys_only(edf)
+  ek <- epi_keys_only(observed_response)
   predictions <- predictions %>%
     mutate(
-      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "/"),
+      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = " / "),
     )
-  if (.max_facets < Inf) {
-    top_n <- levels(as.factor(bp$data$.facets))[seq_len(.max_facets)]
-    predictions <- filter(predictions, .facets %in% top_n) %>%
+  .facet_filter <- rlang::enquo(.facet_filter)
+  if (!rlang::quo_is_null(.facet_filter) && ".facets" %in% names(bp$data)) {
+    predictions <- filter(predictions, .facets %in% unique(bp$data$.facets)) %>%
       mutate(.facets = droplevels(.facets))
   }
 
@@ -184,7 +197,7 @@ autoplot.epi_workflow <- function(
   }
 
   if (".pred" %in% names(predictions)) {
-    ntarget_dates <- n_distinct(predictions$time_value)
+    ntarget_dates <- dplyr::n_distinct(predictions$time_value)
     if (ntarget_dates > 1L) {
       bp <- bp +
         geom_line(
@@ -205,25 +218,40 @@ autoplot.epi_workflow <- function(
 #' @export
 #' @rdname autoplot-epipred
 autoplot.canned_epipred <- function(
-    object, ...,
+    object, observed_response = NULL, ...,
     .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
     .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
     .base_color = "dodgerblue4",
     .point_pred_color = "orange",
-    .max_facets = Inf) {
+    .facet_filter = NULL,
+    .max_facets = deprecated()) {
   rlang::check_dots_empty()
   rlang::arg_match(.color_by)
   rlang::arg_match(.facet_by)
 
   ewf <- object$epi_workflow
   predictions <- object$predictions %>%
-    dplyr::rename(time_value = target_date)
+    rename(time_value = target_date)
 
-  autoplot(ewf, predictions,
+  autoplot(ewf, predictions, observed_response, ...,
     .color_by = .color_by, .facet_by = .facet_by,
-    .base_color = .base_color, .max_facets = .max_facets
+    .base_color = .base_color, .facet_filter = {{ .facet_filter }},
+    .max_facets = .max_facets
   )
 }
+
+#' @export
+#' @rdname autoplot-epipred
+plot.epi_workflow <- function(x, ...) {
+  autoplot(x, ...)
+}
+
+#' @export
+#' @rdname autoplot-epipred
+plot.canned_epipred <- function(x, ...) {
+  autoplot(x, ...)
+}
+
 
 starts_with_impl <- function(x, vars) {
   n <- nchar(x)
@@ -232,24 +260,25 @@ starts_with_impl <- function(x, vars) {
 
 plot_bands <- function(
     base_plot, predictions,
-    levels = c(.5, .8, .95),
+    levels = c(.5, .8, .9),
     fill = "blue4",
     alpha = 0.6,
     linewidth = 0.05) {
   innames <- names(predictions)
-  n <- length(levels)
-  alpha <- alpha / (n - 1)
-  l <- (1 - levels) / 2
-  l <- c(rev(l), 1 - l)
+  n_levels <- length(levels)
+  alpha <- alpha / (n_levels - 1)
+  # generate the corresponding level that is 1 - level
+  levels <- (1 - levels) / 2
+  levels <- c(rev(levels), 1 - levels)
 
   ntarget_dates <- dplyr::n_distinct(predictions$time_value)
 
   predictions <- predictions %>%
-    mutate(.pred_distn = dist_quantiles(quantile(.pred_distn, l), l)) %>%
+    mutate(.pred_distn = quantile_pred(quantile(.pred_distn, levels), levels)) %>%
     pivot_quantiles_wider(.pred_distn)
   qnames <- setdiff(names(predictions), innames)
 
-  for (i in 1:n) {
+  for (i in 1:n_levels) {
     bottom <- qnames[i]
     top <- rev(qnames)[i]
     if (i == 1) {

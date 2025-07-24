@@ -1,29 +1,29 @@
 url: https://cmu-delphi.github.io/epipredict/
 
-# This is to give a default value to the `mode` parameter in the
-# `pkgdown::build_site()` function. This is useful when building the site locally,
-# as it will default to `devel` mode. In practice, this should all be handled
-# dynamically by the CI/CD pipeline.
 development:
-  mode: auto
+  mode: devel
 
 template:
   package: delphidocs
 
-articles:
-- title: Get started
-  navbar: ~
-  contents:
-  - epipredict
-  - preprocessing-and-models
-  - arx-classifier
-  - update
-
-- title: Advanced methods
-  contents:
-  - articles/sliding
-  - articles/smooth-qr
-  - panel-data
+navbar:
+  structure:
+    left: [intro, workflows, backtesting, reference, articles, news]
+    right: [search, github, lightswitch]
+  components:
+    workflows:
+      text: Epiworkflows
+      href: articles/custom_epiworkflows.html
+    backtesting:
+      text: Backtesting
+      href: articles/backtesting.html
+    articles:
+      text: Articles
+      menu:
+        - text: Using the add/update/remove/adjust functions
+          href: articles/update.html
+        - text: Using epipredict on non-epidemic panel data
+          href: articles/panel-data.html
 
 home:
   links:
@@ -46,66 +46,90 @@ reference:
     contents:
       - contains("forecaster")
       - contains("classifier")
-  - title: Forecaster modifications
+
+  - subtitle: Forecaster modifications
     desc: Constructors to modify forecaster arguments and utilities to produce `epi_workflow` objects
     contents:
       - contains("args_list")
       - contains("_epi_workflow")
-  - title: Helper functions for Hub submission
-    contents:
-      - flusight_hub_formatter
-  - title: Parsnip engines
-    desc: Prediction methods not available elsewhere
-    contents:
-      - quantile_reg
-      - smooth_quantile_reg
-      - grf_quantiles
-  - title: Custom panel data forecasting workflows
-    contents:
-    - epi_recipe
-    - epi_workflow
-    - add_epi_recipe
-    - adjust_epi_recipe
-    - Add_model
-    - predict.epi_workflow
-    - fit.epi_workflow
-    - augment.epi_workflow
-    - forecast.epi_workflow
+  ##########################
+  - title: Steps and Layers
 
-  - title: Epi recipe preprocessing steps
+  - subtitle: Epi recipe preprocessing steps
+    desc: >
+      Note that any `{recipes}`
+      [`step`](https://recipes.tidymodels.org/reference/index.html) is also valid
     contents:
       - starts_with("step_")
-      - contains("bake")
-  - title: Epi recipe verification checks
+
+  - subtitle: Frosting post-processing layers
     contents:
-      - check_enough_train_data
-  - title: Forecast postprocessing
-    desc: Create a series of postprocessing operations
+      - starts_with("layer_")
+
+  ##########################
+  - title: Epiworkflows
+  - subtitle: Basic forecasting workflow functions
+    contents:
+      - epi_recipe
+      - epi_workflow
+      - add_epi_recipe
+      - fit.epi_workflow
+
+  - subtitle: Forecast post-processing workflow functions
+    desc: Create and apply series of post-processing operations
     contents:
       - frosting
       - ends_with("_frosting")
-      - get_test_data
       - tidy.frosting
-  - title: Frosting layers
-    contents:
-      - contains("layer")
       - contains("slather")
+
+  - subtitle: Prediction
+    desc: Methods for prediction and modifying predictions
+    contents:
+      - predict.epi_workflow
+      - augment.epi_workflow
+      - get_test_data
+      - forecast.epi_workflow
+
+  - subtitle: Modifying forecasting epiworkflows
+    desc: >
+      Modify or inspect an existing recipe, workflow, or frosting. See also [the
+      article on the topic](../articles/update.html)
+    contents:
+      - adjust_epi_recipe
+      - Add_model
+      - add_layer
+      - layer-processors
+      - update.layer
+
+  ##########################
   - title: Automatic forecast visualization
     contents:
       - autoplot.epi_workflow
       - autoplot.canned_epipred
-  - title: Utilities for quantile distribution processing
+
+  ##########################
+  - title: Parsnip engines
+    desc: >
+      Prediction methods not available in the [general parsnip
+      repository](https://www.tidymodels.org/find/parsnip/)
     contents:
+      - quantile_reg
+      - smooth_quantile_reg
+      - grf_quantiles
+
+  ##########################
+  - title: Utilities
+    contents:
+      - flusight_hub_formatter
+      - clean_f_name
+      - check_enough_data
+
+  - subtitle: Utilities for quantile distribution processing
+    contents:
+      - pivot_quantiles
       - dist_quantiles
+      - contains("quantile_pred")
       - extrapolate_quantiles
       - nested_quantiles
       - weighted_interval_score
-      - starts_with("pivot_quantiles")
-  - title: Other utilities
-    contents:
-      - clean_f_name
-  - title: Included datasets
-    contents:
-      - case_death_rate_subset
-      - state_census
-      - grad_employ_subset

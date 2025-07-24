@@ -1,4 +1,4 @@
-jhu <- case_death_rate_subset %>%
+jhu <- covid_case_death_rates %>%
   dplyr::filter(time_value < "2021-03-08", geo_value %in% c("ak", "ca", "ar"))
 r <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -20,7 +20,7 @@ test_that("Default pred_lower and pred_upper work as intended", {
   expect_equal(ncol(p), 3L)
   expect_s3_class(p, "epi_df")
   expect_equal(nrow(p), 3L)
-  expect_equal(round(p$.pred, digits = 3), c(0.180, 0, 0.764))
+  expect_equal(round(p$.pred, digits = 3), c(0.179, 0, 0.765))
   # expect_named(p, c("time_value", "geo_value", ".pred"))
   expect_named(p, c("geo_value", "time_value", ".pred"))
 })
@@ -56,8 +56,10 @@ test_that("thresholds additional columns", {
   expect_equal(round(p$.pred, digits = 3), c(0.180, 0.180, 0.310))
   expect_named(p, c("geo_value", "time_value", ".pred", ".pred_distn"))
   p <- p %>%
-    dplyr::mutate(.quantiles = nested_quantiles(.pred_distn)) %>%
-    tidyr::unnest(.quantiles)
-  expect_equal(round(p$values, digits = 3), c(0.180, 0.31, 0.180, .18, 0.310, .31))
-  expect_equal(p$quantile_levels, rep(c(.1, .9), times = 3))
+    pivot_quantiles_longer(.pred_distn)
+  expect_equal(
+    round(p$.pred_distn_value, digits = 3),
+    c(0.180, 0.180, 0.31, 0.180, .18, .18, .31, 0.310, .31)
+  )
+  expect_equal(p$.pred_distn_quantile_level, rep(c(.1, 0.5, .9), times = 3))
 })

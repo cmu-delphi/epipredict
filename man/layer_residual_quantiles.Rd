@@ -7,7 +7,7 @@
 layer_residual_quantiles(
   frosting,
   ...,
-  quantile_levels = c(0.05, 0.95),
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
   symmetrize = TRUE,
   by_key = character(0L),
   name = ".pred_distn",
@@ -20,9 +20,13 @@ layer_residual_quantiles(
 \item{...}{Unused, include for consistency with other layers.}
 
 \item{quantile_levels}{numeric vector of probabilities with values in (0,1)
-referring to the desired quantile.}
+referring to the desired quantile. Note that 0.5 will always be included
+even if left out by the user.}
 
-\item{symmetrize}{logical. If \code{TRUE} then interval will be symmetric.}
+\item{symmetrize}{logical. If \code{TRUE} then the interval will be symmetric.
+Typically, one would only want non-symmetric quantiles when increasing
+trajectories are quite different from decreasing ones, such as a strictly
+postive variable near zero.}
 
 \item{by_key}{A character vector of keys to group the residuals by before
 calculating quantiles. The default, \code{c()} performs no grouping.}
@@ -36,11 +40,13 @@ an updated \code{frosting} postprocessor with additional columns of the
 residual quantiles added to the prediction
 }
 \description{
-Creates predictions based on residual quantiles
+This function calculates predictive quantiles based on the empirical
+quantiles of the model's residuals. If the model producing the forecast is
+distributional, it is recommended to use \code{layer_residual_quantiles()}
+instead, as those will be more accurate.
 }
 \examples{
-library(dplyr)
-jhu <- case_death_rate_subset \%>\%
+jhu <- covid_case_death_rates \%>\%
   filter(time_value > "2021-11-01", geo_value \%in\% c("ak", "ca", "ny"))
 
 r <- epi_recipe(jhu) \%>\%
@@ -53,7 +59,7 @@ wf <- epi_workflow(r, linear_reg()) \%>\% fit(jhu)
 f <- frosting() \%>\%
   layer_predict() \%>\%
   layer_residual_quantiles(
-    quantile_levels = c(0.0275, 0.975),
+    quantile_levels = c(0.025, 0.975),
     symmetrize = FALSE
   ) \%>\%
   layer_naomit(.pred)

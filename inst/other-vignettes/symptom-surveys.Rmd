@@ -145,22 +145,40 @@ own forecaster under the `epipredict` framework, we could easily add steps to
 re-scale and transform the signals to our `epi_recipe`. This would make the code
 more succinct and self-contained.
 
+We will compare two CLI-in-community indicators from
+different sources. The data are available in the [`epidatasets` package](https://cmu-delphi.github.io/epidatasets/)), 
+and can be loaded with:
+
 ```{r, message = FALSE, warning = FALSE}
-library(epidatr)
 library(dplyr)
 library(purrr)
 library(epipredict)
 library(recipes)
 
 case_num <- 200
-as_of_date <- "2020-05-14"
-geo_values <- pub_covidcast(
+z <- epidatasets::county_smoothed_cli_comparison
+```
+
+The data can also be constructed from data the Delphi API with the following code:
+
+```{r, message = FALSE, warning = FALSE, eval = FALSE}
+library(epidatr)
+
+d <- "2020-09-21"
+
+case_num <- 200
+geos_date <- "2020-05-14"
+
+# Find counties that on 2020-05-14 had >= 200 cases reported.
+# For later datasets, we will only keep data for these geos.
+geo_values_initial <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_cumulative_num",
   geo_type = "county",
   time_type = "day",
   geo_values = "*",
-  time_values = epirange(20200514, 20200514)
+  time_values = epirange(geos_date, geos_date),
+  as_of = d
 ) %>%
   filter(value >= case_num) %>%
   pull(geo_value) %>%
@@ -177,9 +195,10 @@ goog_sm_cli <- pub_covidcast(
   geo_type = "county",
   time_type = "day",
   geo_values = "*",
-  time_values = epirange(start_day, end_day)
+  time_values = epirange(start_day, end_day),
+  as_of = d
 ) %>%
-  filter(geo_value %in% geo_values) %>%
+  filter(geo_value %in% geo_values_initial) %>%
   select(geo_value, time_value, value) %>%
   rename(goog = value)
 
@@ -189,9 +208,10 @@ fb_survey <- pub_covidcast(
   geo_type = "county",
   time_type = "day",
   geo_values = "*",
-  time_values = epirange(start_day, end_day)
+  time_values = epirange(start_day, end_day),
+  as_of = d
 ) %>%
-  filter(geo_value %in% geo_values) %>%
+  filter(geo_value %in% geo_values_initial) %>%
   select(geo_value, time_value, value) %>%
   rename(fb = value)
 
@@ -201,26 +221,31 @@ jhu_7dav_incid <- pub_covidcast(
   geo_type = "county",
   time_type = "day",
   geo_values = "*",
-  time_values = epirange(start_day, end_day)
+  time_values = epirange(start_day, end_day),
+  as_of = d
 ) %>%
-  filter(geo_value %in% geo_values) %>%
+  filter(geo_value %in% geo_values_initial) %>%
   select(geo_value, time_value, value) %>%
   rename(case = value)
 
-# Find "complete" counties, present in all three data signals at all times
+# Find "complete" counties, present in all three data signals, and also
+# present in the `geo_values_initial` object.
 geo_values_complete <- intersect(
   intersect(goog_sm_cli$geo_value, fb_survey$geo_value),
   jhu_7dav_incid$geo_value
 )
 
-# Make one big matrix by joining these three data frames
-z <- full_join(full_join(goog_sm_cli, fb_survey, by = c("geo_value", "time_value")),
+# Join the three data frames together
+z <- full_join(
+  full_join(goog_sm_cli, fb_survey, by = c("geo_value", "time_value")),
   jhu_7dav_incid,
   by = c("geo_value", "time_value")
 ) %>%
   filter(geo_value %in% geo_values_complete) %>%
-  as_epi_df()
+  as_epi_df(as_of = d)
+```
 
+```{r, message = FALSE, warning = FALSE}
 Logit <- function(x, a = 0.01) log((x + a) / (1 - x + a))
 Sigmd <- function(y, a = 0.01) (exp(y) * (1 + a) - a) / (1 + exp(y))
 
@@ -423,7 +448,7 @@ res_err4 <- res_all4 %>%
 knitr::kable(
   res_err4 %>%
     group_by(model, lead) %>%
-    summarize(err = median(err), n = length(unique(forecast_date))) %>%
+    summarise(err = median(err), n = length(unique(forecast_date))) %>%
     arrange(lead) %>% ungroup() %>%
     rename(
       "Model" = model, "Median scaled error" = err,
@@ -472,7 +497,7 @@ res_dif4 <- res_all4 %>%
 knitr::kable(
   res_dif4 %>%
     group_by(model, lead) %>%
-    summarize(p = binom.test(
+    summarise(p = binom.test(
       x = sum(diff > 0, na.rm = TRUE),
       n = n(), alt = "greater"
     )$p.val) %>%
@@ -501,7 +526,7 @@ ggplot_colors <- c("#FC4E07", "#00AFBB", "#E7B800")
 
 ggplot(res_dif4 %>%
   group_by(model, lead, forecast_date) %>%
-  summarize(p = binom.test(
+  summarise(p = binom.test(
     x = sum(diff > 0, na.rm = TRUE),
     n = n(), alt = "greater"
   )$p.val) %>%
@@ -649,7 +674,7 @@ knitr::kable(
   res_err2 %>%
     select(-ends_with("diff")) %>%
     group_by(model, lead) %>%
-    summarize(err = median(err), n = length(unique(forecast_date))) %>%
+    summarise(err = median(err), n = length(unique(forecast_date))) %>%
     arrange(lead) %>% ungroup() %>%
     rename(
       "Model" = model, "Median scaled error" = err,
@@ -684,7 +709,7 @@ to incorporate during periods of time where forecasting is easier.
 ggplot(
   res_err2 %>%
     group_by(model, lead, forecast_date) %>%
-    summarize(err = median(err)) %>% ungroup(),
+    summarise(err = median(err)) %>% ungroup(),
   aes(x = forecast_date, y = err)
 ) +
   geom_line(aes(color = model)) +
@@ -722,7 +747,7 @@ res_dif2 <- res_all2 %>%
 knitr::kable(
   res_dif2 %>%
     group_by(model, lead) %>%
-    summarize(p = binom.test(
+    summarise(p = binom.test(
       x = sum(diff > 0, na.rm = TRUE),
       n = n(), alt = "greater"
     )$p.val) %>%
@@ -739,7 +764,7 @@ quite small.
 ```{r}
 ggplot(res_dif2 %>%
   group_by(model, lead, forecast_date) %>%
-  summarize(p = binom.test(
+  summarise(p = binom.test(
     x = sum(diff > 0, na.rm = TRUE),
     n = n(), alt = "greater"
   )$p.val) %>%
@@ -802,7 +827,7 @@ err_by_lead <- res %>%
   ) %>%
   mutate(model = factor(model, labels = model_names[1:2])) %>%
   group_by(model, lead) %>%
-  summarize(err = median(err)) %>%
+  summarise(err = median(err)) %>%
   ungroup()
 
 ggplot(err_by_lead, aes(x = lead, y = err)) +

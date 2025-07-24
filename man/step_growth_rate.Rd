@@ -11,11 +11,11 @@ step_growth_rate(
   horizon = 7,
   method = c("rel_change", "linear_reg"),
   log_scale = FALSE,
+  na_rm = TRUE,
   replace_Inf = NA,
   prefix = "gr_",
   skip = FALSE,
-  id = rand_id("growth_rate"),
-  additional_gr_args_list = list()
+  id = rand_id("growth_rate")
 )
 }
 \arguments{
@@ -41,6 +41,9 @@ growth rates). See \code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()
 \item{log_scale}{Should growth rates be estimated using the parameterization
 on the log scale? See details for an explanation. Default is \code{FALSE}.}
 
+\item{na_rm}{Should missing values be removed before the computation? Default
+is \code{FALSE}.}
+
 \item{replace_Inf}{Sometimes, the growth rate calculation can result in
 infinite values (if the denominator is zero, for example). In this case,
 most prediction methods will fail. This argument specifies potential
@@ -59,30 +62,32 @@ Care should be taken when using \code{skip = TRUE} as it may affect
 the computations for subsequent operations.}
 
 \item{id}{A unique identifier for the step}
-
-\item{additional_gr_args_list}{A list of additional arguments used by
-\code{\link[epiprocess:growth_rate]{epiprocess::growth_rate()}}. All \code{...} arguments may be passed here along
-with \code{dup_rm} and \code{na_rm}.}
 }
 \value{
 An updated version of \code{recipe} with the new step added to the
 sequence of any existing operations.
 }
 \description{
-\code{step_growth_rate()} creates a \emph{specification} of a recipe step
-that will generate one or more new columns of derived data.
+\code{step_growth_rate()} creates a \emph{specification} of a recipe step that will
+generate one or more new columns of derived data. This is a wrapper around
+\code{epiprocess::growth_rate()} to allow its use within an \code{epi_recipe()}.
 }
 \examples{
-r <- epi_recipe(case_death_rate_subset) \%>\%
+tiny_geos <- c("as", "mp", "vi", "gu", "pr")
+rates <- covid_case_death_rates \%>\%
+  filter(time_value >= as.Date("2021-11-01"), !(geo_value \%in\% tiny_geos))
+
+r <- epi_recipe(rates) \%>\%
   step_growth_rate(case_rate, death_rate)
 r
 
 r \%>\%
-  prep(case_death_rate_subset) \%>\%
-  bake(case_death_rate_subset)
+  prep(rates) \%>\%
+  bake(new_data = NULL)
 }
 \seealso{
 Other row operation steps: 
+\code{\link{step_adjust_latency}()},
 \code{\link{step_epi_lag}()},
 \code{\link{step_lag_difference}()}
 }

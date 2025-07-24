@@ -1,11 +1,13 @@
-#' Postprocessing step to add the forecast date
+#' Post-processing step to add the forecast date
 #'
 #' @param frosting a `frosting` postprocessor
 #' @param forecast_date The forecast date to add as a column to the `epi_df`.
-#' For most cases, this should be specified in the form "yyyy-mm-dd". Note that
-#' when the forecast date is left unspecified, it is set to the maximum time
-#' value from the data used in pre-processing, fitting the model, and
-#' postprocessing.
+#'   For most cases, this should be specified in the form "yyyy-mm-dd". Note
+#'   that when the forecast date is left unspecified, it is set to one of two
+#'   values.  If there is a `step_adjust_latency` step present, it uses the
+#'   `forecast_date` as set in that function. Otherwise, it uses the maximum
+#'   `time_value` across the data used for pre-processing, fitting the model,
+#'   and post-processing.
 #' @param id a random id string
 #'
 #' @return an updated `frosting` postprocessor
@@ -13,14 +15,13 @@
 #' @details To use this function, either specify a forecast date or leave the
 #'  forecast date unspecifed here. In the latter case, the forecast date will
 #'  be set as the maximum time value from the data used in pre-processing,
-#'  fitting the model, and postprocessing. In any case, when the forecast date is
+#'  fitting the model, and post-processing. In any case, when the forecast date is
 #'  less than the maximum `as_of` value (from the data used pre-processing,
-#'  model fitting, and postprocessing), an appropriate warning will be thrown.
+#'  model fitting, and post-processing), an appropriate warning will be thrown.
 #'
 #' @export
 #' @examples
-#' library(dplyr)
-#' jhu <- case_death_rate_subset %>%
+#' jhu <- covid_case_death_rates %>%
 #'   filter(time_value > "2021-11-01", geo_value %in% c("ak", "ca", "ny"))
 #' r <- epi_recipe(jhu) %>%
 #'   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
@@ -86,19 +87,16 @@ layer_add_forecast_date_new <- function(forecast_date, id) {
 }
 
 #' @export
+#' @importFrom workflows extract_preprocessor
 slather.layer_add_forecast_date <- function(object, components, workflow,
                                             new_data, ...) {
   rlang::check_dots_empty()
-  if (is.null(object$forecast_date)) {
-    max_time_value <- as.Date(max(
-      workflows::extract_preprocessor(workflow)$max_time_value,
+  forecast_date <- object$forecast_date %||%
+    get_forecast_date_in_layer(
+      extract_recipe(workflow),
       workflow$fit$meta$max_time_value,
-      max(new_data$time_value)
-    ))
-    forecast_date <- max_time_value
-  } else {
-    forecast_date <- object$forecast_date
-  }
+      new_data
+    )
 
   expected_time_type <- attr(
     workflows::extract_preprocessor(workflow)$template, "metadata"
