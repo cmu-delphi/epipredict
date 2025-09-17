@@ -1,6 +1,6 @@
 location_to_abbr <- function(location) {
   dictionary <-
-    state_census %>%
+    epidatasets::state_census %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -10,7 +10,7 @@ location_to_abbr <- function(location) {
 
 abbr_to_location <- function(abbr) {
   dictionary <-
-    state_census %>%
+    epidatasets::state_census %>%
     dplyr::transmute(
       location = dplyr::case_match(fips, "00" ~ "US", .default = fips),
       abbr
@@ -62,7 +62,7 @@ abbr_to_location <- function(abbr) {
 #'     geo_value %in% c("ca", "ny", "dc", "ga", "vt")
 #'   ) %>%
 #'   select(geo_value, time_value, death_rate) %>%
-#'   left_join(state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
+#'   left_join(epidatasets::state_census %>% select(pop, abbr), by = c("geo_value" = "abbr")) %>%
 #'   mutate(deaths = pmax(death_rate / 1e5 * pop * 7, 0)) %>%
 #'   select(-pop, -death_rate) %>%
 #'   group_by(geo_value) %>%
