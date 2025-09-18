@@ -75,7 +75,7 @@ this color.}
 
 \item{.facet_filter}{Select which facets will be displayed. Especially
 useful for when there are many \code{geo_value}'s or keys. This is a
-<\code{\link[=args_data_masking]{rlang}}> expression along the lines of \code{\link[dplyr:filter]{dplyr::filter()}}.
+<\code{\link[rlang:args_data_masking]{rlang}}> expression along the lines of \code{\link[dplyr:filter]{dplyr::filter()}}.
 However, it must be a single expression combined with the \code{&} operator. This
 contrasts to the typical use case which allows multiple comma-separated expressions
 which are implicitly combined with \code{&}. When multiple variables are selected

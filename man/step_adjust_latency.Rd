@@ -17,11 +17,11 @@ step_adjust_latency(
 )
 }
 \arguments{
-\item{recipe}{A recipe object. The step will be added to the
-sequence of operations for this recipe.}
+\item{recipe}{A recipe object. The step will be added to the sequence of
+operations for this recipe.}
 
-\item{...}{One or more selector functions to choose variables
-for this step. See \code{\link[recipes:selections]{selections()}} for more details.}
+\item{...}{One or more selector functions to choose variables for this step.
+See \code{\link[recipes:selections]{selections()}} for more details.}
 
 \item{method}{a character. Determines the method by which the
 forecast handles latency. The options are:
