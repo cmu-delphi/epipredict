@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.1
+
+- Fix bug in `flusight_hub_formatter()` so that it works as expected even if the user has not first loaded the `epidatasets` package.
+
 # epipredict 0.2
 
 ## Breaking changes
