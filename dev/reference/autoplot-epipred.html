@@ -13,7 +13,7 @@ can simply call autoplot() on the original epi_df)."><meta name="robots" content
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.1</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -67,8 +67,7 @@ can simply call <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.
 <span>  .facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">".response"</span>, <span class="st">"other_keys"</span>, <span class="st">"all_keys"</span>, <span class="st">"geo_value"</span>, <span class="st">"all"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  .base_color <span class="op">=</span> <span class="st">"dodgerblue4"</span>,</span>
 <span>  .point_pred_color <span class="op">=</span> <span class="st">"orange"</span>,</span>
-<span>  .facet_filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  .max_facets <span class="op">=</span> <span class="fu">deprecated</span><span class="op">(</span><span class="op">)</span></span>
+<span>  .facet_filter <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'canned_epipred'</span></span>
@@ -80,8 +79,7 @@ can simply call <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.
 <span>  .facet_by <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">".response"</span>, <span class="st">"other_keys"</span>, <span class="st">"all_keys"</span>, <span class="st">"geo_value"</span>, <span class="st">"all"</span>, <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  .base_color <span class="op">=</span> <span class="st">"dodgerblue4"</span>,</span>
 <span>  .point_pred_color <span class="op">=</span> <span class="st">"orange"</span>,</span>
-<span>  .facet_filter <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  .max_facets <span class="op">=</span> <span class="fu">deprecated</span><span class="op">(</span><span class="op">)</span></span>
+<span>  .facet_filter <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'epi_workflow'</span></span>
@@ -155,10 +153,6 @@ which are implicitly combined with <code>&amp;</code>. When multiple variables a
 with <code>...</code>, their names can be filtered in combination with other factors
 by using <code>.response_name</code>. See the examples below.</p></dd>
 
-
-<dt id="arg--max-facets">.max_facets<a class="anchor" aria-label="anchor" href="#arg--max-facets"></a></dt>
-<dd><p><a href="https://lifecycle.r-lib.org/articles/stages.html#deprecated" class="external-link"><img src="figures/lifecycle-deprecated.svg" alt="[Deprecated]"></a></p></dd>
-
 </dl></div>
 
     <div class="section level2">
@@ -199,7 +193,7 @@ by using <code>.response_name</code>. See the examples below.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="https://generics.r-lib.org/reference/forecast.html" class="external-link">forecast</a></span><span class="op">(</span><span class="va">ewf</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">p</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/vec_bind.html" class="external-link">vec_rbind</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="va">p</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">wf</span>, <span class="va">p</span>, .facet_filter <span class="op">=</span> <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"ny"</span>, <span class="st">"de"</span>, <span class="st">"mt"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="autoplot-epipred-3.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>
@@ -209,7 +203,7 @@ by using <code>.response_name</code>. See the examples below.</p></dd>
 <span class="r-in"><span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">time_value</span> <span class="op">&gt;=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2021-11-01"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">flat</span> <span class="op">&lt;-</span> <span class="fu"><a href="flatline_forecaster.html">flatline_forecaster</a></span><span class="op">(</span><span class="va">jhu</span>, <span class="st">"death_rate"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">flat</span>, .facet_filter <span class="op">=</span> <span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ca"</span>, <span class="st">"ny"</span>, <span class="st">"de"</span>, <span class="st">"mt"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 7 rows containing missing values or values outside the scale range</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Removed 28 rows containing missing values or values outside the scale range</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> (`geom_line()`).</span>
 <span class="r-plt img"><img src="autoplot-epipred-4.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

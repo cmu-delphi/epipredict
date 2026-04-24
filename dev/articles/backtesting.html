@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.1</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -175,7 +175,7 @@ Code for plotting
 <span>    guide <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guide_legend.html" class="external-link">guide_legend</a></span><span class="op">(</span>reverse<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span>, direction <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_continuous.html" class="external-link">scale_y_continuous</a></span><span class="op">(</span>limits <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="cn">NA</span><span class="op">)</span>, expand <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/expansion.html" class="external-link">expansion</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">0.05</span><span class="op">)</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span></code></pre></div>
-</details><p><img src="backtesting_files/figure-html/plot_just_revisioning-1.png" width="90%" style="display: block; margin: auto;"></p>
+</details><p><img src="backtesting_files/figure-html/plot_just_revisioning-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></p>
 <p>The snapshots are taken on the first of each month, with the vertical
 dashed line representing the issue date for the time series of the
 corresponding color. For example, the snapshot on March 1st, 2021 is
@@ -456,7 +456,7 @@ Code for plotting
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_viridis.html" class="external-link">scale_fill_viridis_c</a></span><span class="op">(</span>option <span class="op">=</span> <span class="st">"viridis"</span>, direction <span class="op">=</span> <span class="op">-</span><span class="fl">1</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>legend.position <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span><span class="va">p2</span></span></code></pre></div>
-<img src="backtesting_files/figure-html/plot_fl_forecasts-1.png" width="90%" style="display: block; margin: auto;"></details><p><img src="backtesting_files/figure-html/show-plot1-1.png" width="90%" style="display: block; margin: auto;"></p>
+<img src="backtesting_files/figure-html/plot_fl_forecasts-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></details><p><img src="backtesting_files/figure-html/show-plot1-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></p>
 <p>There are some weeks when the forecasts are somewhat similar, and
 others when they are wildly different, although neither approach
 produces amazingly accurate forecasts.</p>
@@ -472,7 +472,7 @@ value of 5, which is in line with the finalized data but would have been
 out of place compared to the version data.</p>
 <p>The October 2021 forecast for the version faithful case floors out at
 zero, whereas the un-faithful is much closer to the finalized data.</p>
-<p><img src="backtesting_files/figure-html/show-plot2-1.png" width="90%" style="display: block; margin: auto;"></p>
+<p><img src="backtesting_files/figure-html/show-plot2-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></p>
 <p>Now let’s look at Florida. In the version faithful case, the three
 late-2021 forecasts (purples and pinks) starting in September predict
 very low values, near 0. The trend leading up to each forecast shows a

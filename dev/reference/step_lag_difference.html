@@ -15,7 +15,7 @@ horizon=1, this would simply be the difference between adjacent days."><meta nam
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.1</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -125,9 +125,9 @@ inherent in the <code>epi_df()</code> as specified by <code>geo_value</code> and
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other row operation steps:
-<code><a href="step_adjust_latency.html">step_adjust_latency</a>()</code>,
-<code><a href="step_epi_shift.html">step_epi_lag</a>()</code>,
-<code><a href="step_growth_rate.html">step_growth_rate</a>()</code></p></div>
+<code><a href="step_adjust_latency.html">step_adjust_latency()</a></code>,
+<code><a href="step_epi_shift.html">step_epi_lag()</a></code>,
+<code><a href="step_growth_rate.html">step_growth_rate()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -157,6 +157,8 @@ inherent in the <code>epi_df()</code> as specified by <code>geo_value</code> and
 <span class="r-out co"><span class="r-pr">#&gt;</span> * geo_type  = state</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * time_type = day</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> * as_of     = 2023-03-10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Latency (lag between last available observation and epi_df's as_of, by time series):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> * lag across all time series = 434 days</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 19,712 × 8</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    geo_value time_value case_rate death_rate lag_diff_7_case_rate</span>

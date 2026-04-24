@@ -19,7 +19,7 @@ event occurring and the event being reported."><meta name="robots" content="noin
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.1</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -207,6 +207,8 @@ forward to the <code>forecast_date</code>:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2015-01-14</span></span>
+<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * lag across all time series = 0 days</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; # A tibble: 8 x 4</span></span>
 <span><span class="co">#&gt;   geo_value time_value     a     b</span></span>
@@ -243,6 +245,8 @@ latencies, the lags for each are adjusted separately. In the toy example:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2015-01-14</span></span>
+<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * lag  = -2–3 days</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; # A tibble: 21 x 7</span></span>
 <span><span class="co">#&gt;    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a</span></span>
@@ -289,6 +293,8 @@ the most latent data to insure there is data available. In the toy example:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2015-01-14</span></span>
+<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * lag  = 1–5 days</span></span>
 <span><span class="co">#&gt;</span></span>
 <span><span class="co">#&gt; # A tibble: 10 x 6</span></span>
 <span><span class="co">#&gt;    geo_value time_value     a     b lag_0_a ahead_3_a</span></span>
@@ -336,9 +342,9 @@ this step should go before both <code>step_epi_ahead</code> and <code>step_epi_l
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other row operation steps:
-<code><a href="step_epi_shift.html">step_epi_lag</a>()</code>,
-<code><a href="step_growth_rate.html">step_growth_rate</a>()</code>,
-<code><a href="step_lag_difference.html">step_lag_difference</a>()</code></p></div>
+<code><a href="step_epi_shift.html">step_epi_lag()</a></code>,
+<code><a href="step_growth_rate.html">step_growth_rate()</a></code>,
+<code><a href="step_lag_difference.html">step_lag_difference()</a></code></p></div>
     </div>
 
     <div class="section level2">
