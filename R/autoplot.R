@@ -83,16 +83,17 @@ NULL
 #' @export
 #' @rdname autoplot-epipred
 autoplot.epi_workflow <- function(
-    object,
-    predictions = NULL,
-    observed_response = NULL,
-    .levels = c(.5, .8, .9), ...,
-    .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
-    .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-    .base_color = "dodgerblue4",
-    .point_pred_color = "orange",
-    .facet_filter = NULL,
-    .max_facets = deprecated()) {
+  object,
+  predictions = NULL,
+  observed_response = NULL,
+  .levels = c(.5, .8, .9), ...,
+  .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
+  .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
+  .base_color = "dodgerblue4",
+  .point_pred_color = "orange",
+  .facet_filter = NULL,
+  .max_facets = deprecated()
+) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
   rlang::arg_match(.color_by)
@@ -150,7 +151,7 @@ autoplot.epi_workflow <- function(
       .facet_filter = {{ .facet_filter }},
       .max_facets = .max_facets,
       # Avoid subsampling while it is not implemented for this method
-    .max_keys = Inf
+      .max_keys = Inf
     ))
   }
 
@@ -228,13 +229,14 @@ autoplot.epi_workflow <- function(
 #' @export
 #' @rdname autoplot-epipred
 autoplot.canned_epipred <- function(
-    object, observed_response = NULL, ...,
-    .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
-    .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-    .base_color = "dodgerblue4",
-    .point_pred_color = "orange",
-    .facet_filter = NULL,
-    .max_facets = deprecated()) {
+  object, observed_response = NULL, ...,
+  .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
+  .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
+  .base_color = "dodgerblue4",
+  .point_pred_color = "orange",
+  .facet_filter = NULL,
+  .max_facets = deprecated()
+) {
   rlang::check_dots_empty()
   rlang::arg_match(.color_by)
   rlang::arg_match(.facet_by)
@@ -269,11 +271,12 @@ starts_with_impl <- function(x, vars) {
 }
 
 plot_bands <- function(
-    base_plot, predictions,
-    levels = c(.5, .8, .9),
-    fill = "blue4",
-    alpha = 0.6,
-    linewidth = 0.05) {
+  base_plot, predictions,
+  levels = c(.5, .8, .9),
+  fill = "blue4",
+  alpha = 0.6,
+  linewidth = 0.05
+) {
   innames <- names(predictions)
   n_levels <- length(levels)
   alpha <- alpha / (n_levels - 1)
