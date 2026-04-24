@@ -21,7 +21,7 @@ check_enough_data(
 sequence of operations for this recipe.}
 
 \item{...}{One or more selector functions to choose variables for this check.
-See \code{\link[=selections]{selections()}} for more details. You will usually want to use
+See \code{\link[recipes:selections]{recipes::selections()}} for more details. You will usually want to use
 \code{\link[recipes:has_role]{recipes::all_predictors()}} and/or \code{\link[recipes:has_role]{recipes::all_outcomes()}} here.}
 
 \item{min_observations}{The minimum number of data points required for
@@ -63,7 +63,7 @@ For checking training data, it is best to set \code{...} to be
 is best to set \code{...} to be \code{all_predictors()} only, with \code{n = 1}.
 }
 \section{tidy() results}{
-When you \code{\link[=tidy.recipe]{tidy()}} this check, a tibble with column
+When you \code{\link[recipes:tidy.recipe]{tidy()}} this check, a tibble with column
 \code{terms} (the selectors or variables selected) is returned.
 }
 

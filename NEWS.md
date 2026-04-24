@@ -2,6 +2,11 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.2
+
+- Fix `autoplot.epi_workflow()` to correctly handle the response variable and avoid errors related to `.response`.
+- Prevent subsampling in `autoplot.epi_workflow()` by setting `.max_keys = Inf`.
+
 # epipredict 0.2.1
 
 - Fix bug in `flusight_hub_formatter()` so that it works as expected even if the user has not first loaded the `epidatasets` package.
