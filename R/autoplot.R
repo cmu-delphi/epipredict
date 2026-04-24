@@ -176,14 +176,18 @@ autoplot.epi_workflow <- function(
   bp <- autoplot(observed_response, !!new_name_y,
     .color_by = "none", .facet_by = "all_keys",
     .base_color = "black", .facet_filter = {{ .facet_filter }},
-    .max_facets = .max_facets
+    .max_facets = .max_facets,
+    # Avoid subsampling while it is not implemented for this method
+    .max_keys = Inf
   )
 
-  # Now, prepare matching facets in the predictions
+  # Now, prepare matching facets in the predictions.
+  # Use the same separator as epiprocess::autoplot.epi_df (";") so that
+  # the .facets levels align and the filter below works correctly.
   ek <- epi_keys_only(observed_response)
   predictions <- predictions %>%
     mutate(
-      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = " / "),
+      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "; "),
     )
   .facet_filter <- rlang::enquo(.facet_filter)
   if (!rlang::quo_is_null(.facet_filter) && ".facets" %in% names(bp$data)) {
@@ -201,13 +205,17 @@ autoplot.epi_workflow <- function(
     if (ntarget_dates > 1L) {
       bp <- bp +
         geom_line(
-          data = predictions, aes(y = .data$.pred),
+          data = predictions,
+          aes(x = .data$time_value, y = .data$.pred),
+          inherit.aes = FALSE,
           color = .point_pred_color
         )
     } else {
       bp <- bp +
         geom_point(
-          data = predictions, aes(y = .data$.pred),
+          data = predictions,
+          aes(x = .data$time_value, y = .data$.pred),
+          inherit.aes = FALSE,
           color = .point_pred_color
         )
     }
@@ -286,14 +294,16 @@ plot_bands <- function(
         base_plot <- base_plot +
           geom_ribbon(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             alpha = 0.2, linewidth = linewidth, fill = fill
           )
       } else {
         base_plot <- base_plot +
           geom_linerange(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             alpha = 0.2, linewidth = 2, color = fill
           )
       }
@@ -302,14 +312,16 @@ plot_bands <- function(
         base_plot <- base_plot +
           geom_ribbon(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             fill = fill, alpha = alpha
           )
       } else {
         base_plot <- base_plot +
           geom_linerange(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             color = fill, alpha = alpha, linewidth = 2
           )
       }
