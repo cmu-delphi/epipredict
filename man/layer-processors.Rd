@@ -52,7 +52,7 @@ different layers of \code{frosting}.
 f <- frosting() \%>\% layer_predict()
 wf <- epi_workflow(postprocessor = f)
 
-is_layer(f$layers[[1]])
+is_layer(extract_layers(f)[[1]])
 detect_layer(f, "layer_predict")
 detect_layer(wf, "layer_predict")
 

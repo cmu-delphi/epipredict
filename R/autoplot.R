@@ -91,8 +91,7 @@ autoplot.epi_workflow <- function(
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
   .base_color = "dodgerblue4",
   .point_pred_color = "orange",
-  .facet_filter = NULL,
-  .max_facets = deprecated()
+  .facet_filter = NULL
 ) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
@@ -149,7 +148,6 @@ autoplot.epi_workflow <- function(
       observed_response, new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .facet_filter = {{ .facet_filter }},
-      .max_facets = .max_facets,
       # Avoid subsampling while it is not implemented for this method
       .max_keys = Inf
     ))
@@ -171,7 +169,6 @@ autoplot.epi_workflow <- function(
       observed_response, !!new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .facet_filter = {{ .facet_filter }},
-      .max_facets = .max_facets,
       # Avoid subsampling while it is not implemented for this method
       .max_keys = Inf
     ))
@@ -181,7 +178,6 @@ autoplot.epi_workflow <- function(
   bp <- autoplot(observed_response, !!new_name_y,
     .color_by = "none", .facet_by = "all_keys",
     .base_color = "black", .facet_filter = {{ .facet_filter }},
-    .max_facets = .max_facets,
     # Avoid subsampling while it is not implemented for this method
     .max_keys = Inf
   )
@@ -234,8 +230,7 @@ autoplot.canned_epipred <- function(
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
   .base_color = "dodgerblue4",
   .point_pred_color = "orange",
-  .facet_filter = NULL,
-  .max_facets = deprecated()
+  .facet_filter = NULL
 ) {
   rlang::check_dots_empty()
   rlang::arg_match(.color_by)
@@ -247,8 +242,7 @@ autoplot.canned_epipred <- function(
 
   autoplot(ewf, predictions, observed_response, ...,
     .color_by = .color_by, .facet_by = .facet_by,
-    .base_color = .base_color, .facet_filter = {{ .facet_filter }},
-    .max_facets = .max_facets
+    .base_color = .base_color, .facet_filter = {{ .facet_filter }}
   )
 }
 
