@@ -125,7 +125,7 @@ p <- lapply(c(7, 14, 21, 28), function(h) {
   forecast(ewf)
 })
 
-p <- do.call(rbind, p)
+p <- vctrs::vec_rbind(!!!p)
 autoplot(wf, p, .facet_filter = geo_value \%in\% c("ca", "ny", "de", "mt"))
 
 # ------- Plotting canned forecaster output

@@ -15,10 +15,18 @@ layer_predict(
 \arguments{
 \item{frosting}{a frosting object}
 
-\item{type}{A single character value or \code{NULL}. Possible values
-are \code{"numeric"}, \code{"class"}, \code{"prob"}, \code{"conf_int"}, \code{"pred_int"},
-\code{"quantile"}, \code{"time"}, \code{"hazard"}, \code{"survival"}, or \code{"raw"}. When \code{NULL},
-\code{predict()} will choose an appropriate value based on the model's mode.}
+\item{type}{A single character value or \code{NULL}. Possible values are:
+\itemize{
+\item regression: "\code{numeric}"
+\item classification: "\code{class}", "\code{prob}"
+\item censored regression: "\code{survival}", "\code{time}", "\code{hazard}", "\code{linear_pred}"
+\item quantile regression: "\code{quantile}"
+\item interval estimates: "\code{conf_int}", "\code{pred_int}"
+\item other:  "\code{raw}"
+}
+
+When \code{NULL}, \code{predict()} will choose an appropriate value based on the
+model's mode.}
 
 \item{opts}{A list of optional arguments to the underlying
 predict function that will be used when \code{type = "raw"}. The
@@ -30,7 +38,7 @@ value of \code{type}. Arguments to the underlying model's prediction
 function cannot be passed here (use the \code{opts} argument instead).
 Possible arguments are:
 \itemize{
-\item \code{interval}: for \code{type} equal to \code{"survival"} or \code{"quantile"}, should
+\item \code{interval}: for \code{type} equal to \code{"survival"}, should
 interval estimates be added, if available? Options are \code{"none"}
 and \code{"confidence"}.
 \item \code{level}: for \code{type} equal to \code{"conf_int"}, \code{"pred_int"}, or \code{"survival"},
@@ -40,8 +48,6 @@ Default value is \code{0.95}.
 \item \code{std_error}: for \code{type} equal to \code{"conf_int"} or \code{"pred_int"}, add
 the standard error of fit or prediction (on the scale of the
 linear predictors). Default value is \code{FALSE}.
-\item \code{quantile}: for \code{type} equal to \code{quantile}, the quantiles of the
-distribution. Default is \code{(1:9)/10}.
 \item \code{eval_time}: for \code{type} equal to \code{"survival"} or \code{"hazard"}, the
 time points at which the survival probability or hazard is estimated.
 }}

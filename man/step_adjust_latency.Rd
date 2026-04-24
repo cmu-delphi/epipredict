@@ -141,7 +141,7 @@ toy_recipe \%>\%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2015-01-14
-#> Latency (lag from as_of to latest observation by time series):
+#> Latency (lag between last available observation and epi_df's as_of, by time series):
 #> * lag across all time series = 0 days
 #> 
 #> # A tibble: 8 x 4
@@ -179,7 +179,7 @@ toy_recipe \%>\%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2015-01-14
-#> Latency (lag from as_of to latest observation by time series):
+#> Latency (lag between last available observation and epi_df's as_of, by time series):
 #> * lag  = -2–3 days
 #> 
 #> # A tibble: 21 x 7
@@ -229,7 +229,7 @@ toy_recipe \%>\%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2015-01-14
-#> Latency (lag from as_of to latest observation by time series):
+#> Latency (lag between last available observation and epi_df's as_of, by time series):
 #> * lag  = 1–5 days
 #> 
 #> # A tibble: 10 x 6
