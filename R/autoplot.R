@@ -148,7 +148,9 @@ autoplot.epi_workflow <- function(
       observed_response, new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .facet_filter = {{ .facet_filter }},
-      .max_facets = .max_facets
+      .max_facets = .max_facets,
+      # Avoid subsampling while it is not implemented for this method
+    .max_keys = Inf
     ))
   }
 
@@ -168,7 +170,9 @@ autoplot.epi_workflow <- function(
       observed_response, !!new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .facet_filter = {{ .facet_filter }},
-      .max_facets = .max_facets
+      .max_facets = .max_facets,
+      # Avoid subsampling while it is not implemented for this method
+      .max_keys = Inf
     ))
   }
 
