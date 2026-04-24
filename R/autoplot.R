@@ -64,7 +64,7 @@ ggplot2::autoplot
 #'   forecast(ewf)
 #' })
 #'
-#' p <- do.call(rbind, p)
+#' p <- vctrs::vec_rbind(!!!p)
 #' autoplot(wf, p, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' # ------- Plotting canned forecaster output
