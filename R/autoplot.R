@@ -64,7 +64,7 @@ ggplot2::autoplot
 #'   forecast(ewf)
 #' })
 #'
-#' p <- do.call(rbind, p)
+#' p <- vctrs::vec_rbind(!!!p)
 #' autoplot(wf, p, .facet_filter = geo_value %in% c("ca", "ny", "de", "mt"))
 #'
 #' # ------- Plotting canned forecaster output
@@ -83,16 +83,16 @@ NULL
 #' @export
 #' @rdname autoplot-epipred
 autoplot.epi_workflow <- function(
-    object,
-    predictions = NULL,
-    observed_response = NULL,
-    .levels = c(.5, .8, .9), ...,
-    .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
-    .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-    .base_color = "dodgerblue4",
-    .point_pred_color = "orange",
-    .facet_filter = NULL,
-    .max_facets = deprecated()) {
+  object,
+  predictions = NULL,
+  observed_response = NULL,
+  .levels = c(.5, .8, .9), ...,
+  .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
+  .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
+  .base_color = "dodgerblue4",
+  .point_pred_color = "orange",
+  .facet_filter = NULL
+) {
   rlang::check_dots_empty()
   arg_is_probabilities(.levels)
   rlang::arg_match(.color_by)
@@ -148,7 +148,8 @@ autoplot.epi_workflow <- function(
       observed_response, new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .facet_filter = {{ .facet_filter }},
-      .max_facets = .max_facets
+      # Avoid subsampling while it is not implemented for this method
+      .max_keys = Inf
     ))
   }
 
@@ -168,7 +169,8 @@ autoplot.epi_workflow <- function(
       observed_response, !!new_name_y,
       .color_by = .color_by, .facet_by = .facet_by, .base_color = .base_color,
       .facet_filter = {{ .facet_filter }},
-      .max_facets = .max_facets
+      # Avoid subsampling while it is not implemented for this method
+      .max_keys = Inf
     ))
   }
 
@@ -176,14 +178,15 @@ autoplot.epi_workflow <- function(
   bp <- autoplot(observed_response, !!new_name_y,
     .color_by = "none", .facet_by = "all_keys",
     .base_color = "black", .facet_filter = {{ .facet_filter }},
-    .max_facets = .max_facets
+    # Avoid subsampling while it is not implemented for this method
+    .max_keys = Inf
   )
 
   # Now, prepare matching facets in the predictions
   ek <- epi_keys_only(observed_response)
   predictions <- predictions %>%
     mutate(
-      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = " / "),
+      .facets = interaction(!!!rlang::syms(as.list(ek)), sep = "; "),
     )
   .facet_filter <- rlang::enquo(.facet_filter)
   if (!rlang::quo_is_null(.facet_filter) && ".facets" %in% names(bp$data)) {
@@ -201,13 +204,17 @@ autoplot.epi_workflow <- function(
     if (ntarget_dates > 1L) {
       bp <- bp +
         geom_line(
-          data = predictions, aes(y = .data$.pred),
+          data = predictions,
+          aes(x = .data$time_value, y = .data$.pred),
+          inherit.aes = FALSE,
           color = .point_pred_color
         )
     } else {
       bp <- bp +
         geom_point(
-          data = predictions, aes(y = .data$.pred),
+          data = predictions,
+          aes(x = .data$time_value, y = .data$.pred),
+          inherit.aes = FALSE,
           color = .point_pred_color
         )
     }
@@ -218,13 +225,13 @@ autoplot.epi_workflow <- function(
 #' @export
 #' @rdname autoplot-epipred
 autoplot.canned_epipred <- function(
-    object, observed_response = NULL, ...,
-    .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
-    .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
-    .base_color = "dodgerblue4",
-    .point_pred_color = "orange",
-    .facet_filter = NULL,
-    .max_facets = deprecated()) {
+  object, observed_response = NULL, ...,
+  .color_by = c("all_keys", "geo_value", "other_keys", ".response", "all", "none"),
+  .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
+  .base_color = "dodgerblue4",
+  .point_pred_color = "orange",
+  .facet_filter = NULL
+) {
   rlang::check_dots_empty()
   rlang::arg_match(.color_by)
   rlang::arg_match(.facet_by)
@@ -235,8 +242,7 @@ autoplot.canned_epipred <- function(
 
   autoplot(ewf, predictions, observed_response, ...,
     .color_by = .color_by, .facet_by = .facet_by,
-    .base_color = .base_color, .facet_filter = {{ .facet_filter }},
-    .max_facets = .max_facets
+    .base_color = .base_color, .facet_filter = {{ .facet_filter }}
   )
 }
 
@@ -259,11 +265,12 @@ starts_with_impl <- function(x, vars) {
 }
 
 plot_bands <- function(
-    base_plot, predictions,
-    levels = c(.5, .8, .9),
-    fill = "blue4",
-    alpha = 0.6,
-    linewidth = 0.05) {
+  base_plot, predictions,
+  levels = c(.5, .8, .9),
+  fill = "blue4",
+  alpha = 0.6,
+  linewidth = 0.05
+) {
   innames <- names(predictions)
   n_levels <- length(levels)
   alpha <- alpha / (n_levels - 1)
@@ -286,14 +293,16 @@ plot_bands <- function(
         base_plot <- base_plot +
           geom_ribbon(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             alpha = 0.2, linewidth = linewidth, fill = fill
           )
       } else {
         base_plot <- base_plot +
           geom_linerange(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             alpha = 0.2, linewidth = 2, color = fill
           )
       }
@@ -302,14 +311,16 @@ plot_bands <- function(
         base_plot <- base_plot +
           geom_ribbon(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             fill = fill, alpha = alpha
           )
       } else {
         base_plot <- base_plot +
           geom_linerange(
             data = predictions,
-            aes(ymin = .data[[bottom]], ymax = .data[[top]]),
+            aes(x = .data$time_value, ymin = .data[[bottom]], ymax = .data[[top]]),
+            inherit.aes = FALSE,
             color = fill, alpha = alpha, linewidth = 2
           )
       }
