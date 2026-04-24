@@ -181,9 +181,7 @@ autoplot.epi_workflow <- function(
     .max_keys = Inf
   )
 
-  # Now, prepare matching facets in the predictions.
-  # Use the same separator as epiprocess::autoplot.epi_df (";") so that
-  # the .facets levels align and the filter below works correctly.
+  # Now, prepare matching facets in the predictions
   ek <- epi_keys_only(observed_response)
   predictions <- predictions %>%
     mutate(
