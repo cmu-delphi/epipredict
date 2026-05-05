@@ -22,3 +22,6 @@
 ^.lintr$
 ^.venv$
 ^inst/templates$
+^\.workflow$
+^\.plans$
+^\.claude$
