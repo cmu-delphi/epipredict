@@ -18,6 +18,7 @@ page](https://cmu-delphi.github.io/epipredict/dev/index.html#motivating-example)
 Let’s first remind ourselves how to use a simple canned workflow:
 
 ``` r
+
 training_data <- covid_case_death_rates |>
   filter(time_value <= forecast_date, geo_value %in% used_locations)
 four_week_ahead <- arx_forecaster(
@@ -200,6 +201,7 @@ We’ll think through the following sub-steps:
 The steps found in `four_week_ahead` look like:
 
 ``` r
+
 hardhat::extract_recipe(four_week_ahead$epi_workflow)
 #> 
 #> ── Epi Recipe ───────────────────────────────────────────────────────────────
@@ -235,6 +237,7 @@ Let’s create an
 to hold the 6 steps:
 
 ``` r
+
 filtered_data <- covid_case_death_rates |>
   filter(time_value <= forecast_date, geo_value %in% used_locations)
 four_week_recipe <- epi_recipe(
@@ -263,6 +266,7 @@ depend on the steps before them. The other steps can be thought of as
 setting parameters that help specify later processing and computation.
 
 ``` r
+
 four_week_recipe <- four_week_recipe |>
   step_epi_lag(case_rate, lag = c(0, 1, 2, 3, 7, 14)) |>
   step_epi_lag(death_rate, lag = c(0, 7, 14)) |>
@@ -308,11 +312,12 @@ role.
 In general, to inspect the ‘prepared’ steps, we can run
 [`prep()`](https://recipes.tidymodels.org/reference/prep.html), which
 fits any parameters used in the recipe, calculates new columns, and
-assigns roles[¹](#fn1). For example, we can use
+assigns roles[^1]. For example, we can use
 [`prep()`](https://recipes.tidymodels.org/reference/prep.html) to make
 sure that we are training on the correct columns:
 
 ``` r
+
 prepped <- four_week_recipe |> prep(training_data)
 prepped$term_info |> print(n = 14)
 #> # A tibble: 14 × 4
@@ -343,6 +348,7 @@ We can inspect newly-created columns by running
 recipe so far:
 
 ``` r
+
 four_week_recipe |>
   prep(training_data) |>
   bake(training_data)
@@ -350,8 +356,8 @@ four_week_recipe |>
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 586–614 days (see summary() for per-signal details)
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 586–614 days (see summary() for per-signal details)
 #> 
 #> # A tibble: 800 × 14
 #>   geo_value time_value case_rate death_rate lag_0_case_rate lag_1_case_rate
@@ -378,10 +384,11 @@ also allows you to see the exact data that a later
 
 ### Define the `frosting()`
 
-The post-processing `frosting` layers[²](#fn2) found in
-`four_week_ahead` look like:
+The post-processing `frosting` layers[^2] found in `four_week_ahead`
+look like:
 
 ``` r
+
 epipredict::extract_frosting(four_week_ahead$epi_workflow)
 #> 
 #> ── Frosting ─────────────────────────────────────────────────────────────────
@@ -401,9 +408,10 @@ custom function
 to inspect these steps.
 
 Using the detailed information in the output above, we can recreate the
-layers similar to how we defined the `recipe` `step`s[³](#fn3):
+layers similar to how we defined the `recipe` `step`s[^3]:
 
 ``` r
+
 four_week_layers <- frosting() |>
   layer_predict() |>
   layer_residual_quantiles(quantile_levels = c(0.1, 0.25, 0.5, 0.75, 0.9)) |>
@@ -455,6 +463,7 @@ postprocessor into
 [`epi_workflow()`](https://cmu-delphi.github.io/epipredict/dev/reference/epi_workflow.md).
 
 ``` r
+
 four_week_workflow <- epi_workflow(
   four_week_recipe,
   linear_reg(),
@@ -465,6 +474,7 @@ four_week_workflow <- epi_workflow(
 After fitting it, we will have recreated `four_week_ahead$epi_workflow`.
 
 ``` r
+
 fit_workflow <- four_week_workflow |> fit(training_data)
 ```
 
@@ -485,6 +495,7 @@ predict on *every* day in the data-set, and not just on the
 `reference_date`.
 
 ``` r
+
 relevant_data <- get_test_data(
   four_week_recipe,
   training_data
@@ -499,13 +510,14 @@ With a trained workflow and data in hand, we can actually make our
 predictions:
 
 ``` r
+
 fit_workflow |> predict(relevant_data)
 #> An `epi_df` object, 4 x 6 with metadata:
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 586 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 586 days
 #> 
 #> # A tibble: 4 × 6
 #>   geo_value time_value .pred .pred_distn forecast_date target_date
@@ -521,13 +533,14 @@ Note that if we simply plug the full `training_data` into
 predictions:
 
 ``` r
+
 fit_workflow |> predict(training_data)
 #> An `epi_df` object, 800 x 6 with metadata:
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 586 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 586 days
 #> 
 #> # A tibble: 800 × 6
 #>   geo_value time_value .pred .pred_distn forecast_date target_date
@@ -548,6 +561,7 @@ data to produce a prediction. To narrow this down, we could filter to
 rows where the `time_value` matches the `forecast_date`:
 
 ``` r
+
 fit_workflow |>
   predict(training_data) |>
   filter(time_value == forecast_date)
@@ -555,8 +569,8 @@ fit_workflow |>
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 586 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 586 days
 #> 
 #> # A tibble: 4 × 6
 #>   geo_value time_value .pred .pred_distn forecast_date target_date
@@ -599,6 +613,7 @@ can easily create a new growth rate column as a step in the
 `epi_recipe`.
 
 ``` r
+
 growth_rate_recipe <- epi_recipe(
   covid_case_death_rates |>
     filter(time_value <= forecast_date, geo_value %in% used_locations)
@@ -615,6 +630,7 @@ growth_rate_recipe <- epi_recipe(
 Inspecting the newly added column:
 
 ``` r
+
 growth_rate_recipe |>
   prep(training_data) |>
   bake(training_data) |>
@@ -628,8 +644,8 @@ growth_rate_recipe |>
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 586 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 586 days
 #> 
 #> # A tibble: 6 × 5
 #>   geo_value time_value case_rate death_rate gr_7_rel_change_death_rate
@@ -645,6 +661,7 @@ growth_rate_recipe |>
 And the role:
 
 ``` r
+
 prepped <- growth_rate_recipe |>
   prep(training_data)
 prepped$term_info |> filter(grepl("gr", variable))
@@ -670,6 +687,7 @@ and
 [`layer_point_from_distn()`](https://cmu-delphi.github.io/epipredict/dev/reference/layer_point_from_distn.md):
 
 ``` r
+
 growth_rate_layers <- frosting() |>
   layer_predict() |>
   layer_quantile_distn(
@@ -701,6 +719,7 @@ Plot
 We’ll reuse some code from the landing page to plot the result.
 
 ``` r
+
 forecast_date_label <-
   tibble(
     geo_value = rep(used_locations, 2),
@@ -734,9 +753,10 @@ rather than the count prediction. To do that, we can adjust *just* the
 `frosting` to perform post-processing on our existing rates forecaster.
 Since rates are calculated as counts per 100 000 people, we will convert
 back to counts by multiplying rates by the factor
-$\frac{\text{regional population}}{100,000}$.
+$`\frac{ \text{regional population} }{100,000}`$.
 
 ``` r
+
 count_layers <-
   frosting() |>
   layer_predict() |>
@@ -771,8 +791,8 @@ count_predictions
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 586 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 586 days
 #> 
 #> # A tibble: 4 × 6
 #>   geo_value time_value .pred .pred_distn forecast_date target_date
@@ -792,14 +812,15 @@ Let’s work through an example of a more complicated kind of pipeline you
 can build using the `epipredict` framework. This is a hotspot prediction
 model, which predicts whether case rates are increasing (`up`),
 decreasing (`down`) or flat (`flat`). The model comes from a paper by
-McDonald, Bien, Green, Hu et al[⁴](#fn4), and roughly serves as an
-extension of
+McDonald, Bien, Green, Hu et al[^4], and roughly serves as an extension
+of
 [`arx_classifier()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_classifier.md).
 
 First, we need to add a factor version of `geo_value`, so that it can be
 used as a feature.
 
 ``` r
+
 training_data <-
   covid_case_death_rates |>
   filter(time_value <= forecast_date, geo_value %in% used_locations) |>
@@ -815,6 +836,7 @@ such as
 [`step_growth_rate()`](https://cmu-delphi.github.io/epipredict/dev/reference/step_growth_rate.md).
 
 ``` r
+
 classifier_recipe <- epi_recipe(training_data) |>
   # Label `time_value` as predictor and do no other processing
   add_role(time_value, new_role = "predictor") |>
@@ -848,15 +870,18 @@ creates a column with the growth rate one week into the future, and
 [`step_mutate()`](https://recipes.tidymodels.org/reference/step_mutate.html)
 turns that column into a factor with 3 possible values,
 
-$$Z_{\ell,t} = \begin{cases}
-{\text{up},} & {\text{if}\ Y_{\ell,t}^{\Delta} > 0.25} \\
-{\text{down},} & {\text{if}\ Y_{\ell,t}^{\Delta} < - 0.20} \\
-{\text{flat},} & \text{otherwise}
-\end{cases}$$
+``` math
+ Z_{\ell, t}=
+    \begin{cases}
+      \text{up}, & \text{if}\ Y^{\Delta}_{\ell, t} > 0.25 \\
+      \text{down}, & \text{if}\  Y^{\Delta}_{\ell, t} < -0.20\\
+      \text{flat}, & \text{otherwise}
+    \end{cases}
+```
 
-where $Y_{\ell,t}^{\Delta}$ is the growth rate at location $\ell$ and
-time $t$. `up` means that the `case_rate` is has increased by at least
-25%, while `down` means it has decreased by at least 20%.
+where $`Y^{\Delta}_{\ell, t}`$ is the growth rate at location $`\ell`$
+and time $`t`$. `up` means that the `case_rate` is has increased by at
+least 25%, while `down` means it has decreased by at least 20%.
 
 Note that in both
 [`step_growth_rate()`](https://cmu-delphi.github.io/epipredict/dev/reference/step_growth_rate.md)
@@ -881,6 +906,7 @@ regression layers, with the addition that we need to remove some `NA`
 values:
 
 ``` r
+
 frost <- frosting() |>
   layer_naomit(starts_with(".pred")) |>
   layer_add_forecast_date() |>
@@ -888,6 +914,7 @@ frost <- frosting() |>
 ```
 
 ``` r
+
 wf <- epi_workflow(
   classifier_recipe,
   multinom_reg(),
@@ -900,7 +927,7 @@ forecast(wf)
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
+#> Latency (time between last available observation and epi_df's as_of, by time series):
 #> * No time series detected
 #> # A tibble: 4 × 5
 #>   geo_value time_value .pred_class   forecast_date target_date
@@ -915,6 +942,7 @@ And comparing the result with the actual growth rates at that point in
 time,
 
 ``` r
+
 growth_rates <- covid_case_death_rates |>
   filter(geo_value %in% used_locations) |>
   group_by(geo_value) |>
@@ -929,8 +957,8 @@ growth_rates |> filter(time_value == "2021-08-01") |> select(-death_rate)
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 586 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 586 days
 #> 
 #> # A tibble: 4 × 4
 #>   geo_value time_value case_rate case_gr
@@ -948,9 +976,7 @@ See the [tooling
 book](https://cmu-delphi.github.io/delphi-tooling-book/preprocessing-and-models.html)
 for a more in-depth discussion of this example.
 
-------------------------------------------------------------------------
-
-1.  Note that
+[^1]: Note that
     [`prep()`](https://recipes.tidymodels.org/reference/prep.html) and
     [`bake()`](https://recipes.tidymodels.org/reference/bake.html) are
     standard [recipes](https://github.com/tidymodels/recipes) functions,
@@ -958,14 +984,14 @@ for a more in-depth discussion of this example.
     example in the [guide to creating a new
     step](https://www.tidymodels.org/learn/develop/recipes/#create-the-prep-method).
 
-2.  Think of baking a cake, where adding the frosting is the last step
+[^2]: Think of baking a cake, where adding the frosting is the last step
     in the process of actually baking.
 
-3.  Note that the frosting doesn’t require any information about the
+[^3]: Note that the frosting doesn’t require any information about the
     training data, since the output of the model only depends on the
     model used.
 
-4.  McDonald, Bien, Green, Hu, et al. “Can auxiliary indicators improve
-    COVID-19 forecasting and hotspot prediction?.” Proceedings of the
-    National Academy of Sciences 118.51 (2021): e2111453118.
+[^4]: McDonald, Bien, Green, Hu, et al. “Can auxiliary indicators
+    improve COVID-19 forecasting and hotspot prediction?.” Proceedings
+    of the National Academy of Sciences 118.51 (2021): e2111453118.
     <doi:10.1073/pnas.2111453118>

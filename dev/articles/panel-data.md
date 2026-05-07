@@ -1,6 +1,7 @@
 # Using epipredict on non-epidemic panel data
 
 ``` r
+
 library(dplyr)
 library(tidyr)
 library(parsnip)
@@ -21,13 +22,14 @@ dataset, which contains daily state-wise measures of `case_rate` and
 `death_rate` for COVID-19 in 2021:
 
 ``` r
+
 head(covid_case_death_rates, 3)
 #> An `epi_df` object, 3 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 799 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 799 days
 #> 
 #> # A tibble: 3 × 4
 #>   geo_value time_value case_rate death_rate
@@ -96,6 +98,7 @@ the columns in our `epi_df`:
   “Master’s diploma”
 
 ``` r
+
 # Rename for simplicity
 employ <- grad_employ_subset
 sample_n(employ, 6)
@@ -133,6 +136,7 @@ values will vary greatly from province to province since there are large
 differences in population.
 
 ``` r
+
 employ_small <- employ %>%
   group_by(geo_value, age_group, edu_qual) %>%
   # Select groups where there are complete time series values
@@ -168,6 +172,7 @@ Columbia and Ontario. Note that some groups do not have any time series
 information since we filtered out all time series with incomplete dates.
 
 ``` r
+
 employ_small %>%
   filter(geo_value %in% c("British Columbia", "Ontario")) %>%
   filter(grepl("degree", edu_qual, fixed = T)) %>%
@@ -185,29 +190,33 @@ employ_small %>%
 ![](panel-data_files/figure-html/employ-small-graph-1.png)
 
 We will predict the standardized number of graduates (a proportion) in
-the next year (time $t + 1$) using an autoregressive model with three
+the next year (time $`t+1`$) using an autoregressive model with three
 lags (i.e., an AR(3) model). Such a model is represented algebraically
 like this:
 
-$$y_{t + 1,ijk} = \alpha_{0} + \alpha_{1}y_{tijk} + \alpha_{2}y_{t - 1,ijk} + \alpha_{3}y_{t - 2,ijk} + \epsilon_{tijk}$$
+``` math
+  y_{t+1,ijk} =
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk} + \epsilon_{tijk}
+```
 
-where $y_{tij}$ is the proportion of graduates at time $t$ in location
-$i$ and age group $j$ with education quality $k$.
+where $`y_{tij}`$ is the proportion of graduates at time $`t`$ in
+location $`i`$ and age group $`j`$ with education quality $`k`$.
 
 In the pre-processing step, we need to create additional columns in
-`employ` for each of $y_{t + 1,ijk}$, $y_{tijk}$, $y_{t - 1,ijk}$, and
-$y_{t - 2,ijk}$. We do this via an `epi_recipe`. Note that creating an
+`employ` for each of $`y_{t+1,ijk}`$, $`y_{tijk}`$, $`y_{t-1,ijk}`$, and
+$`y_{t-2,ijk}`$. We do this via an `epi_recipe`. Note that creating an
 `epi_recipe` alone doesn’t add these outcome and predictor columns; the
 recipe just stores the instructions for adding them.
 
 Our `epi_recipe` should add one `ahead` column representing
-$y_{t + 1,ijk}$ and 3 `lag` columns representing $y_{tijk}$,
-$y_{t - 1,ijk}$, and $y_{t - 2,ijk}$ (it’s more accurate to think of the
+$`y_{t+1,ijk}`$ and 3 `lag` columns representing $`y_{tijk}`$,
+$`y_{t-1,ijk}`$, and $`y_{t-2,ijk}`$ (it’s more accurate to think of the
 0th “lag” as the “current” value with 2 lags, but that’s not quite how
 the processing works). Also note that since we specified our `time_type`
 to be `year`, our `lag` and `lead` values are both in years.
 
 ``` r
+
 r <- epi_recipe(employ_small) %>%
   step_epi_ahead(num_graduates_prop, ahead = 1) %>%
   step_epi_lag(num_graduates_prop, lag = 0:2) %>%
@@ -234,6 +243,7 @@ Let’s apply this recipe using `prep` and `bake` to generate and view the
 `lag` and `ahead` columns.
 
 ``` r
+
 # Display a sample of the pre-processed data
 bake_and_show_sample <- function(recipe, data, n = 5) {
   recipe %>%
@@ -264,10 +274,10 @@ r %>% bake_and_show_sample(employ_small)
 We can see that the `prep` and `bake` steps created new columns
 according to our `epi_recipe`:
 
-- `ahead_1_num_graduates_prop` corresponds to $y_{t + 1,ijk}$
+- `ahead_1_num_graduates_prop` corresponds to $`y_{t+1,ijk}`$
 - `lag_0_num_graduates_prop`, `lag_1_num_graduates_prop`, and
-  `lag_2_num_graduates_prop` correspond to $y_{tijk}$, $y_{t - 1,ijk}$,
-  and $y_{t - 2,ijk}$ respectively.
+  `lag_2_num_graduates_prop` correspond to $`y_{tijk}`$,
+  $`y_{t-1,ijk}`$, and $`y_{t-2,ijk}`$ respectively.
 
 ### Model estimation and prediction
 
@@ -283,9 +293,10 @@ pre-processing section along with the
 model. Note that `epi_workflow` is a container and doesn’t actually do
 the fitting. We have to pass the workflow into
 [`fit()`](https://generics.r-lib.org/reference/fit.html) to get our
-estimated model coefficients ${\widehat{\alpha}}_{i},\ i = 0,...,3$.
+estimated model coefficients $`\widehat{\alpha}_i,\ i=0,...,3`$.
 
 ``` r
+
 wf_linreg <- epi_workflow(r, linear_reg()) %>%
   fit(employ_small)
 summary(extract_fit_engine(wf_linreg))
@@ -312,14 +323,15 @@ summary(extract_fit_engine(wf_linreg))
 ```
 
 This output tells us the coefficients of the fitted model; for instance,
-the estimated intercept is ${\widehat{\alpha}}_{0} =$ 0.109 and the
-coefficient for $y_{tijk}$ is ${\widehat{\alpha}}_{1} =$ 0.324. The
+the estimated intercept is $`\widehat{\alpha}_0 =`$ 0.109 and the
+coefficient for $`y_{tijk}`$ is $`\widehat\alpha_1 =`$ 0.324. The
 summary also tells us that all estimated coefficients are significantly
 different from zero. Extracting the 95% confidence intervals for the
 coefficients also leads us to the same conclusion: all the coefficient
 estimates are significantly different from 0.
 
 ``` r
+
 confint(extract_fit_engine(wf_linreg))
 #>                                2.5 %      97.5 %
 #> (Intercept)               0.09538942  0.12167466
@@ -333,6 +345,7 @@ of our data. For this demo, we will predict the number of graduates
 using the last 2 years of our dataset.
 
 ``` r
+
 latest <- get_test_data(recipe = r, x = employ_small)
 preds <- stats::predict(wf_linreg, latest) %>% filter(!is.na(.pred))
 # Display a sample of the prediction values, excluding NAs
@@ -359,6 +372,7 @@ We can do this using the `augment` function too. Note that `predict` and
 with all of the keys that were present in the original dataset.
 
 ``` r
+
 augment(wf_linreg, latest) %>% sample_n(5)
 #> An `epi_df` object, 5 x 11 with metadata:
 #> * geo_type  = custom
@@ -381,10 +395,11 @@ augment(wf_linreg, latest) %>% sample_n(5)
 ### Model diagnostics
 
 First, we’ll plot the residuals (that is,
-$y_{tijk} - {\widehat{y}}_{tijk}$) against the fitted values
-(${\widehat{y}}_{tijk}$).
+$`y_{tijk} - \widehat{y}_{tijk}`$) against the fitted values
+($`\widehat{y}_{tijk}`$).
 
 ``` r
+
 par(mfrow = c(2, 2), mar = c(5, 3, 1.2, 0))
 plot(extract_fit_engine(wf_linreg))
 ```
@@ -419,22 +434,26 @@ employment income and the number of graduates in the previous 2 years.
 We would do this using an autoregressive model with exogenous inputs,
 defined as follows:
 
-$$\begin{aligned}
-y_{t + 1,ijk} & {= \alpha_{0} + \alpha_{1}y_{tijk} + \alpha_{2}y_{t - 1,ijk} + \alpha_{3}y_{t - 2,ijk}} \\
- & {\quad + \beta_{1}x_{tijk} + \beta_{2}x_{t - 1,ijk}} \\
- & {\quad + \gamma_{2}z_{tijk} + \gamma_{2}z_{t - 1,ijk} + \epsilon_{tijk}}
-\end{aligned}$$
+``` math
+\begin{aligned}
+  y_{t+1,ijk} &=
+  \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk}\\
+  &\quad + \beta_1 x_{tijk} + \beta_2 x_{t-1,ijk}\\
+  &\quad + \gamma_2 z_{tijk} + \gamma_2 z_{t-1,ijk} + \epsilon_{tijk}
+\end{aligned}
+```
 
-where $y_{tijk}$ is the 5-year median income (proportion) at time $t$
-(in location $i$, age group $j$ with education quality $k$), $x_{tijk}$
-is the 2-year median income (proportion) at time $t$, and $z_{tijk}$ is
-the number of graduates (proportion) at time $t$.
+where $`y_{tijk}`$ is the 5-year median income (proportion) at time
+$`t`$ (in location $`i`$, age group $`j`$ with education quality $`k`$),
+$`x_{tijk}`$ is the 2-year median income (proportion) at time $`t`$, and
+$`z_{tijk}`$ is the number of graduates (proportion) at time $`t`$.
 
 ### Pre-processing
 
 Again, we construct an `epi_recipe` detailing the pre-processing steps.
 
 ``` r
+
 rx <- epi_recipe(employ_small) %>%
   step_epi_ahead(med_income_5y_prop, ahead = 1) %>%
   # 5-year median income has current, and two lags c(0, 1, 2)
@@ -482,6 +501,7 @@ layers to do a few things:
     [`layer_population_scaling()`](https://cmu-delphi.github.io/epipredict/dev/reference/layer_population_scaling.md).
 
 ``` r
+
 # Create dataframe of the sums we used for standardizing
 # Only have to include med_income_5y since that is our outcome
 totals <- employ_small %>%
@@ -540,6 +560,7 @@ Let’s take a look at the predictions along with their 90% prediction
 intervals.
 
 ``` r
+
 latest <- get_test_data(recipe = rx, x = employ_small)
 predsx <- predict(wfx_linreg, latest)
 
@@ -593,10 +614,14 @@ each group by the keys in our `epi_df`.
 In this first example, we’ll use `flatline_forecaster` to make a simple
 prediction of the 2-year median income for the next year, based on one
 previous time point. This model is representated algebraically as:
-$$y_{t + 1,ijk} = y_{tijk} + \epsilon_{tijk}$$ where $y_{tijk}$ is the
-2-year median income (proportion) at time $t$.
+``` math
+y_{t+1,ijk} = y_{tijk} + \epsilon_{tijk}
+```
+where $`y_{tijk}`$ is the 2-year median income (proportion) at time
+$`t`$.
 
 ``` r
+
 out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
   args_list = flatline_args_list(ahead = 1)
 )
@@ -604,7 +629,7 @@ out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
 out_fl
 #> ══ A basic forecaster of type flatline ══════════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-04-24 21:27:20.
+#> This forecaster was fit on 2026-05-07 19:45:48.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,
@@ -636,6 +661,7 @@ the scenes. This is very similar to the model we introduced in the
 article, but where all inputs have the same number of lags.
 
 ``` r
+
 arx_args <- arx_args_list(lags = c(0L, 1L), ahead = 1L)
 
 out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
@@ -646,7 +672,7 @@ out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
 out_arx_lr
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-04-24 21:27:22.
+#> This forecaster was fit on 2026-05-07 19:45:50.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,
@@ -669,6 +695,7 @@ also work as expected. Below we use a boosted tree model instead of a
 linear regression.
 
 ``` r
+
 out_arx_rf <- arx_forecaster(
   employ_small, "med_income_5y_prop",
   c("med_income_5y_prop", "med_income_2y_prop", "num_graduates_prop"),
@@ -679,7 +706,7 @@ out_arx_rf <- arx_forecaster(
 out_arx_rf
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-04-24 21:27:23.
+#> This forecaster was fit on 2026-05-07 19:45:51.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,

@@ -143,8 +143,8 @@ forecast(wf)
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2024-03-20
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 810 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 810 days
 #> 
 #> # A tibble: 2 × 4
 #>   geo_value time_value .pred .pred_scaled

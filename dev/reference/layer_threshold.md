@@ -84,8 +84,8 @@ p
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 733 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 733 days
 #> 
 #> # A tibble: 3 × 3
 #>   geo_value time_value .pred

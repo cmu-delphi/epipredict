@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -190,8 +190,8 @@ look at an example <code>epi_df</code>:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag across all time series = 434 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 434 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 20,496 × 4</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span></span></span>
@@ -593,8 +593,8 @@ rates for the <code>target_date</code>, as computed using
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag across all time series = 573 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 573 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span> <span style="font-weight: bold;">deaths_gr</span></span></span>
@@ -766,7 +766,7 @@ at location
 and
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>c</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><annotation encoding="application/x-tex">c_{t,j}</annotation></semantics></math>
 is the associated case rate, then the corresponding model is:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>d</mi><mrow><mi>t</mi><mo>+</mo><mn>28</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left"><msub><mi>a</mi><mn>0</mn></msub><mo>+</mo><msub><mi>a</mi><mn>1</mn></msub><msub><mi>d</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>2</mn></msub><msub><mi>d</mi><mrow><mi>t</mi><mo>−</mo><mn>7</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>3</mn></msub><msub><mi>d</mi><mrow><mi>t</mi><mo>−</mo><mn>14</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><msub><mi>a</mi><mn>4</mn></msub><msub><mi>c</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>5</mn></msub><msub><mi>c</mi><mrow><mi>t</mi><mo>−</mo><mn>7</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>6</mn></msub><msub><mi>c</mi><mrow><mi>t</mi><mo>−</mo><mn>14</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>d</mi><mrow><mi>t</mi><mo>+</mo><mn>28</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>=</mo></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>a</mi><mn>0</mn></msub><mo>+</mo><msub><mi>a</mi><mn>1</mn></msub><msub><mi>d</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>2</mn></msub><msub><mi>d</mi><mrow><mi>t</mi><mo>−</mo><mn>7</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>3</mn></msub><msub><mi>d</mi><mrow><mi>t</mi><mo>−</mo><mn>14</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><msub><mi>a</mi><mn>4</mn></msub><msub><mi>c</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>5</mn></msub><msub><mi>c</mi><mrow><mi>t</mi><mo>−</mo><mn>7</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>a</mi><mn>6</mn></msub><msub><mi>c</mi><mrow><mi>t</mi><mo>−</mo><mn>14</mn><mo>,</mo><mi>j</mi></mrow></msub><mo>+</mo><msub><mi>ε</mi><mrow><mi>t</mi><mo>,</mo><mi>j</mi></mrow></msub><mi>.</mi></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
 d_{t+28, j} = &amp; a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
      &amp; a_4 c_{t, j} + a_5 c_{t-7, j} + a_6 c_{t-14, j} + \varepsilon_{t,j}.

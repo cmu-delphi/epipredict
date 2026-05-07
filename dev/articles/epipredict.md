@@ -85,6 +85,7 @@ for forecasting a single ahead using the default engine. Before we start
 actually building forecasters, lets import some relevant libraries
 
 ``` r
+
 library(dplyr)
 library(parsnip)
 library(workflows)
@@ -101,6 +102,7 @@ And our default forecasting date and selected states (we will use these
 to limit the data to make discussion easier):
 
 ``` r
+
 forecast_date <- as.Date("2021-08-01")
 used_locations <- c("ca", "ma", "ny", "tx")
 ```
@@ -117,13 +119,14 @@ makes several pre-compiled example datasets available. Let’s look at an
 example `epi_df`:
 
 ``` r
+
 covid_case_death_rates
 #> An `epi_df` object, 20,496 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 434 days
 #> 
 #> # A tibble: 20,496 × 4
 #>   geo_value time_value case_rate death_rate
@@ -150,6 +153,7 @@ demographic information. For example, `grad_employ_subset` from
 `age_group` and `edu_qual` as additional keys:
 
 ``` r
+
 grad_employ_subset
 #> An `epi_df` object, 1,445 x 7 with metadata:
 #> * geo_type  = custom
@@ -193,6 +197,7 @@ included engines, such as
 [`smooth_quantile_reg()`](https://cmu-delphi.github.io/epipredict/dev/reference/smooth_quantile_reg.md):
 
 ``` r
+
 two_week_ahead <- arx_forecaster(
   covid_case_death_rates |> filter(time_value <= forecast_date),
   outcome = "death_rate",
@@ -240,11 +245,12 @@ quantile, reflected in the several different columns for `tau` above.
 
 Because of the flexibility of
 [parsnip](https://github.com/tidymodels/parsnip), there are a whole host
-of models available to us[¹](#fn1); as an example, we could have just as
+of models available to us[^1]; as an example, we could have just as
 easily substituted a non-linear random forest model from
 [ranger](https://imbs-hl.github.io/ranger/):
 
 ``` r
+
 two_week_ahead <- arx_forecaster(
   covid_case_death_rates |> filter(time_value <= forecast_date),
   outcome = "death_rate",
@@ -261,6 +267,7 @@ Other customization is possible via `args_list = arx_args_list()`; for
 example, if we wanted to increase the number of quantiles fit:
 
 ``` r
+
 two_week_ahead <- arx_forecaster(
   covid_case_death_rates |>
     filter(time_value <= forecast_date, geo_value %in% used_locations),
@@ -318,6 +325,7 @@ by looping over aheads. For example, to predict every day over a 4-week
 time period:
 
 ``` r
+
 all_canned_results <- lapply(
   seq(0, 28),
   \(days_ahead) {
@@ -364,6 +372,7 @@ using
 For example, on the same dataset as above:
 
 ``` r
+
 all_flatlines <- lapply(
   seq(0, 28),
   \(days_ahead) {
@@ -398,6 +407,7 @@ baseline for [the CDC COVID-19 Forecasting
 Hub](https://covid19forecasthub.org).
 
 ``` r
+
 all_cdc_flatline <-
   cdc_baseline_forecaster(
     covid_case_death_rates |>
@@ -447,15 +457,16 @@ is the only one well suited for forecasts at long time horizons.
 
 Since it requires multiple years of data and a roughly seasonal signal,
 the dataset we’ve been using for demonstrations so far is poor example
-for a climate forecast[²](#fn2). Instead, we’ll use the fluview ILI
-dataset, which is weekly influenza like illness data for hhs regions,
-going back to 1997.
+for a climate forecast[^2]. Instead, we’ll use the fluview ILI dataset,
+which is weekly influenza like illness data for hhs regions, going back
+to 1997.
 
 We’ll predict the 2023/24 season using all previous data, including
 2020-2022, the two years where there was approximately no seasonal flu,
 forecasting from the start of the season, `2023-10-08`:
 
 ``` r
+
 fluview_hhs <- pub_fluview(
   regions = paste0("hhs", 1:10),
   epiweeks = epirange(100001,222201)
@@ -500,7 +511,7 @@ aheads simultaneously; here we do so for the entire season of 28 weeks.
 This is possible for
 [`arx_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.md),
 but only using `trainer = smooth_quantile_reg()`, which is built to
-handle multiple aheads simultaneously[³](#fn3).
+handle multiple aheads simultaneously[^3].
 
 A pure climatological forecast can be thought of as forecasting a
 typical year so far. The 2023/24 had some regions, such as `hhs10` which
@@ -517,6 +528,7 @@ provided by the user. For example, on the same dataset and
 `forecast_date` as above, this model outputs:
 
 ``` r
+
 classifier <- arx_classifier(
   covid_case_death_rates |>
     filter(geo_value %in% used_locations, time_value < forecast_date),
@@ -557,6 +569,7 @@ rates for the `target_date`, as computed using
 [epiprocess](https://github.com/cmu-delphi/epiprocess):
 
 ``` r
+
 growth_rates <- covid_case_death_rates |>
   filter(geo_value %in% used_locations) |>
   group_by(geo_value) |>
@@ -569,8 +582,8 @@ growth_rates |> filter(time_value == "2021-08-14")
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 573 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 573 days
 #> 
 #> # A tibble: 4 × 5
 #>   geo_value time_value case_rate death_rate deaths_gr
@@ -592,6 +605,7 @@ required geographic key. For example, predicting the number of graduates
 in a subset of the categories in `grad_employ_subset` from above:
 
 ``` r
+
 edu_quals <- c("Undergraduate degree", "Professional degree")
 geo_values <- c("Quebec", "British Columbia")
 
@@ -653,6 +667,7 @@ simplest way to avoid geo-pooling and use different parameters for each
 geography is to loop over the `geo_value`s:
 
 ``` r
+
 geo_values <- covid_case_death_rates |>
   pull(geo_value) |>
   unique()
@@ -690,9 +705,9 @@ all_fits |>
 ```
 
 Estimating separate models for each geography uses far less data for
-each estimate than geo-pooling and is 56 times slower[⁴](#fn4). If a
-dataset contains relatively few observations for each geography, fitting
-a geo-pooled model is likely to produce better, more stable results.
+each estimate than geo-pooling and is 56 times slower[^4]. If a dataset
+contains relatively few observations for each geography, fitting a
+geo-pooled model is likely to produce better, more stable results.
 However, geo-pooling can only be used if values are comparable in
 meaning and scale across geographies or can be made comparable, for
 example by normalization.
@@ -716,6 +731,7 @@ Let’s look at the mathematical details of the model in more detail,
 using a minimal version of `four_week_ahead`:
 
 ``` r
+
 four_week_small <- arx_forecaster(
   covid_case_death_rates |> filter(time_value <= forecast_date),
   outcome = "death_rate",
@@ -738,18 +754,21 @@ hardhat::extract_fit_engine(four_week_small$epi_workflow)
 #>         0.0929132          0.0641027          0.0348096
 ```
 
-If $d_{t,j}$ is the death rate on day $t$ at location $j$ and $c_{t,j}$
-is the associated case rate, then the corresponding model is:
+If $`d_{t,j}`$ is the death rate on day $`t`$ at location $`j`$ and
+$`c_{t,j}`$ is the associated case rate, then the corresponding model
+is:
 
-$$\begin{aligned}
-{d_{t + 28,j} =} & {a_{0} + a_{1}d_{t,j} + a_{2}d_{t - 7,j} + a_{3}d_{t - 14,j} +} \\
- & {a_{4}c_{t,j} + a_{5}c_{t - 7,j} + a_{6}c_{t - 14,j} + \varepsilon_{t,j}.}
-\end{aligned}$$
+``` math
+\begin{aligned}
+d_{t+28, j} = & a_0 + a_1 d_{t,j} + a_2 d_{t-7,j} + a_3 d_{t-14, j} +\\
+     & a_4 c_{t, j} + a_5 c_{t-7, j} + a_6 c_{t-14, j} + \varepsilon_{t,j}.
+\end{aligned}
+```
 
-For example, $a_{1}$ is `lag_0_death_rate` above, with a value of 0.093,
-while $a_{5}$ is 0.0027. Note that unlike `d_{t,j}` or `c_{t,j}`, these
-*don’t* depend on either the time $t$ or the location $j$. This is what
-make it a geo-pooled model.
+For example, $`a_1`$ is `lag_0_death_rate` above, with a value of 0.093,
+while $`a_5`$ is 0.0027. Note that unlike `d_{t,j}` or `c_{t,j}`, these
+*don’t* depend on either the time $`t`$ or the location $`j`$. This is
+what make it a geo-pooled model.
 
 The training data for estimating the parameters of this linear model is
 constructed within the
@@ -757,7 +776,7 @@ constructed within the
 function by shifting a series of columns the appropriate amount – based
 on the requested `lags`. Each row containing no `NA` values in the
 predictors is used as a training observation to fit the coefficients
-$a_{0},\ldots,a_{6}$.
+$`a_0,\ldots, a_6`$.
 
 The equation above is only an accurate description of the model for a
 linear engine like
@@ -774,6 +793,7 @@ Let’s dissect the forecaster we trained back on the [landing
 page](https://cmu-delphi.github.io/epipredict/dev/index.html#motivating-example):
 
 ``` r
+
 four_week_ahead <- arx_forecaster(
   covid_case_death_rates |> filter(time_value <= forecast_date),
   outcome = "death_rate",
@@ -791,6 +811,7 @@ four_week_ahead <- arx_forecaster(
 simple tibble,
 
 ``` r
+
 four_week_ahead$predictions
 #> # A tibble: 56 × 5
 #>   geo_value  .pred .pred_distn forecast_date target_date
@@ -808,7 +829,7 @@ where `.pred` gives the point/median prediction, and `.pred_distn` is a
 [`hardhat::quantile_pred()`](https://hardhat.tidymodels.org/reference/quantile_pred.html)
 object representing a distribution through various quantile levels. The
 `5` in `<qtls(5)>` refers to the number of quantiles that have been
-explicitly created, while the \[0.234\] is the median value[⁵](#fn5). By
+explicitly created, while the \[0.234\] is the median value[^5]. By
 default, `.pred_distn` covers the quantiles
 `c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95)`.
 
@@ -818,6 +839,7 @@ a
 to include post-processing steps:
 
 ``` r
+
 four_week_ahead$epi_workflow
 #> 
 #> ══ Epi Workflow [trained] ═══════════════════════════════════════════════════
@@ -869,8 +891,7 @@ consists of 3 parts:
   this package, or [be defined in
   `{recipes}`](https://recipes.tidymodels.org/reference/index.html).
   `four_week_ahead` has 5 steps; you can inspect them more closely by
-  running
-  `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.[⁶](#fn6)
+  running `hardhat::extract_recipe(four_week_ahead$epi_workflow)`.[^6]
 - `spec`: a
   [`parsnip::model_spec`](https://parsnip.tidymodels.org/reference/model_spec.html)
   which includes both the model parameters and an engine to fit those
@@ -893,25 +914,23 @@ vignette](https://cmu-delphi.github.io/epipredict/dev/articles/custom_epiworkflo
 for recreating and then extending `four_week_ahead` using the custom
 forecaster framework.
 
-------------------------------------------------------------------------
-
-1.  in the case of `arx_forecaster`, this is any model with
+[^1]: in the case of `arx_forecaster`, this is any model with
     `mode="regression"` from [this
     list](https://www.tidymodels.org/find/parsnip/).
 
-2.  It has only a year of data, which is barely enough to run the method
-    without errors, let alone get a meaningful prediction.
+[^2]: It has only a year of data, which is barely enough to run the
+    method without errors, let alone get a meaningful prediction.
 
-3.  Though not 28 weeks into the future! Such a forecast will likely be
-    absurdly low or high.
+[^3]: Though not 28 weeks into the future! Such a forecast will likely
+    be absurdly low or high.
 
-4.  the number of geographies
+[^4]: the number of geographies
 
-5.  in the case of a [parsnip](https://github.com/tidymodels/parsnip)
+[^5]: in the case of a [parsnip](https://github.com/tidymodels/parsnip)
     engine which doesn’t explicitly predict quantiles, these quantiles
     are created using
     [`layer_residual_quantiles()`](https://cmu-delphi.github.io/epipredict/dev/reference/layer_residual_quantiles.md),
     which infers the quantiles from the residuals of the fit.
 
-6.  alternatively, for an unfit version of the preprocessor, you can
+[^6]: alternatively, for an unfit version of the preprocessor, you can
     call `hardhat::extract_preprocessor(four_week_ahead$epi_workflow)`

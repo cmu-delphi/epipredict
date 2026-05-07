@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,8 +95,8 @@ dataset, which contains daily state-wise measures of
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag across all time series = 799 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 799 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 3 × 4</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span></span></span>
@@ -501,7 +501,7 @@ information from the other two time-series in our dataset: the 2-year
 employment income and the number of graduates in the previous 2 years.
 We would do this using an autoregressive model with exogenous inputs,
 defined as follows:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right"><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left"><mo>=</mo><msub><mi>α</mi><mn>0</mn></msub><mo>+</mo><msub><mi>α</mi><mn>1</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>2</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>3</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mspace width="1.0em"></mspace><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right"></mtd><mtd columnalign="left" style="text-align: left"><mspace width="1.0em"></mspace><mo>+</mo><msub><mi>γ</mi><mn>2</mn></msub><msub><mi>z</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>γ</mi><mn>2</mn></msub><msub><mi>z</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mtable><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"><msub><mi>y</mi><mrow><mi>t</mi><mo>+</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mo>=</mo><msub><mi>α</mi><mn>0</mn></msub><mo>+</mo><msub><mi>α</mi><mn>1</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>2</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>α</mi><mn>3</mn></msub><msub><mi>y</mi><mrow><mi>t</mi><mo>−</mo><mn>2</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mspace width="1.0em"></mspace><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>x</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr><mtr><mtd columnalign="right" style="text-align: right; padding-right: 0"></mtd><mtd columnalign="left" style="text-align: left; padding-left: 0"><mspace width="1.0em"></mspace><mo>+</mo><msub><mi>γ</mi><mn>2</mn></msub><msub><mi>z</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>γ</mi><mn>2</mn></msub><msub><mi>z</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mo>,</mo><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mrow><mi>t</mi><mi>i</mi><mi>j</mi><mi>k</mi></mrow></msub></mtd></mtr></mtable><annotation encoding="application/x-tex">
 \begin{aligned}
   y_{t+1,ijk} &amp;=
   \alpha_0 + \alpha_1 y_{tijk} + \alpha_2 y_{t-1,ijk} + \alpha_3 y_{t-2,ijk}\\
@@ -698,7 +698,7 @@ is the 2-year median income (proportion) at time
 <span><span class="va">out_fl</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type flatline ══════════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2026-04-24 21:27:20</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2026-05-07 19:45:48</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -738,7 +738,7 @@ article, but where all inputs have the same number of lags.</p>
 <span><span class="va">out_arx_lr</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2026-04-24 21:27:22</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2026-05-07 19:45:50</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>
@@ -768,7 +768,7 @@ linear regression.</p>
 <span><span class="va">out_arx_rf</span></span>
 <span><span class="co">#&gt; ══ A basic forecaster of type ARX Forecaster ════════════════════════════════</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2026-04-24 21:27:23</span>.</span></span>
+<span><span class="co">#&gt; This forecaster was fit on <span style="color: #00BB00;">2026-05-07 19:45:51</span>.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Training data was an <span style="color: #0000BB;">&lt;epi_df&gt;</span> with:</span></span>
 <span><span class="co">#&gt; • Geography: <span style="color: #00BB00;">custom</span>,</span></span>

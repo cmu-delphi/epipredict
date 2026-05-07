@@ -29,6 +29,7 @@ on historical COVID-19 case data from the US and Canada.
 ## Getting case data from US states into an `epi_archive`
 
 ``` r
+
 # Setup
 library(epipredict)
 library(epiprocess)
@@ -48,6 +49,7 @@ from medical insurance claims and the number of new confirmed COVID-19
 cases per 100,000 population (daily) for 4 states
 
 ``` r
+
 # Select the `percent_cli` column from the data archive
 doctor_visits <- archive_cases_dv_subset$DT |>
   select(geo_value, time_value, version, percent_cli) |>
@@ -59,6 +61,7 @@ The data can also be fetched from the Delphi Epidata API with the
 following query:
 
 ``` r
+
 library(epidatr)
 doctor_visits <- pub_covidcast(
   source = "doctor-visits",
@@ -85,6 +88,7 @@ the data.
 Code for plotting
 
 ``` r
+
 geo_choose <- "ca"
 forecast_dates <- seq(
   from = as.Date("2020-08-01"),
@@ -127,10 +131,9 @@ dashed line representing the issue date for the time series of the
 corresponding color. For example, the snapshot on March 1st, 2021 is
 aquamarine, and increases to slightly over 10. Every series is
 necessarily to the left of the snapshot date (since all known values
-must happen before the snapshot is taken[¹](#fn1)). The black line
-overlaying the various snapshots represents the “final value”, which is
-just the snapshot at the last version in the archive (the
-`versions_end`).
+must happen before the snapshot is taken[^1]). The black line overlaying
+the various snapshots represents the “final value”, which is just the
+snapshot at the last version in the archive (the `versions_end`).
 
 Comparing with the black line tells us how much the value at the time of
 the snapshot differs with what was eventually reported. The drop in
@@ -146,6 +149,7 @@ gap between the forecast date and the end of the red time-series to its
 left. In fact, if we take a snapshot and get the last `time_value`,
 
 ``` r
+
 doctor_visits |>
   epix_as_of(as.Date("2020-08-01")) |>
   pull(time_value) |>
@@ -181,6 +185,7 @@ setting the `.versions` argument in
 [`epix_slide()`](https://cmu-delphi.github.io/epiprocess/reference/epix_slide.html):
 
 ``` r
+
 forecast_date <- as.Date("2021-04-06")
 forecasts <- doctor_visits |>
   epix_slide(
@@ -198,7 +203,7 @@ forecasts <- doctor_visits |>
 We need truth data to compare our forecast against. We can construct it
 by using
 [`epix_as_of()`](https://cmu-delphi.github.io/epiprocess/reference/epix_as_of.html)
-to snapshot the archive at the last available date[²](#fn2).
+to snapshot the archive at the last available date[^2].
 
 *Note:* We always want to compare our forecasts to actual (most recently
 reported) values because that is the outcome we care about. `as_of` data
@@ -210,6 +215,7 @@ forecast. Unfortunately, it’s not uncommon for revisions to cause poor
 forecast.
 
 ``` r
+
 forecasts |>
   inner_join(
     doctor_visits |>
@@ -242,9 +248,10 @@ want to use `epix_slide` for backtesting. We want to simulate a data set
 that receives finalized updates every day, that is, a data set with no
 revisions. To do this, we will snapshot the latest version of the data
 to create a synthetic data set, and convert it into an archive where
-`version = time_value`[³](#fn3).
+`version = time_value`[^3].
 
 ``` r
+
 archive_cases_dv_subset_faux <- doctor_visits |>
   epix_as_of(doctor_visits$versions_end) |>
   mutate(version = time_value) |>
@@ -258,6 +265,7 @@ We will also create the helper function `forecast_wrapper()` to let us
 easily map across aheads.
 
 ``` r
+
 forecast_wrapper <- function(
     epi_data, aheads, outcome, predictors, process_data = identity
     ) {
@@ -280,8 +288,8 @@ forecast_wrapper <- function(
 *Note:* In the helper function, we’re using the parameter
 `adjust_latency`. We need to use it because the most recently released
 data may still be several days old on any given forecast date (lag \>
-0); `adjust_latency` will modify the forecaster to compensate[⁴](#fn4).
-See the function
+0); `adjust_latency` will modify the forecaster to compensate[^4]. See
+the function
 [`step_adjust_latency()`](https://cmu-delphi.github.io/epipredict/dev/reference/step_adjust_latency.md)
 for more details and examples.
 
@@ -289,6 +297,7 @@ Now that we’re set up, we can generate forecasts for both the version
 faithful and un-faithful archives, and bind the results together.
 
 ``` r
+
 forecast_dates <- seq(
   from = as.Date("2020-09-01"),
   to = as.Date("2021-11-01"),
@@ -337,6 +346,7 @@ simpler.
 Code for plotting
 
 ``` r
+
 geo_choose <- "ca"
 forecasts_filtered <- forecasts |>
   filter(geo_value == geo_choose) |>
@@ -382,6 +392,7 @@ p1 <- ggplot(data = forecasts_filtered,
 ```
 
 ``` r
+
 geo_choose <- "fl"
 forecasts_filtered <- forecasts |>
   filter(geo_value == geo_choose) |>
@@ -478,24 +489,22 @@ achievable if the training data has no revisions. If a data source has
 any revisions, version un-faithful-level performance is unachievable
 when making forecasts in real time.
 
-------------------------------------------------------------------------
+[^1]: Until we have a time machine
 
-1.  Until we have a time machine
-
-2.  For forecasting a single day like this, we could have actually just
-    used `doctor_visits |> epix_as_of(forecast_date)` to get the
+[^2]: For forecasting a single day like this, we could have actually
+    just used `doctor_visits |> epix_as_of(forecast_date)` to get the
     relevant snapshot, and then fed that into
     [`arx_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.md)
     as we did in the [landing
     page](https://cmu-delphi.github.io/epipredict/dev/index.html#motivating-example).
 
-3.  Generally we advise against this; the only time to consider faking
+[^3]: Generally we advise against this; the only time to consider faking
     versioning like this are if you’re back-testing data with no
     versions available at all, or if you’re doing an explicit comparison
     like this. If you have no versions you should assume performance is
     worse than what the test would otherwise suggest.
 
-4.  In this case by adjusting the length of the ahead so that it is
+[^4]: In this case by adjusting the length of the ahead so that it is
     actually forecasting from the last day of data (e.g. for 2 day
     latent data and a true ahead of 5, the `extended_ahead` would
     actually be 7)

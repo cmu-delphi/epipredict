@@ -79,8 +79,8 @@ p
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 3 × 5
 #>   geo_value time_value .pred forecast_date target_date
@@ -111,8 +111,8 @@ p2
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 3 × 4
 #>   geo_value time_value .pred target_date
@@ -135,8 +135,8 @@ p2
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 3 × 4
 #>   geo_value time_value .pred target_date
@@ -158,8 +158,8 @@ p4
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 3 × 4
 #>   geo_value time_value .pred target_date

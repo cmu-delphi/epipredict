@@ -1,5 +1,12 @@
 # Changelog
 
+## epipredict 0.2.3
+
+- Fix `print.canned_epipred()` so the latency-adjustment information
+  actually displays for canned forecasters that include
+  `step_adjust_latency` in their recipe
+  ([\#447](https://github.com/cmu-delphi/epipredict/issues/447)).
+
 ## epipredict 0.2.2
 
 - Fix

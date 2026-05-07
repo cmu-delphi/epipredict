@@ -1,6 +1,7 @@
 # Using the add/update/remove and adjust functions
 
 ``` r
+
 library(epipredict)
 library(recipes)
 library(dplyr)
@@ -38,7 +39,7 @@ step number or name. For a model, one may
 [`Update_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md),
 or
 [`Remove_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md)
-in an `epi_workflow`.[¹](#fn1) For post-processing, where the goal is to
+in an `epi_workflow`.[^1] For post-processing, where the goal is to
 update a frosting object or a layer in it, we have
 [`add_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md),
 [`remove_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md),
@@ -51,11 +52,11 @@ to adjust a particular layer in a `frosting` or `epi_workflow` by its
 number or name. A summary of the function uses by processing step is
 shown by the following table:
 
-|                     | Add/update/remove functions                                                                                                                                                                                                                                                                       | adjust functions                                                                                    |
-|---------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| Pre-processing      | [`add_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md), [`update_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md), [`remove_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md) | [`adjust_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/adjust_epi_recipe.md) |
-| Model specification | [`Add_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md), [`Update_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md) [`Remove_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md)                                |                                                                                                     |
-| Post-processing     | [`add_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md), [`remove_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md), [`update_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md)             | [`adjust_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/adjust_frosting.md)     |
+|  | Add/update/remove functions | adjust functions |
+|----|----|----|
+| Pre-processing | [`add_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md), [`update_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md), [`remove_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md) | [`adjust_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/adjust_epi_recipe.md) |
+| Model specification | [`Add_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md), [`Update_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md) [`Remove_model()`](https://cmu-delphi.github.io/epipredict/dev/reference/Add_model.md) |  |
+| Post-processing | [`add_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md), [`remove_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md), [`update_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_frosting.md) | [`adjust_frosting()`](https://cmu-delphi.github.io/epipredict/dev/reference/adjust_frosting.md) |
 
 Since adding/removing/updating frosting as well as adjusting a layer in
 a `frosting` object proceeds in the same way as performing those tasks
@@ -71,6 +72,7 @@ of it from Nov. 1, 2021 to Dec. 31, 2021 for the four states of Alaska,
 California, New York, and South Carolina.
 
 ``` r
+
 jhu <- covid_case_death_rates %>%
   filter(time_value >= as.Date("2021-11-01"), geo_value %in% c("ak", "ca", "ny", "sc"))
 
@@ -79,8 +81,8 @@ jhu
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 434 days
 #> 
 #> # A tibble: 244 × 4
 #>   geo_value time_value case_rate death_rate
@@ -101,6 +103,7 @@ omit NA values in all predictors and then in all outcomes (and set
 the recipe is baked).
 
 ``` r
+
 r <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 14) %>%
@@ -113,6 +116,7 @@ We add this recipe to an `epi_workflow` object by inputting `r` into the
 function:
 
 ``` r
+
 wf <- epi_workflow() %>%
   add_epi_recipe(r)
 
@@ -136,6 +140,7 @@ wf
 We may then go on to add the fitted linear model to our `epi_workflow`:
 
 ``` r
+
 # Fit a linear model
 wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
 
@@ -174,6 +179,7 @@ function to trade our current recipe `r` for another recipe `r2` in `wf`
 as follows:
 
 ``` r
+
 r2 <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 1, 7, 14)) %>%
   step_epi_lag(case_rate, lag = c(0:7, 14)) %>%
@@ -235,6 +241,7 @@ To see this, let’s look at what happens if we remove our current
 and then inspect the class of `wf`:
 
 ``` r
+
 wf %>% class() # class before
 #> [1] "epi_workflow" "workflow"
 remove_recipe(wf) %>% class() # class after removing recipe using workflows function
@@ -254,6 +261,7 @@ remove it, note that we did not actually store that change to `wf`.
 Hence, our `epi_workflow` remains unchanged.
 
 ``` r
+
 wf
 #> 
 #> ══ Epi Workflow ═════════════════════════════════════════════════════════════
@@ -292,6 +300,7 @@ the old recipe, then they should be re-generated using the version
 to replace the model used in `wf`, and then fit as before:
 
 ``` r
+
 # fit linear model
 wf <- Update_model(wf, linear_reg()) %>% fit(jhu)
 wf
@@ -340,6 +349,7 @@ predictions. In our initial frosting object, `f`, we simply implement
 predictions on the fitted `epi_workflow`:
 
 ``` r
+
 f <- frosting() %>%
   layer_predict()
 
@@ -350,8 +360,8 @@ p1
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 4 × 3
 #>   geo_value time_value   .pred
@@ -372,6 +382,7 @@ To update the `frosting` while leaving the remainder of the
 function as follows:
 
 ``` r
+
 # Update frosting in a workflow and predict
 f2 <- frosting() %>%
   layer_predict() %>%
@@ -386,8 +397,8 @@ p2
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 4 × 5
 #>   geo_value time_value  .pred forecast_date target_date
@@ -402,6 +413,7 @@ Internally, this works by removing the old frosting followed by adding
 the new frosting, just like when we update a recipe or model.
 
 ``` r
+
 update_frosting
 #> function (x, frosting, ...) 
 #> {
@@ -409,7 +421,7 @@ update_frosting
 #>     x <- remove_frosting(x)
 #>     add_frosting(x, frosting)
 #> }
-#> <bytecode: 0x557c056879b0>
+#> <bytecode: 0x561c89e73050>
 #> <environment: namespace:epipredict>
 ```
 
@@ -418,6 +430,7 @@ we can remove the `frosting` object from the workflow and make
 predictions as follows:
 
 ``` r
+
 wf3 <- wf2 %>% remove_frosting()
 p3 <- forecast(wf3)
 p3
@@ -425,8 +438,8 @@ p3
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag  = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 434 days
 #> 
 #> # A tibble: 4 × 3
 #>   geo_value time_value   .pred
@@ -457,6 +470,7 @@ instead of 7. We may adjust this step in `wf` recipe by setting
 obtained by inspecting `r2` or the tidy summary of it:
 
 ``` r
+
 extract_preprocessor(wf) # step_epi_ahead is the third step in r2
 #> 
 #> ── Epi Recipe ───────────────────────────────────────────────────────────────
@@ -490,6 +504,7 @@ Alternatively, we may adjust that step by name by specifying the full
 name of the step, `step_epi_ahead`, in `which_step`:
 
 ``` r
+
 wf %>% adjust_epi_recipe(which_step = "step_epi_ahead", ahead = 14) # not overwrite r2 because same result
 #> 
 #> ══ Epi Workflow ═════════════════════════════════════════════════════════════
@@ -535,6 +550,7 @@ modify the lags for the `case_rate` variable, we would specify the step
 number of 2 in `which_step`.
 
 ``` r
+
 wf <- wf %>% adjust_epi_recipe(which_step = 2, lag = c(0, 1, 7, 14, 21))
 
 extract_preprocessor(wf)
@@ -562,6 +578,7 @@ the first argument to
 but rather `r2`.
 
 ``` r
+
 adjust_epi_recipe(r2, which_step = 2, lag = c(0, 1, 7, 14, 21)) # should be same result as above
 #> 
 #> ── Epi Recipe ───────────────────────────────────────────────────────────────
@@ -590,6 +607,7 @@ undergone the adjustment (using
 [`update_epi_recipe()`](https://cmu-delphi.github.io/epipredict/dev/reference/add_epi_recipe.md)):
 
 ``` r
+
 r2 <- adjust_epi_recipe(r2, which_step = 2, lag = 0:21)
 
 extract_preprocessor(wf)
@@ -626,6 +644,7 @@ through the `epi_workflow` in a simple, illustrative example. Recall
 frosting `f2` which has the following layers:
 
 ``` r
+
 f2
 #> 
 #> ── Frosting ─────────────────────────────────────────────────────────────────
@@ -643,6 +662,7 @@ object by setting `which_layer` to the layer number, 3 (which can be
 found by inspecting `f2` or `tidy(f2)`):
 
 ``` r
+
 f2 <- f2 %>% adjust_frosting(which_layer = 2, upper = 10)
 
 f2
@@ -660,6 +680,7 @@ Alternatively, we may adjust that layer by specifying its full name,
 `layer_threshold`, in `which_layer`, to achieve the same result:
 
 ``` r
+
 f2 %>% adjust_frosting(which_layer = "layer_threshold", upper = 10) # not overwrite f2 because same result
 #> 
 #> ── Frosting ─────────────────────────────────────────────────────────────────
@@ -684,6 +705,7 @@ step is applied when
 called, and the id of the operation.
 
 ``` r
+
 tidy(r2)
 #> # A tibble: 5 × 6
 #>   number operation type      trained skip  id             
@@ -700,6 +722,7 @@ and roles of the variables) as well as the ordering and a brief written
 summary of the operations:
 
 ``` r
+
 r2
 #> 
 #> ── Epi Recipe ───────────────────────────────────────────────────────────────
@@ -728,6 +751,7 @@ of a frosting object and the tidy tibble are simplified in comparison to
 those for an `epi_recipe`.
 
 ``` r
+
 f
 #> 
 #> ── Frosting ─────────────────────────────────────────────────────────────────
@@ -742,9 +766,7 @@ tidy(f)
 #> 1      1 layer     predict predict_default_qZ3vE
 ```
 
-------------------------------------------------------------------------
-
-1.  We capitalize these names to avoid possible clashes with the
+[^1]: We capitalize these names to avoid possible clashes with the
     [workflows](https://github.com/tidymodels/workflows) versions of
     these functions. The lower-case versions are also available,
     however, if you load

@@ -71,14 +71,6 @@ p
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Warning: There were 2 warnings in `dplyr::summarize()`.
-#> The first warning was:
-#> ℹ In argument: `min_t = if (...) NULL`.
-#> Caused by warning in `min.default()`:
-#> ! no non-missing arguments to min; returning Inf
-#> ℹ Run `dplyr::last_dplyr_warnings()` to see the 1 remaining warning.
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * No time series detected
 #> # A tibble: 0 × 3
 #> # ℹ 3 variables: geo_value <chr>, time_value <date>, .pred <???>
 ```

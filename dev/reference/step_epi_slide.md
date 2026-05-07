@@ -130,8 +130,8 @@ bake(prep(rec, jhu), new_data = NULL)
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 434 days
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 434 days
 #> 
 #> # A tibble: 730 × 6
 #>    geo_value time_value case_rate death_rate epi_slide__.f_case_rate

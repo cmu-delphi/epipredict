@@ -24,6 +24,7 @@ Unless you’re planning on contributing to package development, we
 suggest using the stable version. To install, run:
 
 ``` r
+
 # Stable version
 pak::pkg_install("cmu-delphi/epipredict@main")
 
@@ -40,6 +41,7 @@ is at <https://cmu-delphi.github.io/epipredict/dev>.
 Required packages
 
 ``` r
+
 library(epipredict)
 library(epidatr)
 library(epiprocess)
@@ -53,12 +55,14 @@ forecasting, suppose we want to predict COVID-19 deaths per 100k people
 for each of a subset of states
 
 ``` r
+
 used_locations <- c("ca", "ma", "ny", "tx")
 ```
 
 on
 
 ``` r
+
 forecast_date <- as.Date("2021-08-01")
 ```
 
@@ -80,6 +84,7 @@ API](https://cmu-delphi.github.io/delphi-epidata/api/covidcast.html)
 using the [`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
 
 ``` r
+
 cases <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_7dav_incidence_prop",
@@ -109,6 +114,7 @@ Since visualizing the results on every geography is somewhat
 overwhelming, we’ll only train on a subset of locations.
 
 ``` r
+
 # plotting the data as it was downloaded
 cases_deaths |>
   autoplot(
@@ -133,6 +139,7 @@ actually usable; we’ll use some utilities from
 Specifically we’ll trim outliers, especially negative values:
 
 ``` r
+
 cases_deaths <-
   cases_deaths |>
   group_by(geo_value) |>
@@ -162,6 +169,7 @@ forecast date with a vertical line:
 Plot
 
 ``` r
+
 forecast_date_label <-
   tibble(
     geo_value = rep(used_locations, 2),
@@ -196,9 +204,10 @@ processed_data_plot <-
 
 To make a forecast, we will use a simple “canned” auto-regressive
 forecaster to predict the death rate four weeks into the future using
-lagged[¹](#fn1) deaths and cases.
+lagged[^1] deaths and cases.
 
 ``` r
+
 four_week_ahead <- arx_forecaster(
   cases_deaths |> filter(time_value <= forecast_date),
   outcome = "death_rate",
@@ -237,11 +246,12 @@ predicted values (and prediction intervals) for each location 28 days
 after the forecast date.
 
 Plotting the prediction intervals on the true values for our location
-subset[²](#fn2):
+subset[^2]:
 
 Plot
 
 ``` r
+
 epiworkflow <- four_week_ahead$epi_workflow
 restricted_predictions <-
   four_week_ahead$predictions |>
@@ -265,6 +275,7 @@ forecast_plot <-
 And as a tibble of quantile level-value pairs:
 
 ``` r
+
 four_week_ahead$predictions |>
   select(-.pred) |>
   pivot_quantiles_longer(.pred_distn) |>
@@ -282,10 +293,10 @@ four_week_ahead$predictions |>
 ```
 
 The orange dot gives the point prediction, while the blue intervals give
-the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges[³](#fn3).
-For this particular day and these locations, the forecasts are
-relatively accurate, with the true data being at least within the 10-90%
-interval. A couple of things to note:
+the 25-75%, the 10-90%, and 2.5-97.5% inter-quantile ranges[^3]. For
+this particular day and these locations, the forecasts are relatively
+accurate, with the true data being at least within the 10-90% interval.
+A couple of things to note:
 
 1.  `epipredict` methods are primarily direct forecasters; this means we
     don’t need to predict 1, 2,…, 27 days ahead to then predict 28 days
@@ -306,17 +317,17 @@ questions, feel free to reach out to the authors, either via this
 form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
 email, or the InsightNet Slack.
 
-------------------------------------------------------------------------
+[^1]: lagged by 3 in this context meaning using the value from 3 days
+    ago.
 
-1.  lagged by 3 in this context meaning using the value from 3 days ago.
-
-2.  Alternatively, you could call
+[^2]: Alternatively, you could call
     `autoplot(four_week_ahead, observed_response = cases_deaths)` to get
     the full collection of forecasts. This is too busy for the space we
     have for plotting here.
 
-3.  Note that these are not the same quantiles that we fit when creating
-    `four_week_ahead`. They are extrapolated from those quantiles using
+[^3]: Note that these are not the same quantiles that we fit when
+    creating `four_week_ahead`. They are extrapolated from those
+    quantiles using
     [`extrapolate_quantiles()`](https://cmu-delphi.github.io/epipredict/dev/reference/extrapolate_quantiles.md)
     (which assumes an exponential decay in the tails).
 

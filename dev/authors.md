@@ -31,12 +31,12 @@ Source:
 
 McDonald D, Tibshirani R, Shemetov D, Weber D, Brooks L, Lobay R (2026).
 *epipredict: Basic epidemiology forecasting methods*. R package version
-0.2.2, <https://github.com/cmu-delphi/epipredict/>.
+0.2.3, <https://github.com/cmu-delphi/epipredict/>.
 
     @Manual{,
       title = {epipredict: Basic epidemiology forecasting methods},
       author = {Daniel J. McDonald and Ryan Tibshirani and Dmitry Shemetov and David Weber and Logan Brooks and Rachel Lobay},
       year = {2026},
-      note = {R package version 0.2.2},
+      note = {R package version 0.2.3},
       url = {https://github.com/cmu-delphi/epipredict/},
     }

@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.2</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -365,8 +365,8 @@ running <code><a href="https://recipes.tidymodels.org/reference/bake.html" class
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag across all time series = 586–614 days (see summary() for per-signal details)</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 586–614 days (see summary() for per-signal details)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 800 × 14</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span> <span style="font-weight: bold;">lag_0_case_rate</span> <span style="font-weight: bold;">lag_1_case_rate</span></span></span>
@@ -499,8 +499,8 @@ predictions:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag  = 586 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency  = 586 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
@@ -517,8 +517,8 @@ predictions:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag  = 586 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency  = 586 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 800 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
@@ -544,8 +544,8 @@ filter to rows where the <code>time_value</code> matches the
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag  = 586 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency  = 586 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
@@ -611,8 +611,8 @@ can easily create a new growth rate column as a step in the
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag across all time series = 586 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 586 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">death_rate</span> <span style="font-weight: bold;">gr_7_rel_change_death_rate</span></span></span>
@@ -738,8 +738,8 @@ the factor
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag  = 586 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency  = 586 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 6</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred</span> <span style="font-weight: bold;">.pred_distn</span> <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
@@ -808,7 +808,7 @@ lagged by one and two weeks</li>
 <code><a href="../reference/step_epi_shift.html">step_epi_ahead()</a></code> creates a column with the growth rate one
 week into the future, and <code><a href="https://recipes.tidymodels.org/reference/step_mutate.html" class="external-link">step_mutate()</a></code> turns that column
 into a factor with 3 possible values,</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mrow><mo>ℓ</mo><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">up</mtext><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">if</mtext><mspace width="0.222em"></mspace><msubsup><mi>Y</mi><mrow><mo>ℓ</mo><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><mo>&gt;</mo><mn>0.25</mn></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">down</mtext><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">if</mtext><mspace width="0.222em"></mspace><msubsup><mi>Y</mi><mrow><mo>ℓ</mo><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><mo>&lt;</mo><mo>−</mo><mn>0.20</mn></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">flat</mtext><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">otherwise</mtext></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>Z</mi><mrow><mi>ℓ</mi><mo>,</mo><mi>t</mi></mrow></msub><mo>=</mo><mrow><mo stretchy="true" form="prefix">{</mo><mtable><mtr><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">up</mtext><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">if</mtext><mspace width="0.222em"></mspace><msubsup><mi>Y</mi><mrow><mi>ℓ</mi><mo>,</mo><mi>t</mi></mrow><mi mathvariant="normal">Δ</mi></msubsup><mo>&gt;</mo><mn>0.25</mn></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">down</mtext><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">if</mtext><mspace width="0.222em"></mspace><msubsup><mi>Y</mi><mrow><mi>ℓ</mi><mo>,</mo><mi>t</mi></mrow><mi mathvariant="normal">Δ</mi></msubsup><mo>&lt;</mo><mi>−</mi><mn>0.20</mn></mtd></mtr><mtr><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">flat</mtext><mo>,</mo></mtd><mtd columnalign="left" style="text-align: left"><mtext mathvariant="normal">otherwise</mtext></mtd></mtr></mtable></mrow></mrow><annotation encoding="application/x-tex">
  Z_{\ell, t}=
     \begin{cases}
       \text{up}, &amp; \text{if}\ Y^{\Delta}_{\ell, t} &gt; 0.25 \\
@@ -817,9 +817,9 @@ into a factor with 3 possible values,</p>
     \end{cases}
 </annotation></semantics></math></p>
 <p>where
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>Y</mi><mrow><mo>ℓ</mo><mo>,</mo><mi>t</mi></mrow><mi>Δ</mi></msubsup><annotation encoding="application/x-tex">Y^{\Delta}_{\ell, t}</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msubsup><mi>Y</mi><mrow><mi>ℓ</mi><mo>,</mo><mi>t</mi></mrow><mi mathvariant="normal">Δ</mi></msubsup><annotation encoding="application/x-tex">Y^{\Delta}_{\ell, t}</annotation></semantics></math>
 is the growth rate at location
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mo>ℓ</mo><annotation encoding="application/x-tex">\ell</annotation></semantics></math>
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ℓ</mi><annotation encoding="application/x-tex">\ell</annotation></semantics></math>
 and time
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>t</mi><annotation encoding="application/x-tex">t</annotation></semantics></math>.
 <code>up</code> means that the <code>case_rate</code> is has increased
@@ -859,7 +859,7 @@ the addition that we need to remove some <code>NA</code> values:</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
 <span><span class="co">#&gt; * No time series detected</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 5</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">.pred_class</span>   <span style="font-weight: bold;">forecast_date</span> <span style="font-weight: bold;">target_date</span></span></span>
@@ -885,8 +885,8 @@ in time,</p>
 <span><span class="co">#&gt; * geo_type  = state</span></span>
 <span><span class="co">#&gt; * time_type = day</span></span>
 <span><span class="co">#&gt; * as_of     = 2023-03-10</span></span>
-<span><span class="co">#&gt; Latency (lag between last available observation and epi_df's as_of, by time series):</span></span>
-<span><span class="co">#&gt; * lag across all time series = 586 days</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 586 days</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 4</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span> <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">case_rate</span> <span style="font-weight: bold;">case_gr</span></span></span>

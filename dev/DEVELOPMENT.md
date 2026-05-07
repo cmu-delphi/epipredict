@@ -3,6 +3,7 @@
 ## Setting up the development environment
 
 ``` r
+
 install.packages(c('devtools', 'pkgdown', 'styler', 'lintr', 'pak')) # install dev dependencies
 pak::pkg_install(".") # install package and dependencies
 ```
@@ -10,6 +11,7 @@ pak::pkg_install(".") # install package and dependencies
 ## Validating the package
 
 ``` r
+
 styler::style_pkg() # format code
 lintr::lint_package() # lint code
 

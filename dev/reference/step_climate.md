@@ -177,8 +177,8 @@ r %>%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 434–441 days (see summary() for per-signal details)
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 434–441 days (see summary() for per-signal details)
 #> 
 #> # A tibble: 20,888 × 6
 #>    geo_value time_value case_rate death_rate ahead_7_death_rate
@@ -224,8 +224,8 @@ r %>%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 434–441 days (see summary() for per-signal details)
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 434–441 days (see summary() for per-signal details)
 #> 
 #> # A tibble: 20,888 × 6
 #>    geo_value time_value case_rate death_rate ahead_7_death_rate
@@ -268,8 +268,8 @@ r %>%
 #> * geo_type  = state
 #> * time_type = day
 #> * as_of     = 2023-03-10
-#> Latency (lag between last available observation and epi_df's as_of, by time series):
-#> * lag across all time series = 434–441 days (see summary() for per-signal details)
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 434–441 days (see summary() for per-signal details)
 #> 
 #> # A tibble: 20,888 × 6
 #>    geo_value time_value case_rate death_rate climate_death_rate
