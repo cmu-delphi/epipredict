@@ -727,6 +727,7 @@
       * 56 unique geographic regions,
       * At forecast date: 2022-01-03,
       * For target date: 2022-01-10,
+      * Lags adjusted per column: case_rate=3, death_rate=3
       
 
 ---
@@ -750,6 +751,7 @@
       * 56 unique geographic regions,
       * At forecast date: 2022-01-03,
       * For target date: 2022-01-10,
+      * Aheads adjusted for death_rate=3
       
 
 # arx_classifier snapshots

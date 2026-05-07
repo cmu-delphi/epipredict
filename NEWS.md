@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.3
+
+- Fix `print.canned_epipred()` so the latency-adjustment information actually displays for canned forecasters that include `step_adjust_latency` in their recipe (#447).
+
 # epipredict 0.2.2
 
 - Fix `autoplot.epi_workflow()` to correctly handle the response variable and avoid errors related to `.response`.

@@ -132,6 +132,10 @@ test_that("arx_forecaster output format snapshots", {
   expect_equal(as.Date(format(out2$metadata$forecast_created, "%Y-%m-%d")), Sys.Date())
   out2$metadata$forecast_created <- as.Date("1999-01-01")
   expect_snapshot(out2)
+  expect_match(
+    paste(testthat::capture_messages(print(out2)), collapse = ""),
+    "adjusted"
+  )
   out3 <- arx_forecaster(jhu, "death_rate",
     c("case_rate", "death_rate"),
     trainer = quantile_reg(),
@@ -143,6 +147,10 @@ test_that("arx_forecaster output format snapshots", {
   expect_equal(as.Date(format(out3$metadata$forecast_created, "%Y-%m-%d")), Sys.Date())
   out3$metadata$forecast_created <- as.Date("1999-01-01")
   expect_snapshot(out3)
+  expect_match(
+    paste(testthat::capture_messages(print(out3)), collapse = ""),
+    "adjusted"
+  )
 })
 
 test_that("arx_classifier snapshots", {

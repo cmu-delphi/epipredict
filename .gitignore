@@ -11,3 +11,6 @@ inst/doc
 renv.lock
 renv/
 .Renviron
+.workflow/
+.plans/
+.claude/
