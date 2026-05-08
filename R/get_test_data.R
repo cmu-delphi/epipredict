@@ -66,13 +66,13 @@ get_test_data <- function(recipe, x) {
 
   # If we skip NA completion, we remove undesirably early time values
   # Happens globally, over all groups
-  x <- filter(x, max_time_value - time_value <= keep)
+  x <- filter(x, max_time_value - time_value <= keep, time_value <= max_time_value)
 
   # If all(lags > 0), then we get rid of recent data
   if (min_lags > 0 && min_lags < Inf) {
     x <- filter(x, max_time_value - time_value >= min_lags)
   }
 
-  filter(x, max_time_value - time_value <= keep) %>%
+  filter(x, max_time_value - time_value <= keep, time_value <= max_time_value) %>%
     epiprocess::ungroup()
 }
