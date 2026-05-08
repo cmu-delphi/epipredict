@@ -1,5 +1,14 @@
 # Changelog
 
+## epipredict 0.2.4
+
+- Fix
+  [`flatline_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/flatline_forecaster.md)
+  to return one prediction per geographic key when the input `epi_df`
+  has trailing rows with `NA`s in the outcome
+  ([\#454](https://github.com/cmu-delphi/epipredict/issues/454)).
+  Previously, the forecast was duplicated once per trailing-NA day.
+
 ## epipredict 0.2.3
 
 - Fix `print.canned_epipred()` so the latency-adjustment information

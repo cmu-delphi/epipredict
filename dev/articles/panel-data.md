@@ -629,7 +629,7 @@ out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
 out_fl
 #> ══ A basic forecaster of type flatline ══════════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-07 19:45:48.
+#> This forecaster was fit on 2026-05-08 18:23:50.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,
@@ -672,7 +672,7 @@ out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
 out_arx_lr
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-07 19:45:50.
+#> This forecaster was fit on 2026-05-08 18:23:52.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,
@@ -706,7 +706,7 @@ out_arx_rf <- arx_forecaster(
 out_arx_rf
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-07 19:45:51.
+#> This forecaster was fit on 2026-05-08 18:23:53.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,

@@ -84,7 +84,7 @@ out <- arx_forecaster(jhu,
 out
 #> ══ A basic forecaster of type ARX Forecaster ═══════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-07 19:41:09.
+#> This forecaster was fit on 2026-05-08 18:19:24.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,

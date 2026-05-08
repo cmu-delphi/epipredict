@@ -472,6 +472,7 @@ fluview_hhs <- pub_fluview(
   epiweeks = epirange(100001,222201)
 )
 #> Waiting 3s for retry backoff ■■■■■■■■■■■■■■                  
+#> Waiting 3s for retry backoff ■■■■■■■■■■■■■■■■■■■■■■■■■■■■    
 #> Waiting 3s for retry backoff ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  
 fluview <- fluview_hhs %>%
   select(

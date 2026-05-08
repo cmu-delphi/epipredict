@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.3</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,10 @@
       <small>Source: <a href="https://github.com/cmu-delphi/epipredict/blob/dev/NEWS.md" class="external-link"><code>NEWS.md</code></a></small>
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.2.4" id="epipredict-024">epipredict 0.2.4<a class="anchor" aria-label="anchor" href="#epipredict-024"></a></h2>
+<ul><li>Fix <code><a href="../reference/flatline_forecaster.html">flatline_forecaster()</a></code> to return one prediction per geographic key when the input <code>epi_df</code> has trailing rows with <code>NA</code>s in the outcome (<a href="https://github.com/cmu-delphi/epipredict/issues/454" class="external-link">#454</a>). Previously, the forecast was duplicated once per trailing-NA day.</li>
+</ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.3" id="epipredict-023">epipredict 0.2.3<a class="anchor" aria-label="anchor" href="#epipredict-023"></a></h2>
 <ul><li>Fix <code>print.canned_epipred()</code> so the latency-adjustment information actually displays for canned forecasters that include <code>step_adjust_latency</code> in their recipe (<a href="https://github.com/cmu-delphi/epipredict/issues/447" class="external-link">#447</a>).</li>
