@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.5
+
+- Fix `arx_forecaster()` and `arx_fcast_epi_workflow()` so that the error raised when `forecast_date + ahead != target_date` reports the actual validation message rather than a cryptic `cli` template-evaluation error (#473).
+
 # epipredict 0.2.4
 
 - Fix `flatline_forecaster()` to return one prediction per geographic key when the input `epi_df` has trailing rows with `NA`s in the outcome (#454). Previously, the forecast was duplicated once per trailing-NA day.

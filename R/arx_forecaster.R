@@ -144,7 +144,7 @@ arx_fcast_epi_workflow <- function(
   forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   if (forecast_date + args_list$ahead != target_date) {
-    cli_abort("`forecast_date` {.val {forecast_date}} + `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
+    cli_abort("`forecast_date` {.val {forecast_date}} + `ahead` {.val {args_list$ahead}} must equal `target_date` {.val {target_date}}.",
       class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecaste_date"
     )
   }
