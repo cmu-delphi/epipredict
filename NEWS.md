@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.6
+
+- Regenerate roxygen-derived `man/step_adjust_latency.Rd` so its recorded example output matches the current `epi_df` print phrasing (`lag` → `latency`) from upstream `epiprocess`. No user-visible behavior change.
+
 # epipredict 0.2.5
 
 - Fix `arx_forecaster()` and `arx_fcast_epi_workflow()` so that the error raised when `forecast_date + ahead != target_date` reports the actual validation message rather than a cryptic `cli` template-evaluation error (#473).
