@@ -1,5 +1,16 @@
 # Changelog
 
+## epipredict 0.2.5
+
+- Fix
+  [`arx_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.md)
+  and
+  [`arx_fcast_epi_workflow()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_fcast_epi_workflow.md)
+  so that the error raised when `forecast_date + ahead != target_date`
+  reports the actual validation message rather than a cryptic `cli`
+  template-evaluation error
+  ([\#473](https://github.com/cmu-delphi/epipredict/issues/473)).
+
 ## epipredict 0.2.4
 
 - Fix
