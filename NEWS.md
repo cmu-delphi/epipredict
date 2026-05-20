@@ -2,6 +2,11 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.7
+
+- `arx_forecaster()` and `flatline_forecaster()` now error early when `quantile_by_key` contains columns that are not keys of the input `epi_df`, rather than silently dropping the invalid keys (#229).
+- `arx_forecaster()` now warns when `quantile_by_key` is supplied with a quantile-output trainer (`quantile_reg()`, `rand_forest()` with engine `"grf_quantiles"`), where the argument would otherwise be silently ignored (#229).
+
 # epipredict 0.2.5
 
 - Fix `arx_forecaster()` and `arx_fcast_epi_workflow()` so that the error raised when `forecast_date + ahead != target_date` reports the actual validation message rather than a cryptic `cli` template-evaluation error (#473).
