@@ -1,5 +1,12 @@
 # Changelog
 
+## epipredict 0.2.6
+
+- Regenerate roxygen-derived `man/step_adjust_latency.Rd` so its
+  recorded example output matches the current `epi_df` print phrasing
+  (`lag` → `latency`) from upstream `epiprocess`. No user-visible
+  behavior change.
+
 ## epipredict 0.2.5
 
 - Fix

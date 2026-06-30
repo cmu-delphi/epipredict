@@ -160,6 +160,8 @@ grad_employ_subset
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17967–17973 (see summary() for per-signal details)
 #> 
 #> # A tibble: 1,445 × 7
 #>   geo_value           age_group      edu_qual        time_value num_graduates
@@ -471,8 +473,6 @@ fluview_hhs <- pub_fluview(
   regions = paste0("hhs", 1:10),
   epiweeks = epirange(100001,222201)
 )
-#> Waiting 3s for retry backoff ■■■■■■■■■■■■■■                  
-#> Waiting 3s for retry backoff ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  
 fluview <- fluview_hhs %>%
   select(
     geo_value = region,
@@ -618,6 +618,8 @@ grad_employ
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17967
 #> 
 #> # A tibble: 64 × 7
 #>   geo_value        age_group      edu_qual           time_value num_graduates

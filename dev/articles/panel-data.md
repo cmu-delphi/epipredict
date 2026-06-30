@@ -107,6 +107,8 @@ sample_n(employ, 6)
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17967–17974 (see summary() for per-signal details)
 #> 
 #> # A tibble: 6 × 7
 #>   geo_value        age_group      edu_qual           time_value num_graduates
@@ -153,6 +155,8 @@ head(employ_small)
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17974
 #> 
 #> # A tibble: 6 × 10
 #>   geo_value           age_group      edu_qual        time_value num_graduates
@@ -258,6 +262,8 @@ r %>% bake_and_show_sample(employ_small)
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17968–17972 (see summary() for per-signal details)
 #> 
 #> # A tibble: 5 × 14
 #>   geo_value        age_group      edu_qual           time_value num_graduates
@@ -355,6 +361,8 @@ preds %>% sample_n(5)
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency  = 17967
 #> 
 #> # A tibble: 5 × 5
 #>   geo_value                 age_group      edu_qual          time_value .pred
@@ -379,7 +387,9 @@ augment(wf_linreg, latest) %>% sample_n(5)
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
-#> 
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17967–17969 (see summary() for per-signal details)
+#> * Empty time series detected
 #> # A tibble: 5 × 11
 #>   geo_value        age_group      edu_qual                  time_value  .pred
 #>   <chr>            <fct>          <fct>                          <dbl>  <dbl>
@@ -469,7 +479,9 @@ bake_and_show_sample(rx, employ_small)
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
-#> 
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17967–17970 (see summary() for per-signal details)
+#> * Empty time series detected
 #> # A tibble: 5 × 18
 #>   geo_value           age_group      edu_qual        time_value num_graduates
 #>   <chr>               <fct>          <fct>                <dbl>         <dbl>
@@ -577,6 +589,8 @@ predsx %>%
 #> * time_type = integer
 #> * other_keys = age_group, edu_qual
 #> * as_of     = 2024-09-18
+#> Latency (time between last available observation and epi_df's as_of, by time series):
+#> * latency across all time series = 17967
 #> 
 #> # A tibble: 6 × 12
 #>   geo_value            time_value edu_qual        age_group      .pred_scaled
@@ -629,7 +643,7 @@ out_fl <- flatline_forecaster(employ_small, "med_income_2y_prop",
 out_fl
 #> ══ A basic forecaster of type flatline ══════════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-09 20:56:55.
+#> This forecaster was fit on 2026-06-30 23:26:45.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,
@@ -672,7 +686,7 @@ out_arx_lr <- arx_forecaster(employ_small, "med_income_5y_prop",
 out_arx_lr
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-09 20:56:57.
+#> This forecaster was fit on 2026-06-30 23:26:47.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,
@@ -706,7 +720,7 @@ out_arx_rf <- arx_forecaster(
 out_arx_rf
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-05-09 20:56:58.
+#> This forecaster was fit on 2026-06-30 23:26:48.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: custom,

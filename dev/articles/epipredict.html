@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Get started with `epipredict` • epipredict</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Open_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Open_Sans-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/Source_Serif_Pro-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.5</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.6</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -222,6 +222,8 @@ from <a href="https://github.com/cmu-delphi/epidatasets" class="external-link">e
 <span><span class="co">#&gt; * time_type = integer</span></span>
 <span><span class="co">#&gt; * other_keys = age_group, edu_qual</span></span>
 <span><span class="co">#&gt; * as_of     = 2024-09-18</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 17967–17973 (see summary() for per-signal details)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1,445 × 7</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span>           <span style="font-weight: bold;">age_group</span>      <span style="font-weight: bold;">edu_qual</span>        <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">num_graduates</span></span></span>
@@ -492,8 +494,6 @@ forecasting from the start of the season, <code>2023-10-08</code>:</p>
 <span>  regions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"hhs"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>,</span>
 <span>  epiweeks <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">100001</span>,<span class="fl">222201</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Waiting 3s for retry backoff <span style="color: #00BB00;">■■■■■■■■■■■■■■                  </span></span></span>
-<span><span class="co">#&gt; Waiting 3s for retry backoff <span style="color: #00BB00;">■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■  </span></span></span>
 <span><span class="va">fluview</span> <span class="op">&lt;-</span> <span class="va">fluview_hhs</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
 <span>    geo_value <span class="op">=</span> <span class="va">region</span>,</span>
@@ -629,6 +629,8 @@ predicting the number of graduates in a subset of the categories in
 <span><span class="co">#&gt; * time_type = integer</span></span>
 <span><span class="co">#&gt; * other_keys = age_group, edu_qual</span></span>
 <span><span class="co">#&gt; * as_of     = 2024-09-18</span></span>
+<span><span class="co">#&gt; Latency (time between last available observation and epi_df's as_of, by time series):</span></span>
+<span><span class="co">#&gt; * latency across all time series = 17967</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 64 × 7</span></span></span>
 <span><span class="co">#&gt;   <span style="font-weight: bold;">geo_value</span>        <span style="font-weight: bold;">age_group</span>      <span style="font-weight: bold;">edu_qual</span>           <span style="font-weight: bold;">time_value</span> <span style="font-weight: bold;">num_graduates</span></span></span>

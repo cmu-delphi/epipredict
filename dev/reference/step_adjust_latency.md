@@ -168,8 +168,8 @@ just fills forward to the `forecast_date`:
     #> * geo_type  = state
     #> * time_type = day
     #> * as_of     = 2015-01-14
-    #> Latency (lag between last available observation and epi_df's as_of, by time series):
-    #> * lag across all time series = 0 days
+    #> Latency (time between last available observation and epi_df's as_of, by time series):
+    #> * latency across all time series = 0 days
     #>
     #> # A tibble: 8 x 4
     #>   geo_value time_value     a     b
@@ -204,8 +204,8 @@ each are adjusted separately. In the toy example:
     #> * geo_type  = state
     #> * time_type = day
     #> * as_of     = 2015-01-14
-    #> Latency (lag between last available observation and epi_df's as_of, by time series):
-    #> * lag  = -2–3 days
+    #> Latency (time between last available observation and epi_df's as_of, by time series):
+    #> * latency  = -2–3 days
     #>
     #> # A tibble: 21 x 7
     #>    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a
@@ -253,8 +253,8 @@ example:
     #> * geo_type  = state
     #> * time_type = day
     #> * as_of     = 2015-01-14
-    #> Latency (lag between last available observation and epi_df's as_of, by time series):
-    #> * lag  = 1–5 days
+    #> Latency (time between last available observation and epi_df's as_of, by time series):
+    #> * latency  = 1–5 days
     #>
     #> # A tibble: 10 x 6
     #>    geo_value time_value     a     b lag_0_a ahead_3_a
