@@ -42,7 +42,11 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.6" id="epipredict-026">epipredict 0.2.6<a class="anchor" aria-label="anchor" href="#epipredict-026"></a></h2>
-<ul><li>Regenerate roxygen-derived <code>man/step_adjust_latency.Rd</code> so its recorded example output matches the current <code>epi_df</code> print phrasing (<code>lag</code> → <code>latency</code>) from upstream <code>epiprocess</code>. No user-visible behavior change.</li>
+<ul><li>
+<code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> and <code><a href="../reference/flatline_forecaster.html">flatline_forecaster()</a></code> now error early when <code>quantile_by_key</code> contains columns that are not keys of the input <code>epi_df</code>, rather than silently dropping the invalid keys (<a href="https://github.com/cmu-delphi/epipredict/issues/229" class="external-link">#229</a>).</li>
+<li>
+<code><a href="../reference/arx_forecaster.html">arx_forecaster()</a></code> now warns when <code>quantile_by_key</code> is supplied with a quantile-output trainer (<code><a href="../reference/quantile_reg.html">quantile_reg()</a></code>, <code><a href="https://parsnip.tidymodels.org/reference/rand_forest.html" class="external-link">rand_forest()</a></code> with engine <code>"grf_quantiles"</code>), where the argument would otherwise be silently ignored (<a href="https://github.com/cmu-delphi/epipredict/issues/229" class="external-link">#229</a>).</li>
+<li>Regenerate roxygen-derived <code>man/step_adjust_latency.Rd</code> so its recorded example output matches the current <code>epi_df</code> print phrasing (<code>lag</code> → <code>latency</code>) from upstream <code>epiprocess</code>. No user-visible behavior change.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.5" id="epipredict-025">epipredict 0.2.5<a class="anchor" aria-label="anchor" href="#epipredict-025"></a></h2>

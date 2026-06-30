@@ -421,7 +421,7 @@ update_frosting
 #>     x <- remove_frosting(x)
 #>     add_frosting(x, frosting)
 #> }
-#> <bytecode: 0x5643c6416fe0>
+#> <bytecode: 0x5561bb6f6618>
 #> <environment: namespace:epipredict>
 ```
 

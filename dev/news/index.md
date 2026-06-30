@@ -2,6 +2,20 @@
 
 ## epipredict 0.2.6
 
+- [`arx_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.md)
+  and
+  [`flatline_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/flatline_forecaster.md)
+  now error early when `quantile_by_key` contains columns that are not
+  keys of the input `epi_df`, rather than silently dropping the invalid
+  keys ([\#229](https://github.com/cmu-delphi/epipredict/issues/229)).
+- [`arx_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.md)
+  now warns when `quantile_by_key` is supplied with a quantile-output
+  trainer
+  ([`quantile_reg()`](https://cmu-delphi.github.io/epipredict/dev/reference/quantile_reg.md),
+  [`rand_forest()`](https://parsnip.tidymodels.org/reference/rand_forest.html)
+  with engine `"grf_quantiles"`), where the argument would otherwise be
+  silently ignored
+  ([\#229](https://github.com/cmu-delphi/epipredict/issues/229)).
 - Regenerate roxygen-derived `man/step_adjust_latency.Rd` so its
   recorded example output matches the current `epi_df` print phrasing
   (`lag` → `latency`) from upstream `epiprocess`. No user-visible
