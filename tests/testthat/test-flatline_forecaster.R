@@ -20,3 +20,13 @@ test_that("flatline_forecaster returns one prediction per geo with trailing NAs 
   counts <- res$predictions %>% dplyr::count(geo_value, target_date)
   expect_true(all(counts$n == 1L))
 })
+
+test_that("flatline_forecaster errors on invalid quantile_by_key columns (issue #229)", {
+  jhu <- epidatasets::covid_case_death_rates
+  expect_error(
+    flatline_forecaster(jhu, "death_rate",
+      flatline_args_list(quantile_by_key = "nonexistent_column")
+    ),
+    class = "epipredict__flatline_forecaster__quantile_by_key_invalid"
+  )
+})

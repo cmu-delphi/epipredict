@@ -59,6 +59,20 @@ flatline_forecaster <- function(
   if (!inherits(args_list, c("flat_fcast", "alist"))) {
     cli_abort("`args_list` was not created using `flatline_args_list()`.")
   }
+  if (length(args_list$quantile_by_key) > 0L) {
+    valid_keys <- key_colnames(epi_data)
+    missing_keys <- setdiff(args_list$quantile_by_key, valid_keys)
+    if (length(missing_keys) > 0L) {
+      cli_abort(
+        c(
+          "Some {.arg quantile_by_key} columns are not key columns of the input {.cls epi_df}.",
+          "!" = "Missing: {.val {missing_keys}}.",
+          i = "Available keys: {.val {valid_keys}}."
+        ),
+        class = "epipredict__flatline_forecaster__quantile_by_key_invalid"
+      )
+    }
+  }
   keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
