@@ -45,6 +45,11 @@ test_that("quantile pivotting longer behaves", {
   expect_length(pivot_quantiles_longer(tib, d1), 4L)
   expect_identical(nrow(pivot_quantiles_longer(tib, d1)), 6L)
   expect_identical(pivot_quantiles_longer(tib, d1)$d1_value, c(1:3, 2:4))
+
+  # add quantile_level to epi_df other_keys, if epi_df
+  tib <- tibble(geo_value = c("a", "b"), time_value = as.Date(c("2021-01-01", "2021-01-02")), d1 = d1, d2 = d2)
+  epi_df <- tib %>% as_epi_df() %>% pivot_quantiles_longer(d1)
+  expect_equal(key_colnames(epi_df), c("geo_value","d1_quantile_level", "time_value"))
 })
 
 test_that("nested_quantiles is deprecated, but works where possible", {
