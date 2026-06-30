@@ -133,6 +133,8 @@
   detects if there’s enough data to predict
 - Add `observed_response` to `autoplot` so that forecasts can be plotted
   against the values they’re predicting
+- [`pivot_quantiles_longer()`](https://cmu-delphi.github.io/epipredict/dev/reference/pivot_quantiles.md)
+  now appropriately adds `quantile_level` to the `epi_df` other keys
 
 ### Bug fixes
 

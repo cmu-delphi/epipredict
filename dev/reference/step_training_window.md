@@ -82,7 +82,7 @@ epi_recipe(y ~ x, data = tib) %>%
 #> An `epi_df` object, 6 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
-#> * as_of     = 2026-06-30 23:40:26.732028
+#> * as_of     = 2026-06-30 23:51:54.243917
 #> Latency (time between last available observation and epi_df's as_of, by time series):
 #> * latency across all time series = 2368 days
 #> 
@@ -104,7 +104,7 @@ epi_recipe(y ~ x, data = tib) %>%
 #> An `epi_df` object, 6 x 4 with metadata:
 #> * geo_type  = state
 #> * time_type = day
-#> * as_of     = 2026-06-30 23:40:26.732028
+#> * as_of     = 2026-06-30 23:51:54.243917
 #> Latency (time between last available observation and epi_df's as_of, by time series):
 #> * latency across all time series = 2368 days
 #> 
