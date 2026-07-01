@@ -1,6 +1,6 @@
 Package: epipredict
 Title: Basic epidemiology forecasting methods
-Version: 0.2.6
+Version: 0.2.7
 Authors@R: c(
     person("Daniel J.", "McDonald", , "daniel@stat.ubc.ca", role = c("aut", "cre")),
     person("Ryan", "Tibshirani", , "ryantibs@cmu.edu", role = "aut"),
@@ -21,7 +21,7 @@ Description: A forecasting "framework" for creating epidemiological
     are included.
 License: MIT + file LICENSE
 URL: https://github.com/cmu-delphi/epipredict/,
-    https://cmu-delphi.github.io/epipredict
+    https://cmu-delphi.github.io/epipredict/
 BugReports: https://github.com/cmu-delphi/epipredict/issues/
 Depends:
     epidatasets,
