@@ -141,21 +141,33 @@
 #'   )
 #' )
 arx_classifier <- function(
+  epi_data,
+  outcome,
+  predictors,
+  trainer = logistic_reg(),
+  args_list = arx_class_args_list()
+) {
+  if (!is_classification(trainer)) {
+    cli_abort(
+      "`trainer` must be a {.pkg parsnip} model of mode 'classification'."
+    )
+  }
+
+  wf <- arx_class_epi_workflow(
     epi_data,
     outcome,
     predictors,
-    trainer = logistic_reg(),
-    args_list = arx_class_args_list()) {
-  if (!is_classification(trainer)) {
-    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
-  }
-
-  wf <- arx_class_epi_workflow(epi_data, outcome, predictors, trainer, args_list)
+    trainer,
+    args_list
+  )
   wf <- fit(wf, epi_data)
 
   if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
-    if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
+    if (
+      !is.null(args_list$forecast_date) &&
+        args_list$forecast_date != forecast_date_default
+    ) {
       cli_warn(
         "The specified forecast date {args_list$forecast_date} doesn't match the
         date from which the forecast is occurring {forecast_date}."
@@ -218,23 +230,31 @@ arx_classifier <- function(
 #'   )
 #' )
 arx_class_epi_workflow <- function(
-    epi_data,
-    outcome,
-    predictors,
-    trainer = parsnip::logistic_reg(),
-    args_list = arx_class_args_list()) {
+  epi_data,
+  outcome,
+  predictors,
+  trainer = parsnip::logistic_reg(),
+  args_list = arx_class_args_list()
+) {
   validate_forecaster_inputs(epi_data, outcome, predictors)
   if (!inherits(args_list, c("arx_class", "alist"))) {
     cli_abort("`args_list` was not created using `arx_class_args_list()`.")
   }
   if (!(is.null(trainer) || is_classification(trainer))) {
-    cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'classification'.")
+    cli_abort(
+      "`trainer` must be a {.pkg parsnip} model of mode 'classification'."
+    )
   }
 
   if (args_list$adjust_latency == "none") {
     forecast_date_default <- max(epi_data$time_value)
-    if (!is.null(args_list$forecast_date) && args_list$forecast_date != forecast_date_default) {
-      cli_warn("The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}.")
+    if (
+      !is.null(args_list$forecast_date) &&
+        args_list$forecast_date != forecast_date_default
+    ) {
+      cli_warn(
+        "The specified forecast date {args_list$forecast_date} doesn't match the date from which the forecast is occurring {forecast_date}."
+      )
     }
   } else {
     forecast_date_default <- attributes(epi_data)$metadata$as_of
@@ -257,7 +277,8 @@ arx_class_epi_workflow <- function(
   for (l in seq_along(lags)) {
     pred_names <- predictors[l]
     pred_names <- as.character(glue::glue_data(
-      args_list, "gr_{horizon}_{method}_{pred_names}"
+      args_list,
+      "gr_{horizon}_{method}_{pred_names}"
     ))
     r <- step_epi_lag(r, !!pred_names, lag = lags[[l]])
   }
@@ -293,17 +314,24 @@ arx_class_epi_workflow <- function(
   method_adjust_latency <- args_list$adjust_latency
   if (method_adjust_latency != "none") {
     if (method_adjust_latency != "extend_ahead") {
-      cli_abort("only extend_ahead is currently supported",
+      cli_abort(
+        "only extend_ahead is currently supported",
         class = "epipredict__arx_classifier__adjust_latency_unsupported_method"
       )
     }
-    r <- r %>% step_adjust_latency(!!pre_out_name,
-      fixed_forecast_date = forecast_date,
-      method = method_adjust_latency
-    )
+    r <- r %>%
+      step_adjust_latency(
+        !!pre_out_name,
+        fixed_forecast_date = forecast_date,
+        method = method_adjust_latency
+      )
   }
   r <- r %>%
-    step_epi_ahead(!!pre_out_name, ahead = args_list$ahead, role = "pre-outcome")
+    step_epi_ahead(
+      !!pre_out_name,
+      ahead = args_list$ahead,
+      role = "pre-outcome"
+    )
   r <- r %>%
     step_mutate(
       across(
@@ -345,8 +373,8 @@ arx_class_epi_workflow <- function(
 #'   be created using growth rates (as the predictors are) or lagged
 #'   differences. The second case is closer to the requirements for the
 #'   [2022-23 CDC Flusight Hospitalization Experimental Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md).
-#'   See the [Classification chapter from the forecasting book](https://cmu-delphi.github.io/delphi-tooling-book/arx-classifier.html) Vignette for details of how to create a reasonable
-#'   baseline for this case. Selecting `"growth_rate"` (the default) uses
+#'   See the `vignette("epipredict")` for more details.
+#'   Selecting `"growth_rate"` (the default) uses
 #'   [epiprocess::growth_rate()] to create the outcome using some of the
 #'   additional arguments below. Choosing `"lag_difference"` instead simply
 #'   uses the change from the value at the selected `horizon`.
@@ -384,36 +412,48 @@ arx_class_epi_workflow <- function(
 #' # also needs arx_classifier(trainer = parsnip::multinom_reg())
 #' arx_class_args_list(breaks = c(-.2, .25))
 arx_class_args_list <- function(
-    lags = c(0L, 7L, 14L),
-    ahead = 7L,
-    n_training = Inf,
-    forecast_date = NULL,
-    target_date = NULL,
-    adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
-    warn_latency = TRUE,
-    outcome_transform = c("growth_rate", "lag_difference"),
-    breaks = 0.25,
-    horizon = 7L,
-    method = c("rel_change", "linear_reg"),
-    log_scale = FALSE,
-    check_enough_data_n = NULL,
-    check_enough_data_epi_keys = NULL,
-    ...) {
+  lags = c(0L, 7L, 14L),
+  ahead = 7L,
+  n_training = Inf,
+  forecast_date = NULL,
+  target_date = NULL,
+  adjust_latency = c("none", "extend_ahead", "extend_lags", "locf"),
+  warn_latency = TRUE,
+  outcome_transform = c("growth_rate", "lag_difference"),
+  breaks = 0.25,
+  horizon = 7L,
+  method = c("rel_change", "linear_reg"),
+  log_scale = FALSE,
+  check_enough_data_n = NULL,
+  check_enough_data_epi_keys = NULL,
+  ...
+) {
   rlang::check_dots_empty()
   .lags <- lags
-  if (is.list(lags)) lags <- unlist(lags)
+  if (is.list(lags)) {
+    lags <- unlist(lags)
+  }
   method <- rlang::arg_match(method)
   outcome_transform <- rlang::arg_match(outcome_transform)
 
   adjust_latency <- rlang::arg_match(adjust_latency)
-  arg_is_scalar(ahead, n_training, horizon, log_scale, adjust_latency, warn_latency)
+  arg_is_scalar(
+    ahead,
+    n_training,
+    horizon,
+    log_scale,
+    adjust_latency,
+    warn_latency
+  )
   arg_is_scalar(forecast_date, target_date, allow_null = TRUE)
   arg_is_date(forecast_date, target_date, allow_null = TRUE)
   arg_is_nonneg_int(ahead, lags, horizon)
   arg_is_numeric(breaks)
   arg_is_lgl(log_scale)
   arg_is_pos(n_training)
-  if (is.finite(n_training)) arg_is_pos_int(n_training)
+  if (is.finite(n_training)) {
+    arg_is_pos_int(n_training)
+  }
   arg_is_pos(check_enough_data_n, allow_null = TRUE)
   arg_is_chr(check_enough_data_epi_keys, allow_null = TRUE)
 
@@ -428,9 +468,12 @@ arx_class_args_list <- function(
   }
 
   breaks <- sort(breaks)
-  if (min(breaks) > -Inf) breaks <- c(-Inf, breaks)
-  if (max(breaks) < Inf) breaks <- c(breaks, Inf)
-
+  if (min(breaks) > -Inf) {
+    breaks <- c(-Inf, breaks)
+  }
+  if (max(breaks) < Inf) {
+    breaks <- c(breaks, Inf)
+  }
 
   max_lags <- max(lags)
   structure(
