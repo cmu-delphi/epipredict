@@ -246,7 +246,7 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2026-06-30 18:31:49.
+#> This forecaster was fit on 2026-06-30 18:35:46.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
