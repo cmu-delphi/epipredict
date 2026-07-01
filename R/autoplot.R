@@ -171,9 +171,7 @@ autoplot.epi_workflow <- function(
       .color_by = .color_by,
       .facet_by = .facet_by,
       .base_color = .base_color,
-      .facet_filter = {{ .facet_filter }},
-      # Avoid subsampling while it is not implemented for this method
-      .max_keys = Inf
+      .facet_filter = {{ .facet_filter }}
     ))
   }
 
