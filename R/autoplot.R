@@ -171,7 +171,9 @@ autoplot.epi_workflow <- function(
       .color_by = .color_by,
       .facet_by = .facet_by,
       .base_color = .base_color,
-      .facet_filter = {{ .facet_filter }}
+      .facet_filter = {{ .facet_filter }},
+      # Avoid subsampling while it is not implemented for this method
+      .max_keys = Inf
     ))
   }
 
@@ -196,7 +198,9 @@ autoplot.epi_workflow <- function(
       .color_by = .color_by,
       .facet_by = .facet_by,
       .base_color = .base_color,
-      .facet_filter = {{ .facet_filter }}
+      .facet_filter = {{ .facet_filter }},
+      # Avoid subsampling while it is not implemented for this method
+      .max_keys = Inf
     ))
   }
 
@@ -207,7 +211,9 @@ autoplot.epi_workflow <- function(
     .color_by = "none",
     .facet_by = "all_keys",
     .base_color = "black",
-    .facet_filter = {{ .facet_filter }}
+    .facet_filter = {{ .facet_filter }},
+    # Avoid subsampling while it is not implemented for this method
+    .max_keys = Inf
   )
 
   # Now, prepare matching facets in the predictions

@@ -31,7 +31,7 @@ Imports:
     checkmate,
     cli,
     dplyr,
-    epiprocess (>= 0.11.2),
+    epiprocess (>= 0.13.0),
     generics,
     ggplot2,
     glue,
