@@ -396,7 +396,8 @@ results <- all_flatlines |>
 autoplot(
   object = workflow,
   predictions = results,
-  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates |>
+    filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
@@ -405,8 +406,8 @@ autoplot(
 #### `cdc_baseline_forecaster()`
 
 This is a different method of generating a flatline forecast, used as a
-baseline for [the CDC COVID-19 Forecasting
-Hub](https://covid19forecasthub.org).
+baseline for various CDC forecasting challenges, e.g.,
+<https://github.com/cdcepi/Flusight-baseline/>.
 
 ``` r
 
@@ -426,7 +427,8 @@ results <- all_cdc_flatline$predictions
 autoplot(
   object = workflow,
   predictions = results,
-  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates |>
+    filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
@@ -471,14 +473,15 @@ forecasting from the start of the season, `2023-10-08`:
 
 fluview_hhs <- pub_fluview(
   regions = paste0("hhs", 1:10),
-  epiweeks = epirange(100001,222201)
+  epiweeks = epirange(100001, 222201)
 )
 fluview <- fluview_hhs %>%
   select(
     geo_value = region,
     time_value = epiweek,
     issue,
-    ili) %>%
+    ili
+  ) %>%
   as_epi_archive() %>%
   epix_as_of_current()
 #> inferring version column.
@@ -648,7 +651,8 @@ autoplot(
   grad_forecast$epi_workflow,
   grad_forecast$predictions,
   observed_response = grad_employ,
-) + geom_vline(aes(xintercept = 2016))
+) +
+  geom_vline(aes(xintercept = 2016))
 ```
 
 ![](epipredict_files/figure-html/multi_key_forecast-1.png)

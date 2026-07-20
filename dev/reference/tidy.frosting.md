@@ -54,9 +54,12 @@ r <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_naomit()
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 
 wf <- epi_workflow(r, parsnip::linear_reg()) %>% fit(jhu)
+#> Error: object 'r' not found
 latest <- get_test_data(recipe = r, x = jhu)
+#> Error in get_test_data(recipe = r, x = jhu): `x` must be an `epi_df`.
 
 f <- frosting() %>%
   layer_predict() %>%
@@ -66,6 +69,6 @@ tidy(f)
 #> # A tibble: 2 × 4
 #>   number operation type    id                   
 #>    <int> <chr>     <chr>   <chr>                
-#> 1      1 layer     predict predict_default_u4azG
-#> 2      2 layer     naomit  naomit_RfvmL         
+#> 1      1 layer     predict predict_default_FMUfJ
+#> 2      2 layer     naomit  naomit_jNB0j         
 ```

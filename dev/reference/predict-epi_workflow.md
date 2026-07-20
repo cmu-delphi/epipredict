@@ -51,23 +51,11 @@ predict(object, new_data, type = NULL, opts = list(), ...)
 
 - type:
 
-  A single character value or `NULL`. Possible values are:
-
-  - regression: "`numeric`"
-
-  - classification: "`class`", "`prob`"
-
-  - censored regression: "`survival`", "`time`", "`hazard`",
-    "`linear_pred`"
-
-  - quantile regression: "`quantile`"
-
-  - interval estimates: "`conf_int`", "`pred_int`"
-
-  - other: "`raw`"
-
-  When `NULL`, [`predict()`](https://rdrr.io/r/stats/predict.html) will
-  choose an appropriate value based on the model's mode.
+  A single character value or `NULL`. Possible values are `"numeric"`,
+  `"class"`, `"prob"`, `"conf_int"`, `"pred_int"`, `"quantile"`,
+  `"time"`, `"hazard"`, `"survival"`, or `"raw"`. When `NULL`,
+  [`predict()`](https://rdrr.io/r/stats/predict.html) will choose an
+  appropriate value based on the model's mode.
 
 - opts:
 
@@ -82,8 +70,8 @@ predict(object, new_data, type = NULL, opts = list(), ...)
   be passed here (use the `opts` argument instead). Possible arguments
   are:
 
-  - `interval`: for `type` equal to `"survival"`, should interval
-    estimates be added, if available? Options are `"none"` and
+  - `interval`: for `type` equal to `"survival"` or `"quantile"`, should
+    interval estimates be added, if available? Options are `"none"` and
     `"confidence"`.
 
   - `level`: for `type` equal to `"conf_int"`, `"pred_int"`, or
@@ -94,6 +82,9 @@ predict(object, new_data, type = NULL, opts = list(), ...)
   - `std_error`: for `type` equal to `"conf_int"` or `"pred_int"`, add
     the standard error of fit or prediction (on the scale of the linear
     predictors). Default value is `FALSE`.
+
+  - `quantile`: for `type` equal to `quantile`, the quantiles of the
+    distribution. Default is `(1:9)/10`.
 
   - `eval_time`: for `type` equal to `"survival"` or `"hazard"`, the
     time points at which the survival probability or hazard is

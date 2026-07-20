@@ -23,7 +23,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.6</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -429,7 +429,8 @@ dataset as above:</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span></span>
 <span>  object <span class="op">=</span> <span class="va">workflow</span>,</span>
 <span>  predictions <span class="op">=</span> <span class="va">results</span>,</span>
-<span>  observed_response <span class="op">=</span> <span class="va">covid_case_death_rates</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">used_locations</span>, <span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-07-01"</span><span class="op">)</span></span>
+<span>  observed_response <span class="op">=</span> <span class="va">covid_case_death_rates</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">used_locations</span>, <span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-07-01"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="epipredict_files/figure-html/make-flatline-forecast-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></p>
 </div>
@@ -438,8 +439,7 @@ dataset as above:</p>
 <code>cdc_baseline_forecaster()</code><a class="anchor" aria-label="anchor" href="#cdc_baseline_forecaster"></a>
 </h4>
 <p>This is a different method of generating a flatline forecast, used as
-a baseline for <a href="https://covid19forecasthub.org" class="external-link">the CDC COVID-19
-Forecasting Hub</a>.</p>
+a baseline for various CDC forecasting challenges, e.g., <a href="https://github.com/cdcepi/Flusight-baseline/" class="external-link uri">https://github.com/cdcepi/Flusight-baseline/</a>.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">all_cdc_flatline</span> <span class="op">&lt;-</span></span>
 <span>  <span class="fu"><a href="../reference/cdc_baseline_forecaster.html">cdc_baseline_forecaster</a></span><span class="op">(</span></span>
@@ -457,7 +457,8 @@ Forecasting Hub</a>.</p>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span></span>
 <span>  object <span class="op">=</span> <span class="va">workflow</span>,</span>
 <span>  predictions <span class="op">=</span> <span class="va">results</span>,</span>
-<span>  observed_response <span class="op">=</span> <span class="va">covid_case_death_rates</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">used_locations</span>, <span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-07-01"</span><span class="op">)</span></span>
+<span>  observed_response <span class="op">=</span> <span class="va">covid_case_death_rates</span> <span class="op">|&gt;</span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">geo_value</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">used_locations</span>, <span class="va">time_value</span> <span class="op">&gt;</span> <span class="st">"2021-07-01"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="epipredict_files/figure-html/make-cdc-forecast-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></p>
 <p><code><a href="../reference/cdc_baseline_forecaster.html">cdc_baseline_forecaster()</a></code> and
@@ -492,14 +493,15 @@ forecasting from the start of the season, <code>2023-10-08</code>:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">fluview_hhs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/pub_fluview.html" class="external-link">pub_fluview</a></span><span class="op">(</span></span>
 <span>  regions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"hhs"</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>,</span>
-<span>  epiweeks <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">100001</span>,<span class="fl">222201</span><span class="op">)</span></span>
+<span>  epiweeks <span class="op">=</span> <span class="fu"><a href="https://cmu-delphi.github.io/epidatr/reference/epirange.html" class="external-link">epirange</a></span><span class="op">(</span><span class="fl">100001</span>, <span class="fl">222201</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">fluview</span> <span class="op">&lt;-</span> <span class="va">fluview_hhs</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span></span>
 <span>    geo_value <span class="op">=</span> <span class="va">region</span>,</span>
 <span>    time_value <span class="op">=</span> <span class="va">epiweek</span>,</span>
 <span>    <span class="va">issue</span>,</span>
-<span>    <span class="va">ili</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
+<span>    <span class="va">ili</span></span>
+<span>  <span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epi_archive.html" class="external-link">as_epi_archive</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://cmu-delphi.github.io/epiprocess/reference/epix_as_of_current.html" class="external-link">epix_as_of_current</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="co">#&gt; inferring version column.</span></span>
@@ -659,7 +661,8 @@ predicting the number of graduates in a subset of the categories in
 <span>  <span class="va">grad_forecast</span><span class="op">$</span><span class="va">epi_workflow</span>,</span>
 <span>  <span class="va">grad_forecast</span><span class="op">$</span><span class="va">predictions</span>,</span>
 <span>  observed_response <span class="op">=</span> <span class="va">grad_employ</span>,</span>
-<span><span class="op">)</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">2016</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_abline.html" class="external-link">geom_vline</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>xintercept <span class="op">=</span> <span class="fl">2016</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="epipredict_files/figure-html/multi_key_forecast-1.png" class="r-plt" alt="" width="90%" style="display: block; margin: auto;"></p>
 <p>The 8 graphs represent all combinations of the
 <code>geo_values</code> (<code>"Quebec"</code> and

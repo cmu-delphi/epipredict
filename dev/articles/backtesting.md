@@ -11,9 +11,8 @@ available at the time of the *backtest*. This is because new data is
 constantly being collected and added to the dataset, and old data
 potentially revised. Training and making predictions only on finalized
 data can lead to overly optimistic estimates of accuracy (see, for
-example, [McDonald et al.
-2021](https://www.pnas.org/content/118/51/e2111453118/) and the
-references therein).
+example, [McDonald et al. 2021](https://doi.org/10.1073/pnas.2111453118)
+and the references therein).
 
 In the [epiprocess](https://github.com/cmu-delphi/epiprocess) package,
 we provide the function
@@ -93,7 +92,8 @@ geo_choose <- "ca"
 forecast_dates <- seq(
   from = as.Date("2020-08-01"),
   to = as.Date("2021-11-01"),
-  by = "1 month")
+  by = "1 month"
+)
 percent_cli_data <- bind_rows(
   # Snapshotted data for the version-faithful forecasts
   map(
@@ -108,18 +108,22 @@ percent_cli_data <- bind_rows(
   doctor_visits |>
     epix_as_of(doctor_visits$versions_end) |>
     mutate(version_faithful = "Version un-faithful")
-) |> as_tibble()
+) |>
+  as_tibble()
 p0 <- autoplot(
-  archive_cases_dv_subset, percent_cli, 
-  .versions = forecast_dates, 
+  archive_cases_dv_subset,
+  percent_cli,
+  .versions = forecast_dates,
   .mark_versions = TRUE,
   .facet_filter = (geo_value == "ca")
 ) +
   scale_x_date(minor_breaks = "month", date_labels = "%b %Y") +
-  labs(x = "", y = "% of doctor's visits with\n Covid-like illness") + 
+  labs(x = "", y = "% of doctor's visits with\n Covid-like illness") +
   scale_color_viridis_c(
     option = "viridis",
-    guide = guide_legend(reverse=TRUE), direction = -1) +
+    guide = guide_legend(reverse = TRUE),
+    direction = -1
+  ) +
   scale_y_continuous(limits = c(0, NA), expand = expansion(c(0, 0.05))) +
   theme(legend.position = "none")
 ```
@@ -267,21 +271,29 @@ easily map across aheads.
 ``` r
 
 forecast_wrapper <- function(
-    epi_data, aheads, outcome, predictors, process_data = identity
-    ) {
+  epi_data,
+  aheads,
+  outcome,
+  predictors,
+  process_data = identity
+) {
   map(
     aheads,
     \(ahead) {
       arx_forecaster(
-        process_data(epi_data), outcome, predictors,
+        process_data(epi_data),
+        outcome,
+        predictors,
         args_list = arx_args_list(
           ahead = ahead,
           lags = c(0:7, 14, 21),
           adjust_latency = "extend_ahead"
         )
-      )$predictions |> pivot_quantiles_wider(.pred_distn)
+      )$predictions |>
+        pivot_quantiles_wider(.pred_distn)
     }
-  ) |> bind_rows()
+  ) |>
+    bind_rows()
 }
 ```
 
@@ -360,11 +372,14 @@ plotting_data <- bind_rows(
     mutate(version_faithful = "Version faithful")
 )
 
-p1 <- ggplot(data = forecasts_filtered,
-             aes(x = target_date, group = time_value)) +
+p1 <- ggplot(
+  data = forecasts_filtered,
+  aes(x = target_date, group = time_value)
+) +
   geom_ribbon(
     aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)),
-    alpha = 0.4) +
+    alpha = 0.4
+  ) +
   geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
   geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
   # the forecast date
@@ -379,13 +394,16 @@ p1 <- ggplot(data = forecasts_filtered,
   geom_line(
     data = plotting_data |> filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = (version), group = version),
-    inherit.aes = FALSE, na.rm = TRUE
+    inherit.aes = FALSE,
+    na.rm = TRUE
   ) +
   facet_grid(version_faithful ~ geo_value, scales = "free") +
   scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  labs(x = "Date",
-       y = "smoothed, day of week adjusted covid-like doctors visits") +
+  labs(
+    x = "Date",
+    y = "smoothed, day of week adjusted covid-like doctors visits"
+  ) +
   scale_color_viridis_c(option = "viridis", direction = -1) +
   scale_fill_viridis_c(option = "viridis", direction = -1) +
   theme(legend.position = "none")
@@ -406,12 +424,17 @@ forecasts_filtered %>% names
 #> [13] "version_faithful" "time_value"
 p2 <-
   ggplot(data = forecasts_filtered, aes(x = target_date, group = time_value)) +
-  geom_ribbon(aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)), alpha = 0.4) +
+  geom_ribbon(
+    aes(ymin = `0.05`, ymax = `0.95`, fill = (time_value)),
+    alpha = 0.4
+  ) +
   geom_line(aes(y = .pred, color = (time_value)), linetype = 2L) +
   geom_point(aes(y = .pred, color = (time_value)), size = 0.75) +
   # the forecast date
   geom_vline(
-    data = percent_cli_data |> filter(geo_value == geo_choose) |> select(-version_faithful),
+    data = percent_cli_data |>
+      filter(geo_value == geo_choose) |>
+      select(-version_faithful),
     aes(color = version, xintercept = version, group = version),
     lty = 2
   ) +
@@ -419,12 +442,16 @@ p2 <-
   geom_line(
     data = plotting_data |> filter(geo_value == geo_choose),
     aes(x = time_value, y = percent_cli, color = (version), group = version),
-    inherit.aes = FALSE, na.rm = TRUE
+    inherit.aes = FALSE,
+    na.rm = TRUE
   ) +
   facet_grid(version_faithful ~ geo_value, scales = "free") +
   scale_x_date(breaks = "2 months", date_labels = "%b %Y") +
   scale_y_continuous(expand = expansion(c(0, 0.05))) +
-  labs(x = "Date", y = "smoothed, day of week adjusted covid-like doctors visits") +
+  labs(
+    x = "Date",
+    y = "smoothed, day of week adjusted covid-like doctors visits"
+  ) +
   scale_color_viridis_c(option = "viridis", direction = -1) +
   scale_fill_viridis_c(option = "viridis", direction = -1) +
   theme(legend.position = "none")

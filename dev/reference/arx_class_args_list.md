@@ -89,10 +89,9 @@ arx_class_args_list(
   is closer to the requirements for the [2022-23 CDC Flusight
   Hospitalization Experimental
   Target](https://github.com/cdcepi/Flusight-forecast-data/blob/745511c436923e1dc201dea0f4181f21a8217b52/data-experimental/README.md).
-  See the [Classification chapter from the forecasting
-  book](https://cmu-delphi.github.io/delphi-tooling-book/arx-classifier.html)
-  Vignette for details of how to create a reasonable baseline for this
-  case. Selecting `"growth_rate"` (the default) uses
+  See the
+  [`vignette("epipredict")`](https://cmu-delphi.github.io/epipredict/dev/articles/epipredict.md)
+  for more details. Selecting `"growth_rate"` (the default) uses
   [`epiprocess::growth_rate()`](https://cmu-delphi.github.io/epiprocess/reference/growth_rate.html)
   to create the outcome using some of the additional arguments below.
   Choosing `"lag_difference"` instead simply uses the change from the

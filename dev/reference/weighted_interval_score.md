@@ -94,6 +94,8 @@ preds <- flatline_forecaster(
   training, "death_rate",
   flatline_args_list(quantile_levels = c(.01, .025, 1:19 / 20, .975, .99))
 )$predictions
+#> Error in validate_forecaster_inputs(epi_data, outcome, "time_value"): `epi_data` must be an <epi_df>.
+#> ! This one is a <tbl_df/tbl/data.frame>.
 actuals <- covid_case_death_rates %>%
   filter(time_value == as.Date("2021-12-01") + 7) %>%
   select(geo_value, time_value, actual = death_rate)
@@ -101,19 +103,7 @@ preds <- left_join(preds, actuals,
   by = c("target_date" = "time_value", "geo_value")
 ) %>%
   mutate(wis = weighted_interval_score(.pred_distn, actual))
+#> Error: object 'preds' not found
 preds
-#> # A tibble: 56 × 7
-#>    geo_value .pred .pred_distn forecast_date target_date actual    wis
-#>    <chr>     <dbl>  <qtls(23)> <date>        <date>       <dbl>  <dbl>
-#>  1 ak        0.217     [0.217] 2021-12-01    2021-12-08  0.0988 0.0673
-#>  2 al        0.119     [0.119] 2021-12-01    2021-12-08  0.174  0.0364
-#>  3 ar        0.207     [0.207] 2021-12-01    2021-12-08  0.514  0.196 
-#>  4 as        0             [0] 2021-12-01    2021-12-08  0      0.0145
-#>  5 az        0.485     [0.485] 2021-12-01    2021-12-08  0.826  0.223 
-#>  6 ca        0.169     [0.169] 2021-12-01    2021-12-08  0.185  0.0278
-#>  7 co        0.509     [0.509] 2021-12-01    2021-12-08  0.534  0.0313
-#>  8 ct        0.177     [0.177] 2021-12-01    2021-12-08  0.149  0.0301
-#>  9 dc        0             [0] 2021-12-01    2021-12-08  0.0200 0.0166
-#> 10 de        0.217     [0.217] 2021-12-01    2021-12-08  0.391  0.101 
-#> # ℹ 46 more rows
+#> Error: object 'preds' not found
 ```

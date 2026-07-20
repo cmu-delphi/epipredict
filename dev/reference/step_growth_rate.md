@@ -119,42 +119,12 @@ rates <- covid_case_death_rates %>%
 
 r <- epi_recipe(rates) %>%
   step_growth_rate(case_rate, death_rate)
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 r
-#> 
-#> ── Epi Recipe ──────────────────────────────────────────────────────────────────
-#> 
-#> ── Inputs 
-#> Number of variables by role
-#> raw:        2
-#> geo_value:  1
-#> time_value: 1
-#> 
-#> ── Operations 
-#> 1. Calculating growth_rate for: case_rate death_rate by rel_change
+#> Error: object 'r' not found
 
 r %>%
   prep(rates) %>%
   bake(new_data = NULL)
-#> An `epi_df` object, 3,111 x 6 with metadata:
-#> * geo_type  = state
-#> * time_type = day
-#> * as_of     = 2023-03-10
-#> Latency (time between last available observation and epi_df's as_of, by time series):
-#> * latency across all time series = 434–442 days (see summary() for per-signal details)
-#> 
-#> # A tibble: 3,111 × 6
-#>    geo_value time_value case_rate death_rate gr_7_rel_change_case_rate
-#>  * <chr>     <date>         <dbl>      <dbl>                     <dbl>
-#>  1 ak        2021-11-01     87.9       0.494                        NA
-#>  2 al        2021-11-01     34.7       0.482                        NA
-#>  3 ar        2021-11-01     13.9       0.434                        NA
-#>  4 az        2021-11-01     40.4       0.566                        NA
-#>  5 ca        2021-11-01     15.6       0.241                        NA
-#>  6 co        2021-11-01     51.0       0.590                        NA
-#>  7 ct        2021-11-01      9.20      0.108                        NA
-#>  8 dc        2021-11-01     11.8       0.100                        NA
-#>  9 de        2021-11-01     26.0       0.391                        NA
-#> 10 fl        2021-11-01      7.99      0.484                        NA
-#> # ℹ 3,101 more rows
-#> # ℹ 1 more variable: gr_7_rel_change_death_rate <dbl>
+#> Error: object 'r' not found
 ```

@@ -15,9 +15,6 @@ provided by [`{epidatr}`](https://cmu-delphi.github.io/epidatr/).
 Pre-compiled example datasets are also available in
 [`{epidatasets}`](https://cmu-delphi.github.io/epidatasets/).
 
-If you are looking for detail beyond the package documentation, see our
-[forecasting book](https://cmu-delphi.github.io/delphi-tooling-book/).
-
 ## Installation
 
 Unless you’re planning on contributing to package development, we
@@ -33,8 +30,8 @@ pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
 
 The documentation for the stable version is at
-<https://cmu-delphi.github.io/epipredict>, while the development version
-is at <https://cmu-delphi.github.io/epipredict/dev>.
+<https://cmu-delphi.github.io/epipredict/>, while the development
+version is at <https://cmu-delphi.github.io/epipredict/dev/>.
 
 ## Motivating example
 
@@ -145,11 +142,13 @@ cases_deaths <-
   group_by(geo_value) |>
   mutate(
     outlr_death_rate = detect_outlr_rm(
-      time_value, death_rate,
+      time_value,
+      death_rate,
       detect_negatives = TRUE
     ),
     outlr_case_rate = detect_outlr_rm(
-      time_value, case_rate,
+      time_value,
+      case_rate,
       detect_negatives = TRUE
     )
   ) |>
@@ -194,7 +193,8 @@ processed_data_plot <-
   geom_text(
     data = forecast_date_label,
     aes(x = dates, label = "forecast\ndate", y = heights),
-    size = 3, hjust = "right"
+    size = 3,
+    hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -221,12 +221,12 @@ four_week_ahead <- arx_forecaster(
 four_week_ahead
 #> ══ A basic forecaster of type ARX Forecaster ════════════════════════════════
 #> 
-#> This forecaster was fit on 2025-05-22 11:56:44.
+#> This forecaster was fit on 2026-06-30 18:35:46.
 #> 
 #> Training data was an <epi_df> with:
 #> • Geography: state,
 #> • Time type: day,
-#> • Using data up-to-date as of: 2022-01-01.
+#> • Using data up-to-date as of: 2023-03-10.
 #> • With the last data available on 2021-08-01
 #> 
 #> ── Predictions ──────────────────────────────────────────────────────────────
@@ -264,7 +264,8 @@ forecast_plot <-
   geom_text(
     data = forecast_date_label %>% filter(.response_name == "death_rate"),
     aes(x = dates, label = "forecast\ndate", y = heights),
-    size = 3, hjust = "right"
+    size = 3,
+    hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -279,7 +280,13 @@ And as a tibble of quantile level-value pairs:
 four_week_ahead$predictions |>
   select(-.pred) |>
   pivot_quantiles_longer(.pred_distn) |>
-  select(geo_value, forecast_date, target_date, quantile = .pred_distn_quantile_level, value = .pred_distn_value)
+  select(
+    geo_value,
+    forecast_date,
+    target_date,
+    quantile = .pred_distn_quantile_level,
+    value = .pred_distn_value
+  )
 #> # A tibble: 20 × 5
 #>   geo_value forecast_date target_date quantile  value
 #>   <chr>     <date>        <date>         <dbl>  <dbl>

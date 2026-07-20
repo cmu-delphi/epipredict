@@ -168,8 +168,6 @@ just fills forward to the `forecast_date`:
     #> * geo_type  = state
     #> * time_type = day
     #> * as_of     = 2015-01-14
-    #> Latency (time between last available observation and epi_df's as_of, by time series):
-    #> * latency across all time series = 0 days
     #>
     #> # A tibble: 8 x 4
     #>   geo_value time_value     a     b
@@ -204,8 +202,6 @@ each are adjusted separately. In the toy example:
     #> * geo_type  = state
     #> * time_type = day
     #> * as_of     = 2015-01-14
-    #> Latency (time between last available observation and epi_df's as_of, by time series):
-    #> * latency  = -2–3 days
     #>
     #> # A tibble: 21 x 7
     #>    geo_value time_value     a     b lag_3_a lag_4_b ahead_1_a
@@ -253,8 +249,6 @@ example:
     #> * geo_type  = state
     #> * time_type = day
     #> * as_of     = 2015-01-14
-    #> Latency (time between last available observation and epi_df's as_of, by time series):
-    #> * latency  = 1–5 days
     #>
     #> # A tibble: 10 x 6
     #>    geo_value time_value     a     b lag_0_a ahead_3_a
@@ -324,47 +318,15 @@ r <- epi_recipe(rates) %>%
   step_adjust_latency(recipes::has_role("raw"), method = "extend_ahead") %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 r
-#> 
-#> ── Epi Recipe ──────────────────────────────────────────────────────────────────
-#> 
-#> ── Inputs 
-#> Number of variables by role
-#> raw:        2
-#> geo_value:  1
-#> time_value: 1
-#> 
-#> ── Operations 
-#> 1. Adj. extend_ahead: recipes::has_role("raw") latency TBD at train time
-#> 2. Leading: death_rate by 7
-#> 3. Lagging: death_rate by 0, 7, 14
+#> Error: object 'r' not found
 
 rates_fit <- epi_workflow() %>%
   add_epi_recipe(r) %>%
   add_model(linear_reg()) %>%
   fit(data = rates)
+#> Error: object 'r' not found
 rates_fit
-#> 
-#> ══ Epi Workflow [trained] ══════════════════════════════════════════════════════
-#> Preprocessor: Recipe
-#> Model: linear_reg()
-#> Postprocessor: None
-#> 
-#> ── Preprocessor ────────────────────────────────────────────────────────────────
-#> 
-#> 3 Recipe steps.
-#> 1. step_adjust_latency()
-#> 2. step_epi_ahead()
-#> 3. step_epi_lag()
-#> 
-#> ── Model ───────────────────────────────────────────────────────────────────────
-#> 
-#> Call:
-#> stats::lm(formula = ..y ~ ., data = data)
-#> 
-#> Coefficients:
-#>       (Intercept)   lag_0_death_rate   lag_7_death_rate  lag_14_death_rate  
-#>            0.3806            -0.2208            -0.0403            -0.0394  
-#> 
-#> 
+#> Error: object 'rates_fit' not found
 ```

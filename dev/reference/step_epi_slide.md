@@ -125,27 +125,7 @@ rec <- epi_recipe(jhu) %>%
     .f = \(x) mean(x, na.rm = TRUE),
     .window_size = 7L
   )
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 bake(prep(rec, jhu), new_data = NULL)
-#> An `epi_df` object, 730 x 6 with metadata:
-#> * geo_type  = state
-#> * time_type = day
-#> * as_of     = 2023-03-10
-#> Latency (time between last available observation and epi_df's as_of, by time series):
-#> * latency across all time series = 434 days
-#> 
-#> # A tibble: 730 × 6
-#>    geo_value time_value case_rate death_rate epi_slide__.f_case_rate
-#>  * <chr>     <date>         <dbl>      <dbl>                   <dbl>
-#>  1 ca        2021-01-01      104.      0.854                    104.
-#>  2 ca        2021-01-02      102.      0.861                    103.
-#>  3 ca        2021-01-03      102.      0.864                    103.
-#>  4 ca        2021-01-04      102.      0.914                    103.
-#>  5 ca        2021-01-05      101.      0.913                    102.
-#>  6 ca        2021-01-06      108.      0.897                    103.
-#>  7 ca        2021-01-07      106.      0.943                    104.
-#>  8 ca        2021-01-08      106.      1.02                     104.
-#>  9 ca        2021-01-09      107.      1.11                     105.
-#> 10 ca        2021-01-10      110.      1.23                     106.
-#> # ℹ 720 more rows
-#> # ℹ 1 more variable: epi_slide__.f_death_rate <dbl>
+#> Error: object 'rec' not found
 ```

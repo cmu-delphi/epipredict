@@ -10,8 +10,8 @@ By default, the predictive intervals are computed separately for each
 combination of key values (`geo_value` + any additional keys) in the
 `epi_data` argument.
 
-This forecaster is very similar to that used by the
-[COVID19ForecastHub](https://covid19forecasthub.org)
+This forecaster is very similar to that used as the as [FluSight
+Baseline](https://github.com/cdcepi/Flusight-baseline/).
 
 ## Usage
 

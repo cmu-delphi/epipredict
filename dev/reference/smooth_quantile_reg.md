@@ -56,6 +56,11 @@ smooth_quantile_reg(
 
 ``` r
 library(smoothqr)
+#> 
+#> Attaching package: ‘smoothqr’
+#> The following object is masked from ‘package:epidatasets’:
+#> 
+#>     covid_case_death_rates
 tib <- data.frame(
   y1 = rnorm(100), y2 = rnorm(100), y3 = rnorm(100),
   y4 = rnorm(100), y5 = rnorm(100), y6 = rnorm(100),

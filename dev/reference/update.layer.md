@@ -33,7 +33,9 @@ r <- epi_recipe(jhu) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14)) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_naomit()
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 wf <- epi_workflow(r, linear_reg()) %>% fit(jhu)
+#> Error: object 'r' not found
 latest <- jhu %>% filter(time_value >= max(time_value) - 14)
 
 # Specify a `forecast_date` that is greater than or equal to `as_of` date
@@ -43,62 +45,23 @@ f <- frosting() %>%
   layer_naomit(.pred)
 
 wf1 <- wf %>% add_frosting(f)
+#> Error: object 'wf' not found
 
 p1 <- predict(wf1, latest)
+#> Error: object 'wf1' not found
 p1
-#> An `epi_df` object, 3 x 4 with metadata:
-#> * geo_type  = state
-#> * time_type = day
-#> * as_of     = 2023-03-10
-#> Latency (time between last available observation and epi_df's as_of, by time series):
-#> * latency  = 434 days
-#> 
-#> # A tibble: 3 × 4
-#>   geo_value time_value .pred forecast_date
-#>   <chr>     <date>     <dbl> <date>       
-#> 1 ak        2021-12-31 0.245 2022-05-31   
-#> 2 ca        2021-12-31 0.312 2022-05-31   
-#> 3 ny        2021-12-31 0.295 2022-05-31   
+#> Error: object 'p1' not found
 
 # Update forecast date
 f$layers[[2]] <- update(f$layers[[2]], forecast_date = "2021-06-01")
 
 # Need to still update workflow if only update a layer in frosting
 wf2 <- wf %>% add_frosting(f)
+#> Error: object 'wf' not found
 wf2$post # Check that wf1 has update
-#> $actions
-#> $actions$frosting
-#> $frosting
-#> 
-#> ── Frosting ────────────────────────────────────────────────────────────────────
-#> 
-#> ── Layers 
-#> 1. Creating predictions: "<calculated>"
-#> 2. Adding forecast date: "2021-06-01"
-#> 3. Removing na predictions from: .pred
-#> 
-#> attr(,"class")
-#> [1] "action_post" "action"     
-#> 
-#> 
-#> $fit
-#> NULL
-#> 
-#> attr(,"class")
-#> [1] "stage_post" "stage"     
+#> Error: object 'wf2' not found
 p1 <- predict(wf2, latest)
+#> Error: object 'wf2' not found
 p1
-#> An `epi_df` object, 3 x 4 with metadata:
-#> * geo_type  = state
-#> * time_type = day
-#> * as_of     = 2023-03-10
-#> Latency (time between last available observation and epi_df's as_of, by time series):
-#> * latency  = 434 days
-#> 
-#> # A tibble: 3 × 4
-#>   geo_value time_value .pred forecast_date
-#>   <chr>     <date>     <dbl> <date>       
-#> 1 ak        2021-12-31 0.245 2021-06-01   
-#> 2 ca        2021-12-31 0.312 2021-06-01   
-#> 3 ny        2021-12-31 0.295 2021-06-01   
+#> Error: object 'p1' not found
 ```

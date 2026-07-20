@@ -31,16 +31,5 @@ Given a `recipe`, this step is literally equivalent to
 covid_case_death_rates %>%
   epi_recipe() %>%
   step_epi_naomit()
-#> 
-#> ── Epi Recipe ──────────────────────────────────────────────────────────────────
-#> 
-#> ── Inputs 
-#> Number of variables by role
-#> raw:        2
-#> geo_value:  1
-#> time_value: 1
-#> 
-#> ── Operations 
-#> 1. • Removing rows with NA values in: all_predictors()
-#> 2. • Removing rows with NA values in: all_outcomes()
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 ```

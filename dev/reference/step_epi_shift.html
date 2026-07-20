@@ -17,7 +17,7 @@ or you may specify an alternative value with the default argument."><meta name="
 
     <a class="navbar-brand me-2" href="../index.html">epipredict</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.6</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="In-development version">0.2.7</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -166,19 +166,9 @@ are always set to <code>"ahead_"</code> and <code>"epi_ahead"</code> respectivel
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">r</span> <span class="op">&lt;-</span> <span class="fu"><a href="epi_recipe.html">epi_recipe</a></span><span class="op">(</span><span class="va">covid_case_death_rates</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">step_epi_ahead</span><span class="op">(</span><span class="va">death_rate</span>, ahead <span class="op">=</span> <span class="fl">7</span><span class="op">)</span> <span class="op"><a href="pipe.html">%&gt;%</a></span></span></span>
 <span class="r-in"><span>  <span class="fu">step_epi_lag</span><span class="op">(</span><span class="va">death_rate</span>, lag <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">7</span>, <span class="fl">14</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in UseMethod("epi_recipe"):</span> no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"</span>
 <span class="r-in"><span><span class="va">r</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">──</span> <span style="font-weight: bold;">Epi Recipe</span> <span style="color: #00BBBB;">──────────────────────────────────────────────────────────────────</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Inputs </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of variables by role</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> raw:        2</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> geo_value:  1</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> time_value: 1</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> ── Operations </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 1. Leading: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">7</span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 2. Lagging: <span style="color: #0000BB;">death_rate</span> by <span style="color: #0000BB;">0, 7, 14</span></span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error:</span> object 'r' not found</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

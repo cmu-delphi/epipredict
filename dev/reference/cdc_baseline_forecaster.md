@@ -44,8 +44,8 @@ horizons) for each unique combination of `key_vars`.
 By default, the predictive intervals are computed separately for each
 combination of `geo_value` in the `epi_data` argument.
 
-This forecaster is meant to produce exactly the CDC Baseline used for
-[COVID19ForecastHub](https://covid19forecasthub.org)
+This forecaster is meant to produce exactly the CDC Baseline used for,
+e.g., <https://github.com/cdcepi/Flusight-baseline/>
 
 ## Examples
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## epipredict 0.2.7
+
+- [`autoplot.canned_epipred()`](https://cmu-delphi.github.io/epipredict/dev/reference/autoplot-epipred.md)
+  had internal code using
+  `epiprocess:::autoplot.epi_df(.max_facets = Inf)`. This argument no
+  longer exists there, so it caused an error (noted by rebuilding the
+  `README.Rmd`)
+
 ## epipredict 0.2.6
 
 - [`arx_forecaster()`](https://cmu-delphi.github.io/epipredict/dev/reference/arx_forecaster.md)
@@ -20,6 +28,7 @@
   recorded example output matches the current `epi_df` print phrasing
   (`lag` → `latency`) from upstream `epiprocess`. No user-visible
   behavior change.
+- Bump GitHub action checkout version.
 
 ## epipredict 0.2.5
 

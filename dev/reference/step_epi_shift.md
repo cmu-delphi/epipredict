@@ -119,17 +119,7 @@ Other row operation steps:
 r <- epi_recipe(covid_case_death_rates) %>%
   step_epi_ahead(death_rate, ahead = 7) %>%
   step_epi_lag(death_rate, lag = c(0, 7, 14))
+#> Error in UseMethod("epi_recipe"): no applicable method for 'epi_recipe' applied to an object of class "c('tbl_df', 'tbl', 'data.frame')"
 r
-#> 
-#> ── Epi Recipe ──────────────────────────────────────────────────────────────────
-#> 
-#> ── Inputs 
-#> Number of variables by role
-#> raw:        2
-#> geo_value:  1
-#> time_value: 1
-#> 
-#> ── Operations 
-#> 1. Leading: death_rate by 7
-#> 2. Lagging: death_rate by 0, 7, 14
+#> Error: object 'r' not found
 ```
