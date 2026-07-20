@@ -33,8 +33,8 @@ forward over all available training data.
 By default, the predictive intervals are computed separately for each
 combination of \code{geo_value} in the \code{epi_data} argument.
 
-This forecaster is meant to produce exactly the CDC Baseline used for
-\href{https://covid19forecasthub.org}{COVID19ForecastHub}
+This forecaster is meant to produce exactly the CDC Baseline used for, e.g.,
+\url{https://github.com/cdcepi/Flusight-baseline/}
 }
 \examples{
 library(dplyr)

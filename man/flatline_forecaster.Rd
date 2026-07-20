@@ -29,8 +29,8 @@ By default, the predictive intervals are computed separately for each
 combination of key values (\code{geo_value} + any additional keys) in the
 \code{epi_data} argument.
 
-This forecaster is very similar to that used by the
-\href{https://covid19forecasthub.org}{COVID19ForecastHub}
+This forecaster is very similar to that used as the
+as \href{https://github.com/cdcepi/Flusight-baseline/}{FluSight Baseline}.
 }
 \details{
 Here is (roughly) the code for the \code{flatline_forecaster()} applied to the

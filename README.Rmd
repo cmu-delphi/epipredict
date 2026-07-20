@@ -11,7 +11,7 @@ knitr::opts_chunk$set(
   digits = 3,
   comment = "#>",
   collapse = TRUE,
-  cache = TRUE,
+  cache = FALSE,
   dev.args = list(bg = "transparent"),
   dpi = 300,
   cache.lazy = FALSE,
@@ -51,15 +51,20 @@ tertiary <- "#177245"
 fourth_colour <- "#A393BF"
 fifth_colour <- "#2e8edd"
 colvec <- c(
-  base = base, primary = primary, secondary = secondary,
-  tertiary = tertiary, fourth_colour = fourth_colour,
+  base = base,
+  primary = primary,
+  secondary = secondary,
+  tertiary = tertiary,
+  fourth_colour = fourth_colour,
   fifth_colour = fifth_colour
 )
 library(epiprocess)
 suppressMessages(library(tidyverse))
 theme_update(legend.position = "bottom", legend.title = element_blank())
 delphi_pal <- function(n) {
-  if (n > 6L) warning("Not enough colors in this palette!")
+  if (n > 6L) {
+    warning("Not enough colors in this palette!")
+  }
   unname(colvec)[1:n]
 }
 scale_fill_delphi <- function(..., aesthetics = "fill") {
@@ -87,16 +92,17 @@ Both of the packages are meant to work well with the panel data provided by
 Pre-compiled example datasets are also available in
 [`{epidatasets}`](https://cmu-delphi.github.io/epidatasets/).
 
+<!--
 If you are looking for detail beyond the package documentation, see our
 [forecasting book](https://cmu-delphi.github.io/delphi-tooling-book/).
-
+-->
 
 ## Installation
 
 Unless you’re planning on contributing to package development, we suggest using the stable version.
 To install, run:
 
-```r
+```{r echo=TRUE, eval=FALSE}
 # Stable version
 pak::pkg_install("cmu-delphi/epipredict@main")
 
@@ -105,8 +111,8 @@ pak::pkg_install("cmu-delphi/epipredict@dev")
 ```
 
 The documentation for the stable version is at
-<https://cmu-delphi.github.io/epipredict>, while the development version is at
-<https://cmu-delphi.github.io/epipredict/dev>.
+<https://cmu-delphi.github.io/epipredict/>, while the development version is at
+<https://cmu-delphi.github.io/epipredict/dev/>.
 
 
 ## Motivating example
@@ -151,7 +157,7 @@ First we pull both `jhu-csse` cases and deaths data from the
 [Delphi API](https://cmu-delphi.github.io/delphi-epidata/api/covidcast.html) using the
 [`{epidatr}`](https://cmu-delphi.github.io/epidatr/) package:
 
-```{r case_death, warning = FALSE, eval = TRUE}
+```{r case_death, warning = FALSE, eval = FALSE}
 cases <- pub_covidcast(
   source = "jhu-csse",
   signals = "confirmed_7dav_incidence_prop",
@@ -174,6 +180,15 @@ deaths <- pub_covidcast(
 cases_deaths <-
   full_join(cases, deaths, by = c("time_value", "geo_value")) |>
   filter(geo_value %in% used_locations) |>
+  as_epi_df(as_of = as.Date("2022-01-01"))
+```
+
+```{r case_death_epidatasets, echo = FALSE}
+cases_deaths <- epidatasets::covid_case_death_rates_extended |>
+  filter(
+    geo_value %in% used_locations,
+    between(time_value, ymd("2020-06-01"), ymd("2021-12-31"))
+  ) |>
   as_epi_df(as_of = as.Date("2022-01-01"))
 ```
 
@@ -208,11 +223,13 @@ cases_deaths <-
   group_by(geo_value) |>
   mutate(
     outlr_death_rate = detect_outlr_rm(
-      time_value, death_rate,
+      time_value,
+      death_rate,
       detect_negatives = TRUE
     ),
     outlr_case_rate = detect_outlr_rm(
-      time_value, case_rate,
+      time_value,
+      case_rate,
       detect_negatives = TRUE
     )
   ) |>
@@ -257,7 +274,8 @@ processed_data_plot <-
   geom_text(
     data = forecast_date_label,
     aes(x = dates, label = "forecast\ndate", y = heights),
-    size = 3, hjust = "right"
+    size = 3,
+    hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%Y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -315,7 +333,8 @@ forecast_plot <-
   geom_text(
     data = forecast_date_label %>% filter(.response_name == "death_rate"),
     aes(x = dates, label = "forecast\ndate", y = heights),
-    size = 3, hjust = "right"
+    size = 3,
+    hjust = "right"
   ) +
   scale_x_date(date_breaks = "3 months", date_labels = "%y %b") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
@@ -331,7 +350,13 @@ And as a tibble of quantile level-value pairs:
 four_week_ahead$predictions |>
   select(-.pred) |>
   pivot_quantiles_longer(.pred_distn) |>
-  select(geo_value, forecast_date, target_date, quantile = .pred_distn_quantile_level, value = .pred_distn_value)
+  select(
+    geo_value,
+    forecast_date,
+    target_date,
+    quantile = .pred_distn_quantile_level,
+    value = .pred_distn_value
+  )
 ```
 
 The orange dot gives the point prediction, while the blue intervals give the

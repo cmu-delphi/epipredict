@@ -2,11 +2,21 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.7
+
+- `autoplot.canned_epipred()` had internal code using
+  `epiprocess:::autoplot.epi_df(.max_facets = Inf)`. This argument no longer
+  exists there, so it caused an error (noted by rebuilding the `README.Rmd`)
+
+
 # epipredict 0.2.6
 
 - `arx_forecaster()` and `flatline_forecaster()` now error early when `quantile_by_key` contains columns that are not keys of the input `epi_df`, rather than silently dropping the invalid keys (#229).
 - `arx_forecaster()` now warns when `quantile_by_key` is supplied with a quantile-output trainer (`quantile_reg()`, `rand_forest()` with engine `"grf_quantiles"`), where the argument would otherwise be silently ignored (#229).
-- Regenerate roxygen-derived `man/step_adjust_latency.Rd` so its recorded example output matches the current `epi_df` print phrasing (`lag` → `latency`) from upstream `epiprocess`. No user-visible behavior change.
+- Regenerate roxygen-derived `man/step_adjust_latency.Rd` so its recorded
+  example output matches the current `epi_df` print phrasing (`lag` → `latency`)
+  from upstream `epiprocess`. No user-visible behavior change.
+- Bump GitHub action checkout version.
 
 # epipredict 0.2.5
 

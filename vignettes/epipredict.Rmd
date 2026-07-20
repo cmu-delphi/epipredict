@@ -272,14 +272,15 @@ results <- all_flatlines |>
 autoplot(
   object = workflow,
   predictions = results,
-  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates |>
+    filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
 ### `cdc_baseline_forecaster()`
 
 This is a different method of generating a flatline forecast, used as a baseline
-for [the CDC COVID-19 Forecasting Hub](https://covid19forecasthub.org).
+for various CDC forecasting challenges, e.g., <https://github.com/cdcepi/Flusight-baseline/>.
 
 ```{r make-cdc-forecast, warning=FALSE}
 all_cdc_flatline <-
@@ -298,7 +299,8 @@ results <- all_cdc_flatline$predictions
 autoplot(
   object = workflow,
   predictions = results,
-  observed_response = covid_case_death_rates |> filter(geo_value %in% used_locations, time_value > "2021-07-01")
+  observed_response = covid_case_death_rates |>
+    filter(geo_value %in% used_locations, time_value > "2021-07-01")
 )
 ```
 
@@ -327,14 +329,15 @@ We'll predict the 2023/24 season using all previous data, including 2020-2022, t
 ```{r make-climatological-forecast, warning=FALSE}
 fluview_hhs <- pub_fluview(
   regions = paste0("hhs", 1:10),
-  epiweeks = epirange(100001,222201)
+  epiweeks = epirange(100001, 222201)
 )
 fluview <- fluview_hhs %>%
   select(
     geo_value = region,
     time_value = epiweek,
     issue,
-    ili) %>%
+    ili
+  ) %>%
   as_epi_archive() %>%
   epix_as_of_current()
 
@@ -451,7 +454,8 @@ autoplot(
   grad_forecast$epi_workflow,
   grad_forecast$predictions,
   observed_response = grad_employ,
-) + geom_vline(aes(xintercept = 2016))
+) +
+  geom_vline(aes(xintercept = 2016))
 ```
 
 The 8 graphs represent all combinations of the `geo_values` (`"Quebec"` and `"British Columbia"`), `edu_quals` (`"Undergraduate degree"` and `"Professional degree"`), and age brackets (`"15 to 34 years"` and `"35 to 64 years"`).

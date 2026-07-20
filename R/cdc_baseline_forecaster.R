@@ -9,8 +9,8 @@
 #' By default, the predictive intervals are computed separately for each
 #' combination of `geo_value` in the `epi_data` argument.
 #'
-#' This forecaster is meant to produce exactly the CDC Baseline used for
-#' [COVID19ForecastHub](https://covid19forecasthub.org)
+#' This forecaster is meant to produce exactly the CDC Baseline used for, e.g.,
+#' <https://github.com/cdcepi/Flusight-baseline/>
 #'
 #' @param epi_data An [`epiprocess::epi_df`][epiprocess::as_epi_df]
 #' @param outcome A scalar character for the column name we wish to predict.
@@ -56,9 +56,10 @@
 #'   theme_bw() +
 #'   geom_vline(xintercept = forecast_date)
 cdc_baseline_forecaster <- function(
-    epi_data,
-    outcome,
-    args_list = cdc_baseline_args_list()) {
+  epi_data,
+  outcome,
+  args_list = cdc_baseline_args_list()
+) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("cdc_flat_fcast", "alist"))) {
     cli_abort("`args_list` was not created using `cdc_baseline_args_list().")
@@ -66,7 +67,6 @@ cdc_baseline_forecaster <- function(
   keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
-
 
   r <- epi_recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$data_frequency, skip = TRUE) %>%
@@ -76,7 +76,6 @@ cdc_baseline_forecaster <- function(
 
   forecast_date <- args_list$forecast_date %||% max(epi_data$time_value)
   # target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
-
 
   latest <- get_test_data(epi_recipe(epi_data), epi_data)
 
@@ -93,7 +92,9 @@ cdc_baseline_forecaster <- function(
     layer_add_forecast_date(forecast_date = forecast_date) %>%
     layer_unnest(.pred_distn_all)
   # layer_add_target_date(target_date = target_date)
-  if (args_list$nonneg) f <- layer_threshold(f, ".pred")
+  if (args_list$nonneg) {
+    f <- layer_threshold(f, ".pred")
+  }
 
   eng <- linear_reg(engine = "flatline")
 
@@ -116,7 +117,6 @@ cdc_baseline_forecaster <- function(
     class = c("cdc_baseline_fcast", "canned_epipred")
   )
 }
-
 
 
 #' CDC baseline forecaster argument constructor
@@ -157,16 +157,17 @@ cdc_baseline_forecaster <- function(
 #' cdc_baseline_args_list(symmetrize = FALSE)
 #' cdc_baseline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 cdc_baseline_args_list <- function(
-    data_frequency = "1 week",
-    aheads = 1:5,
-    n_training = Inf,
-    forecast_date = NULL,
-    quantile_levels = c(.01, .025, 1:19 / 20, .975, .99),
-    nsims = 1e5L,
-    symmetrize = TRUE,
-    nonneg = TRUE,
-    quantile_by_key = "geo_value",
-    ...) {
+  data_frequency = "1 week",
+  aheads = 1:5,
+  n_training = Inf,
+  forecast_date = NULL,
+  quantile_levels = c(.01, .025, 1:19 / 20, .975, .99),
+  nsims = 1e5L,
+  symmetrize = TRUE,
+  nonneg = TRUE,
+  quantile_by_key = "geo_value",
+  ...
+) {
   rlang::check_dots_empty()
   arg_is_scalar(n_training, nsims, data_frequency)
   data_frequency <- parse_period(data_frequency)
@@ -178,7 +179,9 @@ cdc_baseline_args_list <- function(
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
-  if (is.finite(n_training)) arg_is_pos_int(n_training)
+  if (is.finite(n_training)) {
+    arg_is_pos_int(n_training)
+  }
 
   structure(
     enlist(
@@ -206,10 +209,13 @@ parse_period <- function(x) {
   arg_is_scalar(x)
   if (is.character(x)) {
     x <- unlist(strsplit(x, " "))
-    if (length(x) == 1L) x <- as.numeric(x)
+    if (length(x) == 1L) {
+      x <- as.numeric(x)
+    }
     if (length(x) == 2L) {
       mult <- substr(x[2], 1, 3)
-      mult <- switch(mult,
+      mult <- switch(
+        mult,
         day = 1L,
         wee = 7L,
         cli_abort("incompatible timespan in `aheads`.")
