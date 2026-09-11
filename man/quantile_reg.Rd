@@ -39,5 +39,5 @@ ff <- rq_spec \%>\% fit(y ~ ., data = tib)
 predict(ff, new_data = tib)
 }
 \seealso{
-\code{\link[=fit.model_spec]{fit.model_spec()}}, \code{\link[=set_engine]{set_engine()}}
+\code{\link[parsnip:fit]{parsnip::fit.model_spec()}}, \code{\link[parsnip:set_engine]{parsnip::set_engine()}}
 }

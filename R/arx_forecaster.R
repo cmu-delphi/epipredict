@@ -127,6 +127,20 @@ arx_fcast_epi_workflow <- function(
   if (!(is.null(trainer) || is_regression(trainer))) {
     cli_abort("`trainer` must be a {.pkg parsnip} model of mode 'regression'.")
   }
+  if (length(args_list$quantile_by_key) > 0L) {
+    valid_keys <- key_colnames(epi_data)
+    missing_keys <- setdiff(args_list$quantile_by_key, valid_keys)
+    if (length(missing_keys) > 0L) {
+      cli_abort(
+        c(
+          "Some {.arg quantile_by_key} columns are not key columns of the input {.cls epi_df}.",
+          "!" = "Missing: {.val {missing_keys}}.",
+          i = "Available keys: {.val {valid_keys}}."
+        ),
+        class = "epipredict__arx_forecaster__quantile_by_key_invalid"
+      )
+    }
+  }
   # forecast_date is above all what they set;
   # if they don't and they're not adjusting latency, it defaults to the max time_value
   # if they're adjusting, it defaults to the as_of
@@ -144,7 +158,7 @@ arx_fcast_epi_workflow <- function(
   forecast_date <- args_list$forecast_date %||% forecast_date_default
   target_date <- args_list$target_date %||% (forecast_date + args_list$ahead)
   if (forecast_date + args_list$ahead != target_date) {
-    cli_abort("`forecast_date` {.val {forecast_date}} + `ahead` {.val {ahead}} must equal `target_date` {.val {target_date}}.",
+    cli_abort("`forecast_date` {.val {forecast_date}} + `ahead` {.val {args_list$ahead}} must equal `target_date` {.val {target_date}}.",
       class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecaste_date"
     )
   }
@@ -194,6 +208,17 @@ arx_fcast_epi_workflow <- function(
   f <- frosting() %>% layer_predict() # %>% layer_naomit()
   is_quantile_reg <- inherits(trainer, "quantile_reg") |
     (inherits(trainer, "rand_forest") & trainer$engine == "grf_quantiles")
+  if (is_quantile_reg && length(args_list$quantile_by_key) > 0L) {
+    cli_warn(
+      paste0(
+        "{.arg quantile_by_key} (set to {.val {args_list$quantile_by_key}}) ",
+        "has no effect when the trainer produces quantile distributions ",
+        "directly (e.g., {.fn quantile_reg}, {.fn rand_forest} with engine ",
+        "{.val grf_quantiles}). The argument is being ignored."
+      ),
+      class = "epipredict__arx_forecaster__quantile_by_key_ignored"
+    )
+  }
   if (is_quantile_reg) {
     # add all quantile_level to the forecaster and update postprocessor
     if (inherits(trainer, "quantile_reg")) {

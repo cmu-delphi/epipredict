@@ -2,6 +2,39 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.7
+
+- `autoplot.canned_epipred()` had internal code using
+  `epiprocess:::autoplot.epi_df(.max_facets = Inf)`. This argument no longer
+  exists there, so it caused an error (noted by rebuilding the `README.Rmd`)
+
+
+# epipredict 0.2.6
+
+- `arx_forecaster()` and `flatline_forecaster()` now error early when `quantile_by_key` contains columns that are not keys of the input `epi_df`, rather than silently dropping the invalid keys (#229).
+- `arx_forecaster()` now warns when `quantile_by_key` is supplied with a quantile-output trainer (`quantile_reg()`, `rand_forest()` with engine `"grf_quantiles"`), where the argument would otherwise be silently ignored (#229).
+- Regenerate roxygen-derived `man/step_adjust_latency.Rd` so its recorded
+  example output matches the current `epi_df` print phrasing (`lag` → `latency`)
+  from upstream `epiprocess`. No user-visible behavior change.
+- Bump GitHub action checkout version.
+
+# epipredict 0.2.5
+
+- Fix `arx_forecaster()` and `arx_fcast_epi_workflow()` so that the error raised when `forecast_date + ahead != target_date` reports the actual validation message rather than a cryptic `cli` template-evaluation error (#473).
+
+# epipredict 0.2.4
+
+- Fix `flatline_forecaster()` to return one prediction per geographic key when the input `epi_df` has trailing rows with `NA`s in the outcome (#454). Previously, the forecast was duplicated once per trailing-NA day.
+
+# epipredict 0.2.3
+
+- Fix `print.canned_epipred()` so the latency-adjustment information actually displays for canned forecasters that include `step_adjust_latency` in their recipe (#447).
+
+# epipredict 0.2.2
+
+- Fix `autoplot.epi_workflow()` to correctly handle the response variable and avoid errors related to `.response`.
+- Prevent subsampling in `autoplot.epi_workflow()` by setting `.max_keys = Inf`.
+
 # epipredict 0.2.1
 
 - Fix bug in `flusight_hub_formatter()` so that it works as expected even if the user has not first loaded the `epidatasets` package.
@@ -16,12 +49,12 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
   `data(<dataset name>, package = "epidatasets")`, `epidatasets::<dataset name>`
   or, after loading the package, the name of the dataset alone (#382).
 - `step_adjust_latency()` no longer allows empty column selection.
-- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`). 
+- Addresses upstream breaking changes from cmu-delphi/epiprocess#595 (`growth_rate()`).
   `step_growth_rate()` has lost its `additional_gr_args_list` argument and now
   has an `na_rm` argument.
 - Moves `epiprocess` out of depends (#440). No internals have changed, but downstream
   users may need to add `library(epiprocess)` to existing code.
-- Removes dependence on the `distributional` package, replacing the quantiles 
+- Removes dependence on the `distributional` package, replacing the quantiles
   with `hardhat::quantile_pred()`. Some associated functions are deprecated with
   `lifecycle` messages.
 - Rename `check_enough_train_data()` to `check_enough_data()`, and generalize it
@@ -43,6 +76,8 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - Allow `quantile()` to threshold to an interval if desired (#434)
 - `arx_forecaster()` detects if there's enough data to predict
 - Add `observed_response` to `autoplot` so that forecasts can be plotted against the values they're predicting
+- `pivot_quantiles_longer()` now appropriately adds `quantile_level` to the
+  `epi_df` other keys
 
 ## Bug fixes
 

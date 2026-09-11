@@ -80,8 +80,16 @@ pivot_quantiles_longer <- function(.data, ...) {
   long_tib <- as_tibble(.data[[col]])
   .data <- select(.data, !all_of(col))
   names(long_tib)[1:2] <- c(glue::glue("{col}_value"), glue::glue("{col}_quantile_level"))
-  left_join(.data, long_tib, by = ".row") %>%
-    select(!.row)
+  out <- left_join(.data, long_tib, by = ".row") %>% select(!.row)
+  if (inherits(.data, "epi_df")) {
+    # register the new quantile_level column as a key
+    out <- as_epi_df(
+      out,
+      as_of = attr(.data, "metadata")$as_of,
+      other_keys = c(attr(.data, "metadata")$other_keys, glue::glue("{col}_quantile_level"))
+    )
+  }
+  out
 }
 
 #' @rdname pivot_quantiles

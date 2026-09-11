@@ -18,8 +18,7 @@
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
   .base_color = "dodgerblue4",
   .point_pred_color = "orange",
-  .facet_filter = NULL,
-  .max_facets = deprecated()
+  .facet_filter = NULL
 )
 
 \method{autoplot}{canned_epipred}(
@@ -30,8 +29,7 @@
   .facet_by = c(".response", "other_keys", "all_keys", "geo_value", "all", "none"),
   .base_color = "dodgerblue4",
   .point_pred_color = "orange",
-  .facet_filter = NULL,
-  .max_facets = deprecated()
+  .facet_filter = NULL
 )
 
 \method{plot}{epi_workflow}(x, ...)
@@ -81,8 +79,6 @@ contrasts to the typical use case which allows multiple comma-separated expressi
 which are implicitly combined with \code{&}. When multiple variables are selected
 with \code{...}, their names can be filtered in combination with other factors
 by using \code{.response_name}. See the examples below.}
-
-\item{.max_facets}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}}}
 }
 \description{
 For a fit workflow, the training data will be displayed, the response by
@@ -125,7 +121,7 @@ p <- lapply(c(7, 14, 21, 28), function(h) {
   forecast(ewf)
 })
 
-p <- do.call(rbind, p)
+p <- vctrs::vec_rbind(!!!p)
 autoplot(wf, p, .facet_filter = geo_value \%in\% c("ca", "ny", "de", "mt"))
 
 # ------- Plotting canned forecaster output

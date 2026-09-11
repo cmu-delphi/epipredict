@@ -112,7 +112,7 @@ print.canned_epipred <- function(x, name, ...) {
     "At forecast date{?s}: {.val {fds}},",
     "For target date{?s}: {.val {tds}},"
   ))
-  if ("pre" %in% names(x) && "actions" %in% names(x$pre) && "recipe" %in% names(x$pre$actions)) {
+  if (!is.null(x$epi_workflow$pre$actions$recipe)) {
     fit_recipe <- extract_recipe(x$epi_workflow)
     if (detect_step(fit_recipe, "adjust_latency")) {
       is_adj_latency <- map_lgl(fit_recipe$steps, function(x) inherits(x, "step_adjust_latency"))

@@ -43,3 +43,39 @@ test_that("warns if there's not enough data to predict", {
     class = "epipredict__not_enough_data"
   )
 })
+
+test_that("arx_forecaster errors on invalid quantile_by_key columns (issue #229)", {
+  jhu <- epidatasets::covid_case_death_rates
+  expect_error(
+    arx_forecaster(jhu, "death_rate", c("death_rate"),
+      args_list = arx_args_list(quantile_by_key = "nonexistent_column")
+    ),
+    class = "epipredict__arx_forecaster__quantile_by_key_invalid"
+  )
+})
+
+test_that("arx_forecaster warns when quantile_by_key is used with quantile_reg trainer (issue #229)", {
+  jhu <- epidatasets::covid_case_death_rates
+  expect_warning(
+    arx_forecaster(jhu, "death_rate", c("death_rate"),
+      trainer = quantile_reg(),
+      args_list = arx_args_list(quantile_by_key = "geo_value")
+    ),
+    class = "epipredict__arx_forecaster__quantile_by_key_ignored"
+  )
+})
+
+test_that("arx_forecaster errors with documented class when forecast_date + ahead != target_date (issue #473)", {
+  df <- tibble(
+    geo_value = "ri",
+    time_value = seq.Date(as.Date("2026-01-01"), as.Date("2026-01-31"), by = "day"),
+    value = 0
+  ) %>%
+    as_epi_df(as_of = as.Date("2026-02-10"))
+  expect_error(
+    arx_forecaster(df, "value",
+      args_list = arx_args_list(target_date = as.Date("2026-02-17"))
+    ),
+    class = "epipredict__arx_forecaster__inconsistent_target_ahead_forecaste_date"
+  )
+})

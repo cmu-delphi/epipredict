@@ -10,8 +10,8 @@
 #'   combination of key values (`geo_value` + any additional keys) in the
 #'   `epi_data` argument.
 #'
-#' This forecaster is very similar to that used by the
-#'   [COVID19ForecastHub](https://covid19forecasthub.org)
+#' This forecaster is very similar to that used as the
+#'   as [FluSight Baseline](https://github.com/cdcepi/Flusight-baseline/).
 #'
 #' @details
 #'  Here is (roughly) the code for the `flatline_forecaster()` applied to the
@@ -52,17 +52,31 @@
 #'
 #' out <- flatline_forecaster(jhu, "death_rate")
 flatline_forecaster <- function(
-    epi_data,
-    outcome,
-    args_list = flatline_args_list()) {
+  epi_data,
+  outcome,
+  args_list = flatline_args_list()
+) {
   validate_forecaster_inputs(epi_data, outcome, "time_value")
   if (!inherits(args_list, c("flat_fcast", "alist"))) {
     cli_abort("`args_list` was not created using `flatline_args_list()`.")
   }
+  if (length(args_list$quantile_by_key) > 0L) {
+    valid_keys <- key_colnames(epi_data)
+    missing_keys <- setdiff(args_list$quantile_by_key, valid_keys)
+    if (length(missing_keys) > 0L) {
+      cli_abort(
+        c(
+          "Some {.arg quantile_by_key} columns are not key columns of the input {.cls epi_df}.",
+          "!" = "Missing: {.val {missing_keys}}.",
+          i = "Available keys: {.val {valid_keys}}."
+        ),
+        class = "epipredict__flatline_forecaster__quantile_by_key_invalid"
+      )
+    }
+  }
   keys <- key_colnames(epi_data)
   ek <- kill_time_value(keys)
   outcome <- rlang::sym(outcome)
-
 
   r <- epi_recipe(epi_data) %>%
     step_epi_ahead(!!outcome, ahead = args_list$ahead, skip = TRUE) %>%
@@ -82,7 +96,9 @@ flatline_forecaster <- function(
     ) %>%
     layer_add_forecast_date(forecast_date = forecast_date) %>%
     layer_add_target_date(target_date = target_date)
-  if (args_list$nonneg) f <- layer_threshold(f, dplyr::starts_with(".pred"))
+  if (args_list$nonneg) {
+    f <- layer_threshold(f, dplyr::starts_with(".pred"))
+  }
 
   eng <- linear_reg(engine = "flatline")
 
@@ -106,7 +122,6 @@ flatline_forecaster <- function(
 }
 
 
-
 #' Flatline forecaster argument constructor
 #'
 #' Constructs a list of arguments for [flatline_forecaster()].
@@ -127,15 +142,16 @@ flatline_forecaster <- function(
 #' flatline_args_list(symmetrize = FALSE)
 #' flatline_args_list(quantile_levels = c(.1, .3, .7, .9), n_training = 120)
 flatline_args_list <- function(
-    ahead = 7L,
-    n_training = Inf,
-    forecast_date = NULL,
-    target_date = NULL,
-    quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
-    symmetrize = TRUE,
-    nonneg = TRUE,
-    quantile_by_key = character(0L),
-    ...) {
+  ahead = 7L,
+  n_training = Inf,
+  forecast_date = NULL,
+  target_date = NULL,
+  quantile_levels = c(0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.95),
+  symmetrize = TRUE,
+  nonneg = TRUE,
+  quantile_by_key = character(0L),
+  ...
+) {
   rlang::check_dots_empty()
   arg_is_scalar(ahead, n_training)
   arg_is_chr(quantile_by_key, allow_empty = TRUE)
@@ -145,7 +161,9 @@ flatline_args_list <- function(
   arg_is_lgl(symmetrize, nonneg)
   arg_is_probabilities(quantile_levels, allow_null = TRUE)
   arg_is_pos(n_training)
-  if (is.finite(n_training)) arg_is_pos_int(n_training)
+  if (is.finite(n_training)) {
+    arg_is_pos_int(n_training)
+  }
 
   if (!is.null(forecast_date) && !is.null(target_date)) {
     if (forecast_date + ahead != target_date) {
