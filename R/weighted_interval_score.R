@@ -17,7 +17,7 @@
 #'   calculated if possible using the available quantiles. For `"drop"`,
 #'   explicitly missing values are ignored in the calculation of the score, but
 #'   implicitly missing values are imputed if possible.
-#'   For `"propogate"`, the resulting score will be `NA` if any missing values
+#'   For `"propagate"`, the resulting score will be `NA` if any missing values
 #'   exist. Finally, if
 #'   `quantile_levels` is specified, `"fail"` will result in
 #'   the score being `NA` when any required quantile levels (implicit or explicit)

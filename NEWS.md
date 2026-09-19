@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.8
+
+- Fix typo in `weighted_interval_score()` docs: `na_handling = "propogate"` → `"propagate"` (#495).
+
 # epipredict 0.2.7
 
 - `autoplot.canned_epipred()` had internal code using
