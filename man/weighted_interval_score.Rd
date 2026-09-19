@@ -26,7 +26,7 @@ For \code{"impute"}, missing values will be
 calculated if possible using the available quantiles. For \code{"drop"},
 explicitly missing values are ignored in the calculation of the score, but
 implicitly missing values are imputed if possible.
-For \code{"propogate"}, the resulting score will be \code{NA} if any missing values
+For \code{"propagate"}, the resulting score will be \code{NA} if any missing values
 exist. Finally, if
 \code{quantile_levels} is specified, \code{"fail"} will result in
 the score being \code{NA} when any required quantile levels (implicit or explicit)
