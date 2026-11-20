@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.8
+
+- Point the README contact link to the Delphi Contact Us page.
+
 # epipredict 0.2.7
 
 - `autoplot.canned_epipred()` had internal code using
