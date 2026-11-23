@@ -1,5 +1,9 @@
 # Changelog
 
+## epipredict 0.2.8
+
+- Point the README contact link to the Delphi Contact Us page.
+
 ## epipredict 0.2.7
 
 - [`autoplot.canned_epipred()`](https://cmu-delphi.github.io/epipredict/dev/reference/autoplot-epipred.md)

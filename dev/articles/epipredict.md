@@ -212,8 +212,8 @@ two_week_ahead <- arx_forecaster(
 )
 hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 #> Call:
-#> quantreg::rq(formula = ..y ~ ., tau = ~c(0.05, 0.1, 0.25, 0.5, 
-#> 0.75, 0.9, 0.95), data = data, na.action = stats::na.omit, method = ~"br", 
+#> quantreg::rq(formula = ..y ~ ., tau = c(0.05, 0.1, 0.25, 0.5, 
+#> 0.75, 0.9, 0.95), data = data, na.action = stats::na.omit, method = "br", 
 #>     model = FALSE)
 #> 
 #> Coefficients:
@@ -286,9 +286,9 @@ two_week_ahead <- arx_forecaster(
 )
 hardhat::extract_fit_engine(two_week_ahead$epi_workflow)
 #> Call:
-#> quantreg::rq(formula = ..y ~ ., tau = ~c(0.05, 0.1, 0.2, 0.3, 
+#> quantreg::rq(formula = ..y ~ ., tau = c(0.05, 0.1, 0.2, 0.3, 
 #> 0.5, 0.7, 0.8, 0.9, 0.95), data = data, na.action = stats::na.omit, 
-#>     method = ~"br", model = FALSE)
+#>     method = "br", model = FALSE)
 #> 
 #> Coefficients:
 #>                     tau= 0.05    tau= 0.10    tau= 0.20     tau= 0.30

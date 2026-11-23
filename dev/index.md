@@ -319,10 +319,9 @@ A couple of things to note:
 If you encounter a bug or have a feature request, feel free to file an
 [issue on our GitHub
 page](https://github.com/cmu-delphi/epipredict/issues). For other
-questions, feel free to reach out to the authors, either via this
-[contact
-form](https://docs.google.com/forms/d/e/1FAIpQLScqgT1fKZr5VWBfsaSp-DNaN03aV6EoZU4YljIzHJ1Wl_zmtg/viewform),
-email, or the InsightNet Slack.
+questions, feel free to reach out to the authors, either via our
+[contact page](https://delphi.cmu.edu/contact/), email, or the
+InsightNet Slack.
 
 [^1]: lagged by 3 in this context meaning using the value from 3 days
     ago.
