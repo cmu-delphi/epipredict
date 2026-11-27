@@ -103,6 +103,7 @@ slather.layer_residual_quantiles <-
     r <- grab_residuals(the_fit, components)
 
     ## Handle any grouping requests
+    grps <- character(0L)
     if (length(object$by_key) > 0L) {
       key_cols <- bind_cols(
         geo_value = components$mold$extras$roles$geo_value,
@@ -120,7 +121,7 @@ slather.layer_residual_quantiles <-
         r <- r %>% select(any_of(c(common, ".resid")))
         common_in_r <- common[common %in% names(r)]
         if (length(common_in_r) == length(common)) {
-          r <- left_join(key_cols, r, by = common_in_r)
+          r <- group_by(r, !!!rlang::syms(common))
         } else {
           cli_warn(paste(
             "Some grouping keys are not in data.frame returned by the",
@@ -129,6 +130,7 @@ slather.layer_residual_quantiles <-
           r <- bind_cols(key_cols, select(r, .resid)) %>%
             group_by(!!!rlang::syms(common))
         }
+        grps <- common
       }
     }
 
@@ -146,6 +148,13 @@ slather.layer_residual_quantiles <-
     }
 
     estimate <- components$predictions$.pred
+    if (length(grps) > 0L) {
+      # match each prediction to the residual quantiles of its own key
+      r <- left_join(
+        select(components$predictions, all_of(grps)), r,
+        by = grps, relationship = "many-to-one"
+      )
+    }
     res <- tibble(.pred_distn = r$dstn + estimate)
     res <- check_name(
       res,

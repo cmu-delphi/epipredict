@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.9
+
+- `layer_residual_quantiles(by_key = )` now computes residual quantiles within each key and matches them to predictions by key. Before, `flatline_forecaster(quantile_by_key = "geo_value")` pooled residuals across all locations, and grouped quantiles errored when a key had no prediction.
+
 # epipredict 0.2.8
 
 - Point the README contact link to the Delphi Contact Us page.
