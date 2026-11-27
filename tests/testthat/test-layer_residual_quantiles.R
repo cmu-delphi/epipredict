@@ -87,6 +87,44 @@ test_that("Grouping by keys is supported", {
   expect_false(all(pivot2$width == pivot2$width[1]))
 })
 
+test_that("by_key uses each key's own residuals with flatline", {
+  out <- flatline_forecaster(
+    jhu, "death_rate",
+    args_list = flatline_args_list(
+      quantile_levels = c(0.1, 0.9), nonneg = FALSE,
+      quantile_by_key = "geo_value"
+    )
+  )
+  res <- residuals(workflows::extract_fit_engine(out$epi_workflow))
+  expected <- res %>%
+    dplyr::group_by(geo_value) %>%
+    dplyr::summarise(width = diff(quantile(
+      c(.resid, -.resid), c(0.1, 0.9),
+      na.rm = TRUE, names = FALSE
+    )))
+  widths <- out$predictions %>%
+    pivot_quantiles_wider(.pred_distn) %>%
+    dplyr::transmute(geo_value, width = `0.9` - `0.1`)
+  expect_equal(
+    widths$width,
+    expected$width[match(widths$geo_value, expected$geo_value)]
+  )
+})
+
+test_that("by_key matches residual quantiles to predictions by key", {
+  # ak has no forecast because its latest predictors are missing
+  jhu_lag <- jhu %>%
+    dplyr::filter(!(geo_value == "ak" & time_value > max(time_value) - 3))
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(by_key = "geo_value")
+  wf_lag <- epi_workflow(r, parsnip::linear_reg(), f) %>% fit(jhu_lag)
+  expect_warning(p <- forecast(wf_lag), "grouping keys")
+  expect_equal(p$geo_value, c("ca", "ny"))
+  expect_false(anyNA(as.matrix(p$.pred_distn)))
+})
+
 test_that("Canned forecasters work with / without", {
   meta <- attr(jhu, "metadata")
   meta$as_of <- max(jhu$time_value)
