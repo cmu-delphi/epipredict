@@ -103,7 +103,7 @@ slather.layer_residual_quantiles <-
     r <- grab_residuals(the_fit, components)
 
     ## Handle any grouping requests
-    grps <- character(0L)
+    common <- character(0L)
     if (length(object$by_key) > 0L) {
       key_cols <- bind_cols(
         geo_value = components$mold$extras$roles$geo_value,
@@ -112,25 +112,25 @@ slather.layer_residual_quantiles <-
       common <- intersect(object$by_key, names(key_cols))
       excess <- setdiff(object$by_key, names(key_cols))
       if (length(excess) > 0L) {
-        cli_warn(paste(
-          "Requested residual grouping key(s) {.val {excess}} are unavailable ",
-          "in the original data. Grouping by the remainder: {.val {common}}."
+        cli_warn(c(
+          "Residual grouping key{?s} {.val {excess}} {?was/were} not found in the training data.",
+          i = if (length(common) > 0L) {
+            "Residual quantiles will be grouped by the remaining key{?s}: {.val {common}}."
+          } else {
+            "Residual quantiles will be calculated across all observations without grouping."
+          }
         ))
       }
       if (length(common) > 0L) {
         r <- r %>% select(any_of(c(common, ".resid")))
-        common_in_r <- common[common %in% names(r)]
-        if (length(common_in_r) == length(common)) {
-          r <- group_by(r, !!!rlang::syms(common))
-        } else {
+        if (!all(common %in% names(r))) {
           cli_warn(paste(
             "Some grouping keys are not in data.frame returned by the",
             "`residuals()` method. Groupings may not be correct."
           ))
-          r <- bind_cols(key_cols, select(r, .resid)) %>%
-            group_by(!!!rlang::syms(common))
+          r <- bind_cols(key_cols, select(r, .resid))
         }
-        grps <- common
+        r <- group_by(r, !!!rlang::syms(common))
       }
     }
 
@@ -140,20 +140,48 @@ slather.layer_residual_quantiles <-
         probs = object$quantile_levels, na.rm = TRUE
       ), nrow = 1), quantile_levels = object$quantile_levels))
     # Check for NA
-    if (anyNA(as.matrix(r$dstn))) {
+    na_rows <- rowSums(is.na(as.matrix(r$dstn))) > 0
+    if (length(common) > 0L && any(na_rows) && !all(na_rows)) {
+      bad <- do.call(paste, c(r[na_rows, common], sep = " / "))
+      cli_abort(c(
+        "Residual quantiles could not be calculated for some keys.",
+        x = "All training residuals are missing (`NA`) for: {.val {bad}}.",
+        i = paste(
+          "This typically happens when a key has too few training observations",
+          "for the forecast horizon."
+        )
+      ))
+    }
+    if (any(na_rows)) {
       cli_abort(c(
         "Residual quantiles could not be calculated due to missing residuals.",
-        i = "This may be due to `n_train` < `ahead` in your {.cls epi_recipe}."
+        i = paste(
+          "This can happen when the training window has fewer observations than",
+          "the forecast horizon (for example, `n_training` < `ahead` or",
+          "`n_train` < `ahead`)."
+        )
       ))
     }
 
     estimate <- components$predictions$.pred
-    if (length(grps) > 0L) {
+    if (length(common) > 0L) {
       # match each prediction to the residual quantiles of its own key
-      r <- left_join(
-        select(components$predictions, all_of(grps)), r,
-        by = grps, relationship = "many-to-one"
-      )
+      keys <- select(components$predictions, all_of(common))
+      unseen <- anti_join(distinct(keys), r, by = common)
+      if (nrow(unseen) > 0L) {
+        unseen_keys <- do.call(paste, c(unseen, sep = " / "))
+        cli_warn(c(
+          paste(
+            "Prediction data contains {cli::qty(length(unseen_keys))}{?a key/keys}",
+            "not present in the training data: {.val {unseen_keys}}."
+          ),
+          i = paste(
+            "Because {?this key has/these keys have} no training residuals,",
+            "predictive distribution quantiles ({.col {object$name}}) will be `NA`."
+          )
+        ))
+      }
+      r <- left_join(keys, r, by = common, relationship = "many-to-one")
     }
     res <- tibble(.pred_distn = r$dstn + estimate)
     res <- check_name(
@@ -172,28 +200,37 @@ grab_residuals <- function(the_fit, components) {
   }
   r <- stats::residuals(the_fit$fit)
   if (!is.null(r)) { # Got something from the method
+    cl <- class(the_fit$fit)
     if (inherits(r, "data.frame")) {
       if (".resid" %in% names(r)) { # success
         return(r)
       } else { # failure
         cli_warn(c(
-          "The `residuals()` method for objects of class {.cls {cl}} results in",
-          "a data frame without a column named `.resid`.",
-          i = "Residual quantiles will be calculated directly from the",
-          i = "difference between predictions and observations.",
-          i = "This may result in unexpected behaviour."
+          paste(
+            "The `residuals()` method for objects of class {.cls {cl}} returned",
+            "a data frame without a column named {.col .resid}."
+          ),
+          i = paste(
+            "Residual quantiles will be calculated directly from the difference",
+            "between predictions and observations."
+          ),
+          i = "This may result in unexpected behavior."
         ))
       }
     } else if (is.vector(drop(r))) { # also success
       return(tibble(.resid = drop(r)))
     } else { # failure
-      cli_warn(paste(
-        "The `residuals()` method for objects of class {.cls {cl}} results in an",
-        "object that is neither a data frame with a column named `.resid`,",
-        "nor something coercible to a vector.",
-        i = "Residual quantiles will be calculated directly from the",
-        i = "difference between predictions and observations.",
-        i = "This may result in unexpected behaviour."
+      cli_warn(c(
+        paste(
+          "The `residuals()` method for objects of class {.cls {cl}} returned",
+          "an object that is neither a data frame with a column named",
+          "{.col .resid} nor coercible to a vector."
+        ),
+        i = paste(
+          "Residual quantiles will be calculated directly from the difference",
+          "between predictions and observations."
+        ),
+        i = "This may result in unexpected behavior."
       ))
     }
   }

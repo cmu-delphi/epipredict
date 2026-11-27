@@ -7,7 +7,7 @@
 #' @importFrom cli cli_abort cli_warn
 #' @importFrom dplyr arrange across all_of any_of bind_cols bind_rows group_by
 #' @importFrom dplyr full_join relocate summarise everything
-#' @importFrom dplyr inner_join
+#' @importFrom dplyr inner_join anti_join distinct
 #' @importFrom dplyr summarize filter mutate select left_join rename ungroup
 #' @importFrom epiprocess growth_rate growth_rate_params is_epi_df
 #' @importFrom lifecycle deprecated
