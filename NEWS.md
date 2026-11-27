@@ -2,6 +2,10 @@
 
 Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicate PR's.
 
+# epipredict 0.2.10
+
+- `layer_residual_quantiles(by_key = )` reports keys with missing training residuals, and warns when unseen prediction keys yield `NA` quantiles.
+
 # epipredict 0.2.9
 
 - `layer_residual_quantiles(by_key = )` now computes residual quantiles within each key and matches them to predictions by key. Before, `flatline_forecaster(quantile_by_key = "geo_value")` pooled residuals across all locations, and grouped quantiles errored when a key had no prediction.
@@ -15,7 +19,6 @@ Pre-1.0.0 numbering scheme: 0.x will indicate releases, while 0.0.x will indicat
 - `autoplot.canned_epipred()` had internal code using
   `epiprocess:::autoplot.epi_df(.max_facets = Inf)`. This argument no longer
   exists there, so it caused an error (noted by rebuilding the `README.Rmd`)
-
 
 # epipredict 0.2.6
 

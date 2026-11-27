@@ -77,7 +77,7 @@ test_that("Grouping by keys is supported", {
     layer_naomit(.pred) %>%
     layer_residual_quantiles(by_key = "geo_value")
   wf2 <- wf %>% add_frosting(f2)
-  expect_warning(p2 <- forecast(wf2))
+  expect_warning(p2 <- forecast(wf2), "grouping keys")
 
   pivot1 <- pivot_quantiles_wider(p1, .pred_distn) %>%
     mutate(width = `0.95` - `0.05`)
@@ -123,6 +123,62 @@ test_that("by_key matches residual quantiles to predictions by key", {
   expect_warning(p <- forecast(wf_lag), "grouping keys")
   expect_equal(p$geo_value, c("ca", "ny"))
   expect_false(anyNA(as.matrix(p$.pred_distn)))
+})
+
+test_that("by_key names the keys without usable residuals", {
+  # tx has too few observations for a single 7-day flatline residual
+  short <- covid_case_death_rates %>%
+    dplyr::filter(geo_value == "tx", time_value > max(jhu$time_value) - 3)
+  jhu_short <- dplyr::bind_rows(jhu, short) %>% as_epi_df()
+  expect_snapshot(
+    error = TRUE,
+    flatline_forecaster(jhu_short, "death_rate", args_list = flatline_args_list(
+      quantile_by_key = "geo_value"
+    ))
+  )
+})
+
+test_that("by_key warns for keys that were not in training", {
+  f <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(by_key = "geo_value")
+  wf_no_ak <- epi_workflow(r, parsnip::linear_reg(), f) %>%
+    fit(dplyr::filter(jhu, geo_value != "ak"))
+  expect_warning(
+    expect_warning(
+      p <- predict(wf_no_ak, get_test_data(r, jhu)),
+      "no training residuals"
+    ),
+    "grouping keys"
+  )
+  expect_true(all(is.na(as.matrix(p$.pred_distn[p$geo_value == "ak"]))))
+  expect_false(anyNA(as.matrix(p$.pred_distn[p$geo_value != "ak"])))
+})
+
+test_that("by_key warns informatively when requested keys are unavailable", {
+  f_some <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(by_key = c("nonexistent", "geo_value"))
+  wf_some <- epi_workflow(r, parsnip::linear_reg(), f_some) %>% fit(jhu)
+  expect_warning(
+    expect_warning(
+      predict(wf_some, get_test_data(r, jhu)),
+      "Residual grouping key \"nonexistent\" was not found in the training data"
+    ),
+    "grouping keys"
+  )
+
+  f_none <- frosting() %>%
+    layer_predict() %>%
+    layer_naomit(.pred) %>%
+    layer_residual_quantiles(by_key = "nonexistent")
+  wf_none <- epi_workflow(r, parsnip::linear_reg(), f_none) %>% fit(jhu)
+  expect_warning(
+    predict(wf_none, get_test_data(r, jhu)),
+    "calculated across all observations without grouping"
+  )
 })
 
 test_that("Canned forecasters work with / without", {
